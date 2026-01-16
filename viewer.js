@@ -1,7 +1,7 @@
 // viewer.js — Vignettes + filtres + tri dates + affichage progressif
 (() => {
   const DEFAULT_URL = "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json";
-  const GAME_BASE = "/game/"; // Stratégie A: /game/ID
+  const GAME_BASE = "/game/?id="; // Stratégie A: /game/ID
 
   const $ = sel => document.querySelector(sel);
 

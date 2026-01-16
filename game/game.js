@@ -227,23 +227,6 @@ async function renderTranslationStatus(game) {
     const j = await r.json();
     if (!j?.ok || !j?.currentTitle) return;
 
-    // Badge dans la ligne des badges (comme avant)
-    const badge = document.createElement("span");
-    badge.classList.add("badge");
-
-    if (j.isUpToDate) {
-      badge.textContent = "✅ Traduction à jour";
-      badge.classList.add("status-updated");
-      if (maj) maj.innerHTML = `<span class="ok">✅ Traduction à jour</span>`;
-    } else {
-      badge.textContent = "🔄 Traduction non à jour";
-      badge.classList.add("status-outdated");
-      if (maj) maj.innerHTML = `<span class="no">🔄 Traduction non à jour</span>`;
-    }
-
-    const wrap = $("badges");
-    if (wrap) wrap.appendChild(badge);
-
   } catch {
     // silencieux (pas de badge si erreur)
     if (maj) maj.innerHTML = `<span class="wait">⚠️ Impossible de vérifier (réessaie plus tard)</span>`;

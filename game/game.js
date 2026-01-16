@@ -324,6 +324,7 @@ function renderRating4UI(gameId, data) {
 
   const avg = Number(data?.avg) || 0;
   const count = Number(data?.count) || 0;
+  const myVote = getMyVote4(gameId);
 
   avgEl.textContent = avg > 0 ? avg.toFixed(1) + "/4" : "—";
   countEl.textContent = String(count);
@@ -332,14 +333,14 @@ function renderRating4UI(gameId, data) {
   choices.innerHTML = "";
   choices.style.display = "flex";
   choices.style.justifyContent = "center";
+  choices.style.alignItems = "center";
   choices.style.gap = "6px";
   choices.style.flexWrap = "wrap";
 
   const setVisual = (hoverValue) => {
     const v = hoverValue || getMyVote4(gameId) || 0;
-    [...choices.children].forEach((btn, idx) => {
+    [...choices.querySelectorAll(".ratingStar")].forEach((btn, idx) => {
       btn.textContent = (idx + 1) <= v ? "★" : "☆";
-      btn.setAttribute("aria-pressed", String((idx + 1) === getMyVote4(gameId)));
     });
   };
 
@@ -351,6 +352,44 @@ function renderRating4UI(gameId, data) {
       : "Clique sur les étoiles pour noter la traduction.";
   };
 
+  /* ❌ Étoile d’annulation (à gauche) */
+  if (myVote) {
+    const cancel = document.createElement("button");
+    cancel.type = "button";
+    cancel.className = "ratingCancel";
+    cancel.textContent = "❌";
+    cancel.setAttribute("aria-label", "Annuler ma note");
+
+    cancel.addEventListener("mouseenter", () => {
+      setVisual(0);
+      if (msgEl) msgEl.textContent = "Annuler ma note";
+    });
+    cancel.addEventListener("mouseleave", restoreMsg);
+    cancel.addEventListener("focus", () => {
+      setVisual(0);
+      if (msgEl) msgEl.textContent = "Annuler ma note";
+    });
+    cancel.addEventListener("blur", restoreMsg);
+
+    cancel.addEventListener("click", async () => {
+      const prev = getMyVote4(gameId);
+      if (!prev) return;
+      try {
+        const res = await rating4Vote(gameId, 0, prev); // suppression
+        if (res?.ok) {
+          try { localStorage.removeItem(`rating4_${gameId}`); } catch {}
+          renderRating4UI(gameId, res);
+          if (msgEl) msgEl.textContent = "Note supprimée ✅";
+        }
+      } catch {
+        if (msgEl) msgEl.textContent = "Erreur lors de l’annulation.";
+      }
+    });
+
+    choices.appendChild(cancel);
+  }
+
+  /* ⭐ Étoiles 1 → 4 */
   for (let i = 1; i <= 4; i++) {
     const star = document.createElement("button");
     star.type = "button";
@@ -358,35 +397,18 @@ function renderRating4UI(gameId, data) {
     star.textContent = "☆";
     star.setAttribute("aria-label", `${i}/4 — ${RATING4_LABELS[i]}`);
 
-    // PC (hover)
     star.addEventListener("mouseenter", () => {
       setVisual(i);
       if (msgEl) msgEl.textContent = `${i}/4 — ${RATING4_LABELS[i]}`;
     });
-    star.addEventListener("mouseleave", () => {
-      setVisual(0);
-      restoreMsg();
-    });
+    star.addEventListener("mouseleave", restoreMsg);
 
-    // Clavier / mobile (instant)
     star.addEventListener("focus", () => {
       setVisual(i);
       if (msgEl) msgEl.textContent = `${i}/4 — ${RATING4_LABELS[i]}`;
     });
-    star.addEventListener("blur", () => {
-      setVisual(0);
-      restoreMsg();
-    });
-    star.addEventListener(
-      "touchstart",
-      () => {
-        setVisual(i);
-        if (msgEl) msgEl.textContent = `${i}/4 — ${RATING4_LABELS[i]}`;
-      },
-      { passive: true }
-    );
+    star.addEventListener("blur", restoreMsg);
 
-    // Vote
     star.addEventListener("click", async () => {
       const prev = getMyVote4(gameId);
       if (prev === i) {
@@ -398,48 +420,15 @@ function renderRating4UI(gameId, data) {
         if (res?.ok) {
           setMyVote4(gameId, i);
           renderRating4UI(gameId, res);
-          if (msgEl) msgEl.textContent = prev ? "Vote modifié ✅" : "Merci pour ton vote ⭐";
+          if (msgEl) msgEl.textContent = prev ? "Note modifiée ✅" : "Merci pour ton vote ⭐";
         }
       } catch {
-        if (msgEl) msgEl.textContent = "Erreur lors du vote (réessaie plus tard).";
+        if (msgEl) msgEl.textContent = "Erreur lors du vote.";
       }
     });
 
     choices.appendChild(star);
   }
-
-  // ✅ Bouton "Annuler ma note"
-  let resetBtn = $("ratingReset");
-  if (!resetBtn) {
-    resetBtn = document.createElement("button");
-    resetBtn.id = "ratingReset";
-    resetBtn.type = "button";
-    resetBtn.className = "btnLike";
-    resetBtn.style.marginTop = "8px";
-    resetBtn.style.fontSize = "12px";
-    resetBtn.style.padding = "8px 12px";
-    resetBtn.style.opacity = "0.9";
-    resetBtn.textContent = "Annuler ma note";
-    box.appendChild(resetBtn);
-  }
-
-  resetBtn.style.display = getMyVote4(gameId) ? "" : "none";
-
-  resetBtn.onclick = async () => {
-    const prev = getMyVote4(gameId);
-    if (!prev) return;
-
-    try {
-      const res = await rating4Vote(gameId, 0, prev); // ✅ suppression
-      if (res?.ok) {
-        try { localStorage.removeItem(`rating4_${gameId}`); } catch {}
-        renderRating4UI(gameId, res);
-        if (msgEl) msgEl.textContent = "Ta note a été supprimée ✅";
-      }
-    } catch {
-      if (msgEl) msgEl.textContent = "Erreur lors de l’annulation (réessaie plus tard).";
-    }
-  };
 
   setVisual(0);
   restoreMsg();

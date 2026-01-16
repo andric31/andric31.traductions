@@ -280,9 +280,9 @@ async function initCounters(gameId, megaHref) {
 
 const RATING4_LABELS = {
   1: "Traduction à refaire",
-  2: "Traduction à améliorer",
-  3: "Traduction moyenne pour de l'auto",
-  4: "Traduction bonne pour de l'auto",
+  2: "Traduction avec défauts",
+  3: "Traduction correcte",
+  4: "Bonne traduction",
 };
 
 async function rating4Get(id) {

@@ -1,4 +1,4 @@
-// viewer.js — Vignettes + filtres + tri dates + affichage progressif
+// viewer.js — Vignettes + filtres + tri dates + affichage progressif + menu hamburger (À propos)
 (() => {
   const DEFAULT_URL = "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json";
   const GAME_BASE = "/game/?id="; // Stratégie A: /game/ID
@@ -18,6 +18,214 @@
     pageSize: 50,
     visibleCount: 0
   };
+
+  // --------------------------
+  // Menu Hamburger (Topbar)
+  // --------------------------
+
+  const ABOUT_TEXT = `
+Pour tout renseignement, aide ou autre, rejoignez mon serveur Discord :
+https://discord.gg/Jr8Ykf8yMd
+
+Contact Discord :
+https://discord.com/users/@andric31
+
+Vous pouvez aussi me contacter sur F95zone :
+Profil https://f95zone.to/members/andric31.247797/
+`.trim();
+
+  function escapeHtml(s) {
+    return String(s || "").replace(/[&<>"']/g, m => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[m]));
+  }
+
+  function linkify(text) {
+    // transforme les urls en liens <a>
+    const esc = escapeHtml(text);
+    return esc.replace(
+      /(https?:\/\/[^\s<]+)/g,
+      (m) => `<a href="${m}" target="_blank" rel="noopener">${m}</a>`
+    );
+  }
+
+  function ensureMenuDom() {
+    let pop = $("#topMenuPopover");
+    if (!pop) {
+      pop = document.createElement("div");
+      pop.id = "topMenuPopover";
+      pop.className = "menu-popover hidden";
+      pop.innerHTML = `
+        <button type="button" class="menu-item" id="menuAbout">ℹ️ À propos</button>
+      `;
+      document.body.appendChild(pop);
+    }
+
+    let overlay = $("#aboutOverlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.id = "aboutOverlay";
+      overlay.className = "modal-overlay hidden";
+      overlay.innerHTML = `
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+          <div class="modal-head">
+            <div class="modal-title" id="aboutTitle">À propos</div>
+            <button type="button" class="modal-close" id="aboutClose" aria-label="Fermer">✕</button>
+          </div>
+          <div class="modal-body" id="aboutBody"></div>
+          <div class="modal-foot">
+            <button type="button" class="modal-btn" id="aboutOk">OK</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+    }
+
+    return { pop, overlay };
+  }
+
+  function positionPopover(pop, anchorBtn) {
+    const r = anchorBtn.getBoundingClientRect();
+    const margin = 8;
+
+    // position: sous le bouton, aligné à gauche
+    let left = Math.round(r.left);
+    let top = Math.round(r.bottom + margin);
+
+    // clamp dans la fenêtre
+    const popRect = pop.getBoundingClientRect();
+    const maxLeft = window.innerWidth - (popRect.width || 260) - 10;
+    if (left > maxLeft) left = Math.max(10, maxLeft);
+    if (left < 10) left = 10;
+
+    pop.style.left = left + "px";
+    pop.style.top = top + "px";
+  }
+
+  function closePopover() {
+    const pop = $("#topMenuPopover");
+    if (pop) pop.classList.add("hidden");
+  }
+
+  function openAbout() {
+    const overlay = $("#aboutOverlay");
+    const body = $("#aboutBody");
+    if (body) body.innerHTML = `<div class="aboutText">${linkify(ABOUT_TEXT).replace(/\n/g, "<br>")}</div>`;
+    if (overlay) overlay.classList.remove("hidden");
+  }
+
+  function closeAbout() {
+    const overlay = $("#aboutOverlay");
+    if (overlay) overlay.classList.add("hidden");
+  }
+
+  function initTopMenu() {
+    const row = $(".top-title-row");
+    if (!row) return;
+
+    // évite double injection
+    if ($("#hamburgerBtn")) return;
+
+    const h1 = row.querySelector("h1");
+    if (!h1) return;
+
+    row.classList.add("top-title-flex");
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.id = "hamburgerBtn";
+    btn.className = "hamburger-btn";
+    btn.setAttribute("aria-label", "Ouvrir le menu");
+    btn.setAttribute("aria-haspopup", "menu");
+    btn.setAttribute("aria-expanded", "false");
+    btn.innerHTML = `
+      <span class="ham-lines" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </span>
+    `;
+
+    // place à gauche du titre
+    row.insertBefore(btn, h1);
+
+    const { pop } = ensureMenuDom();
+
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const isOpen = !pop.classList.contains("hidden");
+      if (isOpen) {
+        pop.classList.add("hidden");
+        btn.setAttribute("aria-expanded", "false");
+        return;
+      }
+
+      pop.classList.remove("hidden");
+      btn.setAttribute("aria-expanded", "true");
+
+      // position après affichage (pour connaître la taille)
+      positionPopover(pop, btn);
+    });
+
+    // item À propos
+    document.addEventListener("click", (e) => {
+      // fermeture popover si clic dehors
+      const p = $("#topMenuPopover");
+      const b = $("#hamburgerBtn");
+      if (!p || !b) return;
+
+      const target = e.target;
+      const clickedInside = p.contains(target) || b.contains(target);
+      if (!clickedInside) {
+        b.setAttribute("aria-expanded", "false");
+        p.classList.add("hidden");
+      }
+    });
+
+    window.addEventListener("resize", () => {
+      const p = $("#topMenuPopover");
+      const b = $("#hamburgerBtn");
+      if (p && b && !p.classList.contains("hidden")) positionPopover(p, b);
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closePopover();
+        closeAbout();
+        const b = $("#hamburgerBtn");
+        if (b) b.setAttribute("aria-expanded", "false");
+      }
+    });
+
+    // handlers modal
+    const popAbout = () => {
+      closePopover();
+      const b = $("#hamburgerBtn");
+      if (b) b.setAttribute("aria-expanded", "false");
+      openAbout();
+    };
+
+    const aboutBtn = $("#menuAbout");
+    if (aboutBtn) aboutBtn.addEventListener("click", popAbout);
+
+    const overlay = $("#aboutOverlay");
+    if (overlay) {
+      overlay.addEventListener("click", (e) => {
+        // clic sur fond => ferme
+        if (e.target === overlay) closeAbout();
+      });
+    }
+    $("#aboutClose")?.addEventListener("click", closeAbout);
+    $("#aboutOk")?.addEventListener("click", closeAbout);
+  }
+
+  // --------------------------
+  // Helpers list / prefs
+  // --------------------------
 
   async function getListUrl() {
     try {
@@ -240,16 +448,6 @@
     };
   }
 
-  function escapeHtml(s) {
-    return String(s || "").replace(/[&<>"']/g, m => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;"
-    }[m]));
-  }
-
   function badgesLineHtml(g) {
     const out = [];
     const cats = Array.isArray(g.categories) ? g.categories : (g.category ? [g.category] : []);
@@ -466,6 +664,9 @@
     $("#gridEmpty")?.classList.add("hidden");
 
     try {
+      // ✅ inject menu dès le départ
+      initTopMenu();
+
       state.cols = await getViewerCols();
       const colsSel = $("#cols");
       if (colsSel) colsSel.value = state.cols;
@@ -487,3 +688,4 @@
 
   init();
 })();
+

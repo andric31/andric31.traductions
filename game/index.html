@@ -50,7 +50,7 @@
       color: #fff;
     }
 
-    /* Cover bannière */
+    /* Cover */
     .cover{
       width:100%;
       height: 190px;
@@ -60,8 +60,6 @@
       object-fit: cover;
       display:block;
     }
-
-    /* Cover neutre si pas d'image (PAS de favicon) */
     .cover.is-placeholder{
       background:
         radial-gradient(1200px 300px at 20% 0%, rgba(255,255,255,0.06), rgba(0,0,0,0)),
@@ -82,7 +80,6 @@
       border-radius: 999px;
       font-size: 12px;
       padding: 6px 10px;
-      line-height: 1;
       user-select:none;
     }
 
@@ -121,11 +118,28 @@
       background: #3ddc84;
       color:#000;
       border: none;
-      padding: 11px 18px;
       min-width: 230px;
     }
 
-    /* ✅ Compteurs en bas, hors tuile */
+    /* ⭐ Notation */
+    .ratingStar{
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 26px;
+      line-height: 1;
+      color: #ffd36b;
+      user-select: none;
+    }
+    .ratingStar:hover{
+      filter: brightness(1.1);
+      transform: scale(1.06);
+    }
+    #ratingChoices{ flex-wrap: nowrap; }
+
+    /* 📊 Stats */
     .statsOut{
       margin-top: 10px;
       padding: 10px 12px;
@@ -168,12 +182,10 @@
         <div class="badgesRow" id="badges"></div>
         <h1 class="title" id="title">Chargement…</h1>
 
-        <!-- IMPORTANT: cover neutre par defaut (pas favicon) -->
         <img id="cover" class="cover is-placeholder" alt="" referrerpolicy="no-referrer">
 
         <div class="tagsRow" id="tags"></div>
 
-        <!-- Ordre demandé : Discord puis F95 -->
         <div class="btnRow">
           <a class="btnLike" id="btnDiscord" target="_blank" rel="noopener" style="display:none;">💬 Discord</a>
           <a class="btnLike" id="btnF95" target="_blank" rel="noopener" style="display:none;">🌐 F95Zone</a>
@@ -183,19 +195,21 @@
           <a class="btnLike btnMega" id="btnMega" target="_blank" rel="noopener" style="display:none;">📥 Télécharger (MEGA)</a>
         </div>
 
-        <!-- ⭐ Notation traduction (dans la tuile) -->
+        <!-- ⭐ Notation -->
         <div class="ratingBox" id="ratingBox" style="margin-top:12px; text-align:center;">
           <div style="color:var(--muted); font-size:12px; margin-bottom:6px;">
-            Note de la traduction : <strong id="ratingAvg">—</strong> (<span id="ratingCount">0</span> votes)
+            Note de la traduction :
+            <strong id="ratingAvg">—</strong>
+            (<span id="ratingCount">0</span> votes)
           </div>
-          <div id="ratingChoices" style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap;"></div>
+          <div id="ratingChoices" style="display:flex; justify-content:center; gap:8px;"></div>
           <div id="ratingMsg" style="margin-top:6px; color:var(--muted); font-size:12px;"></div>
         </div>
 
       </div>
     </div>
 
-    <!-- ✅ En bas, hors tuile -->
+    <!-- 📊 Stats globales -->
     <div class="statsOut" id="statsOut" style="display:none;">
       👁️ Vues : <strong id="statViews">0</strong>
       ·
@@ -208,4 +222,5 @@
   <script src="./game.js"></script>
 </body>
 </html>
+
 

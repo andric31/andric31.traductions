@@ -326,30 +326,41 @@ function renderRating4UI(gameId, data) {
   const msgEl = $("ratingMsg");
   if (!box || !choices || !avgEl || !countEl) return;
 
-  avgEl.textContent = fmtAvg4(Number(data?.avg));
-  countEl.textContent = String(data?.count ?? 0);
-
+  const avg = Number(data?.avg) || 0;
+  const count = Number(data?.count) || 0;
   const myVote = getMyVote4(gameId);
 
+  avgEl.textContent = avg > 0 ? avg.toFixed(1) + "/4" : "—";
+  countEl.textContent = String(count);
+
+  // zone étoiles
   choices.innerHTML = "";
+  choices.style.display = "flex";
+  choices.style.justifyContent = "center";
+  choices.style.gap = "6px";
+  choices.style.flexWrap = "wrap";
+
+  const setVisual = (hoverValue) => {
+    const v = hoverValue || myVote || 0;
+    [...choices.children].forEach((btn, idx) => {
+      btn.textContent = (idx + 1) <= v ? "★" : "☆";
+      btn.setAttribute("aria-pressed", String((idx + 1) === myVote));
+    });
+  };
+
   for (let i = 1; i <= 4; i++) {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "btnLike";
-    b.style.padding = "8px 12px";
-    b.style.minWidth = "240px";
-    b.style.justifyContent = "center";
-    b.textContent = `${i} — ${RATING4_LABELS[i]}`;
+    const star = document.createElement("button");
+    star.type = "button";
+    star.className = "ratingStar";
+    star.textContent = "☆";
+    star.title = `${i}/4 — ${RATING4_LABELS[i]}`;
+    star.setAttribute("aria-label", star.title);
 
-    // petit feedback visuel si c'est ton vote actuel
-    if (myVote === i) {
-      b.style.outline = "2px solid rgba(255,255,255,0.35)";
-    }
+    star.addEventListener("mouseenter", () => setVisual(i));
+    star.addEventListener("mouseleave", () => setVisual(0));
 
-    b.addEventListener("click", async () => {
+    star.addEventListener("click", async () => {
       const prev = getMyVote4(gameId);
-
-      // si clique sur la même note, on ne fait rien
       if (prev === i) {
         if (msgEl) msgEl.textContent = "C’est déjà ta note actuelle ✅";
         return;
@@ -360,23 +371,25 @@ function renderRating4UI(gameId, data) {
         if (res?.ok) {
           setMyVote4(gameId, i);
           renderRating4UI(gameId, res);
-          if (msgEl) msgEl.textContent = prev ? "Vote modifié ✅" : "Merci ! Vote enregistré ✅";
+          if (msgEl) msgEl.textContent = prev ? "Vote modifié ✅" : "Merci pour ton vote ⭐";
         }
       } catch {
         if (msgEl) msgEl.textContent = "Erreur lors du vote (réessaie plus tard).";
       }
     });
 
-    choices.appendChild(b);
+    choices.appendChild(star);
   }
+
+  // initialise l'affichage
+  setVisual(0);
 
   if (msgEl) {
     msgEl.textContent = myVote
-      ? `Ta note actuelle : ${myVote} — ${RATING4_LABELS[myVote]} (tu peux la modifier)`
-      : "Choisis une note (tu pourras la modifier plus tard).";
+      ? `Ta note : ${myVote}/4 — ${RATING4_LABELS[myVote]} (tu peux la modifier)`
+      : "Clique sur les étoiles pour noter la traduction.";
   }
 }
-
 
 // ====== Main ======
 

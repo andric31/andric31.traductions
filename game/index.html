@@ -185,6 +185,26 @@
       opacity: 0.95;
     }
 
+    /* étoile vide */
+    .ratingStar{
+      color: rgba(255, 211, 107, 0.35);
+      transition: color 220ms cubic-bezier(.4,0,.2,1),
+                  opacity 220ms cubic-bezier(.4,0,.2,1),
+                  filter 220ms cubic-bezier(.4,0,.2,1);
+    }
+    
+    /* étoile pleine (★ injectée par JS) */
+    .ratingStar{
+      font-weight: 700;
+    }
+    
+    /* quand l’étoile est active (hover ou sélection) */
+    .ratingStar:hover,
+    .ratingStar:focus-visible{
+      color: rgba(255, 211, 107, 0.9);
+      filter: brightness(1.02);
+    }
+
     #ratingChoices{ flex-wrap: nowrap; }
 
     /* 📊 Stats */

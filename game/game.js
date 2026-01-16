@@ -480,7 +480,7 @@ function renderRating4UI(gameId, data) {
 
     const megaHref = (game.translation || "").trim();
     setHref("btnMega", megaHref);
-    if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger (MEGA)";
+    if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction (MEGA)";
 
     // ✅ Vues + clics MEGA
     await initCounters(id, megaHref);

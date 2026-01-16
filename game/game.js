@@ -56,7 +56,9 @@ function $(id) {
 function showError(msg) {
   const err = $("errBox");
   const card = $("card");
+  const stats = $("statsOut");
   if (card) card.style.display = "none";
+  if (stats) stats.style.display = "none";
   if (err) {
     err.style.display = "block";
     err.textContent = msg;
@@ -205,6 +207,75 @@ function renderBadgesFromGame(game) {
   wrap.appendChild(b3);
 }
 
+// ====== Counters (Cloudflare Pages Function /api/counter + D1) ======
+
+function formatInt(n) {
+  const x = Number(n);
+  if (!Number.isFinite(x)) return "0";
+  try { return x.toLocaleString("fr-FR"); } catch { return String(Math.floor(x)); }
+}
+
+function showStatsBox() {
+  const stats = $("statsOut");
+  if (stats) stats.style.display = "";
+}
+
+async function counterGet(id) {
+  const r = await fetch(`/api/counter?op=get&id=${encodeURIComponent(id)}`, { cache: "no-store" });
+  if (!r.ok) throw new Error("counter get HTTP " + r.status);
+  return await r.json();
+}
+
+async function counterHit(id, kind) {
+  const r = await fetch(`/api/counter?op=hit&kind=${encodeURIComponent(kind)}&id=${encodeURIComponent(id)}`, { cache: "no-store" });
+  if (!r.ok) throw new Error("counter hit HTTP " + r.status);
+  return await r.json();
+}
+
+async function initCounters(gameId, megaHref) {
+  // 1) Vue : on hit au chargement
+  try {
+    const j = await counterHit(gameId, "view");
+    if (j?.ok) {
+      setText("statViews", formatInt(j.views));
+      setText("statMegaClicks", formatInt(j.mega));
+      showStatsBox();
+    }
+  } catch {
+    // fallback: get
+    try {
+      const j = await counterGet(gameId);
+      if (j?.ok) {
+        setText("statViews", formatInt(j.views));
+        setText("statMegaClicks", formatInt(j.mega));
+        showStatsBox();
+      }
+    } catch {
+      // silencieux (la page doit continuer à marcher)
+      setText("statViews", "0");
+      setText("statMegaClicks", "0");
+      showStatsBox();
+    }
+  }
+
+  // 2) Clic MEGA : on hit au clic
+  if (!megaHref) return;
+  const btn = $("btnMega");
+  if (!btn) return;
+
+  btn.addEventListener("click", async () => {
+    try {
+      const j = await counterHit(gameId, "mega");
+      if (j?.ok) {
+        setText("statMegaClicks", formatInt(j.mega));
+        showStatsBox();
+      }
+    } catch {
+      // silencieux
+    }
+  }, { passive: true });
+}
+
 // ====== Main ======
 
 (async function main() {
@@ -249,8 +320,12 @@ function renderBadgesFromGame(game) {
     setHref("btnF95", (game.url || "").trim());
     if ($("btnF95")) $("btnF95").textContent = "🌐 F95Zone";
 
-    setHref("btnMega", (game.translation || "").trim());
+    const megaHref = (game.translation || "").trim();
+    setHref("btnMega", megaHref);
     if ($("btnMega")) $("btnMega").textContent = "⬇ Télécharger (MEGA)";
+
+    // ✅ Vues + clics MEGA
+    await initCounters(id, megaHref);
 
   } catch (e) {
     showError(`Erreur: ${e?.message || e}`);

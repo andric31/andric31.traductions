@@ -125,6 +125,26 @@
       min-width: 230px;
     }
 
+    /* ✅ Compteurs en bas, hors tuile */
+    .statsOut{
+      margin-top: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+      color: var(--muted);
+      font-size: 12px;
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      flex-wrap:wrap;
+      user-select:none;
+    }
+    .statsOut strong{
+      color: var(--fg);
+      font-weight: 800;
+    }
+
     .err{
       margin: 14px auto 0;
       max-width: 820px;
@@ -163,6 +183,13 @@
           <a class="btnLike btnMega" id="btnMega" target="_blank" rel="noopener" style="display:none;">⬇ Télécharger (MEGA)</a>
         </div>
       </div>
+    </div>
+
+    <!-- ✅ En bas, hors tuile -->
+    <div class="statsOut" id="statsOut" style="display:none;">
+      👁️ Vues : <strong id="statViews">0</strong>
+      ·
+      ⬇️ Clics MEGA : <strong id="statMegaClicks">0</strong>
     </div>
 
     <div class="err" id="errBox"></div>

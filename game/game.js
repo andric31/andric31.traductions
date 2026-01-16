@@ -207,96 +207,39 @@ function renderBadgesFromGame(game) {
   wrap.appendChild(b3);
 }
 
-// ====== ✅ À jour / Pas à jour (basé sur dates) ======
-// Principe simple (sans casser / sans CORS):
-// - si updatedAtLocal (ta date de traduction) >= updatedAt (date du thread F95) => À jour ✅
-// - sinon => Pas à jour 🔄
-// Si on ne peut pas parser => on n'affiche rien.
+async function renderTranslationStatus(game) {
+  if (!game?.url || !game?.title) return;
 
-function parseFrenchDateToTs(s) {
-  const raw = String(s || "").trim();
-  if (!raw) return NaN;
+  try {
+    const r = await fetch(
+      `/api/f95meta?url=${encodeURIComponent(game.url)}`,
+      { cache: "no-store" }
+    );
+    if (!r.ok) return;
 
-  // Formats ISO / classiques
-  const iso = Date.parse(raw);
-  if (!Number.isNaN(iso)) return iso;
+    const j = await r.json();
+    if (!j?.ok || !j?.title) return;
 
-  // Formats FR possibles (ex: "16 janv. 2026", "16 janvier 2026", "16 jan 2026")
-  const months = {
-    "jan": 0, "janv": 0, "janvier": 0,
-    "fev": 1, "fevr": 1, "fevrier": 1, "févr": 1, "février": 1,
-    "mar": 2, "mars": 2,
-    "avr": 3, "avril": 3,
-    "mai": 4,
-    "jun": 5, "juin": 5,
-    "jui": 6, "juil": 6, "juillet": 6,
-    "aou": 7, "aoû": 7, "août": 7,
-    "sep": 8, "sept": 8, "septembre": 8,
-    "oct": 9, "octobre": 9,
-    "nov": 10, "novembre": 10,
-    "dec": 11, "déc": 11, "decembre": 11, "décembre": 11
-  };
+    const localTitle = normalizeTitle(game.title);
+    const remoteTitle = normalizeTitle(j.title);
 
-  const cleaned = raw
-    .toLowerCase()
-    .replace(/\./g, "")
-    .replace(/,/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+    const badge = document.createElement("span");
+    badge.classList.add("badge");
 
-  // Ex: "16 janv 2026" (optionnellement avec heure)
-  const m = cleaned.match(/^(\d{1,2})\s+([a-zéûôîàç]+)\s+(\d{4})(?:\s+(\d{1,2}):(\d{2}))?$/i);
-  if (!m) return NaN;
+    if (localTitle === remoteTitle) {
+      badge.textContent = "✅ Traduction à jour";
+      badge.classList.add("status-updated");
+    } else {
+      badge.textContent = "🔄 Traduction non à jour";
+      badge.classList.add("status-outdated");
+    }
 
-  const day = Number(m[1]);
-  const monKey = String(m[2] || "").normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // retire accents
-  const year = Number(m[3]);
-  const hh = m[4] ? Number(m[4]) : 0;
-  const mm = m[5] ? Number(m[5]) : 0;
+    const wrap = $("badges");
+    if (wrap) wrap.appendChild(badge);
 
-  const mon = months[monKey];
-  if (!Number.isFinite(day) || !Number.isFinite(year) || !Number.isFinite(mon)) return NaN;
-
-  // Date locale
-  const d = new Date(year, mon, day, hh, mm, 0, 0);
-  return d.getTime();
-}
-
-function computeUpToDate(game) {
-  // 1) Dates
-  const tsThread = parseFrenchDateToTs(game?.updatedAt || "");
-  const tsLocal = Date.parse(String(game?.updatedAtLocal || "").trim());
-
-  // si updatedAtLocal est ISO valide, ok
-  const localOk = !Number.isNaN(tsLocal);
-
-  if (!Number.isNaN(tsThread) && localOk) {
-    return tsLocal >= tsThread; // ✅ à jour si ta trad est au moins aussi récente
+  } catch {
+    // silencieux (pas de badge si erreur)
   }
-
-  // 2) Fallback éventuel si ton JSON a déjà un champ
-  // (ex: game.isUpToDate / game.upToDate / game.needUpdate)
-  if (typeof game?.isUpToDate === "boolean") return game.isUpToDate;
-  if (typeof game?.upToDate === "boolean") return game.upToDate;
-  if (typeof game?.needUpdate === "boolean") return !game.needUpdate;
-
-  return null; // inconnu => on n'affiche rien
-}
-
-function renderUpToDateBadge(game) {
-  const wrap = $("badges");
-  if (!wrap) return;
-
-  const res = computeUpToDate(game);
-  if (res === null) return;
-
-  const b = document.createElement("span");
-  b.classList.add("badge");
-  // on réutilise les classes existantes (pas besoin de CSS)
-  b.className = `badge status-${res ? "ajour" : "pasajour"}`;
-  b.textContent = res ? "✅ À jour" : "🔄 Pas à jour";
-
-  wrap.appendChild(b);
 }
 
 // ====== Counters (Cloudflare Pages Function /api/counter + D1) ======
@@ -526,6 +469,13 @@ function renderRating4UI(gameId, data) {
   restoreMsg();
 }
 
+function normalizeTitle(s) {
+  return String(s || "")
+    .replace(/\u00A0/g, " ") // espaces insécables
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 // ====== Main ======
 
 (async function main() {
@@ -562,9 +512,7 @@ function renderRating4UI(gameId, data) {
 
     // Badges (cat/engine/status)
     renderBadgesFromGame(game);
-
-    // ✅ Ajout : à jour / pas à jour (sans rien casser)
-    renderUpToDateBadge(game);
+    renderTranslationStatus(game);
 
     // Boutons (ordre: Discord puis F95)
     setHref("btnDiscord", (game.discordlink || "").trim());

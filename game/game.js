@@ -207,6 +207,98 @@ function renderBadgesFromGame(game) {
   wrap.appendChild(b3);
 }
 
+// ====== ✅ À jour / Pas à jour (basé sur dates) ======
+// Principe simple (sans casser / sans CORS):
+// - si updatedAtLocal (ta date de traduction) >= updatedAt (date du thread F95) => À jour ✅
+// - sinon => Pas à jour 🔄
+// Si on ne peut pas parser => on n'affiche rien.
+
+function parseFrenchDateToTs(s) {
+  const raw = String(s || "").trim();
+  if (!raw) return NaN;
+
+  // Formats ISO / classiques
+  const iso = Date.parse(raw);
+  if (!Number.isNaN(iso)) return iso;
+
+  // Formats FR possibles (ex: "16 janv. 2026", "16 janvier 2026", "16 jan 2026")
+  const months = {
+    "jan": 0, "janv": 0, "janvier": 0,
+    "fev": 1, "fevr": 1, "fevrier": 1, "févr": 1, "février": 1,
+    "mar": 2, "mars": 2,
+    "avr": 3, "avril": 3,
+    "mai": 4,
+    "jun": 5, "juin": 5,
+    "jui": 6, "juil": 6, "juillet": 6,
+    "aou": 7, "aoû": 7, "août": 7,
+    "sep": 8, "sept": 8, "septembre": 8,
+    "oct": 9, "octobre": 9,
+    "nov": 10, "novembre": 10,
+    "dec": 11, "déc": 11, "decembre": 11, "décembre": 11
+  };
+
+  const cleaned = raw
+    .toLowerCase()
+    .replace(/\./g, "")
+    .replace(/,/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  // Ex: "16 janv 2026" (optionnellement avec heure)
+  const m = cleaned.match(/^(\d{1,2})\s+([a-zéûôîàç]+)\s+(\d{4})(?:\s+(\d{1,2}):(\d{2}))?$/i);
+  if (!m) return NaN;
+
+  const day = Number(m[1]);
+  const monKey = String(m[2] || "").normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // retire accents
+  const year = Number(m[3]);
+  const hh = m[4] ? Number(m[4]) : 0;
+  const mm = m[5] ? Number(m[5]) : 0;
+
+  const mon = months[monKey];
+  if (!Number.isFinite(day) || !Number.isFinite(year) || !Number.isFinite(mon)) return NaN;
+
+  // Date locale
+  const d = new Date(year, mon, day, hh, mm, 0, 0);
+  return d.getTime();
+}
+
+function computeUpToDate(game) {
+  // 1) Dates
+  const tsThread = parseFrenchDateToTs(game?.updatedAt || "");
+  const tsLocal = Date.parse(String(game?.updatedAtLocal || "").trim());
+
+  // si updatedAtLocal est ISO valide, ok
+  const localOk = !Number.isNaN(tsLocal);
+
+  if (!Number.isNaN(tsThread) && localOk) {
+    return tsLocal >= tsThread; // ✅ à jour si ta trad est au moins aussi récente
+  }
+
+  // 2) Fallback éventuel si ton JSON a déjà un champ
+  // (ex: game.isUpToDate / game.upToDate / game.needUpdate)
+  if (typeof game?.isUpToDate === "boolean") return game.isUpToDate;
+  if (typeof game?.upToDate === "boolean") return game.upToDate;
+  if (typeof game?.needUpdate === "boolean") return !game.needUpdate;
+
+  return null; // inconnu => on n'affiche rien
+}
+
+function renderUpToDateBadge(game) {
+  const wrap = $("badges");
+  if (!wrap) return;
+
+  const res = computeUpToDate(game);
+  if (res === null) return;
+
+  const b = document.createElement("span");
+  b.classList.add("badge");
+  // on réutilise les classes existantes (pas besoin de CSS)
+  b.className = `badge status-${res ? "ajour" : "pasajour"}`;
+  b.textContent = res ? "✅ À jour" : "🔄 Pas à jour";
+
+  wrap.appendChild(b);
+}
+
 // ====== Counters (Cloudflare Pages Function /api/counter + D1) ======
 
 function formatInt(n) {
@@ -468,8 +560,11 @@ function renderRating4UI(gameId, data) {
     // Tags
     renderTags(game.tags || []);
 
-    // Badges
+    // Badges (cat/engine/status)
     renderBadgesFromGame(game);
+
+    // ✅ Ajout : à jour / pas à jour (sans rien casser)
+    renderUpToDateBadge(game);
 
     // Boutons (ordre: Discord puis F95)
     setHref("btnDiscord", (game.discordlink || "").trim());
@@ -497,4 +592,3 @@ function renderRating4UI(gameId, data) {
     showError(`Erreur: ${e?.message || e}`);
   }
 })();
-

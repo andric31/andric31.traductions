@@ -43,6 +43,19 @@
       align-items:center;
     }
 
+    /* ✅ Etat MAJ (comme extension) */
+    .majState{
+      margin-top: -2px;
+      margin-bottom: 8px;
+      text-align: left;
+      font-size: 13px;
+      color: var(--muted);
+      user-select:none;
+    }
+    .majState .ok{ color:#4ade80; font-weight:800; }
+    .majState .no{ color:#f97316; font-weight:800; }
+    .majState .wait{ color:#cbd5e1; font-weight:700; }
+
     .title{
       margin: 0 0 12px 0;
       font-size: 22px;
@@ -201,6 +214,10 @@
     <div class="cardPreview" id="card" aria-live="polite">
       <div class="cardInner">
         <div class="badgesRow" id="badges"></div>
+
+        <!-- ✅ Etat MAJ (affiché par game.js) -->
+        <div class="majState" id="majState" style="display:none;"></div>
+
         <h1 class="title" id="title">Chargement…</h1>
 
         <img id="cover" class="cover is-placeholder" alt="" referrerpolicy="no-referrer">
@@ -243,3 +260,4 @@
   <script src="./game.js"></script>
 </body>
 </html>
+

@@ -140,31 +140,31 @@
       display:inline-flex;
       align-items:center;
       justify-content:center;
-    
+
       width: 40px;
       height: 34px;
-    
+
       background: rgba(255,255,255,0.035);
       border: 1px solid var(--border);
       border-radius: 10px;
-    
+
       cursor: pointer;
       user-select: none;
-    
+
       font-size: 26px;
       line-height: 1;
       color: #ffd36b;
-    
+
       /* 🌙 état calme */
       opacity: 0.7;
-    
+
       /* 🧈 transition très douce */
       transition:
         opacity 220ms cubic-bezier(.4,0,.2,1),
         transform 220ms cubic-bezier(.4,0,.2,1),
         filter 220ms cubic-bezier(.4,0,.2,1);
     }
-    
+
     .ratingStar:hover,
     .ratingCancel:hover,
     .ratingStar:focus-visible,
@@ -173,39 +173,33 @@
       filter: brightness(1.04);   /* très léger */
       transform: scale(1.02);     /* quasi imperceptible */
     }
-    
+
     .ratingCancel{
       font-size: 16px;
       color: #fff;
       opacity: 0.75;
     }
-    
+
     .ratingCancel:hover{
       color: #ff9a9a;
       opacity: 0.95;
     }
 
-    /* étoile vide */
-    .ratingStar{
-      color: rgba(255, 211, 107, 0.35);
-      transition: color 220ms cubic-bezier(.4,0,.2,1),
-                  opacity 220ms cubic-bezier(.4,0,.2,1),
-                  filter 220ms cubic-bezier(.4,0,.2,1);
-    }
-    
-    /* étoile pleine (★ injectée par JS) */
-    .ratingStar{
-      font-weight: 700;
-    }
-    
-    /* quand l’étoile est active (hover ou sélection) */
-    .ratingStar:hover,
-    .ratingStar:focus-visible{
-      color: rgba(255, 211, 107, 0.9);
-      filter: brightness(1.02);
-    }
-
     #ratingChoices{ flex-wrap: nowrap; }
+
+    /* ✨ Fade doux sur le texte "titre" (ratingMsg) quand il change */
+    #ratingMsg{
+      opacity: 0.82;
+      transition: opacity 220ms cubic-bezier(.4,0,.2,1);
+      will-change: opacity;
+    }
+    @keyframes ratingMsgFade {
+      from { opacity: 0.35; }
+      to   { opacity: 0.82; }
+    }
+    #ratingMsg.msgFade{
+      animation: ratingMsgFade 220ms cubic-bezier(.4,0,.2,1);
+    }
 
     /* 📊 Stats */
     .statsOut{
@@ -291,7 +285,27 @@
     <div class="err" id="errBox"></div>
   </div>
 
+  <!-- ✅ Observer : ajoute un mini fade à #ratingMsg à chaque changement de texte (sans toucher game.js) -->
+  <script>
+    (function(){
+      const msg = document.getElementById("ratingMsg");
+      if (!msg) return;
+
+      const flash = () => {
+        msg.classList.remove("msgFade");
+        // force reflow pour relancer l'animation
+        void msg.offsetWidth;
+        msg.classList.add("msgFade");
+      };
+
+      const obs = new MutationObserver(() => flash());
+      obs.observe(msg, { childList: true, characterData: true, subtree: true });
+
+      // au chargement, si déjà du texte
+      if ((msg.textContent || "").trim()) flash();
+    })();
+  </script>
+
   <script src="./game.js"></script>
 </body>
 </html>
-

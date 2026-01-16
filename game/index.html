@@ -140,24 +140,30 @@
       display:inline-flex;
       align-items:center;
       justify-content:center;
-
+    
       width: 40px;
       height: 34px;
-
+    
       background: rgba(255,255,255,0.04);
       border: 1px solid var(--border);
       border-radius: 10px;
-
+    
       cursor: pointer;
       user-select: none;
-
+    
       font-size: 26px;
       line-height: 1;
       color: #ffd36b;
+    
+      /* ✅ Fade doux */
+      opacity: 0.78;
+      transition: opacity 140ms ease, transform 140ms ease, filter 140ms ease, background-color 140ms ease;
     }
+    
     .ratingStar:hover,
     .ratingCancel:hover{
-      filter: brightness(1.1);
+      opacity: 1;
+      filter: brightness(1.12);
       transform: scale(1.06);
     }
 

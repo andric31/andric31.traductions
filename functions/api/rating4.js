@@ -73,7 +73,13 @@ export async function onRequest(context) {
       let prev = Number(prevRaw);
       if (!Number.isFinite(prev) || prev < 0 || prev > 4) prev = 0;
 
-      // Assure une ligne existante
+      // --- Amélioration: ne pas créer une row si on annule et qu'il n'y a rien ---
+      if (v === 0 && prev === 0) {
+        const row = await getRow();
+        return new Response(JSON.stringify({ ok: true, ...row }), { headers });
+      }
+
+      // Assure une ligne existante uniquement si on va modifier quelque chose
       await env.DB.prepare(`
         INSERT INTO ratings4 (id, sum, count, updated_at)
         VALUES (?1, 0, 0, unixepoch())
@@ -104,8 +110,16 @@ export async function onRequest(context) {
         `).bind(id, v).run();
       }
 
-      const row = await getRow();
-      return new Response(JSON.stringify({ ok: true, ...row }), { headers });
+      // --- Amélioration: si plus aucun vote, on supprime la row (DB plus clean) ---
+      // (optionnel mais demandé ici)
+      const after = await getRow();
+      if (after.count <= 0) {
+        await env.DB.prepare(`DELETE FROM ratings4 WHERE id=?1`).bind(id).run();
+        // Renvoie un état "vide"
+        return new Response(JSON.stringify({ ok: true, id, sum: 0, count: 0, avg: 0 }), { headers });
+      }
+
+      return new Response(JSON.stringify({ ok: true, ...after }), { headers });
     }
 
     return new Response(JSON.stringify({ ok: false, error: "op invalide" }), { status: 400, headers });
@@ -121,5 +135,3 @@ export async function onRequest(context) {
     );
   }
 }
-
-

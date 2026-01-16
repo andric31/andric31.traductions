@@ -324,7 +324,6 @@ function renderRating4UI(gameId, data) {
 
   const avg = Number(data?.avg) || 0;
   const count = Number(data?.count) || 0;
-  const myVote = getMyVote4(gameId);
 
   avgEl.textContent = avg > 0 ? avg.toFixed(1) + "/4" : "—";
   countEl.textContent = String(count);
@@ -378,10 +377,14 @@ function renderRating4UI(gameId, data) {
       setVisual(0);
       restoreMsg();
     });
-    star.addEventListener("touchstart", () => {
-      setVisual(i);
-      if (msgEl) msgEl.textContent = `${i}/4 — ${RATING4_LABELS[i]}`;
-    }, { passive: true });
+    star.addEventListener(
+      "touchstart",
+      () => {
+        setVisual(i);
+        if (msgEl) msgEl.textContent = `${i}/4 — ${RATING4_LABELS[i]}`;
+      },
+      { passive: true }
+    );
 
     // Vote
     star.addEventListener("click", async () => {
@@ -404,6 +407,39 @@ function renderRating4UI(gameId, data) {
 
     choices.appendChild(star);
   }
+
+  // ✅ Bouton "Annuler ma note"
+  let resetBtn = $("ratingReset");
+  if (!resetBtn) {
+    resetBtn = document.createElement("button");
+    resetBtn.id = "ratingReset";
+    resetBtn.type = "button";
+    resetBtn.className = "btnLike";
+    resetBtn.style.marginTop = "8px";
+    resetBtn.style.fontSize = "12px";
+    resetBtn.style.padding = "8px 12px";
+    resetBtn.style.opacity = "0.9";
+    resetBtn.textContent = "Annuler ma note";
+    box.appendChild(resetBtn);
+  }
+
+  resetBtn.style.display = getMyVote4(gameId) ? "" : "none";
+
+  resetBtn.onclick = async () => {
+    const prev = getMyVote4(gameId);
+    if (!prev) return;
+
+    try {
+      const res = await rating4Vote(gameId, 0, prev); // ✅ suppression
+      if (res?.ok) {
+        try { localStorage.removeItem(`rating4_${gameId}`); } catch {}
+        renderRating4UI(gameId, res);
+        if (msgEl) msgEl.textContent = "Ta note a été supprimée ✅";
+      }
+    } catch {
+      if (msgEl) msgEl.textContent = "Erreur lors de l’annulation (réessaie plus tard).";
+    }
+  };
 
   setVisual(0);
   restoreMsg();

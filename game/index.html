@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="referrer" content="no-referrer">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jeu</title>
+
+  <link rel="icon" href="/favicon.png" />
+  <link rel="stylesheet" href="/viewer.css" />
+
+  <style>
+    main{ padding: 18px 16px; max-width: 1100px; margin: 0 auto; }
+    .game-wrap{ background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .hero{ display:flex; gap:16px; padding:16px; align-items:stretch; flex-wrap:wrap; }
+    .cover{ width:320px; max-width:100%; border-radius:12px; border:1px solid var(--border); object-fit:cover; background:#1c1f2e; min-height:180px; }
+    .info{ flex:1; min-width:280px; }
+    .title{ margin:0 0 8px 0; font-size:22px; line-height:1.2; color:#fff; }
+    .meta{ color: var(--muted); font-size: 13px; margin-bottom:10px; }
+    .btnrow{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+    .section{ padding: 0 16px 16px; }
+    .kv{ display:grid; grid-template-columns: 160px 1fr; gap:8px 12px; }
+    .kv div{ padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.04); }
+    .kv .k{ color:var(--muted); }
+    .tags{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+    .tag{ border:1px solid var(--border); padding:3px 8px; border-radius:999px; font-size:12px; color:#fff; background: rgba(255,255,255,0.03); }
+  </style>
+</head>
+<body>
+  <header class="topbar" role="banner">
+    <div class="top-title-row">
+      <h1><a href="/" style="color:#fff;text-decoration:none;">f95list_andric31_viewer</a></h1>
+    </div>
+    <div class="top-actions">
+      <div class="search-wrap">
+        <span class="total-inline">Page jeu (URL /ID)</span>
+      </div>
+      <a class="btn" href="/">⬅ Retour</a>
+    </div>
+  </header>
+
+  <main role="main" style="padding-top: calc(var(--topbar-h) + 16px);">
+    <div class="game-wrap" id="wrap">
+      <div class="hero">
+        <img id="cover" class="cover" src="/favicon.png" alt="" referrerpolicy="no-referrer">
+        <div class="info">
+          <h2 class="title" id="title">Chargement…</h2>
+          <div class="meta" id="meta"></div>
+
+          <div class="badges-line" id="badges"></div>
+
+          <div class="btnrow">
+            <a class="btn" id="btnMega" target="_blank" rel="noopener">⬇ Mega</a>
+            <a class="btn" id="btnDiscord" target="_blank" rel="noopener">💬 Discord</a>
+            <a class="btn" id="btnF95" target="_blank" rel="noopener">🌐 F95</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="kv">
+          <div class="k">ID</div><div id="gid">—</div>
+          <div class="k">Version</div><div id="gver">—</div>
+          <div class="k">OS</div><div id="gos">—</div>
+          <div class="k">Censuré</div><div id="gcens">—</div>
+          <div class="k">Maj F95</div><div id="gupd">—</div>
+          <div class="k">Sortie</div><div id="grel">—</div>
+        </div>
+
+        <div style="margin-top:12px;color:var(--muted);font-size:13px;">Tags :</div>
+        <div class="tags" id="tags"></div>
+      </div>
+    </div>
+
+    <div class="empty hidden" id="errBox"></div>
+  </main>
+
+  <script src="/game/game.js"></script>
+</body>
+</html>

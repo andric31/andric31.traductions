@@ -210,29 +210,35 @@ function renderBadgesFromGame(game) {
 async function renderTranslationStatus(game) {
   if (!game?.url || !game?.title) return;
 
+  // Petit indicateur texte (si tu utilises ton <div id="majState">)
+  const maj = $("majState");
+  if (maj) {
+    maj.style.display = "";
+    maj.innerHTML = `<span class="wait">⏳ Vérification F95…</span>`;
+  }
+
   try {
     const r = await fetch(
       `/api/f95status?url=${encodeURIComponent(game.url)}&storedTitle=${encodeURIComponent(game.title)}`,
       { cache: "no-store" }
     );
-
     if (!r.ok) return;
 
     const j = await r.json();
-    if (!j?.ok || !j?.title) return;
+    if (!j?.ok || !j?.currentTitle) return;
 
-    const localTitle = normalizeTitle(game.title);
-    const remoteTitle = normalizeTitle(j.title);
-
+    // Badge dans la ligne des badges (comme avant)
     const badge = document.createElement("span");
     badge.classList.add("badge");
 
-    if (localTitle === remoteTitle) {
+    if (j.isUpToDate) {
       badge.textContent = "✅ Traduction à jour";
       badge.classList.add("status-updated");
+      if (maj) maj.innerHTML = `<span class="ok">✅ Traduction à jour</span>`;
     } else {
       badge.textContent = "🔄 Traduction non à jour";
       badge.classList.add("status-outdated");
+      if (maj) maj.innerHTML = `<span class="no">🔄 Traduction non à jour</span>`;
     }
 
     const wrap = $("badges");
@@ -240,6 +246,7 @@ async function renderTranslationStatus(game) {
 
   } catch {
     // silencieux (pas de badge si erreur)
+    if (maj) maj.innerHTML = `<span class="wait">⚠️ Impossible de vérifier (réessaie plus tard)</span>`;
   }
 }
 

@@ -1,3 +1,4 @@
+// /functions/api/f95status.js  (Cloudflare Pages Function)
 export async function onRequest(context) {
   const { request } = context;
 
@@ -33,25 +34,32 @@ export async function onRequest(context) {
     } catch {
       return new Response(JSON.stringify({ ok: false, error: "url invalide" }), { status: 400, headers });
     }
+
     const host = (u.hostname || "").toLowerCase();
     if (!host.endsWith("f95zone.to")) {
       return new Response(JSON.stringify({ ok: false, error: "host non autorisé" }), { status: 400, headers });
     }
 
     // Petit cache Cloudflare (30 min) pour éviter de refetch à chaque visite
+    // Le cache contient { currentTitle } uniquement (sans storedTitle)
     const cacheKey = new Request("https://cache.local/f95status?u=" + encodeURIComponent(f95Url), request);
     const cache = caches.default;
 
     const cached = await cache.match(cacheKey);
     if (cached) {
       const data = await cached.json();
-      // On refait la comparaison côté server avec storedTitle (car le cache contient currentTitle)
-      const isUpToDate = clean(data.currentTitle) === clean(storedTitle);
-      return new Response(JSON.stringify({
-        ok: true,
-        currentTitle: data.currentTitle,
-        isUpToDate
-      }), { headers });
+
+      const currentTitle = String(data?.currentTitle || "");
+      const isUpToDate = clean(currentTitle) === clean(storedTitle);
+
+      return new Response(
+        JSON.stringify({
+          ok: true,
+          currentTitle,
+          isUpToDate,
+        }),
+        { headers }
+      );
     }
 
     // Fetch page F95
@@ -59,12 +67,15 @@ export async function onRequest(context) {
       headers: {
         // UA simple (évite certains blocages)
         "user-agent": "Mozilla/5.0 (compatible; andric31-trad/1.0)",
-        "accept": "text/html,*/*",
-      }
+        accept: "text/html,*/*",
+      },
     });
 
     if (!resp.ok) {
-      return new Response(JSON.stringify({ ok: false, error: "fetch F95 failed", status: resp.status }), { status: 502, headers });
+      return new Response(
+        JSON.stringify({ ok: false, error: "fetch F95 failed", status: resp.status }),
+        { status: 502, headers }
+      );
     }
 
     const html = await resp.text();
@@ -78,43 +89,78 @@ export async function onRequest(context) {
     const payloadToCache = { currentTitle };
 
     // Met en cache la valeur actuelle 30 minutes
-    await cache.put(cacheKey, new Response(JSON.stringify(payloadToCache), {
-      headers: {
-        "content-type": "application/json; charset=utf-8",
-        "cache-control": "public, max-age=1800",
-      }
-    }));
+    await cache.put(
+      cacheKey,
+      new Response(JSON.stringify(payloadToCache), {
+        headers: {
+          "content-type": "application/json; charset=utf-8",
+          "cache-control": "public, max-age=1800",
+        },
+      })
+    );
 
     const isUpToDate = clean(currentTitle) === clean(storedTitle);
 
-    return new Response(JSON.stringify({
-      ok: true,
-      currentTitle,
-      isUpToDate
-    }), { headers });
-
+    return new Response(
+      JSON.stringify({
+        ok: true,
+        currentTitle,
+        isUpToDate,
+      }),
+      { headers }
+    );
   } catch (err) {
-    return new Response(JSON.stringify({
-      ok: false,
-      error: "Exception Worker",
-      detail: String(err?.message || err),
-    }), { status: 500, headers });
+    return new Response(
+      JSON.stringify({
+        ok: false,
+        error: "Exception Worker",
+        detail: String(err?.message || err),
+      }),
+      { status: 500, headers }
+    );
   }
 }
 
 // -------- helpers ----------
+
 function stripTags(s) {
   return String(s || "").replace(/<[^>]+>/g, " ");
 }
+
 function decodeHtml(s) {
-  // mini decode: suffisant pour les titres (amp, quot, etc.)
-  return String(s || "")
+  // Décode entités nommées + numériques (&#...; et &#x...;)
+  let out = String(s || "");
+
+  // entités nommées courantes
+  out = out
     .replace(/&amp;/g, "&")
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
     .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">");
+    .replace(/&gt;/g, ">")
+    .replace(/&nbsp;/gi, " "); // IMPORTANT
+
+  // entités numériques décimales
+  out = out.replace(/&#(\d+);/g, (_, n) => {
+    const code = Number(n);
+    return Number.isFinite(code) ? String.fromCodePoint(code) : _;
+  });
+
+  // entités numériques hex
+  out = out.replace(/&#x([0-9a-f]+);/gi, (_, hx) => {
+    const code = parseInt(hx, 16);
+    return Number.isFinite(code) ? String.fromCodePoint(code) : _;
+  });
+
+  return out;
 }
+
 function clean(str) {
-  return String(str || "").replace(/\s+/g, " ").trim();
+  return String(str || "")
+    .normalize("NFKC") // uniformise Unicode
+    .replace(/[\u200B-\u200D\uFEFF]/g, "") // vire les invisibles (ZW*, BOM)
+    .replace(/[\u00A0\u202F\u2009]/g, " ") // espaces spéciaux -> espace
+    .replace(/[‐-‒–—−]/g, "-") // tous les tirets -> "-"
+    .replace(/\s+/g, " ")
+    .trim();
 }

@@ -348,7 +348,7 @@ function renderRating4UI(gameId, data) {
     const v = getMyVote4(gameId);
     if (!msgEl) return;
     msgEl.textContent = v
-      ? `Ta note : ${v}/4 — ${RATING4_LABELS[v]} (tu peux la modifier)`
+      ? `Ta note : ${v}/4 — ${RATING4_LABELS[v]} (tu peux changer ta note)`
       : "Clique sur les étoiles pour noter la traduction.";
   };
 

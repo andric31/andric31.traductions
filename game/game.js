@@ -208,8 +208,7 @@ function renderBadgesFromGame(game) {
 }
 
 /**
- * ✅ Traduction status : on affiche UNIQUEMENT le badge en gras (dans #badges)
- * ❌ Plus de majState => plus de doublon
+ * ✅ Traduction status : on affiche UNIQUEMENT le badge (dans #badges)
  */
 async function renderTranslationStatus(game) {
   if (!game?.url || !game?.title) return;
@@ -239,8 +238,169 @@ async function renderTranslationStatus(game) {
     if (wrap) wrap.appendChild(badge);
 
   } catch {
-    // silencieux (pas de badge si erreur)
+    // silencieux
   }
+}
+
+// ====== Menu ☰ + À propos (page game) ======
+
+const ABOUT_TEXT = `
+Pour tout renseignement, aide ou autre, rejoignez mon serveur Discord :
+https://discord.gg/Jr8Ykf8yMd
+
+Contact Discord :
+https://discord.com/users/@andric31
+
+Vous pouvez aussi me contacter sur F95zone :
+Profil https://f95zone.to/members/andric31.247797/
+`.trim();
+
+function escapeHtml(s) {
+  return String(s || "").replace(/[&<>"']/g, m => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[m]));
+}
+
+function linkify(text) {
+  const esc = escapeHtml(text);
+  return esc.replace(
+    /(https?:\/\/[^\s<]+)/g,
+    (m) => `<a href="${m}" target="_blank" rel="noopener">${m}</a>`
+  );
+}
+
+function ensureMenuDom() {
+  let pop = $("topMenuPopover");
+  if (!pop) {
+    pop = document.createElement("div");
+    pop.id = "topMenuPopover";
+    pop.className = "menu-popover hidden";
+    pop.innerHTML = `
+      <button type="button" class="menu-item" id="menuAbout">ℹ️ À propos</button>
+    `;
+    document.body.appendChild(pop);
+  }
+
+  let overlay = $("aboutOverlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "aboutOverlay";
+    overlay.className = "modal-overlay hidden";
+    overlay.innerHTML = `
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+        <div class="modal-head">
+          <div class="modal-title" id="aboutTitle">À propos</div>
+          <button type="button" class="modal-close" id="aboutClose" aria-label="Fermer">✕</button>
+        </div>
+        <div class="modal-body" id="aboutBody"></div>
+        <div class="modal-foot">
+          <button type="button" class="modal-btn" id="aboutOk">OK</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+  }
+
+  return { pop, overlay };
+}
+
+function positionPopover(pop, anchorBtn) {
+  const r = anchorBtn.getBoundingClientRect();
+  const margin = 8;
+
+  let left = Math.round(r.left);
+  let top = Math.round(r.bottom + margin);
+
+  const maxLeft = window.innerWidth - 260 - 10;
+  if (left > maxLeft) left = Math.max(10, maxLeft);
+  if (left < 10) left = 10;
+
+  pop.style.left = left + "px";
+  pop.style.top = top + "px";
+}
+
+function closePopover() {
+  const pop = $("topMenuPopover");
+  if (pop) pop.classList.add("hidden");
+  const b = $("hamburgerBtn");
+  if (b) b.setAttribute("aria-expanded", "false");
+}
+
+function openAbout() {
+  const overlay = $("aboutOverlay");
+  const body = $("aboutBody");
+  if (body) body.innerHTML = `<div class="aboutText">${linkify(ABOUT_TEXT).replace(/\n/g, "<br>")}</div>`;
+  if (overlay) overlay.classList.remove("hidden");
+}
+
+function closeAbout() {
+  const overlay = $("aboutOverlay");
+  if (overlay) overlay.classList.add("hidden");
+}
+
+function initHamburgerMenu() {
+  const btn = $("hamburgerBtn");
+  if (!btn) return;
+
+  const { pop } = ensureMenuDom();
+
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const isOpen = !pop.classList.contains("hidden");
+    if (isOpen) {
+      closePopover();
+      return;
+    }
+
+    pop.classList.remove("hidden");
+    btn.setAttribute("aria-expanded", "true");
+    positionPopover(pop, btn);
+  });
+
+  document.addEventListener("click", (e) => {
+    const p = $("topMenuPopover");
+    const b = $("hamburgerBtn");
+    if (!p || !b) return;
+
+    const target = e.target;
+    const clickedInside = p.contains(target) || b.contains(target);
+    if (!clickedInside) closePopover();
+  });
+
+  window.addEventListener("resize", () => {
+    const p = $("topMenuPopover");
+    const b = $("hamburgerBtn");
+    if (p && b && !p.classList.contains("hidden")) positionPopover(p, b);
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closePopover();
+      closeAbout();
+    }
+  });
+
+  // menu item
+  document.getElementById("menuAbout")?.addEventListener("click", () => {
+    closePopover();
+    openAbout();
+  });
+
+  // modal close
+  const overlay = $("aboutOverlay");
+  if (overlay) {
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) closeAbout();
+    });
+  }
+  document.getElementById("aboutClose")?.addEventListener("click", closeAbout);
+  document.getElementById("aboutOk")?.addEventListener("click", closeAbout);
 }
 
 // ====== Counters (Cloudflare Pages Function /api/counter + D1) ======
@@ -287,7 +447,6 @@ async function initCounters(gameId, megaHref) {
         showStatsBox();
       }
     } catch {
-      // silencieux (la page doit continuer à marcher)
       setText("statViews", "0");
       setText("statMegaClicks", "0");
       showStatsBox();
@@ -306,9 +465,7 @@ async function initCounters(gameId, megaHref) {
         setText("statMegaClicks", formatInt(j.mega));
         showStatsBox();
       }
-    } catch {
-      // silencieux
-    }
+    } catch {}
   }, { passive: true });
 }
 
@@ -351,12 +508,11 @@ function setMyVote4(gameId, v) {
 }
 
 function renderRating4UI(gameId, data) {
-  const box = $("ratingBox");
   const choices = $("ratingChoices");
   const avgEl = $("ratingAvg");
   const countEl = $("ratingCount");
   const msgEl = $("ratingMsg");
-  if (!box || !choices || !avgEl || !countEl) return;
+  if (!choices || !avgEl || !countEl) return;
 
   const avg = Number(data?.avg) || 0;
   const count = Number(data?.count) || 0;
@@ -365,15 +521,8 @@ function renderRating4UI(gameId, data) {
   avgEl.textContent = avg > 0 ? avg.toFixed(1) + "/4" : "—";
   countEl.textContent = String(count);
 
-  // zone étoiles
   choices.innerHTML = "";
-  choices.style.display = "flex";
-  choices.style.justifyContent = "center";
-  choices.style.alignItems = "center";
-  choices.style.gap = "6px";
-  choices.style.flexWrap = "wrap";
 
-  // ✅ IMPORTANT : 0 doit être pris en compte (pas traité comme falsy)
   const setVisual = (hoverValue) => {
     const v =
       (hoverValue === 0 || typeof hoverValue === "number")
@@ -393,7 +542,6 @@ function renderRating4UI(gameId, data) {
       : "Clique sur les étoiles pour noter la traduction.";
   };
 
-  /* 🗑️ Annulation (à gauche) */
   if (myVote) {
     const cancel = document.createElement("button");
     cancel.type = "button";
@@ -409,20 +557,12 @@ function renderRating4UI(gameId, data) {
       setVisual(null);
       restoreMsg();
     });
-    cancel.addEventListener("focus", () => {
-      setVisual(0);
-      if (msgEl) msgEl.textContent = "Annuler ma note";
-    });
-    cancel.addEventListener("blur", () => {
-      setVisual(null);
-      restoreMsg();
-    });
 
     cancel.addEventListener("click", async () => {
       const prev = getMyVote4(gameId);
       if (!prev) return;
       try {
-        const res = await rating4Vote(gameId, 0, prev); // suppression
+        const res = await rating4Vote(gameId, 0, prev);
         if (res?.ok) {
           try { localStorage.removeItem(`rating4_${gameId}`); } catch {}
           renderRating4UI(gameId, res);
@@ -436,7 +576,6 @@ function renderRating4UI(gameId, data) {
     choices.appendChild(cancel);
   }
 
-  /* ⭐ Étoiles 1 → 4 */
   for (let i = 1; i <= 4; i++) {
     const star = document.createElement("button");
     star.type = "button";
@@ -449,15 +588,6 @@ function renderRating4UI(gameId, data) {
       if (msgEl) msgEl.textContent = `${i}/4 — ${RATING4_LABELS[i]}`;
     });
     star.addEventListener("mouseleave", () => {
-      setVisual(null);
-      restoreMsg();
-    });
-
-    star.addEventListener("focus", () => {
-      setVisual(i);
-      if (msgEl) msgEl.textContent = `${i}/4 — ${RATING4_LABELS[i]}`;
-    });
-    star.addEventListener("blur", () => {
       setVisual(null);
       restoreMsg();
     });
@@ -487,17 +617,13 @@ function renderRating4UI(gameId, data) {
   restoreMsg();
 }
 
-function normalizeTitle(s) {
-  return String(s || "")
-    .replace(/\u00A0/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
 // ====== Main ======
 
 (async function main() {
   try {
+    // ✅ menu ☰ (page game)
+    initHamburgerMenu();
+
     const id = getIdFromUrl();
     if (!id) {
       showError("Aucun ID dans l’URL. Exemple : /game/?id=215277");
@@ -522,17 +648,12 @@ function normalizeTitle(s) {
 
     setText("title", title);
 
-    // Cover (jamais favicon)
     setCover(game.imageUrl || "");
-
-    // Tags
     renderTags(game.tags || []);
 
-    // Badges (cat/engine/status)
     renderBadgesFromGame(game);
     renderTranslationStatus(game);
 
-    // Boutons (ordre: Discord puis F95)
     setHref("btnDiscord", (game.discordlink || "").trim());
     if ($("btnDiscord")) $("btnDiscord").textContent = "💬 Discord";
 
@@ -543,16 +664,12 @@ function normalizeTitle(s) {
     setHref("btnMega", megaHref);
     if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction (MEGA)";
 
-    // ✅ Vues + clics MEGA
     await initCounters(id, megaHref);
 
-    // ⭐ Notation traduction (sur 4)
     try {
       const j = await rating4Get(id);
       if (j?.ok) renderRating4UI(id, j);
-    } catch {
-      // silencieux
-    }
+    } catch {}
 
   } catch (e) {
     showError(`Erreur: ${e?.message || e}`);

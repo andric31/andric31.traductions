@@ -35,13 +35,160 @@
       padding: 16px 16px 18px 16px;
     }
 
+    /* ✅ Ligne du haut : bouton ☰ + badges */
+    .headRow{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+
     .badgesRow{
       display:flex;
       gap:8px;
       flex-wrap:wrap;
-      margin-bottom:10px;
       align-items:center;
+      margin:0;
     }
+
+    /* ✅ bouton hamburger (page game) */
+    .hamburger-btn{
+      width:34px;
+      height:34px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      user-select:none;
+      flex:0 0 auto;
+    }
+    .hamburger-btn:hover{ filter: brightness(1.10); }
+    .hamburger-btn:active{ transform: translateY(1px); }
+
+    .ham-lines{
+      width:16px;
+      height:12px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+    .ham-lines span{
+      display:block;
+      height:2px;
+      border-radius:999px;
+      background:#ffffff;
+      opacity:0.92;
+    }
+
+    /* ✅ popover menu */
+    .menu-popover{
+      position:fixed;
+      z-index:2000;
+      min-width: 220px;
+      background: rgba(20,24,38,0.98);
+      border:1px solid var(--border);
+      border-radius:12px;
+      box-shadow: 0 18px 45px rgba(0,0,0,.45);
+      padding:6px;
+    }
+    .menu-popover.hidden{ display:none !important; }
+
+    .menu-item{
+      width:100%;
+      text-align:left;
+      padding:10px 10px;
+      border-radius:10px;
+      border:1px solid transparent;
+      background: transparent;
+      color: var(--fg);
+      cursor:pointer;
+      font-weight:700;
+    }
+    .menu-item:hover{
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.06);
+    }
+
+    /* ✅ modal À propos */
+    .modal-overlay{
+      position:fixed;
+      inset:0;
+      z-index:3000;
+      background: rgba(0,0,0,0.55);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+    }
+    .modal-overlay.hidden{ display:none !important; }
+
+    .modal{
+      width: 680px;
+      max-width: 92vw;
+      background: var(--card);
+      border:1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 18px 55px rgba(0,0,0,.55);
+      overflow:hidden;
+    }
+
+    .modal-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02);
+    }
+    .modal-title{
+      font-weight: 900;
+      color:#fff;
+    }
+    .modal-close{
+      width:32px;
+      height:32px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      color: var(--fg);
+      cursor:pointer;
+    }
+    .modal-close:hover{ filter: brightness(1.10); }
+
+    .modal-body{
+      padding: 14px;
+      color: var(--fg);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .aboutText a{
+      color: var(--primary);
+      text-decoration:none;
+    }
+    .aboutText a:hover{ text-decoration:underline; }
+
+    .modal-foot{
+      padding: 12px 14px 14px;
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .modal-btn{
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      color:#fff;
+      font-weight:800;
+      cursor:pointer;
+      user-select:none;
+    }
+    .modal-btn:hover{ filter: brightness(1.08); }
 
     /* ✅ Etat MAJ (comme extension) */
     .majState{
@@ -134,7 +281,7 @@
       min-width: 230px;
     }
 
-    /* ⭐ Notation (étoiles + croix dans le même “carré”) */
+    /* ⭐ Notation (étoiles + croix) */
     .ratingStar,
     .ratingCancel{
       display:inline-flex;
@@ -155,10 +302,8 @@
       line-height: 1;
       color: #ffd36b;
 
-      /* 🌙 état calme */
       opacity: 0.7;
 
-      /* 🧈 transition très douce */
       transition:
         opacity 220ms cubic-bezier(.4,0,.2,1),
         transform 220ms cubic-bezier(.4,0,.2,1),
@@ -170,8 +315,8 @@
     .ratingStar:focus-visible,
     .ratingCancel:focus-visible{
       opacity: 0.92;
-      filter: brightness(1.04);   /* très léger */
-      transform: scale(1.02);     /* quasi imperceptible */
+      filter: brightness(1.04);
+      transform: scale(1.02);
     }
 
     .ratingCancel{
@@ -187,7 +332,7 @@
 
     #ratingChoices{ flex-wrap: nowrap; }
 
-    /* ✨ Fade doux sur le texte "titre" (ratingMsg) quand il change */
+    /* ✨ Fade doux sur le texte (ratingMsg) */
     #ratingMsg{
       opacity: 0.82;
       transition: opacity 220ms cubic-bezier(.4,0,.2,1);
@@ -198,7 +343,7 @@
       to   { opacity: 0.82; }
     }
     #ratingMsg.msgFade{
-      animation: ratingMsgFade 520ms cubic-bezier(.4,0,.2,1);
+      animation: ratingMsgFade 220ms cubic-bezier(.4,0,.2,1);
     }
 
     /* 📊 Stats */
@@ -241,7 +386,14 @@
   <div class="wrap">
     <div class="cardPreview" id="card" aria-live="polite">
       <div class="cardInner">
-        <div class="badgesRow" id="badges"></div>
+
+        <!-- ✅ Bouton ☰ + badges -->
+        <div class="headRow">
+          <button type="button" class="hamburger-btn" id="hamburgerBtn" aria-label="Ouvrir le menu" aria-haspopup="menu" aria-expanded="false">
+            <span class="ham-lines" aria-hidden="true"><span></span><span></span><span></span></span>
+          </button>
+          <div class="badgesRow" id="badges"></div>
+        </div>
 
         <!-- ✅ Etat MAJ (affiché par game.js) -->
         <div class="majState" id="majState" style="display:none;"></div>
@@ -285,7 +437,7 @@
     <div class="err" id="errBox"></div>
   </div>
 
-  <!-- ✅ Observer : ajoute un mini fade à #ratingMsg à chaque changement de texte (sans toucher game.js) -->
+  <!-- ✅ Observer : mini fade sur #ratingMsg à chaque changement -->
   <script>
     (function(){
       const msg = document.getElementById("ratingMsg");
@@ -293,7 +445,6 @@
 
       const flash = () => {
         msg.classList.remove("msgFade");
-        // force reflow pour relancer l'animation
         void msg.offsetWidth;
         msg.classList.add("msgFade");
       };
@@ -301,7 +452,6 @@
       const obs = new MutationObserver(() => flash());
       obs.observe(msg, { childList: true, characterData: true, subtree: true });
 
-      // au chargement, si déjà du texte
       if ((msg.textContent || "").trim()) flash();
     })();
   </script>

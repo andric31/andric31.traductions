@@ -352,12 +352,12 @@ function renderRating4UI(gameId, data) {
       : "Clique sur les étoiles pour noter la traduction.";
   };
 
-  /* ❌ Étoile d’annulation (à gauche) */
+  /* 🗑️ Annulation (à gauche) */
   if (myVote) {
     const cancel = document.createElement("button");
     cancel.type = "button";
     cancel.className = "ratingCancel";
-    cancel.textContent = "❌";
+    cancel.textContent = "🗑️";
     cancel.setAttribute("aria-label", "Annuler ma note");
 
     cancel.addEventListener("mouseenter", () => {

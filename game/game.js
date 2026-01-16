@@ -276,6 +276,108 @@ async function initCounters(gameId, megaHref) {
   }, { passive: true });
 }
 
+const RATING4_LABELS = {
+  1: "Traduction à refaire",
+  2: "Traduction à améliorer",
+  3: "Traduction moyenne pour de l'auto",
+  4: "Traduction bonne pour de l'auto",
+};
+
+function fmtAvg4(avg) {
+  const x = Number(avg);
+  if (!Number.isFinite(x) || x <= 0) return "—";
+  return x.toFixed(1) + "/4";
+}
+
+async function rating4Get(id) {
+  const r = await fetch(`/api/rating4?op=get&id=${encodeURIComponent(id)}`, { cache: "no-store" });
+  if (!r.ok) throw new Error("rating4 get HTTP " + r.status);
+  return await r.json();
+}
+
+async function rating4Vote(id, v, prev) {
+  const qs = new URLSearchParams({
+    op: "vote",
+    id: String(id),
+    v: String(v),
+    prev: String(prev || 0),
+  });
+  const r = await fetch(`/api/rating4?${qs.toString()}`, { cache: "no-store" });
+  if (!r.ok) throw new Error("rating4 vote HTTP " + r.status);
+  return await r.json();
+}
+
+function getMyVote4(gameId) {
+  try {
+    const v = Number(localStorage.getItem(`rating4_${gameId}`) || "0");
+    return Number.isFinite(v) ? v : 0;
+  } catch { return 0; }
+}
+
+function setMyVote4(gameId, v) {
+  try { localStorage.setItem(`rating4_${gameId}`, String(v)); } catch {}
+}
+
+function renderRating4UI(gameId, data) {
+  const box = $("ratingBox");
+  const choices = $("ratingChoices");
+  const avgEl = $("ratingAvg");
+  const countEl = $("ratingCount");
+  const msgEl = $("ratingMsg");
+  if (!box || !choices || !avgEl || !countEl) return;
+
+  avgEl.textContent = fmtAvg4(Number(data?.avg));
+  countEl.textContent = String(data?.count ?? 0);
+
+  const myVote = getMyVote4(gameId);
+
+  choices.innerHTML = "";
+  for (let i = 1; i <= 4; i++) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "btnLike";
+    b.style.padding = "8px 12px";
+    b.style.minWidth = "240px";
+    b.style.justifyContent = "center";
+    b.textContent = `${i} — ${RATING4_LABELS[i]}`;
+
+    // petit feedback visuel si c'est ton vote actuel
+    if (myVote === i) {
+      b.style.outline = "2px solid rgba(255,255,255,0.35)";
+    }
+
+    b.addEventListener("click", async () => {
+      const prev = getMyVote4(gameId);
+
+      // si clique sur la même note, on ne fait rien
+      if (prev === i) {
+        if (msgEl) msgEl.textContent = "C’est déjà ta note actuelle ✅";
+        return;
+      }
+
+      try {
+        const res = await rating4Vote(gameId, i, prev);
+        if (res?.ok) {
+          setMyVote4(gameId, i);
+          renderRating4UI(gameId, res);
+          if (msgEl) msgEl.textContent = prev ? "Vote modifié ✅" : "Merci ! Vote enregistré ✅";
+        }
+      } catch {
+        if (msgEl) msgEl.textContent = "Erreur lors du vote (réessaie plus tard).";
+      }
+    });
+
+    choices.appendChild(b);
+  }
+
+  if (msgEl) {
+    msgEl.textContent = myVote
+      ? `Ta note actuelle : ${myVote} — ${RATING4_LABELS[myVote]} (tu peux la modifier)`
+      : "Choisis une note (tu pourras la modifier plus tard).";
+  }
+}
+
+
 // ====== Main ======
 
 (async function main() {
@@ -326,6 +428,14 @@ async function initCounters(gameId, megaHref) {
 
     // ✅ Vues + clics MEGA
     await initCounters(id, megaHref);
+
+    // ⭐ Notation traduction (sur 4)
+    try {
+      const j = await rating4Get(id);
+      if (j?.ok) renderRating4UI(id, j);
+    } catch {
+      // silencieux
+    }
 
   } catch (e) {
     showError(`Erreur: ${e?.message || e}`);

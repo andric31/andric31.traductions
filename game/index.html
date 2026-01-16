@@ -180,8 +180,18 @@
         </div>
 
         <div class="btnMainRow">
-          <a class="btnLike btnMega" id="btnMega" target="_blank" rel="noopener" style="display:none;">⬇ Télécharger (MEGA)</a>
+          <a class="btnLike btnMega" id="btnMega" target="_blank" rel="noopener" style="display:none;">📥 Télécharger (MEGA)</a>
         </div>
+
+        <!-- ⭐ Notation traduction (dans la tuile) -->
+        <div class="ratingBox" id="ratingBox" style="margin-top:12px; text-align:center;">
+          <div style="color:var(--muted); font-size:12px; margin-bottom:6px;">
+            Note de la traduction : <strong id="ratingAvg">—</strong> (<span id="ratingCount">0</span> votes)
+          </div>
+          <div id="ratingChoices" style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap;"></div>
+          <div id="ratingMsg" style="margin-top:6px; color:var(--muted); font-size:12px;"></div>
+        </div>
+
       </div>
     </div>
 
@@ -189,7 +199,7 @@
     <div class="statsOut" id="statsOut" style="display:none;">
       👁️ Vues : <strong id="statViews">0</strong>
       ·
-      ⬇️ Clics MEGA : <strong id="statMegaClicks">0</strong>
+      📥 Téléchargements : <strong id="statMegaClicks">0</strong>
     </div>
 
     <div class="err" id="errBox"></div>
@@ -198,3 +208,4 @@
   <script src="./game.js"></script>
 </body>
 </html>
+

@@ -121,22 +121,43 @@
       min-width: 230px;
     }
 
-    /* ⭐ Notation */
-    .ratingStar{
+    /* ⭐ Notation (étoiles + croix dans le même “carré”) */
+    .ratingStar,
+    .ratingCancel{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+
+      width: 40px;
+      height: 34px;
+
       background: rgba(255,255,255,0.04);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 6px 10px;
+
       cursor: pointer;
+      user-select: none;
+
       font-size: 26px;
       line-height: 1;
       color: #ffd36b;
-      user-select: none;
     }
-    .ratingStar:hover{
+    .ratingStar:hover,
+    .ratingCancel:hover{
       filter: brightness(1.1);
       transform: scale(1.06);
     }
+
+    .ratingCancel{
+      font-size: 16px;
+      color: #fff;
+      opacity: 0.9;
+    }
+    .ratingCancel:hover{
+      color: #ff6b6b;
+      opacity: 1;
+    }
+
     #ratingChoices{ flex-wrap: nowrap; }
 
     /* 📊 Stats */
@@ -222,5 +243,3 @@
   <script src="./game.js"></script>
 </body>
 </html>
-
-

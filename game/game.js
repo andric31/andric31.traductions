@@ -212,9 +212,10 @@ async function renderTranslationStatus(game) {
 
   try {
     const r = await fetch(
-      `/api/f95meta?url=${encodeURIComponent(game.url)}`,
+      `/api/f95status?url=${encodeURIComponent(game.url)}&storedTitle=${encodeURIComponent(game.title)}`,
       { cache: "no-store" }
     );
+
     if (!r.ok) return;
 
     const j = await r.json();

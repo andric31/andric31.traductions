@@ -207,15 +207,12 @@ function renderBadgesFromGame(game) {
   wrap.appendChild(b3);
 }
 
+/**
+ * ✅ Traduction status : on affiche UNIQUEMENT le badge en gras (dans #badges)
+ * ❌ Plus de majState => plus de doublon
+ */
 async function renderTranslationStatus(game) {
   if (!game?.url || !game?.title) return;
-
-  // Petit indicateur texte (si tu utilises ton <div id="majState">)
-  const maj = $("majState");
-  if (maj) {
-    maj.style.display = "";
-    maj.innerHTML = `<span class="wait">⏳ Vérification F95…</span>`;
-  }
 
   try {
     const r = await fetch(
@@ -227,9 +224,22 @@ async function renderTranslationStatus(game) {
     const j = await r.json();
     if (!j?.ok || !j?.currentTitle) return;
 
+    const badge = document.createElement("span");
+    badge.classList.add("badge");
+
+    if (j.isUpToDate) {
+      badge.textContent = "✅ Traduction à jour";
+      badge.classList.add("status-updated");
+    } else {
+      badge.textContent = "🔄 Traduction non à jour";
+      badge.classList.add("status-outdated");
+    }
+
+    const wrap = $("badges");
+    if (wrap) wrap.appendChild(badge);
+
   } catch {
     // silencieux (pas de badge si erreur)
-    if (maj) maj.innerHTML = `<span class="wait">⚠️ Impossible de vérifier (réessaie plus tard)</span>`;
   }
 }
 
@@ -462,7 +472,7 @@ function renderRating4UI(gameId, data) {
 
 function normalizeTitle(s) {
   return String(s || "")
-    .replace(/\u00A0/g, " ") // espaces insécables
+    .replace(/\u00A0/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }

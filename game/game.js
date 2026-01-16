@@ -276,18 +276,14 @@ async function initCounters(gameId, megaHref) {
   }, { passive: true });
 }
 
+// ====== Rating 4 ======
+
 const RATING4_LABELS = {
   1: "Traduction à refaire",
   2: "Traduction à améliorer",
   3: "Traduction moyenne pour de l'auto",
   4: "Traduction bonne pour de l'auto",
 };
-
-function fmtAvg4(avg) {
-  const x = Number(avg);
-  if (!Number.isFinite(x) || x <= 0) return "—";
-  return x.toFixed(1) + "/4";
-}
 
 async function rating4Get(id) {
   const r = await fetch(`/api/rating4?op=get&id=${encodeURIComponent(id)}`, { cache: "no-store" });
@@ -341,11 +337,19 @@ function renderRating4UI(gameId, data) {
   choices.style.flexWrap = "wrap";
 
   const setVisual = (hoverValue) => {
-    const v = hoverValue || myVote || 0;
+    const v = hoverValue || getMyVote4(gameId) || 0;
     [...choices.children].forEach((btn, idx) => {
       btn.textContent = (idx + 1) <= v ? "★" : "☆";
-      btn.setAttribute("aria-pressed", String((idx + 1) === myVote));
+      btn.setAttribute("aria-pressed", String((idx + 1) === getMyVote4(gameId)));
     });
+  };
+
+  const restoreMsg = () => {
+    const v = getMyVote4(gameId);
+    if (!msgEl) return;
+    msgEl.textContent = v
+      ? `Ta note : ${v}/4 — ${RATING4_LABELS[v]} (tu peux la modifier)`
+      : "Clique sur les étoiles pour noter la traduction.";
   };
 
   for (let i = 1; i <= 4; i++) {
@@ -353,19 +357,39 @@ function renderRating4UI(gameId, data) {
     star.type = "button";
     star.className = "ratingStar";
     star.textContent = "☆";
-    star.title = `${i}/4 — ${RATING4_LABELS[i]}`;
-    star.setAttribute("aria-label", star.title);
+    star.setAttribute("aria-label", `${i}/4 — ${RATING4_LABELS[i]}`);
 
-    star.addEventListener("mouseenter", () => setVisual(i));
-    star.addEventListener("mouseleave", () => setVisual(0));
+    // PC (hover)
+    star.addEventListener("mouseenter", () => {
+      setVisual(i);
+      if (msgEl) msgEl.textContent = `${i}/4 — ${RATING4_LABELS[i]}`;
+    });
+    star.addEventListener("mouseleave", () => {
+      setVisual(0);
+      restoreMsg();
+    });
 
+    // Clavier / mobile (instant)
+    star.addEventListener("focus", () => {
+      setVisual(i);
+      if (msgEl) msgEl.textContent = `${i}/4 — ${RATING4_LABELS[i]}`;
+    });
+    star.addEventListener("blur", () => {
+      setVisual(0);
+      restoreMsg();
+    });
+    star.addEventListener("touchstart", () => {
+      setVisual(i);
+      if (msgEl) msgEl.textContent = `${i}/4 — ${RATING4_LABELS[i]}`;
+    }, { passive: true });
+
+    // Vote
     star.addEventListener("click", async () => {
       const prev = getMyVote4(gameId);
       if (prev === i) {
         if (msgEl) msgEl.textContent = "C’est déjà ta note actuelle ✅";
         return;
       }
-
       try {
         const res = await rating4Vote(gameId, i, prev);
         if (res?.ok) {
@@ -381,14 +405,8 @@ function renderRating4UI(gameId, data) {
     choices.appendChild(star);
   }
 
-  // initialise l'affichage
   setVisual(0);
-
-  if (msgEl) {
-    msgEl.textContent = myVote
-      ? `Ta note : ${myVote}/4 — ${RATING4_LABELS[myVote]} (tu peux la modifier)`
-      : "Clique sur les étoiles pour noter la traduction.";
-  }
+  restoreMsg();
 }
 
 // ====== Main ======
@@ -454,3 +472,4 @@ function renderRating4UI(gameId, data) {
     showError(`Erreur: ${e?.message || e}`);
   }
 })();
+

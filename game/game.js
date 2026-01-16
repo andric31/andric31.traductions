@@ -373,8 +373,13 @@ function renderRating4UI(gameId, data) {
   choices.style.gap = "6px";
   choices.style.flexWrap = "wrap";
 
+  // ✅ IMPORTANT : 0 doit être pris en compte (pas traité comme falsy)
   const setVisual = (hoverValue) => {
-    const v = hoverValue || getMyVote4(gameId) || 0;
+    const v =
+      (hoverValue === 0 || typeof hoverValue === "number")
+        ? hoverValue
+        : (getMyVote4(gameId) || 0);
+
     [...choices.querySelectorAll(".ratingStar")].forEach((btn, idx) => {
       btn.textContent = (idx + 1) <= v ? "★" : "☆";
     });
@@ -400,12 +405,18 @@ function renderRating4UI(gameId, data) {
       setVisual(0);
       if (msgEl) msgEl.textContent = "Annuler ma note";
     });
-    cancel.addEventListener("mouseleave", restoreMsg);
+    cancel.addEventListener("mouseleave", () => {
+      setVisual(null);
+      restoreMsg();
+    });
     cancel.addEventListener("focus", () => {
       setVisual(0);
       if (msgEl) msgEl.textContent = "Annuler ma note";
     });
-    cancel.addEventListener("blur", restoreMsg);
+    cancel.addEventListener("blur", () => {
+      setVisual(null);
+      restoreMsg();
+    });
 
     cancel.addEventListener("click", async () => {
       const prev = getMyVote4(gameId);
@@ -437,13 +448,19 @@ function renderRating4UI(gameId, data) {
       setVisual(i);
       if (msgEl) msgEl.textContent = `${i}/4 — ${RATING4_LABELS[i]}`;
     });
-    star.addEventListener("mouseleave", restoreMsg);
+    star.addEventListener("mouseleave", () => {
+      setVisual(null);
+      restoreMsg();
+    });
 
     star.addEventListener("focus", () => {
       setVisual(i);
       if (msgEl) msgEl.textContent = `${i}/4 — ${RATING4_LABELS[i]}`;
     });
-    star.addEventListener("blur", restoreMsg);
+    star.addEventListener("blur", () => {
+      setVisual(null);
+      restoreMsg();
+    });
 
     star.addEventListener("click", async () => {
       const prev = getMyVote4(gameId);
@@ -466,7 +483,7 @@ function renderRating4UI(gameId, data) {
     choices.appendChild(star);
   }
 
-  setVisual(0);
+  setVisual(null);
   restoreMsg();
 }
 

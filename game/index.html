@@ -157,7 +157,10 @@
     
       /* ✅ Fade doux */
       opacity: 0.78;
-      transition: opacity 140ms ease, transform 140ms ease, filter 140ms ease, background-color 140ms ease;
+      transition: opacity 140ms ease,
+                  transform 140ms ease,
+                  filter 140ms ease,
+                  background-color 140ms ease;
     }
     
     .ratingStar:hover,
@@ -166,12 +169,20 @@
       filter: brightness(1.12);
       transform: scale(1.06);
     }
-
+    
+    .ratingStar:focus-visible,
+    .ratingCancel:focus-visible{
+      opacity: 1;
+      filter: brightness(1.12);
+      transform: scale(1.06);
+    }
+    
     .ratingCancel{
       font-size: 16px;
       color: #fff;
       opacity: 0.9;
     }
+    
     .ratingCancel:hover{
       color: #ff6b6b;
       opacity: 1;

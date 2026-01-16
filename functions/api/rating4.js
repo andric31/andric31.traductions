@@ -17,10 +17,13 @@ export async function onRequest(context) {
     }
 
     if (!env || !env.DB) {
-      return new Response(JSON.stringify({ ok: false, error: "DB non liée (binding manquant)" }), { status: 500, headers });
+      return new Response(
+        JSON.stringify({ ok: false, error: "DB non liée (binding manquant)" }),
+        { status: 500, headers }
+      );
     }
 
-    // ⚠️ Sécurité: crée la table si elle n’existe pas (évite 1101 si oubli SQL)
+    // ✅ Sécurité: crée la table si elle n’existe pas
     await env.DB.prepare(`
       CREATE TABLE IF NOT EXISTS ratings4 (
         id TEXT PRIMARY KEY,
@@ -57,13 +60,18 @@ export async function onRequest(context) {
     }
 
     if (op === "vote") {
+      // ✅ v peut être 0 => annuler la note
       const v = Number(vRaw);
-      if (!Number.isFinite(v) || v < 1 || v > 4) {
-        return new Response(JSON.stringify({ ok: false, error: "Vote invalide (1..4)" }), { status: 400, headers });
+      if (!Number.isFinite(v) || v < 0 || v > 4) {
+        return new Response(
+          JSON.stringify({ ok: false, error: "Vote invalide (0..4)" }),
+          { status: 400, headers }
+        );
       }
 
+      // prev peut être 0..4 (0 = rien à retirer)
       let prev = Number(prevRaw);
-      if (!Number.isFinite(prev) || prev < 1 || prev > 4) prev = 0;
+      if (!Number.isFinite(prev) || prev < 0 || prev > 4) prev = 0;
 
       // Assure une ligne existante
       await env.DB.prepare(`
@@ -73,7 +81,7 @@ export async function onRequest(context) {
       `).bind(id).run();
 
       // Retire l’ancien vote (si fourni)
-      if (prev) {
+      if (prev > 0) {
         await env.DB.prepare(`
           UPDATE ratings4
           SET
@@ -84,15 +92,17 @@ export async function onRequest(context) {
         `).bind(id, prev).run();
       }
 
-      // Ajoute le nouveau vote
-      await env.DB.prepare(`
-        UPDATE ratings4
-        SET
-          sum = sum + ?2,
-          count = count + 1,
-          updated_at = unixepoch()
-        WHERE id = ?1
-      `).bind(id, v).run();
+      // Ajoute le nouveau vote uniquement si v > 0
+      if (v > 0) {
+        await env.DB.prepare(`
+          UPDATE ratings4
+          SET
+            sum = sum + ?2,
+            count = count + 1,
+            updated_at = unixepoch()
+          WHERE id = ?1
+        `).bind(id, v).run();
+      }
 
       const row = await getRow();
       return new Response(JSON.stringify({ ok: true, ...row }), { headers });
@@ -101,12 +111,15 @@ export async function onRequest(context) {
     return new Response(JSON.stringify({ ok: false, error: "op invalide" }), { status: 400, headers });
 
   } catch (err) {
-    // ✅ Ne jamais renvoyer 1101 : on renvoie un JSON d’erreur
-    return new Response(JSON.stringify({
-      ok: false,
-      error: "Exception Worker",
-      detail: String(err?.message || err),
-    }), { status: 500, headers });
+    return new Response(
+      JSON.stringify({
+        ok: false,
+        error: "Exception Worker",
+        detail: String(err?.message || err),
+      }),
+      { status: 500, headers }
+    );
   }
 }
+
 

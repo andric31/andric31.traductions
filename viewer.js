@@ -868,6 +868,11 @@ Profil https://f95zone.to/members/andric31.247797/
     clearSavedTags();
     updateTagsCountBadge();
     closeTagsPopover();
+
+    // --- reset pageSize ---
+    state.pageSize = 50;
+    const ps = $("#pageSize");
+    if (ps) ps.value = "50";
   
     // --- reload complet ---
     init();
@@ -893,7 +898,9 @@ Profil https://f95zone.to/members/andric31.247797/
       state.all = Array.isArray(raw) ? raw.map(normalize) : [];
 
       // ✅ charge tags sauvegardés avant d’afficher
-      state.filterTags = getSavedTags();
+      if (!state.filterTags || !state.filterTags.length) {
+        state.filterTags = getSavedTags();
+      }
       updateTagsCountBadge();
 
       buildDynamicFilters();

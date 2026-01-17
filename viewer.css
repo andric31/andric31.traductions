@@ -262,7 +262,7 @@ body{
 
 /* ----- MAIN ----- */
 main{
-  padding: calc(var(--topbar-h) + 12px) 12px 16px;
+  padding: calc(var(--topbar-h) + 26px) 12px 16px;
 }
 
 /* ----- GRID ----- */

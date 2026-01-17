@@ -329,15 +329,17 @@ Profil https://f95zone.to/members/andric31.247797/
     c.classList.toggle("hidden", n <= 0);
   }
 
+let TAGS_UI_BOUND = false;
+
   function initTagsUI(allTags) {
     const { btn, pop } = ensureTagsDom();
     const list = document.getElementById("tagsList");
-
+  
     const renderTagList = () => {
       if (!list) return;
       const active = new Set(state.filterTags || []);
       list.innerHTML = "";
-
+  
       for (const t of allTags) {
         const item = document.createElement("button");
         item.type = "button";
@@ -352,59 +354,66 @@ Profil https://f95zone.to/members/andric31.247797/
           const cur = new Set(state.filterTags || []);
           if (cur.has(t)) cur.delete(t);
           else cur.add(t);
-
+  
           state.filterTags = Array.from(cur);
           setSavedTags(state.filterTags);
           updateTagsCountBadge();
           renderTagList();
           applyFilters();
         });
-
+  
         list.appendChild(item);
       }
     };
-
-    // ouvrir/fermer popover
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      const isOpen = !pop.classList.contains("hidden");
-      if (isOpen) { closeTagsPopover(); return; }
-
-      pop.classList.remove("hidden");
-      btn.setAttribute("aria-expanded", "true");
-      renderTagList();
-      positionTagsPopover(pop, btn);
-    });
-
-    // clear
-    document.getElementById("tagsClearBtn")?.addEventListener("click", () => {
-      state.filterTags = [];
-      clearSavedTags();
-      updateTagsCountBadge();
-      renderTagList();
-      applyFilters();
-    });
-
-    // clic dehors => fermer
-    document.addEventListener("click", (e) => {
-      const p = document.getElementById("tagsPopover");
-      const b = document.getElementById("tagsBtn");
-      if (!p || !b) return;
-      const t = e.target;
-      if (!p.contains(t) && !b.contains(t)) closeTagsPopover();
-    });
-
-    window.addEventListener("resize", () => {
-      const p = document.getElementById("tagsPopover");
-      const b = document.getElementById("tagsBtn");
-      if (p && b && !p.classList.contains("hidden")) positionTagsPopover(p, b);
-    });
-
+  
+    // ✅ IMPORTANT: binder une seule fois (sinon double click = open puis close)
+    if (!TAGS_UI_BOUND) {
+      TAGS_UI_BOUND = true;
+  
+      // ouvrir/fermer popover
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+  
+        const isOpen = !pop.classList.contains("hidden");
+        if (isOpen) { closeTagsPopover(); return; }
+  
+        pop.classList.remove("hidden");
+        btn.setAttribute("aria-expanded", "true");
+        renderTagList();
+        positionTagsPopover(pop, btn);
+      });
+  
+      // clear
+      document.getElementById("tagsClearBtn")?.addEventListener("click", () => {
+        state.filterTags = [];
+        clearSavedTags();
+        updateTagsCountBadge();
+        renderTagList();
+        applyFilters();
+      });
+  
+      // clic dehors => fermer
+      document.addEventListener("click", (e) => {
+        const p = document.getElementById("tagsPopover");
+        const b = document.getElementById("tagsBtn");
+        if (!p || !b) return;
+        const t = e.target;
+        if (!p.contains(t) && !b.contains(t)) closeTagsPopover();
+      });
+  
+      window.addEventListener("resize", () => {
+        const p = document.getElementById("tagsPopover");
+        const b = document.getElementById("tagsBtn");
+        if (p && b && !p.classList.contains("hidden")) positionTagsPopover(p, b);
+      });
+    }
+  
+    // ✅ À chaque init() on met juste à jour l’affichage
     updateTagsCountBadge();
     renderTagList();
   }
+
 
   // =========================
   // Helpers URL / prefs / list

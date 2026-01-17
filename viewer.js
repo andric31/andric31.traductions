@@ -1,7 +1,7 @@
-// viewer.js — Vignettes + filtres + tri dates + affichage progressif + menu hamburger (À propos)
+// viewer.js — Vignettes + filtres + tri dates + affichage progressif + menu ☰ + réorg topbar
 (() => {
   const DEFAULT_URL = "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json";
-  const GAME_BASE = "/game/?id="; // Stratégie A: /game/ID
+  const GAME_BASE = "/game/?id="; // /game/?id=ID
 
   const $ = sel => document.querySelector(sel);
 
@@ -19,9 +19,9 @@
     visibleCount: 0
   };
 
-  // --------------------------
-  // Menu Hamburger (Topbar)
-  // --------------------------
+  // =========================
+  // ☰ MENU + À PROPOS
+  // =========================
 
   const ABOUT_TEXT = `
 Pour tout renseignement, aide ou autre, rejoignez mon serveur Discord :
@@ -45,7 +45,6 @@ Profil https://f95zone.to/members/andric31.247797/
   }
 
   function linkify(text) {
-    // transforme les urls en liens <a>
     const esc = escapeHtml(text);
     return esc.replace(
       /(https?:\/\/[^\s<]+)/g,
@@ -92,13 +91,12 @@ Profil https://f95zone.to/members/andric31.247797/
     const r = anchorBtn.getBoundingClientRect();
     const margin = 8;
 
-    // position: sous le bouton, aligné à gauche
     let left = Math.round(r.left);
     let top = Math.round(r.bottom + margin);
 
-    // clamp dans la fenêtre
-    const popRect = pop.getBoundingClientRect();
-    const maxLeft = window.innerWidth - (popRect.width || 260) - 10;
+    const widthGuess = pop.getBoundingClientRect().width || 260;
+    const maxLeft = window.innerWidth - widthGuess - 10;
+
     if (left > maxLeft) left = Math.max(10, maxLeft);
     if (left < 10) left = 10;
 
@@ -109,6 +107,8 @@ Profil https://f95zone.to/members/andric31.247797/
   function closePopover() {
     const pop = $("#topMenuPopover");
     if (pop) pop.classList.add("hidden");
+    const b = $("#hamburgerBtn");
+    if (b) b.setAttribute("aria-expanded", "false");
   }
 
   function openAbout() {
@@ -148,7 +148,6 @@ Profil https://f95zone.to/members/andric31.247797/
       </span>
     `;
 
-    // place à gauche du titre
     row.insertBefore(btn, h1);
 
     const { pop } = ensureMenuDom();
@@ -159,31 +158,22 @@ Profil https://f95zone.to/members/andric31.247797/
 
       const isOpen = !pop.classList.contains("hidden");
       if (isOpen) {
-        pop.classList.add("hidden");
-        btn.setAttribute("aria-expanded", "false");
+        closePopover();
         return;
       }
 
       pop.classList.remove("hidden");
       btn.setAttribute("aria-expanded", "true");
-
-      // position après affichage (pour connaître la taille)
       positionPopover(pop, btn);
     });
 
-    // item À propos
+    // clic dehors => fermer
     document.addEventListener("click", (e) => {
-      // fermeture popover si clic dehors
       const p = $("#topMenuPopover");
       const b = $("#hamburgerBtn");
       if (!p || !b) return;
-
-      const target = e.target;
-      const clickedInside = p.contains(target) || b.contains(target);
-      if (!clickedInside) {
-        b.setAttribute("aria-expanded", "false");
-        p.classList.add("hidden");
-      }
+      const t = e.target;
+      if (!p.contains(t) && !b.contains(t)) closePopover();
     });
 
     window.addEventListener("resize", () => {
@@ -196,36 +186,76 @@ Profil https://f95zone.to/members/andric31.247797/
       if (e.key === "Escape") {
         closePopover();
         closeAbout();
-        const b = $("#hamburgerBtn");
-        if (b) b.setAttribute("aria-expanded", "false");
       }
     });
 
-    // handlers modal
-    const popAbout = () => {
+    // À propos
+    $("#menuAbout")?.addEventListener("click", () => {
       closePopover();
-      const b = $("#hamburgerBtn");
-      if (b) b.setAttribute("aria-expanded", "false");
       openAbout();
-    };
+    });
 
-    const aboutBtn = $("#menuAbout");
-    if (aboutBtn) aboutBtn.addEventListener("click", popAbout);
-
-    const overlay = $("#aboutOverlay");
-    if (overlay) {
-      overlay.addEventListener("click", (e) => {
-        // clic sur fond => ferme
-        if (e.target === overlay) closeAbout();
-      });
-    }
+    // modal close
     $("#aboutClose")?.addEventListener("click", closeAbout);
     $("#aboutOk")?.addEventListener("click", closeAbout);
+    $("#aboutOverlay")?.addEventListener("click", (e) => {
+      if (e.target && e.target.id === "aboutOverlay") closeAbout();
+    });
   }
 
-  // --------------------------
+  // =========================
+  // RÉORGANISATION TOPBAR
+  // =========================
+
+  function reorganizeTopbarLayout() {
+    const top = document.querySelector(".top-actions");
+    if (!top) return;
+
+    // évite double init
+    if (top.querySelector(".top-actions-display")) return;
+
+    const rowDisplay = document.createElement("div");
+    rowDisplay.className = "top-actions-display";
+
+    const rowSearch = document.createElement("div");
+    rowSearch.className = "top-actions-search";
+
+    // éléments existants
+    const total = document.querySelector(".total-inline");
+    const cols = document.getElementById("cols");
+    const pageSize = document.getElementById("pageSize");
+
+    const searchWrap = document.querySelector(".search-wrap");
+    const sort = document.getElementById("sort");
+    const cat = document.getElementById("filterCat");
+    const eng = document.getElementById("filterEngine");
+    const st = document.getElementById("filterStatus");
+    const tag = document.getElementById("filterTag");
+    const refresh = document.getElementById("refresh");
+
+    // Ligne 1 : Affichage
+    if (total) rowDisplay.appendChild(total);
+    if (cols) rowDisplay.appendChild(cols);
+    if (pageSize) rowDisplay.appendChild(pageSize);
+
+    // Ligne 2 : Recherche
+    if (searchWrap) rowSearch.appendChild(searchWrap);
+    if (sort) rowSearch.appendChild(sort);
+    if (cat) rowSearch.appendChild(cat);
+    if (eng) rowSearch.appendChild(eng);
+    if (st) rowSearch.appendChild(st);
+    if (tag) rowSearch.appendChild(tag);
+    if (refresh) rowSearch.appendChild(refresh);
+
+    // Remplace le contenu
+    top.innerHTML = "";
+    top.appendChild(rowDisplay);
+    top.appendChild(rowSearch);
+  }
+
+  // =========================
   // Helpers list / prefs
-  // --------------------------
+  // =========================
 
   async function getListUrl() {
     try {
@@ -626,6 +656,10 @@ Profil https://f95zone.to/members/andric31.247797/
     updateStats();
   }
 
+  // =========================
+  // Events
+  // =========================
+
   $("#search")?.addEventListener("input", e => { state.q = e.target.value || ""; applyFilters(); });
   $("#sort")?.addEventListener("change", e => { state.sort = e.target.value || "title-asc"; sortNow(); state.visibleCount = 0; renderGrid(); });
   $("#filterCat")?.addEventListener("change", e => { state.filterCat = e.target.value || "all"; applyFilters(); });
@@ -659,13 +693,18 @@ Profil https://f95zone.to/members/andric31.247797/
 
   $("#refresh")?.addEventListener("click", init);
 
+  // =========================
+  // Init
+  // =========================
+
   async function init() {
     $("#grid").innerHTML = "";
     $("#gridEmpty")?.classList.add("hidden");
 
     try {
-      // ✅ inject menu dès le départ
+      // ✅ Menu + réorg topbar (avant le reste)
       initTopMenu();
+      reorganizeTopbarLayout();
 
       state.cols = await getViewerCols();
       const colsSel = $("#cols");
@@ -688,4 +727,5 @@ Profil https://f95zone.to/members/andric31.247797/
 
   init();
 })();
+
 

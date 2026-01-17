@@ -571,34 +571,32 @@ main{
    ========================= */
 
 .like-btn{
-  padding: 0;                 /* 🔥 enlève le gros padding */
+  padding: 0;
   width: 34px;
   height: 34px;
 
   border-radius: 10px;
   font-size: 18px;
-  font-weight: normal;
+  line-height: 1;
 
-  color: #9aa0b4;             /* ❤️ gris par défaut */
   background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  transition:
-    color .15s ease,
-    transform .1s ease;
+  color: #9aa0b4; /* gris */
+  cursor: pointer;
+
+  transition: transform .1s ease, filter .15s ease;
 }
 
 .like-btn:hover{
-  color: #c0c6dd;
-}
-
-.like-btn.is-liked{
-  color: #e53935;             /* ❤️ rouge quand aimé */
+  filter: brightness(1.15);
 }
 
 .like-btn:active{
   transform: scale(0.95);
 }
+

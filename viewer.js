@@ -20,6 +20,40 @@
   };
 
   // =========================
+  // ✅ Compteur vues page principale (Viewer)
+  // =========================
+
+  const MAIN_PAGE_ID = "__viewer_main__";
+
+  function formatInt(n) {
+    const x = Number(n);
+    if (!Number.isFinite(x)) return "0";
+    try { return x.toLocaleString("fr-FR"); }
+    catch { return String(Math.floor(x)); }
+  }
+
+  async function initMainPageCounter() {
+    // Affiche "—" si pas présent
+    const el = document.getElementById("mainViews");
+    if (!el) return;
+
+    try {
+      const r = await fetch(
+        `/api/counter?op=hit&kind=view&id=${encodeURIComponent(MAIN_PAGE_ID)}`,
+        { cache: "no-store" }
+      );
+      if (!r.ok) return;
+
+      const j = await r.json();
+      if (!j?.ok) return;
+
+      el.textContent = formatInt(j.views);
+    } catch {
+      // silencieux
+    }
+  }
+
+  // =========================
   // ☰ MENU + À PROPOS (Viewer)
   // =========================
 
@@ -128,7 +162,7 @@ Profil https://f95zone.to/members/andric31.247797/
    * - le bouton ☰ à gauche du titre
    * - une zone "outils d’affichage" à droite du titre
    * Et déplace dans cette zone:
-   * - .total-inline
+   * - .total-inline (⚠️ il y en a 2 chez toi => on déplace TOUTES)
    * - #cols
    * - #pageSize
    */
@@ -166,12 +200,12 @@ Profil https://f95zone.to/members/andric31.247797/
     row.insertBefore(btn, h1);
     row.appendChild(tools);
 
-    // Déplace Total + cols + pageSize vers la ligne du titre
-    const total = document.querySelector(".total-inline");
+    // ✅ Déplace tous les .total-inline (Total + Vues) vers la ligne du titre
+    const totals = [...document.querySelectorAll(".total-inline")];
     const cols = document.getElementById("cols");
     const pageSize = document.getElementById("pageSize");
 
-    if (total) tools.appendChild(total);
+    totals.forEach(t => tools.appendChild(t));
     if (cols) tools.appendChild(cols);
     if (pageSize) tools.appendChild(pageSize);
 
@@ -330,17 +364,17 @@ Profil https://f95zone.to/members/andric31.247797/
     c.classList.toggle("hidden", n <= 0);
   }
 
-let TAGS_UI_BOUND = false;
+  let TAGS_UI_BOUND = false;
 
   function initTagsUI(allTags) {
     const { btn, pop } = ensureTagsDom();
     const list = document.getElementById("tagsList");
-  
+
     const renderTagList = () => {
       if (!list) return;
       const active = new Set(state.filterTags || []);
       list.innerHTML = "";
-  
+
       for (const t of allTags) {
         const item = document.createElement("button");
         item.type = "button";
@@ -355,36 +389,36 @@ let TAGS_UI_BOUND = false;
           const cur = new Set(state.filterTags || []);
           if (cur.has(t)) cur.delete(t);
           else cur.add(t);
-  
+
           state.filterTags = Array.from(cur);
           setSavedTags(state.filterTags);
           updateTagsCountBadge();
           renderTagList();
           applyFilters();
         });
-  
+
         list.appendChild(item);
       }
     };
-  
+
     // ✅ IMPORTANT: binder une seule fois (sinon double click = open puis close)
     if (!TAGS_UI_BOUND) {
       TAGS_UI_BOUND = true;
-  
+
       // ouvrir/fermer popover
       btn.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
-  
+
         const isOpen = !pop.classList.contains("hidden");
         if (isOpen) { closeTagsPopover(); return; }
-  
+
         pop.classList.remove("hidden");
         btn.setAttribute("aria-expanded", "true");
         renderTagList();
         positionTagsPopover(pop, btn);
       });
-  
+
       // clear
       document.getElementById("tagsClearBtn")?.addEventListener("click", () => {
         state.filterTags = [];
@@ -393,7 +427,7 @@ let TAGS_UI_BOUND = false;
         renderTagList();
         applyFilters();
       });
-  
+
       // clic dehors => fermer
       document.addEventListener("click", (e) => {
         const p = document.getElementById("tagsPopover");
@@ -402,19 +436,18 @@ let TAGS_UI_BOUND = false;
         const t = e.target;
         if (!p.contains(t) && !b.contains(t)) closeTagsPopover();
       });
-  
+
       window.addEventListener("resize", () => {
         const p = document.getElementById("tagsPopover");
         const b = document.getElementById("tagsBtn");
         if (p && b && !p.classList.contains("hidden")) positionTagsPopover(p, b);
       });
     }
-  
+
     // ✅ À chaque init() on met juste à jour l’affichage
     updateTagsCountBadge();
     renderTagList();
   }
-
 
   // =========================
   // Helpers URL / prefs / list
@@ -857,23 +890,23 @@ let TAGS_UI_BOUND = false;
     state.filterStatus = "all";
     state.filterTags = [];
     state.visibleCount = 0;
-  
+
     // --- reset UI ---
     const search = $("#search");
     if (search) search.value = "";
-  
+
     const sort = $("#sort");
     if (sort) sort.value = state.sort;
-  
+
     const cat = $("#filterCat");
     if (cat) cat.value = "all";
-  
+
     const eng = $("#filterEngine");
     if (eng) eng.value = "all";
-  
+
     const stat = $("#filterStatus");
     if (stat) stat.value = "all";
-  
+
     // --- reset tags ---
     clearSavedTags();
     updateTagsCountBadge();
@@ -883,7 +916,7 @@ let TAGS_UI_BOUND = false;
     state.pageSize = 50;
     const ps = $("#pageSize");
     if (ps) ps.value = "50";
-  
+
     // --- reload complet ---
     init();
   });
@@ -899,6 +932,9 @@ let TAGS_UI_BOUND = false;
     try {
       // ✅ menu + outils d’affichage à droite du titre
       initHeaderMenuAndDisplayTools();
+
+      // ✅ compteur vues page principale (1 hit par chargement / refresh)
+      initMainPageCounter();
 
       state.cols = await getViewerCols();
       const colsSel = $("#cols");
@@ -928,3 +964,4 @@ let TAGS_UI_BOUND = false;
 
   init();
 })();
+

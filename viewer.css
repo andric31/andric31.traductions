@@ -39,7 +39,7 @@ body{
 
 /* ✅ Ligne titre = flex */
 .top-title-row{
-  padding:6px 12px 10px;
+  padding:14px 12px 12px;
 }
 .top-title-row.top-title-flex{
   display:flex;

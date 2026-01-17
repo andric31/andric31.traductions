@@ -36,9 +36,15 @@ export async function onRequest(context) {
         id TEXT PRIMARY KEY,
         views INTEGER NOT NULL DEFAULT 0,
         mega INTEGER NOT NULL DEFAULT 0,
+        likes INTEGER NOT NULL DEFAULT 0,
         updated_at INTEGER NOT NULL DEFAULT (unixepoch())
       );
     `).run();
+
+    // ✅ si table existait sans likes → on tente d'ajouter la colonne (ignore si déjà là)
+    try {
+      await env.DB.prepare(`ALTER TABLE counters ADD COLUMN likes INTEGER NOT NULL DEFAULT 0;`).run();
+    } catch { /* déjà présent */ }
 
     // ✅ IMPORTANT : lot petit pour éviter limites D1
     const CHUNK = 90;
@@ -46,26 +52,30 @@ export async function onRequest(context) {
 
     for (let i = 0; i < ids.length; i += CHUNK) {
       const batch = ids.slice(i, i + CHUNK);
-      const placeholders = batch.map(() => "?").join(", ");
+      const placeholders = batch.map((_, i) => `?${i + 1}`).join(", ");
       const stmt = env.DB
-        .prepare(`SELECT id, views, mega FROM counters WHERE id IN (${placeholders})`)
+        .prepare(`SELECT id, views, mega, likes FROM counters WHERE id IN (${placeholders})`)
         .bind(...batch);
 
       const res = await stmt.all();
       const rows = res?.results || [];
 
       for (const row of rows) {
-        stats[row.id] = { views: Number(row.views || 0), mega: Number(row.mega || 0) };
+        stats[row.id] = {
+          views: Number(row.views || 0),
+          mega: Number(row.mega || 0),
+          likes: Number(row.likes || 0),
+        };
       }
     }
 
     return new Response(JSON.stringify({ ok: true, stats }), { headers });
 
   } catch (e) {
-    // ✅ au lieu d’un 500 muet, tu vois l’erreur
     return new Response(
       JSON.stringify({ ok: false, error: "Erreur serveur", details: String(e?.message || e) }),
       { status: 500, headers }
     );
   }
 }
+

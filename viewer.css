@@ -567,26 +567,23 @@ main{
 }
 
 /* =========================
-   👍 Like bouton simple (pas vert, pas couleur)
+   👍 Like bouton
    ========================= */
 
 .like-btn{
   font-size: 18px;
-  opacity: 0.35;              /* non liké = discret */
-  transition: opacity .15s ease, transform .1s ease;
+  color: #9aa0b4;              /* gris (pas aimé) */
+  transition: color .15s ease, transform .1s ease;
 }
 
-/* hover léger */
 .like-btn:hover{
-  opacity: 0.6;
+  color: #c0c6dd;
 }
 
-/* état liké */
 .like-btn.is-liked{
-  opacity: 1;                 /* liké = bien visible */
+  color: #e53935;              /* rouge (aimé) */
 }
 
-/* petit feedback au clic */
 .like-btn:active{
   transform: scale(0.95);
 }

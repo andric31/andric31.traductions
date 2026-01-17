@@ -16,7 +16,7 @@ export async function onRequest(context) {
 
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers });
 
-  if (!env.DB) {
+  if (!env?.DB) {
     return new Response(JSON.stringify({ ok: false, error: "DB non liée" }), { status: 500, headers });
   }
 
@@ -24,7 +24,7 @@ export async function onRequest(context) {
     return new Response(JSON.stringify({ ok: false, error: "ID invalide" }), { status: 400, headers });
   }
 
-  // ✅ Table + colonne likes (compat si ancienne DB)
+  // ✅ Table (avec likes)
   await env.DB.prepare(`
     CREATE TABLE IF NOT EXISTS counters (
       id TEXT PRIMARY KEY,
@@ -35,10 +35,18 @@ export async function onRequest(context) {
     );
   `).run();
 
-  // si la table existait sans likes → on tente un ALTER (ignorer si déjà OK)
+  // ✅ Migration douce: si ancienne table sans likes, on tente 1 fois et on ignore si déjà OK
+  // (D1: ALTER TABLE échoue si la colonne existe)
   try {
-    await env.DB.prepare(`ALTER TABLE counters ADD COLUMN likes INTEGER NOT NULL DEFAULT 0;`).run();
-  } catch { /* déjà présent */ }
+    // on vérifie les colonnes vite fait
+    const info = await env.DB.prepare(`PRAGMA table_info(counters);`).all();
+    const cols = (info?.results || []).map(r => String(r?.name || "").toLowerCase());
+    if (!cols.includes("likes")) {
+      await env.DB.prepare(`ALTER TABLE counters ADD COLUMN likes INTEGER NOT NULL DEFAULT 0;`).run();
+    }
+  } catch {
+    // silencieux (au pire, ta table est déjà bonne)
+  }
 
   async function getRow() {
     const row = await env.DB
@@ -62,6 +70,7 @@ export async function onRequest(context) {
           views = views + 1,
           updated_at = unixepoch()
       `).bind(id).run();
+
     } else if (kind === "mega") {
       await env.DB.prepare(`
         INSERT INTO counters (id, views, mega, likes, updated_at)
@@ -70,6 +79,7 @@ export async function onRequest(context) {
           mega = mega + 1,
           updated_at = unixepoch()
       `).bind(id).run();
+
     } else if (kind === "like") {
       await env.DB.prepare(`
         INSERT INTO counters (id, views, mega, likes, updated_at)
@@ -78,6 +88,7 @@ export async function onRequest(context) {
           likes = likes + 1,
           updated_at = unixepoch()
       `).bind(id).run();
+
     } else {
       return new Response(JSON.stringify({ ok: false, error: "kind invalide" }), { status: 400, headers });
     }
@@ -86,7 +97,6 @@ export async function onRequest(context) {
     return new Response(JSON.stringify({ ok: true, ...row }), { headers });
   }
 
-  // ✅ unlike (toggle)
   if (op === "unhit") {
     if (kind !== "like") {
       return new Response(JSON.stringify({ ok: false, error: "kind invalide (unhit)" }), { status: 400, headers });
@@ -106,4 +116,3 @@ export async function onRequest(context) {
 
   return new Response(JSON.stringify({ ok: false, error: "op invalide" }), { status: 400, headers });
 }
-

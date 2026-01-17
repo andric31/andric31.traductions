@@ -75,7 +75,15 @@
   
     GAME_STATS.loaded = true;
   }
-  
+ 
+   async function forceReloadGameStats() {
+     GAME_STATS.loaded = false;
+     GAME_STATS.views.clear();
+     GAME_STATS.mega.clear();
+     GAME_STATS.likes.clear();
+     await ensureGameStatsLoaded();
+   }
+ 
   async function initMainPageCounter() {
     const el = document.getElementById("mainViews");
     if (!el) return;
@@ -951,7 +959,7 @@ Profil https://f95zone.to/members/andric31.247797/
       state.sort.startsWith("mega")  ||
       state.sort.startsWith("likes")
     ) {
-      await ensureGameStatsLoaded();
+      await forceReloadGameStats();
     }
   
     sortNow();

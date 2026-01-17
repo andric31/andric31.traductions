@@ -24,6 +24,7 @@
   // =========================
 
   const MAIN_PAGE_ID = "__viewer_main__";
+  let MAIN_VIEW_HIT_DONE = false;
 
   function formatInt(n) {
     const x = Number(n);
@@ -35,17 +36,20 @@
   async function initMainPageCounter() {
     const el = document.getElementById("mainViews");
     if (!el) return;
-
+  
     try {
+      // ✅ 1 seul "hit" par chargement de page
+      const op = MAIN_VIEW_HIT_DONE ? "get" : "hit";
       const r = await fetch(
-        `/api/counter?op=hit&kind=view&id=${encodeURIComponent(MAIN_PAGE_ID)}`,
+        `/api/counter?op=${op}&kind=view&id=${encodeURIComponent(MAIN_PAGE_ID)}`,
         { cache: "no-store" }
       );
       if (!r.ok) return;
-
+  
       const j = await r.json();
       if (!j?.ok) return;
-
+  
+      MAIN_VIEW_HIT_DONE = true; // ✅ verrou après le 1er hit
       el.textContent = formatInt(j.views);
     } catch {
       // silencieux

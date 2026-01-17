@@ -428,6 +428,29 @@ async function counterHit(id, kind) {
   return await r.json();
 }
 
+// ✅ UNLIKE (si ton API supporte op=unhit&kind=like)
+async function counterUnhit(id, kind) {
+  const r = await fetch(`/api/counter?op=unhit&kind=${encodeURIComponent(kind)}&id=${encodeURIComponent(id)}`, { cache: "no-store" });
+  if (!r.ok) throw new Error("counter unhit HTTP " + r.status);
+  return await r.json();
+}
+
+// ✅ Like local (anti-spam simple par navigateur)
+function getMyLike(gameId) {
+  try { return localStorage.getItem(`like_${gameId}`) === "1"; }
+  catch { return false; }
+}
+function setMyLike(gameId, v) {
+  try { localStorage.setItem(`like_${gameId}`, v ? "1" : "0"); } catch {}
+}
+function updateLikeBtn(gameId) {
+  const b = $("btnLike");
+  if (!b) return;
+  const liked = getMyLike(gameId);
+  b.textContent = liked ? "💔 Je n’aime plus" : "❤️ J’aime";
+  b.classList.toggle("is-liked", liked);
+}
+
 async function initCounters(gameId, megaHref) {
   // 1) Vue : on hit au chargement
   try {
@@ -435,6 +458,8 @@ async function initCounters(gameId, megaHref) {
     if (j?.ok) {
       setText("statViews", formatInt(j.views));
       setText("statMegaClicks", formatInt(j.mega));
+      // ✅ Likes si dispo (sinon 0)
+      if ($("statLikes")) setText("statLikes", formatInt(j.likes || 0));
       showStatsBox();
     }
   } catch {
@@ -444,29 +469,58 @@ async function initCounters(gameId, megaHref) {
       if (j?.ok) {
         setText("statViews", formatInt(j.views));
         setText("statMegaClicks", formatInt(j.mega));
+        if ($("statLikes")) setText("statLikes", formatInt(j.likes || 0));
         showStatsBox();
       }
     } catch {
       setText("statViews", "0");
       setText("statMegaClicks", "0");
+      if ($("statLikes")) setText("statLikes", "0");
       showStatsBox();
     }
   }
 
   // 2) Clic MEGA : on hit au clic
-  if (!megaHref) return;
-  const btn = $("btnMega");
-  if (!btn) return;
+  if (megaHref) {
+    const btn = $("btnMega");
+    if (btn) {
+      btn.addEventListener("click", async () => {
+        try {
+          const j = await counterHit(gameId, "mega");
+          if (j?.ok) {
+            setText("statMegaClicks", formatInt(j.mega));
+            showStatsBox();
+          }
+        } catch {}
+      }, { passive: true });
+    }
+  }
 
-  btn.addEventListener("click", async () => {
-    try {
-      const j = await counterHit(gameId, "mega");
-      if (j?.ok) {
-        setText("statMegaClicks", formatInt(j.mega));
-        showStatsBox();
+  // 3) ❤️ Like toggle (si le HTML contient #btnLike et #statLikes)
+  const btnLike = $("btnLike");
+  if (btnLike && $("statLikes")) {
+    updateLikeBtn(gameId);
+
+    btnLike.addEventListener("click", async () => {
+      const liked = getMyLike(gameId);
+
+      try {
+        const j = liked
+          ? await counterUnhit(gameId, "like")
+          : await counterHit(gameId, "like");
+
+        if (j?.ok) {
+          setText("statLikes", formatInt(j.likes || 0));
+          setMyLike(gameId, !liked);
+          updateLikeBtn(gameId);
+          showStatsBox();
+        }
+      } catch {
+        // si ton API n'a pas encore op=unhit, on évite de casser :
+        // - le like (hit) fonctionnera, mais le unlike échouera silencieusement.
       }
-    } catch {}
-  }, { passive: true });
+    });
+  }
 }
 
 // ====== Rating 4 ======
@@ -675,3 +729,4 @@ function renderRating4UI(gameId, data) {
     showError(`Erreur: ${e?.message || e}`);
   }
 })();
+

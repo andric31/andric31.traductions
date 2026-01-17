@@ -299,7 +299,8 @@ Profil https://f95zone.to/members/andric31.247797/
     let top  = Math.round(r.bottom + margin);
 
     const w = pop.getBoundingClientRect().width || 320;
-    const maxLeft = window.innerWidth - w - 10;
+    const SCROLLBAR_GAP = 18; // espace visuel avec le scrollbar
+    const maxLeft = window.innerWidth - w - SCROLLBAR_GAP;
 
     if (left > maxLeft) left = Math.max(10, maxLeft);
     if (left < 10) left = 10;

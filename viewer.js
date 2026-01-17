@@ -34,11 +34,12 @@
   }
 
   // =========================
-  // Stats jeux (vues + téléchargements)
+  // Stats jeux (vues + likes + téléchargements)
   // =========================
   const GAME_STATS = {
-    views: new Map(), // id -> number
-    mega: new Map(),  // id -> number
+    views: new Map(),
+    mega: new Map(),
+    likes: new Map(),
     loaded: false
   };
   
@@ -69,6 +70,7 @@
       const s = stats[id] || {};
       GAME_STATS.views.set(id, Number(s.views || 0));
       GAME_STATS.mega.set(id, Number(s.mega || 0));
+      GAME_STATS.likes.set(id, Number(s.likes || 0));
     }
   
     GAME_STATS.loaded = true;
@@ -788,6 +790,21 @@ Profil https://f95zone.to/members/andric31.247797/
       });
       return;
     }
+
+    if (k === "likes") {
+      state.filtered.sort((a, b) => {
+        const da = (GAME_STATS.likes.get(a.id) || 0);
+        const db = (GAME_STATS.likes.get(b.id) || 0);
+        if (da !== db) return (da - db) * mul;
+    
+        const ta = a.updatedAtLocalTs || 0;
+        const tb = b.updatedAtLocalTs || 0;
+        if (ta !== tb) return (ta - tb) * mul;
+    
+        return a.title.localeCompare(b.title);
+      });
+      return;
+    }
   }
 
   function applyFilters() {
@@ -929,7 +946,11 @@ Profil https://f95zone.to/members/andric31.247797/
     state.sort = e.target.value;
   
     // 🔥 charge les stats seulement si nécessaire
-    if (state.sort.startsWith("views") || state.sort.startsWith("mega")) {
+    if (
+      state.sort.startsWith("views") ||
+      state.sort.startsWith("mega")  ||
+      state.sort.startsWith("likes")
+    ) {
       await ensureGameStatsLoaded();
     }
   
@@ -995,6 +1016,7 @@ Profil https://f95zone.to/members/andric31.247797/
     GAME_STATS.loaded = false;
     GAME_STATS.views.clear();
     GAME_STATS.mega.clear();
+    GAME_STATS.likes.clear();
   
     init();
   });
@@ -1025,7 +1047,11 @@ Profil https://f95zone.to/members/andric31.247797/
       buildDynamicFilters();
 
       // ✅ si le tri actuel est "views" ou "mega", on charge les stats avant de trier
-      if (state.sort.startsWith("views") || state.sort.startsWith("mega")) {
+      if (
+        state.sort.startsWith("views") ||
+        state.sort.startsWith("mega")  ||
+        state.sort.startsWith("likes")
+      ) {
         await ensureGameStatsLoaded();
       }
 

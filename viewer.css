@@ -567,47 +567,48 @@ main{
 }
 
 /* =========================
-   👍 Like
+   👍 Like (bouton encadré + icône qui change)
    ========================= */
 
 #btnLike{
-  background: none;
-  border: none;
+  width: 40px;
+  height: 34px;
   padding: 0;
-  margin: 0;
-
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-
-  cursor:pointer;
-  user-select:none;
+  gap: 0;                 /* important car btnLike a gap:8px */
 }
 
-/* état normal : clair */
 #btnLike .likeIcon{
-  width: 20px;
-  height: 20px;
-  fill: currentColor;
-
-  color: var(--fg);     /* couleur texte */
-  opacity: .45;         /* clair */
-
-  transition:
-    opacity .18s ease,
-    filter .18s ease,
-    transform .18s ease;
+  width: 18px;
+  height: 18px;
+  display: block;
 }
 
-/* hover */
-#btnLike:hover .likeIcon{
-  opacity: .65;
-  transform: scale(1.05);
+/* état par défaut: outline visible, filled caché */
+#btnLike .like-on{ display:none; }
+#btnLike .like-off{ display:block; }
+
+/* outline: juste un contour (pas de remplissage) */
+#btnLike .like-off path{
+  fill: none;
+  stroke: rgba(232,234,240,0.85);  /* ton --fg en version soft */
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+  stroke-linecap: round;
 }
 
-/* ✅ liké : même couleur, plus foncée */
-#btnLike.is-liked .likeIcon{
-  opacity: .95;         /* foncé */
-  filter: saturate(0) brightness(1);
+/* liked: outline caché, filled visible */
+#btnLike.is-liked .like-off{ display:none; }
+#btnLike.is-liked .like-on{ display:block; }
+
+/* filled: plein plus foncé (sans couleur) */
+#btnLike.is-liked .like-on path{
+  fill: rgba(232,234,240,0.92);
 }
+
+/* petit feedback visuel (sans vert) */
+#btnLike.is-liked{
+  border-color: rgba(232,234,240,0.22);
+  background: rgba(255,255,255,0.08);
+}
+
 

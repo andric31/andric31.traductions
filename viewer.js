@@ -33,6 +33,47 @@
     catch { return String(Math.floor(x)); }
   }
 
+  // =========================
+  // Stats jeux (vues + téléchargements)
+  // =========================
+  const GAME_STATS = {
+    views: new Map(), // id -> number
+    mega: new Map(),  // id -> number
+    loaded: false
+  };
+  
+  async function fetchGameStatsBulk(ids) {
+    try {
+      const r = await fetch("/api/counters", {
+        method: "POST",
+        cache: "no-store",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ ids })
+      });
+      if (!r.ok) return {};
+      const j = await r.json();
+      if (!j?.ok || !j.stats) return {};
+      return j.stats; // { id: {views, mega}, ... }
+    } catch {
+      return {};
+    }
+  }
+  
+  async function ensureGameStatsLoaded() {
+    if (GAME_STATS.loaded) return;
+  
+    const ids = state.all.map(g => g.id).filter(Boolean);
+    const stats = await fetchGameStatsBulk(ids);
+  
+    for (const id of ids) {
+      const s = stats[id] || {};
+      GAME_STATS.views.set(id, Number(s.views || 0));
+      GAME_STATS.mega.set(id, Number(s.mega || 0));
+    }
+  
+    GAME_STATS.loaded = true;
+  }
+  
   async function initMainPageCounter() {
     const el = document.getElementById("mainViews");
     if (!el) return;
@@ -703,12 +744,31 @@ Profil https://f95zone.to/members/andric31.247797/
   function sortNow() {
     const [k, dir] = state.sort.split("-");
     const mul = dir === "asc" ? 1 : -1;
-
+  
     if (k === "title") {
       state.filtered.sort((a, b) => a.title.localeCompare(b.title) * mul);
-    } else if (["releaseDate", "updatedAt", "updatedAtLocal"].includes(k)) {
+      return;
+    }
+  
+    if (["releaseDate", "updatedAt", "updatedAtLocal"].includes(k)) {
       const key = k + "Ts";
       state.filtered.sort((a, b) => ((a[key] || 0) - (b[key] || 0)) * mul);
+      return;
+    }
+  
+    // ✅ NOUVEAUX TRIS
+    if (k === "views") {
+      state.filtered.sort((a, b) =>
+        ((GAME_STATS.views.get(a.id) || 0) - (GAME_STATS.views.get(b.id) || 0)) * mul
+      );
+      return;
+    }
+    
+    if (k === "mega") {
+      state.filtered.sort((a, b) =>
+        ((GAME_STATS.mega.get(a.id) || 0) - (GAME_STATS.mega.get(b.id) || 0)) * mul
+      );
+      return;
     }
   }
 
@@ -847,7 +907,18 @@ Profil https://f95zone.to/members/andric31.247797/
   // =========================
 
   $("#search")?.addEventListener("input", e => { state.q = e.target.value || ""; applyFilters(); });
-  $("#sort")?.addEventListener("change", e => { state.sort = e.target.value || "title-asc"; sortNow(); state.visibleCount = 0; renderGrid(); });
+  $("#sort")?.addEventListener("change", async e => {
+    state.sort = e.target.value;
+  
+    // 🔥 charge les stats seulement si nécessaire
+    if (state.sort.startsWith("views") || state.sort.startsWith("mega")) {
+      await ensureGameStatsLoaded();
+    }
+  
+    sortNow();
+    state.visibleCount = 0;
+    renderGrid();
+  });
   $("#filterCat")?.addEventListener("change", e => { state.filterCat = e.target.value || "all"; applyFilters(); });
   $("#filterEngine")?.addEventListener("change", e => { state.filterEngine = e.target.value || "all"; applyFilters(); });
   $("#filterStatus")?.addEventListener("change", e => { state.filterStatus = e.target.value || "all"; applyFilters(); });
@@ -878,30 +949,35 @@ Profil https://f95zone.to/members/andric31.247797/
     state.filterStatus = "all";
     state.filterTags = [];
     state.visibleCount = 0;
-
+  
     const search = $("#search");
     if (search) search.value = "";
-
+  
     const sort = $("#sort");
     if (sort) sort.value = state.sort;
-
+  
     const cat = $("#filterCat");
     if (cat) cat.value = "all";
-
+  
     const eng = $("#filterEngine");
     if (eng) eng.value = "all";
-
+  
     const stat = $("#filterStatus");
     if (stat) stat.value = "all";
-
+  
     clearSavedTags();
     updateTagsCountBadge();
     closeTagsPopover();
-
+  
     state.pageSize = 50;
     const ps = $("#pageSize");
     if (ps) ps.value = "50";
-
+  
+    // ✅ reset cache stats (sinon tri reste sur anciennes valeurs)
+    GAME_STATS.loaded = false;
+    GAME_STATS.views.clear();
+    GAME_STATS.mega.clear();
+  
     init();
   });
 
@@ -929,6 +1005,12 @@ Profil https://f95zone.to/members/andric31.247797/
       updateTagsCountBadge();
 
       buildDynamicFilters();
+
+      // ✅ si le tri actuel est "views" ou "mega", on charge les stats avant de trier
+      if (state.sort.startsWith("views") || state.sort.startsWith("mega")) {
+        await ensureGameStatsLoaded();
+      }
+
       applyFilters();
 
       // ✅ Compteur vues (après chargement DOM ok)

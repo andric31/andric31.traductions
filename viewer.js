@@ -756,18 +756,36 @@ Profil https://f95zone.to/members/andric31.247797/
       return;
     }
   
-    // ✅ NOUVEAUX TRIS
+    // ✅ NOUVEAUX TRIS (avec tie-break stable)
     if (k === "views") {
-      state.filtered.sort((a, b) =>
-        ((GAME_STATS.views.get(a.id) || 0) - (GAME_STATS.views.get(b.id) || 0)) * mul
-      );
+      state.filtered.sort((a, b) => {
+        const da = (GAME_STATS.views.get(a.id) || 0);
+        const db = (GAME_STATS.views.get(b.id) || 0);
+        if (da !== db) return (da - db) * mul;
+    
+        // tie-break 1 : date locale (plus récent d'abord si mul = -1)
+        const ta = a.updatedAtLocalTs || 0;
+        const tb = b.updatedAtLocalTs || 0;
+        if (ta !== tb) return (ta - tb) * mul;
+    
+        // tie-break 2 : titre (stable)
+        return a.title.localeCompare(b.title);
+      });
       return;
     }
     
     if (k === "mega") {
-      state.filtered.sort((a, b) =>
-        ((GAME_STATS.mega.get(a.id) || 0) - (GAME_STATS.mega.get(b.id) || 0)) * mul
-      );
+      state.filtered.sort((a, b) => {
+        const da = (GAME_STATS.mega.get(a.id) || 0);
+        const db = (GAME_STATS.mega.get(b.id) || 0);
+        if (da !== db) return (da - db) * mul;
+    
+        const ta = a.updatedAtLocalTs || 0;
+        const tb = b.updatedAtLocalTs || 0;
+        if (ta !== tb) return (ta - tb) * mul;
+    
+        return a.title.localeCompare(b.title);
+      });
       return;
     }
   }

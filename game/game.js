@@ -446,9 +446,11 @@ function setMyLike(gameId, v) {
 function updateLikeBtn(gameId) {
   const b = $("btnLike");
   if (!b) return;
+
   const liked = getMyLike(gameId);
-  b.textContent = liked ? "💔 Je n’aime plus" : "❤️ J’aime";
+  b.textContent = "👍"; // toujours pareil
   b.classList.toggle("is-liked", liked);
+  b.setAttribute("aria-label", liked ? "Je n’aime plus" : "J’aime");
 }
 
 // ✅ helper : safe update likes text

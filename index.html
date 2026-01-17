@@ -20,9 +20,6 @@
       <div class="search-wrap">
         <input id="search" type="search" placeholder="Rechercher un jeu." autocomplete="off" />
         <span class="stat-in-bar total-inline">Total : <strong id="countTotal">0</strong></span>
-
-        <!-- ✅ AJOUT : vues de la page principale -->
-        <span class="stat-in-bar total-inline">👁️ Vues : <strong id="mainViews">—</strong></span>
       </div>
 
       <select id="sort" title="Trier">
@@ -88,9 +85,15 @@
       <div id="grid" class="grid"></div>
       <div id="gridEmpty" class="empty hidden">Aucun résultat.</div>
     </section>
+
+    <!-- ✅ Footer stats -->
+    <footer class="viewer-footer">
+      👁️ Vues de la page : <strong id="mainViews">—</strong>
+    </footer>
   </main>
 
   <script src="/viewer.js"></script>
 </body>
 </html>
+
 

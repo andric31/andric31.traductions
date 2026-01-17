@@ -553,3 +553,15 @@ main{
   border-color: rgba(90,162,255,0.35);
 }
 
+.viewer-footer{
+  margin-top: 24px;
+  padding: 12px 0 18px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  user-select: none;
+}
+.viewer-footer strong{
+  color: var(--fg);
+  font-weight: 800;
+}

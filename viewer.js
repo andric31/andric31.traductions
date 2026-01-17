@@ -33,7 +33,6 @@
   }
 
   async function initMainPageCounter() {
-    // Affiche "—" si pas présent
     const el = document.getElementById("mainViews");
     if (!el) return;
 
@@ -162,7 +161,7 @@ Profil https://f95zone.to/members/andric31.247797/
    * - le bouton ☰ à gauche du titre
    * - une zone "outils d’affichage" à droite du titre
    * Et déplace dans cette zone:
-   * - .total-inline (⚠️ il y en a 2 chez toi => on déplace TOUTES)
+   * - le Total (uniquement)
    * - #cols
    * - #pageSize
    */
@@ -200,12 +199,12 @@ Profil https://f95zone.to/members/andric31.247797/
     row.insertBefore(btn, h1);
     row.appendChild(tools);
 
-    // ✅ Déplace tous les .total-inline (Total + Vues) vers la ligne du titre
-    const totals = [...document.querySelectorAll(".total-inline")];
+    // ✅ Déplace seulement le Total (countTotal) vers la ligne du titre
+    const total = document.querySelector("#countTotal")?.closest(".total-inline");
     const cols = document.getElementById("cols");
     const pageSize = document.getElementById("pageSize");
 
-    totals.forEach(t => tools.appendChild(t));
+    if (total) tools.appendChild(total);
     if (cols) tools.appendChild(cols);
     if (pageSize) tools.appendChild(pageSize);
 
@@ -287,7 +286,6 @@ Profil https://f95zone.to/members/andric31.247797/
   }
 
   function ensureTagsDom() {
-    // bouton tags (inséré à côté des filtres)
     let btn = document.getElementById("tagsBtn");
     if (!btn) {
       btn = document.createElement("button");
@@ -297,7 +295,6 @@ Profil https://f95zone.to/members/andric31.247797/
       btn.setAttribute("aria-haspopup", "menu");
       btn.setAttribute("aria-expanded", "false");
       btn.innerHTML = `🏷️ Tags <span id="tagsCount" class="tags-count hidden">0</span>`;
-      // on l’insère après #filterStatus si possible, sinon à la fin
       const anchor = document.getElementById("filterStatus");
       if (anchor && anchor.parentElement) {
         anchor.parentElement.insertBefore(btn, anchor.nextSibling);
@@ -306,7 +303,6 @@ Profil https://f95zone.to/members/andric31.247797/
       }
     }
 
-    // popover tags
     let pop = document.getElementById("tagsPopover");
     if (!pop) {
       pop = document.createElement("div");
@@ -333,13 +329,12 @@ Profil https://f95zone.to/members/andric31.247797/
     let top  = Math.round(r.bottom + margin);
 
     const w = pop.getBoundingClientRect().width || 320;
-    const SCROLLBAR_GAP = 18; // espace visuel avec le scrollbar
+    const SCROLLBAR_GAP = 18;
     const maxLeft = window.innerWidth - w - SCROLLBAR_GAP;
 
     if (left > maxLeft) left = Math.max(10, maxLeft);
     if (left < 10) left = 10;
 
-    // si ça dépasse en bas, on met au-dessus (approx)
     const approxH = 380;
     if (top + approxH > window.innerHeight - 10) {
       top = Math.max(10, Math.round(r.top - margin - approxH));
@@ -401,11 +396,9 @@ Profil https://f95zone.to/members/andric31.247797/
       }
     };
 
-    // ✅ IMPORTANT: binder une seule fois (sinon double click = open puis close)
     if (!TAGS_UI_BOUND) {
       TAGS_UI_BOUND = true;
 
-      // ouvrir/fermer popover
       btn.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -419,7 +412,6 @@ Profil https://f95zone.to/members/andric31.247797/
         positionTagsPopover(pop, btn);
       });
 
-      // clear
       document.getElementById("tagsClearBtn")?.addEventListener("click", () => {
         state.filterTags = [];
         clearSavedTags();
@@ -428,7 +420,6 @@ Profil https://f95zone.to/members/andric31.247797/
         applyFilters();
       });
 
-      // clic dehors => fermer
       document.addEventListener("click", (e) => {
         const p = document.getElementById("tagsPopover");
         const b = document.getElementById("tagsBtn");
@@ -444,7 +435,6 @@ Profil https://f95zone.to/members/andric31.247797/
       });
     }
 
-    // ✅ À chaque init() on met juste à jour l’affichage
     updateTagsCountBadge();
     renderTagList();
   }
@@ -698,14 +688,11 @@ Profil https://f95zone.to/members/andric31.247797/
   }
 
   function buildDynamicFilters() {
-    // tags uniques
     const tags = new Set();
     for (const g of state.all) {
       if (Array.isArray(g.tags)) g.tags.forEach(t => { if (t) tags.add(t); });
     }
     const allTags = Array.from(tags).sort((a, b) => a.localeCompare(b));
-
-    // init UI tags (popover + check + save)
     initTagsUI(allTags);
   }
 
@@ -742,7 +729,6 @@ Profil https://f95zone.to/members/andric31.247797/
       let mt = true;
       if (ft && ft.length) {
         const tags = Array.isArray(g.tags) ? g.tags : [];
-        // ✅ AND (tous les tags sélectionnés doivent être présents)
         mt = ft.every(t => tags.includes(t));
       }
 
@@ -880,9 +866,7 @@ Profil https://f95zone.to/members/andric31.247797/
     await setViewerCols(state.cols);
   });
 
-  // ✅ Refresh => désactive tags + enlève save + ferme popover, puis recharge
   $("#refresh")?.addEventListener("click", () => {
-    // --- reset état ---
     state.q = "";
     state.sort = "updatedAtLocal-desc";
     state.filterCat = "all";
@@ -891,7 +875,6 @@ Profil https://f95zone.to/members/andric31.247797/
     state.filterTags = [];
     state.visibleCount = 0;
 
-    // --- reset UI ---
     const search = $("#search");
     if (search) search.value = "";
 
@@ -907,17 +890,14 @@ Profil https://f95zone.to/members/andric31.247797/
     const stat = $("#filterStatus");
     if (stat) stat.value = "all";
 
-    // --- reset tags ---
     clearSavedTags();
     updateTagsCountBadge();
     closeTagsPopover();
 
-    // --- reset pageSize ---
     state.pageSize = 50;
     const ps = $("#pageSize");
     if (ps) ps.value = "50";
 
-    // --- reload complet ---
     init();
   });
 
@@ -930,11 +910,7 @@ Profil https://f95zone.to/members/andric31.247797/
     $("#gridEmpty")?.classList.add("hidden");
 
     try {
-      // ✅ menu + outils d’affichage à droite du titre
       initHeaderMenuAndDisplayTools();
-
-      // ✅ compteur vues page principale (1 hit par chargement / refresh)
-      initMainPageCounter();
 
       state.cols = await getViewerCols();
       const colsSel = $("#cols");
@@ -943,7 +919,6 @@ Profil https://f95zone.to/members/andric31.247797/
       const raw = await loadList();
       state.all = Array.isArray(raw) ? raw.map(normalize) : [];
 
-      // ✅ charge tags sauvegardés avant d’afficher
       if (!state.filterTags || !state.filterTags.length) {
         state.filterTags = getSavedTags();
       }
@@ -951,6 +926,9 @@ Profil https://f95zone.to/members/andric31.247797/
 
       buildDynamicFilters();
       applyFilters();
+
+      // ✅ Compteur vues (après chargement DOM ok)
+      initMainPageCounter();
     } catch (e) {
       console.error("[viewer] load error:", e);
       $("#grid").innerHTML = "";
@@ -964,4 +942,3 @@ Profil https://f95zone.to/members/andric31.247797/
 
   init();
 })();
-

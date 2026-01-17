@@ -567,13 +567,28 @@ main{
 }
 
 /* =========================
-   👍 Like bouton
+   ❤️ Bouton Like (icône seule)
    ========================= */
 
 .like-btn{
+  padding: 0;                 /* 🔥 enlève le gros padding */
+  width: 34px;
+  height: 34px;
+
+  border-radius: 10px;
   font-size: 18px;
-  color: #9aa0b4;              /* gris (pas aimé) */
-  transition: color .15s ease, transform .1s ease;
+  font-weight: normal;
+
+  color: #9aa0b4;             /* ❤️ gris par défaut */
+  background: rgba(255,255,255,0.05);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  transition:
+    color .15s ease,
+    transform .1s ease;
 }
 
 .like-btn:hover{
@@ -581,7 +596,7 @@ main{
 }
 
 .like-btn.is-liked{
-  color: #e53935;              /* rouge (aimé) */
+  color: #e53935;             /* ❤️ rouge quand aimé */
 }
 
 .like-btn:active{

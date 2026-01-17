@@ -389,12 +389,16 @@
 
         <!-- ✅ Bouton ☰ + badges -->
         <div class="headRow">
-          <button type="button" class="hamburger-btn" id="hamburgerBtn" aria-label="Ouvrir le menu" aria-haspopup="menu" aria-expanded="false">
-            <span class="ham-lines" aria-hidden="true"><span></span><span></span><span></span></span>
+          <button type="button" class="hamburger-btn" id="hamburgerBtn">
+            <span class="ham-lines"><span></span><span></span><span></span></span>
           </button>
         
-          <!-- ❤️ Like bouton (entre ☰ et badges) -->
-          <button class="btnLike like-btn" id="btnLike" type="button" aria-label="J’aime">👍</button>
+          <!-- ❤️ Like (pouce seul, sans case) -->
+          <button id="btnLike" type="button" aria-label="J’aime">
+            <svg class="likeIcon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M2 10h4v12H2zM22 11c0-1.1-.9-2-2-2h-6.3l.95-4.57.02-.23c0-.3-.12-.59-.33-.8L13.17 2 6.59 8.59C6.22 8.95 6 9.45 6 10v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73z"/>
+            </svg>
+          </button>
         
           <div class="badgesRow" id="badges"></div>
         </div>

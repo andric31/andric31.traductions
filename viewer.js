@@ -20,16 +20,29 @@
   };
 
   // =========================
-  // Stats jeux (vues + téléchargements + likes)
+  // ✅ Compteur vues page principale (Viewer)
   // =========================
 
+  const MAIN_PAGE_ID = "__viewer_main__";
+  let MAIN_VIEW_HIT_DONE = false;
+
+  function formatInt(n) {
+    const x = Number(n);
+    if (!Number.isFinite(x)) return "0";
+    try { return x.toLocaleString("fr-FR"); }
+    catch { return String(Math.floor(x)); }
+  }
+
+  // =========================
+  // Stats jeux (vues + likes + téléchargements)
+  // =========================
   const GAME_STATS = {
-    views: new Map(), // id -> number
-    mega: new Map(),  // id -> number
-    likes: new Map(), // id -> number
+    views: new Map(),
+    mega: new Map(),
+    likes: new Map(),
     loaded: false
   };
-
+  
   async function fetchGameStatsBulk(ids) {
     try {
       const r = await fetch("/api/counters", {
@@ -41,26 +54,49 @@
       if (!r.ok) return {};
       const j = await r.json();
       if (!j?.ok || !j.stats) return {};
-      return j.stats; // { id: {views, mega, likes}, ... }
+      return j.stats; // { id: {views, mega}, ... }
     } catch {
       return {};
     }
   }
-
+  
   async function ensureGameStatsLoaded() {
     if (GAME_STATS.loaded) return;
-
+  
     const ids = state.all.map(g => g.id).filter(Boolean);
     const stats = await fetchGameStatsBulk(ids);
-
+  
     for (const id of ids) {
       const s = stats[id] || {};
       GAME_STATS.views.set(id, Number(s.views || 0));
       GAME_STATS.mega.set(id, Number(s.mega || 0));
       GAME_STATS.likes.set(id, Number(s.likes || 0));
     }
-
+  
     GAME_STATS.loaded = true;
+  }
+  
+  async function initMainPageCounter() {
+    const el = document.getElementById("mainViews");
+    if (!el) return;
+  
+    try {
+      // ✅ 1 seul "hit" par chargement de page
+      const op = MAIN_VIEW_HIT_DONE ? "get" : "hit";
+      const r = await fetch(
+        `/api/counter?op=${op}&kind=view&id=${encodeURIComponent(MAIN_PAGE_ID)}`,
+        { cache: "no-store" }
+      );
+      if (!r.ok) return;
+  
+      const j = await r.json();
+      if (!j?.ok) return;
+  
+      MAIN_VIEW_HIT_DONE = true; // ✅ verrou après le 1er hit
+      el.textContent = formatInt(j.views);
+    } catch {
+      // silencieux
+    }
   }
 
   // =========================
@@ -172,7 +208,7 @@ Profil https://f95zone.to/members/andric31.247797/
    * - le bouton ☰ à gauche du titre
    * - une zone "outils d’affichage" à droite du titre
    * Et déplace dans cette zone:
-   * - .total-inline
+   * - le Total (uniquement)
    * - #cols
    * - #pageSize
    */
@@ -210,8 +246,8 @@ Profil https://f95zone.to/members/andric31.247797/
     row.insertBefore(btn, h1);
     row.appendChild(tools);
 
-    // Déplace Total + cols + pageSize vers la ligne du titre
-    const total = document.querySelector(".total-inline");
+    // ✅ Déplace seulement le Total (countTotal) vers la ligne du titre
+    const total = document.querySelector("#countTotal")?.closest(".total-inline");
     const cols = document.getElementById("cols");
     const pageSize = document.getElementById("pageSize");
 
@@ -297,7 +333,6 @@ Profil https://f95zone.to/members/andric31.247797/
   }
 
   function ensureTagsDom() {
-    // bouton tags (inséré à côté des filtres)
     let btn = document.getElementById("tagsBtn");
     if (!btn) {
       btn = document.createElement("button");
@@ -307,7 +342,6 @@ Profil https://f95zone.to/members/andric31.247797/
       btn.setAttribute("aria-haspopup", "menu");
       btn.setAttribute("aria-expanded", "false");
       btn.innerHTML = `🏷️ Tags <span id="tagsCount" class="tags-count hidden">0</span>`;
-      // on l’insère après #filterStatus si possible, sinon à la fin
       const anchor = document.getElementById("filterStatus");
       if (anchor && anchor.parentElement) {
         anchor.parentElement.insertBefore(btn, anchor.nextSibling);
@@ -316,7 +350,6 @@ Profil https://f95zone.to/members/andric31.247797/
       }
     }
 
-    // popover tags
     let pop = document.getElementById("tagsPopover");
     if (!pop) {
       pop = document.createElement("div");
@@ -343,13 +376,12 @@ Profil https://f95zone.to/members/andric31.247797/
     let top  = Math.round(r.bottom + margin);
 
     const w = pop.getBoundingClientRect().width || 320;
-    const SCROLLBAR_GAP = 18; // espace visuel avec le scrollbar
+    const SCROLLBAR_GAP = 18;
     const maxLeft = window.innerWidth - w - SCROLLBAR_GAP;
 
     if (left > maxLeft) left = Math.max(10, maxLeft);
     if (left < 10) left = 10;
 
-    // si ça dépasse en bas, on met au-dessus (approx)
     const approxH = 380;
     if (top + approxH > window.innerHeight - 10) {
       top = Math.max(10, Math.round(r.top - margin - approxH));
@@ -374,17 +406,17 @@ Profil https://f95zone.to/members/andric31.247797/
     c.classList.toggle("hidden", n <= 0);
   }
 
-let TAGS_UI_BOUND = false;
+  let TAGS_UI_BOUND = false;
 
   function initTagsUI(allTags) {
     const { btn, pop } = ensureTagsDom();
     const list = document.getElementById("tagsList");
-  
+
     const renderTagList = () => {
       if (!list) return;
       const active = new Set(state.filterTags || []);
       list.innerHTML = "";
-  
+
       for (const t of allTags) {
         const item = document.createElement("button");
         item.type = "button";
@@ -399,37 +431,34 @@ let TAGS_UI_BOUND = false;
           const cur = new Set(state.filterTags || []);
           if (cur.has(t)) cur.delete(t);
           else cur.add(t);
-  
+
           state.filterTags = Array.from(cur);
           setSavedTags(state.filterTags);
           updateTagsCountBadge();
           renderTagList();
           applyFilters();
         });
-  
+
         list.appendChild(item);
       }
     };
-  
-    // ✅ IMPORTANT: binder une seule fois (sinon double click = open puis close)
+
     if (!TAGS_UI_BOUND) {
       TAGS_UI_BOUND = true;
-  
-      // ouvrir/fermer popover
+
       btn.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
-  
+
         const isOpen = !pop.classList.contains("hidden");
         if (isOpen) { closeTagsPopover(); return; }
-  
+
         pop.classList.remove("hidden");
         btn.setAttribute("aria-expanded", "true");
         renderTagList();
         positionTagsPopover(pop, btn);
       });
-  
-      // clear
+
       document.getElementById("tagsClearBtn")?.addEventListener("click", () => {
         state.filterTags = [];
         clearSavedTags();
@@ -437,8 +466,7 @@ let TAGS_UI_BOUND = false;
         renderTagList();
         applyFilters();
       });
-  
-      // clic dehors => fermer
+
       document.addEventListener("click", (e) => {
         const p = document.getElementById("tagsPopover");
         const b = document.getElementById("tagsBtn");
@@ -446,19 +474,17 @@ let TAGS_UI_BOUND = false;
         const t = e.target;
         if (!p.contains(t) && !b.contains(t)) closeTagsPopover();
       });
-  
+
       window.addEventListener("resize", () => {
         const p = document.getElementById("tagsPopover");
         const b = document.getElementById("tagsBtn");
         if (p && b && !p.classList.contains("hidden")) positionTagsPopover(p, b);
       });
     }
-  
-    // ✅ À chaque init() on met juste à jour l’affichage
+
     updateTagsCountBadge();
     renderTagList();
   }
-
 
   // =========================
   // Helpers URL / prefs / list
@@ -709,52 +735,76 @@ let TAGS_UI_BOUND = false;
   }
 
   function buildDynamicFilters() {
-    // tags uniques
     const tags = new Set();
     for (const g of state.all) {
       if (Array.isArray(g.tags)) g.tags.forEach(t => { if (t) tags.add(t); });
     }
     const allTags = Array.from(tags).sort((a, b) => a.localeCompare(b));
-
-    // init UI tags (popover + check + save)
     initTagsUI(allTags);
   }
 
   function sortNow() {
     const [k, dir] = state.sort.split("-");
     const mul = dir === "asc" ? 1 : -1;
-
+  
     if (k === "title") {
       state.filtered.sort((a, b) => a.title.localeCompare(b.title) * mul);
       return;
     }
-
+  
     if (["releaseDate", "updatedAt", "updatedAtLocal"].includes(k)) {
       const key = k + "Ts";
       state.filtered.sort((a, b) => ((a[key] || 0) - (b[key] || 0)) * mul);
       return;
     }
-
-    // ✅ Tris basés sur les stats (vues / téléchargements / likes)
-    const sortByStat = (map) => {
+  
+    // ✅ NOUVEAUX TRIS (avec tie-break stable)
+    if (k === "views") {
       state.filtered.sort((a, b) => {
-        const da = (map.get(a.id) || 0);
-        const db = (map.get(b.id) || 0);
+        const da = (GAME_STATS.views.get(a.id) || 0);
+        const db = (GAME_STATS.views.get(b.id) || 0);
         if (da !== db) return (da - db) * mul;
-
-        // tie-break 1 : date locale
+    
+        // tie-break 1 : date locale (plus récent d'abord si mul = -1)
         const ta = a.updatedAtLocalTs || 0;
         const tb = b.updatedAtLocalTs || 0;
         if (ta !== tb) return (ta - tb) * mul;
-
+    
         // tie-break 2 : titre (stable)
         return a.title.localeCompare(b.title);
       });
-    };
+      return;
+    }
+    
+    if (k === "mega") {
+      state.filtered.sort((a, b) => {
+        const da = (GAME_STATS.mega.get(a.id) || 0);
+        const db = (GAME_STATS.mega.get(b.id) || 0);
+        if (da !== db) return (da - db) * mul;
+    
+        const ta = a.updatedAtLocalTs || 0;
+        const tb = b.updatedAtLocalTs || 0;
+        if (ta !== tb) return (ta - tb) * mul;
+    
+        return a.title.localeCompare(b.title);
+      });
+      return;
+    }
 
-    if (k === "views") { sortByStat(GAME_STATS.views); return; }
-    if (k === "mega")  { sortByStat(GAME_STATS.mega);  return; }
-    if (k === "likes") { sortByStat(GAME_STATS.likes); return; }
+    if (k === "likes") {
+      state.filtered.sort((a, b) => {
+        const da = (GAME_STATS.likes.get(a.id) || 0);
+        const db = (GAME_STATS.likes.get(b.id) || 0);
+        if (da !== db) return (da - db) * mul;
+    
+        const ta = a.updatedAtLocalTs || 0;
+        const tb = b.updatedAtLocalTs || 0;
+        if (ta !== tb) return (ta - tb) * mul;
+    
+        return a.title.localeCompare(b.title);
+      });
+      return;
+    }
   }
 
   function applyFilters() {
@@ -778,7 +828,6 @@ let TAGS_UI_BOUND = false;
       let mt = true;
       if (ft && ft.length) {
         const tags = Array.isArray(g.tags) ? g.tags : [];
-        // ✅ AND (tous les tags sélectionnés doivent être présents)
         mt = ft.every(t => tags.includes(t));
       }
 
@@ -893,14 +942,18 @@ let TAGS_UI_BOUND = false;
   // =========================
 
   $("#search")?.addEventListener("input", e => { state.q = e.target.value || ""; applyFilters(); });
-  $("#sort")?.addEventListener("change", async (e) => {
-    state.sort = e.target.value || "title-asc";
-
-    // ✅ charge les stats uniquement si nécessaire
-    if (state.sort.startsWith("views") || state.sort.startsWith("mega") || state.sort.startsWith("likes")) {
+  $("#sort")?.addEventListener("change", async e => {
+    state.sort = e.target.value;
+  
+    // 🔥 charge les stats seulement si nécessaire
+    if (
+      state.sort.startsWith("views") ||
+      state.sort.startsWith("mega")  ||
+      state.sort.startsWith("likes")
+    ) {
       await ensureGameStatsLoaded();
     }
-
+  
     sortNow();
     state.visibleCount = 0;
     renderGrid();
@@ -927,9 +980,7 @@ let TAGS_UI_BOUND = false;
     await setViewerCols(state.cols);
   });
 
-  // ✅ Refresh => désactive tags + enlève save + ferme popover, puis recharge
   $("#refresh")?.addEventListener("click", () => {
-    // --- reset état ---
     state.q = "";
     state.sort = "updatedAtLocal-desc";
     state.filterCat = "all";
@@ -938,7 +989,6 @@ let TAGS_UI_BOUND = false;
     state.filterTags = [];
     state.visibleCount = 0;
   
-    // --- reset UI ---
     const search = $("#search");
     if (search) search.value = "";
   
@@ -954,23 +1004,20 @@ let TAGS_UI_BOUND = false;
     const stat = $("#filterStatus");
     if (stat) stat.value = "all";
   
-    // --- reset tags ---
     clearSavedTags();
     updateTagsCountBadge();
     closeTagsPopover();
-
-    // --- reset pageSize ---
+  
     state.pageSize = 50;
     const ps = $("#pageSize");
     if (ps) ps.value = "50";
-
-    // ✅ reset cache stats (sinon tri likes/views/mega peut rester sur anciennes valeurs)
+  
+    // ✅ reset cache stats (sinon tri reste sur anciennes valeurs)
     GAME_STATS.loaded = false;
     GAME_STATS.views.clear();
     GAME_STATS.mega.clear();
     GAME_STATS.likes.clear();
   
-    // --- reload complet ---
     init();
   });
 
@@ -983,7 +1030,6 @@ let TAGS_UI_BOUND = false;
     $("#gridEmpty")?.classList.add("hidden");
 
     try {
-      // ✅ menu + outils d’affichage à droite du titre
       initHeaderMenuAndDisplayTools();
 
       state.cols = await getViewerCols();
@@ -993,7 +1039,6 @@ let TAGS_UI_BOUND = false;
       const raw = await loadList();
       state.all = Array.isArray(raw) ? raw.map(normalize) : [];
 
-      // ✅ charge tags sauvegardés avant d’afficher
       if (!state.filterTags || !state.filterTags.length) {
         state.filterTags = getSavedTags();
       }
@@ -1001,12 +1046,19 @@ let TAGS_UI_BOUND = false;
 
       buildDynamicFilters();
 
-      // ✅ si le tri actuel est basé sur des compteurs, on charge les stats avant de filtrer/trier
-      if (state.sort.startsWith("views") || state.sort.startsWith("mega") || state.sort.startsWith("likes")) {
+      // ✅ si le tri actuel est "views" ou "mega", on charge les stats avant de trier
+      if (
+        state.sort.startsWith("views") ||
+        state.sort.startsWith("mega")  ||
+        state.sort.startsWith("likes")
+      ) {
         await ensureGameStatsLoaded();
       }
 
       applyFilters();
+
+      // ✅ Compteur vues (après chargement DOM ok)
+      initMainPageCounter();
     } catch (e) {
       console.error("[viewer] load error:", e);
       $("#grid").innerHTML = "";

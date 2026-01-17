@@ -200,17 +200,12 @@ Profil https://f95zone.to/members/andric31.247797/
     row.insertBefore(btn, h1);
     row.appendChild(tools);
 
-    // --- Vues juste à droite du titre ---
-    const views = document.querySelector("#mainViews")?.closest(".total-inline");
-    if (views) tools.insertBefore(views, tools.firstChild);
-    
-    // --- Total reste avec les outils ---
-    const total = document.querySelector("#countTotal")?.closest(".total-inline");
-    if (total) tools.appendChild(total);
-    
-    // autres outils
+    // ✅ Déplace tous les .total-inline (Total + Vues) vers la ligne du titre
+    const totals = [...document.querySelectorAll(".total-inline")];
     const cols = document.getElementById("cols");
     const pageSize = document.getElementById("pageSize");
+
+    totals.forEach(t => tools.appendChild(t));
     if (cols) tools.appendChild(cols);
     if (pageSize) tools.appendChild(pageSize);
 

@@ -9,66 +9,63 @@ export async function onRequest(context) {
     "access-control-allow-headers": "content-type",
   };
 
-  if (request.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers });
-  }
-
+  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers });
   if (request.method !== "POST") {
     return new Response(JSON.stringify({ ok: false, error: "Méthode invalide" }), { status: 405, headers });
   }
 
-  if (!env?.DB) {
-    return new Response(JSON.stringify({ ok: false, error: "DB non liée" }), { status: 500, headers });
-  }
-
-  let body;
   try {
-    body = await request.json();
-  } catch {
-    return new Response(JSON.stringify({ ok: false, error: "JSON invalide" }), { status: 400, headers });
-  }
-
-  const idsRaw = Array.isArray(body?.ids) ? body.ids : [];
-  const ids = idsRaw
-    .map(x => String(x || "").trim())
-    .filter(id => id && id.length <= 80);
-
-  // limite de sécurité
-  if (!ids.length) {
-    return new Response(JSON.stringify({ ok: true, stats: {} }), { headers });
-  }
-  if (ids.length > 2000) {
-    return new Response(JSON.stringify({ ok: false, error: "Trop d'IDs" }), { status: 400, headers });
-  }
-
-  // ✅ sécurité : table si manquante
-  await env.DB.prepare(`
-    CREATE TABLE IF NOT EXISTS counters (
-      id TEXT PRIMARY KEY,
-      views INTEGER NOT NULL DEFAULT 0,
-      mega INTEGER NOT NULL DEFAULT 0,
-      updated_at INTEGER NOT NULL DEFAULT (unixepoch())
-    );
-  `).run();
-
-  // D1 a une limite de paramètres : on fait par lots
-  const CHUNK = 200;
-  const stats = {};
-
-  for (let i = 0; i < ids.length; i += CHUNK) {
-    const batch = ids.slice(i, i + CHUNK);
-    const placeholders = batch.map(() => "?").join(", ");
-    const stmt = env.DB.prepare(
-      `SELECT id, views, mega FROM counters WHERE id IN (${placeholders})`
-    ).bind(...batch);
-
-    const res = await stmt.all();
-    const rows = res?.results || [];
-
-    for (const row of rows) {
-      stats[row.id] = { views: Number(row.views || 0), mega: Number(row.mega || 0) };
+    if (!env?.DB) {
+      return new Response(JSON.stringify({ ok: false, error: "DB non liée" }), { status: 500, headers });
     }
-  }
 
-  return new Response(JSON.stringify({ ok: true, stats }), { headers });
+    let body;
+    try { body = await request.json(); }
+    catch { return new Response(JSON.stringify({ ok: false, error: "JSON invalide" }), { status: 400, headers }); }
+
+    const idsRaw = Array.isArray(body?.ids) ? body.ids : [];
+    const ids = idsRaw
+      .map(x => String(x || "").trim())
+      .filter(id => id && id.length <= 80);
+
+    if (!ids.length) return new Response(JSON.stringify({ ok: true, stats: {} }), { headers });
+
+    // ✅ table si jamais
+    await env.DB.prepare(`
+      CREATE TABLE IF NOT EXISTS counters (
+        id TEXT PRIMARY KEY,
+        views INTEGER NOT NULL DEFAULT 0,
+        mega INTEGER NOT NULL DEFAULT 0,
+        updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+      );
+    `).run();
+
+    // ✅ IMPORTANT : lot petit pour éviter limites D1
+    const CHUNK = 90;
+    const stats = {};
+
+    for (let i = 0; i < ids.length; i += CHUNK) {
+      const batch = ids.slice(i, i + CHUNK);
+      const placeholders = batch.map(() => "?").join(", ");
+      const stmt = env.DB
+        .prepare(`SELECT id, views, mega FROM counters WHERE id IN (${placeholders})`)
+        .bind(...batch);
+
+      const res = await stmt.all();
+      const rows = res?.results || [];
+
+      for (const row of rows) {
+        stats[row.id] = { views: Number(row.views || 0), mega: Number(row.mega || 0) };
+      }
+    }
+
+    return new Response(JSON.stringify({ ok: true, stats }), { headers });
+
+  } catch (e) {
+    // ✅ au lieu d’un 500 muet, tu vois l’erreur
+    return new Response(
+      JSON.stringify({ ok: false, error: "Erreur serveur", details: String(e?.message || e) }),
+      { status: 500, headers }
+    );
+  }
 }

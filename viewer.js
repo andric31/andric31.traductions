@@ -1,4 +1,4 @@
-// viewer.js — Vignettes + filtres + tri dates + affichage progressif + menu ☰ (À propos)
+// viewer.js — Vignettes + filtres + tri dates + affichage progressif + menu ☰ (À propos) + Tags multi (popover + save)
 (() => {
   const DEFAULT_URL = "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json";
   const GAME_BASE = "/game/?id="; // /game/?id=ID
@@ -13,7 +13,7 @@
     filterCat: "all",
     filterEngine: "all",
     filterStatus: "all",
-    filterTags: [],
+    filterTags: [], // ✅ multi tags
     cols: "auto",
     pageSize: 50,
     visibleCount: 0
@@ -212,6 +212,7 @@ Profil https://f95zone.to/members/andric31.247797/
       if (e.key === "Escape") {
         closePopover();
         closeAbout();
+        closeTagsPopover();
       }
     });
 
@@ -225,6 +226,184 @@ Profil https://f95zone.to/members/andric31.247797/
     document.getElementById("aboutOverlay")?.addEventListener("click", (e) => {
       if (e.target && e.target.id === "aboutOverlay") closeAbout();
     });
+  }
+
+  // =========================
+  // ✅ TAGS MULTI (popover + save)
+  // =========================
+
+  const TAGS_STORE_KEY = "viewerSelectedTags";
+
+  function getSavedTags() {
+    try {
+      const raw = localStorage.getItem(TAGS_STORE_KEY) || "[]";
+      const arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr.filter(Boolean) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function setSavedTags(tags) {
+    try { localStorage.setItem(TAGS_STORE_KEY, JSON.stringify(tags || [])); } catch {}
+  }
+
+  function clearSavedTags() {
+    try { localStorage.removeItem(TAGS_STORE_KEY); } catch {}
+  }
+
+  function ensureTagsDom() {
+    // bouton tags (inséré à côté des filtres)
+    let btn = document.getElementById("tagsBtn");
+    if (!btn) {
+      btn = document.createElement("button");
+      btn.type = "button";
+      btn.id = "tagsBtn";
+      btn.className = "tags-btn";
+      btn.setAttribute("aria-haspopup", "menu");
+      btn.setAttribute("aria-expanded", "false");
+      btn.innerHTML = `🏷️ Tags <span id="tagsCount" class="tags-count hidden">0</span>`;
+      // on l’insère après #filterStatus si possible, sinon à la fin
+      const anchor = document.getElementById("filterStatus");
+      if (anchor && anchor.parentElement) {
+        anchor.parentElement.insertBefore(btn, anchor.nextSibling);
+      } else {
+        document.querySelector(".top-actions")?.appendChild(btn);
+      }
+    }
+
+    // popover tags
+    let pop = document.getElementById("tagsPopover");
+    if (!pop) {
+      pop = document.createElement("div");
+      pop.id = "tagsPopover";
+      pop.className = "tag-popover hidden";
+      pop.innerHTML = `
+        <div class="tag-head">
+          <div class="tag-title">Tags</div>
+          <button type="button" class="tag-clear" id="tagsClearBtn">Tout enlever</button>
+        </div>
+        <div class="tag-list" id="tagsList"></div>
+      `;
+      document.body.appendChild(pop);
+    }
+
+    return { btn, pop };
+  }
+
+  function positionTagsPopover(pop, anchorBtn) {
+    const r = anchorBtn.getBoundingClientRect();
+    const margin = 8;
+
+    let left = Math.round(r.left);
+    let top  = Math.round(r.bottom + margin);
+
+    const w = pop.getBoundingClientRect().width || 320;
+    const maxLeft = window.innerWidth - w - 10;
+
+    if (left > maxLeft) left = Math.max(10, maxLeft);
+    if (left < 10) left = 10;
+
+    // si ça dépasse en bas, on met au-dessus (approx)
+    const approxH = 380;
+    if (top + approxH > window.innerHeight - 10) {
+      top = Math.max(10, Math.round(r.top - margin - approxH));
+    }
+
+    pop.style.left = left + "px";
+    pop.style.top  = top + "px";
+  }
+
+  function closeTagsPopover() {
+    const pop = document.getElementById("tagsPopover");
+    if (pop) pop.classList.add("hidden");
+    const b = document.getElementById("tagsBtn");
+    if (b) b.setAttribute("aria-expanded", "false");
+  }
+
+  function updateTagsCountBadge() {
+    const c = document.getElementById("tagsCount");
+    if (!c) return;
+    const n = (state.filterTags || []).length;
+    c.textContent = String(n);
+    c.classList.toggle("hidden", n <= 0);
+  }
+
+  function initTagsUI(allTags) {
+    const { btn, pop } = ensureTagsDom();
+    const list = document.getElementById("tagsList");
+
+    const renderTagList = () => {
+      if (!list) return;
+      const active = new Set(state.filterTags || []);
+      list.innerHTML = "";
+
+      for (const t of allTags) {
+        const item = document.createElement("button");
+        item.type = "button";
+        item.className = "tag-item" + (active.has(t) ? " active" : "");
+        item.innerHTML = `
+          <span class="tag-left">
+            <span class="tag-check">✓</span>
+            <span class="tag-name">${escapeHtml(t)}</span>
+          </span>
+        `;
+        item.addEventListener("click", () => {
+          const cur = new Set(state.filterTags || []);
+          if (cur.has(t)) cur.delete(t);
+          else cur.add(t);
+
+          state.filterTags = Array.from(cur);
+          setSavedTags(state.filterTags);
+          updateTagsCountBadge();
+          renderTagList();
+          applyFilters();
+        });
+
+        list.appendChild(item);
+      }
+    };
+
+    // ouvrir/fermer popover
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const isOpen = !pop.classList.contains("hidden");
+      if (isOpen) { closeTagsPopover(); return; }
+
+      pop.classList.remove("hidden");
+      btn.setAttribute("aria-expanded", "true");
+      renderTagList();
+      positionTagsPopover(pop, btn);
+    });
+
+    // clear
+    document.getElementById("tagsClearBtn")?.addEventListener("click", () => {
+      state.filterTags = [];
+      clearSavedTags();
+      updateTagsCountBadge();
+      renderTagList();
+      applyFilters();
+    });
+
+    // clic dehors => fermer
+    document.addEventListener("click", (e) => {
+      const p = document.getElementById("tagsPopover");
+      const b = document.getElementById("tagsBtn");
+      if (!p || !b) return;
+      const t = e.target;
+      if (!p.contains(t) && !b.contains(t)) closeTagsPopover();
+    });
+
+    window.addEventListener("resize", () => {
+      const p = document.getElementById("tagsPopover");
+      const b = document.getElementById("tagsBtn");
+      if (p && b && !p.classList.contains("hidden")) positionTagsPopover(p, b);
+    });
+
+    updateTagsCountBadge();
+    renderTagList();
   }
 
   // =========================
@@ -476,22 +655,15 @@ Profil https://f95zone.to/members/andric31.247797/
   }
 
   function buildDynamicFilters() {
-    const tagSel = $("#filterTag");
+    // tags uniques
     const tags = new Set();
-
     for (const g of state.all) {
       if (Array.isArray(g.tags)) g.tags.forEach(t => { if (t) tags.add(t); });
     }
+    const allTags = Array.from(tags).sort((a, b) => a.localeCompare(b));
 
-    if (tagSel) {
-      tagSel.innerHTML = `<option value="all">Tags : Tous</option>`;
-      Array.from(tags).sort((a,b) => a.localeCompare(b)).forEach(t => {
-        const o = document.createElement("option");
-        o.value = t;
-        o.textContent = t;
-        tagSel.appendChild(o);
-      });
-    }
+    // init UI tags (popover + check + save)
+    initTagsUI(allTags);
   }
 
   function sortNow() {
@@ -527,6 +699,7 @@ Profil https://f95zone.to/members/andric31.247797/
       let mt = true;
       if (ft && ft.length) {
         const tags = Array.isArray(g.tags) ? g.tags : [];
+        // ✅ AND (tous les tags sélectionnés doivent être présents)
         mt = ft.every(t => tags.includes(t));
       }
 
@@ -646,13 +819,6 @@ Profil https://f95zone.to/members/andric31.247797/
   $("#filterEngine")?.addEventListener("change", e => { state.filterEngine = e.target.value || "all"; applyFilters(); });
   $("#filterStatus")?.addEventListener("change", e => { state.filterStatus = e.target.value || "all"; applyFilters(); });
 
-  const tagSel = $("#filterTag");
-  if (tagSel) tagSel.addEventListener("change", e => {
-    const v = e.target.value;
-    state.filterTags = (v === "all" || !v) ? [] : [v];
-    applyFilters();
-  });
-
   const pageSizeSel = $("#pageSize");
   if (pageSizeSel) pageSizeSel.addEventListener("change", e => {
     const v = e.target.value;
@@ -671,7 +837,14 @@ Profil https://f95zone.to/members/andric31.247797/
     await setViewerCols(state.cols);
   });
 
-  $("#refresh")?.addEventListener("click", init);
+  // ✅ Refresh => désactive tags + enlève save + ferme popover, puis recharge
+  $("#refresh")?.addEventListener("click", () => {
+    state.filterTags = [];
+    clearSavedTags();
+    updateTagsCountBadge();
+    closeTagsPopover();
+    init();
+  });
 
   // =========================
   // Init
@@ -691,6 +864,11 @@ Profil https://f95zone.to/members/andric31.247797/
 
       const raw = await loadList();
       state.all = Array.isArray(raw) ? raw.map(normalize) : [];
+
+      // ✅ charge tags sauvegardés avant d’afficher
+      state.filterTags = getSavedTags();
+      updateTagsCountBadge();
+
       buildDynamicFilters();
       applyFilters();
     } catch (e) {

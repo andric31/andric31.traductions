@@ -450,7 +450,7 @@ function updateLikeBtn(gameId) {
   const liked = getMyLike(gameId);
 
   // ❤️ logique simple et claire
-  b.textContent = liked ? "❤️" : "♡";
+  b.textContent = liked ? "❤️" : "🤍";
   b.setAttribute("aria-label", liked ? "Je n’aime plus" : "J’aime");
 }
 

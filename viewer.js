@@ -839,10 +839,37 @@ Profil https://f95zone.to/members/andric31.247797/
 
   // ✅ Refresh => désactive tags + enlève save + ferme popover, puis recharge
   $("#refresh")?.addEventListener("click", () => {
+    // --- reset état ---
+    state.q = "";
+    state.sort = "updatedAtLocal-desc";
+    state.filterCat = "all";
+    state.filterEngine = "all";
+    state.filterStatus = "all";
     state.filterTags = [];
+    state.visibleCount = 0;
+  
+    // --- reset UI ---
+    const search = $("#search");
+    if (search) search.value = "";
+  
+    const sort = $("#sort");
+    if (sort) sort.value = state.sort;
+  
+    const cat = $("#filterCat");
+    if (cat) cat.value = "all";
+  
+    const eng = $("#filterEngine");
+    if (eng) eng.value = "all";
+  
+    const stat = $("#filterStatus");
+    if (stat) stat.value = "all";
+  
+    // --- reset tags ---
     clearSavedTags();
     updateTagsCountBadge();
     closeTagsPopover();
+  
+    // --- reload complet ---
     init();
   });
 

@@ -2,8 +2,8 @@ export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
 
-  const op = (url.searchParams.get("op") || "get").trim();   // get | hit
-  const kind = (url.searchParams.get("kind") || "").trim();  // view | mega
+  const op = (url.searchParams.get("op") || "get").trim();   // get | hit | unhit
+  const kind = (url.searchParams.get("kind") || "").trim();  // view | mega | like
   const id = (url.searchParams.get("id") || "").trim();
 
   const headers = {
@@ -24,12 +24,28 @@ export async function onRequest(context) {
     return new Response(JSON.stringify({ ok: false, error: "ID invalide" }), { status: 400, headers });
   }
 
+  // ✅ Table + colonne likes (compat si ancienne DB)
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS counters (
+      id TEXT PRIMARY KEY,
+      views INTEGER NOT NULL DEFAULT 0,
+      mega INTEGER NOT NULL DEFAULT 0,
+      likes INTEGER NOT NULL DEFAULT 0,
+      updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+    );
+  `).run();
+
+  // si la table existait sans likes → on tente un ALTER (ignorer si déjà OK)
+  try {
+    await env.DB.prepare(`ALTER TABLE counters ADD COLUMN likes INTEGER NOT NULL DEFAULT 0;`).run();
+  } catch { /* déjà présent */ }
+
   async function getRow() {
     const row = await env.DB
-      .prepare("SELECT id, views, mega FROM counters WHERE id=?1")
+      .prepare("SELECT id, views, mega, likes FROM counters WHERE id=?1")
       .bind(id)
       .first();
-    return row || { id, views: 0, mega: 0 };
+    return row || { id, views: 0, mega: 0, likes: 0 };
   }
 
   if (op === "get") {
@@ -40,18 +56,26 @@ export async function onRequest(context) {
   if (op === "hit") {
     if (kind === "view") {
       await env.DB.prepare(`
-        INSERT INTO counters (id, views, mega, updated_at)
-        VALUES (?1, 1, 0, unixepoch())
+        INSERT INTO counters (id, views, mega, likes, updated_at)
+        VALUES (?1, 1, 0, 0, unixepoch())
         ON CONFLICT(id) DO UPDATE SET
           views = views + 1,
           updated_at = unixepoch()
       `).bind(id).run();
     } else if (kind === "mega") {
       await env.DB.prepare(`
-        INSERT INTO counters (id, views, mega, updated_at)
-        VALUES (?1, 0, 1, unixepoch())
+        INSERT INTO counters (id, views, mega, likes, updated_at)
+        VALUES (?1, 0, 1, 0, unixepoch())
         ON CONFLICT(id) DO UPDATE SET
           mega = mega + 1,
+          updated_at = unixepoch()
+      `).bind(id).run();
+    } else if (kind === "like") {
+      await env.DB.prepare(`
+        INSERT INTO counters (id, views, mega, likes, updated_at)
+        VALUES (?1, 0, 0, 1, unixepoch())
+        ON CONFLICT(id) DO UPDATE SET
+          likes = likes + 1,
           updated_at = unixepoch()
       `).bind(id).run();
     } else {
@@ -62,5 +86,24 @@ export async function onRequest(context) {
     return new Response(JSON.stringify({ ok: true, ...row }), { headers });
   }
 
+  // ✅ unlike (toggle)
+  if (op === "unhit") {
+    if (kind !== "like") {
+      return new Response(JSON.stringify({ ok: false, error: "kind invalide (unhit)" }), { status: 400, headers });
+    }
+
+    await env.DB.prepare(`
+      INSERT INTO counters (id, views, mega, likes, updated_at)
+      VALUES (?1, 0, 0, 0, unixepoch())
+      ON CONFLICT(id) DO UPDATE SET
+        likes = CASE WHEN likes > 0 THEN likes - 1 ELSE 0 END,
+        updated_at = unixepoch()
+    `).bind(id).run();
+
+    const row = await getRow();
+    return new Response(JSON.stringify({ ok: true, ...row }), { headers });
+  }
+
   return new Response(JSON.stringify({ ok: false, error: "op invalide" }), { status: 400, headers });
 }
+

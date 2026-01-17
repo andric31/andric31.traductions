@@ -743,6 +743,15 @@ function renderRating4UI(gameId, data) {
 
     await initCounters(id, megaHref);
 
+    // ⛔ Bloquer le clic droit sur le bouton Télécharger (MEGA)
+    const btnMega = document.getElementById("btnMega");
+    if (btnMega) {
+      btnMega.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        return false;
+      });
+    }
+
     try {
       const j = await rating4Get(id);
       if (j?.ok) renderRating4UI(id, j);

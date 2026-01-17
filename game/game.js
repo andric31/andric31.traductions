@@ -448,8 +448,9 @@ function updateLikeBtn(gameId) {
   if (!b) return;
 
   const liked = getMyLike(gameId);
-  b.textContent = "❤️"; // toujours pareil
-  b.classList.toggle("is-liked", liked);
+
+  // ❤️ logique simple et claire
+  b.textContent = liked ? "❤️" : "♡";
   b.setAttribute("aria-label", liked ? "Je n’aime plus" : "J’aime");
 }
 

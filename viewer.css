@@ -13,6 +13,9 @@
   --name-lh: 1.25rem;
   --name-lines: 2;
   --badges-h: 28px;
+
+  /* ✅ un peu plus compact qu’avant */
+  --topbar-h: 78px;
 }
 
 *{box-sizing:border-box}
@@ -24,31 +27,39 @@ body{
   background:linear-gradient(180deg,#0d1018,#101425 30%,#0f1117);
 }
 
-/* ---------- TOPBAR (sticky = plus de grosse zone vide) ---------- */
+/* ---------- TOPBAR FIXE ---------- */
 .topbar{
-  position:sticky; /* ✅ au lieu de fixed */
-  top:0;
+  position:fixed;
+  top:0; left:0; right:0;
   z-index:1000;
   background:rgba(16,20,37,.9);
   backdrop-filter: blur(6px);
   border-bottom:1px solid var(--border);
 }
 
-/* Titre */
+/* ✅ Ligne titre = flex */
 .top-title-row{
-  padding:10px 12px 6px;
+  padding:10px 12px 4px;
+}
+.top-title-row.top-title-flex{
+  display:flex;
+  align-items:center;
+  gap:10px;
 }
 .top-title-row h1{
   font-size:18px;
   margin:0;
   color:#fff;
+  white-space:nowrap;
 }
 
-/* ✅ titre en flex quand menu injecté */
-.top-title-row.top-title-flex{
+/* ✅ outils d’affichage à droite du titre */
+.top-title-tools{
+  margin-left:auto;
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:8px;
+  flex-wrap:nowrap;
 }
 
 /* ✅ bouton hamburger */
@@ -63,6 +74,7 @@ body{
   justify-content:center;
   cursor:pointer;
   user-select:none;
+  flex:0 0 auto;
 }
 .hamburger-btn:hover{ filter: brightness(1.12); }
 .hamburger-btn:active{ transform: translateY(1px); }
@@ -186,29 +198,16 @@ body{
 }
 .modal-btn:hover{ filter: brightness(1.10); }
 
-/* ---------- TOP ACTIONS : 2 lignes (Affichage / Recherche) ---------- */
+/* ----- BARRE (recherche/filtres) SUR UNE LIGNE ----- */
 .top-actions{
   display:flex;
-  flex-direction:column;      /* ✅ 2 lignes */
+  flex-wrap:nowrap;
   gap:6px;
-  padding:6px 12px 10px;
+  align-items:center;
+  padding:6px 12px 8px;
   border-top:1px solid rgba(255,255,255,0.03);
   width:100%;
-  overflow:visible;
-}
-
-.top-actions-display{
-  display:flex;
-  gap:6px;
-  align-items:center;
-  flex-wrap:wrap;
-}
-
-.top-actions-search{
-  display:flex;
-  gap:6px;
-  align-items:center;
-  flex-wrap:wrap;
+  overflow-x:auto;
 }
 
 /* Barre de recherche stretch */
@@ -217,20 +216,21 @@ body{
   flex:1;
   gap:8px;
   align-items:center;
-  min-width:320px;
+  min-width:300px;
 }
 
 #search{
   flex:1;
   width:100%;
-  min-width:320px;
+  min-width:350px;
   max-width:none;
 }
 
 /* ----- INPUTS / SELECTS / BOUTONS ----- */
 .top-actions select,
 .top-actions input,
-.top-actions button{
+.top-actions button,
+.top-title-tools select{
   height:34px;
   border-radius:8px;
   border:1px solid var(--border);
@@ -239,21 +239,23 @@ body{
   padding:0 10px;
   white-space:nowrap;
 }
+
 .top-actions button{
   background:var(--btn);
   cursor:pointer;
 }
 .top-actions button:hover{ filter:brightness(1.1) }
 
+/* Total */
 .total-inline{
   color:var(--muted);
   font-size:12px;
   white-space:nowrap;
 }
 
-/* ----- MAIN (plus de padding “compensatoire” puisque topbar est sticky) ----- */
+/* ----- MAIN ----- */
 main{
-  padding: 12px 12px 16px;
+  padding: calc(var(--topbar-h) + 12px) 12px 16px;
 }
 
 /* ----- GRID ----- */
@@ -286,7 +288,6 @@ main{
   background:#1c1f2e;
 }
 
-/* Fallback (quand l'image distante ne charge pas) */
 .thumb.is-fallback{
   object-fit:contain;
   background:#0f0f10;
@@ -334,11 +335,8 @@ main{
   color:#fff;
 }
 
-.badges-line .badge{
-  line-height: 1;
-}
+.badges-line .badge{ line-height: 1; }
 
-/* ======= COULEURS EXACTES (comme build_pages.py) ======= */
 .badge.cat-vn{ background:#D32F2F; }
 .badge.cat-collection{ background:#616161; }
 
@@ -381,53 +379,6 @@ main{
 .btn[aria-disabled="true"]{ opacity:.6; pointer-events:none }
 .btn:hover{ filter:brightness(1.07) }
 
-/* ----- MODE 1 COLONNE LISTE ----- */
-.grid[data-cols="1"] .card{
-  display:flex;
-  gap:14px;
-  align-items:stretch;
-  min-height:140px;
-}
-
-/* Image ultra large (x2) */
-.grid[data-cols="1"] .thumb{
-  width:480px;
-  height:120px;
-  flex:0 0 auto;
-  border-radius:10px;
-  margin:12px;
-}
-
-.grid[data-cols="1"] .body{
-  display:flex;
-  flex-direction:column;
-  padding:12px 12px 12px 0;
-}
-
-/* ----- MODE COMPACT >=7 cols ----- */
-.grid[data-density="compact"] .card{ border-radius:10px }
-.grid[data-density="compact"] .card{
-  min-height: calc(var(--thumb-h) + 120px);
-}
-.grid[data-density="compact"] .body{ padding:10px }
-.grid[data-density="compact"] .name{
-  font-size:.95rem;
-  --name-lh:1.15rem;
-}
-.grid[data-density="compact"]{
-  --thumb-h:140px;
-  --badges-h:24px;
-}
-.grid[data-density="compact"] .badge{
-  font-size:11px;
-  padding:2px 6px;
-}
-.grid[data-density="compact"] .btn{
-  font-size:12px;
-  padding:6px 8px;
-}
-
-/* ----- STATES ----- */
 .empty{
   margin:16px 0;
   padding:18px;
@@ -436,6 +387,7 @@ main{
   color:var(--muted);
   text-align:center;
 }
+
 .hidden{ display:none !important }
 
 .load-more-wrap{
@@ -456,12 +408,7 @@ main{
   cursor:pointer;
   box-shadow:0 8px 18px rgba(0,0,0,.35);
 }
-.load-more-btn:hover{
-  filter:brightness(1.12);
-}
-
-/* Curseur main sur le bouton F95 */
-a[data-act="f95"] { cursor: pointer; }
+.load-more-btn:hover{ filter:brightness(1.12); }
 
 .btn.btn-page{
   display:flex;
@@ -472,11 +419,3 @@ a[data-act="f95"] { cursor: pointer; }
   text-align:center;
   cursor:pointer;
 }
-
-/* ===== Mode 1 colonne : le bouton doit prendre toute la largeur ===== */
-.grid[data-cols="1"] .body{ flex:1; width:100%; }
-.grid[data-cols="1"] .actions{ width:100%; }
-.grid[data-cols="1"] .btn.btn-page{ width:100%; }
-
-.grid[data-density="compact"] .badges-line{ margin-bottom:6px; }
-.grid[data-density="compact"] .btn.btn-page{ margin-top:6px; }

@@ -1,4 +1,4 @@
-// viewer.js — Vignettes + filtres + tri dates + affichage progressif + menu ☰ + réorg topbar
+// viewer.js — Vignettes + filtres + tri dates + affichage progressif + menu ☰ (À propos)
 (() => {
   const DEFAULT_URL = "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json";
   const GAME_BASE = "/game/?id="; // /game/?id=ID
@@ -20,7 +20,7 @@
   };
 
   // =========================
-  // ☰ MENU + À PROPOS
+  // ☰ MENU + À PROPOS (Viewer)
   // =========================
 
   const ABOUT_TEXT = `
@@ -53,7 +53,7 @@ Profil https://f95zone.to/members/andric31.247797/
   }
 
   function ensureMenuDom() {
-    let pop = $("#topMenuPopover");
+    let pop = document.getElementById("topMenuPopover");
     if (!pop) {
       pop = document.createElement("div");
       pop.id = "topMenuPopover";
@@ -64,7 +64,7 @@ Profil https://f95zone.to/members/andric31.247797/
       document.body.appendChild(pop);
     }
 
-    let overlay = $("#aboutOverlay");
+    let overlay = document.getElementById("aboutOverlay");
     if (!overlay) {
       overlay = document.createElement("div");
       overlay.id = "aboutOverlay";
@@ -105,36 +105,46 @@ Profil https://f95zone.to/members/andric31.247797/
   }
 
   function closePopover() {
-    const pop = $("#topMenuPopover");
+    const pop = document.getElementById("topMenuPopover");
     if (pop) pop.classList.add("hidden");
-    const b = $("#hamburgerBtn");
+    const b = document.getElementById("hamburgerBtn");
     if (b) b.setAttribute("aria-expanded", "false");
   }
 
   function openAbout() {
-    const overlay = $("#aboutOverlay");
-    const body = $("#aboutBody");
+    const overlay = document.getElementById("aboutOverlay");
+    const body = document.getElementById("aboutBody");
     if (body) body.innerHTML = `<div class="aboutText">${linkify(ABOUT_TEXT).replace(/\n/g, "<br>")}</div>`;
     if (overlay) overlay.classList.remove("hidden");
   }
 
   function closeAbout() {
-    const overlay = $("#aboutOverlay");
+    const overlay = document.getElementById("aboutOverlay");
     if (overlay) overlay.classList.add("hidden");
   }
 
-  function initTopMenu() {
-    const row = $(".top-title-row");
+  /**
+   * ✅ Injecte:
+   * - le bouton ☰ à gauche du titre
+   * - une zone "outils d’affichage" à droite du titre
+   * Et déplace dans cette zone:
+   * - .total-inline
+   * - #cols
+   * - #pageSize
+   */
+  function initHeaderMenuAndDisplayTools() {
+    const row = document.querySelector(".top-title-row");
     if (!row) return;
 
-    // évite double injection
-    if ($("#hamburgerBtn")) return;
+    // évite double init
+    if (document.getElementById("hamburgerBtn")) return;
 
     const h1 = row.querySelector("h1");
     if (!h1) return;
 
     row.classList.add("top-title-flex");
 
+    // bouton hamburger
     const btn = document.createElement("button");
     btn.type = "button";
     btn.id = "hamburgerBtn";
@@ -148,8 +158,24 @@ Profil https://f95zone.to/members/andric31.247797/
       </span>
     `;
 
-    row.insertBefore(btn, h1);
+    // outils à droite
+    const tools = document.createElement("div");
+    tools.className = "top-title-tools";
 
+    // inject
+    row.insertBefore(btn, h1);
+    row.appendChild(tools);
+
+    // Déplace Total + cols + pageSize vers la ligne du titre
+    const total = document.querySelector(".total-inline");
+    const cols = document.getElementById("cols");
+    const pageSize = document.getElementById("pageSize");
+
+    if (total) tools.appendChild(total);
+    if (cols) tools.appendChild(cols);
+    if (pageSize) tools.appendChild(pageSize);
+
+    // Menu DOM
     const { pop } = ensureMenuDom();
 
     btn.addEventListener("click", (e) => {
@@ -169,16 +195,16 @@ Profil https://f95zone.to/members/andric31.247797/
 
     // clic dehors => fermer
     document.addEventListener("click", (e) => {
-      const p = $("#topMenuPopover");
-      const b = $("#hamburgerBtn");
+      const p = document.getElementById("topMenuPopover");
+      const b = document.getElementById("hamburgerBtn");
       if (!p || !b) return;
       const t = e.target;
       if (!p.contains(t) && !b.contains(t)) closePopover();
     });
 
     window.addEventListener("resize", () => {
-      const p = $("#topMenuPopover");
-      const b = $("#hamburgerBtn");
+      const p = document.getElementById("topMenuPopover");
+      const b = document.getElementById("hamburgerBtn");
       if (p && b && !p.classList.contains("hidden")) positionPopover(p, b);
     });
 
@@ -189,72 +215,20 @@ Profil https://f95zone.to/members/andric31.247797/
       }
     });
 
-    // À propos
-    $("#menuAbout")?.addEventListener("click", () => {
+    document.getElementById("menuAbout")?.addEventListener("click", () => {
       closePopover();
       openAbout();
     });
 
-    // modal close
-    $("#aboutClose")?.addEventListener("click", closeAbout);
-    $("#aboutOk")?.addEventListener("click", closeAbout);
-    $("#aboutOverlay")?.addEventListener("click", (e) => {
+    document.getElementById("aboutClose")?.addEventListener("click", closeAbout);
+    document.getElementById("aboutOk")?.addEventListener("click", closeAbout);
+    document.getElementById("aboutOverlay")?.addEventListener("click", (e) => {
       if (e.target && e.target.id === "aboutOverlay") closeAbout();
     });
   }
 
   // =========================
-  // RÉORGANISATION TOPBAR
-  // =========================
-
-  function reorganizeTopbarLayout() {
-    const top = document.querySelector(".top-actions");
-    if (!top) return;
-
-    // évite double init
-    if (top.querySelector(".top-actions-display")) return;
-
-    const rowDisplay = document.createElement("div");
-    rowDisplay.className = "top-actions-display";
-
-    const rowSearch = document.createElement("div");
-    rowSearch.className = "top-actions-search";
-
-    // éléments existants
-    const total = document.querySelector(".total-inline");
-    const cols = document.getElementById("cols");
-    const pageSize = document.getElementById("pageSize");
-
-    const searchWrap = document.querySelector(".search-wrap");
-    const sort = document.getElementById("sort");
-    const cat = document.getElementById("filterCat");
-    const eng = document.getElementById("filterEngine");
-    const st = document.getElementById("filterStatus");
-    const tag = document.getElementById("filterTag");
-    const refresh = document.getElementById("refresh");
-
-    // Ligne 1 : Affichage
-    if (total) rowDisplay.appendChild(total);
-    if (cols) rowDisplay.appendChild(cols);
-    if (pageSize) rowDisplay.appendChild(pageSize);
-
-    // Ligne 2 : Recherche
-    if (searchWrap) rowSearch.appendChild(searchWrap);
-    if (sort) rowSearch.appendChild(sort);
-    if (cat) rowSearch.appendChild(cat);
-    if (eng) rowSearch.appendChild(eng);
-    if (st) rowSearch.appendChild(st);
-    if (tag) rowSearch.appendChild(tag);
-    if (refresh) rowSearch.appendChild(refresh);
-
-    // Remplace le contenu
-    top.innerHTML = "";
-    top.appendChild(rowDisplay);
-    top.appendChild(rowSearch);
-  }
-
-  // =========================
-  // Helpers list / prefs
+  // Helpers URL / prefs / list
   // =========================
 
   async function getListUrl() {
@@ -288,6 +262,10 @@ Profil https://f95zone.to/members/andric31.247797/
     if (!r.ok) throw new Error("HTTP " + r.status);
     return r.json();
   }
+
+  // =========================
+  // Title parsing / normalize
+  // =========================
 
   const CAT_ALLOWED    = ["VN", "Collection"];
   const ENGINE_ALLOWED = ["Ren'Py", "RPGM", "Unity", "Others", "Wolf RPG"];
@@ -478,6 +456,10 @@ Profil https://f95zone.to/members/andric31.247797/
     };
   }
 
+  // =========================
+  // Render
+  // =========================
+
   function badgesLineHtml(g) {
     const out = [];
     const cats = Array.isArray(g.categories) ? g.categories : (g.category ? [g.category] : []);
@@ -512,6 +494,18 @@ Profil https://f95zone.to/members/andric31.247797/
     }
   }
 
+  function sortNow() {
+    const [k, dir] = state.sort.split("-");
+    const mul = dir === "asc" ? 1 : -1;
+
+    if (k === "title") {
+      state.filtered.sort((a, b) => a.title.localeCompare(b.title) * mul);
+    } else if (["releaseDate", "updatedAt", "updatedAtLocal"].includes(k)) {
+      const key = k + "Ts";
+      state.filtered.sort((a, b) => ((a[key] || 0) - (b[key] || 0)) * mul);
+    }
+  }
+
   function applyFilters() {
     const q  = state.q.toLowerCase();
     const fc = state.filterCat;
@@ -542,18 +536,6 @@ Profil https://f95zone.to/members/andric31.247797/
     sortNow();
     state.visibleCount = 0;
     renderGrid();
-  }
-
-  function sortNow() {
-    const [k, dir] = state.sort.split("-");
-    const mul = dir === "asc" ? 1 : -1;
-
-    if (k === "title") {
-      state.filtered.sort((a, b) => a.title.localeCompare(b.title) * mul);
-    } else if (["releaseDate", "updatedAt", "updatedAtLocal"].includes(k)) {
-      const key = k + "Ts";
-      state.filtered.sort((a, b) => ((a[key] || 0) - (b[key] || 0)) * mul);
-    }
   }
 
   function updateStats() {
@@ -616,10 +598,8 @@ Profil https://f95zone.to/members/andric31.247797/
              referrerpolicy="no-referrer"
              onerror="this.onerror=null;this.src='/favicon.png';this.classList.add('is-fallback');">
         <div class="body">
-
           <h3 class="name clamp-2">${escapeHtml(g.title)}</h3>
           <div class="badges-line one-line">${badgesLineHtml(g)}</div>
-
           <div class="actions">
             <a class="btn btn-page" href="${pageHref}" target="_blank" rel="noopener">
               📄 Ouvrir la page
@@ -702,9 +682,8 @@ Profil https://f95zone.to/members/andric31.247797/
     $("#gridEmpty")?.classList.add("hidden");
 
     try {
-      // ✅ Menu + réorg topbar (avant le reste)
-      initTopMenu();
-      reorganizeTopbarLayout();
+      // ✅ menu + outils d’affichage à droite du titre
+      initHeaderMenuAndDisplayTools();
 
       state.cols = await getViewerCols();
       const colsSel = $("#cols");
@@ -727,5 +706,3 @@ Profil https://f95zone.to/members/andric31.247797/
 
   init();
 })();
-
-

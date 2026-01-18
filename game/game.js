@@ -242,71 +242,11 @@ async function renderTranslationStatus(game) {
   }
 }
 
-// ====== Menu ☰ + À propos (page game) ======
-
-const ABOUT_TEXT = `
-Pour tout renseignement, aide ou autre, rejoignez mon serveur Discord :
-https://discord.gg/Jr8Ykf8yMd
-
-Contact Discord :
-https://discord.com/users/@andric31
-
-Vous pouvez aussi me contacter sur F95zone :
-Profil https://f95zone.to/members/andric31.247797/
-`.trim();
-
-function escapeHtml(s) {
-  return String(s || "").replace(/[&<>"']/g, m => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  }[m]));
-}
-
-function linkify(text) {
-  const esc = escapeHtml(text);
-  return esc.replace(
-    /(https?:\/\/[^\s<]+)/g,
-    (m) => `<a href="${m}" target="_blank" rel="noopener">${m}</a>`
-  );
-}
-
-function ensureMenuDom() {
-  let pop = $("topMenuPopover");
-  if (!pop) {
-    pop = document.createElement("div");
-    pop.id = "topMenuPopover";
-    pop.className = "menu-popover hidden";
-    pop.innerHTML = `
-      <button type="button" class="menu-item" id="menuAbout">ℹ️ À propos</button>
-    `;
-    document.body.appendChild(pop);
-  }
-
-  let overlay = $("aboutOverlay");
-  if (!overlay) {
-    overlay = document.createElement("div");
-    overlay.id = "aboutOverlay";
-    overlay.className = "modal-overlay hidden";
-    overlay.innerHTML = `
-      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
-        <div class="modal-head">
-          <div class="modal-title" id="aboutTitle">À propos</div>
-          <button type="button" class="modal-close" id="aboutClose" aria-label="Fermer">✕</button>
-        </div>
-        <div class="modal-body" id="aboutBody"></div>
-        <div class="modal-foot">
-          <button type="button" class="modal-btn" id="aboutOk">OK</button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(overlay);
-  }
-
-  return { pop, overlay };
-}
+// ============================================================================
+// ✅ MENU ☰ (page game) — RÉUTILISE LE MENU RACINE (viewer.menu.js + modules)
+// Ici on garde UNIQUEMENT: ouverture/fermeture + positionnement.
+// Plus de ABOUT_TEXT / modale locale dans game.js.
+// ============================================================================
 
 function positionPopover(pop, anchorBtn) {
   const r = anchorBtn.getBoundingClientRect();
@@ -315,7 +255,9 @@ function positionPopover(pop, anchorBtn) {
   let left = Math.round(r.left);
   let top = Math.round(r.bottom + margin);
 
-  const maxLeft = window.innerWidth - 260 - 10;
+  const widthGuess = pop.getBoundingClientRect().width || 260;
+  const maxLeft = window.innerWidth - widthGuess - 10;
+
   if (left > maxLeft) left = Math.max(10, maxLeft);
   if (left < 10) left = 10;
 
@@ -323,38 +265,24 @@ function positionPopover(pop, anchorBtn) {
   pop.style.top = top + "px";
 }
 
-function closePopover() {
-  const pop = $("topMenuPopover");
-  if (pop) pop.classList.add("hidden");
-  const b = $("hamburgerBtn");
-  if (b) b.setAttribute("aria-expanded", "false");
-}
-
-function openAbout() {
-  const overlay = $("aboutOverlay");
-  const body = $("aboutBody");
-  if (body) body.innerHTML = `<div class="aboutText">${linkify(ABOUT_TEXT).replace(/\n/g, "<br>")}</div>`;
-  if (overlay) overlay.classList.remove("hidden");
-}
-
-function closeAbout() {
-  const overlay = $("aboutOverlay");
-  if (overlay) overlay.classList.add("hidden");
-}
-
 function initHamburgerMenu() {
   const btn = $("hamburgerBtn");
   if (!btn) return;
 
-  const { pop } = ensureMenuDom();
+  // Init menu racine (crée le popover + items)
+  try { window.ViewerMenu?.init?.(); } catch {}
 
   btn.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
 
+    const pop = document.getElementById("topMenuPopover");
+    if (!pop) return;
+
     const isOpen = !pop.classList.contains("hidden");
     if (isOpen) {
-      closePopover();
+      try { window.ViewerMenu?.closeMenu?.(); } catch { pop.classList.add("hidden"); }
+      btn.setAttribute("aria-expanded", "false");
       return;
     }
 
@@ -363,44 +291,32 @@ function initHamburgerMenu() {
     positionPopover(pop, btn);
   });
 
+  // clic dehors => fermer menu
   document.addEventListener("click", (e) => {
-    const p = $("topMenuPopover");
-    const b = $("hamburgerBtn");
-    if (!p || !b) return;
+    const pop = document.getElementById("topMenuPopover");
+    if (!pop) return;
 
     const target = e.target;
-    const clickedInside = p.contains(target) || b.contains(target);
-    if (!clickedInside) closePopover();
-  });
-
-  window.addEventListener("resize", () => {
-    const p = $("topMenuPopover");
-    const b = $("hamburgerBtn");
-    if (p && b && !p.classList.contains("hidden")) positionPopover(p, b);
-  });
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      closePopover();
-      closeAbout();
+    if (!pop.contains(target) && !btn.contains(target)) {
+      try { window.ViewerMenu?.closeMenu?.(); } catch { pop.classList.add("hidden"); }
+      btn.setAttribute("aria-expanded", "false");
     }
   });
 
-  // menu item
-  document.getElementById("menuAbout")?.addEventListener("click", () => {
-    closePopover();
-    openAbout();
+  // resize => repositionne si ouvert
+  window.addEventListener("resize", () => {
+    const pop = document.getElementById("topMenuPopover");
+    if (pop && !pop.classList.contains("hidden")) positionPopover(pop, btn);
   });
 
-  // modal close
-  const overlay = $("aboutOverlay");
-  if (overlay) {
-    overlay.addEventListener("click", (e) => {
-      if (e.target === overlay) closeAbout();
-    });
-  }
-  document.getElementById("aboutClose")?.addEventListener("click", closeAbout);
-  document.getElementById("aboutOk")?.addEventListener("click", closeAbout);
+  // ESC => ferme menu + modales (about/extension)
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    try { window.ViewerMenu?.closeMenu?.(); } catch {}
+    try { window.ViewerMenu?.closeAbout?.(); } catch {}
+    try { window.ViewerMenu?.closeExtension?.(); } catch {}
+    try { window.ViewerMenuExtension?.close?.(); } catch {}
+  });
 }
 
 // ====== Counters (Cloudflare Pages Function /api/counter + D1) ======
@@ -698,7 +614,7 @@ function renderRating4UI(gameId, data) {
 
 (async function main() {
   try {
-    // ✅ menu ☰ (page game)
+    // ✅ menu ☰ (page game) — via menu racine
     initHamburgerMenu();
 
     const id = getIdFromUrl();
@@ -761,5 +677,3 @@ function renderRating4UI(gameId, data) {
     showError(`Erreur: ${e?.message || e}`);
   }
 })();
-
-

@@ -125,9 +125,10 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
     // ✅ espace plus clair entre les 2 blocs
     const settingsHtml = `
       <div style="height:18px;"></div>
-      <div style="font-weight:900;margin:14px 0 6px;">🛠️ Réglages de l’icône sur les vignettes</div>
+      <div style="font-weight:900;margin:14px 0 6px;">🛠️ Réglages de l’icône sur les vignettes et du clic sur les icones</div>
       <div style="opacity:.95;margin-bottom:8px;">
-        Vous pouvez modifier la taille de l’icône affichée sur les vignettes.
+        Vous pouvez modifier la taille de l’icône affichée sur les vignettes.<br>
+        Vous pouvais aussi modifier le choix du clic sur l'icone.
       </div>
       <ol style="margin:0;padding-left:18px;line-height:1.6;">
         <li>Épinglez l’extension (si ce n’est pas déjà fait)</li>
@@ -193,6 +194,9 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
             📥 Télécharger l’extension (MEGA)
           </a>
         </div>
+
+        <!-- ✅ Espace sous le bouton -->
+        <div style="margin-top:18px;"></div>
 
         ${installHtml}
 

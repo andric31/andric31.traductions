@@ -608,3 +608,33 @@ main{
 .like-btn:active{
   transform: scale(0.95);
 }
+
+/* =========================
+   Scrollbar sombre (modales & page)
+   ========================= */
+
+/* Chrome / Edge / Brave */
+::-webkit-scrollbar{
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track{
+  background: #0f1117;
+}
+
+::-webkit-scrollbar-thumb{
+  background: #2a314b;
+  border-radius: 999px;
+  border: 2px solid #0f1117;
+}
+
+::-webkit-scrollbar-thumb:hover{
+  background: #3b4568;
+}
+
+/* Scrollbar spécifique aux modales */
+.modal-body{
+  scrollbar-width: thin;                 /* Firefox */
+  scrollbar-color: #2a314b #0f1117;       /* Firefox */
+}

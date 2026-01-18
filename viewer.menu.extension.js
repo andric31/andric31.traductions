@@ -87,16 +87,25 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
     }
   }
 
+  // ✅ Images NON cliquables, NON ouvrables
   function imageBlock(src) {
     if (!src) return "";
     return `
       <div style="margin:12px 0;text-align:center;">
-        <a href="${escapeHtml(src)}" target="_blank" rel="noopener" style="display:inline-block;">
-          <img src="${escapeHtml(src)}" alt=""
-            referrerpolicy="no-referrer"
-            style="max-width:100%;border-radius:14px;border:1px solid rgba(255,255,255,.08)"
-            onerror="this.style.display='none'">
-        </a>
+        <img
+          src="${escapeHtml(src)}"
+          alt=""
+          referrerpolicy="no-referrer"
+          draggable="false"
+          style="
+            max-width:100%;
+            border-radius:14px;
+            border:1px solid rgba(255,255,255,.08);
+            user-select:none;
+            pointer-events:none; /* ✅ empêche tout clic */
+          "
+          onerror="this.style.display='none'"
+        >
       </div>
     `;
   }
@@ -113,7 +122,9 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
       </ol>
     `;
 
+    // ✅ espace plus clair entre les 2 blocs
     const settingsHtml = `
+      <div style="height:18px;"></div>
       <div style="font-weight:900;margin:14px 0 6px;">🛠️ Réglages de l’icône sur les vignettes</div>
       <div style="opacity:.95;margin-bottom:8px;">
         Vous pouvez modifier la taille de l’icône affichée sur les vignettes.
@@ -222,6 +233,13 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
         return false;
       });
     }
+
+    // ❌ bloque clic droit sur la modale (ça couvre aussi images)
+    const overlay = document.getElementById("extOverlay");
+    overlay?.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      return false;
+    }, { once: true });
   }
 
   function close() {

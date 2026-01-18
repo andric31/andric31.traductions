@@ -615,8 +615,8 @@ main{
 
 /* Chrome / Edge / Brave */
 ::-webkit-scrollbar{
-  width: 10px;
-  height: 10px;
+  width: 12px;   /* ⬅ rail légèrement plus large */
+  height: 12px;
 }
 
 ::-webkit-scrollbar-track{
@@ -626,7 +626,9 @@ main{
 ::-webkit-scrollbar-thumb{
   background: #2a314b;
   border-radius: 999px;
-  border: 2px solid #0f1117;
+
+  /* ⬅ crée l’effet “thumb plus petit que le rail” */
+  border: 3px solid #0f1117;
 }
 
 ::-webkit-scrollbar-thumb:hover{

@@ -101,7 +101,7 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
           ${escapeHtml(EXT_TEXT_BOTTOM)}
         </div>
 
-        <!-- 🔥 Bouton téléchargement -->
+        <!-- Bouton téléchargement -->
         <div style="display:flex;justify-content:center;margin:14px 0;">
           <a id="extDownloadBtn"
              href="${DOWNLOAD_URL}"
@@ -120,7 +120,7 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
           </a>
         </div>
 
-        <!-- ✅ ESPACE RENFORCÉ ICI -->
+        <!-- Espace renforcé -->
         <div style="margin-top:36px;"></div>
 
         <!-- Installation Chrome -->
@@ -135,39 +135,35 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
 
         <div style="height:22px;"></div>
 
-        <!-- Installation Opera -->
-        <div style="font-weight:900;margin-bottom:6px;">
-          ✅ Installation dans Opera
-        </div>
-        <ol style="padding-left:18px;line-height:1.6;margin:0;">
-          <li><b>Dézippe</b> l’extension</li>
-          <li>Ouvre la page des extensions : <code>opera://extensions</code></li>
-          <li>Active le <b>mode développeur</b> (en haut à droite)</li>
-          <li>Charge l’extension :
-            <ul style="margin:6px 0 0 0;padding-left:18px;line-height:1.6;">
-              <li><b>Charger l’extension non empaquetée</b></li>
-              <li>Sélectionne le dossier dézippé</li>
-              <li>OK</li>
-            </ul>
-          </li>
-        </ol>
-
-        <div style="height:22px;"></div>
-
         <!-- Réglages -->
         <div style="font-weight:900;margin-bottom:6px;">
           🛠️ Réglages de l’icône sur les vignettes et du clic sur les icones
         </div>
         <div style="opacity:.95;margin-bottom:8px;">
           Vous pouvez modifier la taille de l’icône affichée sur les vignettes.<br>
-          Vous pouvez aussi modifier le comportement du clic sur l’icône.
+          Vous pouvez également définir le comportement du clic sur l’icône.
         </div>
         <ol style="padding-left:18px;line-height:1.6;margin:0;">
-          <li>Épinglez l’extension : Icône puzzle 🧩 → épingle 📌</li>
-          <li>Cliquez sur l’icône <b>f95list_andric31_viewer</b> dans la barre Chrome.</li>
+          <li>Épinglez l’extension via l’icône puzzle 🧩 puis l’épingle 📌</li>
+          <li>Cliquez sur l’icône <b>f95list_andric31_viewer</b> dans la barre du navigateur.</li>
         </ol>
 
         ${imageBlock(IMAGES[1])}
+
+        <div style="height:22px;"></div>
+
+        <!-- Installation Opera (formel) -->
+        <div style="font-weight:900;margin-bottom:6px;">
+          ✅ Installation dans Opera
+        </div>
+        <ol style="padding-left:18px;line-height:1.6;margin:0;">
+          <li>Décompressez l’archive de l’extension.</li>
+          <li>Ouvrez la page des extensions : <code>opera://extensions</code></li>
+          <li>Activez le <b>Mode développeur</b> (en haut à droite).</li>
+          <li>Cliquez sur <b>Charger l’extension non empaquetée</b>.</li>
+          <li>Sélectionnez le dossier décompressé de l’extension.</li>
+          <li>Validez pour finaliser l’installation.</li>
+        </ol>
 
         <!-- Compteur -->
         <div style="
@@ -217,4 +213,3 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
 
   const t = setInterval(() => register() && clearInterval(t), 50);
 })();
-

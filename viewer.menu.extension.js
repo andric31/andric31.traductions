@@ -123,14 +123,33 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
         <!-- ✅ ESPACE RENFORCÉ ICI -->
         <div style="margin-top:36px;"></div>
 
-        <!-- Installation -->
+        <!-- Installation Chrome -->
         <div style="font-weight:900;margin-bottom:6px;">
           ✅ Installation dans Chrome
         </div>
-        <ol style="padding-left:18px;line-height:1.6;">
+        <ol style="padding-left:18px;line-height:1.6;margin:0;">
           <li>Ouvrez <code>chrome://extensions/</code></li>
           <li>Activez le <b>Mode développeur</b></li>
           <li>Glissez-déposez l’archive <b>.zip</b></li>
+        </ol>
+
+        <div style="height:22px;"></div>
+
+        <!-- Installation Opera -->
+        <div style="font-weight:900;margin-bottom:6px;">
+          ✅ Installation dans Opera
+        </div>
+        <ol style="padding-left:18px;line-height:1.6;margin:0;">
+          <li><b>Dézippe</b> l’extension</li>
+          <li>Ouvre la page des extensions : <code>opera://extensions</code></li>
+          <li>Active le <b>mode développeur</b> (en haut à droite)</li>
+          <li>Charge l’extension :
+            <ul style="margin:6px 0 0 0;padding-left:18px;line-height:1.6;">
+              <li><b>Charger l’extension non empaquetée</b></li>
+              <li>Sélectionne le dossier dézippé</li>
+              <li>OK</li>
+            </ul>
+          </li>
         </ol>
 
         <div style="height:22px;"></div>
@@ -143,7 +162,7 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
           Vous pouvez modifier la taille de l’icône affichée sur les vignettes.<br>
           Vous pouvez aussi modifier le comportement du clic sur l’icône.
         </div>
-        <ol style="padding-left:18px;line-height:1.6;">
+        <ol style="padding-left:18px;line-height:1.6;margin:0;">
           <li>Épinglez l’extension : Icône puzzle 🧩 → épingle 📌</li>
           <li>Cliquez sur l’icône <b>f95list_andric31_viewer</b> dans la barre Chrome.</li>
         </ol>
@@ -198,3 +217,4 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
 
   const t = setInterval(() => register() && clearInterval(t), 50);
 })();
+

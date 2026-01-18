@@ -1,4 +1,4 @@
-// viewer.menu.extension.js — Entrée menu : Extension (image + bouton Mega + compteur en bas + install)
+// viewer.menu.extension.js — Entrée menu : Extension (image + bouton Mega + compteur en bas + install + réglages icône)
 (() => {
   "use strict";
 
@@ -11,9 +11,10 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
   // ✅ ID compteur (unique)
   const EXT_DL_ID = "__viewer_extension_download__";
 
-  // ✅ Images
+  // ✅ Images (ordre d'affichage)
   const IMAGES = [
-    "/img/f95list_extension.png"
+    "/img/f95list_extension.png",
+    "/img/f95list_extension_param.png"
   ];
 
   function escapeHtml(s) {
@@ -86,17 +87,22 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
     }
   }
 
+  function imageBlock(src) {
+    if (!src) return "";
+    return `
+      <div style="margin:12px 0;text-align:center;">
+        <a href="${escapeHtml(src)}" target="_blank" rel="noopener" style="display:inline-block;">
+          <img src="${escapeHtml(src)}" alt=""
+            referrerpolicy="no-referrer"
+            style="max-width:100%;border-radius:14px;border:1px solid rgba(255,255,255,.08)"
+            onerror="this.style.display='none'">
+        </a>
+      </div>
+    `;
+  }
+
   function renderHtml() {
     const imgs = IMAGES.filter(Boolean);
-
-    const imageHtml = imgs.length ? `
-      <div style="margin:12px 0;text-align:center;">
-        <img src="${escapeHtml(imgs[0])}" alt=""
-          referrerpolicy="no-referrer"
-          style="max-width:100%;border-radius:14px;border:1px solid rgba(255,255,255,.08)"
-          onerror="this.style.display='none'">
-      </div>
-    ` : ``;
 
     const installHtml = `
       <div style="font-weight:900;margin:12px 0 6px;">✅ Installation dans Chrome</div>
@@ -104,6 +110,19 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
         <li>Ouvrez la page des extensions <code>chrome://extensions/</code></li>
         <li>Activez le <b>Mode développeur</b> en haut à droite.</li>
         <li>Glissez-déposez l’archive <b>.zip</b> dans la page.</li>
+      </ol>
+    `;
+
+    const settingsHtml = `
+      <div style="font-weight:900;margin:14px 0 6px;">🛠️ Réglages de l’icône sur les vignettes</div>
+      <div style="opacity:.95;margin-bottom:8px;">
+        Vous pouvez modifier la taille de l’icône affichée sur les vignettes.
+      </div>
+      <ol style="margin:0;padding-left:18px;line-height:1.6;">
+        <li>Épinglez l’extension (si ce n’est pas déjà fait)</li>
+        <li>Cliquez sur l’icône puzzle 🧩 en haut à droite de Chrome</li>
+        <li>Cliquez sur l’épingle 📌 à côté de <b>f95list_andric31</b></li>
+        <li>Cliquez ensuite sur l’icône de l’extension dans la barre Chrome.</li>
       </ol>
     `;
 
@@ -138,9 +157,14 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
           ${escapeHtml("Voici mon extension qui ajoute une icône directement sur les threads et les vignettes de F95Zone.")}
         </div>
 
-        ${imageHtml}
+        ${imageBlock(imgs[0])}
 
-        <!-- ✅ Bouton Mega (style viewer .btn, avec look Mega) -->
+        <!-- ✅ Texte AVANT le bouton -->
+        <div style="margin:10px 0 12px;text-align:center;">
+          ${escapeHtml(EXT_TEXT_BOTTOM)}
+        </div>
+
+        <!-- ✅ Bouton Mega -->
         <div style="display:flex;justify-content:center;margin:12px 0 10px;">
           <a class="btn btn-page" id="extDownloadBtn"
              href="${escapeHtml(DOWNLOAD_URL)}"
@@ -159,11 +183,11 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
           </a>
         </div>
 
-        <div style="margin:10px 0 12px;text-align:center;">
-          ${escapeHtml(EXT_TEXT_BOTTOM)}
-        </div>
-
         ${installHtml}
+
+        ${settingsHtml}
+
+        ${imageBlock(imgs[1])}
 
         ${statsHtml}
       </div>
@@ -185,12 +209,18 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
     // ✅ affiche compteur (sans incrémenter)
     updateCount("get");
 
-    // ✅ clic bouton => incrémente en parallèle (sans bloquer l'ouverture Mega)
     const btn = document.getElementById("extDownloadBtn");
     if (btn) {
+      // ✅ clic gauche => incrémente en parallèle (sans bloquer l'ouverture Mega)
       btn.addEventListener("click", () => {
         try { updateCount("hit"); } catch {}
-      }, { once: false });
+      });
+
+      // ❌ bloque clic droit (menu contextuel)
+      btn.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        return false;
+      });
     }
   }
 

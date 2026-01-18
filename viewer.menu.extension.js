@@ -1,30 +1,17 @@
-// viewer.menu.extension.js — Entrée menu : Extension (image + bouton téléchargement + compteur + install)
+// viewer.menu.extension.js — Entrée menu : Extension (image + bouton Mega + compteur en bas + install)
 (() => {
   "use strict";
-
-  const EXT_TEXT_TOP = `
-✨ Mes traductions à portée de clic ! ✨
-Voici mon extension qui ajoute une icône directement sur les threads et les vignettes de F95Zone.
-`.trim();
 
   const EXT_TEXT_BOTTOM = `
 C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
 `.trim();
 
-  const INSTALL_TEXT = `
-✅ Installation dans Chrome
-Ouvrez la page des extensions chrome://extensions/
-Activez le Mode développeur en haut à droite.
-Glissez-déposez l’archive .zip dans la page.
-`.trim();
-
-  // ✅ Lien Mega (bouton)
   const DOWNLOAD_URL = "https://mega.nz/folder/zFsCQJbJ#PkeQbqOCla9RCwoy9sK4tw";
 
   // ✅ ID compteur (unique)
   const EXT_DL_ID = "__viewer_extension_download__";
 
-  // Images (chemins/urls)
+  // ✅ Images
   const IMAGES = [
     "/img/f95list_extension.png"
   ];
@@ -37,6 +24,38 @@ Glissez-déposez l’archive .zip dans la page.
       '"': "&quot;",
       "'": "&#39;"
     }[m]));
+  }
+
+  function formatInt(n) {
+    const x = Number(n);
+    if (!Number.isFinite(x)) return "0";
+    try { return x.toLocaleString("fr-FR"); }
+    catch { return String(Math.floor(x)); }
+  }
+
+  async function fetchCounter(op) {
+    try {
+      const r = await fetch(
+        `/api/counter?op=${encodeURIComponent(op)}&kind=mega&id=${encodeURIComponent(EXT_DL_ID)}`,
+        { cache: "no-store" }
+      );
+      if (!r.ok) return null;
+      const j = await r.json();
+      if (!j?.ok) return null;
+
+      // Tolérant selon ton backend
+      const n =
+        j.megaClicks ??
+        j.downloads ??
+        j.count ??
+        j.value ??
+        j.mega ??
+        0;
+
+      return Number(n || 0);
+    } catch {
+      return null;
+    }
   }
 
   function ensureDom() {
@@ -67,32 +86,10 @@ Glissez-déposez l’archive .zip dans la page.
     }
   }
 
-  async function fetchCounter(op) {
-    try {
-      const r = await fetch(
-        `/api/counter?op=${encodeURIComponent(op)}&kind=download&id=${encodeURIComponent(EXT_DL_ID)}`,
-        { cache: "no-store" }
-      );
-      if (!r.ok) return null;
-      const j = await r.json();
-      if (!j?.ok) return null;
-      return Number(j.downloads ?? j.count ?? j.value ?? 0);
-    } catch {
-      return null;
-    }
-  }
-
-  function formatInt(n) {
-    const x = Number(n);
-    if (!Number.isFinite(x)) return "0";
-    try { return x.toLocaleString("fr-FR"); }
-    catch { return String(Math.floor(x)); }
-  }
-
   function renderHtml() {
     const imgs = IMAGES.filter(Boolean);
 
-    const imagesHtml = imgs.length ? `
+    const imageHtml = imgs.length ? `
       <div style="margin:12px 0;text-align:center;">
         <img src="${escapeHtml(imgs[0])}" alt=""
           referrerpolicy="no-referrer"
@@ -110,25 +107,65 @@ Glissez-déposez l’archive .zip dans la page.
       </ol>
     `;
 
+    // ✅ Compteur tout à la fin (comme page jeu)
+    const statsHtml = `
+      <div style="
+        margin-top:14px;
+        padding:10px 12px;
+        border:1px solid var(--border);
+        border-radius:12px;
+        background: rgba(255,255,255,0.03);
+        color: var(--muted);
+        font-size:12px;
+        display:flex;
+        justify-content:center;
+        gap:10px;
+        user-select:none;
+      ">
+        📥 Téléchargements : <strong style="color:var(--fg);font-weight:800;" id="extDlCount">0</strong>
+      </div>
+    `;
+
     return `
       <div class="aboutText">
-        <div style="font-weight:900;font-size:16px;margin-bottom:8px;">✨ Mes traductions à portée de clic ! ✨</div>
-        <div style="margin-bottom:10px;">${escapeHtml("Voici mon extension qui ajoute une icône directement sur les threads et les vignettes de F95Zone.")}</div>
 
-        ${imagesHtml}
-
-        <div style="display:flex;align-items:center;gap:10px;margin:10px 0 14px;flex-wrap:wrap;">
-          <a class="btn btn-page" id="extDownloadBtn" href="${escapeHtml(DOWNLOAD_URL)}" target="_blank" rel="noopener">
-            📥 Télécharger l’extension
-          </a>
-          <span style="opacity:.85;">
-            ⬇️ <span id="extDlCount">…</span>
-          </span>
+        <!-- ✅ Titre centré -->
+        <div style="font-weight:900;font-size:16px;margin-bottom:8px;text-align:center;">
+          ✨ Mes traductions à portée de clic ! ✨
         </div>
 
-        <div style="margin:10px 0 12px;">${escapeHtml(EXT_TEXT_BOTTOM)}</div>
+        <div style="margin-bottom:10px;text-align:center;opacity:.95;">
+          ${escapeHtml("Voici mon extension qui ajoute une icône directement sur les threads et les vignettes de F95Zone.")}
+        </div>
+
+        ${imageHtml}
+
+        <!-- ✅ Bouton Mega (style viewer .btn, avec look Mega) -->
+        <div style="display:flex;justify-content:center;margin:12px 0 10px;">
+          <a class="btn btn-page" id="extDownloadBtn"
+             href="${escapeHtml(DOWNLOAD_URL)}"
+             target="_blank" rel="noopener"
+             style="
+               width:auto;
+               min-width: 260px;
+               padding:10px 14px;
+               border-radius:12px;
+               font-weight:800;
+               background:#3ddc84;
+               color:#000;
+               border:none;
+             ">
+            📥 Télécharger l’extension (MEGA)
+          </a>
+        </div>
+
+        <div style="margin:10px 0 12px;text-align:center;">
+          ${escapeHtml(EXT_TEXT_BOTTOM)}
+        </div>
 
         ${installHtml}
+
+        ${statsHtml}
       </div>
     `;
   }
@@ -145,17 +182,15 @@ Glissez-déposez l’archive .zip dans la page.
     if (body) body.innerHTML = renderHtml();
     document.getElementById("extOverlay")?.classList.remove("hidden");
 
-    // ✅ affiche le compteur (sans incrémenter)
+    // ✅ affiche compteur (sans incrémenter)
     updateCount("get");
 
-    // ✅ clic bouton => ouvre Mega + incrémente compteur
+    // ✅ clic bouton => incrémente en parallèle (sans bloquer l'ouverture Mega)
     const btn = document.getElementById("extDownloadBtn");
     if (btn) {
-      btn.onclick = async (e) => {
-        // laisse l'ouverture se faire en "user gesture" (important pour popup blockers)
-        // et incrémente en parallèle
+      btn.addEventListener("click", () => {
         try { updateCount("hit"); } catch {}
-      };
+      }, { once: false });
     }
   }
 
@@ -176,4 +211,3 @@ Glissez-déposez l’archive .zip dans la page.
     if (register() || tries > 80) clearInterval(t);
   }, 50);
 })();
-

@@ -129,7 +129,7 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
         </div>
         <ol style="padding-left:18px;line-height:1.6;margin:0;">
           <li>Ouvrez <code>chrome://extensions/</code></li>
-          <li>Activez le <b>Mode développeur</b></li>
+          <li>Activez le <b>Mode développeur</b> (en haut à droite).</li>
           <li>Glissez-déposez l’archive <b>.zip</b></li>
         </ol>
 
@@ -157,8 +157,8 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
           ✅ Installation dans Opera
         </div>
         <ol style="padding-left:18px;line-height:1.6;margin:0;">
-          <li>Décompressez l’archive de l’extension.</li>
-          <li>Ouvrez la page des extensions : <code>opera://extensions</code></li>
+          <li>Décompressez l’archive de l’extension dans un dossier.</li>
+          <li>Ouvrez <code>opera://extensions</code></li>
           <li>Activez le <b>Mode développeur</b> (en haut à droite).</li>
           <li>Cliquez sur <b>Charger l’extension non empaquetée</b>.</li>
           <li>Sélectionnez le dossier décompressé de l’extension.</li>

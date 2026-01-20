@@ -721,16 +721,12 @@ main{
   display:none;
 }
 
-/* Centrage annonce */
-.viewer-annonce__title {
-  text-align: center;
-  width: 100%; /* important pour que le centrage fonctionne bien */
-}
 /* Centrage du texte */
 .viewer-annonce__title,
 .viewer-annonce__body {
   text-align: center;
 }
+
 /* Centrage en maintenance */
 .viewer-annonce.is-locked .viewer-annonce__body {
   text-align: center;

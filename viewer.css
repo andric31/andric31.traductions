@@ -701,7 +701,7 @@ main{
 
 .viewer-annonce__btn{
   cursor:pointer;
-  padding:6px 10px; /* bouton plus fin */
+  padding:6px 10px; /* bouton */
   border-radius:10px;
   border: 1px solid rgba(255,255,255,.18);
   background: rgba(255,255,255,.06);
@@ -721,12 +721,16 @@ main{
   display:none;
 }
 
+/* Centrage annonce */
+.viewer-annonce__title {
+  text-align: center;
+  width: 100%; /* important pour que le centrage fonctionne bien */
+}
 /* Centrage du texte */
 .viewer-annonce__title,
 .viewer-annonce__body {
   text-align: center;
 }
-
 /* Centrage en maintenance */
 .viewer-annonce.is-locked .viewer-annonce__body {
   text-align: center;

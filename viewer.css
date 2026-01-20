@@ -671,3 +671,52 @@ main{
   scrollbar-width: auto;               /* ⬅ plus large que thin */
   scrollbar-color: #2a314b #0f1117;
 }
+
+/* =========================
+   📢 Viewer Annonce (bandeau)
+   ========================= */
+
+#viewerAnnonceHost {
+  margin: 12px 0;
+}
+
+.viewer-annonce{
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255,255,255,.04);
+}
+
+.viewer-annonce__bar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 12px;
+  background: rgba(255,255,255,.06);
+}
+
+.viewer-annonce__title{
+  font-weight: 800;
+}
+
+.viewer-annonce__btn{
+  cursor:pointer;
+  padding:6px 10px;
+  border-radius:10px;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.06);
+  color: inherit;
+}
+
+.viewer-annonce__btn:hover{
+  background: rgba(255,255,255,.10);
+}
+
+.viewer-annonce__body{
+  padding: 12px;
+  line-height: 1.35;
+}
+
+.viewer-annonce.is-min .viewer-annonce__body{
+  display:none;
+}

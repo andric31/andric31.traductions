@@ -989,7 +989,6 @@
 
       buildDynamicFilters();
 
-      // ✅ si le tri actuel est "views" / "mega" / "likes", on charge les stats avant de trier
       if (
         state.sort.startsWith("views") ||
         state.sort.startsWith("mega")  ||
@@ -1000,10 +999,17 @@
 
       applyFilters();
 
-      // ✅ Compteur vues (après chargement DOM ok)
       initMainPageCounter();
     } catch (e) {
       console.error("[viewer] load error:", e);
+
+      // ✅ Bandeau maintenance (même si la grille ne charge pas)
+      try {
+        window.viewerAnnonce?.setMaintenance?.(
+          "La liste est indisponible pour le moment."
+        );
+      } catch {}
+
       $("#grid").innerHTML = "";
       const ge = $("#gridEmpty");
       if (ge) {

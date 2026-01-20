@@ -85,6 +85,10 @@
 
   <main role="main">
     <section id="gridMode" class="grid-wrap" aria-label="Vignettes des jeux">
+
+      <!-- ✅ BANDEAU ANNONCE ICI (au-dessus des tuiles) -->
+      <div id="viewerAnnonceHost"></div>
+
       <div id="grid" class="grid"></div>
       <div id="gridEmpty" class="empty hidden">Aucun résultat.</div>
     </section>
@@ -98,7 +102,12 @@
   <script src="/viewer.menu.js"></script>
   <script src="/viewer.menu.about.js"></script>
   <script src="/viewer.menu.extension.js"></script>
+
+  <!-- ✅ charge le bandeau (indépendant de f95list.json) -->
+  <script src="/viewer.annonce.js"></script>
+
   <script src="/viewer.js"></script>
 
 </body>
 </html>
+

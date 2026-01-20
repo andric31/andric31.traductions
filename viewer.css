@@ -691,7 +691,7 @@ main{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:6px 10px; /* ⬅️ hauteur de la barre */
+  padding:4px 8px; /* ⬅️ hauteur de la barre */
   background: rgba(255,255,255,.06);
 }
 

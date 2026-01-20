@@ -720,3 +720,14 @@ main{
 .viewer-annonce.is-min .viewer-annonce__body{
   display:none;
 }
+
+/* Centrage du texte */
+.viewer-annonce__title,
+.viewer-annonce__body {
+  text-align: center;
+}
+
+/* Centrage en maintenance */
+.viewer-annonce.is-locked .viewer-annonce__body {
+  text-align: center;
+}

@@ -691,7 +691,7 @@ main{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:10px 12px;
+  padding:6px 10px; /* ⬅️ hauteur de la barre */
   background: rgba(255,255,255,.06);
 }
 
@@ -701,7 +701,7 @@ main{
 
 .viewer-annonce__btn{
   cursor:pointer;
-  padding:6px 10px;
+  padding:6px 10px; /* bouton plus fin */
   border-radius:10px;
   border: 1px solid rgba(255,255,255,.18);
   background: rgba(255,255,255,.06);
@@ -713,7 +713,7 @@ main{
 }
 
 .viewer-annonce__body{
-  padding: 12px;
+  padding: 12px; /* ⬅️ hauteur du contenu */
   line-height: 1.35;
 }
 

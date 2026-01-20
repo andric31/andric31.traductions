@@ -3,7 +3,7 @@
 // Fonctionne même si f95list.json échoue.
 
 (() => {
-  const LS_KEY = "viewer_annonce_minimized";
+  const SS_KEY = "viewer_annonce_minimized";
   const ANNOUNCE_URL = "/annonce.html";
 
   function $(sel) { return document.querySelector(sel); }
@@ -33,12 +33,12 @@
   }
 
   function getMinimized() {
-    try { return localStorage.getItem(LS_KEY) === "1"; }
+    try { return sessionStorage.getItem(SS_KEY) === "1"; }
     catch { return false; }
   }
-
+  
   function setMinimized(v) {
-    try { localStorage.setItem(LS_KEY, v ? "1" : "0"); } catch {}
+    try { sessionStorage.setItem(SS_KEY, v ? "1" : "0"); } catch {}
   }
 
   function render(html, opts = {}) {

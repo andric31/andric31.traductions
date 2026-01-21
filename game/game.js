@@ -58,7 +58,19 @@ function buildGameUrl(g) {
 }
 
 function getDisplayTitle(g) {
-  return (g?.gameData?.title || g?.cleanTitle || g?.title || "").toString().trim();
+  // Règle: si c'est un enfant de collection (id vide + collection non vide),
+  // on affiche UNIQUEMENT le titre du gameData (le title principal est celui de la collection).
+  const id = (g?.id || "").toString().trim();
+  const col = (g?.collection || "").toString().trim();
+  if (!id && col) {
+    return (g?.gameData?.title || "").toString().trim();
+  }
+  return (g?.cleanTitle || g?.title || "").toString().trim();
+}
+
+function getCollectionChildTitle(g) {
+  // Strict: pas de fallback vers g.title (sinon doublons "Collection ...")
+  return (g?.gameData?.title || "").toString().trim();
 }
 
 function getEntryRefs(g) {
@@ -196,7 +208,7 @@ function renderCollectionBlockForChild(parent, siblings, currentUid, collectionI
   const parentTitle = (parent.cleanTitle || parent.title || `Collection ${collectionId}`).toString();
 
   const li = siblings.map(g => {
-    const t = getDisplayTitle(g) || (g.title || "");
+    const t = getCollectionChildTitle(g) || getDisplayTitle(g);
     const href = `/game/?id=${encodeURIComponent(collectionId)}&uid=${encodeURIComponent(g.uid)}`;
     const isCurrent = String(g.uid) === String(currentUid);
     return `<li style="margin:4px 0;">
@@ -221,7 +233,7 @@ function renderCollectionBlockForParent(parent, children) {
   const parentTitle = (parent.cleanTitle || parent.title || "").toString();
 
   const li = children.map(g => {
-    const t = getDisplayTitle(g) || (g.title || "");
+    const t = getCollectionChildTitle(g) || getDisplayTitle(g);
     const href = `/game/?id=${encodeURIComponent(parent.id)}&uid=${encodeURIComponent(g.uid)}`;
     return `<li style="margin:4px 0;">
       <a href="${href}" class="btn-link">${escapeHtml(t || `Jeu uid:${g.uid}`)}</a>
@@ -244,7 +256,7 @@ function renderSeriesBlocks(seriesList, games, currentCanonicalKey) {
     const items = resolveSerieRefsToEntries(serie, games);
 
     const li = items.map(g => {
-      const t = getDisplayTitle(g) || (g.title || "");
+      const t = getCollectionChildTitle(g) || getDisplayTitle(g);
       const href = buildGameUrl(g);
 
       // clé canonique pour surligner : id si existe, sinon uid, sinon collection+uid

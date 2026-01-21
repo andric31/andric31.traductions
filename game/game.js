@@ -389,7 +389,7 @@ function renderTags(tags) {
 // ====== Badges (style F95 comme build_pages.py) ======
 
 const CAT_ALLOWED = ["VN", "Collection"];
-const ENGINE_ALLOWED = ["Ren'Py", "RPGM", "Unity", "Others", "Wolf RPG"];
+const ENGINE_ALLOWED = ["Ren'Py", "RPGM", "Unity", "HTML", "Flash", "Others", "Wolf RPG"];
 const STATUS_ALLOWED = ["Completed", "Abandoned", "Onhold"];
 
 const ENGINE_RAW = {
@@ -400,6 +400,8 @@ const ENGINE_RAW = {
   "rpgmakermv": "RPGM",
   "rpgmakermz": "RPGM",
   "unity": "Unity",
+  "html": "HTML",
+  "flash": "Flash",
   "others": "Others",
   "other": "Others",
   "wolf": "Wolf RPG",
@@ -449,7 +451,11 @@ function cleanTitle(raw) {
 
     if (norm === "wolf") break;
 
-    if (norm === "flash") { cut = i + 1; continue; }
+    if (norm === "flash") {
+      if (!engines.includes("Flash")) engines.push("Flash");
+      cut = i + 1;
+      continue;
+    }
 
     if (norm === "others" || norm === "other") {
       if (!engines.includes("Others")) engines.push("Others");
@@ -516,7 +522,9 @@ function renderBadgesFromGame(display, entry, isCollectionChild) {
     wrap.appendChild(makeBadge("cat", "VN"));
   }
 
-  if (c.engines[0]) wrap.appendChild(makeBadge("eng", c.engines[0]));
+  for (const eng of (c.engines || [])) {
+    wrap.appendChild(makeBadge("eng", eng));
+  }
   if (c.status)     wrap.appendChild(makeBadge("status", c.status));
 }
 

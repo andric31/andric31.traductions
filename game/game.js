@@ -389,7 +389,7 @@ function renderTags(tags) {
 // ====== Badges (style F95 comme build_pages.py) ======
 
 const CAT_ALLOWED = ["VN", "Collection"];
-const ENGINE_ALLOWED = ["Ren'Py", "RPGM", "Unity", "Others", "Wolf RPGM"];
+const ENGINE_ALLOWED = ["Ren'Py", "RPGM", "Unity", "Others", "Wolf RPG"];
 const STATUS_ALLOWED = ["Completed", "Abandoned", "Onhold"];
 
 const ENGINE_RAW = {
@@ -402,104 +402,129 @@ const ENGINE_RAW = {
   "unity": "Unity",
   "others": "Others",
   "other": "Others",
-  "wolf": "Wolf RPGM",
-  "wolfrpg": "Wolf RPGM",
+  "wolf": "Wolf RPG",
+  "wolfrpg": "Wolf RPG",
 };
 
 function slug(s) {
   return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
 }
 
-function parseTitleMeta(raw) {
-  const t = String(raw || "").trim();
+const SEP_RE = /[\u2014\u2013\-:]/; // — – - :
+const ucFirst = s => (s ? s[0].toUpperCase() + s.slice(1) : s);
+
+function cleanTitle(raw) {
+  let t = String(raw || "").trim();
   let categories = [];
   let engines = [];
   let status = null;
+  let othersExplicit = false;
 
-  const head = t.split(/[\u2014\u2013\-:]/)[0];
-  const tokens = head.split(/[\s/|,]+/).filter(Boolean);
-
-  for (const tok of tokens) {
-    const k = tok.toLowerCase();
-
-    if (k === "vn") categories.push("VN");
-    if (k === "collection") categories.push("Collection");
-
-    const pretty = k ? (k[0].toUpperCase() + k.slice(1)) : "";
-    if (STATUS_ALLOWED.includes(pretty)) status = pretty;
-
-    if (ENGINE_RAW[k]) engines.push(ENGINE_RAW[k]);
+  if (/^collection\b/i.test(t)) {
+    categories.push("Collection");
+    t = t.replace(/^collection[ :\-]*/i, "").trim();
   }
 
-  // ✅ ne plus inventer VN / Ren'Py
-  if (!categories.length) categories = [];
-  if (!engines.length) engines = [];
+  const head = t.split(SEP_RE)[0];
+  const tokens = head.split(/[\s/|,]+/).filter(Boolean);
+  let cut = 0;
+
+  for (let i = 0; i < tokens.length; i++) {
+    const wRaw = tokens[i];
+    const w = wRaw.toLowerCase();
+    const norm = w.replace(/[^\w']/g, "");
+
+    if (norm === "vn") {
+      if (!categories.includes("VN")) categories.push("VN");
+      cut = i + 1;
+      continue;
+    }
+
+    if (norm === "wolf" && tokens[i + 1] && tokens[i + 1].toLowerCase().replace(/[^\w']/g, "") === "rpg") {
+      if (!engines.includes("Wolf RPG")) engines.push("Wolf RPG");
+      cut = i + 2;
+      i++;
+      continue;
+    }
+
+    if (norm === "wolf") break;
+
+    if (norm === "flash") { cut = i + 1; continue; }
+
+    if (norm === "others" || norm === "other") {
+      if (!engines.includes("Others")) engines.push("Others");
+      othersExplicit = true;
+      cut = i + 1;
+      continue;
+    }
+
+    if (ENGINE_RAW[norm] !== undefined) {
+      const eng = ENGINE_RAW[norm];
+      if (eng && !engines.includes(eng)) engines.push(eng);
+      cut = i + 1;
+      continue;
+    }
+
+    const pretty = ucFirst(norm);
+    if (STATUS_ALLOWED.includes(pretty)) {
+      status = pretty;
+      cut = i + 1;
+      continue;
+    }
+
+    if (w === "&" || w === "and" || w === "/") { cut = i + 1; continue; }
+
+    break;
+  }
+
+  if (cut > 0) {
+    const headSlice = tokens.slice(0, cut).join(" ");
+    t = t.slice(headSlice.length).trim();
+    t = t.replace(/^[\u2014\u2013\-:|]+/, "").trim();
+  }
+
   if (!status) status = "En cours";
 
-  categories = categories.filter(c => CAT_ALLOWED.includes(c));
-  engines = engines.filter(e => ENGINE_ALLOWED.includes(e));
-  if (!STATUS_ALLOWED.includes(status) && status !== "En cours") status = "En cours";
+  const allowedCat = new Set(CAT_ALLOWED);
+  const allowedEng = new Set(ENGINE_ALLOWED);
+  categories = categories.filter(c => allowedCat.has(c));
+  engines    = engines.filter(e => allowedEng.has(e));
 
-  return {
-    category: categories[0] || null,
-    engine: engines[0] || null,
-    status,
-  };
-}
-
-function renderBadgesFromGame(game, isCollectionChild = false) {
-  let meta;
-
-  if (isCollectionChild) {
-    // ⛔ AUCUNE invention
-  const eng = String(game?.engine || "").trim() || null;
-  
-  const rawStatus = String(game?.status || "").trim();
-  const norm = rawStatus.toLowerCase();
-  
-  let status = "En cours";
-  if (norm === "completed") status = "Completed";
-  else if (norm === "abandoned") status = "Abandoned";
-  else if (norm === "onhold" || norm === "on hold") status = "Onhold";
-  
-  meta = {
-    category: null,   // pas de VN auto pour enfant de collection
-    engine: eng,
-    status,
-  };
-
-  } else {
-    // logique EXISTANTE
-    meta = parseTitleMeta(String(game?.title || ""));
+  if (!othersExplicit && engines.includes("Others") && engines.some(e => e !== "Others")) {
+    engines = engines.filter(e => e !== "Others");
   }
 
+  return { title: t, categories, engines, status };
+}
+
+function renderBadgesFromGame(display, entry, isCollectionChild) {
   const wrap = $("badges");
   if (!wrap) return;
   wrap.innerHTML = "";
 
-  if (meta.category) {
-    const b1 = document.createElement("span");
-    b1.className = `badge cat-${slug(meta.category)}`;
-    b1.textContent = meta.category;
-    b1.classList.add("badge");
-    wrap.appendChild(b1);
+  // ✅ Source unique (comme viewer.js)
+  // - enfant collection => display.title (gameData.title)
+  // - normal => entry.title (titre complet F95)
+  const rawTitle = isCollectionChild
+    ? String(display?.title || "")
+    : String(entry?.title || "");
+
+  const c = cleanTitle(rawTitle);
+
+  // ⛔ jamais VN pour enfant de collection
+  if (!isCollectionChild && c.categories.includes("VN")) {
+    wrap.appendChild(makeBadge("cat", "VN"));
   }
 
-  if (meta.engine) {
-    const b2 = document.createElement("span");
-    b2.className = `badge eng-${slug(meta.engine)}`;
-    b2.textContent = meta.engine;
-    b2.classList.add("badge");
-    wrap.appendChild(b2);
-  }
+  if (c.engines[0]) wrap.appendChild(makeBadge("eng", c.engines[0]));
+  if (c.status)     wrap.appendChild(makeBadge("status", c.status));
+}
 
-  if (meta.status) {
-    const b3 = document.createElement("span");
-    b3.className = `badge status-${slug(meta.status)}`;
-    b3.textContent = meta.status;
-    b3.classList.add("badge");
-    wrap.appendChild(b3);
-  }
+function makeBadge(type, value) {
+  const b = document.createElement("span");
+  b.className = `badge ${type}-${slug(value)}`;
+  b.textContent = value;
+  return b;
 }
 
 /**
@@ -949,7 +974,7 @@ function renderRating4UI(gameId, data) {
     setCover(display.imageUrl || entry.imageUrl || "");
     renderTags(display.tags || entry.tags || []);
 
-    renderBadgesFromGame(display, isCollectionChild);
+    renderBadgesFromGame(display, entry, isCollectionChild);
     renderTranslationStatus(entry);
 
     setHref("btnDiscord", (entry.discordlink || "").trim());

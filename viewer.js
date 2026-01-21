@@ -488,8 +488,8 @@ function getDisplayTitle(g) {
   // Title parsing / normalize
   // =========================
 
-  const CAT_ALLOWED    = ["VN", "Collection"];
-  const ENGINE_ALLOWED = ["Ren'Py", "RPGM", "Unity", "Others", "Wolf RPG"];
+  const CAT_ALLOWED    = ["Collection"];
+  const ENGINE_ALLOWED = ["Ren'Py", "RPGM", "Unity", "HTML", "Flash", "Others", "Wolf RPG"];
   const STATUS_ALLOWED = ["Completed", "Abandoned", "Onhold"];
   const ENGINE_RAW = {
     "renpy": "Ren'Py",
@@ -502,6 +502,8 @@ function getDisplayTitle(g) {
     "rpgmakermz": "RPGM",
     "rpg maker": "RPGM",
     "unity": "Unity",
+  "html": "HTML",
+  "flash": "Flash",
     "others": "Others",
     "other": "Others",
     "html": "Others",
@@ -572,8 +574,7 @@ function getDisplayTitle(g) {
       const norm = w.replace(/[^\w']/g, "");
 
       if (norm === "vn") {
-        if (!categories.includes("VN")) categories.push("VN");
-        cut = i + 1;
+cut = i + 1;
         continue;
       }
 
@@ -875,9 +876,15 @@ function getDisplayTitle(g) {
           <h3 class="name clamp-2">${escapeHtml(getDisplayTitle(g))}</h3>
           <div class="badges-line one-line">${badgesLineHtml(g)}</div>
           <div class="actions">
-            <a class="btn btn-page" href="${pageHref}" target="_blank" rel="noopener">
-              📄 Ouvrir la page
-            </a>
+            <a class="btn btn-page" href="${pageHref}" target="_blank" rel="noopener">📄 Ouvrir la page</a>
+            ${(() => {
+              const v = (g.gameData?.videoUrl || g.videoUrl || "").trim();
+              const a = (g.translationsArchive || "").trim();
+              const out = [];
+              if (v) out.push(`<a class="btn btn-mini" href="${escapeHtml(v)}" target="_blank" rel="noopener">🎥 Vidéo</a>`);
+              if (a) out.push(`<a class="btn btn-mini" href="${escapeHtml(a)}" target="_blank" rel="noopener">🗃️ Archives</a>`);
+              return out.join("");
+            })()}
           </div>
         </div>
       `;

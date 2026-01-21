@@ -732,38 +732,14 @@ main{
   text-align: center;
 }
 
-/* Collection parent */
-.collection-block {
-  border: 1px solid rgba(255,255,255,.25);
-  padding: 12px;
-  border-radius: 8px;
-  margin: 16px 0;
-  background: rgba(0,0,0,.15);
-}
-.collection-block h3 {
-  margin-top: 0;
-}
-
-/* Collection child */
-.collection-child-block {
-  border: 1px solid rgba(255,255,255,.25);
-  padding: 12px;
-  border-radius: 8px;
-  margin: 16px 0;
-  background: rgba(0,0,0,.15);
-}
-.collection-child-block h3 {
-  margin-top: 0;
-}
-
-/* Serie block */
-.serie-block {
-  border: 1px solid rgba(255,255,255,.25);
-  padding: 12px;
-  border-radius: 8px;
-  margin: 16px 0;
-  background: rgba(0,0,0,.15);
-}
 .serie-block h3 {
   margin-top: 0;
+}
+
+/* Mini buttons in viewer cards */
+.btn-mini{
+  padding: 6px 10px;
+  font-size: 12px;
+  line-height: 1;
+  opacity: .95;
 }

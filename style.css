@@ -1,0 +1,58 @@
+/* ===== Global base ===== */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:system-ui,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial;
+  color:var(--fg);
+  background:linear-gradient(180deg,#0d1018,#101425 30%,#0f1117);
+}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+.hidden{ display:none !important }
+
+/* ===== Shared UI bits ===== */
+.badge{
+  display:inline-flex;
+  align-items:center;
+  padding:4px 8px;
+  font-size:12px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  white-space:nowrap;
+  color:#fff;
+  line-height:1;
+}
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:6px 8px;
+  border-radius:8px;
+  background:#2e3652;
+  color:#ffffff;
+  border:1px solid #3c466a;
+  text-decoration:none;
+  font-size:13px;
+  font-weight:600;
+  transition:0.15s ease;
+}
+.btn:hover{
+  background:#3b4568;
+  border-color:#4d5a84;
+  filter:brightness(1.05);
+}
+.btn[aria-disabled="true"]{ opacity:.6; pointer-events:none }
+
+/* ===== Scrollbar sombre ===== */
+/* Chrome / Edge */
+::-webkit-scrollbar{ width:16px; height:16px; }
+::-webkit-scrollbar-track{ background:#0f1117; }
+::-webkit-scrollbar-thumb{
+  background:#2a314b;
+  border-radius:999px;
+  border:4px solid #0f1117;
+}
+::-webkit-scrollbar-thumb:hover{ background:#3b4568; }
+/* Firefox */
+*{ scrollbar-color:#2a314b #0f1117; scrollbar-width:auto; }

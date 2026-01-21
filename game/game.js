@@ -230,11 +230,16 @@ function renderCollectionBlock(parent, children) {
   `;
 }
 
-function renderCollectionBlockForChild(/* parent */) {
-  // Sur un sous-jeu de collection : on affiche UNIQUEMENT l’indication.
+function renderCollectionBlockForChild(parent) {
+  // Encadré minimal : titre + lien vers la page principale de la collection
+  const parentId = parent?.id ? String(parent.id) : "";
+  const href = parentId ? `/game/?id=${encodeURIComponent(parentId)}` : "";
+  const label = parent ? (parent.cleanTitle || parent.title || parentId) : "Voir la collection";
+
   return `
     <div class="game-block collection-child-block">
       <h3>📦 Fait partie de la collection</h3>
+      ${href ? `<a class="collection-parent-link" href="${href}">${escapeHtml(label)}</a>` : ``}
     </div>
   `;
 }

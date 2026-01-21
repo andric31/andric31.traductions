@@ -28,7 +28,6 @@ function getParamsFromUrl() {
   }
 }
 
-
 function extractGames(raw) {
   if (Array.isArray(raw)) return raw;
   if (!raw || typeof raw !== "object") return [];
@@ -41,7 +40,6 @@ function extractGames(raw) {
   }
   return [];
 }
-
 
 function escapeHtml(s) {
   return String(s ?? "")
@@ -221,25 +219,6 @@ function ensureRelatedContainer() {
   return out;
 }
 
-function renderCollectionBlock(parent, children) {
-  if (!parent || !children || !children.length) return "";
-
-  const items = children.map(g => {
-    const t = escapeHtml(getDisplayTitle(g, "collectionChild"));
-    const href = `/game/?id=${encodeURIComponent(parent.id)}&uid=${encodeURIComponent(g.uid)}`;
-    return `<li><a href="${href}">${t}</a></li>`;
-  }).join("");
-
-  return `
-    <div class="game-block collection-block">
-      <h3>📦 Collection</h3>
-      <ul class="collection-list">
-        ${items}
-      </ul>
-    </div>
-  `;
-}
-
 function renderCollectionBlockForChild(parent) {
   // Encadré minimal : titre + lien vers la page principale de la collection
   const parentId = parent?.id ? String(parent.id) : "";
@@ -253,9 +232,6 @@ function renderCollectionBlockForChild(parent) {
     </div>
   `;
 }
-
-
-
 
 function renderCollectionBlockForParent(parent, children) {
   if (!children || !children.length) return "";
@@ -1036,6 +1012,13 @@ function renderRating4UI(gameId, data) {
 
     const megaHref = (entry.translation || "").trim();
 
+    // ======================================================
+    // ✅ EXTRA BOX (vidéo/description/notes/archive)
+    // IMPORTANT: si #extraBox existe dans index.html et est display:none,
+    // il faut le rendre visible si au moins un champ existe.
+    // ======================================================
+    let hasExtra = false;
+
     // =========================
     // 📺 Vidéo
     // =========================
@@ -1044,8 +1027,11 @@ function renderRating4UI(gameId, data) {
       const iframe = document.getElementById("videoFrame");
       if (iframe) iframe.src = videoUrl;
       show("videoBox", true);
+      hasExtra = true;
+    } else {
+      show("videoBox", false);
     }
-    
+
     // =========================
     // 📝 Description
     // =========================
@@ -1053,8 +1039,11 @@ function renderRating4UI(gameId, data) {
     if (desc) {
       setHtml("descriptionText", escapeHtml(desc).replace(/\n/g, "<br>"));
       show("descriptionBox", true);
+      hasExtra = true;
+    } else {
+      show("descriptionBox", false);
     }
-    
+
     // =========================
     // 🗒️ Notes
     // =========================
@@ -1062,8 +1051,11 @@ function renderRating4UI(gameId, data) {
     if (notes) {
       setHtml("notesText", escapeHtml(notes).replace(/\n/g, "<br>"));
       show("notesBox", true);
+      hasExtra = true;
+    } else {
+      show("notesBox", false);
     }
-    
+
     // =========================
     // 🗃️ Archives de traduction
     // =========================
@@ -1072,7 +1064,13 @@ function renderRating4UI(gameId, data) {
       const a = document.getElementById("archiveLink");
       if (a) a.href = archive;
       show("archiveBox", true);
+      hasExtra = true;
+    } else {
+      show("archiveBox", false);
     }
+
+    // ✅ Affiche / cache le bloc encadré global
+    show("extraBox", hasExtra);
 
     setHref("btnMega", megaHref);
     if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction (MEGA)";
@@ -1109,7 +1107,7 @@ function renderRating4UI(gameId, data) {
     else if (entry?.id && String(entry.id).trim()) analyticsKey = String(entry.id).trim();
     else analyticsKey = String(entry.uid).trim();
 
-await initCounters(analyticsKey, megaHref);
+    await initCounters(analyticsKey, megaHref);
 
     // ⛔ Bloquer le clic droit sur le bouton Télécharger (MEGA)
     const btnMega = document.getElementById("btnMega");

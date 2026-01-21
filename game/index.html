@@ -382,6 +382,28 @@
     }
 
     .topbar{ display:none !important; }
+
+    /* ✅ Encadrés séparés pour chaque champ */
+    .infoBlock{
+      margin-top: 12px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: rgba(0,0,0,.15);
+    }
+    .infoBlock h3{
+      margin: 0 0 6px 0;
+    }
+    .infoBlock .infoText{
+      color: var(--fg);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .infoBlock .infoTextMuted{
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
   </style>
 </head>
 
@@ -411,39 +433,6 @@
 
         <div class="tagsRow" id="tags"></div>
 
-        <!-- ✅ Infos (vidéo + description + notes + archive) AVANT les liens -->
-        <div id="extraBox" class="game-block" style="display:none;">
-
-          <!-- 📺 Vidéo -->
-          <div id="videoBox" style="display:none;">
-            <iframe id="videoFrame"
-              style="width:100%; aspect-ratio:16/9; border-radius:12px; border:1px solid var(--border);"
-              loading="lazy"
-              allowfullscreen>
-            </iframe>
-          </div>
-
-          <!-- 📝 Description -->
-          <div id="descriptionBox" style="display:none; margin-top:12px;">
-            <h3>📝 Description</h3>
-            <div id="descriptionText" style="color:var(--fg); font-size:14px; line-height:1.45;"></div>
-          </div>
-
-          <!-- 🗒️ Notes -->
-          <div id="notesBox" style="display:none; margin-top:12px;">
-            <h3>🗒️ Notes</h3>
-            <div id="notesText" style="color:var(--muted); font-size:13px;"></div>
-          </div>
-
-          <!-- 🗃️ Archives -->
-          <div id="archiveBox" style="display:none; margin-top:12px;">
-            <a id="archiveLink" class="btnLike" target="_blank" rel="noopener">
-              🗃️ Archives de traduction
-            </a>
-          </div>
-
-        </div>
-
         <div class="btnRow">
           <a class="btnLike" id="btnDiscord" target="_blank" rel="noopener" style="display:none;">💬 Discord</a>
           <a class="btnLike" id="btnF95" target="_blank" rel="noopener" style="display:none;">🌐 F95Zone</a>
@@ -451,6 +440,35 @@
 
         <div class="btnMainRow">
           <a class="btnLike btnMega" id="btnMega" target="_blank" rel="noopener" style="display:none;">📥 Télécharger la traduction (MEGA)</a>
+        </div>
+
+        <!-- ✅ NOTES sous MEGA -->
+        <div id="notesBox" class="infoBlock" style="display:none;">
+          <h3>🗒️ Notes</h3>
+          <div id="notesText" class="infoTextMuted"></div>
+        </div>
+
+        <!-- ✅ ARCHIVES sous NOTES -->
+        <div id="archiveBox" class="infoBlock" style="display:none;">
+          <a id="archiveLink" class="btnLike" target="_blank" rel="noopener" style="width:100%; justify-content:center;">
+            🗃️ Archives de traduction
+          </a>
+        </div>
+
+        <!-- 📺 Vidéo (encadré séparé) -->
+        <div id="videoBox" class="infoBlock" style="display:none;">
+          <h3>📺 Vidéo</h3>
+          <iframe id="videoFrame"
+            style="width:100%; aspect-ratio:16/9; border-radius:12px; border:1px solid var(--border);"
+            loading="lazy"
+            allowfullscreen>
+          </iframe>
+        </div>
+
+        <!-- 📝 Description (encadré séparé) -->
+        <div id="descriptionBox" class="infoBlock" style="display:none;">
+          <h3>📝 Description</h3>
+          <div id="descriptionText" class="infoText"></div>
         </div>
 
         <!-- ⭐ Notation -->
@@ -505,3 +523,4 @@
 
 </body>
 </html>
+

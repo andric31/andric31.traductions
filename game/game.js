@@ -106,9 +106,9 @@ function buildSeriesIndex(games) {
 
     const serieObj = {
       name: String(s.name),
-      refs: s.refs.map(x => String(x)),
+      refs: s.refs.map((x) => String(x)),
       ownerUid: owner?.uid,
-      ownerId: owner?.id || ""
+      ownerId: owner?.id || "",
     };
 
     // refs déclarées
@@ -151,10 +151,10 @@ function resolveSerieRefsToEntries(serie, games) {
   for (const ref of (serie?.refs || [])) {
     const [type, value] = String(ref).split(":");
     if (type === "id") {
-      const g = (games || []).find(x => String(x?.id) === String(value) && !x?.collection);
+      const g = (games || []).find((x) => String(x?.id) === String(value) && !x?.collection);
       if (g) out.push(g);
     } else if (type === "uid") {
-      const g = (games || []).find(x => String(x?.uid) === String(value));
+      const g = (games || []).find((x) => String(x?.uid) === String(value));
       if (g) out.push(g);
     }
   }
@@ -167,27 +167,27 @@ function resolveGamePage(params, games) {
 
   // 1) Sous-jeu de collection
   if (id && uid) {
-    const child = (games || []).find(g =>
-      String(g?.uid) === String(uid) && String(g?.collection) === String(id)
+    const child = (games || []).find(
+      (g) => String(g?.uid) === String(uid) && String(g?.collection) === String(id)
     );
     if (!child) return { kind: "notfound" };
 
-    const parent = (games || []).find(g => String(g?.id) === String(id) && !g?.collection) || null;
+    const parent = (games || []).find((g) => String(g?.id) === String(id) && !g?.collection) || null;
     const siblings = (games || [])
-      .filter(g => String(g?.collection) === String(id))
-      .sort((a,b) => Number(a?.uid) - Number(b?.uid));
+      .filter((g) => String(g?.collection) === String(id))
+      .sort((a, b) => Number(a?.uid) - Number(b?.uid));
 
     return { kind: "collectionChild", idParam: id, uidParam: uid, entry: child, parent, siblings };
   }
 
   // 2) id seul
   if (id) {
-    const parentOrGame = (games || []).find(g => String(g?.id) === String(id) && !g?.collection) || null;
+    const parentOrGame = (games || []).find((g) => String(g?.id) === String(id) && !g?.collection) || null;
     if (!parentOrGame) return { kind: "notfound" };
 
     const children = (games || [])
-      .filter(g => String(g?.collection) === String(id))
-      .sort((a,b) => Number(a?.uid) - Number(b?.uid));
+      .filter((g) => String(g?.collection) === String(id))
+      .sort((a, b) => Number(a?.uid) - Number(b?.uid));
 
     if (children.length) return { kind: "collectionParent", idParam: id, entry: parentOrGame, children };
     return { kind: "normal", idParam: id, entry: parentOrGame };
@@ -195,7 +195,7 @@ function resolveGamePage(params, games) {
 
   // 3) uid seul
   if (uid) {
-    const g = (games || []).find(x => String(x?.uid) === String(uid)) || null;
+    const g = (games || []).find((x) => String(x?.uid) === String(uid)) || null;
     if (!g) return { kind: "notfound" };
     return { kind: "uidOnly", uidParam: uid, entry: g };
   }
@@ -236,11 +236,13 @@ function renderCollectionBlockForChild(parent) {
 function renderCollectionBlockForParent(parent, children) {
   if (!children || !children.length) return "";
 
-  const items = children.map(g => {
-    const t = escapeHtml(getDisplayTitle(g, "collectionChild"));
-    const href = `/game/?id=${encodeURIComponent(parent.id)}&uid=${encodeURIComponent(g.uid)}`;
-    return `<li><a href="${href}">${t}</a></li>`;
-  }).join("");
+  const items = children
+    .map((g) => {
+      const t = escapeHtml(getDisplayTitle(g, "collectionChild"));
+      const href = `/game/?id=${encodeURIComponent(parent.id)}&uid=${encodeURIComponent(g.uid)}`;
+      return `<li><a href="${href}">${t}</a></li>`;
+    })
+    .join("");
 
   return `
     <div class="game-block collection-block">
@@ -255,37 +257,41 @@ function renderCollectionBlockForParent(parent, children) {
 function renderSeriesBlocks(seriesList, games, currentCanonicalKey) {
   if (!Array.isArray(seriesList) || !seriesList.length) return "";
 
-  const blocks = seriesList.map(serie => {
-    const items = resolveSerieRefsToEntries(serie, games);
+  const blocks = seriesList
+    .map((serie) => {
+      const items = resolveSerieRefsToEntries(serie, games);
 
-    const li = items.map(g => {
-      const t = getCollectionChildTitle(g) || getDisplayTitle(g);
-      const href = buildGameUrl(g);
+      const li = items
+        .map((g) => {
+          const t = getCollectionChildTitle(g) || getDisplayTitle(g);
+          const href = buildGameUrl(g);
 
-      // clé canonique pour surligner : id si existe, sinon uid, sinon collection+uid
-      let key = "";
-      const id = (g.id || "").toString().trim();
-      const coll = (g.collection || "").toString().trim();
-      if (coll) key = `c:${coll}|u:${g.uid}`;
-      else if (id) key = `id:${id}`;
-      else key = `uid:${g.uid}`;
+          // clé canonique pour surligner : id si existe, sinon uid, sinon collection+uid
+          let key = "";
+          const id = (g.id || "").toString().trim();
+          const coll = (g.collection || "").toString().trim();
+          if (coll) key = `c:${coll}|u:${g.uid}`;
+          else if (id) key = `id:${id}`;
+          else key = `uid:${g.uid}`;
 
-      const isCurrent = key === currentCanonicalKey;
+          const isCurrent = key === currentCanonicalKey;
 
-      return `<li style="margin:4px 0;">
+          return `<li style="margin:4px 0;">
         <a href="${href}" class="btn-link" style="${isCurrent ? "font-weight:700;text-decoration:underline;" : ""}">
           ${escapeHtml(t || "Sans titre")}
         </a>
       </li>`;
-    }).join("");
+        })
+        .join("");
 
-    return `
+      return `
       <div class="game-block" style="border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 12px;">
         <h3 style="margin:0 0 6px 0;">📚 Série : ${escapeHtml(serie.name)}</h3>
         <ul style="margin:0;padding-left:18px;">${li}</ul>
       </div>
     `;
-  }).join("");
+    })
+    .join("");
 
   return blocks;
 }
@@ -363,7 +369,7 @@ function renderTags(tags) {
   const box = $("tags");
   if (!box) return;
   box.innerHTML = "";
-  (tags || []).forEach(t => {
+  (tags || []).forEach((t) => {
     if (!t) return;
     const s = document.createElement("span");
     s.className = "tagPill";
@@ -379,19 +385,19 @@ const ENGINE_ALLOWED = ["Ren'Py", "RPGM", "Unity", "HTML", "Flash", "Others", "W
 const STATUS_ALLOWED = ["Completed", "Abandoned", "Onhold"];
 
 const ENGINE_RAW = {
-  "renpy": "Ren'Py",
+  renpy: "Ren'Py",
   "ren'py": "Ren'Py",
-  "rpgm": "RPGM",
-  "rpgmaker": "RPGM",
-  "rpgmakermv": "RPGM",
-  "rpgmakermz": "RPGM",
-  "unity": "Unity",
-  "html": "HTML",
-  "flash": "Flash",
-  "others": "Others",
-  "other": "Others",
-  "wolf": "Wolf RPG",
-  "wolfrpg": "Wolf RPG",
+  rpgm: "RPGM",
+  rpgmaker: "RPGM",
+  rpgmakermv: "RPGM",
+  rpgmakermz: "RPGM",
+  unity: "Unity",
+  html: "HTML",
+  flash: "Flash",
+  others: "Others",
+  other: "Others",
+  wolf: "Wolf RPG",
+  wolfrpg: "Wolf RPG",
 };
 
 function slug(s) {
@@ -399,7 +405,7 @@ function slug(s) {
 }
 
 const SEP_RE = /[\u2014\u2013\-:]/; // — – - :
-const ucFirst = s => (s ? s[0].toUpperCase() + s.slice(1) : s);
+const ucFirst = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
 function cleanTitle(raw) {
   let t = String(raw || "").trim();
@@ -428,7 +434,11 @@ function cleanTitle(raw) {
       continue;
     }
 
-    if (norm === "wolf" && tokens[i + 1] && tokens[i + 1].toLowerCase().replace(/[^\w']/g, "") === "rpg") {
+    if (
+      norm === "wolf" &&
+      tokens[i + 1] &&
+      tokens[i + 1].toLowerCase().replace(/[^\w']/g, "") === "rpg"
+    ) {
       if (!engines.includes("Wolf RPG")) engines.push("Wolf RPG");
       cut = i + 2;
       i++;
@@ -464,7 +474,10 @@ function cleanTitle(raw) {
       continue;
     }
 
-    if (w === "&" || w === "and" || w === "/") { cut = i + 1; continue; }
+    if (w === "&" || w === "and" || w === "/") {
+      cut = i + 1;
+      continue;
+    }
 
     break;
   }
@@ -479,11 +492,11 @@ function cleanTitle(raw) {
 
   const allowedCat = new Set(CAT_ALLOWED);
   const allowedEng = new Set(ENGINE_ALLOWED);
-  categories = categories.filter(c => allowedCat.has(c));
-  engines    = engines.filter(e => allowedEng.has(e));
+  categories = categories.filter((c) => allowedCat.has(c));
+  engines = engines.filter((e) => allowedEng.has(e));
 
-  if (!othersExplicit && engines.includes("Others") && engines.some(e => e !== "Others")) {
-    engines = engines.filter(e => e !== "Others");
+  if (!othersExplicit && engines.includes("Others") && engines.some((e) => e !== "Others")) {
+    engines = engines.filter((e) => e !== "Others");
   }
 
   return { title: t, categories, engines, status };
@@ -501,7 +514,7 @@ function renderBadgesFromGame(display, entry, isCollectionChild) {
   if (!wrap) return;
   wrap.innerHTML = "";
 
-  const childTitle  = String(display?.title || "");
+  const childTitle = String(display?.title || "");
   const parentTitle = String(entry?.title || "");
 
   // ✅ Si c'est un enfant, on affiche TOUJOURS "Collection"
@@ -525,7 +538,6 @@ function renderBadgesFromGame(display, entry, isCollectionChild) {
   // =========================================================
   // ✅ MOTEUR / STATUS : enfant => priorité gameData
   // =========================================================
-
   if (isCollectionChild) {
     // --- ENGINE: priorité gameData.engine ---
     if (display?.engine) {
@@ -548,7 +560,7 @@ function renderBadgesFromGame(display, entry, isCollectionChild) {
   }
 
   // Render engines + status
-  for (const eng of (c.engines || [])) {
+  for (const eng of c.engines || []) {
     wrap.appendChild(makeBadge("eng", eng));
   }
   if (c.status) wrap.appendChild(makeBadge("status", c.status));
@@ -583,7 +595,6 @@ async function renderTranslationStatus(game) {
 
     const wrap = $("badges");
     if (wrap) wrap.appendChild(badge);
-
   } catch {
     // silencieux
   }
@@ -592,7 +603,6 @@ async function renderTranslationStatus(game) {
 // ============================================================================
 // ✅ MENU ☰ (page game) — RÉUTILISE LE MENU RACINE (viewer.menu.js + modules)
 // Ici on garde UNIQUEMENT: ouverture/fermeture + positionnement.
-// Plus de ABOUT_TEXT / modale locale dans game.js.
 // ============================================================================
 
 function positionPopover(pop, anchorBtn) {
@@ -617,7 +627,9 @@ function initHamburgerMenu() {
   if (!btn) return;
 
   // Init menu racine (crée le popover + items)
-  try { window.ViewerMenu?.init?.(); } catch {}
+  try {
+    window.ViewerMenu?.init?.();
+  } catch {}
 
   btn.addEventListener("click", (e) => {
     e.preventDefault();
@@ -628,7 +640,11 @@ function initHamburgerMenu() {
 
     const isOpen = !pop.classList.contains("hidden");
     if (isOpen) {
-      try { window.ViewerMenu?.closeMenu?.(); } catch { pop.classList.add("hidden"); }
+      try {
+        window.ViewerMenu?.closeMenu?.();
+      } catch {
+        pop.classList.add("hidden");
+      }
       btn.setAttribute("aria-expanded", "false");
       return;
     }
@@ -645,7 +661,11 @@ function initHamburgerMenu() {
 
     const target = e.target;
     if (!pop.contains(target) && !btn.contains(target)) {
-      try { window.ViewerMenu?.closeMenu?.(); } catch { pop.classList.add("hidden"); }
+      try {
+        window.ViewerMenu?.closeMenu?.();
+      } catch {
+        pop.classList.add("hidden");
+      }
       btn.setAttribute("aria-expanded", "false");
     }
   });
@@ -659,10 +679,18 @@ function initHamburgerMenu() {
   // ESC => ferme menu + modales (about/extension)
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
-    try { window.ViewerMenu?.closeMenu?.(); } catch {}
-    try { window.ViewerMenu?.closeAbout?.(); } catch {}
-    try { window.ViewerMenu?.closeExtension?.(); } catch {}
-    try { window.ViewerMenuExtension?.close?.(); } catch {}
+    try {
+      window.ViewerMenu?.closeMenu?.();
+    } catch {}
+    try {
+      window.ViewerMenu?.closeAbout?.();
+    } catch {}
+    try {
+      window.ViewerMenu?.closeExtension?.();
+    } catch {}
+    try {
+      window.ViewerMenuExtension?.close?.();
+    } catch {}
   });
 }
 
@@ -671,7 +699,11 @@ function initHamburgerMenu() {
 function formatInt(n) {
   const x = Number(n);
   if (!Number.isFinite(x)) return "0";
-  try { return x.toLocaleString("fr-FR"); } catch { return String(Math.floor(x)); }
+  try {
+    return x.toLocaleString("fr-FR");
+  } catch {
+    return String(Math.floor(x));
+  }
 }
 
 function showStatsBox() {
@@ -686,25 +718,36 @@ async function counterGet(id) {
 }
 
 async function counterHit(id, kind) {
-  const r = await fetch(`/api/counter?op=hit&kind=${encodeURIComponent(kind)}&id=${encodeURIComponent(id)}`, { cache: "no-store" });
+  const r = await fetch(
+    `/api/counter?op=hit&kind=${encodeURIComponent(kind)}&id=${encodeURIComponent(id)}`,
+    { cache: "no-store" }
+  );
   if (!r.ok) throw new Error("counter hit HTTP " + r.status);
   return await r.json();
 }
 
 // ✅ UNLIKE (ne casse pas si ton API ne supporte pas)
 async function counterUnhit(id, kind) {
-  const r = await fetch(`/api/counter?op=unhit&kind=${encodeURIComponent(kind)}&id=${encodeURIComponent(id)}`, { cache: "no-store" });
+  const r = await fetch(
+    `/api/counter?op=unhit&kind=${encodeURIComponent(kind)}&id=${encodeURIComponent(id)}`,
+    { cache: "no-store" }
+  );
   if (!r.ok) throw new Error("counter unhit HTTP " + r.status);
   return await r.json();
 }
 
 // ✅ Like local (anti-spam simple par navigateur)
 function getMyLike(gameId) {
-  try { return localStorage.getItem(`like_${gameId}`) === "1"; }
-  catch { return false; }
+  try {
+    return localStorage.getItem(`like_${gameId}`) === "1";
+  } catch {
+    return false;
+  }
 }
 function setMyLike(gameId, v) {
-  try { localStorage.setItem(`like_${gameId}`, v ? "1" : "0"); } catch {}
+  try {
+    localStorage.setItem(`like_${gameId}`, v ? "1" : "0");
+  } catch {}
 }
 function updateLikeBtn(gameId) {
   const b = $("btnLike");
@@ -756,15 +799,19 @@ async function initCounters(gameId, megaHref) {
   if (megaHref) {
     const btn = $("btnMega");
     if (btn) {
-      btn.addEventListener("click", async () => {
-        try {
-          const j = await counterHit(gameId, "mega");
-          if (j?.ok) {
-            setText("statMegaClicks", formatInt(j.mega));
-            showStatsBox();
-          }
-        } catch {}
-      }, { passive: true });
+      btn.addEventListener(
+        "click",
+        async () => {
+          try {
+            const j = await counterHit(gameId, "mega");
+            if (j?.ok) {
+              setText("statMegaClicks", formatInt(j.mega));
+              showStatsBox();
+            }
+          } catch {}
+        },
+        { passive: true }
+      );
     }
   }
 
@@ -801,9 +848,7 @@ async function initCounters(gameId, megaHref) {
           showStatsBox();
         }
       } catch {
-        // Si ton API n'a pas unhit, on évite de casser:
-        // - le like (hit) marche si supporté
-        // - l'unlike peut échouer silencieusement
+        // Si ton API n'a pas unhit, on évite de casser.
       }
     });
   }
@@ -840,11 +885,15 @@ function getMyVote4(gameId) {
   try {
     const v = Number(localStorage.getItem(`rating4_${gameId}`) || "0");
     return Number.isFinite(v) ? v : 0;
-  } catch { return 0; }
+  } catch {
+    return 0;
+  }
 }
 
 function setMyVote4(gameId, v) {
-  try { localStorage.setItem(`rating4_${gameId}`, String(v)); } catch {}
+  try {
+    localStorage.setItem(`rating4_${gameId}`, String(v));
+  } catch {}
 }
 
 function renderRating4UI(gameId, data) {
@@ -865,12 +914,12 @@ function renderRating4UI(gameId, data) {
 
   const setVisual = (hoverValue) => {
     const v =
-      (hoverValue === 0 || typeof hoverValue === "number")
+      hoverValue === 0 || typeof hoverValue === "number"
         ? hoverValue
-        : (getMyVote4(gameId) || 0);
+        : getMyVote4(gameId) || 0;
 
     [...choices.querySelectorAll(".ratingStar")].forEach((btn, idx) => {
-      btn.textContent = (idx + 1) <= v ? "★" : "☆";
+      btn.textContent = idx + 1 <= v ? "★" : "☆";
     });
   };
 
@@ -904,7 +953,9 @@ function renderRating4UI(gameId, data) {
       try {
         const res = await rating4Vote(gameId, 0, prev);
         if (res?.ok) {
-          try { localStorage.removeItem(`rating4_${gameId}`); } catch {}
+          try {
+            localStorage.removeItem(`rating4_${gameId}`);
+          } catch {}
           renderRating4UI(gameId, res);
           if (msgEl) msgEl.textContent = "Note supprimée ✅";
         }
@@ -957,6 +1008,22 @@ function renderRating4UI(gameId, data) {
   restoreMsg();
 }
 
+// =========================
+// ✅ Placement DOM (encadrés)
+// =========================
+
+function moveAfter(el, afterEl) {
+  if (!el || !afterEl || !afterEl.parentNode) return;
+  if (afterEl.nextSibling) afterEl.parentNode.insertBefore(el, afterEl.nextSibling);
+  else afterEl.parentNode.appendChild(el);
+}
+
+function addGameBlockClass(id) {
+  const el = $(id);
+  if (!el) return;
+  el.classList.add("game-block");
+}
+
 // ====== Main ======
 
 (async function main() {
@@ -967,7 +1034,9 @@ function renderRating4UI(gameId, data) {
     const { id: idParam, uid: uidParam } = getParamsFromUrl();
 
     if (!idParam && !uidParam) {
-      showError("Aucun paramètre dans l’URL. Exemples : /game/?id=215277  ou  /game/?id=17373&uid=898  ou  /game/?uid=898");
+      showError(
+        "Aucun paramètre dans l’URL. Exemples : /game/?id=215277  ou  /game/?id=17373&uid=898  ou  /game/?uid=898"
+      );
       return;
     }
 
@@ -988,10 +1057,7 @@ function renderRating4UI(gameId, data) {
     // display = données "jeu" (gameData si présent)
     const display = entry?.gameData ? entry.gameData : entry;
 
-    const isCollectionChild =
-      page.kind === "collectionChild" &&
-      entry &&
-      entry.gameData;
+    const isCollectionChild = page.kind === "collectionChild" && entry && entry.gameData;
 
     const title = (getDisplayTitle(entry) || getDisplayTitle(display) || `Jeu ${idParam || uidParam}`).trim();
     document.title = title;
@@ -1004,6 +1070,7 @@ function renderRating4UI(gameId, data) {
     renderBadgesFromGame(display, entry, isCollectionChild);
     renderTranslationStatus(entry);
 
+    // ----- Liens principaux -----
     setHref("btnDiscord", (entry.discordlink || "").trim());
     if ($("btnDiscord")) $("btnDiscord").textContent = "💬 Discord";
 
@@ -1011,69 +1078,84 @@ function renderRating4UI(gameId, data) {
     if ($("btnF95")) $("btnF95").textContent = "🌐 F95Zone";
 
     const megaHref = (entry.translation || "").trim();
-
-    // ======================================================
-    // ✅ EXTRA BOX (vidéo/description/notes/archive)
-    // IMPORTANT: si #extraBox existe dans index.html et est display:none,
-    // il faut le rendre visible si au moins un champ existe.
-    // ======================================================
-    let hasExtra = false;
+    setHref("btnMega", megaHref);
+    if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction (MEGA)";
 
     // =========================
-    // 📺 Vidéo
+    // ✅ Encadrés (un champ = un bloc)
+    // + ordre demandé :
+    // - Notes sous le bouton MEGA
+    // - Lien "dossier/archives" sous Notes
     // =========================
-    const videoUrl = (entry.videoUrl || "").trim();
+
+    // Ajoute le style "encadré" (CSS .game-block) aux blocs existants
+    addGameBlockClass("videoBox");
+    addGameBlockClass("descriptionBox");
+    addGameBlockClass("notesBox");
+    addGameBlockClass("archiveBox");
+    // (ratingBox est déjà un bloc visuel, on le laisse tel quel)
+
+    const btnMainRow = document.querySelector(".btnMainRow");
+    const notesBox = $("notesBox");
+    const archiveBox = $("archiveBox");
+
+    // =========================
+    // 📺 Vidéo (entry prioritaire, sinon display)
+    // =========================
+    const videoUrl = (entry.videoUrl || display.videoUrl || "").trim();
     if (videoUrl) {
       const iframe = document.getElementById("videoFrame");
       if (iframe) iframe.src = videoUrl;
       show("videoBox", true);
-      hasExtra = true;
     } else {
       show("videoBox", false);
     }
 
     // =========================
-    // 📝 Description
+    // 📝 Description (entry prioritaire)
     // =========================
-    const desc = (entry.description || "").trim();
+    const desc = (entry.description || display.description || "").trim();
     if (desc) {
       setHtml("descriptionText", escapeHtml(desc).replace(/\n/g, "<br>"));
       show("descriptionBox", true);
-      hasExtra = true;
     } else {
       show("descriptionBox", false);
     }
 
     // =========================
-    // 🗒️ Notes
+    // 🗒️ Notes (entry prioritaire) — doit être sous MEGA
     // =========================
     const notes = (entry.notes || "").trim();
     if (notes) {
       setHtml("notesText", escapeHtml(notes).replace(/\n/g, "<br>"));
       show("notesBox", true);
-      hasExtra = true;
     } else {
       show("notesBox", false);
     }
 
+    // Place Notes juste sous le bouton MEGA (btnMainRow)
+    if (btnMainRow && notesBox) moveAfter(notesBox, btnMainRow);
+
     // =========================
-    // 🗃️ Archives de traduction
+    // 🗃️ Dossier / Archives de traduction — sous Notes
     // =========================
     const archive = (entry.translationsArchive || "").trim();
     if (archive) {
       const a = document.getElementById("archiveLink");
-      if (a) a.href = archive;
+      if (a) {
+        a.href = archive;
+        a.textContent = "🗃️ Dossier / Archives de traduction";
+      }
       show("archiveBox", true);
-      hasExtra = true;
     } else {
       show("archiveBox", false);
     }
 
-    // ✅ Affiche / cache le bloc encadré global
-    show("extraBox", hasExtra);
-
-    setHref("btnMega", megaHref);
-    if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction (MEGA)";
+    // Place Archives sous Notes si Notes visible, sinon sous MEGA
+    if (archiveBox) {
+      if (notes && notesBox) moveAfter(archiveBox, notesBox);
+      else if (btnMainRow) moveAfter(archiveBox, btnMainRow);
+    }
 
     // --- Related blocks (Collection / Série)
     const relatedOut = ensureRelatedContainer();
@@ -1122,7 +1204,6 @@ function renderRating4UI(gameId, data) {
       const j = await rating4Get(analyticsKey);
       if (j?.ok) renderRating4UI(analyticsKey, j);
     } catch {}
-
   } catch (e) {
     showError(`Erreur: ${e?.message || e}`);
   }

@@ -7,6 +7,30 @@
 
   const $ = sel => document.querySelector(sel);
 
+
+// ✅ URL page jeu (id central + support collection child)
+function buildGameUrl(g) {
+  const coll = (g.collection || "").toString().trim();
+  const id = (g.id || "").toString().trim();
+  const uid = (g.uid ?? "").toString().trim();
+
+  // Sous-jeu de collection : /game/?id=<collection>&uid=<uid>
+  if (coll) {
+    return `/game/?id=${encodeURIComponent(coll)}&uid=${encodeURIComponent(uid)}`;
+  }
+  // Jeu normal / collection parent : /game/?id=<id>
+  if (id) {
+    return `/game/?id=${encodeURIComponent(id)}`;
+  }
+  // Fallback uid seul
+  return `/game/?uid=${encodeURIComponent(uid)}`;
+}
+
+// ✅ Titre affiché (gameData prioritaire si présent)
+function getDisplayTitle(g) {
+  return (g.gameData?.title || g.cleanTitle || g.title || "").toString().trim() || "Sans titre";
+}
+
   const state = {
     all: [],
     filtered: [],
@@ -465,7 +489,7 @@
   // =========================
 
   const CAT_ALLOWED    = ["VN", "Collection"];
-  const ENGINE_ALLOWED = ["Ren'Py", "RPGM", "Unity", "HTML", "Flash", "Others", "Wolf RPG"];
+  const ENGINE_ALLOWED = ["Ren'Py", "RPGM", "Unity", "Others", "Wolf RPG"];
   const STATUS_ALLOWED = ["Completed", "Abandoned", "Onhold"];
   const ENGINE_RAW = {
     "renpy": "Ren'Py",
@@ -478,8 +502,6 @@
     "rpgmakermz": "RPGM",
     "rpg maker": "RPGM",
     "unity": "Unity",
-    "html": "HTML",
-    "flash": "Flash",
     "others": "Others",
     "other": "Others",
     "html": "Others",
@@ -612,38 +634,20 @@
     return { title: t, categories, engines, status };
   }
 
-  
-  
-  function getDisplayTitle(g) {
-    // Collection child: priorité à gameData.title
-    if (g.collection && String(g.collection).trim() !== "" && (!g.id || String(g.id).trim() === "")) {
-      return String(g.gameData?.title || g.title || g.rawTitle || "").trim();
-    }
-    return String(g.title || g.rawTitle || "").trim();
-  }
+  function normalize(game) {
+    const coll = String(game.collection || "");
+    const uid = (game.uid ?? "");
 
-function buildGameUrl(g) {
-    // Sous-jeu d'une collection: /game/?id=<collectionId>&uid=<uid>
-    if (g.collection && String(g.collection).trim() !== "" && (!g.id || String(g.id).trim() === "")) {
-      return `/game/?id=${encodeURIComponent(g.collection)}&uid=${encodeURIComponent(g.uid)}`;
-    }
-    // Jeu normal / collection parent: /game/?id=<id>
-    if (g.id && String(g.id).trim() !== "") {
-      return buildGameUrl(g);
-    }
-    // Fallback uid-only
-    return `/game/?uid=${encodeURIComponent(g.uid)}`;
-  }
+    // ✅ Pour les jeux de collection (id vide), on affiche/filtre sur gameData (titre/image/tags/engine)
+    const displayTitleRaw = String((game.gameData && game.gameData.title) ? game.gameData.title : (game.title || ""));
+    const displayImageRaw = String((game.gameData && game.gameData.imageUrl) ? game.gameData.imageUrl : (game.imageUrl || ""));
+    const displayTags = Array.isArray(game.gameData?.tags)
+      ? game.gameData.tags.slice()
+      : (Array.isArray(game.tags) ? game.tags.slice() : []);
 
-function normalize(game) {
-    const c = cleanTitle(game.title);
+    const c = cleanTitle(displayTitleRaw);
     const categories = Array.isArray(c.categories) ? c.categories : (game.category ? [game.category] : []);
     const engines    = Array.isArray(c.engines)    ? c.engines    : (game.engine ? [game.engine] : []);
-
-    const isCollectionChild = (!game.id || String(game.id).trim() === "") && String(game.collection || "").trim() !== "";
-    const effectiveTitle = isCollectionChild ? (game.gameData?.title || c.title) : c.title;
-    const effectiveEngines = isCollectionChild ? ([game.gameData?.engine].filter(Boolean)) : engines;
-    const effectiveCategories = isCollectionChild ? [] : categories;
 
     const updatedAtTs   = parseFrenchDate(game.updatedAt);
     const releaseDateTs = parseFrenchDate(game.releaseDate);
@@ -657,23 +661,22 @@ function normalize(game) {
     const createdAtLocalTs = !Number.isNaN(createdAtLocalParsed) ? createdAtLocalParsed : 0;
 
     return {
-      uid: (game.uid !== undefined && game.uid !== null) ? Number(game.uid) : null,
-      collection: String(game.collection || ""),
-      serie: game.serie || "",
-      gameData: game.gameData || null,
+      uid,
+      collection: coll,
       id: String(game.id || ""),
-      rawTitle: String(game.title || ""),
-      title: effectiveTitle,
-      categories: effectiveCategories,
-      category: (effectiveCategories[0] || null),
-      engines: effectiveEngines,
-      engine: (effectiveEngines[0] || null),
-      status: (isCollectionChild ? (game.gameData?.status || "En cours") : ((STATUS_ALLOWED.includes(c.status) || c.status === "En cours") ? c.status : "En cours")),
+      rawTitle: displayTitleRaw,
+      title: c.title,
+      gameData: game.gameData || null,
+      categories,
+      category: categories[0] || null,
+      engines,
+      engine: engines[0] || null,
+      status: (STATUS_ALLOWED.includes(c.status) || c.status === "En cours") ? c.status : "En cours",
       discord: String(game.discordlink || ""),
       translation: String(game.translation || ""),
-      image: String(game.imageUrl || ""),
+      image: displayImageRaw,
       url: String(game.url || game.threadUrl || ""),
-      tags: Array.isArray(game.tags) ? game.tags.slice() : [],
+      tags: displayTags,
 
       updatedAt: game.updatedAt || "",
       updatedAtTs,
@@ -862,7 +865,7 @@ function normalize(game) {
       card.className = "card";
 
       const imgSrc = (g.image || "").trim() || "/favicon.png";
-      const pageHref = GAME_BASE + encodeURIComponent(g.id);
+      const pageHref = buildGameUrl(g);
 
       card.innerHTML = `
         <img src="${imgSrc}" class="thumb" alt=""

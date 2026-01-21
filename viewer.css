@@ -731,3 +731,11 @@ main{
 .viewer-annonce.is-locked .viewer-annonce__body {
   text-align: center;
 }
+
+.collection-child-block {
+  border: 1px solid rgba(255,255,255,.25);
+  padding: 12px;
+  border-radius: 8px;
+  margin: 12px 0;
+  background: rgba(0,0,0,.15);
+}

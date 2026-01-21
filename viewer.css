@@ -769,3 +769,15 @@ main{
 .serie-block h3 {
   margin-top: 0;
 }
+
+/* ✅ Bloc générique (page game + autres) */
+.game-block{
+  border: 1px solid rgba(255,255,255,.25);
+  padding: 12px;
+  border-radius: 8px;
+  margin: 12px 0;
+  background: rgba(0,0,0,.15);
+}
+.game-block h3{
+  margin: 0 0 8px 0;
+}

@@ -7,6 +7,30 @@
 
   const $ = sel => document.querySelector(sel);
 
+
+// ✅ URL page jeu (id central + support collection child)
+function buildGameUrl(g) {
+  const coll = (g.collection || "").toString().trim();
+  const id = (g.id || "").toString().trim();
+  const uid = (g.uid ?? "").toString().trim();
+
+  // Sous-jeu de collection : /game/?id=<collection>&uid=<uid>
+  if (coll) {
+    return `/game/?id=${encodeURIComponent(coll)}&uid=${encodeURIComponent(uid)}`;
+  }
+  // Jeu normal / collection parent : /game/?id=<id>
+  if (id) {
+    return `/game/?id=${encodeURIComponent(id)}`;
+  }
+  // Fallback uid seul
+  return `/game/?uid=${encodeURIComponent(uid)}`;
+}
+
+// ✅ Titre affiché (gameData prioritaire si présent)
+function getDisplayTitle(g) {
+  return (g.gameData?.title || g.cleanTitle || g.title || "").toString().trim() || "Sans titre";
+}
+
   const state = {
     all: [],
     filtered: [],
@@ -828,14 +852,14 @@
       card.className = "card";
 
       const imgSrc = (g.image || "").trim() || "/favicon.png";
-      const pageHref = GAME_BASE + encodeURIComponent(g.id);
+      const pageHref = buildGameUrl(g);
 
       card.innerHTML = `
         <img src="${imgSrc}" class="thumb" alt=""
              referrerpolicy="no-referrer"
              onerror="this.onerror=null;this.src='/favicon.png';this.classList.add('is-fallback');">
         <div class="body">
-          <h3 class="name clamp-2">${escapeHtml(g.title)}</h3>
+          <h3 class="name clamp-2">${escapeHtml(getDisplayTitle(g))}</h3>
           <div class="badges-line one-line">${badgesLineHtml(g)}</div>
           <div class="actions">
             <a class="btn btn-page" href="${pageHref}" target="_blank" rel="noopener">

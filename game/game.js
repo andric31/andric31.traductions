@@ -508,14 +508,29 @@ function renderBadgesFromGame(display, entry, isCollectionChild) {
   if (!wrap) return;
   wrap.innerHTML = "";
 
-  // ✅ Source unique (comme viewer.js)
-  // - enfant collection => display.title (gameData.title)
-  // - normal => entry.title (titre complet F95)
-  const rawTitle = isCollectionChild
-    ? String(display?.title || "")
-    : String(entry?.title || "");
+  const childTitle  = String(display?.title || "");
+  const parentTitle = String(entry?.title || "");
 
-  const c = cleanTitle(rawTitle);
+  // ✅ Si c'est un enfant, on affiche TOUJOURS "Collection"
+  if (isCollectionChild) {
+    wrap.appendChild(makeBadge("cat", "Collection"));
+  }
+
+  // 1) on parse d'abord le titre enfant (pour garder Unity/Ren'Py/etc si présent)
+  let c = cleanTitle(isCollectionChild ? childTitle : parentTitle);
+
+  // 2) si enfant ET aucun moteur détecté => on récupère les moteurs depuis le titre parent
+  if (isCollectionChild && (!c.engines || c.engines.length === 0)) {
+    const cp = cleanTitle(parentTitle);
+    c.engines = cp.engines || [];
+    // (optionnel) status du parent si tu veux le même
+    if (!c.status && cp.status) c.status = cp.status;
+  }
+
+  // ✅ Pour un parent "Collection ..." (non enfant), on affiche aussi le badge Collection
+  if (!isCollectionChild && c.categories.includes("Collection")) {
+    wrap.appendChild(makeBadge("cat", "Collection"));
+  }
 
   // ⛔ jamais VN pour enfant de collection
   if (!isCollectionChild && c.categories.includes("VN")) {
@@ -525,14 +540,7 @@ function renderBadgesFromGame(display, entry, isCollectionChild) {
   for (const eng of (c.engines || [])) {
     wrap.appendChild(makeBadge("eng", eng));
   }
-  if (c.status)     wrap.appendChild(makeBadge("status", c.status));
-}
-
-function makeBadge(type, value) {
-  const b = document.createElement("span");
-  b.className = `badge ${type}-${slug(value)}`;
-  b.textContent = value;
-  return b;
+  if (c.status) wrap.appendChild(makeBadge("status", c.status));
 }
 
 /**

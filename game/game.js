@@ -388,8 +388,8 @@ function renderTags(tags) {
 
 // ====== Badges (style F95 comme build_pages.py) ======
 
-const CAT_ALLOWED = ["VN", "Collection"];
-const ENGINE_ALLOWED = ["Ren'Py", "RPGM", "Unity", "Others", "Wolf RPGM"];
+const CAT_ALLOWED = ["Collection"];
+const ENGINE_ALLOWED = ["Ren'Py", "RPGM", "Unity", "HTML", "Flash", "Others", "Wolf RPGM"];
 const STATUS_ALLOWED = ["Completed", "Abandoned", "Onhold"];
 
 const ENGINE_RAW = {
@@ -400,6 +400,8 @@ const ENGINE_RAW = {
   "rpgmakermv": "RPGM",
   "rpgmakermz": "RPGM",
   "unity": "Unity",
+  "html": "HTML",
+  "flash": "Flash",
   "others": "Others",
   "other": "Others",
   "wolf": "Wolf RPGM",
@@ -421,9 +423,7 @@ function parseTitleMeta(raw) {
 
   for (const tok of tokens) {
     const k = tok.toLowerCase();
-
-    if (k === "vn") categories.push("VN");
-    if (k === "collection") categories.push("Collection");
+if (k === "collection") categories.push("Collection");
 
     const pretty = k ? (k[0].toUpperCase() + k.slice(1)) : "";
     if (STATUS_ALLOWED.includes(pretty)) status = pretty;
@@ -431,7 +431,7 @@ function parseTitleMeta(raw) {
     if (ENGINE_RAW[k]) engines.push(ENGINE_RAW[k]);
   }
 
-  if (!categories.length) categories = ["VN"];
+  if (!categories.length) categories = [];
   if (!engines.length) engines = ["Ren'Py"];
   if (!status) status = "En cours";
 
@@ -915,6 +915,20 @@ function renderRating4UI(gameId, data) {
     renderBadgesFromGame(display);
     renderTranslationStatus(entry);
 
+    // Description / Notes
+    const desc = (entry.description || "").trim();
+    if (desc) {
+      const box = $("descBox");
+      const out = $("descText");
+      if (box && out) { box.classList.remove("hidden"); out.innerHTML = escapeHtml(desc).replace(/\n/g, "<br>"); }
+    }
+    const notes = (entry.notes || "").trim();
+    if (notes) {
+      const box = $("notesBox");
+      const out = $("notesText");
+      if (box && out) { box.classList.remove("hidden"); out.innerHTML = escapeHtml(notes).replace(/\n/g, "<br>"); }
+    }
+
     setHref("btnDiscord", (entry.discordlink || "").trim());
     if ($("btnDiscord")) $("btnDiscord").textContent = "💬 Discord";
 
@@ -923,6 +937,21 @@ function renderRating4UI(gameId, data) {
 
     const megaHref = (entry.translation || "").trim();
     setHref("btnMega", megaHref);
+
+    // Archives
+    const archHref = (entry.translationsArchive || "").trim();
+    if (archHref) {
+      setHref("btnArchive", archHref);
+      $("btnArchive")?.classList.remove("hidden");
+    }
+
+    // Video
+    const vidHref = ((display.videoUrl || entry.videoUrl) || "").trim();
+    if (vidHref) {
+      setHref("btnVideo", vidHref);
+      $("btnVideo")?.classList.remove("hidden");
+    }
+
     if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction (MEGA)";
 
     // --- Related blocks (Collection / Série)

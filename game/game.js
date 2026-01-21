@@ -52,6 +52,16 @@ function escapeHtml(s) {
     .replace(/'/g, "&#39;");
 }
 
+function setHtml(id, html) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = html ?? "";
+}
+
+function show(id, cond) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = cond ? "" : "none";
+}
+
 // =========================
 // ✅ Routing (id central) + Collections + Séries
 // =========================
@@ -1025,6 +1035,45 @@ function renderRating4UI(gameId, data) {
     if ($("btnF95")) $("btnF95").textContent = "🌐 F95Zone";
 
     const megaHref = (entry.translation || "").trim();
+
+    // =========================
+    // 📺 Vidéo
+    // =========================
+    const videoUrl = (entry.videoUrl || "").trim();
+    if (videoUrl) {
+      const iframe = document.getElementById("videoFrame");
+      if (iframe) iframe.src = videoUrl;
+      show("videoBox", true);
+    }
+    
+    // =========================
+    // 📝 Description
+    // =========================
+    const desc = (entry.description || "").trim();
+    if (desc) {
+      setHtml("descriptionText", escapeHtml(desc).replace(/\n/g, "<br>"));
+      show("descriptionBox", true);
+    }
+    
+    // =========================
+    // 🗒️ Notes
+    // =========================
+    const notes = (entry.notes || "").trim();
+    if (notes) {
+      setHtml("notesText", escapeHtml(notes).replace(/\n/g, "<br>"));
+      show("notesBox", true);
+    }
+    
+    // =========================
+    // 🗃️ Archives de traduction
+    // =========================
+    const archive = (entry.translationsArchive || "").trim();
+    if (archive) {
+      const a = document.getElementById("archiveLink");
+      if (a) a.href = archive;
+      show("archiveBox", true);
+    }
+
     setHref("btnMega", megaHref);
     if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction (MEGA)";
 

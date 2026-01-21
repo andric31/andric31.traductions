@@ -732,9 +732,18 @@ main{
   text-align: center;
 }
 
-.serie-block h3 {
+/* ===== Game blocks (Collection / Serie / Meta) ===== */
+.collection-block, .collection-child-block, .serie-block, .meta-block{
+  border: 1px solid rgba(255,255,255,.25);
+  padding: 12px;
+  border-radius: 8px;
+  margin: 16px 0;
+  background: rgba(0,0,0,.15);
+}
+.collection-block h3, .collection-child-block h3, .serie-block h3, .meta-block h3{
   margin-top: 0;
 }
+.meta-text{ opacity:.95; line-height:1.4; }
 
 /* Mini buttons in viewer cards */
 .btn-mini{

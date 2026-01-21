@@ -17,17 +17,24 @@ function getListUrl() {
   }
 }
 
-function getParamsFromUrl() {
+function getUidFromUrl() {
+  try {
+    const p = new URLSearchParams(location.search);
+    const u = (p.get("uid") || "").trim();
+    return u ? u : "";
+  } catch { return ""; }
+}
+
+function getIdFromUrl() {
+  // Mode final: uniquement ?id=
   try {
     const p = new URLSearchParams(location.search);
     const id = (p.get("id") || "").trim();
-    const uid = (p.get("uid") || "").trim();
-    return { id: id || "", uid: uid || "" };
+    return id || null;
   } catch {
-    return { id: "", uid: "" };
+    return null;
   }
 }
-
 
 function extractGames(raw) {
   if (Array.isArray(raw)) return raw;
@@ -40,268 +47,6 @@ function extractGames(raw) {
     if (Array.isArray(raw[k])) return raw[k];
   }
   return [];
-}
-
-
-function escapeHtml(s) {
-  return String(s ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
-// =========================
-// ✅ Routing (id central) + Collections + Séries
-// =========================
-
-function buildGameUrl(g) {
-  const coll = (g.collection || "").toString().trim();
-  const id = (g.id || "").toString().trim();
-  const uid = (g.uid ?? "").toString().trim();
-
-  if (coll) return `/game/?id=${encodeURIComponent(coll)}&uid=${encodeURIComponent(uid)}`;
-  if (id) return `/game/?id=${encodeURIComponent(id)}`;
-  return `/game/?uid=${encodeURIComponent(uid)}`;
-}
-
-function getDisplayTitle(g) {
-  // Règle: si c'est un enfant de collection (id vide + collection non vide),
-  // on affiche UNIQUEMENT le titre du gameData (le title principal est celui de la collection).
-  const id = (g?.id || "").toString().trim();
-  const col = (g?.collection || "").toString().trim();
-  if (!id && col) {
-    return (g?.gameData?.title || "").toString().trim();
-  }
-  return (g?.cleanTitle || g?.title || "").toString().trim();
-}
-
-function getCollectionChildTitle(g) {
-  // Strict: pas de fallback vers g.title (sinon doublons "Collection ...")
-  return (g?.gameData?.title || "").toString().trim();
-}
-
-function getEntryRefs(g) {
-  const refs = [];
-  const id = (g?.id || "").toString().trim();
-  if (id) refs.push(`id:${id}`);
-  if (g?.uid !== undefined && g?.uid !== null) refs.push(`uid:${String(g.uid)}`);
-  return refs;
-}
-
-function buildSeriesIndex(games) {
-  const map = new Map(); // ref => [serieObj]
-  for (const owner of games || []) {
-    const s = owner?.serie;
-    if (!s?.name || !Array.isArray(s.refs)) continue;
-
-    const serieObj = {
-      name: String(s.name),
-      refs: s.refs.map(x => String(x)),
-      ownerUid: owner?.uid,
-      ownerId: owner?.id || ""
-    };
-
-    // refs déclarées
-    for (const ref of serieObj.refs) {
-      if (!map.has(ref)) map.set(ref, []);
-      map.get(ref).push(serieObj);
-    }
-
-    // rendre visible sur la page du owner (id central)
-    for (const selfRef of getEntryRefs(owner)) {
-      if (!map.has(selfRef)) map.set(selfRef, []);
-      map.get(selfRef).push(serieObj);
-    }
-  }
-  return map;
-}
-
-function getCurrentPageRefs({ kind, idParam, uidParam, entry }) {
-  if (kind === "collectionChild") {
-    return [`id:${String(idParam)}`, `uid:${String(uidParam)}`];
-  }
-  return getEntryRefs(entry);
-}
-
-function getSeriesForCurrentPage(pageRefs, seriesIndex) {
-  const found = [];
-  for (const r of pageRefs || []) {
-    const arr = seriesIndex.get(r);
-    if (arr) found.push(...arr);
-  }
-  const uniq = new Map();
-  for (const s of found) {
-    uniq.set(`${s.name}|${s.ownerUid}`, s);
-  }
-  return [...uniq.values()];
-}
-
-function resolveSerieRefsToEntries(serie, games) {
-  const out = [];
-  for (const ref of (serie?.refs || [])) {
-    const [type, value] = String(ref).split(":");
-    if (type === "id") {
-      const g = (games || []).find(x => String(x?.id) === String(value) && !x?.collection);
-      if (g) out.push(g);
-    } else if (type === "uid") {
-      const g = (games || []).find(x => String(x?.uid) === String(value));
-      if (g) out.push(g);
-    }
-  }
-  return out;
-}
-
-function resolveGamePage(params, games) {
-  const id = (params?.id || "").toString().trim();
-  const uid = (params?.uid || "").toString().trim();
-
-  // 1) Sous-jeu de collection
-  if (id && uid) {
-    const child = (games || []).find(g =>
-      String(g?.uid) === String(uid) && String(g?.collection) === String(id)
-    );
-    if (!child) return { kind: "notfound" };
-
-    const parent = (games || []).find(g => String(g?.id) === String(id) && !g?.collection) || null;
-    const siblings = (games || [])
-      .filter(g => String(g?.collection) === String(id))
-      .sort((a,b) => Number(a?.uid) - Number(b?.uid));
-
-    return { kind: "collectionChild", idParam: id, uidParam: uid, entry: child, parent, siblings };
-  }
-
-  // 2) id seul
-  if (id) {
-    const parentOrGame = (games || []).find(g => String(g?.id) === String(id) && !g?.collection) || null;
-    if (!parentOrGame) return { kind: "notfound" };
-
-    const children = (games || [])
-      .filter(g => String(g?.collection) === String(id))
-      .sort((a,b) => Number(a?.uid) - Number(b?.uid));
-
-    if (children.length) return { kind: "collectionParent", idParam: id, entry: parentOrGame, children };
-    return { kind: "normal", idParam: id, entry: parentOrGame };
-  }
-
-  // 3) uid seul
-  if (uid) {
-    const g = (games || []).find(x => String(x?.uid) === String(uid)) || null;
-    if (!g) return { kind: "notfound" };
-    return { kind: "uidOnly", uidParam: uid, entry: g };
-  }
-
-  return { kind: "notfound" };
-}
-
-function ensureRelatedContainer() {
-  const tags = document.getElementById("tags");
-  if (!tags) return null;
-
-  let out = document.getElementById("relatedOut");
-  if (!out) {
-    out = document.createElement("div");
-    out.id = "relatedOut";
-    out.style.marginTop = "12px";
-    out.style.display = "grid";
-    out.style.gap = "10px";
-    tags.parentNode.insertBefore(out, tags.nextSibling);
-  }
-  return out;
-}
-
-function renderCollectionBlock(parent, children) {
-  if (!parent || !children || !children.length) return "";
-
-  const items = children.map(g => {
-    const t = escapeHtml(getDisplayTitle(g, "collectionChild"));
-    const href = `/game/?id=${encodeURIComponent(parent.id)}&uid=${encodeURIComponent(g.uid)}`;
-    return `<li><a href="${href}">${t}</a></li>`;
-  }).join("");
-
-  return `
-    <div class="game-block collection-block">
-      <h3>📦 Collection</h3>
-      <ul class="collection-list">
-        ${items}
-      </ul>
-    </div>
-  `;
-}
-
-function renderCollectionBlockForChild(parent) {
-  // Encadré minimal : titre + lien vers la page principale de la collection
-  const parentId = parent?.id ? String(parent.id) : "";
-  const href = parentId ? `/game/?id=${encodeURIComponent(parentId)}` : "";
-  const label = parent ? (parent.cleanTitle || parent.title || parentId) : "Voir la collection";
-
-  return `
-    <div class="game-block collection-child-block" style="border:1px solid rgba(255,255,255,.25);padding:12px;border-radius:8px;margin:12px 0;background:rgba(0,0,0,.15)">
-      <h3>📦 Fait partie de la collection</h3>
-      ${href ? `<a class="collection-parent-link" href="${href}">${escapeHtml(label)}</a>` : ``}
-    </div>
-  `;
-}
-
-
-
-
-function renderCollectionBlockForParent(parent, children) {
-  if (!children || !children.length) return "";
-
-  const items = children.map(g => {
-    const t = escapeHtml(getDisplayTitle(g, "collectionChild"));
-    const href = `/game/?id=${encodeURIComponent(parent.id)}&uid=${encodeURIComponent(g.uid)}`;
-    return `<li><a href="${href}">${t}</a></li>`;
-  }).join("");
-
-  return `
-    <div class="game-block collection-block">
-      <h3>📦 Collection</h3>
-      <ul class="collection-list">
-        ${items}
-      </ul>
-    </div>
-  `;
-}
-
-function renderSeriesBlocks(seriesList, games, currentCanonicalKey) {
-  if (!Array.isArray(seriesList) || !seriesList.length) return "";
-
-  const blocks = seriesList.map(serie => {
-    const items = resolveSerieRefsToEntries(serie, games);
-
-    const li = items.map(g => {
-      const t = getCollectionChildTitle(g) || getDisplayTitle(g);
-      const href = buildGameUrl(g);
-
-      // clé canonique pour surligner : id si existe, sinon uid, sinon collection+uid
-      let key = "";
-      const id = (g.id || "").toString().trim();
-      const coll = (g.collection || "").toString().trim();
-      if (coll) key = `c:${coll}|u:${g.uid}`;
-      else if (id) key = `id:${id}`;
-      else key = `uid:${g.uid}`;
-
-      const isCurrent = key === currentCanonicalKey;
-
-      return `<li style="margin:4px 0;">
-        <a href="${href}" class="btn-link" style="${isCurrent ? "font-weight:700;text-decoration:underline;" : ""}">
-          ${escapeHtml(t || "Sans titre")}
-        </a>
-      </li>`;
-    }).join("");
-
-    return `
-      <div class="game-block" style="border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 12px;">
-        <h3 style="margin:0 0 6px 0;">📚 Série : ${escapeHtml(serie.name)}</h3>
-        <ul style="margin:0;padding-left:18px;">${li}</ul>
-      </div>
-    `;
-  }).join("");
-
-  return blocks;
 }
 
 async function fetchJson(url) {
@@ -386,9 +131,27 @@ function renderTags(tags) {
   });
 }
 
+
+function buildGameUrl(entry) {
+  if (entry && entry.collection && String(entry.collection).trim() !== "" && (!entry.id || String(entry.id).trim() === "")) {
+    return `/game/?id=${encodeURIComponent(entry.collection)}&uid=${encodeURIComponent(entry.uid)}`;
+  }
+  if (entry && entry.id && String(entry.id).trim() !== "") {
+    return `/game/?id=${encodeURIComponent(entry.id)}`;
+  }
+  return `/game/?uid=${encodeURIComponent(entry.uid)}`;
+}
+
+function getDisplayTitle(entry, kind) {
+  if (kind === "collectionChild") {
+    return String(entry.gameData?.title || "").trim() || String(entry.title || entry.cleanTitle || "").trim();
+  }
+  return String(entry.cleanTitle || entry.title || "").trim();
+}
+
 // ====== Badges (style F95 comme build_pages.py) ======
 
-const CAT_ALLOWED = ["Collection"];
+const CAT_ALLOWED = ["VN", "Collection"];
 const ENGINE_ALLOWED = ["Ren'Py", "RPGM", "Unity", "HTML", "Flash", "Others", "Wolf RPGM"];
 const STATUS_ALLOWED = ["Completed", "Abandoned", "Onhold"];
 
@@ -423,7 +186,9 @@ function parseTitleMeta(raw) {
 
   for (const tok of tokens) {
     const k = tok.toLowerCase();
-if (k === "collection") categories.push("Collection");
+
+    if (k === "vn") categories.push("VN");
+    if (k === "collection") categories.push("Collection");
 
     const pretty = k ? (k[0].toUpperCase() + k.slice(1)) : "";
     if (STATUS_ALLOWED.includes(pretty)) status = pretty;
@@ -431,7 +196,7 @@ if (k === "collection") categories.push("Collection");
     if (ENGINE_RAW[k]) engines.push(ENGINE_RAW[k]);
   }
 
-  if (!categories.length) categories = [];
+  if (!categories.length) categories = ["VN"];
   if (!engines.length) engines = ["Ren'Py"];
   if (!status) status = "En cours";
 
@@ -880,9 +645,9 @@ function renderRating4UI(gameId, data) {
     // ✅ menu ☰ (page game) — via menu racine
     initHamburgerMenu();
 
-    const { id: idParam, uid: uidParam } = getParamsFromUrl();
-
-    if (!idParam && !uidParam) {
+    const id = getIdFromUrl();
+    const uid = getUidFromUrl();
+    if (!id && !uid) {
       showError("Aucun paramètre dans l’URL. Exemples : /game/?id=215277  ou  /game/?id=17373&uid=898  ou  /game/?uid=898");
       return;
     }
@@ -891,102 +656,32 @@ function renderRating4UI(gameId, data) {
     const raw = await fetchJson(listUrl);
     const list = extractGames(raw);
 
-    const page = resolveGamePage({ id: idParam, uid: uidParam }, list);
+    const game = Array.isArray(list)
+      ? list.find(x => String(x?.id) === String(id))
+      : null;
 
-    if (page.kind === "notfound") {
-      showError(`Jeu introuvable (id=${idParam || "-"} uid=${uidParam || "-"}) dans f95list.json`);
-      return;
-    }
-
-    // entry = objet principal (discord/mega/notes/description)
-    const entry = page.entry;
-
-    // display = données "jeu" (gameData si présent)
-    const display = entry?.gameData ? entry.gameData : entry;
-
-    const title = (getDisplayTitle(entry) || getDisplayTitle(display) || `Jeu ${idParam || uidParam}`).trim();
+    const title = (game.cleanTitle || game.title || `Jeu ${id}`).trim();
     document.title = title;
 
     setText("title", title);
 
-    setCover(display.imageUrl || entry.imageUrl || "");
-    renderTags(display.tags || entry.tags || []);
+    setCover(game.imageUrl || "");
+    renderTags(game.tags || []);
 
-    renderBadgesFromGame(display);
-    renderTranslationStatus(entry);
+    renderBadgesFromGame(game);
+    renderTranslationStatus(game);
 
-    // Description / Notes
-    const desc = (entry.description || "").trim();
-    if (desc) {
-      const box = $("descBox");
-      const out = $("descText");
-      if (box && out) { box.classList.remove("hidden"); out.innerHTML = escapeHtml(desc).replace(/\n/g, "<br>"); }
-    }
-    const notes = (entry.notes || "").trim();
-    if (notes) {
-      const box = $("notesBox");
-      const out = $("notesText");
-      if (box && out) { box.classList.remove("hidden"); out.innerHTML = escapeHtml(notes).replace(/\n/g, "<br>"); }
-    }
-
-    setHref("btnDiscord", (entry.discordlink || "").trim());
+    setHref("btnDiscord", (game.discordlink || "").trim());
     if ($("btnDiscord")) $("btnDiscord").textContent = "💬 Discord";
 
-    setHref("btnF95", (entry.url || "").trim());
+    setHref("btnF95", (game.url || "").trim());
     if ($("btnF95")) $("btnF95").textContent = "🌐 F95Zone";
 
-    const megaHref = (entry.translation || "").trim();
+    const megaHref = (game.translation || "").trim();
     setHref("btnMega", megaHref);
-
-    // Archives
-    const archHref = (entry.translationsArchive || "").trim();
-    if (archHref) {
-      setHref("btnArchive", archHref);
-      $("btnArchive")?.classList.remove("hidden");
-    }
-
-    // Video
-    const vidHref = ((display.videoUrl || entry.videoUrl) || "").trim();
-    if (vidHref) {
-      setHref("btnVideo", vidHref);
-      $("btnVideo")?.classList.remove("hidden");
-    }
-
     if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction (MEGA)";
 
-    // --- Related blocks (Collection / Série)
-    const relatedOut = ensureRelatedContainer();
-    if (relatedOut) {
-      const parts = [];
-
-      if (page.kind === "collectionParent") {
-        parts.push(renderCollectionBlockForParent(entry, page.children));
-      } else if (page.kind === "collectionChild") {
-        parts.push(renderCollectionBlockForChild(page.parent, page.siblings, page.uidParam, page.idParam));
-      }
-
-      const seriesIndex = buildSeriesIndex(list);
-      const pageRefs = getCurrentPageRefs({ kind: page.kind, idParam: idParam, uidParam: uidParam, entry });
-      const seriesList = getSeriesForCurrentPage(pageRefs, seriesIndex);
-
-      // clé canonique pour surligner dans la série
-      let canonicalKey = "";
-      if (page.kind === "collectionChild") canonicalKey = `c:${page.idParam}|u:${page.uidParam}`;
-      else if (entry?.id) canonicalKey = `id:${String(entry.id).trim()}`;
-      else canonicalKey = `uid:${String(entry.uid).trim()}`;
-
-      parts.push(renderSeriesBlocks(seriesList, list, canonicalKey));
-
-      relatedOut.innerHTML = parts.filter(Boolean).join("");
-    }
-
-    // ✅ identifiant analytics (unique) : id central si possible, sinon uid ; enfant de collection => composite
-    let analyticsKey = "";
-    if (page.kind === "collectionChild") analyticsKey = `c:${page.idParam}|u:${page.uidParam}`;
-    else if (entry?.id && String(entry.id).trim()) analyticsKey = String(entry.id).trim();
-    else analyticsKey = String(entry.uid).trim();
-
-await initCounters(analyticsKey, megaHref);
+    await initCounters(id, megaHref);
 
     // ⛔ Bloquer le clic droit sur le bouton Télécharger (MEGA)
     const btnMega = document.getElementById("btnMega");
@@ -998,11 +693,109 @@ await initCounters(analyticsKey, megaHref);
     }
 
     try {
-      const j = await rating4Get(analyticsKey);
-      if (j?.ok) renderRating4UI(analyticsKey, j);
+      const j = await rating4Get(id);
+      if (j?.ok) renderRating4UI(id, j);
     } catch {}
 
   } catch (e) {
     showError(`Erreur: ${e?.message || e}`);
   }
 })();
+function renderCollectionBlockForParent(parent, children) {
+  if (!parent || !children || !children.length) return "";
+  const items = children.map(ch => {
+    const href = `/game/?id=${encodeURIComponent(parent.id)}&uid=${encodeURIComponent(ch.uid)}`;
+    const t = escapeHtml(getDisplayTitle(ch, "collectionChild"));
+    return `<li><a href="${href}">${t}</a></li>`;
+  }).join("");
+  return `
+    <div class="collection-block">
+      <h3>📦 Collection</h3>
+      <ul>${items}</ul>
+    </div>
+  `;
+}
+
+function renderCollectionBlockForChild(parent) {
+  if (!parent) return `
+    <div class="collection-child-block">
+      <h3>📦 Fait partie de la collection</h3>
+    </div>
+  `;
+  const href = `/game/?id=${encodeURIComponent(parent.id)}`;
+  const t = escapeHtml(getDisplayTitle(parent, "collectionParent"));
+  return `
+    <div class="collection-child-block">
+      <h3>📦 Fait partie de la collection</h3>
+      <a href="${href}">${t}</a>
+    </div>
+  `;
+}
+
+function buildSeriesIndex(list) {
+  const map = new Map(); // ref -> [serieObj]
+  for (const owner of list) {
+    const s = owner?.serie;
+    if (!s || typeof s !== "object" || !s.name || !Array.isArray(s.refs)) continue;
+    const serieObj = { name: s.name, refs: s.refs.slice(), ownerUid: owner.uid, ownerId: owner.id || "" };
+
+    const add = (ref) => {
+      if (!map.has(ref)) map.set(ref, []);
+      map.get(ref).push(serieObj);
+    };
+
+    // declared refs
+    for (const ref of s.refs) add(String(ref));
+
+    // also show on owner page
+    if (owner.id) add(`id:${owner.id}`);
+    if (owner.uid !== undefined && owner.uid !== null) add(`uid:${owner.uid}`);
+  }
+  return map;
+}
+
+function getPageRefs(kind, idParam, uidParam, entry) {
+  if (kind === "collectionChild") return [`id:${idParam}`, `uid:${uidParam}`];
+  const refs = [];
+  if (entry?.id) refs.push(`id:${entry.id}`);
+  if (entry?.uid !== undefined && entry?.uid !== null) refs.push(`uid:${entry.uid}`);
+  return refs;
+}
+
+function resolveSerieRefsToEntries(serie, list) {
+  const out = [];
+  for (const ref of serie.refs || []) {
+    const [type, value] = String(ref).split(":");
+    if (type === "id") {
+      const g = list.find(x => String(x.id) === String(value) && !x.collection);
+      if (g) out.push(g);
+    } else if (type === "uid") {
+      const g = list.find(x => String(x.uid) === String(value));
+      if (g) out.push(g);
+    }
+  }
+  return out;
+}
+
+function renderSeriesBlocks(seriesArr, list, currentKey) {
+  if (!seriesArr || !seriesArr.length) return "";
+  const blocks = seriesArr.map(serie => {
+    const entries = resolveSerieRefsToEntries(serie, list);
+    const items = entries.map(e => {
+      const href = buildGameUrl(e);
+      const title = escapeHtml(getDisplayTitle(e, (e.collection && !e.id) ? "collectionChild" : "normal"));
+      const key = (e.collection && !e.id) ? `c:${e.collection}|u:${e.uid}` : (e.id ? `id:${e.id}` : `uid:${e.uid}`);
+      const cls = (key === currentKey) ? ' style="font-weight:800;"' : "";
+      return `<li${cls}><a href="${href}">${title}</a></li>`;
+    }).join("");
+    return `
+      <div class="serie-block">
+        <h3>📚 Série : ${escapeHtml(serie.name)}</h3>
+        <ul>${items}</ul>
+      </div>
+    `;
+  }).join("");
+  return blocks;
+}
+
+

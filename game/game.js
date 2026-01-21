@@ -503,6 +503,13 @@ function cleanTitle(raw) {
   return { title: t, categories, engines, status };
 }
 
+function makeBadge(type, value) {
+  const b = document.createElement("span");
+  b.className = `badge ${type}-${slug(value)}`;
+  b.textContent = value;
+  return b;
+}
+
 function renderBadgesFromGame(display, entry, isCollectionChild) {
   const wrap = $("badges");
   if (!wrap) return;

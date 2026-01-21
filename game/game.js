@@ -17,16 +17,17 @@ function getListUrl() {
   }
 }
 
-function getIdFromUrl() {
-  // Mode final: uniquement ?id=
+function getParamsFromUrl() {
   try {
     const p = new URLSearchParams(location.search);
     const id = (p.get("id") || "").trim();
-    return id || null;
+    const uid = (p.get("uid") || "").trim();
+    return { id: id || "", uid: uid || "" };
   } catch {
-    return null;
+    return { id: "", uid: "" };
   }
 }
+
 
 function extractGames(raw) {
   if (Array.isArray(raw)) return raw;
@@ -39,6 +40,239 @@ function extractGames(raw) {
     if (Array.isArray(raw[k])) return raw[k];
   }
   return [];
+}
+
+
+// =========================
+// ✅ Routing (id central) + Collections + Séries
+// =========================
+
+function buildGameUrl(g) {
+  const coll = (g.collection || "").toString().trim();
+  const id = (g.id || "").toString().trim();
+  const uid = (g.uid ?? "").toString().trim();
+
+  if (coll) return `/game/?id=${encodeURIComponent(coll)}&uid=${encodeURIComponent(uid)}`;
+  if (id) return `/game/?id=${encodeURIComponent(id)}`;
+  return `/game/?uid=${encodeURIComponent(uid)}`;
+}
+
+function getDisplayTitle(g) {
+  return (g?.gameData?.title || g?.cleanTitle || g?.title || "").toString().trim();
+}
+
+function getEntryRefs(g) {
+  const refs = [];
+  const id = (g?.id || "").toString().trim();
+  if (id) refs.push(`id:${id}`);
+  if (g?.uid !== undefined && g?.uid !== null) refs.push(`uid:${String(g.uid)}`);
+  return refs;
+}
+
+function buildSeriesIndex(games) {
+  const map = new Map(); // ref => [serieObj]
+  for (const owner of games || []) {
+    const s = owner?.serie;
+    if (!s?.name || !Array.isArray(s.refs)) continue;
+
+    const serieObj = {
+      name: String(s.name),
+      refs: s.refs.map(x => String(x)),
+      ownerUid: owner?.uid,
+      ownerId: owner?.id || ""
+    };
+
+    // refs déclarées
+    for (const ref of serieObj.refs) {
+      if (!map.has(ref)) map.set(ref, []);
+      map.get(ref).push(serieObj);
+    }
+
+    // rendre visible sur la page du owner (id central)
+    for (const selfRef of getEntryRefs(owner)) {
+      if (!map.has(selfRef)) map.set(selfRef, []);
+      map.get(selfRef).push(serieObj);
+    }
+  }
+  return map;
+}
+
+function getCurrentPageRefs({ kind, idParam, uidParam, entry }) {
+  if (kind === "collectionChild") {
+    return [`id:${String(idParam)}`, `uid:${String(uidParam)}`];
+  }
+  return getEntryRefs(entry);
+}
+
+function getSeriesForCurrentPage(pageRefs, seriesIndex) {
+  const found = [];
+  for (const r of pageRefs || []) {
+    const arr = seriesIndex.get(r);
+    if (arr) found.push(...arr);
+  }
+  const uniq = new Map();
+  for (const s of found) {
+    uniq.set(`${s.name}|${s.ownerUid}`, s);
+  }
+  return [...uniq.values()];
+}
+
+function resolveSerieRefsToEntries(serie, games) {
+  const out = [];
+  for (const ref of (serie?.refs || [])) {
+    const [type, value] = String(ref).split(":");
+    if (type === "id") {
+      const g = (games || []).find(x => String(x?.id) === String(value) && !x?.collection);
+      if (g) out.push(g);
+    } else if (type === "uid") {
+      const g = (games || []).find(x => String(x?.uid) === String(value));
+      if (g) out.push(g);
+    }
+  }
+  return out;
+}
+
+function resolveGamePage(params, games) {
+  const id = (params?.id || "").toString().trim();
+  const uid = (params?.uid || "").toString().trim();
+
+  // 1) Sous-jeu de collection
+  if (id && uid) {
+    const child = (games || []).find(g =>
+      String(g?.uid) === String(uid) && String(g?.collection) === String(id)
+    );
+    if (!child) return { kind: "notfound" };
+
+    const parent = (games || []).find(g => String(g?.id) === String(id) && !g?.collection) || null;
+    const siblings = (games || [])
+      .filter(g => String(g?.collection) === String(id))
+      .sort((a,b) => Number(a?.uid) - Number(b?.uid));
+
+    return { kind: "collectionChild", idParam: id, uidParam: uid, entry: child, parent, siblings };
+  }
+
+  // 2) id seul
+  if (id) {
+    const parentOrGame = (games || []).find(g => String(g?.id) === String(id) && !g?.collection) || null;
+    if (!parentOrGame) return { kind: "notfound" };
+
+    const children = (games || [])
+      .filter(g => String(g?.collection) === String(id))
+      .sort((a,b) => Number(a?.uid) - Number(b?.uid));
+
+    if (children.length) return { kind: "collectionParent", idParam: id, entry: parentOrGame, children };
+    return { kind: "normal", idParam: id, entry: parentOrGame };
+  }
+
+  // 3) uid seul
+  if (uid) {
+    const g = (games || []).find(x => String(x?.uid) === String(uid)) || null;
+    if (!g) return { kind: "notfound" };
+    return { kind: "uidOnly", uidParam: uid, entry: g };
+  }
+
+  return { kind: "notfound" };
+}
+
+function ensureRelatedContainer() {
+  const tags = document.getElementById("tags");
+  if (!tags) return null;
+
+  let out = document.getElementById("relatedOut");
+  if (!out) {
+    out = document.createElement("div");
+    out.id = "relatedOut";
+    out.style.marginTop = "12px";
+    out.style.display = "grid";
+    out.style.gap = "10px";
+    tags.parentNode.insertBefore(out, tags.nextSibling);
+  }
+  return out;
+}
+
+function renderCollectionBlockForChild(parent, siblings, currentUid, collectionId) {
+  if (!parent || !Array.isArray(siblings) || !siblings.length) return "";
+
+  const parentTitle = (parent.cleanTitle || parent.title || `Collection ${collectionId}`).toString();
+
+  const li = siblings.map(g => {
+    const t = getDisplayTitle(g) || (g.title || "");
+    const href = `/game/?id=${encodeURIComponent(collectionId)}&uid=${encodeURIComponent(g.uid)}`;
+    const isCurrent = String(g.uid) === String(currentUid);
+    return `<li style="margin:4px 0;">
+      <a href="${href}" class="btn-link" style="${isCurrent ? "font-weight:700;text-decoration:underline;" : ""}">
+        ${escapeHtml(t || `Jeu uid:${g.uid}`)}
+      </a>
+    </li>`;
+  }).join("");
+
+  return `
+    <div class="game-block" style="border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 12px;">
+      <h3 style="margin:0 0 6px 0;">📦 Fait partie de la collection</h3>
+      <div style="opacity:.9;margin-bottom:8px;">${escapeHtml(parentTitle)}</div>
+      <ul style="margin:0;padding-left:18px;">${li}</ul>
+    </div>
+  `;
+}
+
+function renderCollectionBlockForParent(parent, children) {
+  if (!parent || !Array.isArray(children) || !children.length) return "";
+
+  const parentTitle = (parent.cleanTitle || parent.title || "").toString();
+
+  const li = children.map(g => {
+    const t = getDisplayTitle(g) || (g.title || "");
+    const href = `/game/?id=${encodeURIComponent(parent.id)}&uid=${encodeURIComponent(g.uid)}`;
+    return `<li style="margin:4px 0;">
+      <a href="${href}" class="btn-link">${escapeHtml(t || `Jeu uid:${g.uid}`)}</a>
+    </li>`;
+  }).join("");
+
+  return `
+    <div class="game-block" style="border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 12px;">
+      <h3 style="margin:0 0 6px 0;">📦 Collection</h3>
+      <div style="opacity:.9;margin-bottom:8px;">${escapeHtml(parentTitle)}</div>
+      <ul style="margin:0;padding-left:18px;">${li}</ul>
+    </div>
+  `;
+}
+
+function renderSeriesBlocks(seriesList, games, currentCanonicalKey) {
+  if (!Array.isArray(seriesList) || !seriesList.length) return "";
+
+  const blocks = seriesList.map(serie => {
+    const items = resolveSerieRefsToEntries(serie, games);
+
+    const li = items.map(g => {
+      const t = getDisplayTitle(g) || (g.title || "");
+      const href = buildGameUrl(g);
+
+      // clé canonique pour surligner : id si existe, sinon uid, sinon collection+uid
+      let key = "";
+      const id = (g.id || "").toString().trim();
+      const coll = (g.collection || "").toString().trim();
+      if (coll) key = `c:${coll}|u:${g.uid}`;
+      else if (id) key = `id:${id}`;
+      else key = `uid:${g.uid}`;
+
+      const isCurrent = key === currentCanonicalKey;
+
+      return `<li style="margin:4px 0;">
+        <a href="${href}" class="btn-link" style="${isCurrent ? "font-weight:700;text-decoration:underline;" : ""}">
+          ${escapeHtml(t || "Sans titre")}
+        </a>
+      </li>`;
+    }).join("");
+
+    return `
+      <div class="game-block" style="border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 12px;">
+        <h3 style="margin:0 0 6px 0;">📚 Série : ${escapeHtml(serie.name)}</h3>
+        <ul style="margin:0;padding-left:18px;">${li}</ul>
+      </div>
+    `;
+  }).join("");
+
+  return blocks;
 }
 
 async function fetchJson(url) {
@@ -617,9 +851,10 @@ function renderRating4UI(gameId, data) {
     // ✅ menu ☰ (page game) — via menu racine
     initHamburgerMenu();
 
-    const id = getIdFromUrl();
-    if (!id) {
-      showError("Aucun ID dans l’URL. Exemple : /game/?id=215277");
+    const { id: idParam, uid: uidParam } = getParamsFromUrl();
+
+    if (!idParam && !uidParam) {
+      showError("Aucun paramètre dans l’URL. Exemples : /game/?id=215277  ou  /game/?id=17373&uid=898  ou  /game/?uid=898");
       return;
     }
 
@@ -627,37 +862,73 @@ function renderRating4UI(gameId, data) {
     const raw = await fetchJson(listUrl);
     const list = extractGames(raw);
 
-    const game = Array.isArray(list)
-      ? list.find(x => String(x?.id) === String(id))
-      : null;
+    const page = resolveGamePage({ id: idParam, uid: uidParam }, list);
 
-    if (!game) {
-      showError(`Jeu introuvable (ID ${id}) dans f95list.json`);
+    if (page.kind === "notfound") {
+      showError(`Jeu introuvable (id=${idParam || "-"} uid=${uidParam || "-"}) dans f95list.json`);
       return;
     }
 
-    const title = (game.cleanTitle || game.title || `Jeu ${id}`).trim();
+    // entry = objet principal (discord/mega/notes/description)
+    const entry = page.entry;
+
+    // display = données "jeu" (gameData si présent)
+    const display = entry?.gameData ? entry.gameData : entry;
+
+    const title = (getDisplayTitle(entry) || getDisplayTitle(display) || `Jeu ${idParam || uidParam}`).trim();
     document.title = title;
 
     setText("title", title);
 
-    setCover(game.imageUrl || "");
-    renderTags(game.tags || []);
+    setCover(display.imageUrl || entry.imageUrl || "");
+    renderTags(display.tags || entry.tags || []);
 
-    renderBadgesFromGame(game);
-    renderTranslationStatus(game);
+    renderBadgesFromGame(display);
+    renderTranslationStatus(entry);
 
-    setHref("btnDiscord", (game.discordlink || "").trim());
+    setHref("btnDiscord", (entry.discordlink || "").trim());
     if ($("btnDiscord")) $("btnDiscord").textContent = "💬 Discord";
 
-    setHref("btnF95", (game.url || "").trim());
+    setHref("btnF95", (entry.url || "").trim());
     if ($("btnF95")) $("btnF95").textContent = "🌐 F95Zone";
 
-    const megaHref = (game.translation || "").trim();
+    const megaHref = (entry.translation || "").trim();
     setHref("btnMega", megaHref);
     if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction (MEGA)";
 
-    await initCounters(id, megaHref);
+    // --- Related blocks (Collection / Série)
+    const relatedOut = ensureRelatedContainer();
+    if (relatedOut) {
+      const parts = [];
+
+      if (page.kind === "collectionParent") {
+        parts.push(renderCollectionBlockForParent(entry, page.children));
+      } else if (page.kind === "collectionChild") {
+        parts.push(renderCollectionBlockForChild(page.parent, page.siblings, page.uidParam, page.idParam));
+      }
+
+      const seriesIndex = buildSeriesIndex(list);
+      const pageRefs = getCurrentPageRefs({ kind: page.kind, idParam: idParam, uidParam: uidParam, entry });
+      const seriesList = getSeriesForCurrentPage(pageRefs, seriesIndex);
+
+      // clé canonique pour surligner dans la série
+      let canonicalKey = "";
+      if (page.kind === "collectionChild") canonicalKey = `c:${page.idParam}|u:${page.uidParam}`;
+      else if (entry?.id) canonicalKey = `id:${String(entry.id).trim()}`;
+      else canonicalKey = `uid:${String(entry.uid).trim()}`;
+
+      parts.push(renderSeriesBlocks(seriesList, list, canonicalKey));
+
+      relatedOut.innerHTML = parts.filter(Boolean).join("");
+    }
+
+    // ✅ identifiant analytics (unique) : id central si possible, sinon uid ; enfant de collection => composite
+    let analyticsKey = "";
+    if (page.kind === "collectionChild") analyticsKey = `c:${page.idParam}|u:${page.uidParam}`;
+    else if (entry?.id && String(entry.id).trim()) analyticsKey = String(entry.id).trim();
+    else analyticsKey = String(entry.uid).trim();
+
+await initCounters(analyticsKey, megaHref);
 
     // ⛔ Bloquer le clic droit sur le bouton Télécharger (MEGA)
     const btnMega = document.getElementById("btnMega");
@@ -669,8 +940,8 @@ function renderRating4UI(gameId, data) {
     }
 
     try {
-      const j = await rating4Get(id);
-      if (j?.ok) renderRating4UI(id, j);
+      const j = await rating4Get(analyticsKey);
+      if (j?.ok) renderRating4UI(analyticsKey, j);
     } catch {}
 
   } catch (e) {

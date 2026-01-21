@@ -442,32 +442,59 @@ function parseTitleMeta(raw) {
   return { category: categories[0], engine: engines[0], status };
 }
 
-function renderBadgesFromGame(game) {
-  const rawTitle = String(game?.title || "");
-  const meta = parseTitleMeta(rawTitle);
+function renderBadgesFromGame(game, isCollectionChild = false) {
+  let meta;
+
+  if (isCollectionChild) {
+    // ⛔ AUCUNE invention
+  const eng = String(game?.engine || "").trim() || null;
+  
+  const rawStatus = String(game?.status || "").trim();
+  const norm = rawStatus.toLowerCase();
+  
+  let status = "En cours";
+  if (norm === "completed") status = "Completed";
+  else if (norm === "abandoned") status = "Abandoned";
+  else if (norm === "onhold" || norm === "on hold") status = "Onhold";
+  
+  meta = {
+    category: null,   // pas de VN auto pour enfant de collection
+    engine: eng,
+    status,
+  };
+
+  } else {
+    // logique EXISTANTE
+    meta = parseTitleMeta(String(game?.title || ""));
+  }
 
   const wrap = $("badges");
   if (!wrap) return;
   wrap.innerHTML = "";
 
-  const b1 = document.createElement("span");
-  b1.className = `badge cat-${slug(meta.category)}`;
-  b1.textContent = meta.category;
-  b1.classList.add("badge");
+  if (meta.category) {
+    const b1 = document.createElement("span");
+    b1.className = `badge cat-${slug(meta.category)}`;
+    b1.textContent = meta.category;
+    b1.classList.add("badge");
+    wrap.appendChild(b1);
+  }
 
-  const b2 = document.createElement("span");
-  b2.className = `badge eng-${slug(meta.engine)}`;
-  b2.textContent = meta.engine;
-  b2.classList.add("badge");
+  if (meta.engine) {
+    const b2 = document.createElement("span");
+    b2.className = `badge eng-${slug(meta.engine)}`;
+    b2.textContent = meta.engine;
+    b2.classList.add("badge");
+    wrap.appendChild(b2);
+  }
 
-  const b3 = document.createElement("span");
-  b3.className = `badge status-${slug(meta.status)}`;
-  b3.textContent = meta.status;
-  b3.classList.add("badge");
-
-  wrap.appendChild(b1);
-  wrap.appendChild(b2);
-  wrap.appendChild(b3);
+  if (meta.status) {
+    const b3 = document.createElement("span");
+    b3.className = `badge status-${slug(meta.status)}`;
+    b3.textContent = meta.status;
+    b3.classList.add("badge");
+    wrap.appendChild(b3);
+  }
 }
 
 /**
@@ -904,6 +931,11 @@ function renderRating4UI(gameId, data) {
     // display = données "jeu" (gameData si présent)
     const display = entry?.gameData ? entry.gameData : entry;
 
+    const isCollectionChild =
+      page.kind === "collectionChild" &&
+      entry &&
+      entry.gameData;
+
     const title = (getDisplayTitle(entry) || getDisplayTitle(display) || `Jeu ${idParam || uidParam}`).trim();
     document.title = title;
 
@@ -912,7 +944,7 @@ function renderRating4UI(gameId, data) {
     setCover(display.imageUrl || entry.imageUrl || "");
     renderTags(display.tags || entry.tags || []);
 
-    renderBadgesFromGame(display);
+    renderBadgesFromGame(display, isCollectionChild);
     renderTranslationStatus(entry);
 
     setHref("btnDiscord", (entry.discordlink || "").trim());

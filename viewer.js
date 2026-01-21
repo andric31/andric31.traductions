@@ -647,7 +647,20 @@ function getDisplayTitle(g) {
 
     const c = cleanTitle(displayTitleRaw);
     const categories = Array.isArray(c.categories) ? c.categories : (game.category ? [game.category] : []);
-    const engines    = Array.isArray(c.engines)    ? c.engines    : (game.engine ? [game.engine] : []);
+    // engines : priorité au champ explicite gameData.engine si présent,
+    // sinon fallback sur le parsing du titre.
+    let engines = Array.isArray(c.engines) ? c.engines : (game.engine ? [game.engine] : []);
+    
+    if (game.gameData?.engine) {
+      const engNorm = ENGINE_RAW[slug(game.gameData.engine)] || game.gameData.engine;
+      engines = [engNorm];
+    } else if (!engines || engines.length === 0) {
+      // fallback parent si enfant de collection et rien trouvé
+      if (!String(game.id || "").trim() && String(game.collection || "").trim()) {
+        const cp = cleanTitle(String(game.title || ""));
+        engines = Array.isArray(cp.engines) ? cp.engines : [];
+      }
+    }
 
     const updatedAtTs   = parseFrenchDate(game.updatedAt);
     const releaseDateTs = parseFrenchDate(game.releaseDate);

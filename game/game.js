@@ -431,15 +431,20 @@ function parseTitleMeta(raw) {
     if (ENGINE_RAW[k]) engines.push(ENGINE_RAW[k]);
   }
 
-  if (!categories.length) categories = ["VN"];
-  if (!engines.length) engines = ["Ren'Py"];
+  // ✅ ne plus inventer VN / Ren'Py
+  if (!categories.length) categories = [];
+  if (!engines.length) engines = [];
   if (!status) status = "En cours";
 
-  categories = categories.filter(c => CAT_ALLOWED.includes(c)) || ["VN"];
-  engines = engines.filter(e => ENGINE_ALLOWED.includes(e)) || ["Ren'Py"];
+  categories = categories.filter(c => CAT_ALLOWED.includes(c));
+  engines = engines.filter(e => ENGINE_ALLOWED.includes(e));
   if (!STATUS_ALLOWED.includes(status) && status !== "En cours") status = "En cours";
 
-  return { category: categories[0], engine: engines[0], status };
+  return {
+    category: categories[0] || null,
+    engine: engines[0] || null,
+    status,
+  };
 }
 
 function renderBadgesFromGame(game, isCollectionChild = false) {

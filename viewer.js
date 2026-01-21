@@ -635,7 +635,17 @@ function getDisplayTitle(g) {
   }
 
   function normalize(game) {
-    const c = cleanTitle(game.title);
+    const coll = String(game.collection || "");
+    const uid = (game.uid ?? "");
+
+    // ✅ Pour les jeux de collection (id vide), on affiche/filtre sur gameData (titre/image/tags/engine)
+    const displayTitleRaw = String((game.gameData && game.gameData.title) ? game.gameData.title : (game.title || ""));
+    const displayImageRaw = String((game.gameData && game.gameData.imageUrl) ? game.gameData.imageUrl : (game.imageUrl || ""));
+    const displayTags = Array.isArray(game.gameData?.tags)
+      ? game.gameData.tags.slice()
+      : (Array.isArray(game.tags) ? game.tags.slice() : []);
+
+    const c = cleanTitle(displayTitleRaw);
     const categories = Array.isArray(c.categories) ? c.categories : (game.category ? [game.category] : []);
     const engines    = Array.isArray(c.engines)    ? c.engines    : (game.engine ? [game.engine] : []);
 
@@ -651,9 +661,12 @@ function getDisplayTitle(g) {
     const createdAtLocalTs = !Number.isNaN(createdAtLocalParsed) ? createdAtLocalParsed : 0;
 
     return {
+      uid,
+      collection: coll,
       id: String(game.id || ""),
-      rawTitle: String(game.title || ""),
+      rawTitle: displayTitleRaw,
       title: c.title,
+      gameData: game.gameData || null,
       categories,
       category: categories[0] || null,
       engines,
@@ -661,9 +674,9 @@ function getDisplayTitle(g) {
       status: (STATUS_ALLOWED.includes(c.status) || c.status === "En cours") ? c.status : "En cours",
       discord: String(game.discordlink || ""),
       translation: String(game.translation || ""),
-      image: String(game.imageUrl || ""),
+      image: displayImageRaw,
       url: String(game.url || game.threadUrl || ""),
-      tags: Array.isArray(game.tags) ? game.tags.slice() : [],
+      tags: displayTags,
 
       updatedAt: game.updatedAt || "",
       updatedAtTs,

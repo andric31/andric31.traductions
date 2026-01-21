@@ -230,43 +230,33 @@ function renderCollectionBlock(parent, children) {
   `;
 }
 
-function renderCollectionChildBlock(parent) {
-  // Sur un sous-jeu de collection, on affiche uniquement l’indication.
-  if (!parent) return `
-    <div class="game-block collection-child-block">
-      <h3>📦 Fait partie de la collection</h3>
-    </div>
-  `;
-
-  const href = `/game/?id=${encodeURIComponent(parent.id)}`;
-  const t = escapeHtml(parent.cleanTitle || parent.title || parent.id);
+function renderCollectionBlockForChild(/* parent */) {
+  // Sur un sous-jeu de collection : on affiche UNIQUEMENT l’indication.
   return `
     <div class="game-block collection-child-block">
       <h3>📦 Fait partie de la collection</h3>
-      <a class="collection-parent-link" href="${href}">${t}</a>
     </div>
   `;
 }
 
 
+
+
 function renderCollectionBlockForParent(parent, children) {
-  if (!parent || !Array.isArray(children) || !children.length) return "";
+  if (!children || !children.length) return "";
 
-  const parentTitle = (parent.cleanTitle || parent.title || "").toString();
-
-  const li = children.map(g => {
-    const t = getCollectionChildTitle(g) || getDisplayTitle(g);
+  const items = children.map(g => {
+    const t = escapeHtml(getDisplayTitle(g, "collectionChild"));
     const href = `/game/?id=${encodeURIComponent(parent.id)}&uid=${encodeURIComponent(g.uid)}`;
-    return `<li style="margin:4px 0;">
-      <a href="${href}" class="btn-link">${escapeHtml(t || `Jeu uid:${g.uid}`)}</a>
-    </li>`;
+    return `<li><a href="${href}">${t}</a></li>`;
   }).join("");
 
   return `
-    <div class="game-block" style="border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 12px;">
-      <h3 style="margin:0 0 6px 0;">📦 Collection</h3>
-      <div style="opacity:.9;margin-bottom:8px;">${escapeHtml(parentTitle)}</div>
-      <ul style="margin:0;padding-left:18px;">${li}</ul>
+    <div class="game-block collection-block">
+      <h3>📦 Collection</h3>
+      <ul class="collection-list">
+        ${items}
+      </ul>
     </div>
   `;
 }

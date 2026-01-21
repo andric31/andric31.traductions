@@ -510,10 +510,46 @@ function makeBadge(type, value) {
   return b;
 }
 
-"gameData": {
-  "engine": "Ren'Py",
-  "status": "",
-  "version": "v1.99"
+function renderBadgesFromGame(display, entry, isCollectionChild) {
+  const wrap = $("badges");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+
+  // --- Catégorie ---
+  if (isCollectionChild) {
+    wrap.appendChild(makeBadge("cat", "Collection"));
+  }
+
+  // --- ENGINE ---
+  let engines = [];
+
+  if (isCollectionChild && display?.engine) {
+    // priorité gameData
+    const e = ENGINE_RAW[slug(display.engine)] || display.engine;
+    engines = [e];
+  } else {
+    // fallback titre
+    const base = cleanTitle(display?.title || entry?.title || "");
+    engines = base.engines || [];
+  }
+
+  for (const eng of engines) {
+    wrap.appendChild(makeBadge("eng", eng));
+  }
+
+  // --- STATUS ---
+  let status = "";
+
+  if (isCollectionChild && display?.status) {
+    status = display.status;
+  } else {
+    const base = cleanTitle(display?.title || entry?.title || "");
+    status = base.status || "";
+  }
+
+  if (status) {
+    wrap.appendChild(makeBadge("status", status));
+  }
 }
 
 /**

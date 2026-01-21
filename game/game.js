@@ -237,7 +237,7 @@ function renderCollectionBlockForChild(parent) {
   const label = parent ? (parent.cleanTitle || parent.title || parentId) : "Voir la collection";
 
   return `
-    <div class="game-block collection-child-block">
+    <div class="game-block collection-child-block" style="border:1px solid rgba(255,255,255,.25);padding:12px;border-radius:8px;margin:12px 0;background:rgba(0,0,0,.15)">
       <h3>📦 Fait partie de la collection</h3>
       ${href ? `<a class="collection-parent-link" href="${href}">${escapeHtml(label)}</a>` : ``}
     </div>

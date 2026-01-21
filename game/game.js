@@ -75,6 +75,8 @@ function buildGameUrl(g) {
 }
 
 function getDisplayTitle(g) {
+  // Règle: si c'est un enfant de collection (id vide + collection non vide),
+  // on affiche UNIQUEMENT le titre du gameData (le title principal est celui de la collection).
   const id = (g?.id || "").toString().trim();
   const col = (g?.collection || "").toString().trim();
   if (!id && col) {
@@ -84,6 +86,7 @@ function getDisplayTitle(g) {
 }
 
 function getCollectionChildTitle(g) {
+  // Strict: pas de fallback vers g.title (sinon doublons "Collection ...")
   return (g?.gameData?.title || "").toString().trim();
 }
 
@@ -96,7 +99,7 @@ function getEntryRefs(g) {
 }
 
 function buildSeriesIndex(games) {
-  const map = new Map();
+  const map = new Map(); // ref => [serieObj]
   for (const owner of games || []) {
     const s = owner?.serie;
     if (!s?.name || !Array.isArray(s.refs)) continue;
@@ -108,11 +111,13 @@ function buildSeriesIndex(games) {
       ownerId: owner?.id || "",
     };
 
+    // refs déclarées
     for (const ref of serieObj.refs) {
       if (!map.has(ref)) map.set(ref, []);
       map.get(ref).push(serieObj);
     }
 
+    // rendre visible sur la page du owner (id central)
     for (const selfRef of getEntryRefs(owner)) {
       if (!map.has(selfRef)) map.set(selfRef, []);
       map.get(selfRef).push(serieObj);
@@ -143,7 +148,7 @@ function getSeriesForCurrentPage(pageRefs, seriesIndex) {
 
 function resolveSerieRefsToEntries(serie, games) {
   const out = [];
-  for (const ref of (serie?.refs || [])) {
+  for (const ref of serie?.refs || []) {
     const [type, value] = String(ref).split(":");
     if (type === "id") {
       const g = (games || []).find((x) => String(x?.id) === String(value) && !x?.collection);
@@ -160,6 +165,7 @@ function resolveGamePage(params, games) {
   const id = (params?.id || "").toString().trim();
   const uid = (params?.uid || "").toString().trim();
 
+  // 1) Sous-jeu de collection
   if (id && uid) {
     const child = (games || []).find(
       (g) => String(g?.uid) === String(uid) && String(g?.collection) === String(id)
@@ -174,8 +180,10 @@ function resolveGamePage(params, games) {
     return { kind: "collectionChild", idParam: id, uidParam: uid, entry: child, parent, siblings };
   }
 
+  // 2) id seul
   if (id) {
-    const parentOrGame = (games || []).find((g) => String(g?.id) === String(id) && !g?.collection) || null;
+    const parentOrGame =
+      (games || []).find((g) => String(g?.id) === String(id) && !g?.collection) || null;
     if (!parentOrGame) return { kind: "notfound" };
 
     const children = (games || [])
@@ -186,6 +194,7 @@ function resolveGamePage(params, games) {
     return { kind: "normal", idParam: id, entry: parentOrGame };
   }
 
+  // 3) uid seul
   if (uid) {
     const g = (games || []).find((x) => String(x?.uid) === String(uid)) || null;
     if (!g) return { kind: "notfound" };
@@ -195,9 +204,11 @@ function resolveGamePage(params, games) {
   return { kind: "notfound" };
 }
 
+// ====== Related container: on va l'insérer après les tags OU après description (selon ton ordre)
+// ✅ Ton ordre final: tags -> related -> description -> video -> boutons -> mega -> notes -> archive
 function ensureRelatedContainer() {
-  const tags = document.getElementById("tags");
-  if (!tags) return null;
+  const anchor = document.getElementById("tags");
+  if (!anchor) return null;
 
   let out = document.getElementById("relatedOut");
   if (!out) {
@@ -206,7 +217,8 @@ function ensureRelatedContainer() {
     out.style.marginTop = "12px";
     out.style.display = "grid";
     out.style.gap = "10px";
-    tags.parentNode.insertBefore(out, tags.nextSibling);
+    // insertion juste après tags (ordre demandé)
+    anchor.parentNode.insertBefore(out, anchor.nextSibling);
   }
   return out;
 }
@@ -217,7 +229,7 @@ function renderCollectionBlockForChild(parent) {
   const label = parent ? (parent.cleanTitle || parent.title || parentId) : "Voir la collection";
 
   return `
-    <div class="game-block collection-child-block" style="border:1px solid rgba(255,255,255,.25);padding:12px;border-radius:8px;margin:12px 0;background:rgba(0,0,0,.15)">
+    <div class="game-block collection-child-block">
       <h3>📦 Fait partie de la collection</h3>
       ${href ? `<a class="collection-parent-link" href="${href}">${escapeHtml(label)}</a>` : ``}
     </div>
@@ -275,8 +287,8 @@ function renderSeriesBlocks(seriesList, games, currentCanonicalKey) {
         .join("");
 
       return `
-        <div class="game-block" style="border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 12px;">
-          <h3 style="margin:0 0 6px 0;">📚 Série : ${escapeHtml(serie.name)}</h3>
+        <div class="game-block serie-block">
+          <h3>📚 Série : ${escapeHtml(serie.name)}</h3>
           <ul style="margin:0;padding-left:18px;">${li}</ul>
         </div>
       `;
@@ -325,6 +337,11 @@ function setHref(id, href) {
   }
 }
 
+/**
+ * IMPORTANT:
+ * - Si pas d'image => on laisse la cover en "placeholder" (PAS de favicon)
+ * - Si image cassée => on repasse en placeholder (PAS de favicon)
+ */
 function setCover(url) {
   const img = $("cover");
   if (!img) return;
@@ -387,7 +404,7 @@ function slug(s) {
   return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
 }
 
-const SEP_RE = /[\u2014\u2013\-:]/;
+const SEP_RE = /[\u2014\u2013\-:]/; // — – - :
 const ucFirst = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
 function cleanTitle(raw) {
@@ -500,13 +517,24 @@ function renderBadgesFromGame(display, entry, isCollectionChild) {
   const childTitle = String(display?.title || "");
   const parentTitle = String(entry?.title || "");
 
-  if (isCollectionChild) wrap.appendChild(makeBadge("cat", "Collection"));
+  // ✅ Enfant => badge Collection
+  if (isCollectionChild) {
+    wrap.appendChild(makeBadge("cat", "Collection"));
+  }
 
   let c = cleanTitle(isCollectionChild ? childTitle : parentTitle);
 
-  if (!isCollectionChild && c.categories.includes("Collection")) wrap.appendChild(makeBadge("cat", "Collection"));
-  if (!isCollectionChild && c.categories.includes("VN")) wrap.appendChild(makeBadge("cat", "VN"));
+  // Parent collection => badge Collection
+  if (!isCollectionChild && c.categories.includes("Collection")) {
+    wrap.appendChild(makeBadge("cat", "Collection"));
+  }
 
+  // VN seulement si pas enfant
+  if (!isCollectionChild && c.categories.includes("VN")) {
+    wrap.appendChild(makeBadge("cat", "VN"));
+  }
+
+  // Enfant => moteur/status priorité gameData
   if (isCollectionChild) {
     if (display?.engine) {
       const eng = ENGINE_RAW[slug(display.engine)] || display.engine;
@@ -524,10 +552,15 @@ function renderBadgesFromGame(display, entry, isCollectionChild) {
     }
   }
 
-  for (const eng of c.engines || []) wrap.appendChild(makeBadge("eng", eng));
+  for (const eng of c.engines || []) {
+    wrap.appendChild(makeBadge("eng", eng));
+  }
   if (c.status) wrap.appendChild(makeBadge("status", c.status));
 }
 
+/**
+ * ✅ Traduction status : badge uniquement (dans #badges)
+ */
 async function renderTranslationStatus(game) {
   if (!game?.url || !game?.title) return;
 
@@ -554,10 +587,14 @@ async function renderTranslationStatus(game) {
 
     const wrap = $("badges");
     if (wrap) wrap.appendChild(badge);
-  } catch {}
+  } catch {
+    // silencieux
+  }
 }
 
-// ====== Menu ☰ ======
+// ============================================================================
+// ✅ MENU ☰ (page game) — réutilise menu racine
+// ============================================================================
 
 function positionPopover(pop, anchorBtn) {
   const r = anchorBtn.getBoundingClientRect();
@@ -700,6 +737,7 @@ function setMyLike(gameId, v) {
 function updateLikeBtn(gameId) {
   const b = $("btnLike");
   if (!b) return;
+
   const liked = getMyLike(gameId);
   b.textContent = liked ? "❤️" : "🤍";
   b.setAttribute("aria-label", liked ? "Je n’aime plus" : "J’aime");
@@ -712,6 +750,7 @@ function setLikesFromJson(j) {
 }
 
 async function initCounters(gameId, megaHref) {
+  // 1) Vue
   try {
     const j = await counterHit(gameId, "view");
     if (j?.ok) {
@@ -737,6 +776,7 @@ async function initCounters(gameId, megaHref) {
     }
   }
 
+  // 2) Clic MEGA
   if (megaHref) {
     const btn = $("btnMega");
     if (btn) {
@@ -756,15 +796,16 @@ async function initCounters(gameId, megaHref) {
     }
   }
 
+  // 3) ❤️ Like toggle
   const btnLike = $("btnLike");
   if (btnLike && $("statLikes")) {
     updateLikeBtn(gameId);
 
     btnLike.addEventListener("click", async () => {
       const liked = getMyLike(gameId);
+
       try {
         let j;
-
         if (!liked) {
           j = await counterHit(gameId, "like");
           if (j?.ok) {
@@ -783,7 +824,9 @@ async function initCounters(gameId, megaHref) {
           updateLikeBtn(gameId);
           showStatsBox();
         }
-      } catch {}
+      } catch {
+        // silencieux (unhit pas supporté)
+      }
     });
   }
 }
@@ -848,9 +891,7 @@ function renderRating4UI(gameId, data) {
 
   const setVisual = (hoverValue) => {
     const v =
-      hoverValue === 0 || typeof hoverValue === "number"
-        ? hoverValue
-        : getMyVote4(gameId) || 0;
+      hoverValue === 0 || typeof hoverValue === "number" ? hoverValue : getMyVote4(gameId) || 0;
 
     [...choices.querySelectorAll(".ratingStar")].forEach((btn, idx) => {
       btn.textContent = idx + 1 <= v ? "★" : "☆";
@@ -943,19 +984,96 @@ function renderRating4UI(gameId, data) {
 }
 
 // =========================
-// ✅ Placement DOM (encadrés / ordre)
+// ✅ Blocs "nouveaux champs" (ordre demandé)
+// Chaque champ = son encadré (game-block)
 // =========================
 
-function moveAfter(el, afterEl) {
-  if (!el || !afterEl || !afterEl.parentNode) return;
-  if (afterEl.nextSibling) afterEl.parentNode.insertBefore(el, afterEl.nextSibling);
-  else afterEl.parentNode.appendChild(el);
+function ensureBlockAfter(anchorEl, id) {
+  if (!anchorEl || !anchorEl.parentNode) return null;
+
+  let el = document.getElementById(id);
+  if (!el) {
+    el = document.createElement("div");
+    el.id = id;
+    anchorEl.parentNode.insertBefore(el, anchorEl.nextSibling);
+  }
+  return el;
 }
 
-function addGameBlockClass(id) {
-  const el = $(id);
-  if (!el) return;
-  el.classList.add("game-block");
+function ensureBlockBefore(anchorEl, id) {
+  if (!anchorEl || !anchorEl.parentNode) return null;
+
+  let el = document.getElementById(id);
+  if (!el) {
+    el = document.createElement("div");
+    el.id = id;
+    anchorEl.parentNode.insertBefore(el, anchorEl);
+  }
+  return el;
+}
+
+function renderTextBlock({ id, title, text, muted }) {
+  const t = (text || "").trim();
+  if (!t) {
+    show(id, false);
+    return;
+  }
+  const htmlText = escapeHtml(t).replace(/\n/g, "<br>");
+  setHtml(
+    id,
+    `
+    <div class="game-block">
+      <h3>${escapeHtml(title)}</h3>
+      <div style="color:${muted ? "var(--muted)" : "var(--fg)"}; font-size:${muted ? "13px" : "14px"}; line-height:1.45;">
+        ${htmlText}
+      </div>
+    </div>
+  `
+  );
+  show(id, true);
+}
+
+function renderLinkBlock({ id, title, href, label }) {
+  const u = (href || "").trim();
+  if (!u) {
+    show(id, false);
+    return;
+  }
+  setHtml(
+    id,
+    `
+    <div class="game-block">
+      <h3>${escapeHtml(title)}</h3>
+      <a class="btnLike" target="_blank" rel="noopener" href="${escapeHtml(u)}" style="display:inline-flex;">
+        ${escapeHtml(label)}
+      </a>
+    </div>
+  `
+  );
+  show(id, true);
+}
+
+function renderVideoBlock({ id, videoUrl }) {
+  const u = (videoUrl || "").trim();
+  if (!u) {
+    show(id, false);
+    return;
+  }
+  setHtml(
+    id,
+    `
+    <div class="game-block">
+      <h3>📺 Vidéo</h3>
+      <iframe
+        src="${escapeHtml(u)}"
+        style="width:100%; aspect-ratio:16/9; border-radius:12px; border:1px solid var(--border);"
+        loading="lazy"
+        allowfullscreen>
+      </iframe>
+    </div>
+  `
+  );
+  show(id, true);
 }
 
 // ====== Main ======
@@ -984,110 +1102,35 @@ function addGameBlockClass(id) {
       return;
     }
 
+    // entry = objet principal (discord/mega/notes/description)
     const entry = page.entry;
+
+    // display = données "jeu" (gameData si présent)
     const display = entry?.gameData ? entry.gameData : entry;
+
     const isCollectionChild = page.kind === "collectionChild" && entry && entry.gameData;
 
     const title = (getDisplayTitle(entry) || getDisplayTitle(display) || `Jeu ${idParam || uidParam}`).trim();
     document.title = title;
 
+    // 1) Titre + cover + tags
     setText("title", title);
-
     setCover(display.imageUrl || entry.imageUrl || "");
     renderTags(display.tags || entry.tags || []);
 
+    // badges
     renderBadgesFromGame(display, entry, isCollectionChild);
     renderTranslationStatus(entry);
 
-    // Liens
-    setHref("btnDiscord", (entry.discordlink || "").trim());
-    if ($("btnDiscord")) $("btnDiscord").textContent = "💬 Discord";
-
-    setHref("btnF95", (entry.url || "").trim());
-    if ($("btnF95")) $("btnF95").textContent = "🌐 F95Zone";
-
-    const megaHref = (entry.translation || "").trim();
-    setHref("btnMega", megaHref);
-    if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction (MEGA)";
-
-    // ✅ chaque champ dans son encadré
-    addGameBlockClass("videoBox");
-    addGameBlockClass("descriptionBox");
-    addGameBlockClass("notesBox");
-    addGameBlockClass("archiveBox");
-
+    // ✅ ANCRAGES HTML existants
+    const tagsEl = document.getElementById("tags");
+    const btnRow = document.querySelector(".btnRow");
     const btnMainRow = document.querySelector(".btnMainRow");
-    const videoBox = $("videoBox");
-    const descriptionBox = $("descriptionBox");
-    const notesBox = $("notesBox");
-    const archiveBox = $("archiveBox");
+    const ratingBox = document.getElementById("ratingBox");
 
-    // 📺 Vidéo (reste à sa place)
-    const videoUrl = (entry.videoUrl || display.videoUrl || "").trim();
-    if (videoUrl) {
-      const iframe = document.getElementById("videoFrame");
-      if (iframe) iframe.src = videoUrl;
-      show("videoBox", true);
-    } else {
-      show("videoBox", false);
-    }
-
-    // 📝 Description (ON NE LA DÉPLACE PAS : elle reste là où elle est dans le HTML)
-    const desc = (entry.description || display.description || "").trim();
-    if (desc) {
-      setHtml("descriptionText", escapeHtml(desc).replace(/\n/g, "<br>"));
-      show("descriptionBox", true);
-    } else {
-      show("descriptionBox", false);
-    }
-
-    // 🗒️ Notes : sous la zone traduction MAIS sans casser la description
-    // => on place Notes juste APRÈS la description (si elle existe), sinon après la vidéo,
-    // sinon après le bouton MEGA.
-    const notes = (entry.notes || "").trim();
-    if (notes) {
-      setHtml("notesText", escapeHtml(notes).replace(/\n/g, "<br>"));
-      show("notesBox", true);
-    } else {
-      show("notesBox", false);
-    }
-
-    if (notesBox && notes) {
-      if (descriptionBox && descriptionBox.style.display !== "none") {
-        moveAfter(notesBox, descriptionBox);
-      } else if (videoBox && videoBox.style.display !== "none") {
-        moveAfter(notesBox, videoBox);
-      } else if (btnMainRow) {
-        moveAfter(notesBox, btnMainRow);
-      }
-    }
-
-    // 🗃️ Dossier / Archives : SOUS Notes
-    const archive = (entry.translationsArchive || "").trim();
-    if (archive) {
-      const a = document.getElementById("archiveLink");
-      if (a) {
-        a.href = archive;
-        a.textContent = "🗃️ Dossier / Archives de traduction";
-      }
-      show("archiveBox", true);
-    } else {
-      show("archiveBox", false);
-    }
-
-    if (archiveBox && archive) {
-      if (notesBox && notesBox.style.display !== "none") {
-        moveAfter(archiveBox, notesBox);
-      } else if (descriptionBox && descriptionBox.style.display !== "none") {
-        moveAfter(archiveBox, descriptionBox);
-      } else if (videoBox && videoBox.style.display !== "none") {
-        moveAfter(archiveBox, videoBox);
-      } else if (btnMainRow) {
-        moveAfter(archiveBox, btnMainRow);
-      }
-    }
-
-    // Related blocks (Collection / Série)
+    // =========================
+    // 2) Related (après tags)
+    // =========================
     const relatedOut = ensureRelatedContainer();
     if (relatedOut) {
       const parts = [];
@@ -1095,7 +1138,7 @@ function addGameBlockClass(id) {
       if (page.kind === "collectionParent") {
         parts.push(renderCollectionBlockForParent(entry, page.children));
       } else if (page.kind === "collectionChild") {
-        parts.push(renderCollectionBlockForChild(page.parent, page.siblings, page.uidParam, page.idParam));
+        parts.push(renderCollectionBlockForChild(page.parent));
       }
 
       const seriesIndex = buildSeriesIndex(list);
@@ -1108,10 +1151,76 @@ function addGameBlockClass(id) {
       else canonicalKey = `uid:${String(entry.uid).trim()}`;
 
       parts.push(renderSeriesBlocks(seriesList, list, canonicalKey));
+
       relatedOut.innerHTML = parts.filter(Boolean).join("");
     }
 
-    // analytics key
+    // =========================
+    // 3) Description (juste après related, avant vidéo)
+    // =========================
+    // On crée un conteneur juste après relatedOut (si relatedOut existe),
+    // sinon juste après tags.
+    const descAnchor = relatedOut || tagsEl;
+    const descHost = ensureBlockAfter(descAnchor, "descriptionHost");
+    renderTextBlock({
+      id: "descriptionHost",
+      title: "📝 Description",
+      text: (entry.description || "").trim(),
+      muted: false,
+    });
+
+    // =========================
+    // 4) Vidéo (si présent) sous description
+    // =========================
+    const videoHost = ensureBlockAfter(document.getElementById("descriptionHost"), "videoHost");
+    renderVideoBlock({
+      id: "videoHost",
+      videoUrl: (entry.videoUrl || "").trim(),
+    });
+
+    // =========================
+    // 5) Boutons Discord + F95 (inchangés)
+    // =========================
+    setHref("btnDiscord", (entry.discordlink || "").trim());
+    if ($("btnDiscord")) $("btnDiscord").textContent = "💬 Discord";
+
+    setHref("btnF95", (entry.url || "").trim());
+    if ($("btnF95")) $("btnF95").textContent = "🌐 F95Zone";
+
+    // =========================
+    // 6) MEGA (bouton existant)
+    // =========================
+    const megaHref = (entry.translation || "").trim();
+    setHref("btnMega", megaHref);
+    if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction (MEGA)";
+
+    // =========================
+    // 7) Notes (encadré sous MEGA)
+    // =========================
+    // On place Notes APRÈS la .btnMainRow (celle du bouton MEGA)
+    const notesAnchor = btnMainRow || btnRow || ratingBox || document.body;
+    const notesHost = ensureBlockAfter(notesAnchor, "notesHost");
+    renderTextBlock({
+      id: "notesHost",
+      title: "🗒️ Notes",
+      text: (entry.notes || "").trim(),
+      muted: true,
+    });
+
+    // =========================
+    // 8) Archives / dossier traduction (encadré sous Notes)
+    // =========================
+    const archiveHost = ensureBlockAfter(document.getElementById("notesHost"), "archiveHost");
+    renderLinkBlock({
+      id: "archiveHost",
+      title: "🗃️ Dossier / Archives de traduction",
+      href: (entry.translationsArchive || "").trim(),
+      label: "🗃️ Ouvrir les archives de traduction",
+    });
+
+    // =========================
+    // ✅ Analytics key (unique)
+    // =========================
     let analyticsKey = "";
     if (page.kind === "collectionChild") analyticsKey = `c:${page.idParam}|u:${page.uidParam}`;
     else if (entry?.id && String(entry.id).trim()) analyticsKey = String(entry.id).trim();
@@ -1119,7 +1228,7 @@ function addGameBlockClass(id) {
 
     await initCounters(analyticsKey, megaHref);
 
-    // ⛔ Bloquer le clic droit sur MEGA
+    // ⛔ Bloquer clic droit sur MEGA
     const btnMega = document.getElementById("btnMega");
     if (btnMega) {
       btnMega.addEventListener("contextmenu", (e) => {
@@ -1128,6 +1237,7 @@ function addGameBlockClass(id) {
       });
     }
 
+    // Rating
     try {
       const j = await rating4Get(analyticsKey);
       if (j?.ok) renderRating4UI(analyticsKey, j);

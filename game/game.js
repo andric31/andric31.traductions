@@ -515,41 +515,57 @@ function renderBadgesFromGame(display, entry, isCollectionChild) {
   if (!wrap) return;
   wrap.innerHTML = "";
 
-  // --- Catégorie ---
+  const childTitle  = String(display?.title || "");
+  const parentTitle = String(entry?.title || "");
+
+  // ✅ Si c'est un enfant, on affiche TOUJOURS "Collection"
   if (isCollectionChild) {
     wrap.appendChild(makeBadge("cat", "Collection"));
   }
 
-  // --- ENGINE ---
-  let engines = [];
+  // Base: parse (enfant => titre enfant, sinon => titre parent)
+  let c = cleanTitle(isCollectionChild ? childTitle : parentTitle);
 
-  if (isCollectionChild && display?.engine) {
-    // priorité gameData
-    const e = ENGINE_RAW[slug(display.engine)] || display.engine;
-    engines = [e];
-  } else {
-    // fallback titre
-    const base = cleanTitle(display?.title || entry?.title || "");
-    engines = base.engines || [];
+  // ✅ Pour un parent "Collection ..." (non enfant), on affiche aussi le badge Collection
+  if (!isCollectionChild && c.categories.includes("Collection")) {
+    wrap.appendChild(makeBadge("cat", "Collection"));
   }
 
-  for (const eng of engines) {
+  // ✅ VN seulement si pas enfant
+  if (!isCollectionChild && c.categories.includes("VN")) {
+    wrap.appendChild(makeBadge("cat", "VN"));
+  }
+
+  // =========================================================
+  // ✅ MOTEUR / STATUS : enfant => priorité gameData
+  // =========================================================
+
+  if (isCollectionChild) {
+    // --- ENGINE: priorité gameData.engine ---
+    if (display?.engine) {
+      const eng = ENGINE_RAW[slug(display.engine)] || display.engine;
+      c.engines = [eng];
+    } else if (!c.engines || c.engines.length === 0) {
+      // fallback parent uniquement si rien détecté
+      const cp = cleanTitle(parentTitle);
+      c.engines = cp.engines || [];
+    }
+
+    // --- STATUS: priorité gameData.status ---
+    if (display?.status) {
+      c.status = display.status;
+    } else if (!c.status) {
+      // fallback parent uniquement si rien
+      const cp = cleanTitle(parentTitle);
+      if (cp.status) c.status = cp.status;
+    }
+  }
+
+  // Render engines + status
+  for (const eng of (c.engines || [])) {
     wrap.appendChild(makeBadge("eng", eng));
   }
-
-  // --- STATUS ---
-  let status = "";
-
-  if (isCollectionChild && display?.status) {
-    status = display.status;
-  } else {
-    const base = cleanTitle(display?.title || entry?.title || "");
-    status = base.status || "";
-  }
-
-  if (status) {
-    wrap.appendChild(makeBadge("status", status));
-  }
+  if (c.status) wrap.appendChild(makeBadge("status", c.status));
 }
 
 /**

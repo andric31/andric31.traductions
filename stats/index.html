@@ -1,76 +1,96 @@
 <!doctype html>
 <html lang="fr">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Stats — Traductions</title>
-  <link rel="icon" href="/favicon.png" />
-  <link rel="stylesheet" href="/viewer.css" />
-  <link rel="stylesheet" href="/stats/stats.css" />
-</head>
-<body>
-  <div class="stats-wrap">
-    <header class="stats-topbar">
-      <div class="stats-title">
-        <div class="h1">📊 Stats</div>
-        <div class="sub">Tableau + graphique, indépendants de la page principale</div>
-      </div>
+  <head>
+    <!-- Meta -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-      <div class="stats-controls">
-        <input id="q" class="inp" placeholder="Rechercher (titre, tags, id…)" autocomplete="off" />
+    <title>Stats — Traductions</title>
+    <link rel="icon" href="/favicon.png" />
 
-        <select id="metric" class="sel" title="Métrique du graphique">
-          <option value="views">👁️ Vues</option>
-          <option value="likes">❤️ Likes</option>
-          <option value="mega">📥 MEGA</option>
-        </select>
+    <!-- Styles -->
+    <link rel="stylesheet" href="/viewer.css" />
+    <link rel="stylesheet" href="/stats/stats.css" />
+  </head>
 
-        <select id="top" class="sel" title="Top">
-          <option value="30">Top 30</option>
-          <option value="50">Top 50</option>
-          <option value="100">Top 100</option>
-          <option value="0">Tout</option>
-        </select>
-      </div>
-    </header>
-
-    <main class="stats-main">
-      <section class="card">
-        <div class="card-h">
-          <div class="card-title">Graphique (Top)</div>
-          <div class="card-note" id="status">Chargement…</div>
+  <body>
+    <div class="stats-wrap">
+      <!-- =========================
+           Topbar
+           ========================= -->
+      <header class="stats-topbar">
+        <div class="stats-title">
+          <div class="h1">📊 Stats</div>
+          <div class="sub">Tableau + graphique, indépendants de la page principale</div>
         </div>
 
-        <div class="chart-wrap">
-          <canvas id="chart" width="1400" height="560"></canvas>
-        </div>
-      </section>
+        <div class="stats-controls">
+          <input
+            id="q"
+            class="inp"
+            placeholder="Rechercher (titre, tags, id…)"
+            autocomplete="off"
+          />
 
-      <section class="card">
-        <div class="card-h">
-          <div class="card-title">Tableau</div>
-          <div class="card-note">Clique une ligne pour ouvrir la fiche du jeu</div>
-        </div>
+          <select id="metric" class="sel" title="Métrique du graphique">
+            <option value="views">👁️ Vues</option>
+            <option value="likes">❤️ Likes</option>
+            <option value="mega">📥 MEGA</option>
+          </select>
 
-        <div class="table-wrap">
-          <table class="tbl" id="tbl">
-            <thead>
-              <tr>
-                <th class="c-cover">Cover</th>
-                <th data-sort="title">Titre</th>
-                <th data-sort="updatedAt">MAJ</th>
-                <th class="num" data-sort="views">👁️</th>
-                <th class="num" data-sort="likes">❤️</th>
-                <th class="num" data-sort="mega">📥</th>
-              </tr>
-            </thead>
-            <tbody id="tbody"></tbody>
-          </table>
+          <select id="top" class="sel" title="Top">
+            <option value="30">Top 30</option>
+            <option value="50">Top 50</option>
+            <option value="100">Top 100</option>
+            <option value="0">Tout</option>
+          </select>
         </div>
-      </section>
-    </main>
-  </div>
+      </header>
 
-  <script src="/stats/stats.js"></script>
-</body>
+      <!-- =========================
+           Content
+           ========================= -->
+      <main class="stats-main">
+        <!-- Graph -->
+        <section class="card">
+          <div class="card-h">
+            <div class="card-title">Graphique (Top)</div>
+            <div class="card-note" id="status">Chargement…</div>
+          </div>
+
+          <div class="chart-wrap">
+            <canvas id="chart" width="1400" height="560"></canvas>
+          </div>
+        </section>
+
+        <!-- Table -->
+        <section class="card">
+          <div class="card-h">
+            <div class="card-title">Tableau</div>
+            <div class="card-note">Clique une ligne pour ouvrir la fiche du jeu</div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="tbl" id="tbl">
+              <thead>
+                <tr>
+                  <th class="c-cover">Cover</th>
+                  <th data-sort="title">Titre</th>
+                  <th data-sort="updatedAt">MAJ</th>
+                  <th class="num" data-sort="views">👁️</th>
+                  <th class="num" data-sort="likes">❤️</th>
+                  <th class="num" data-sort="mega">📥</th>
+                </tr>
+              </thead>
+
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Script -->
+    <script src="/stats/stats.js"></script>
+  </body>
 </html>

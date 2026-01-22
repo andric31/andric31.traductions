@@ -1308,25 +1308,19 @@ function renderVideoBlock({ id, videoUrl }) {
     }
     
     // =========================
-    // 🔁 Ordre final des blocs (DOM)
+    // 🔁 Ordre des blocs (DOM)
     // Boutons -> Informations -> MEGA -> Notation -> Archives
     // =========================
     const parent = btnRow?.parentNode;
     if (parent) {
       // ℹ️ Informations juste après les boutons (avant MEGA)
-      if (notesBoxEl && notesBoxEl.style.display !== "none" && btnMainRow) {
-        parent.insertBefore(notesBoxEl, btnMainRow);
-      }
+      if (notesBoxEl && btnMainRow) parent.insertBefore(notesBoxEl, btnMainRow);
     
-      // 📥 MEGA juste avant la Notation
-      if (btnMainRow && ratingBox) {
-        parent.insertBefore(btnMainRow, ratingBox);
-      }
+      // ⭐ Notation juste après MEGA
+      if (ratingBox && archiveBoxEl) parent.insertBefore(ratingBox, archiveBoxEl);
     
-      // 🗃️ Archives juste après la Notation
-      if (archiveBoxEl && ratingBox) {
-        parent.insertBefore(archiveBoxEl, ratingBox.nextSibling);
-      }
+      // 🗃️ Archives juste après la notation
+      if (archiveBoxEl && ratingBox) parent.insertBefore(archiveBoxEl, ratingBox.nextSibling);
     }
 
     // =========================

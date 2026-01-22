@@ -1248,8 +1248,7 @@ function renderVideoBlock({ id, videoUrl }) {
     // =========================
     // 4) Vidéo (si présent) sous description
     // =========================
-    const descBox = document.getElementById("descriptionBox");
-    const videoAnchor = descBox || relatedOut || tagsEl;
+    const videoAnchor = (descBox && descBox.style.display !== "none") ? descBox : (relatedOut || tagsEl);
     
     const videoHost = ensureBlockAfter(videoAnchor, "videoHost");
     renderVideoBlock({

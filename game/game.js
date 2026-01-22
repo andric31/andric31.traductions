@@ -1266,17 +1266,6 @@ function renderVideoBlock({ id, videoUrl }) {
     if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction (MEGA)";
 
     // =========================
-    // 🔁 Ordre des blocs (DOM)
-    // Boutons -> Informations -> MEGA -> Notation -> Archives
-    // =========================
-    const parent = btnRow?.parentNode;
-    if (parent) {
-      if (notesBox) parent.insertBefore(notesBox, btnMainRow);          // ℹ️ Infos avant MEGA
-      if (btnMainRow) parent.insertBefore(btnMainRow, ratingBox);       // 📥 MEGA avant Notation
-      if (ratingBox && archiveBox) parent.insertBefore(archiveBox, ratingBox.nextSibling); // 🗃️ après Notation
-    }
-
-    // =========================
     // 7) Informations (encadré sous la notation)
     // =========================
     const notes = (entry.notes || "").trim();
@@ -1287,12 +1276,6 @@ function renderVideoBlock({ id, videoUrl }) {
       show("notesBox", false);
     }
     
-    // ✅ Forcer "Informations" juste AU-DESSUS de la notation
-    const notesBox = document.getElementById("notesBox");
-    if (ratingBox && notesBox && ratingBox.parentNode) {
-      ratingBox.parentNode.insertBefore(notesBox, ratingBox);
-    }
-
     // =========================
     // 8) Archives (bouton HTML existant sous Notes) — SANS encadré
     // =========================

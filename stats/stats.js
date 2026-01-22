@@ -12,28 +12,28 @@
 const DEFAULT_URL = "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json";
 
 /* -----------------------------
-   DOM
+   DOM (bind après DOM ready)
 ----------------------------- */
 const els = {
-  q: document.getElementById("q"),
-  metric: document.getElementById("metric"),
-  top: document.getElementById("top"),
-  status: document.getElementById("status"),
-  chart: document.getElementById("chart"),
-  chartWrap: document.querySelector(".chart-wrap"),
-
-  tiles: document.getElementById("tiles"), // ✅ nouveau
+  q: null,
+  metric: null,
+  top: null,
+  status: null,
+  chart: null,
+  chartWrap: null,
+  tiles: null,
 };
 
 /* -----------------------------
    State
+   ⚠️ srcUrl rempli dans init() (après DOM ready)
 ----------------------------- */
 const state = {
-  srcUrl: getListUrl(),
+  srcUrl: "",
   games: [],
   statsById: new Map(), // id -> {views, likes, mega}
 
-  renderLimit: 48, // tuiles visibles
+  renderLimit: 48,
   renderStep: 36,
 };
 
@@ -58,17 +58,22 @@ function scheduleChart(list) {
    Helpers URL / JSON
 ========================================================= */
 function getListUrl() {
-  try {
-    const p = new URLSearchParams(location.search);
-    const src = (p.get("src") || "").trim();
-    if (src) return src;
-  } catch {}
+  // ✅ blindé: aucun crash si file://, sandbox, permissions, etc.
+  let src = "";
 
   try {
-    return (localStorage.getItem("f95listUrl") || "").trim() || DEFAULT_URL;
-  } catch {
-    return DEFAULT_URL;
-  }
+    const p = new URLSearchParams(window.location.search);
+    src = (p.get("src") || "").trim();
+  } catch {}
+
+  if (src) return src;
+
+  try {
+    const v = localStorage.getItem("f95listUrl");
+    if (v && String(v).trim()) return String(v).trim();
+  } catch {}
+
+  return DEFAULT_URL;
 }
 
 function extractGames(raw) {
@@ -110,9 +115,11 @@ function getGameUrl(id) {
   const u = new URL("/game/", location.origin);
   u.searchParams.set("id", String(id));
 
-  const p = new URLSearchParams(location.search);
-  const src = (p.get("src") || "").trim();
-  if (src) u.searchParams.set("src", src);
+  try {
+    const p = new URLSearchParams(location.search);
+    const src = (p.get("src") || "").trim();
+    if (src) u.searchParams.set("src", src);
+  } catch {}
 
   return u.toString();
 }
@@ -172,7 +179,6 @@ function getFilteredGames() {
     });
   }
 
-  // attach stats (mutations OK)
   list = attachStats(list);
 
   cache.q = q;
@@ -234,7 +240,7 @@ function renderTiles(list) {
 }
 
 /* =========================================================
-   Chart (canvas sans lib) — inchangé côté rendu
+   Chart (canvas sans lib)
 ========================================================= */
 function metricValue(g, metric) {
   if (metric === "views") return g._views | 0;
@@ -402,7 +408,7 @@ function setupInfiniteScroll() {
       for (const e of entries) if (e.isIntersecting) loadMore();
     },
     {
-      root: null, // scroll page
+      root: null,
       rootMargin: "500px",
       threshold: 0.01,
     }
@@ -434,7 +440,7 @@ function wireEvents() {
       scheduleChart(getFilteredGames());
     });
 
-  // click tile -> fiche
+  // click tuile -> fiche
   if (els.tiles) {
     els.tiles.addEventListener("click", (e) => {
       const tile = e.target.closest(".tile[data-id]");
@@ -452,6 +458,9 @@ function wireEvents() {
    Init
 ========================================================= */
 async function init() {
+  // ✅ important : on récupère la source ici (après DOM ready)
+  state.srcUrl = getListUrl();
+
   if (els.status) els.status.textContent = "Chargement liste…";
 
   let raw;
@@ -486,10 +495,11 @@ async function init() {
   rerender();
 }
 
+/* =========================================================
+   Boot (DOM ready)
+========================================================= */
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("✅ stats.js DOM ready");
-
-  // rebind DOM proprement
+  // bind DOM proprement (plus jamais de null)
   els.q = document.getElementById("q");
   els.metric = document.getElementById("metric");
   els.top = document.getElementById("top");
@@ -498,11 +508,13 @@ document.addEventListener("DOMContentLoaded", () => {
   els.chartWrap = document.querySelector(".chart-wrap");
   els.tiles = document.getElementById("tiles");
 
-  if (!els.tiles) {
-    console.error("❌ #tiles introuvable");
+  if (!els.chart || !els.tiles) {
+    console.error("Stats: éléments DOM manquants", {
+      chart: !!els.chart,
+      tiles: !!els.tiles,
+    });
     return;
   }
 
   init();
 });
-

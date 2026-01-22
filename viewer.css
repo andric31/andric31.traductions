@@ -363,6 +363,16 @@ main{
 .badge.eng-others{ background:#8BC34A; color:#000; }
 .badge.eng-wolfrpg{ background:#4CAF50; color:#000; }
 
+.badge.eng-unrealengine{ background:#0D47A1; color:#fff; }
+.badge.eng-html{ background:#689F38; color:#000; }
+.badge.eng-java{ background:#52A6B0; color:#000; }
+.badge.eng-flash{ background:#616161; color:#fff; }
+.badge.eng-qsp{ background:#D32F2F; color:#fff; }
+.badge.eng-webgl{ background:#FE5901; color:#000; }
+.badge.eng-rags{ background:#FF9800; color:#000; }
+.badge.eng-tads{ background:#2196F3; color:#000; }
+.badge.eng-adrift{ background:#2196F3; color:#000; }
+
 .badge.status-completed{ background:#2196F3; color:#000; }
 .badge.status-abandoned{ background:#FF9800; color:#000; }
 .badge.status-onhold{ background:#03A9F4; color:#000; }

@@ -1,19 +1,51 @@
-.stats-wrap{max-width:1400px;margin:0 auto;padding:14px;}
+/* --- Layout global : plus large + moins de padding --- */
+.stats-wrap{
+  max-width: 1760px;         /* ✅ plus large que 1400 */
+  margin: 0 auto;
+  padding: 10px;             /* ✅ moins de padding */
+}
+
+/* --- Topbar : moins haute, plus compacte --- */
 .stats-topbar{
-  position:sticky;top:0;z-index:5;
+  position:sticky;
+  top:0;
+  z-index:5;
+
   background:linear-gradient(180deg, rgba(15,17,23,.96), rgba(15,17,23,.86));
   backdrop-filter: blur(8px);
+
   border:1px solid var(--border);
   border-radius:14px;
-  padding:12px 12px;
-  display:flex;gap:12px;align-items:center;justify-content:space-between;
-}
-.stats-title .h1{font-size:20px;font-weight:800;letter-spacing:.2px}
-.stats-title .sub{font-size:12px;color:var(--muted);margin-top:2px}
 
-.stats-controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+  padding: 8px 10px;         /* ✅ réduit (avant 12/12) */
+  display:flex;
+  gap: 10px;                 /* ✅ réduit (avant 12) */
+  align-items:center;
+  justify-content:space-between;
+}
+
+.stats-title .h1{
+  font-size:19px;            /* ✅ léger gain de place */
+  font-weight:800;
+  letter-spacing:.2px;
+}
+.stats-title .sub{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:1px;            /* ✅ réduit */
+}
+
+/* --- Controls : plus serrés --- */
+.stats-controls{
+  display:flex;
+  gap: 6px;                  /* ✅ réduit (avant 8) */
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  align-items:center;
+}
+
 .inp,.sel{
-  height:38px;
+  height: 34px;              /* ✅ réduit (avant 38) */
   border:1px solid var(--border);
   background:var(--btn);
   color:var(--fg);
@@ -21,55 +53,118 @@
   padding:0 10px;
   outline:none;
 }
-.inp{min-width:280px}
-.sel{min-width:140px}
 
-.stats-main{display:flex;flex-direction:column;gap:14px;margin-top:12px}
+.inp{ min-width: 260px; }    /* ✅ un poil moins large */
+.sel{ min-width: 130px; }    /* ✅ un poil moins large */
+
+/* --- Main : moins d’espace sous la topbar --- */
+.stats-main{
+  display:flex;
+  flex-direction:column;
+  gap: 10px;                 /* ✅ réduit (avant 14) */
+  margin-top: 8px;           /* ✅ réduit (avant 12) */
+}
+
 .card{
   background:var(--card);
   border:1px solid var(--border);
   border-radius:14px;
   overflow:hidden;
 }
-.card-h{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border)}
+
+.card-h{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  padding: 8px 10px;         /* ✅ réduit (avant 10/12) */
+  border-bottom:1px solid var(--border);
+}
+
 .card-title{font-weight:800}
 .card-note{color:var(--muted);font-size:12px}
 
-/* ✅ le graphe devient scrollable si "Tout" (canvas peut être très haut) */
+/* --- Chart --- */
 .chart-wrap{
-  padding:10px 12px;
+  padding: 8px 10px;         /* ✅ réduit */
   max-height: 620px;
   overflow: auto;
 }
 .chart-wrap canvas{
   width:100%;
-  height:auto; /* la hauteur est gérée en JS via canvas.style.height */
+  height:auto;
   display:block;
   border:1px solid var(--border);
   border-radius:12px;
   background:rgba(0,0,0,.12);
 }
 
-.table-wrap{overflow:auto}
-.tbl{width:100%;border-collapse:collapse;min-width:920px}
-.tbl th,.tbl td{padding:10px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
-.tbl thead th{position:sticky;top:0;background:rgba(20,24,38,.98);backdrop-filter: blur(6px);text-align:left;font-size:12px;color:var(--muted);cursor:pointer}
+/* --- Table : prend mieux la place --- */
+.table-wrap{
+  overflow:auto;
+}
+
+/* ✅ enlève le min-width énorme si ça te force un scroll horizontal inutile
+   (tu peux le garder si tu préfères, mais là ça “élargit” visuellement) */
+.tbl{
+  width:100%;
+  border-collapse:collapse;
+  min-width: 0;              /* ✅ avant 920px */
+}
+
+/* ✅ padding un peu réduit pour voir plus de lignes à l'écran */
+.tbl th,.tbl td{
+  padding: 8px 10px;         /* ✅ réduit (avant 10/10) */
+  border-bottom:1px solid var(--border);
+  vertical-align:middle;
+}
+
+.tbl thead th{
+  position:sticky;
+  top:0;
+  background:rgba(20,24,38,.98);
+  backdrop-filter: blur(6px);
+  text-align:left;
+  font-size:12px;
+  color:var(--muted);
+  cursor:pointer;
+}
+
 .tbl thead th.num{text-align:right}
 .tbl td.num{text-align:right;font-variant-numeric: tabular-nums}
 .tbl tbody tr:hover{background:rgba(90,162,255,.08);cursor:pointer}
-.c-cover{width:76px}
+
+/* --- Cover un peu plus compact pour élargir le tableau --- */
+.c-cover{width:64px}         /* ✅ avant 76 */
 .cover{
-  width:56px;height:56px;border-radius:10px;object-fit:cover;
-  border:1px solid var(--border);background:rgba(0,0,0,.14);
+  width:50px;                /* ✅ avant 56 */
+  height:50px;               /* ✅ avant 56 */
+  border-radius:10px;
+  object-fit:cover;
+  border:1px solid var(--border);
+  background:rgba(0,0,0,.14);
 }
+
 .badge-mini{
-  display:inline-flex;align-items:center;justify-content:center;
-  height:18px;padding:0 8px;border-radius:999px;font-size:11px;
-  border:1px solid var(--border);background:rgba(0,0,0,.18);color:var(--muted)
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:18px;
+  padding:0 8px;
+  border-radius:999px;
+  font-size:11px;
+  border:1px solid var(--border);
+  background:rgba(0,0,0,.18);
+  color:var(--muted)
 }
+
 .title-line{display:flex;gap:8px;align-items:center}
-.small{font-size:12px;color:var(--muted);margin-top:2px}
+.small{font-size:12px;color:var(--muted);margin-top:1px}
+
+/* --- Responsive --- */
 @media (max-width: 900px){
+  .stats-wrap{padding:8px}
   .inp{min-width:200px}
   .sel{min-width:120px}
+  .tbl th,.tbl td{padding:8px 8px}
 }

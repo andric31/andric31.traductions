@@ -1,79 +1,19 @@
-"use strict";
-
-/* =========================================================
-   Stats — Graph + Tuiles (Dashboard)
-   - Charge f95list.json (src param ou localStorage)
-   - Charge stats bulk via /api/counters
-   - Recherche + rendu progressif (tuiles)
-   - Chart canvas sans lib, click sur bar -> fiche jeu
-   - Infinite scroll des tuiles via IntersectionObserver (sentinel)
-   ========================================================= */
+("use strict");
 
 const DEFAULT_URL = "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json";
 
-/* -----------------------------
-   DOM (bind après DOM ready)
------------------------------ */
-const els = {
-  q: null,
-  metric: null,
-  top: null,
-  status: null,
-  chart: null,
-  chartWrap: null,
-  tiles: null,
-};
-
-/* -----------------------------
-   State
-   ⚠️ srcUrl rempli dans init() (après DOM ready)
------------------------------ */
-const state = {
-  srcUrl: "",
-  games: [],
-  statsById: new Map(), // id -> {views, likes, mega}
-
-  renderLimit: 48,
-  renderStep: 36,
-};
-
-/* -----------------------------
-   Cache (évite recalculs filtre + attachStats)
------------------------------ */
-const cache = {
-  q: "",
-  list: [],
-};
-
-/* -----------------------------
-   Chart scheduler (évite redraws inutiles)
------------------------------ */
-let chartRaf = 0;
-function scheduleChart(list) {
-  cancelAnimationFrame(chartRaf);
-  chartRaf = requestAnimationFrame(() => drawChart(list));
-}
-
-/* =========================================================
-   Helpers URL / JSON
-========================================================= */
+// -------- URL helpers (comme viewer) --------
 function getListUrl() {
-  // ✅ blindé: aucun crash si file://, sandbox, permissions, etc.
-  let src = "";
-
   try {
-    const p = new URLSearchParams(window.location.search);
-    src = (p.get("src") || "").trim();
+    const p = new URLSearchParams(location.search);
+    const src = (p.get("src") || "").trim();
+    if (src) return src;
   } catch {}
-
-  if (src) return src;
-
   try {
-    const v = localStorage.getItem("f95listUrl");
-    if (v && String(v).trim()) return String(v).trim();
-  } catch {}
-
-  return DEFAULT_URL;
+    return (localStorage.getItem("f95listUrl") || "").trim() || DEFAULT_URL;
+  } catch {
+    return DEFAULT_URL;
+  }
 }
 
 function extractGames(raw) {
@@ -82,6 +22,13 @@ function extractGames(raw) {
   if (Array.isArray(raw.games)) return raw.games;
   if (Array.isArray(raw.items)) return raw.items;
   return [];
+}
+
+function normalize(s) {
+  return String(s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "");
 }
 
 async function fetchJson(url) {
@@ -98,7 +45,6 @@ async function fetchGameStatsBulk(ids) {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ ids }),
     });
-
     if (!r.ok) return {};
     const j = await r.json();
     if (!j?.ok || !j.stats) return {};
@@ -108,62 +54,47 @@ async function fetchGameStatsBulk(ids) {
   }
 }
 
-/* =========================================================
-   Navigation
-========================================================= */
+// -------- UI state --------
+const els = {
+  q: document.getElementById("q"),
+  metric: document.getElementById("metric"),
+  top: document.getElementById("top"),
+  status: document.getElementById("status"),
+  chart: document.getElementById("chart"),
+  tbody: document.getElementById("tbody"),
+  tbl: document.getElementById("tbl"),
+  tableWrap: document.querySelector(".table-wrap"),
+  chartWrap: document.querySelector(".chart-wrap"),
+};
+
+const state = {
+  srcUrl: getListUrl(),
+  games: [],
+  statsById: new Map(), // id -> {views,likes,mega}
+  sortKey: "views",
+  sortDir: "desc",
+
+  // ✅ affichage limité (on charge tout mais on ne rend qu'une partie)
+  renderLimit: 50, // nb lignes visibles
+  renderStep: 50,  // nb lignes ajoutées à chaque "bottom"
+};
+
 function getGameUrl(id) {
   const u = new URL("/game/", location.origin);
   u.searchParams.set("id", String(id));
-
-  try {
-    const p = new URLSearchParams(location.search);
-    const src = (p.get("src") || "").trim();
-    if (src) u.searchParams.set("src", src);
-  } catch {}
-
+  // conserve src si présent
+  const p = new URLSearchParams(location.search);
+  const src = (p.get("src") || "").trim();
+  if (src) u.searchParams.set("src", src);
   return u.toString();
 }
 
-function shortUrl(u) {
-  try {
-    const url = new URL(u);
-    return url.hostname + url.pathname;
-  } catch {
-    return String(u || "");
-  }
-}
+function getFiltered() {
+  const q = normalize(els.q.value.trim());
 
-/* =========================================================
-   Normalisation / Recherche
-========================================================= */
-function normalize(s) {
-  return String(s || "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "");
-}
-
-/* =========================================================
-   Data pipeline : filter -> attach stats -> cache
-========================================================= */
-function attachStats(list) {
-  for (const g of list) {
-    const s = state.statsById.get(String(g.id)) || { views: 0, likes: 0, mega: 0 };
-    g._views = s.views | 0;
-    g._likes = s.likes | 0;
-    g._mega = s.mega | 0;
-  }
-  return list;
-}
-
-function getFilteredGames() {
-  const q = els.q ? els.q.value.trim() : "";
-  if (cache.q === q) return cache.list;
-
-  const nq = normalize(q);
   let list = state.games;
 
-  if (nq) {
+  if (q) {
     list = list.filter((g) => {
       const hay = normalize(
         [
@@ -175,99 +106,129 @@ function getFilteredGames() {
           g.collection || "",
         ].join("  ")
       );
-      return hay.includes(nq);
+      return hay.includes(q);
     });
   }
 
-  list = attachStats(list);
-
-  cache.q = q;
-  cache.list = list;
+  // attach numbers
+  for (const g of list) {
+    const s = state.statsById.get(String(g.id)) || {
+      views: 0,
+      likes: 0,
+      mega: 0,
+    };
+    g._views = s.views | 0;
+    g._likes = s.likes | 0;
+    g._mega = s.mega | 0;
+  }
   return list;
 }
 
-function invalidateCache() {
-  cache.q = "__invalidate__";
+function sortList(list) {
+  const key = state.sortKey;
+  const dir = state.sortDir === "asc" ? 1 : -1;
+
+  const getv = (g) => {
+    if (key === "title") return String(g.cleanTitle || g.title || "");
+    if (key === "updatedAt") return String(g.updatedAt || "");
+    if (key === "views") return g._views | 0;
+    if (key === "likes") return g._likes | 0;
+    if (key === "mega") return g._mega | 0;
+    return "";
+  };
+
+  return list
+    .slice()
+    .sort((a, b) => {
+      const va = getv(a),
+        vb = getv(b);
+      if (typeof va === "number" && typeof vb === "number")
+        return (va - vb) * dir;
+      return String(va).localeCompare(String(vb), "fr") * dir;
+    });
 }
 
-/* =========================================================
-   Tiles render
-========================================================= */
-function fmt(n) {
-  return (Number(n) || 0).toLocaleString("fr-FR");
-}
-
-function renderTiles(list) {
-  if (!els.tiles) return;
-
-  els.tiles.innerHTML = "";
+function renderTable(list) {
+  els.tbody.innerHTML = "";
   const frag = document.createDocumentFragment();
 
   for (const g of list) {
-    const tile = document.createElement("div");
-    tile.className = "tile";
-    tile.dataset.id = String(g.id || "");
+    const tr = document.createElement("tr");
+    tr.addEventListener("click", () => (location.href = getGameUrl(g.id)));
 
+    const imgTd = document.createElement("td");
+    imgTd.className = "c-cover";
     const img = document.createElement("img");
-    img.className = "tile-cover";
+    img.className = "cover";
     img.loading = "lazy";
     img.alt = "";
     img.src = g.imageUrl || "/favicon.png";
+    imgTd.appendChild(img);
 
-    const body = document.createElement("div");
-    body.className = "tile-body";
-
-    const title = document.createElement("div");
-    title.className = "tile-title";
-    title.textContent = g.cleanTitle || g.title || "";
+    const titleTd = document.createElement("td");
+    const tl = document.createElement("div");
+    tl.className = "title-line";
+    const t = document.createElement("div");
+    t.textContent = g.cleanTitle || g.title || "";
+    tl.appendChild(t);
+    titleTd.appendChild(tl);
 
     const sub = document.createElement("div");
-    sub.className = "tile-sub";
-    sub.textContent =
-      `id: ${String(g.id || "")}` + (g.collection ? ` • collection: ${g.collection}` : "");
+    sub.className = "small";
+    const idTxt = String(g.id || "");
+    const colTxt = g.collection ? ` • collection: ${g.collection}` : "";
+    sub.textContent = `id: ${idTxt}${colTxt}`;
+    titleTd.appendChild(sub);
 
-    const stats = document.createElement("div");
-    stats.className = "tile-stats";
-    stats.innerHTML =
-      `👁️ ${fmt(g._views)} &nbsp;&nbsp; ❤️ ${fmt(g._likes)} &nbsp;&nbsp; 📥 ${fmt(g._mega)}`;
+    const upTd = document.createElement("td");
+    upTd.textContent = g.updatedAt || "";
 
-    body.append(title, sub, stats);
-    tile.append(img, body);
-    frag.appendChild(tile);
+    const vTd = document.createElement("td");
+    vTd.className = "num";
+    vTd.textContent = (g._views | 0).toLocaleString("fr-FR");
+
+    const lTd = document.createElement("td");
+    lTd.className = "num";
+    lTd.textContent = (g._likes | 0).toLocaleString("fr-FR");
+
+    const mTd = document.createElement("td");
+    mTd.className = "num";
+    mTd.textContent = (g._mega | 0).toLocaleString("fr-FR");
+
+    tr.appendChild(imgTd);
+    tr.appendChild(titleTd);
+    tr.appendChild(upTd);
+    tr.appendChild(vTd);
+    tr.appendChild(lTd);
+    tr.appendChild(mTd);
+
+    frag.appendChild(tr);
   }
 
-  els.tiles.appendChild(frag);
+  els.tbody.appendChild(frag);
 }
 
-/* =========================================================
-   Chart (canvas sans lib)
-========================================================= */
-function metricValue(g, metric) {
-  if (metric === "views") return g._views | 0;
-  if (metric === "likes") return g._likes | 0;
-  if (metric === "mega") return g._mega | 0;
-  return 0;
+function escapeHtml(s) {
+  return String(s || "").replace(
+    /[&<>"']/g,
+    (c) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      }[c])
+  );
 }
 
-function roundRect(ctx, x, y, w, h, r) {
-  r = Math.min(r, h / 2, w / 2);
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + w, y, x + w, y + h, r);
-  ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r);
-  ctx.arcTo(x, y, x + w, y, r);
-  ctx.closePath();
-}
-
+// -------- Chart (canvas, sans lib) --------
 function drawChart(list) {
-  if (!els.chart) return;
-
   const canvas = els.chart;
   const ctx = canvas.getContext("2d");
 
-  const metric = els.metric ? els.metric.value : "views";
-  const topN = Number((els.top && els.top.value) || 30);
+  const metric = els.metric.value;
+  const topN = Number(els.top.value || 30);
   const take = topN > 0 ? topN : list.length;
 
   const items = list
@@ -275,16 +236,20 @@ function drawChart(list) {
     .sort((a, b) => metricValue(b, metric) - metricValue(a, metric))
     .slice(0, take);
 
-  // hauteur
-  const rowPx = 26;
-  const padT = 8;
-  const padB = 12;
-  const cssH = padT + padB + items.length * rowPx;
+  // ✅ APRÈS : hauteur STRICTEMENT nécessaire
+  const rowPx = 26;        // hauteur par ligne
+  const padT = 8;          // marge haute réduite
+  const padB = 12;         // marge basse réduite
+  
+  const desiredCssH = padT + padB + items.length * rowPx;
 
-  canvas.style.height = cssH + "px";
+  // Important : on force une hauteur CSS pour que clientHeight soit correct
+  canvas.style.height = desiredCssH + "px";
 
+  // width responsive
   const dpr = window.devicePixelRatio || 1;
   const cssW = canvas.clientWidth || 1200;
+  const cssH = desiredCssH;
 
   canvas.width = Math.floor(cssW * dpr);
   canvas.height = Math.floor(cssH * dpr);
@@ -292,11 +257,13 @@ function drawChart(list) {
 
   ctx.clearRect(0, 0, cssW, cssH);
 
-  const padL = 260;
-  const padR = 18;
+  const padL = 260, padR = 18;
   const innerW = Math.max(50, cssW - padL - padR);
   const innerH = Math.max(50, cssH - padT - padB);
 
+  // background grid
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = "rgba(0,0,0,0)";
   ctx.strokeStyle = "rgba(170,178,200,.18)";
   ctx.lineWidth = 1;
 
@@ -317,6 +284,7 @@ function drawChart(list) {
     ctx.fillText(val.toLocaleString("fr-FR"), x, padT + innerH + 18);
   }
 
+  // bars
   const rowH = innerH / Math.max(1, items.length);
   const barH = Math.max(10, Math.min(18, rowH * 0.62));
   const y0 = padT + rowH / 2;
@@ -329,25 +297,28 @@ function drawChart(list) {
     const v = metricValue(it, metric);
     const w = Math.max(0, innerW * (v / maxV));
 
+    // label
     ctx.fillStyle = "rgba(232,234,240,.92)";
     ctx.textAlign = "right";
     const label = (it.cleanTitle || it.title || "").slice(0, 42);
     ctx.fillText(label, padL - 10, y);
 
+    // bar
     ctx.fillStyle = "rgba(90,162,255,.55)";
     roundRect(ctx, padL, y - barH / 2, w, barH, 8);
     ctx.fill();
 
+    // value
     ctx.fillStyle = "rgba(232,234,240,.86)";
     ctx.textAlign = "left";
     ctx.fillText(v.toLocaleString("fr-FR"), padL + w + 8, y);
   });
 
+  // click mapping (open game)
   canvas.onclick = (ev) => {
     const rect = canvas.getBoundingClientRect();
     const x = ev.clientX - rect.left;
     const y = ev.clientY - rect.top;
-
     if (x < padL || x > cssW - padR || y < padT || y > padT + innerH) return;
 
     const idx = Math.floor((y - padT) / rowH);
@@ -356,165 +327,189 @@ function drawChart(list) {
   };
 }
 
-/* =========================================================
-   Render orchestration
-========================================================= */
+function metricValue(g, metric) {
+  if (metric === "views") return g._views | 0;
+  if (metric === "likes") return g._likes | 0;
+  if (metric === "mega") return g._mega | 0;
+  return 0;
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  r = Math.min(r, h / 2, w / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+// ✅ reset du "renderLimit" quand on change filtres/tri
 function resetLimit() {
-  state.renderLimit = 48;
-  invalidateCache();
+  state.renderLimit = state.renderStep;
+  if (els.tableWrap) els.tableWrap.scrollTop = 0;
 }
 
+// -------- render --------
 function rerender() {
-  const filtered = getFilteredGames();
-  const visible = filtered.slice(0, state.renderLimit);
+  const filtered = getFiltered();
+  const sorted = sortList(filtered);
 
-  renderTiles(visible);
-  scheduleChart(filtered);
+  const visible = sorted.slice(0, state.renderLimit);
+  renderTable(visible);
 
-  if (els.status) {
-    const total = state.games.length;
-    els.status.textContent =
-      `${filtered.length}/${total} jeux (affichés: ${Math.min(state.renderLimit, filtered.length)}/${filtered.length} • source: ${shortUrl(state.srcUrl)})`;
+  drawChart(sorted);
+
+  const total = state.games.length;
+  els.status.textContent = `${sorted.length}/${total} jeux (affichés: ${Math.min(
+    state.renderLimit,
+    sorted.length
+  )}/${sorted.length} • source: ${shortUrl(state.srcUrl)})`;
+}
+
+function shortUrl(u) {
+  try {
+    const url = new URL(u);
+    return url.hostname + url.pathname;
+  } catch {
+    return String(u || "");
   }
 }
 
-/* =========================================================
-   Infinite scroll (tuiles)
-========================================================= */
-function setupInfiniteScroll() {
-  if (!els.tiles) return;
-
-  const sentinel = document.createElement("div");
-  sentinel.id = "stats-sentinel";
-  sentinel.style.cssText = "height:1px;width:1px;opacity:0;pointer-events:none;";
-  els.tiles.appendChild(sentinel);
-
-  let lock = false;
-
-  const loadMore = () => {
-    if (lock) return;
-
-    const filtered = getFilteredGames();
-    if (state.renderLimit >= filtered.length) return;
-
-    lock = true;
-    state.renderLimit += state.renderStep;
-    rerender();
-    setTimeout(() => (lock = false), 80);
-  };
-
-  const obs = new IntersectionObserver(
-    (entries) => {
-      for (const e of entries) if (e.isIntersecting) loadMore();
-    },
-    {
-      root: null,
-      rootMargin: "500px",
-      threshold: 0.01,
-    }
-  );
-
-  obs.observe(sentinel);
-}
-
-/* =========================================================
-   Events
-========================================================= */
-function wireEvents() {
-  // recherche (debounce)
-  let t = null;
-  const debounced = () => {
-    clearTimeout(t);
-    t = setTimeout(() => {
-      resetLimit();
-      rerender();
-    }, 120);
-  };
-  if (els.q) els.q.addEventListener("input", debounced);
-
-  // chart only
-  if (els.metric) els.metric.addEventListener("change", () => scheduleChart(getFilteredGames()));
-  if (els.top)
-    els.top.addEventListener("change", () => {
-      if (els.chartWrap) els.chartWrap.scrollTop = 0;
-      scheduleChart(getFilteredGames());
-    });
-
-  // click tuile -> fiche
-  if (els.tiles) {
-    els.tiles.addEventListener("click", (e) => {
-      const tile = e.target.closest(".tile[data-id]");
-      if (!tile) return;
-      const id = tile.dataset.id;
-      if (id) location.href = getGameUrl(id);
-    });
-  }
-
-  // resize chart
-  window.addEventListener("resize", () => scheduleChart(getFilteredGames()));
-}
-
-/* =========================================================
-   Init
-========================================================= */
+// -------- init --------
 async function init() {
-  // ✅ important : on récupère la source ici (après DOM ready)
-  state.srcUrl = getListUrl();
-
-  if (els.status) els.status.textContent = "Chargement liste…";
-
+  els.status.textContent = "Chargement liste…";
   let raw;
   try {
     raw = await fetchJson(state.srcUrl);
   } catch (e) {
-    if (els.status) els.status.textContent = "Erreur: impossible de charger la liste";
+    els.status.textContent = "Erreur: impossible de charger la liste";
     console.error(e);
     return;
   }
 
-  state.games = extractGames(raw);
+  const games = extractGames(raw).map((g) => ({ ...g }));
+  state.games = games;
 
-  if (els.status) els.status.textContent = "Chargement stats…";
+  els.status.textContent = "Chargement stats…";
 
-  const ids = state.games.map((g) => String(g.id || "")).filter(Boolean);
+  const ids = games.map((g) => String(g.id || "")).filter(Boolean);
   const statsObj = await fetchGameStatsBulk(ids);
 
   for (const id of ids) {
     const s = statsObj[id] || {};
     state.statsById.set(String(id), {
       views: Number(s.views || 0),
-      likes: Number(s.likes || 0),
       mega: Number(s.mega || 0),
+      likes: Number(s.likes || 0),
     });
   }
 
-  if (els.status) els.status.textContent = "OK";
+  els.status.textContent = "OK";
+  state.sortKey = "views";
+  state.sortDir = "desc";
 
   wireEvents();
-  setupInfiniteScroll();
   rerender();
 }
 
-/* =========================================================
-   Boot (DOM ready)
-========================================================= */
-document.addEventListener("DOMContentLoaded", () => {
-  // bind DOM proprement (plus jamais de null)
-  els.q = document.getElementById("q");
-  els.metric = document.getElementById("metric");
-  els.top = document.getElementById("top");
-  els.status = document.getElementById("status");
-  els.chart = document.getElementById("chart");
-  els.chartWrap = document.querySelector(".chart-wrap");
-  els.tiles = document.getElementById("tiles");
+function wireEvents() {
+  let t = null;
 
-  if (!els.chart || !els.tiles) {
-    console.error("Stats: éléments DOM manquants", {
-      chart: !!els.chart,
-      tiles: !!els.tiles,
+  const deb = () => {
+    clearTimeout(t);
+    t = setTimeout(() => {
+      resetLimit();
+      rerender();
+    }, 120);
+  };
+
+  els.q.addEventListener("input", deb);
+
+  els.metric.addEventListener("change", () => {
+    rerender();
+  });
+
+  els.top.addEventListener("change", () => {
+    // ✅ quand tu passes en "Tout", le graphe devient scrollable (canvas + haut)
+    // on remonte le scroll du graphe en haut pour éviter l'effet "perdu"
+    if (els.chartWrap) els.chartWrap.scrollTop = 0;
+    rerender();
+  });
+
+  // table sorting
+  els.tbl.querySelectorAll("thead th[data-sort]").forEach((th) => {
+    th.addEventListener("click", () => {
+      const k = th.getAttribute("data-sort");
+      if (!k) return;
+
+      if (state.sortKey === k) {
+        state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
+      } else {
+        state.sortKey = k;
+        state.sortDir = (k === "title" || k === "updatedAt") ? "asc" : "desc";
+      }
+
+      resetLimit();
+      rerender();
     });
-    return;
+  });
+
+  // ✅ "afficher plus" robuste via sentinel + IntersectionObserver
+  {
+    const sentinel = document.createElement("div");
+    sentinel.id = "stats-sentinel";
+    sentinel.style.height = "1px";
+    sentinel.style.width = "1px";
+    sentinel.style.opacity = "0";
+    sentinel.style.pointerEvents = "none";
+
+    if (els.tableWrap && els.tableWrap.parentNode) {
+      els.tableWrap.parentNode.appendChild(sentinel);
+    } else {
+      document.body.appendChild(sentinel);
+    }
+
+    let lock = false;
+
+    const loadMoreIfPossible = () => {
+      if (lock) return;
+
+      const filtered = getFiltered();
+      const sorted = sortList(filtered);
+
+      if (state.renderLimit >= sorted.length) return;
+
+      lock = true;
+      state.renderLimit += state.renderStep;
+      rerender();
+      setTimeout(() => (lock = false), 80);
+    };
+
+    const obs = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) loadMoreIfPossible();
+        }
+      },
+      {
+        root: null,           // scroll page
+        rootMargin: "300px",  // déclenche avant d’être tout en bas
+        threshold: 0.01,
+      }
+    );
+
+    obs.observe(sentinel);
   }
 
-  init();
-});
+  window.addEventListener("resize", () => {
+    const filtered = getFiltered();
+    const sorted = sortList(filtered);
+    drawChart(sorted);
+  });
+}
+
+init();
+
+

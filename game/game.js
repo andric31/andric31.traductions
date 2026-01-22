@@ -841,7 +841,7 @@ async function initCounters(gameId, megaHref, archiveHref) {
   };
 
   bindDownload("btnMega", megaHref);
-  bindDownload("btn_archiveHost", archiveHref);
+  bindDownload("archiveLink", archiveHref);
 
   // 3) ❤️ Like toggle
   const btnLike = $("btnLike");
@@ -1279,15 +1279,11 @@ function renderVideoBlock({ id, videoUrl }) {
     });
 
     // =========================
-    // 8) Archives / dossier traduction (encadré sous Notes)
+    // 8) Archives (bouton HTML existant sous Notes) — SANS encadré
     // =========================
-    const archiveHost = ensureBlockAfter(document.getElementById("notesHost"), "archiveHost");
-    renderLinkBlock({
-      id: "archiveHost",
-      title: "🗃️ Dossier / Archives de traduction",
-      href: (entry.translationsArchive || "").trim(),
-      label: "🗃️ Ouvrir les archives de traduction",
-    });
+    setHref("archiveLink", archiveHref);
+    if ($("archiveLink")) $("archiveLink").textContent = "🗃️ Ouvrir les archives de traduction";
+    show("archiveBox", !!archiveHref);
 
     // =========================
     // ✅ Analytics key (unique)

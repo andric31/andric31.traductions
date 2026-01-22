@@ -7,13 +7,11 @@
 
   <link rel="icon" href="/favicon.png" />
   <link rel="stylesheet" href="/viewer.css" />
-  <link rel="stylesheet" href="/stats/stats.css" />
+  <link rel="stylesheet" href="./stats.css" />
 </head>
 
 <body>
   <div class="stats-wrap">
-
-    <!-- Topbar -->
     <header class="stats-topbar">
       <div class="stats-title">
         <div class="h1">📊 Statistiques</div>
@@ -38,10 +36,7 @@
       </div>
     </header>
 
-    <!-- Main -->
     <main class="stats-main">
-
-      <!-- Graph -->
       <section class="card card-chart">
         <div class="card-h">
           <div>
@@ -56,20 +51,17 @@
         </div>
       </section>
 
-      <!-- Tiles -->
       <section class="card card-tiles">
         <div class="card-h">
           <div class="card-title">Jeux</div>
         </div>
 
-        <div class="tiles-wrap" id="tiles">
-          <!-- JS injecte les tuiles ici -->
-        </div>
+        <div class="tiles-wrap" id="tiles"></div>
       </section>
-
     </main>
   </div>
 
-  <script src="/stats/stats.js"></script>
+  <script src="./stats.js"></script>
 </body>
 </html>
+

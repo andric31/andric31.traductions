@@ -762,10 +762,33 @@ function setLikesFromJson(j) {
   setText("statLikes", Number.isFinite(val) ? formatInt(val) : "0");
 }
 
-async function initCounters(gameId, megaHref) {
-  // 1) Vue
+function cooldownKey(kind, gameId) {
+  return `cooldown_${kind}_${gameId}`;
+}
+
+function inCooldown(kind, gameId, ms) {
   try {
-    const j = await counterHit(gameId, "view");
+    const k = cooldownKey(kind, gameId);
+    const last = Number(localStorage.getItem(k) || "0");
+    const now = Date.now();
+    if (now - last < ms) return true;
+    localStorage.setItem(k, String(now));
+    return false;
+  } catch {
+    // si localStorage bloqué, on ne bloque pas
+    return false;
+  }
+}
+
+async function initCounters(gameId, megaHref, archiveHref) {
+  const VIEW_COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
+  const MEGA_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
+
+  // 1) Vue (anti-refresh abusif)
+  const skipViewHit = inCooldown("view", gameId, VIEW_COOLDOWN_MS);
+
+  try {
+    const j = skipViewHit ? await counterGet(gameId) : await counterHit(gameId, "view");
     if (j?.ok) {
       setText("statViews", formatInt(j.views));
       setText("statMegaClicks", formatInt(j.mega));
@@ -773,6 +796,7 @@ async function initCounters(gameId, megaHref) {
       showStatsBox();
     }
   } catch {
+    // fallback basique
     try {
       const j = await counterGet(gameId);
       if (j?.ok) {
@@ -789,32 +813,49 @@ async function initCounters(gameId, megaHref) {
     }
   }
 
-  // 2) Clic MEGA
-  if (megaHref) {
-    const btn = $("btnMega");
-    if (btn) {
-      btn.addEventListener(
-        "click",
-        async () => {
-          try {
-            const j = await counterHit(gameId, "mega");
-            if (j?.ok) {
-              setText("statMegaClicks", formatInt(j.mega));
-              showStatsBox();
-            }
-          } catch {}
-        },
-        { passive: true }
-      );
-    }
-  }
+  // 2) 📥 Téléchargements (MEGA + Archives → même compteur)
+  const bindDownload = (btnId, href) => {
+    if (!href) return;
+    const btn = $(btnId);
+    if (!btn) return;
+
+    if (btn.dataset.boundMega === "1") return; // ✅ anti-double bind
+    btn.dataset.boundMega = "1";
+
+    btn.addEventListener(
+      "click",
+      async () => {
+        // ✅ anti spam clic (local)
+        if (inCooldown("megaClick", gameId, MEGA_COOLDOWN_MS)) return;
+
+        try {
+          const j = await counterHit(gameId, "mega");
+          if (j?.ok) {
+            setText("statMegaClicks", formatInt(j.mega));
+            showStatsBox();
+          }
+        } catch {}
+      },
+      { passive: true }
+    );
+  };
+
+  bindDownload("btnMega", megaHref);
+  bindDownload("btn_archiveHost", archiveHref);
 
   // 3) ❤️ Like toggle
   const btnLike = $("btnLike");
   if (btnLike && $("statLikes")) {
     updateLikeBtn(gameId);
 
+    // ✅ anti double bind (si initCounters est rappelée)
+    if (btnLike.dataset.boundLike === "1") return;
+    btnLike.dataset.boundLike = "1";
+
     btnLike.addEventListener("click", async () => {
+      // ✅ anti spam like (local)
+      if (inCooldown("likeClick", gameId, 1500)) return;
+
       const liked = getMyLike(gameId);
 
       try {
@@ -1062,12 +1103,16 @@ function renderLinkBlock({ id, title, href, label }) {
     show(id, false);
     return;
   }
+
+  const linkId = `btn_${id}`; // ex: btn_archiveHost
+
   setHtml(
     id,
     `
     <div class="game-block">
       <h3>${escapeHtml(title)}</h3>
-      <a class="btnLike" target="_blank" rel="noopener" href="${escapeHtml(u)}" style="display:inline-flex;">
+      <a id="${linkId}" class="btnLike" target="_blank" rel="noopener"
+         href="${escapeHtml(u)}" style="display:inline-flex;">
         ${escapeHtml(label)}
       </a>
     </div>
@@ -1216,6 +1261,7 @@ function renderVideoBlock({ id, videoUrl }) {
     // 6) MEGA (bouton existant)
     // =========================
     const megaHref = (entry.translation || "").trim();
+    const archiveHref = (entry.translationsArchive || "").trim();
     setHref("btnMega", megaHref);
     if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction (MEGA)";
 
@@ -1248,7 +1294,7 @@ function renderVideoBlock({ id, videoUrl }) {
     // =========================
     const analyticsKey = counterKey;
     
-    await initCounters(counterKey, megaHref);
+    await initCounters(counterKey, megaHref, archiveHref);
 
     // ⛔ Bloquer clic droit sur MEGA
     const btnMega = document.getElementById("btnMega");

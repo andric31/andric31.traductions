@@ -1266,17 +1266,18 @@ function renderVideoBlock({ id, videoUrl }) {
     if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction (MEGA)";
 
     // =========================
-    // 7) Notes (encadré sous MEGA)
+    // 7) Informations (encadré sous la notation)
     // =========================
-    // On place Notes APRÈS la .btnMainRow (celle du bouton MEGA)
-    const notesAnchor = btnMainRow || btnRow || ratingBox || document.body;
-    const notesHost = ensureBlockAfter(notesAnchor, "notesHost");
-    renderTextBlock({
-      id: "notesHost",
-      title: "🗒️ Notes",
-      text: (entry.notes || "").trim(),
-      muted: true,
-    });
+    const notesAnchor = ratingBox || document.body;
+    const notesHost = ensureBlockAfter(notesAnchor, "notesBox");
+    
+    const notes = (entry.notes || "").trim();
+    if (notes) {
+      setHtml("notesText", escapeHtml(notes).replace(/\n/g, "<br>"));
+      show("notesBox", true);
+    } else {
+      show("notesBox", false);
+    }
 
     // =========================
     // 8) Archives (bouton HTML existant sous Notes) — SANS encadré

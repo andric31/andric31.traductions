@@ -1,7 +1,6 @@
-/* ==========================================================
-   Stats — PRO Dashboard Layout
-   Compatible avec ton stats.js (IDs/classes conservés)
-   ========================================================== */
+/* ==================================================
+   Stats — Dashboard avec tuiles
+   ================================================== */
 
 .stats-wrap{
   max-width: 1760px;
@@ -9,246 +8,170 @@
   padding: 14px;
 }
 
-/* =========================
-   Topbar (pro)
-   ========================= */
+/* ---------- Topbar ---------- */
 .stats-topbar{
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: 10;
 
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 14px;
+  align-items: center;
+  gap: 16px;
 
-  padding: 12px 12px;
-  border-radius: 16px;
+  padding: 14px;
+  border-radius: 18px;
   border: 1px solid var(--border);
 
-  background:
-    linear-gradient(180deg, rgba(15,17,23,.98), rgba(15,17,23,.86));
+  background: linear-gradient(180deg, rgba(15,17,23,.98), rgba(15,17,23,.85));
   backdrop-filter: blur(10px);
 }
 
 .stats-title .h1{
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 900;
-  letter-spacing: .2px;
-  line-height: 1.1;
 }
 .stats-title .sub{
-  margin-top: 3px;
   font-size: 12px;
   color: var(--muted);
 }
 
-/* =========================
-   Controls (alignés + labels)
-   ========================= */
+/* ---------- Controls ---------- */
 .stats-controls{
   display: flex;
-  align-items: end;
-  justify-content: flex-end;
   gap: 10px;
   flex-wrap: wrap;
-  min-width: 520px;
-}
-
-.control{
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.control--search{
-  flex: 1 1 320px;
-  min-width: 260px;
-}
-.control--select{
-  flex: 0 0 auto;
-  min-width: 160px;
-}
-
-.lbl{
-  font-size: 11px;
-  color: var(--muted);
-  padding-left: 2px;
-  user-select: none;
 }
 
 .inp,.sel{
   height: 38px;
   padding: 0 12px;
-
-  border: 1px solid var(--border);
   border-radius: 12px;
 
+  border: 1px solid var(--border);
   background: var(--btn);
   color: var(--fg);
-
-  outline: none;
-  transition: border-color .15s ease, transform .05s ease;
 }
 
-.inp:focus,.sel:focus{
-  border-color: rgba(90,162,255,.55);
-}
-
-.inp{
-  width: 100%;
-}
-
-/* =========================
-   Main grid (pro)
-   Desktop: 2 colonnes
-   ========================= */
+/* ---------- Main ---------- */
 .stats-main{
-  margin-top: 12px;
-
-  display: grid;
-  grid-template-columns: 1.05fr 1.55fr; /* chart / table */
-  gap: 12px;
-  align-items: start;
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-/* =========================
-   Cards (plus premium)
-   ========================= */
+/* ---------- Cards ---------- */
 .card{
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  overflow: hidden;
   background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
 
-  /* petit effet "pro" */
-  box-shadow:
-    0 10px 30px rgba(0,0,0,.18);
+  box-shadow: 0 10px 30px rgba(0,0,0,.18);
 }
 
 .card-h{
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  align-items: center;
 
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-bottom: 1px solid var(--border);
 
-  background: rgba(20,24,38,.55);
-  backdrop-filter: blur(6px);
+  background: rgba(20,24,38,.6);
 }
 
 .card-title{
   font-weight: 900;
-  letter-spacing: .2px;
 }
 .card-note{
-  color: var(--muted);
   font-size: 12px;
+  color: var(--muted);
 }
 
-/* =========================
-   Chart
-   ========================= */
+/* ---------- Chart ---------- */
 .chart-wrap{
-  padding: 10px 12px 12px;
-  max-height: 72vh;        /* pro: s’adapte écran */
+  padding: 12px;
+  max-height: 70vh;
   overflow: auto;
 }
 
 .chart-wrap canvas{
   width: 100%;
-  height: auto; /* hauteur réelle gérée en JS */
   display: block;
-
   border-radius: 14px;
   border: 1px solid var(--border);
-  background: rgba(0,0,0,.10);
 }
 
-/* =========================
-   Table
-   ========================= */
-.table-wrap{
-  max-height: 72vh;        /* pro: table scroll indépendante */
-  overflow: auto;
+/* ---------- Tiles ---------- */
+.tiles-wrap{
+  padding: 14px;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
 }
 
-.tbl{
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 980px;        /* pro: évite compress trop fort */
-}
+/* Tile */
+.tile{
+  display: flex;
+  gap: 12px;
 
-.tbl th,.tbl td{
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--border);
-  vertical-align: middle;
-}
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
 
-.tbl thead th{
-  position: sticky;
-  top: 0;
-  z-index: 2;
-
-  background: rgba(20,24,38,.98);
-  backdrop-filter: blur(8px);
-
-  text-align: left;
-  font-size: 12px;
-  color: var(--muted);
+  background: rgba(0,0,0,.18);
   cursor: pointer;
+
+  transition: transform .12s ease, background .12s ease;
 }
 
-.tbl thead th.num{ text-align: right; }
-.tbl td.num{
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-.tbl tbody tr{
-  transition: background .12s ease;
-}
-.tbl tbody tr:hover{
-  background: rgba(90,162,255,.10);
-  cursor: pointer;
+.tile:hover{
+  transform: translateY(-2px);
+  background: rgba(90,162,255,.12);
 }
 
 /* Cover */
-.c-cover{ width: 70px; }
-.cover{
-  width: 54px;
-  height: 54px;
+.tile-cover{
+  width: 72px;
+  height: 72px;
   border-radius: 12px;
   object-fit: cover;
-
   border: 1px solid var(--border);
-  background: rgba(0,0,0,.14);
 }
 
-/* Text helpers (compat avec ton JS) */
-.title-line{ display:flex; gap:8px; align-items:center; }
-.small{ font-size:12px; color:var(--muted); margin-top:2px; }
+/* Content */
+.tile-body{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 
-/* =========================
-   Responsive
-   ========================= */
-@media (max-width: 1100px){
-  .stats-main{
-    grid-template-columns: 1fr; /* stack */
-  }
-  .stats-controls{
-    min-width: 0;
-    width: 100%;
-  }
+.tile-title{
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.tile-sub{
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Stats line */
+.tile-stats{
+  display: flex;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 700px){
   .stats-topbar{
-    align-items: flex-start;
     flex-direction: column;
+    align-items: stretch;
   }
-}
-
-@media (max-width: 520px){
-  .stats-wrap{ padding: 10px; }
-  .control--select{ min-width: 140px; }
-  .tbl{ min-width: 860px; }
 }

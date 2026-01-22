@@ -1268,15 +1268,18 @@ function renderVideoBlock({ id, videoUrl }) {
     // =========================
     // 7) Informations (encadré sous la notation)
     // =========================
-    const notesAnchor = ratingBox || document.body;
-    const notesHost = ensureBlockAfter(notesAnchor, "notesBox");
-    
     const notes = (entry.notes || "").trim();
     if (notes) {
       setHtml("notesText", escapeHtml(notes).replace(/\n/g, "<br>"));
       show("notesBox", true);
     } else {
       show("notesBox", false);
+    }
+    
+    // ✅ Forcer le bloc "Informations" juste sous la notation
+    const notesBox = document.getElementById("notesBox");
+    if (ratingBox && notesBox && ratingBox.parentNode) {
+      ratingBox.parentNode.insertBefore(notesBox, ratingBox.nextSibling);
     }
 
     // =========================

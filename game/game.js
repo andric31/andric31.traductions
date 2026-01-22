@@ -1276,10 +1276,10 @@ function renderVideoBlock({ id, videoUrl }) {
       show("notesBox", false);
     }
     
-    // ✅ Forcer le bloc "Informations" juste sous la notation
+    // ✅ Forcer "Informations" juste AU-DESSUS de la notation
     const notesBox = document.getElementById("notesBox");
     if (ratingBox && notesBox && ratingBox.parentNode) {
-      ratingBox.parentNode.insertBefore(notesBox, ratingBox.nextSibling);
+      ratingBox.parentNode.insertBefore(notesBox, ratingBox);
     }
 
     // =========================

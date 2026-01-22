@@ -1265,8 +1265,6 @@ function renderVideoBlock({ id, videoUrl }) {
     setHref("btnMega", megaHref);
     if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction (MEGA)";
 
-
-
     // =========================
     // 7) Informations (encadré sous la notation)
     // =========================
@@ -1277,7 +1275,7 @@ function renderVideoBlock({ id, videoUrl }) {
     } else {
       show("notesBox", false);
     }
- 
+    
     // =========================
     // 8) Archives (bouton HTML existant sous Notes) — SANS encadré
     // =========================
@@ -1294,37 +1292,6 @@ function renderVideoBlock({ id, videoUrl }) {
         e.preventDefault();
         return false;
       });
-    }
-
-    // =========================
-    // ⭐ Notation (étoiles) : encadré dédié ENTRE contenu principal et stats (SANS titre)
-    // =========================
-    const ratingEl = $("ratingBox");
-    const statsOutEl = $("statsOut");
-    
-    if (ratingEl && statsOutEl && statsOutEl.parentNode) {
-      // Host unique (évite les double-wrappers)
-      let ratingHost = document.getElementById("ratingHost");
-      if (!ratingHost) {
-        ratingHost = document.createElement("div");
-        ratingHost.id = "ratingHost";
-        ratingHost.innerHTML = `
-          <div class="game-block">
-            <div id="ratingHostInner"></div>
-          </div>
-        `;
-      }
-    
-      const inner = ratingHost.querySelector("#ratingHostInner");
-      if (inner && ratingEl.parentNode !== inner) {
-        inner.appendChild(ratingEl); // déplace le ratingBox dedans
-      }
-    
-      // place l'encadré avant les stats
-      statsOutEl.parentNode.insertBefore(ratingHost, statsOutEl);
-    
-      // au cas où ratingBox était hidden par défaut
-      ratingEl.style.display = "";
     }
 
     // =========================

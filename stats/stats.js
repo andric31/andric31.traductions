@@ -1,11 +1,8 @@
-"use strict";
-
-/* =========================
-   Config / helpers (comme viewer)
-========================= */
+("use strict");
 
 const DEFAULT_URL = "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json";
 
+// -------- URL helpers (comme viewer) --------
 function getListUrl() {
   try {
     const p = new URLSearchParams(location.search);
@@ -22,420 +19,497 @@ function getListUrl() {
 function extractGames(raw) {
   if (Array.isArray(raw)) return raw;
   if (!raw || typeof raw !== "object") return [];
-  const candidates = ["games", "list", "items", "data", "rows", "results"];
-  for (const k of candidates) {
-    if (Array.isArray(raw[k])) return raw[k];
-  }
-  // fallback : si objet avec valeurs
-  const vals = Object.values(raw);
-  if (vals.length && vals.every(v => v && typeof v === "object")) return vals;
+  if (Array.isArray(raw.games)) return raw.games;
+  if (Array.isArray(raw.items)) return raw.items;
   return [];
 }
 
-function safeNum(x) {
-  const n = Number(x);
-  return Number.isFinite(n) ? n : 0;
-}
-
-function norm(s) {
-  return String(s || "").toLowerCase();
-}
-
-function pickTitle(g) {
-  return String(g.cleanTitle || g.title || g.name || "").trim();
-}
-
-function pickTags(g) {
-  const t = g.tags;
-  if (Array.isArray(t)) return t.map(x => String(x || "").trim()).filter(Boolean);
-  if (typeof t === "string") return t.split(",").map(x => x.trim()).filter(Boolean);
-  return [];
+function normalize(s) {
+  return String(s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "");
 }
 
 async function fetchJson(url) {
   const r = await fetch(url, { cache: "no-store" });
-  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  if (!r.ok) throw new Error("HTTP " + r.status);
   return await r.json();
 }
 
-/* =========================
-   Data loading
-========================= */
-
-async function loadAll() {
-  const listUrl = getListUrl();
-
-  // 1) f95list
-  const raw = await fetchJson(listUrl);
-  const games = extractGames(raw)
-    .filter(g => g && (g.id || g.uid))
-    .map(g => ({
-      id: String(g.id || "").trim(),
-      uid: String(g.uid || "").trim(),
-      url: String(g.url || "").trim(),
-      title: pickTitle(g),
-      tags: pickTags(g),
-      raw: g,
-    }));
-
-  // 2) stats D1
-  const ids = games.map(g => g.id).filter(Boolean);
-
-  // chunk côté client (évite requête trop grosse)
-  const CHUNK = 500;
-  const statsMap = {};
-  for (let i = 0; i < ids.length; i += CHUNK) {
-    const batch = ids.slice(i, i + CHUNK);
-    const resp = await fetch("/api/counters", {
+async function fetchGameStatsBulk(ids) {
+  try {
+    const r = await fetch("/api/counters", {
       method: "POST",
+      cache: "no-store",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ids: batch }),
+      body: JSON.stringify({ ids }),
     });
-    const data = await resp.json().catch(() => ({}));
-    if (data && data.ok && data.stats) {
-      Object.assign(statsMap, data.stats);
-    }
+    if (!r.ok) return {};
+    const j = await r.json();
+    if (!j?.ok || !j.stats) return {};
+    return j.stats; // { id: {views, mega, likes}, ... }
+  } catch {
+    return {};
   }
-
-  // merge
-  const rows = games.map(g => {
-    const s = statsMap[g.id] || { views: 0, mega: 0, likes: 0 };
-    return {
-      ...g,
-      views: safeNum(s.views),
-      mega: safeNum(s.mega),
-      likes: safeNum(s.likes),
-    };
-  });
-
-  return { listUrl, rows };
 }
 
-/* =========================
-   UI
-========================= */
-
+// -------- UI state --------
 const els = {
-  metric: document.getElementById("metric"),
-  dir: document.getElementById("dir"),
-  topn: document.getElementById("topn"),
   q: document.getElementById("q"),
-  refresh: document.getElementById("refresh"),
-  csv: document.getElementById("csv"),
-  tbody: document.getElementById("rows"),
-  canvas: document.getElementById("chart"),
-  meta: document.getElementById("meta"),
+  metric: document.getElementById("metric"),
+  top: document.getElementById("top"),
   status: document.getElementById("status"),
-  status2: document.getElementById("status2"),
+  chart: document.getElementById("chart"),
+  tbody: document.getElementById("tbody"),
+  tbl: document.getElementById("tbl"),
+  tableWrap: document.querySelector(".table-wrap"),
+  chartWrap: document.querySelector(".chart-wrap"),
 };
 
-let ALL = [];
-let LIST_URL = "";
+const state = {
+  srcUrl: getListUrl(),
+  games: [],
+  statsById: new Map(), // id -> {views,likes,mega}
+  sortKey: "views",
+  sortDir: "desc",
 
-function setStatus(msg) {
-  els.status.innerHTML = `<span class="dot"></span><span>${msg}</span>`;
-}
-function setStatus2(msg) {
-  els.status2.textContent = msg || "";
-}
+  // ✅ affichage limité (on charge tout mais on ne rend qu'une partie)
+  renderLimit: 50, // nb lignes visibles
+  renderStep: 50,  // nb lignes ajoutées à chaque "bottom"
+};
 
-function getMetric() {
-  return String(els.metric.value || "views");
-}
-function getDir() {
-  return String(els.dir.value || "desc");
-}
-function getTopN() {
-  const n = parseInt(els.topn.value || "20", 10);
-  return Number.isFinite(n) ? n : 20;
-}
-
-function filterRows(rows) {
-  const q = norm(els.q.value || "");
-  if (!q) return rows;
-
-  return rows.filter(r => {
-    const hay = [
-      r.title,
-      r.id,
-      r.uid,
-      (r.tags || []).join(" "),
-    ].join(" ").toLowerCase();
-    return hay.includes(q);
-  });
+function getGameUrl(id) {
+  const u = new URL("/game/", location.origin);
+  u.searchParams.set("id", String(id));
+  // conserve src si présent
+  const p = new URLSearchParams(location.search);
+  const src = (p.get("src") || "").trim();
+  if (src) u.searchParams.set("src", src);
+  return u.toString();
 }
 
-function sortRows(rows) {
-  const key = getMetric();
-  const dir = getDir();
-  const mul = dir === "asc" ? 1 : -1;
+function getFiltered() {
+  const q = normalize(els.q.value.trim());
 
-  return [...rows].sort((a, b) => {
-    const da = safeNum(a[key]);
-    const db = safeNum(b[key]);
-    if (db !== da) return (db - da) * mul;
-    // fallback stable
-    return (a.title || "").localeCompare(b.title || "");
-  });
+  let list = state.games;
+
+  if (q) {
+    list = list.filter((g) => {
+      const hay = normalize(
+        [
+          g.id,
+          g.uid,
+          g.title,
+          g.cleanTitle,
+          (g.tags || []).join(" "),
+          g.collection || "",
+        ].join("  ")
+      );
+      return hay.includes(q);
+    });
+  }
+
+  // attach numbers
+  for (const g of list) {
+    const s = state.statsById.get(String(g.id)) || {
+      views: 0,
+      likes: 0,
+      mega: 0,
+    };
+    g._views = s.views | 0;
+    g._likes = s.likes | 0;
+    g._mega = s.mega | 0;
+  }
+  return list;
 }
 
-function renderTable(rows) {
+function sortList(list) {
+  const key = state.sortKey;
+  const dir = state.sortDir === "asc" ? 1 : -1;
+
+  const getv = (g) => {
+    if (key === "title") return String(g.cleanTitle || g.title || "");
+    if (key === "updatedAt") return String(g.updatedAt || "");
+    if (key === "views") return g._views | 0;
+    if (key === "likes") return g._likes | 0;
+    if (key === "mega") return g._mega | 0;
+    return "";
+  };
+
+  return list
+    .slice()
+    .sort((a, b) => {
+      const va = getv(a),
+        vb = getv(b);
+      if (typeof va === "number" && typeof vb === "number")
+        return (va - vb) * dir;
+      return String(va).localeCompare(String(vb), "fr") * dir;
+    });
+}
+
+function renderTable(list) {
+  els.tbody.innerHTML = "";
   const frag = document.createDocumentFragment();
-  for (const r of rows) {
+
+  for (const g of list) {
     const tr = document.createElement("tr");
+    tr.addEventListener("click", () => (location.href = getGameUrl(g.id)));
 
-    const tdName = document.createElement("td");
-    tdName.className = "nameCell";
-    const a = document.createElement("a");
-    a.className = "rowLink";
-    a.href = r.url ? `/game/?id=${encodeURIComponent(r.id)}&src=${encodeURIComponent(LIST_URL)}` : "#";
-    a.textContent = r.title || `(id ${r.id})`;
-    a.title = r.tags?.length ? r.tags.join(", ") : "";
-    tdName.appendChild(a);
+    const imgTd = document.createElement("td");
+    imgTd.className = "c-cover";
+    const img = document.createElement("img");
+    img.className = "cover";
+    img.loading = "lazy";
+    img.alt = "";
+    img.src = g.imageUrl || "/favicon.png";
+    imgTd.appendChild(img);
 
-    const tdV = document.createElement("td");
-    tdV.className = "num";
-    tdV.textContent = String(r.views);
+    const titleTd = document.createElement("td");
+    const tl = document.createElement("div");
+    tl.className = "title-line";
+    const t = document.createElement("div");
+    t.textContent = g.cleanTitle || g.title || "";
+    tl.appendChild(t);
+    titleTd.appendChild(tl);
 
-    const tdM = document.createElement("td");
-    tdM.className = "num";
-    tdM.textContent = String(r.mega);
+    const sub = document.createElement("div");
+    sub.className = "small";
+    const idTxt = String(g.id || "");
+    const colTxt = g.collection ? ` • collection: ${g.collection}` : "";
+    sub.textContent = `id: ${idTxt}${colTxt}`;
+    titleTd.appendChild(sub);
 
-    const tdL = document.createElement("td");
-    tdL.className = "num";
-    tdL.textContent = String(r.likes);
+    const upTd = document.createElement("td");
+    upTd.textContent = g.updatedAt || "";
 
-    tr.appendChild(tdName);
-    tr.appendChild(tdV);
-    tr.appendChild(tdM);
-    tr.appendChild(tdL);
+    const vTd = document.createElement("td");
+    vTd.className = "num";
+    vTd.textContent = (g._views | 0).toLocaleString("fr-FR");
+
+    const lTd = document.createElement("td");
+    lTd.className = "num";
+    lTd.textContent = (g._likes | 0).toLocaleString("fr-FR");
+
+    const mTd = document.createElement("td");
+    mTd.className = "num";
+    mTd.textContent = (g._mega | 0).toLocaleString("fr-FR");
+
+    tr.appendChild(imgTd);
+    tr.appendChild(titleTd);
+    tr.appendChild(upTd);
+    tr.appendChild(vTd);
+    tr.appendChild(lTd);
+    tr.appendChild(mTd);
 
     frag.appendChild(tr);
   }
 
-  els.tbody.innerHTML = "";
   els.tbody.appendChild(frag);
 }
 
-function renderMeta(filteredCount) {
-  const total = ALL.length;
-  const key = getMetric();
-  const topN = getTopN();
-  const dir = getDir() === "asc" ? "croissant" : "décroissant";
-
-  const sumViews = ALL.reduce((a, r) => a + r.views, 0);
-  const sumMega  = ALL.reduce((a, r) => a + r.mega, 0);
-  const sumLikes = ALL.reduce((a, r) => a + r.likes, 0);
-
-  els.meta.innerHTML = `
-    <span>Source: <b>${escapeHtml(shortUrl(LIST_URL))}</b></span>
-    <span>•</span>
-    <span>Jeux: <b>${filteredCount}</b> / ${total}</span>
-    <span>•</span>
-    <span>Tri: <b>${labelMetric(key)}</b> (${dir})</span>
-    <span>•</span>
-    <span>Top: <b>${topN}</b></span>
-    <span>•</span>
-    <span>Total vues: <b>${sumViews}</b></span>
-    <span>•</span>
-    <span>Total MEGA: <b>${sumMega}</b></span>
-    <span>•</span>
-    <span>Total likes: <b>${sumLikes}</b></span>
-  `;
+function escapeHtml(s) {
+  return String(s || "").replace(
+    /[&<>"']/g,
+    (c) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      }[c])
+  );
 }
 
-function labelMetric(k){
-  if (k === "mega") return "MEGA";
-  if (k === "likes") return "Likes";
-  return "Vues";
-}
-
-function shortUrl(u){
-  try{
-    const url = new URL(u);
-    if (url.hostname.includes("raw.githubusercontent.com")) return "GitHub raw";
-    return url.hostname;
-  }catch{
-    return u || "";
-  }
-}
-
-function escapeHtml(s){
-  return String(s || "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-
-/* =========================
-   Simple bar chart (canvas)
-========================= */
-
-function drawChart(rows) {
-  const canvas = els.canvas;
+// -------- Chart (canvas, sans lib) --------
+function drawChart(list) {
+  const canvas = els.chart;
   const ctx = canvas.getContext("2d");
-  if (!ctx) return;
 
-  // adapt DPI
-  const cssW = canvas.clientWidth || 900;
-  const cssH = canvas.clientHeight || 320;
-  const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-  canvas.width = Math.round(cssW * dpr);
-  canvas.height = Math.round(cssH * dpr);
+  const metric = els.metric.value;
+  const topN = Number(els.top.value || 30);
+  const take = topN > 0 ? topN : list.length;
+
+  const items = list
+    .slice()
+    .sort((a, b) => metricValue(b, metric) - metricValue(a, metric))
+    .slice(0, take);
+
+  // ✅ APRÈS : hauteur STRICTEMENT nécessaire
+  const rowPx = 26;        // hauteur par ligne
+  const padT = 8;          // marge haute réduite
+  const padB = 12;         // marge basse réduite
+  
+  const desiredCssH = padT + padB + items.length * rowPx;
+
+  // Important : on force une hauteur CSS pour que clientHeight soit correct
+  canvas.style.height = desiredCssH + "px";
+
+  // width responsive
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = canvas.clientWidth || 1200;
+  const cssH = desiredCssH;
+
+  canvas.width = Math.floor(cssW * dpr);
+  canvas.height = Math.floor(cssH * dpr);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-  // clear
   ctx.clearRect(0, 0, cssW, cssH);
 
-  const key = getMetric();
-  const topN = getTopN();
-  const data = rows.slice(0, topN);
+  const padL = 260, padR = 18;
+  const innerW = Math.max(50, cssW - padL - padR);
+  const innerH = Math.max(50, cssH - padT - padB);
 
-  // padding
-  const pad = { l: 54, r: 12, t: 12, b: 30 };
-  const w = cssW - pad.l - pad.r;
-  const h = cssH - pad.t - pad.b;
-
-  // max
-  const maxV = Math.max(1, ...data.map(r => safeNum(r[key])));
-
-  // grid lines
+  // background grid
   ctx.globalAlpha = 1;
+  ctx.fillStyle = "rgba(0,0,0,0)";
+  ctx.strokeStyle = "rgba(170,178,200,.18)";
   ctx.lineWidth = 1;
 
-  const gridN = 4;
-  ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--muted") || "#aab2c8";
-  ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--border") || "#23283b";
+  const maxV = Math.max(1, ...items.map((it) => metricValue(it, metric)));
+  const gridN = 5;
 
   for (let i = 0; i <= gridN; i++) {
-    const y = pad.t + (h * i / gridN);
+    const x = padL + (innerW * i) / gridN;
     ctx.beginPath();
-    ctx.moveTo(pad.l, y);
-    ctx.lineTo(pad.l + w, y);
+    ctx.moveTo(x, padT);
+    ctx.lineTo(x, padT + innerH);
     ctx.stroke();
 
-    const val = Math.round(maxV * (1 - i / gridN));
-    ctx.fillText(String(val), 8, y + 4);
+    const val = Math.round((maxV * i) / gridN);
+    ctx.fillStyle = "rgba(170,178,200,.7)";
+    ctx.font = "12px system-ui";
+    ctx.textAlign = "center";
+    ctx.fillText(val.toLocaleString("fr-FR"), x, padT + innerH + 18);
   }
 
   // bars
-  const gap = 4;
-  const bw = Math.max(6, (w - gap * (data.length - 1)) / Math.max(1, data.length));
-  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--primary") || "#5aa2ff";
+  const rowH = innerH / Math.max(1, items.length);
+  const barH = Math.max(10, Math.min(18, rowH * 0.62));
+  const y0 = padT + rowH / 2;
 
-  data.forEach((r, i) => {
-    const v = safeNum(r[key]);
-    const bh = Math.round((v / maxV) * h);
-    const x = pad.l + i * (bw + gap);
-    const y = pad.t + (h - bh);
-    ctx.fillRect(x, y, bw, bh);
+  ctx.font = "12px system-ui";
+  ctx.textBaseline = "middle";
+
+  items.forEach((it, idx) => {
+    const y = y0 + idx * rowH;
+    const v = metricValue(it, metric);
+    const w = Math.max(0, innerW * (v / maxV));
+
+    // label
+    ctx.fillStyle = "rgba(232,234,240,.92)";
+    ctx.textAlign = "right";
+    const label = (it.cleanTitle || it.title || "").slice(0, 42);
+    ctx.fillText(label, padL - 10, y);
+
+    // bar
+    ctx.fillStyle = "rgba(90,162,255,.55)";
+    roundRect(ctx, padL, y - barH / 2, w, barH, 8);
+    ctx.fill();
+
+    // value
+    ctx.fillStyle = "rgba(232,234,240,.86)";
+    ctx.textAlign = "left";
+    ctx.fillText(v.toLocaleString("fr-FR"), padL + w + 8, y);
   });
 
-  // labels (x) : on n'affiche pas tous, sinon illisible
-  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--muted") || "#aab2c8";
-  const step = data.length <= 20 ? 2 : data.length <= 50 ? 5 : 10;
+  // click mapping (open game)
+  canvas.onclick = (ev) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = ev.clientX - rect.left;
+    const y = ev.clientY - rect.top;
+    if (x < padL || x > cssW - padR || y < padT || y > padT + innerH) return;
 
-  for (let i = 0; i < data.length; i += step) {
-    const r = data[i];
-    const x = pad.l + i * (bw + gap) + 2;
-    const label = (r.title || "").slice(0, 12);
-    ctx.save();
-    ctx.translate(x, pad.t + h + 18);
-    ctx.rotate(-0.35);
-    ctx.fillText(label, 0, 0);
-    ctx.restore();
-  }
-
-  // title
-  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--fg") || "#e8eaf0";
-  ctx.font = "700 13px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-  ctx.fillText(`${labelMetric(key)} — Top ${topN}`, pad.l, 14);
+    const idx = Math.floor((y - padT) / rowH);
+    const item = items[idx];
+    if (item?.id) location.href = getGameUrl(item.id);
+  };
 }
 
-/* =========================
-   Export CSV
-========================= */
-
-function downloadCSV(rows) {
-  const header = ["id", "title", "views", "mega", "likes", "url", "tags"].join(";");
-  const lines = rows.map(r => [
-    csvCell(r.id),
-    csvCell(r.title),
-    csvCell(r.views),
-    csvCell(r.mega),
-    csvCell(r.likes),
-    csvCell(r.url),
-    csvCell((r.tags || []).join(",")),
-  ].join(";"));
-
-  const csv = [header, ...lines].join("\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "stats_f95list.csv";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-
-  setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+function metricValue(g, metric) {
+  if (metric === "views") return g._views | 0;
+  if (metric === "likes") return g._likes | 0;
+  if (metric === "mega") return g._mega | 0;
+  return 0;
 }
 
-function csvCell(v) {
-  const s = String(v ?? "");
-  // on évite les ; et les retours ligne
-  return '"' + s.replaceAll('"', '""').replaceAll("\n", " ").replaceAll("\r", " ").replaceAll(";", ",") + '"';
+function roundRect(ctx, x, y, w, h, r) {
+  r = Math.min(r, h / 2, w / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
 }
 
-/* =========================
-   Main
-========================= */
+// ✅ reset du "renderLimit" quand on change filtres/tri
+function resetLimit() {
+  state.renderLimit = state.renderStep;
+  if (els.tableWrap) els.tableWrap.scrollTop = 0;
+}
 
+// -------- render --------
 function rerender() {
-  const filtered = filterRows(ALL);
-  const sorted = sortRows(filtered);
+  const filtered = getFiltered();
+  const sorted = sortList(filtered);
 
-  renderMeta(filtered.length);
-  renderTable(sorted);
+  const visible = sorted.slice(0, state.renderLimit);
+  renderTable(visible);
+
   drawChart(sorted);
 
-  setStatus2(`${filtered.length} jeu(x) affiché(s)`);
+  const total = state.games.length;
+  els.status.textContent = `${sorted.length}/${total} jeux (affichés: ${Math.min(
+    state.renderLimit,
+    sorted.length
+  )}/${sorted.length} • source: ${shortUrl(state.srcUrl)})`;
 }
 
-async function refresh() {
-  setStatus("Chargement…");
-  setStatus2("");
-
+function shortUrl(u) {
   try {
-    const { listUrl, rows } = await loadAll();
-    LIST_URL = listUrl;
-    ALL = rows;
-
-    setStatus("OK");
-    rerender();
-  } catch (e) {
-    console.error(e);
-    setStatus(`Erreur: ${String(e?.message || e)}`);
+    const url = new URL(u);
+    return url.hostname + url.pathname;
+  } catch {
+    return String(u || "");
   }
 }
 
-els.metric.addEventListener("change", rerender);
-els.dir.addEventListener("change", rerender);
-els.topn.addEventListener("change", rerender);
-els.q.addEventListener("input", () => {
-  // petit debounce
-  window.clearTimeout(window.__q_t);
-  window.__q_t = window.setTimeout(rerender, 80);
-});
-els.refresh.addEventListener("click", refresh);
-els.csv.addEventListener("click", () => downloadCSV(sortRows(filterRows(ALL))));
+// -------- init --------
+async function init() {
+  els.status.textContent = "Chargement liste…";
+  let raw;
+  try {
+    raw = await fetchJson(state.srcUrl);
+  } catch (e) {
+    els.status.textContent = "Erreur: impossible de charger la liste";
+    console.error(e);
+    return;
+  }
 
-window.addEventListener("resize", () => {
-  window.clearTimeout(window.__rs_t);
-  window.__rs_t = window.setTimeout(() => drawChart(sortRows(filterRows(ALL))), 120);
-});
+  const games = extractGames(raw).map((g) => ({ ...g }));
+  state.games = games;
 
-refresh();
+  els.status.textContent = "Chargement stats…";
+
+  const ids = games.map((g) => String(g.id || "")).filter(Boolean);
+  const statsObj = await fetchGameStatsBulk(ids);
+
+  for (const id of ids) {
+    const s = statsObj[id] || {};
+    state.statsById.set(String(id), {
+      views: Number(s.views || 0),
+      mega: Number(s.mega || 0),
+      likes: Number(s.likes || 0),
+    });
+  }
+
+  els.status.textContent = "OK";
+  state.sortKey = "views";
+  state.sortDir = "desc";
+
+  wireEvents();
+  rerender();
+}
+
+function wireEvents() {
+  let t = null;
+
+  const deb = () => {
+    clearTimeout(t);
+    t = setTimeout(() => {
+      resetLimit();
+      rerender();
+    }, 120);
+  };
+
+  els.q.addEventListener("input", deb);
+
+  els.metric.addEventListener("change", () => {
+    rerender();
+  });
+
+  els.top.addEventListener("change", () => {
+    // ✅ quand tu passes en "Tout", le graphe devient scrollable (canvas + haut)
+    // on remonte le scroll du graphe en haut pour éviter l'effet "perdu"
+    if (els.chartWrap) els.chartWrap.scrollTop = 0;
+    rerender();
+  });
+
+  // table sorting
+  els.tbl.querySelectorAll("thead th[data-sort]").forEach((th) => {
+    th.addEventListener("click", () => {
+      const k = th.getAttribute("data-sort");
+      if (!k) return;
+
+      if (state.sortKey === k) {
+        state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
+      } else {
+        state.sortKey = k;
+        state.sortDir = (k === "title" || k === "updatedAt") ? "asc" : "desc";
+      }
+
+      resetLimit();
+      rerender();
+    });
+  });
+
+  // ✅ "afficher plus" robuste via sentinel + IntersectionObserver
+  {
+    const sentinel = document.createElement("div");
+    sentinel.id = "stats-sentinel";
+    sentinel.style.height = "1px";
+    sentinel.style.width = "1px";
+    sentinel.style.opacity = "0";
+    sentinel.style.pointerEvents = "none";
+
+    if (els.tableWrap && els.tableWrap.parentNode) {
+      els.tableWrap.parentNode.appendChild(sentinel);
+    } else {
+      document.body.appendChild(sentinel);
+    }
+
+    let lock = false;
+
+    const loadMoreIfPossible = () => {
+      if (lock) return;
+
+      const filtered = getFiltered();
+      const sorted = sortList(filtered);
+
+      if (state.renderLimit >= sorted.length) return;
+
+      lock = true;
+      state.renderLimit += state.renderStep;
+      rerender();
+      setTimeout(() => (lock = false), 80);
+    };
+
+    const obs = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) loadMoreIfPossible();
+        }
+      },
+      {
+        root: null,           // scroll page
+        rootMargin: "300px",  // déclenche avant d’être tout en bas
+        threshold: 0.01,
+      }
+    );
+
+    obs.observe(sentinel);
+  }
+
+  window.addEventListener("resize", () => {
+    const filtered = getFiltered();
+    const sorted = sortList(filtered);
+    drawChart(sorted);
+  });
+}
+
+init();
+
+

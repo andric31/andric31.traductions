@@ -1,0 +1,178 @@
+/* ===========================
+   Stats — compact (moins d’espace)
+   Remplace entièrement stats.css
+   =========================== */
+
+.stats-wrap{
+  max-width: 1760px;      /* plus large */
+  margin: 0 auto;
+  padding: 10px;          /* moins de padding */
+}
+
+/* --- Topbar : compacte --- */
+.stats-topbar{
+  position:sticky;
+  top:0;
+  z-index:5;
+
+  background:linear-gradient(180deg, rgba(15,17,23,.96), rgba(15,17,23,.86));
+  backdrop-filter: blur(8px);
+
+  border:1px solid var(--border);
+  border-radius:14px;
+
+  padding: 8px 10px;      /* réduit */
+  display:flex;
+  gap: 10px;              /* réduit */
+  align-items:center;
+  justify-content:space-between;
+}
+
+.stats-title .h1{
+  font-size:19px;
+  font-weight:800;
+  letter-spacing:.2px;
+}
+.stats-title .sub{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:1px;         /* réduit */
+}
+
+/* --- Controls : serrés --- */
+.stats-controls{
+  display:flex;
+  gap: 6px;               /* réduit */
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  align-items:center;
+}
+
+.inp,.sel{
+  height: 34px;           /* réduit */
+  border:1px solid var(--border);
+  background:var(--btn);
+  color:var(--fg);
+  border-radius:10px;
+  padding:0 10px;
+  outline:none;
+}
+.inp{ min-width: 260px; }
+.sel{ min-width: 130px; }
+
+/* --- Main : moins d’espace entre graph & tableau --- */
+.stats-main{
+  display:flex;
+  flex-direction:column;
+  gap: 6px;               /* ✅ réduit (clé) */
+  margin-top: 6px;        /* ✅ réduit (clé) */
+}
+
+/* --- Cards --- */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
+}
+
+/* ✅ header de card plus petit */
+.card-h{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 6px 10px;      /* ✅ réduit (clé) */
+  border-bottom:1px solid var(--border);
+}
+
+.card-title{font-weight:800}
+.card-note{color:var(--muted);font-size:12px}
+
+/* --- Chart : padding bas réduit, scroll OK --- */
+.chart-wrap{
+  padding: 6px 10px 4px;  /* ✅ top/sides/bottom réduit (clé) */
+  max-height: 620px;
+  overflow: auto;
+}
+
+.chart-wrap canvas{
+  width:100%;
+  height:auto;            /* la hauteur réelle est gérée en JS via canvas.style.height */
+  display:block;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:rgba(0,0,0,.12);
+}
+
+/* --- Table --- */
+.table-wrap{ overflow:auto; }
+
+.tbl{
+  width:100%;
+  border-collapse:collapse;
+  min-width: 0;           /* plus besoin du 920px si tu veux éviter le scroll horizontal */
+}
+
+.tbl th,.tbl td{
+  padding: 8px 10px;      /* un peu plus compact */
+  border-bottom:1px solid var(--border);
+  vertical-align:middle;
+}
+
+.tbl thead th{
+  position:sticky;
+  top:0;
+  background:rgba(20,24,38,.98);
+  backdrop-filter: blur(6px);
+  text-align:left;
+  font-size:12px;
+  color:var(--muted);
+  cursor:pointer;
+}
+
+.tbl thead th.num{ text-align:right; }
+.tbl td.num{
+  text-align:right;
+  font-variant-numeric: tabular-nums;
+}
+
+.tbl tbody tr:hover{
+  background:rgba(90,162,255,.08);
+  cursor:pointer;
+}
+
+/* --- Cover plus compact --- */
+.c-cover{ width:64px; }
+.cover{
+  width:50px;
+  height:50px;
+  border-radius:10px;
+  object-fit:cover;
+  border:1px solid var(--border);
+  background:rgba(0,0,0,.14);
+}
+
+/* --- Mini UI --- */
+.badge-mini{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:18px;
+  padding:0 8px;
+  border-radius:999px;
+  font-size:11px;
+  border:1px solid var(--border);
+  background:rgba(0,0,0,.18);
+  color:var(--muted);
+}
+
+.title-line{ display:flex; gap:8px; align-items:center; }
+.small{ font-size:12px; color:var(--muted); margin-top:1px; }
+
+/* --- Responsive --- */
+@media (max-width: 900px){
+  .stats-wrap{ padding:8px; }
+  .inp{ min-width:200px; }
+  .sel{ min-width:120px; }
+  .tbl th,.tbl td{ padding:8px 8px; }
+}

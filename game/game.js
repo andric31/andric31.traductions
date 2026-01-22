@@ -304,6 +304,21 @@ async function fetchJson(url) {
 
 // ====== UI helpers ======
 
+function wrapIntoGameBlock(el, titleText) {
+  if (!el) return null;
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "game-block";
+
+  const h3 = document.createElement("h3");
+  h3.textContent = titleText || "⭐ Notation";
+
+  wrapper.appendChild(h3);
+  wrapper.appendChild(el); // déplace le ratingBox dedans
+
+  return wrapper;
+}
+
 function $(id) {
   return document.getElementById(id);
 }
@@ -1265,6 +1280,8 @@ function renderVideoBlock({ id, videoUrl }) {
     setHref("btnMega", megaHref);
     if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction (MEGA)";
 
+
+
     // =========================
     // 7) Informations (encadré sous la notation)
     // =========================
@@ -1274,13 +1291,6 @@ function renderVideoBlock({ id, videoUrl }) {
       show("notesBox", true);
     } else {
       show("notesBox", false);
-    }
- 
-    // ✅ Déplacer "Notes" entre l'encadré principal et l'encadré Stats
-    const notesBoxEl = $("notesBox");
-    const statsOutEl = $("statsOut");
-    if (notesBoxEl && statsOutEl && statsOutEl.parentNode) {
-      statsOutEl.parentNode.insertBefore(notesBoxEl, statsOutEl);
     }
  
     // =========================
@@ -1299,6 +1309,25 @@ function renderVideoBlock({ id, videoUrl }) {
         e.preventDefault();
         return false;
       });
+    }
+
+    // =========================
+    // ⭐ Déplacer la notation (étoiles) entre le contenu principal et les stats
+    // =========================
+    const ratingEl = $("ratingBox");     // ton bloc étoiles existant
+    const statsOutEl = $("statsOut");    // encadré stats
+    
+    if (ratingEl && statsOutEl && statsOutEl.parentNode) {
+      // Si pas déjà dans un game-block, on l'encadre
+      const alreadyWrapped = ratingEl.parentElement && ratingEl.parentElement.classList.contains("game-block");
+    
+      let nodeToInsert = ratingEl;
+      if (!alreadyWrapped) {
+        nodeToInsert = wrapIntoGameBlock(ratingEl, "⭐ Notation de la traduction");
+      }
+    
+      // place avant stats
+      statsOutEl.parentNode.insertBefore(nodeToInsert, statsOutEl);
     }
 
     // =========================

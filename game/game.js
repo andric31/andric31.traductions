@@ -844,6 +844,16 @@ async function initCounters(gameId, megaHref) {
   }
 }
 
+function buildCounterKey(idParam, uidParam) {
+  const id = String(idParam || "").trim();
+  const uid = String(uidParam || "").trim();
+
+  if (id && uid) return `id:${id}|uid:${uid}`;
+  if (id) return `id:${id}`;
+  if (uid) return `uid:${uid}`;
+  return "";
+}
+
 // ====== Rating 4 ======
 
 const RATING4_LABELS = {
@@ -1097,6 +1107,8 @@ function renderVideoBlock({ id, videoUrl }) {
 
     const { id: idParam, uid: uidParam } = getParamsFromUrl();
 
+    const counterKey = buildCounterKey(idParam, uidParam);
+
     if (!idParam && !uidParam) {
       showError(
         "Aucun paramètre dans l’URL. Exemples : /game/?id=215277  ou  /game/?id=17373&uid=898  ou  /game/?uid=898"
@@ -1234,12 +1246,9 @@ function renderVideoBlock({ id, videoUrl }) {
     // =========================
     // ✅ Analytics key (unique)
     // =========================
-    let analyticsKey = "";
-    if (page.kind === "collectionChild") analyticsKey = `c:${page.idParam}|u:${page.uidParam}`;
-    else if (entry?.id && String(entry.id).trim()) analyticsKey = String(entry.id).trim();
-    else analyticsKey = String(entry.uid).trim();
-
-    await initCounters(analyticsKey, megaHref);
+    const analyticsKey = counterKey;
+    
+    await initCounters(counterKey, megaHref);
 
     // ⛔ Bloquer clic droit sur MEGA
     const btnMega = document.getElementById("btnMega");

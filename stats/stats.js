@@ -486,4 +486,23 @@ async function init() {
   rerender();
 }
 
-init();
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("✅ stats.js DOM ready");
+
+  // rebind DOM proprement
+  els.q = document.getElementById("q");
+  els.metric = document.getElementById("metric");
+  els.top = document.getElementById("top");
+  els.status = document.getElementById("status");
+  els.chart = document.getElementById("chart");
+  els.chartWrap = document.querySelector(".chart-wrap");
+  els.tiles = document.getElementById("tiles");
+
+  if (!els.tiles) {
+    console.error("❌ #tiles introuvable");
+    return;
+  }
+
+  init();
+});
+

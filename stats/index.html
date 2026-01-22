@@ -1,43 +1,40 @@
 <!doctype html>
 <html lang="fr">
-  <head>
-    <!-- Meta -->
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Stats — Traductions</title>
 
-    <title>Stats — Traductions</title>
-    <link rel="icon" href="/favicon.png" />
+  <link rel="icon" href="/favicon.png" />
+  <link rel="stylesheet" href="/viewer.css" />
+  <link rel="stylesheet" href="/stats/stats.css" />
+</head>
 
-    <!-- Styles -->
-    <link rel="stylesheet" href="/viewer.css" />
-    <link rel="stylesheet" href="/stats/stats.css" />
-  </head>
+<body>
+  <div class="stats-wrap">
+    <!-- Topbar -->
+    <header class="stats-topbar">
+      <div class="stats-title">
+        <div class="h1">📊 Stats</div>
+        <div class="sub">Tableau + graphique, indépendants de la page principale</div>
+      </div>
 
-  <body>
-    <div class="stats-wrap">
-      <!-- =========================
-           Topbar
-           ========================= -->
-      <header class="stats-topbar">
-        <div class="stats-title">
-          <div class="h1">📊 Stats</div>
-          <div class="sub">Tableau + graphique, indépendants de la page principale</div>
+      <div class="stats-controls" role="search">
+        <div class="control control--search">
+          <input id="q" class="inp" placeholder="Rechercher (titre, tags, id…)" autocomplete="off" />
         </div>
 
-        <div class="stats-controls">
-          <input
-            id="q"
-            class="inp"
-            placeholder="Rechercher (titre, tags, id…)"
-            autocomplete="off"
-          />
-
+        <div class="control control--select">
+          <label class="lbl" for="metric">Graph</label>
           <select id="metric" class="sel" title="Métrique du graphique">
             <option value="views">👁️ Vues</option>
             <option value="likes">❤️ Likes</option>
             <option value="mega">📥 MEGA</option>
           </select>
+        </div>
 
+        <div class="control control--select">
+          <label class="lbl" for="top">Top</label>
           <select id="top" class="sel" title="Top">
             <option value="30">Top 30</option>
             <option value="50">Top 50</option>
@@ -45,52 +42,54 @@
             <option value="0">Tout</option>
           </select>
         </div>
-      </header>
+      </div>
+    </header>
 
-      <!-- =========================
-           Content
-           ========================= -->
-      <main class="stats-main">
-        <!-- Graph -->
-        <section class="card">
-          <div class="card-h">
-            <div class="card-title">Graphique (Top)</div>
-            <div class="card-note" id="status">Chargement…</div>
+    <!-- Dashboard grid -->
+    <main class="stats-main">
+      <!-- Chart -->
+      <section class="card card--chart">
+        <div class="card-h">
+          <div>
+            <div class="card-title">Graphique</div>
+            <div class="card-note">Clique une barre pour ouvrir la fiche</div>
           </div>
+          <div class="card-note" id="status">Chargement…</div>
+        </div>
 
-          <div class="chart-wrap">
-            <canvas id="chart" width="1400" height="560"></canvas>
-          </div>
-        </section>
+        <div class="chart-wrap">
+          <canvas id="chart" width="1400" height="560"></canvas>
+        </div>
+      </section>
 
-        <!-- Table -->
-        <section class="card">
-          <div class="card-h">
+      <!-- Table -->
+      <section class="card card--table">
+        <div class="card-h">
+          <div>
             <div class="card-title">Tableau</div>
             <div class="card-note">Clique une ligne pour ouvrir la fiche du jeu</div>
           </div>
+        </div>
 
-          <div class="table-wrap">
-            <table class="tbl" id="tbl">
-              <thead>
-                <tr>
-                  <th class="c-cover">Cover</th>
-                  <th data-sort="title">Titre</th>
-                  <th data-sort="updatedAt">MAJ</th>
-                  <th class="num" data-sort="views">👁️</th>
-                  <th class="num" data-sort="likes">❤️</th>
-                  <th class="num" data-sort="mega">📥</th>
-                </tr>
-              </thead>
+        <div class="table-wrap">
+          <table class="tbl" id="tbl">
+            <thead>
+              <tr>
+                <th class="c-cover">Cover</th>
+                <th data-sort="title">Titre</th>
+                <th data-sort="updatedAt">MAJ</th>
+                <th class="num" data-sort="views">👁️</th>
+                <th class="num" data-sort="likes">❤️</th>
+                <th class="num" data-sort="mega">📥</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
 
-              <tbody id="tbody"></tbody>
-            </table>
-          </div>
-        </section>
-      </main>
-    </div>
-
-    <!-- Script -->
-    <script src="/stats/stats.js"></script>
-  </body>
+  <script src="/stats/stats.js"></script>
+</body>
 </html>

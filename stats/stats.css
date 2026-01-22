@@ -1,121 +1,148 @@
 /* ==========================================================
-   Stats — compact (moins d’espace)
-   Remplace entièrement stats.css
+   Stats — PRO Dashboard Layout
+   Compatible avec ton stats.js (IDs/classes conservés)
    ========================================================== */
 
-/* =========================
-   Layout
-   ========================= */
-.stats-wrap {
-  max-width: 1760px; /* plus large */
+.stats-wrap{
+  max-width: 1760px;
   margin: 0 auto;
-  padding: 10px; /* moins de padding */
+  padding: 14px;
 }
 
 /* =========================
-   Topbar
+   Topbar (pro)
    ========================= */
-.stats-topbar {
+.stats-topbar{
   position: sticky;
   top: 0;
-  z-index: 5;
+  z-index: 20;
 
-  background: linear-gradient(
-    180deg,
-    rgba(15, 17, 23, 0.96),
-    rgba(15, 17, 23, 0.86)
-  );
-  backdrop-filter: blur(8px);
-
-  border: 1px solid var(--border);
-  border-radius: 14px;
-
-  padding: 8px 10px; /* réduit */
   display: flex;
-  gap: 10px; /* réduit */
   align-items: center;
   justify-content: space-between;
+  gap: 14px;
+
+  padding: 12px 12px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+
+  background:
+    linear-gradient(180deg, rgba(15,17,23,.98), rgba(15,17,23,.86));
+  backdrop-filter: blur(10px);
 }
 
-.stats-title .h1 {
-  font-size: 19px;
-  font-weight: 800;
-  letter-spacing: 0.2px;
+.stats-title .h1{
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: .2px;
+  line-height: 1.1;
 }
-
-.stats-title .sub {
+.stats-title .sub{
+  margin-top: 3px;
   font-size: 12px;
   color: var(--muted);
-  margin-top: 1px; /* réduit */
 }
 
 /* =========================
-   Controls
+   Controls (alignés + labels)
    ========================= */
-.stats-controls {
+.stats-controls{
   display: flex;
-  gap: 6px; /* réduit */
-  flex-wrap: wrap;
+  align-items: end;
   justify-content: flex-end;
-  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: 520px;
 }
 
-.inp,
-.sel {
-  height: 34px; /* réduit */
-  padding: 0 10px;
+.control{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.control--search{
+  flex: 1 1 320px;
+  min-width: 260px;
+}
+.control--select{
+  flex: 0 0 auto;
+  min-width: 160px;
+}
+
+.lbl{
+  font-size: 11px;
+  color: var(--muted);
+  padding-left: 2px;
+  user-select: none;
+}
+
+.inp,.sel{
+  height: 38px;
+  padding: 0 12px;
 
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 12px;
 
   background: var(--btn);
   color: var(--fg);
 
   outline: none;
+  transition: border-color .15s ease, transform .05s ease;
 }
 
-.inp {
-  min-width: 260px;
+.inp:focus,.sel:focus{
+  border-color: rgba(90,162,255,.55);
 }
 
-.sel {
-  min-width: 130px;
-}
-
-/* =========================
-   Main
-   ========================= */
-.stats-main {
-  display: flex;
-  flex-direction: column;
-  gap: 6px; /* réduit (clé) */
-  margin-top: 6px; /* réduit (clé) */
+.inp{
+  width: 100%;
 }
 
 /* =========================
-   Cards
+   Main grid (pro)
+   Desktop: 2 colonnes
    ========================= */
-.card {
-  background: var(--card);
+.stats-main{
+  margin-top: 12px;
+
+  display: grid;
+  grid-template-columns: 1.05fr 1.55fr; /* chart / table */
+  gap: 12px;
+  align-items: start;
+}
+
+/* =========================
+   Cards (plus premium)
+   ========================= */
+.card{
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: hidden;
+  background: var(--card);
+
+  /* petit effet "pro" */
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.18);
 }
 
-.card-h {
+.card-h{
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
 
-  padding: 6px 10px; /* réduit (clé) */
+  padding: 10px 12px;
   border-bottom: 1px solid var(--border);
+
+  background: rgba(20,24,38,.55);
+  backdrop-filter: blur(6px);
 }
 
-.card-title {
-  font-weight: 800;
+.card-title{
+  font-weight: 900;
+  letter-spacing: .2px;
 }
-
-.card-note {
+.card-note{
   color: var(--muted);
   font-size: 12px;
 }
@@ -123,48 +150,49 @@
 /* =========================
    Chart
    ========================= */
-.chart-wrap {
-  padding: 6px 10px 4px; /* top/sides/bottom réduit (clé) */
-  max-height: 620px;
+.chart-wrap{
+  padding: 10px 12px 12px;
+  max-height: 72vh;        /* pro: s’adapte écran */
   overflow: auto;
 }
 
-.chart-wrap canvas {
+.chart-wrap canvas{
   width: 100%;
-  height: auto; /* la hauteur réelle est gérée en JS via canvas.style.height */
+  height: auto; /* hauteur réelle gérée en JS */
   display: block;
 
+  border-radius: 14px;
   border: 1px solid var(--border);
-  border-radius: 12px;
-  background: rgba(0, 0, 0, 0.12);
+  background: rgba(0,0,0,.10);
 }
 
 /* =========================
    Table
    ========================= */
-.table-wrap {
+.table-wrap{
+  max-height: 72vh;        /* pro: table scroll indépendante */
   overflow: auto;
 }
 
-.tbl {
+.tbl{
   width: 100%;
   border-collapse: collapse;
-  min-width: 0; /* évite le scroll horizontal forcé */
+  min-width: 980px;        /* pro: évite compress trop fort */
 }
 
-.tbl th,
-.tbl td {
-  padding: 8px 10px; /* un peu plus compact */
+.tbl th,.tbl td{
+  padding: 10px 12px;
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
 }
 
-.tbl thead th {
+.tbl thead th{
   position: sticky;
   top: 0;
+  z-index: 2;
 
-  background: rgba(20, 24, 38, 0.98);
-  backdrop-filter: blur(6px);
+  background: rgba(20,24,38,.98);
+  backdrop-filter: blur(8px);
 
   text-align: left;
   font-size: 12px;
@@ -172,87 +200,55 @@
   cursor: pointer;
 }
 
-.tbl thead th.num {
-  text-align: right;
-}
-
-.tbl td.num {
+.tbl thead th.num{ text-align: right; }
+.tbl td.num{
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-.tbl tbody tr:hover {
-  background: rgba(90, 162, 255, 0.08);
+.tbl tbody tr{
+  transition: background .12s ease;
+}
+.tbl tbody tr:hover{
+  background: rgba(90,162,255,.10);
   cursor: pointer;
 }
 
-/* =========================
-   Cover
-   ========================= */
-.c-cover {
-  width: 64px;
-}
-
-.cover {
-  width: 50px;
-  height: 50px;
-
-  border-radius: 10px;
+/* Cover */
+.c-cover{ width: 70px; }
+.cover{
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
   object-fit: cover;
 
   border: 1px solid var(--border);
-  background: rgba(0, 0, 0, 0.14);
+  background: rgba(0,0,0,.14);
 }
 
-/* =========================
-   Mini UI
-   ========================= */
-.badge-mini {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  height: 18px;
-  padding: 0 8px;
-
-  border-radius: 999px;
-  font-size: 11px;
-
-  border: 1px solid var(--border);
-  background: rgba(0, 0, 0, 0.18);
-  color: var(--muted);
-}
-
-.title-line {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.small {
-  font-size: 12px;
-  color: var(--muted);
-  margin-top: 1px;
-}
+/* Text helpers (compat avec ton JS) */
+.title-line{ display:flex; gap:8px; align-items:center; }
+.small{ font-size:12px; color:var(--muted); margin-top:2px; }
 
 /* =========================
    Responsive
    ========================= */
-@media (max-width: 900px) {
-  .stats-wrap {
-    padding: 8px;
+@media (max-width: 1100px){
+  .stats-main{
+    grid-template-columns: 1fr; /* stack */
   }
+  .stats-controls{
+    min-width: 0;
+    width: 100%;
+  }
+  .stats-topbar{
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
 
-  .inp {
-    min-width: 200px;
-  }
-
-  .sel {
-    min-width: 120px;
-  }
-
-  .tbl th,
-  .tbl td {
-    padding: 8px 8px;
-  }
+@media (max-width: 520px){
+  .stats-wrap{ padding: 10px; }
+  .control--select{ min-width: 140px; }
+  .tbl{ min-width: 860px; }
 }

@@ -1,12 +1,12 @@
 "use strict";
 
 /* =========================================================
-   Stats — Table + Chart (indépendants de la page principale)
+   Stats — Graph + Tuiles (Dashboard)
    - Charge f95list.json (src param ou localStorage)
    - Charge stats bulk via /api/counters
-   - Recherche + tri + rendu progressif (renderLimit)
+   - Recherche + rendu progressif (tuiles)
    - Chart canvas sans lib, click sur bar -> fiche jeu
-   - Infinite scroll du tableau via IntersectionObserver (sentinel)
+   - Infinite scroll des tuiles via IntersectionObserver (sentinel)
    ========================================================= */
 
 const DEFAULT_URL = "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json";
@@ -20,10 +20,9 @@ const els = {
   top: document.getElementById("top"),
   status: document.getElementById("status"),
   chart: document.getElementById("chart"),
-  tbody: document.getElementById("tbody"),
-  tbl: document.getElementById("tbl"),
-  tableWrap: document.querySelector(".table-wrap"),
   chartWrap: document.querySelector(".chart-wrap"),
+
+  tiles: document.getElementById("tiles"), // ✅ nouveau
 };
 
 /* -----------------------------
@@ -34,20 +33,15 @@ const state = {
   games: [],
   statsById: new Map(), // id -> {views, likes, mega}
 
-  sortKey: "views",
-  sortDir: "desc",
-
-  renderLimit: 50,
-  renderStep: 50,
+  renderLimit: 48, // tuiles visibles
+  renderStep: 36,
 };
 
 /* -----------------------------
-   Cache (évite recalculs filtre+tri)
+   Cache (évite recalculs filtre + attachStats)
 ----------------------------- */
 const cache = {
   q: "",
-  sortKey: "",
-  sortDir: "",
   list: [],
 };
 
@@ -55,14 +49,13 @@ const cache = {
    Chart scheduler (évite redraws inutiles)
 ----------------------------- */
 let chartRaf = 0;
-function scheduleChart(sortedList) {
+function scheduleChart(list) {
   cancelAnimationFrame(chartRaf);
-  chartRaf = requestAnimationFrame(() => drawChart(sortedList));
+  chartRaf = requestAnimationFrame(() => drawChart(list));
 }
 
 /* =========================================================
    Helpers URL / JSON
-   (identiques à ton viewer)
 ========================================================= */
 function getListUrl() {
   try {
@@ -104,7 +97,6 @@ async function fetchGameStatsBulk(ids) {
     if (!r.ok) return {};
     const j = await r.json();
     if (!j?.ok || !j.stats) return {};
-
     return j.stats; // { id: {views, mega, likes}, ... }
   } catch {
     return {};
@@ -118,7 +110,6 @@ function getGameUrl(id) {
   const u = new URL("/game/", location.origin);
   u.searchParams.set("id", String(id));
 
-  // conserve src si présent
   const p = new URLSearchParams(location.search);
   const src = (p.get("src") || "").trim();
   if (src) u.searchParams.set("src", src);
@@ -146,7 +137,7 @@ function normalize(s) {
 }
 
 /* =========================================================
-   Data pipeline : filter -> attach stats -> sort -> cache
+   Data pipeline : filter -> attach stats -> cache
 ========================================================= */
 function attachStats(list) {
   for (const g of list) {
@@ -159,10 +150,13 @@ function attachStats(list) {
 }
 
 function getFilteredGames() {
-  const q = normalize(els.q.value.trim());
+  const q = els.q ? els.q.value.trim() : "";
+  if (cache.q === q) return cache.list;
+
+  const nq = normalize(q);
   let list = state.games;
 
-  if (q) {
+  if (nq) {
     list = list.filter((g) => {
       const hay = normalize(
         [
@@ -174,53 +168,16 @@ function getFilteredGames() {
           g.collection || "",
         ].join("  ")
       );
-      return hay.includes(q);
+      return hay.includes(nq);
     });
   }
 
-  return attachStats(list);
-}
-
-function getSortValue(g, key) {
-  if (key === "title") return String(g.cleanTitle || g.title || "");
-  if (key === "updatedAt") return String(g.updatedAt || "");
-  if (key === "views") return g._views | 0;
-  if (key === "likes") return g._likes | 0;
-  if (key === "mega") return g._mega | 0;
-  return "";
-}
-
-function sortGames(list) {
-  const key = state.sortKey;
-  const dir = state.sortDir === "asc" ? 1 : -1;
-
-  return list
-    .slice()
-    .sort((a, b) => {
-      const va = getSortValue(a, key);
-      const vb = getSortValue(b, key);
-
-      if (typeof va === "number" && typeof vb === "number") return (va - vb) * dir;
-      return String(va).localeCompare(String(vb), "fr") * dir;
-    });
-}
-
-function computeSortedList() {
-  const q = els.q.value.trim();
-
-  // cache hit ?
-  if (cache.q === q && cache.sortKey === state.sortKey && cache.sortDir === state.sortDir) {
-    return cache.list;
-  }
-
-  const sorted = sortGames(getFilteredGames());
+  // attach stats (mutations OK)
+  list = attachStats(list);
 
   cache.q = q;
-  cache.sortKey = state.sortKey;
-  cache.sortDir = state.sortDir;
-  cache.list = sorted;
-
-  return sorted;
+  cache.list = list;
+  return list;
 }
 
 function invalidateCache() {
@@ -228,68 +185,56 @@ function invalidateCache() {
 }
 
 /* =========================================================
-   Table render (DOM)
+   Tiles render
 ========================================================= */
-function renderTable(list) {
-  els.tbody.innerHTML = "";
+function fmt(n) {
+  return (Number(n) || 0).toLocaleString("fr-FR");
+}
 
+function renderTiles(list) {
+  if (!els.tiles) return;
+
+  els.tiles.innerHTML = "";
   const frag = document.createDocumentFragment();
-  for (const g of list) {
-    const tr = document.createElement("tr");
-    tr.dataset.id = String(g.id || "");
 
-    // cover
-    const imgTd = document.createElement("td");
-    imgTd.className = "c-cover";
+  for (const g of list) {
+    const tile = document.createElement("div");
+    tile.className = "tile";
+    tile.dataset.id = String(g.id || "");
+
     const img = document.createElement("img");
-    img.className = "cover";
+    img.className = "tile-cover";
     img.loading = "lazy";
     img.alt = "";
     img.src = g.imageUrl || "/favicon.png";
-    imgTd.appendChild(img);
 
-    // title
-    const titleTd = document.createElement("td");
-    const titleLine = document.createElement("div");
-    titleLine.className = "title-line";
+    const body = document.createElement("div");
+    body.className = "tile-body";
+
     const title = document.createElement("div");
+    title.className = "tile-title";
     title.textContent = g.cleanTitle || g.title || "";
-    titleLine.appendChild(title);
-    titleTd.appendChild(titleLine);
 
     const sub = document.createElement("div");
-    sub.className = "small";
-    const idTxt = String(g.id || "");
-    const colTxt = g.collection ? ` • collection: ${g.collection}` : "";
-    sub.textContent = `id: ${idTxt}${colTxt}`;
-    titleTd.appendChild(sub);
+    sub.className = "tile-sub";
+    sub.textContent =
+      `id: ${String(g.id || "")}` + (g.collection ? ` • collection: ${g.collection}` : "");
 
-    // updatedAt
-    const upTd = document.createElement("td");
-    upTd.textContent = g.updatedAt || "";
+    const stats = document.createElement("div");
+    stats.className = "tile-stats";
+    stats.innerHTML =
+      `👁️ ${fmt(g._views)} &nbsp;&nbsp; ❤️ ${fmt(g._likes)} &nbsp;&nbsp; 📥 ${fmt(g._mega)}`;
 
-    // numbers
-    const vTd = document.createElement("td");
-    vTd.className = "num";
-    vTd.textContent = (g._views | 0).toLocaleString("fr-FR");
-
-    const lTd = document.createElement("td");
-    lTd.className = "num";
-    lTd.textContent = (g._likes | 0).toLocaleString("fr-FR");
-
-    const mTd = document.createElement("td");
-    mTd.className = "num";
-    mTd.textContent = (g._mega | 0).toLocaleString("fr-FR");
-
-    tr.append(imgTd, titleTd, upTd, vTd, lTd, mTd);
-    frag.appendChild(tr);
+    body.append(title, sub, stats);
+    tile.append(img, body);
+    frag.appendChild(tile);
   }
 
-  els.tbody.appendChild(frag);
+  els.tiles.appendChild(frag);
 }
 
 /* =========================================================
-   Chart (canvas sans lib)
+   Chart (canvas sans lib) — inchangé côté rendu
 ========================================================= */
 function metricValue(g, metric) {
   if (metric === "views") return g._views | 0;
@@ -309,29 +254,29 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-function drawChart(sortedList) {
+function drawChart(list) {
+  if (!els.chart) return;
+
   const canvas = els.chart;
   const ctx = canvas.getContext("2d");
 
-  const metric = els.metric.value;
-  const topN = Number(els.top.value || 30);
-  const take = topN > 0 ? topN : sortedList.length;
+  const metric = els.metric ? els.metric.value : "views";
+  const topN = Number((els.top && els.top.value) || 30);
+  const take = topN > 0 ? topN : list.length;
 
-  const items = sortedList
+  const items = list
     .slice()
     .sort((a, b) => metricValue(b, metric) - metricValue(a, metric))
     .slice(0, take);
 
-  // Hauteur strictement nécessaire
+  // hauteur
   const rowPx = 26;
   const padT = 8;
   const padB = 12;
   const cssH = padT + padB + items.length * rowPx;
 
-  // Force la hauteur CSS (sinon clientHeight foire)
   canvas.style.height = cssH + "px";
 
-  // DPR
   const dpr = window.devicePixelRatio || 1;
   const cssW = canvas.clientWidth || 1200;
 
@@ -346,7 +291,6 @@ function drawChart(sortedList) {
   const innerW = Math.max(50, cssW - padL - padR);
   const innerH = Math.max(50, cssH - padT - padB);
 
-  // grid
   ctx.strokeStyle = "rgba(170,178,200,.18)";
   ctx.lineWidth = 1;
 
@@ -367,7 +311,6 @@ function drawChart(sortedList) {
     ctx.fillText(val.toLocaleString("fr-FR"), x, padT + innerH + 18);
   }
 
-  // bars
   const rowH = innerH / Math.max(1, items.length);
   const barH = Math.max(10, Math.min(18, rowH * 0.62));
   const y0 = padT + rowH / 2;
@@ -380,24 +323,20 @@ function drawChart(sortedList) {
     const v = metricValue(it, metric);
     const w = Math.max(0, innerW * (v / maxV));
 
-    // label
     ctx.fillStyle = "rgba(232,234,240,.92)";
     ctx.textAlign = "right";
     const label = (it.cleanTitle || it.title || "").slice(0, 42);
     ctx.fillText(label, padL - 10, y);
 
-    // bar
     ctx.fillStyle = "rgba(90,162,255,.55)";
     roundRect(ctx, padL, y - barH / 2, w, barH, 8);
     ctx.fill();
 
-    // value
     ctx.fillStyle = "rgba(232,234,240,.86)";
     ctx.textAlign = "left";
     ctx.fillText(v.toLocaleString("fr-FR"), padL + w + 8, y);
   });
 
-  // click -> fiche jeu
   canvas.onclick = (ev) => {
     const rect = canvas.getBoundingClientRect();
     const x = ev.clientX - rect.left;
@@ -415,97 +354,42 @@ function drawChart(sortedList) {
    Render orchestration
 ========================================================= */
 function resetLimit() {
-  state.renderLimit = state.renderStep;
+  state.renderLimit = 48;
   invalidateCache();
-  if (els.tableWrap) els.tableWrap.scrollTop = 0;
 }
 
 function rerender() {
-  const sorted = computeSortedList();
-  const visible = sorted.slice(0, state.renderLimit);
+  const filtered = getFilteredGames();
+  const visible = filtered.slice(0, state.renderLimit);
 
-  renderTable(visible);
-  scheduleChart(sorted);
+  renderTiles(visible);
+  scheduleChart(filtered);
 
-  const total = state.games.length;
-  els.status.textContent =
-    `${sorted.length}/${total} jeux ` +
-    `(affichés: ${Math.min(state.renderLimit, sorted.length)}/${sorted.length} • source: ${shortUrl(
-      state.srcUrl
-    )})`;
+  if (els.status) {
+    const total = state.games.length;
+    els.status.textContent =
+      `${filtered.length}/${total} jeux (affichés: ${Math.min(state.renderLimit, filtered.length)}/${filtered.length} • source: ${shortUrl(state.srcUrl)})`;
+  }
 }
 
 /* =========================================================
-   Events
+   Infinite scroll (tuiles)
 ========================================================= */
-function wireEvents() {
-  // recherche (debounce)
-  let t = null;
-  const debouncedRerender = () => {
-    clearTimeout(t);
-    t = setTimeout(() => {
-      resetLimit();
-      rerender();
-    }, 120);
-  };
-  els.q.addEventListener("input", debouncedRerender);
-
-  // chart only
-  els.metric.addEventListener("change", () => scheduleChart(computeSortedList()));
-  els.top.addEventListener("change", () => {
-    if (els.chartWrap) els.chartWrap.scrollTop = 0;
-    scheduleChart(computeSortedList());
-  });
-
-  // click table (delegation)
-  els.tbody.addEventListener("click", (e) => {
-    const tr = e.target.closest("tr[data-id]");
-    if (!tr) return;
-    const id = tr.dataset.id;
-    if (id) location.href = getGameUrl(id);
-  });
-
-  // tri
-  els.tbl.querySelectorAll("thead th[data-sort]").forEach((th) => {
-    th.addEventListener("click", () => {
-      const k = th.getAttribute("data-sort");
-      if (!k) return;
-
-      if (state.sortKey === k) {
-        state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
-      } else {
-        state.sortKey = k;
-        state.sortDir = k === "title" || k === "updatedAt" ? "asc" : "desc";
-      }
-
-      resetLimit();
-      rerender();
-    });
-  });
-
-  // infinite scroll (sentinel dans le container table-wrap)
-  setupInfiniteScroll();
-
-  // resize -> redraw chart (throttlé)
-  window.addEventListener("resize", () => scheduleChart(computeSortedList()));
-}
-
 function setupInfiniteScroll() {
+  if (!els.tiles) return;
+
   const sentinel = document.createElement("div");
   sentinel.id = "stats-sentinel";
-  sentinel.style.cssText =
-    "height:1px;width:1px;opacity:0;pointer-events:none;";
-
-  if (els.tableWrap) els.tableWrap.appendChild(sentinel);
-  else document.body.appendChild(sentinel);
+  sentinel.style.cssText = "height:1px;width:1px;opacity:0;pointer-events:none;";
+  els.tiles.appendChild(sentinel);
 
   let lock = false;
 
-  const loadMoreIfPossible = () => {
+  const loadMore = () => {
     if (lock) return;
 
-    const sorted = computeSortedList();
-    if (state.renderLimit >= sorted.length) return;
+    const filtered = getFilteredGames();
+    if (state.renderLimit >= filtered.length) return;
 
     lock = true;
     state.renderLimit += state.renderStep;
@@ -515,13 +399,11 @@ function setupInfiniteScroll() {
 
   const obs = new IntersectionObserver(
     (entries) => {
-      for (const e of entries) {
-        if (e.isIntersecting) loadMoreIfPossible();
-      }
+      for (const e of entries) if (e.isIntersecting) loadMore();
     },
     {
-      root: els.tableWrap || null,
-      rootMargin: "300px",
+      root: null, // scroll page
+      rootMargin: "500px",
       threshold: 0.01,
     }
   );
@@ -530,23 +412,60 @@ function setupInfiniteScroll() {
 }
 
 /* =========================================================
+   Events
+========================================================= */
+function wireEvents() {
+  // recherche (debounce)
+  let t = null;
+  const debounced = () => {
+    clearTimeout(t);
+    t = setTimeout(() => {
+      resetLimit();
+      rerender();
+    }, 120);
+  };
+  if (els.q) els.q.addEventListener("input", debounced);
+
+  // chart only
+  if (els.metric) els.metric.addEventListener("change", () => scheduleChart(getFilteredGames()));
+  if (els.top)
+    els.top.addEventListener("change", () => {
+      if (els.chartWrap) els.chartWrap.scrollTop = 0;
+      scheduleChart(getFilteredGames());
+    });
+
+  // click tile -> fiche
+  if (els.tiles) {
+    els.tiles.addEventListener("click", (e) => {
+      const tile = e.target.closest(".tile[data-id]");
+      if (!tile) return;
+      const id = tile.dataset.id;
+      if (id) location.href = getGameUrl(id);
+    });
+  }
+
+  // resize chart
+  window.addEventListener("resize", () => scheduleChart(getFilteredGames()));
+}
+
+/* =========================================================
    Init
 ========================================================= */
 async function init() {
-  els.status.textContent = "Chargement liste…";
+  if (els.status) els.status.textContent = "Chargement liste…";
 
   let raw;
   try {
     raw = await fetchJson(state.srcUrl);
   } catch (e) {
-    els.status.textContent = "Erreur: impossible de charger la liste";
+    if (els.status) els.status.textContent = "Erreur: impossible de charger la liste";
     console.error(e);
     return;
   }
 
   state.games = extractGames(raw);
 
-  els.status.textContent = "Chargement stats…";
+  if (els.status) els.status.textContent = "Chargement stats…";
 
   const ids = state.games.map((g) => String(g.id || "")).filter(Boolean);
   const statsObj = await fetchGameStatsBulk(ids);
@@ -560,9 +479,10 @@ async function init() {
     });
   }
 
-  els.status.textContent = "OK";
+  if (els.status) els.status.textContent = "OK";
 
   wireEvents();
+  setupInfiniteScroll();
   rerender();
 }
 

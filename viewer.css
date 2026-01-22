@@ -791,3 +791,29 @@ main{
 .game-block h3{
   margin: 0 0 8px 0;
 }
+
+/* ✅ "Informations" plus petit + encadré bi-ton (haut/bas) */
+#notesBox{
+  /* bi-ton : haut légèrement plus clair, bas légèrement plus sombre */
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.05) 0%,
+      rgba(0,0,0,0.18) 100%
+    );
+  border-color: rgba(255,255,255,0.14);
+}
+
+/* ✅ Titre "ℹ️ Informations" plus petit + couleur un peu différente */
+#notesBox h3{
+  font-size: 13px;              /* plus petit */
+  font-weight: 800;
+  letter-spacing: .2px;
+  color: rgba(255,255,255,0.78); /* légèrement différent */
+  margin-bottom: 6px;
+}
+
+/* (optionnel) texte un peu plus doux */
+#notesBox #notesText{
+  color: rgba(255,255,255,0.72);
+}

@@ -1228,12 +1228,18 @@ function renderVideoBlock({ id, videoUrl }) {
     // =========================
     // 3) Description (juste après related, avant vidéo)
     // =========================
-    const description = (entry.description || "").trim();
+    const descAnchor = relatedOut || tagsEl;
     const descBox = document.getElementById("descriptionBox");
+    const descTextEl = document.getElementById("descriptionText");
     
-    if (description && descBox) {
-      document.getElementById("descriptionText").innerHTML =
-        escapeHtml(description).replace(/\n/g, "<br>");
+    if (descBox && descAnchor && descAnchor.parentNode) {
+      // ✅ force la position: juste après related/tags (donc AVANT les liens)
+      descAnchor.parentNode.insertBefore(descBox, descAnchor.nextSibling);
+    }
+    
+    const description = (entry.description || "").trim();
+    if (description && descBox && descTextEl) {
+      descTextEl.innerHTML = escapeHtml(description).replace(/\n/g, "<br>");
       descBox.style.display = "";
     } else if (descBox) {
       descBox.style.display = "none";
@@ -1242,7 +1248,10 @@ function renderVideoBlock({ id, videoUrl }) {
     // =========================
     // 4) Vidéo (si présent) sous description
     // =========================
-    const videoHost = ensureBlockAfter(document.getElementById("descriptionHost"), "videoHost");
+    const descBox = document.getElementById("descriptionBox");
+    const videoAnchor = descBox || relatedOut || tagsEl;
+    
+    const videoHost = ensureBlockAfter(videoAnchor, "videoHost");
     renderVideoBlock({
       id: "videoHost",
       videoUrl: (entry.videoUrl || "").trim(),

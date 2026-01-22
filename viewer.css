@@ -840,23 +840,28 @@ main{
 }
 
 /* =========================
-   🔁 Inversion fond : ⭐ Rating ↔ 📊 Stats
+   🔁 Inversion fond : ⭐ Rating ↔ 📊 Stats (robuste)
    ========================= */
 
-/* ⭐ Rating : fond normal (comme .game-block) */
-#ratingHost .game-block{
+/* ⭐ Rating : forcer fond "normal" */
+#ratingHost .game-block,
+#ratingHostInner .game-block,
+#ratingHostInner{
   background: rgba(0,0,0,.15) !important;
+  background-image: none !important;
   border-color: rgba(255,255,255,.25) !important;
 }
 
-/* 📊 Stats : fond bi-ton (style "Infos") */
-#statsOut{
+/* 📊 Stats : forcer fond bi-ton (au cas où c'est l'id ou un enfant) */
+#statsOut,
+#statsOut.game-block,
+#statsOut .game-block{
   background:
     linear-gradient(
       180deg,
       rgba(255,255,255,0.05) 0%,
       rgba(0,0,0,0.18) 100%
     ) !important;
+  background-color: transparent !important;
   border-color: rgba(255,255,255,0.14) !important;
 }
-

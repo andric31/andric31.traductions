@@ -514,19 +514,21 @@ function wireEvents() {
     });
   });
 
-  // ✅ scroll = "afficher plus" (sans bouton)
-  if (els.tableWrap) {
+  // ✅ scroll page = "afficher plus" (sans bouton)
+  {
     let lock = false;
-    els.tableWrap.addEventListener("scroll", () => {
+
+    const onScroll = () => {
       if (lock) return;
 
-      const nearBottom =
-        els.tableWrap.scrollTop + els.tableWrap.clientHeight >=
-        els.tableWrap.scrollHeight - 80;
+      const doc = document.documentElement;
+      const y = window.scrollY || doc.scrollTop || 0;
+      const viewportH = window.innerHeight || doc.clientHeight || 0;
+      const fullH = doc.scrollHeight || 0;
 
+      const nearBottom = (y + viewportH) >= (fullH - 200);
       if (!nearBottom) return;
 
-      // on augmente seulement si on a encore des lignes à afficher
       const filtered = getFiltered();
       const sorted = sortList(filtered);
 
@@ -535,10 +537,10 @@ function wireEvents() {
       lock = true;
       state.renderLimit += state.renderStep;
       rerender();
-
-      // mini lock anti spam
       setTimeout(() => (lock = false), 80);
-    });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
   }
 
   window.addEventListener("resize", () => {

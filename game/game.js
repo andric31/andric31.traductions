@@ -304,21 +304,6 @@ async function fetchJson(url) {
 
 // ====== UI helpers ======
 
-function wrapIntoGameBlock(el, titleText) {
-  if (!el) return null;
-
-  const wrapper = document.createElement("div");
-  wrapper.className = "game-block";
-
-  const h3 = document.createElement("h3");
-  h3.textContent = titleText || "⭐ Notation";
-
-  wrapper.appendChild(h3);
-  wrapper.appendChild(el); // déplace le ratingBox dedans
-
-  return wrapper;
-}
-
 function $(id) {
   return document.getElementById(id);
 }
@@ -1312,22 +1297,34 @@ function renderVideoBlock({ id, videoUrl }) {
     }
 
     // =========================
-    // ⭐ Déplacer la notation (étoiles) entre le contenu principal et les stats
+    // ⭐ Notation (étoiles) : encadré dédié ENTRE contenu principal et stats (SANS titre)
     // =========================
-    const ratingEl = $("ratingBox");     // ton bloc étoiles existant
-    const statsOutEl = $("statsOut");    // encadré stats
+    const ratingEl = $("ratingBox");
+    const statsOutEl = $("statsOut");
     
     if (ratingEl && statsOutEl && statsOutEl.parentNode) {
-      // Si pas déjà dans un game-block, on l'encadre
-      const alreadyWrapped = ratingEl.parentElement && ratingEl.parentElement.classList.contains("game-block");
-    
-      let nodeToInsert = ratingEl;
-      if (!alreadyWrapped) {
-        nodeToInsert = wrapIntoGameBlock(ratingEl, "⭐ Notation de la traduction");
+      // Host unique (évite les double-wrappers)
+      let ratingHost = document.getElementById("ratingHost");
+      if (!ratingHost) {
+        ratingHost = document.createElement("div");
+        ratingHost.id = "ratingHost";
+        ratingHost.innerHTML = `
+          <div class="game-block">
+            <div id="ratingHostInner"></div>
+          </div>
+        `;
       }
     
-      // place avant stats
-      statsOutEl.parentNode.insertBefore(nodeToInsert, statsOutEl);
+      const inner = ratingHost.querySelector("#ratingHostInner");
+      if (inner && ratingEl.parentNode !== inner) {
+        inner.appendChild(ratingEl); // déplace le ratingBox dedans
+      }
+    
+      // place l'encadré avant les stats
+      statsOutEl.parentNode.insertBefore(ratingHost, statsOutEl);
+    
+      // au cas où ratingBox était hidden par défaut
+      ratingEl.style.display = "";
     }
 
     // =========================

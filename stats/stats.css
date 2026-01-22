@@ -1,11 +1,15 @@
-/* --- Layout global : plus large + moins de padding --- */
+/* ===========================
+   Stats — compact (moins d’espace)
+   Remplace entièrement stats.css
+   =========================== */
+
 .stats-wrap{
-  max-width: 1760px;         /* ✅ plus large que 1400 */
+  max-width: 1760px;      /* plus large */
   margin: 0 auto;
-  padding: 10px;             /* ✅ moins de padding */
+  padding: 10px;          /* moins de padding */
 }
 
-/* --- Topbar : moins haute, plus compacte --- */
+/* --- Topbar : compacte --- */
 .stats-topbar{
   position:sticky;
   top:0;
@@ -17,35 +21,35 @@
   border:1px solid var(--border);
   border-radius:14px;
 
-  padding: 8px 10px;         /* ✅ réduit (avant 12/12) */
+  padding: 8px 10px;      /* réduit */
   display:flex;
-  gap: 10px;                 /* ✅ réduit (avant 12) */
+  gap: 10px;              /* réduit */
   align-items:center;
   justify-content:space-between;
 }
 
 .stats-title .h1{
-  font-size:19px;            /* ✅ léger gain de place */
+  font-size:19px;
   font-weight:800;
   letter-spacing:.2px;
 }
 .stats-title .sub{
   font-size:12px;
   color:var(--muted);
-  margin-top:1px;            /* ✅ réduit */
+  margin-top:1px;         /* réduit */
 }
 
-/* --- Controls : plus serrés --- */
+/* --- Controls : serrés --- */
 .stats-controls{
   display:flex;
-  gap: 6px;                  /* ✅ réduit (avant 8) */
+  gap: 6px;               /* réduit */
   flex-wrap:wrap;
   justify-content:flex-end;
   align-items:center;
 }
 
 .inp,.sel{
-  height: 34px;              /* ✅ réduit (avant 38) */
+  height: 34px;           /* réduit */
   border:1px solid var(--border);
   background:var(--btn);
   color:var(--fg);
@@ -53,18 +57,18 @@
   padding:0 10px;
   outline:none;
 }
+.inp{ min-width: 260px; }
+.sel{ min-width: 130px; }
 
-.inp{ min-width: 260px; }    /* ✅ un poil moins large */
-.sel{ min-width: 130px; }    /* ✅ un poil moins large */
-
-/* --- Main : moins d’espace sous la topbar --- */
+/* --- Main : moins d’espace entre graph & tableau --- */
 .stats-main{
   display:flex;
   flex-direction:column;
-  gap: 10px;                 /* ✅ réduit (avant 14) */
-  margin-top: 8px;           /* ✅ réduit (avant 12) */
+  gap: 6px;               /* ✅ réduit (clé) */
+  margin-top: 6px;        /* ✅ réduit (clé) */
 }
 
+/* --- Cards --- */
 .card{
   background:var(--card);
   border:1px solid var(--border);
@@ -72,49 +76,45 @@
   overflow:hidden;
 }
 
+/* ✅ header de card plus petit */
 .card-h{
   display:flex;
   align-items:center;
   justify-content:space-between;
-
-  padding: 8px 10px;         /* ✅ réduit (avant 10/12) */
+  padding: 6px 10px;      /* ✅ réduit (clé) */
   border-bottom:1px solid var(--border);
 }
 
 .card-title{font-weight:800}
 .card-note{color:var(--muted);font-size:12px}
 
-/* --- Chart --- */
+/* --- Chart : padding bas réduit, scroll OK --- */
 .chart-wrap{
-  padding: 8px 10px;         /* ✅ réduit */
+  padding: 6px 10px 4px;  /* ✅ top/sides/bottom réduit (clé) */
   max-height: 620px;
   overflow: auto;
 }
+
 .chart-wrap canvas{
   width:100%;
-  height:auto;
+  height:auto;            /* la hauteur réelle est gérée en JS via canvas.style.height */
   display:block;
   border:1px solid var(--border);
   border-radius:12px;
   background:rgba(0,0,0,.12);
 }
 
-/* --- Table : prend mieux la place --- */
-.table-wrap{
-  overflow:auto;
-}
+/* --- Table --- */
+.table-wrap{ overflow:auto; }
 
-/* ✅ enlève le min-width énorme si ça te force un scroll horizontal inutile
-   (tu peux le garder si tu préfères, mais là ça “élargit” visuellement) */
 .tbl{
   width:100%;
   border-collapse:collapse;
-  min-width: 0;              /* ✅ avant 920px */
+  min-width: 0;           /* plus besoin du 920px si tu veux éviter le scroll horizontal */
 }
 
-/* ✅ padding un peu réduit pour voir plus de lignes à l'écran */
 .tbl th,.tbl td{
-  padding: 8px 10px;         /* ✅ réduit (avant 10/10) */
+  padding: 8px 10px;      /* un peu plus compact */
   border-bottom:1px solid var(--border);
   vertical-align:middle;
 }
@@ -130,21 +130,29 @@
   cursor:pointer;
 }
 
-.tbl thead th.num{text-align:right}
-.tbl td.num{text-align:right;font-variant-numeric: tabular-nums}
-.tbl tbody tr:hover{background:rgba(90,162,255,.08);cursor:pointer}
+.tbl thead th.num{ text-align:right; }
+.tbl td.num{
+  text-align:right;
+  font-variant-numeric: tabular-nums;
+}
 
-/* --- Cover un peu plus compact pour élargir le tableau --- */
-.c-cover{width:64px}         /* ✅ avant 76 */
+.tbl tbody tr:hover{
+  background:rgba(90,162,255,.08);
+  cursor:pointer;
+}
+
+/* --- Cover plus compact --- */
+.c-cover{ width:64px; }
 .cover{
-  width:50px;                /* ✅ avant 56 */
-  height:50px;               /* ✅ avant 56 */
+  width:50px;
+  height:50px;
   border-radius:10px;
   object-fit:cover;
   border:1px solid var(--border);
   background:rgba(0,0,0,.14);
 }
 
+/* --- Mini UI --- */
 .badge-mini{
   display:inline-flex;
   align-items:center;
@@ -155,16 +163,16 @@
   font-size:11px;
   border:1px solid var(--border);
   background:rgba(0,0,0,.18);
-  color:var(--muted)
+  color:var(--muted);
 }
 
-.title-line{display:flex;gap:8px;align-items:center}
-.small{font-size:12px;color:var(--muted);margin-top:1px}
+.title-line{ display:flex; gap:8px; align-items:center; }
+.small{ font-size:12px; color:var(--muted); margin-top:1px; }
 
 /* --- Responsive --- */
 @media (max-width: 900px){
-  .stats-wrap{padding:8px}
-  .inp{min-width:200px}
-  .sel{min-width:120px}
-  .tbl th,.tbl td{padding:8px 8px}
+  .stats-wrap{ padding:8px; }
+  .inp{ min-width:200px; }
+  .sel{ min-width:120px; }
+  .tbl th,.tbl td{ padding:8px 8px; }
 }

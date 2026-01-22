@@ -1287,6 +1287,15 @@ function renderVideoBlock({ id, videoUrl }) {
     const ab = $("archiveBox");
     if (ab) ab.style.display = archiveHref ? "flex" : "none";
 
+    // ⛔ Bloquer clic droit sur ARCHIVES
+    const archiveLink = document.getElementById("archiveLink");
+    if (archiveLink) {
+      archiveLink.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        return false;
+      });
+    }
+
     // =========================
     // ✅ Analytics key (unique)
     // =========================

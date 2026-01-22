@@ -1234,7 +1234,6 @@ function renderVideoBlock({ id, videoUrl }) {
     const descHost = ensureBlockAfter(descAnchor, "descriptionHost");
     renderTextBlock({
       id: "descriptionHost",
-      title: "📝 Description",
       text: (entry.description || "").trim(),
       muted: false,
     });

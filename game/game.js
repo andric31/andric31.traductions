@@ -1315,7 +1315,13 @@ function renderVideoBlock({ id, videoUrl }) {
       const j = await rating4Get(analyticsKey);
       if (j?.ok) renderRating4UI(analyticsKey, j);
     } catch {}
-  } catch (e) {
-    showError(`Erreur: ${e?.message || e}`);
-  }
+    
+    // =========================
+    // ⭐ Déplacer la notation en bas de l'encadré principal
+    // =========================
+    const cardInner = document.querySelector(".cardInner");
+    const ratingBox = document.getElementById("ratingBox");
+    if (cardInner && ratingBox) {
+      cardInner.appendChild(ratingBox);
+    }
 })();

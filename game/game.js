@@ -1275,7 +1275,14 @@ function renderVideoBlock({ id, videoUrl }) {
     } else {
       show("notesBox", false);
     }
-    
+ 
+    // ✅ Déplacer "Notes" entre l'encadré principal et l'encadré Stats
+    const notesBoxEl = $("notesBox");
+    const statsOutEl = $("statsOut");
+    if (notesBoxEl && statsOutEl && statsOutEl.parentNode) {
+      statsOutEl.parentNode.insertBefore(notesBoxEl, statsOutEl);
+    }
+ 
     // =========================
     // 8) Archives (bouton HTML existant sous Notes) — SANS encadré
     // =========================

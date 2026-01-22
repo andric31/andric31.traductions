@@ -236,11 +236,12 @@ function drawChart(list) {
     .sort((a, b) => metricValue(b, metric) - metricValue(a, metric))
     .slice(0, take);
 
-  // ✅ hauteur dynamique : si "Tout", le canvas devient grand, et chart-wrap scroll
-  const baseH = 560;
-  const rowPx = 24; // hauteur par ligne (évite le chevauchement)
-  const padT = 16, padB = 28;
-  const desiredCssH = Math.max(baseH, padT + padB + items.length * rowPx);
+  // ✅ APRÈS : hauteur STRICTEMENT nécessaire
+  const rowPx = 26;        // hauteur par ligne
+  const padT = 8;          // marge haute réduite
+  const padB = 12;         // marge basse réduite
+  
+  const desiredCssH = padT + padB + items.length * rowPx;
 
   // Important : on force une hauteur CSS pour que clientHeight soit correct
   canvas.style.height = desiredCssH + "px";

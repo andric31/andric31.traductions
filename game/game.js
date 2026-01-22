@@ -1283,7 +1283,9 @@ function renderVideoBlock({ id, videoUrl }) {
     // =========================
     setHref("archiveLink", archiveHref);
     if ($("archiveLink")) $("archiveLink").textContent = "🗃️ Ouvrir les archives de traduction";
-    show("archiveBox", !!archiveHref);
+    
+    const ab = $("archiveBox");
+    if (ab) ab.style.display = archiveHref ? "flex" : "none";
 
     // =========================
     // ✅ Analytics key (unique)

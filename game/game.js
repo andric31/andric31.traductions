@@ -1262,42 +1262,46 @@ function renderVideoBlock({ id, videoUrl }) {
     // =========================
     const megaHref = (entry.translation || "").trim();
     const archiveHref = (entry.translationsArchive || "").trim();
-    
     setHref("btnMega", megaHref);
     if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction (MEGA)";
-    
-    // ⛔ Bloquer clic droit sur MEGA
-    const btnMega = document.getElementById("btnMega");
-    if (btnMega) {
-      btnMega.addEventListener("contextmenu", (e) => {
-        e.preventDefault();
-        return false;
-      });
+
+    // =========================
+    // 🔁 Ordre des blocs (DOM)
+    // Boutons -> Informations -> MEGA -> Notation -> Archives
+    // =========================
+    const parent = btnRow?.parentNode;
+    if (parent) {
+      if (notesBox) parent.insertBefore(notesBox, btnMainRow);          // ℹ️ Infos avant MEGA
+      if (btnMainRow) parent.insertBefore(btnMainRow, ratingBox);       // 📥 MEGA avant Notation
+      if (ratingBox && archiveBox) parent.insertBefore(archiveBox, ratingBox.nextSibling); // 🗃️ après Notation
     }
-    
+
     // =========================
-    // 7) Informations (encadré) + affichage
+    // 7) Informations (encadré sous la notation)
     // =========================
-    const notesBoxEl = document.getElementById("notesBox");
-    const notesTextEl = document.getElementById("notesText");
-    
     const notes = (entry.notes || "").trim();
-    if (notes && notesBoxEl && notesTextEl) {
-      notesTextEl.innerHTML = escapeHtml(notes).replace(/\n/g, "<br>");
-      notesBoxEl.style.display = "";
-    } else if (notesBoxEl) {
-      notesBoxEl.style.display = "none";
+    if (notes) {
+      setHtml("notesText", escapeHtml(notes).replace(/\n/g, "<br>"));
+      show("notesBox", true);
+    } else {
+      show("notesBox", false);
     }
     
+    // ✅ Forcer "Informations" juste AU-DESSUS de la notation
+    const notesBox = document.getElementById("notesBox");
+    if (ratingBox && notesBox && ratingBox.parentNode) {
+      ratingBox.parentNode.insertBefore(notesBox, ratingBox);
+    }
+
     // =========================
-    // 8) Archives (lien existant)
+    // 8) Archives (bouton HTML existant sous Notes) — SANS encadré
     // =========================
     setHref("archiveLink", archiveHref);
     if ($("archiveLink")) $("archiveLink").textContent = "🗃️ Ouvrir les archives de traduction";
     
-    const archiveBoxEl = document.getElementById("archiveBox");
-    if (archiveBoxEl) archiveBoxEl.style.display = archiveHref ? "flex" : "none";
-    
+    const ab = $("archiveBox");
+    if (ab) ab.style.display = archiveHref ? "flex" : "none";
+
     // ⛔ Bloquer clic droit sur ARCHIVES
     const archiveLink = document.getElementById("archiveLink");
     if (archiveLink) {
@@ -1305,22 +1309,6 @@ function renderVideoBlock({ id, videoUrl }) {
         e.preventDefault();
         return false;
       });
-    }
-    
-    // =========================
-    // 🔁 Ordre des blocs (DOM)
-    // Boutons -> Informations -> MEGA -> Notation -> Archives
-    // =========================
-    const parent = btnRow?.parentNode;
-    if (parent) {
-      // ℹ️ Informations juste après les boutons (avant MEGA)
-      if (notesBoxEl && btnMainRow) parent.insertBefore(notesBoxEl, btnMainRow);
-    
-      // ⭐ Notation juste après MEGA
-      if (ratingBox && archiveBoxEl) parent.insertBefore(ratingBox, archiveBoxEl);
-    
-      // 🗃️ Archives juste après la notation
-      if (archiveBoxEl && ratingBox) parent.insertBefore(archiveBoxEl, ratingBox.nextSibling);
     }
 
     // =========================

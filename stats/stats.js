@@ -24,15 +24,6 @@ function extractGames(raw) {
   return [];
 }
 
-function parseCatEngine(title) {
-  const t = String(title || "").trim();
-  // Ex: "VN Ren'Py After Thunder ..."  => cat=VN, engine=Ren'Py
-  // Ex: "Collection Ren'Py Something ..." => cat=Collection, engine=Ren'Py
-  const m = t.match(/^(\S+)\s+(\S+)\s+/);
-  if (m) return { cat: m[1], engine: m[2] };
-  return { cat: "", engine: "" };
-}
-
 function normalize(s) {
   return String(s || "")
     .toLowerCase()
@@ -67,14 +58,13 @@ async function fetchGameStatsBulk(ids) {
 const els = {
   q: document.getElementById("q"),
   metric: document.getElementById("metric"),
-  cat: document.getElementById("cat"),
-  eng: document.getElementById("eng"),
   top: document.getElementById("top"),
   status: document.getElementById("status"),
   chart: document.getElementById("chart"),
   tbody: document.getElementById("tbody"),
   tbl: document.getElementById("tbl"),
-  tableWrap: document.querySelector(".table-wrap"), // 👈 pour le scroll "afficher plus"
+  tableWrap: document.querySelector(".table-wrap"),
+  chartWrap: document.querySelector(".chart-wrap"),
 };
 
 const state = {
@@ -99,38 +89,10 @@ function getGameUrl(id) {
   return u.toString();
 }
 
-function uniqSorted(arr) {
-  return [...new Set(arr.filter(Boolean))].sort((a, b) =>
-    a.localeCompare(b, "fr")
-  );
-}
-
-function buildFilters() {
-  const cats = uniqSorted(state.games.map((g) => g._cat || ""));
-  const engines = uniqSorted(state.games.map((g) => g._engine || ""));
-  for (const c of cats) {
-    const opt = document.createElement("option");
-    opt.value = c;
-    opt.textContent = c;
-    els.cat.appendChild(opt);
-  }
-  for (const e of engines) {
-    const opt = document.createElement("option");
-    opt.value = e;
-    opt.textContent = e;
-    els.eng.appendChild(opt);
-  }
-}
-
 function getFiltered() {
   const q = normalize(els.q.value.trim());
-  const cat = els.cat.value;
-  const eng = els.eng.value;
 
   let list = state.games;
-
-  if (cat) list = list.filter((g) => g._cat === cat);
-  if (eng) list = list.filter((g) => g._engine === eng);
 
   if (q) {
     list = list.filter((g) => {
@@ -168,8 +130,6 @@ function sortList(list) {
 
   const getv = (g) => {
     if (key === "title") return String(g.cleanTitle || g.title || "");
-    if (key === "cat") return String(g._cat || "");
-    if (key === "engine") return String(g._engine || "");
     if (key === "updatedAt") return String(g.updatedAt || "");
     if (key === "views") return g._views | 0;
     if (key === "likes") return g._likes | 0;
@@ -220,33 +180,23 @@ function renderTable(list) {
     sub.textContent = `id: ${idTxt}${colTxt}`;
     titleTd.appendChild(sub);
 
-    const catTd = document.createElement("td");
-    catTd.innerHTML = `<span class="badge-mini">${escapeHtml(
-      g._cat || ""
-    )}</span>`;
-
-    const engTd = document.createElement("td");
-    engTd.innerHTML = `<span class="badge-mini">${escapeHtml(
-      g._engine || ""
-    )}</span>`;
-
     const upTd = document.createElement("td");
     upTd.textContent = g.updatedAt || "";
 
     const vTd = document.createElement("td");
     vTd.className = "num";
     vTd.textContent = (g._views | 0).toLocaleString("fr-FR");
+
     const lTd = document.createElement("td");
     lTd.className = "num";
     lTd.textContent = (g._likes | 0).toLocaleString("fr-FR");
+
     const mTd = document.createElement("td");
     mTd.className = "num";
     mTd.textContent = (g._mega | 0).toLocaleString("fr-FR");
 
     tr.appendChild(imgTd);
     tr.appendChild(titleTd);
-    tr.appendChild(catTd);
-    tr.appendChild(engTd);
     tr.appendChild(upTd);
     tr.appendChild(vTd);
     tr.appendChild(lTd);
@@ -276,15 +226,6 @@ function escapeHtml(s) {
 function drawChart(list) {
   const canvas = els.chart;
   const ctx = canvas.getContext("2d");
-  // adapt to DPR
-  const dpr = window.devicePixelRatio || 1;
-  const cssW = canvas.clientWidth || 1200;
-  const cssH = canvas.clientHeight || 560;
-  canvas.width = Math.floor(cssW * dpr);
-  canvas.height = Math.floor((cssH || 560) * dpr);
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-  ctx.clearRect(0, 0, cssW, cssH);
 
   const metric = els.metric.value;
   const topN = Number(els.top.value || 30);
@@ -295,14 +236,29 @@ function drawChart(list) {
     .sort((a, b) => metricValue(b, metric) - metricValue(a, metric))
     .slice(0, take);
 
-  const padL = 260,
-    padR = 18,
-    padT = 16,
-    padB = 28;
-  const W = cssW,
-    H = cssH;
-  const innerW = Math.max(50, W - padL - padR);
-  const innerH = Math.max(50, H - padT - padB);
+  // ✅ hauteur dynamique : si "Tout", le canvas devient grand, et chart-wrap scroll
+  const baseH = 560;
+  const rowPx = 24; // hauteur par ligne (évite le chevauchement)
+  const padT = 16, padB = 28;
+  const desiredCssH = Math.max(baseH, padT + padB + items.length * rowPx);
+
+  // Important : on force une hauteur CSS pour que clientHeight soit correct
+  canvas.style.height = desiredCssH + "px";
+
+  // width responsive
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = canvas.clientWidth || 1200;
+  const cssH = desiredCssH;
+
+  canvas.width = Math.floor(cssW * dpr);
+  canvas.height = Math.floor(cssH * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  ctx.clearRect(0, 0, cssW, cssH);
+
+  const padL = 260, padR = 18;
+  const innerW = Math.max(50, cssW - padL - padR);
+  const innerH = Math.max(50, cssH - padT - padB);
 
   // background grid
   ctx.globalAlpha = 1;
@@ -312,6 +268,7 @@ function drawChart(list) {
 
   const maxV = Math.max(1, ...items.map((it) => metricValue(it, metric)));
   const gridN = 5;
+
   for (let i = 0; i <= gridN; i++) {
     const x = padL + (innerW * i) / gridN;
     ctx.beginPath();
@@ -328,7 +285,7 @@ function drawChart(list) {
 
   // bars
   const rowH = innerH / Math.max(1, items.length);
-  const barH = Math.max(8, Math.min(18, rowH * 0.62));
+  const barH = Math.max(10, Math.min(18, rowH * 0.62));
   const y0 = padT + rowH / 2;
 
   ctx.font = "12px system-ui";
@@ -361,7 +318,7 @@ function drawChart(list) {
     const rect = canvas.getBoundingClientRect();
     const x = ev.clientX - rect.left;
     const y = ev.clientY - rect.top;
-    if (x < padL || x > W - padR || y < padT || y > padT + innerH) return;
+    if (x < padL || x > cssW - padR || y < padT || y > padT + innerH) return;
 
     const idx = Math.floor((y - padT) / rowH);
     const item = items[idx];
@@ -398,11 +355,9 @@ function rerender() {
   const filtered = getFiltered();
   const sorted = sortList(filtered);
 
-  // ✅ affiche seulement une partie du tableau (évite de créer toutes les images)
   const visible = sorted.slice(0, state.renderLimit);
   renderTable(visible);
 
-  // chart: on garde la liste complète (top selector gère déjà)
   drawChart(sorted);
 
   const total = state.games.length;
@@ -434,15 +389,7 @@ async function init() {
   }
 
   const games = extractGames(raw).map((g) => ({ ...g }));
-  // enrich
-  for (const g of games) {
-    const { cat, engine } = parseCatEngine(g.title);
-    g._cat = cat || "";
-    g._engine = engine || "";
-  }
   state.games = games;
-
-  buildFilters();
 
   els.status.textContent = "Chargement stats…";
 
@@ -469,7 +416,6 @@ async function init() {
 function wireEvents() {
   let t = null;
 
-  // debounce : resetLimit + rerender
   const deb = () => {
     clearTimeout(t);
     t = setTimeout(() => {
@@ -481,19 +427,17 @@ function wireEvents() {
   els.q.addEventListener("input", deb);
 
   els.metric.addEventListener("change", () => {
-    // metric n'affecte que le chart -> pas besoin de resetLimit
     rerender();
   });
-
-  els.cat.addEventListener("change", deb);
-  els.eng.addEventListener("change", deb);
 
   els.top.addEventListener("change", () => {
-    // top n'affecte que le chart
+    // ✅ quand tu passes en "Tout", le graphe devient scrollable (canvas + haut)
+    // on remonte le scroll du graphe en haut pour éviter l'effet "perdu"
+    if (els.chartWrap) els.chartWrap.scrollTop = 0;
     rerender();
   });
 
-  // table sorting + resetLimit
+  // table sorting
   els.tbl.querySelectorAll("thead th[data-sort]").forEach((th) => {
     th.addEventListener("click", () => {
       const k = th.getAttribute("data-sort");
@@ -503,10 +447,7 @@ function wireEvents() {
         state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
       } else {
         state.sortKey = k;
-        state.sortDir =
-          k === "title" || k === "cat" || k === "engine" || k === "updatedAt"
-            ? "asc"
-            : "desc";
+        state.sortDir = (k === "title" || k === "updatedAt") ? "asc" : "desc";
       }
 
       resetLimit();
@@ -514,20 +455,25 @@ function wireEvents() {
     });
   });
 
-  // ✅ scroll page = "afficher plus" (sans bouton)
+  // ✅ "afficher plus" robuste via sentinel + IntersectionObserver
   {
+    const sentinel = document.createElement("div");
+    sentinel.id = "stats-sentinel";
+    sentinel.style.height = "1px";
+    sentinel.style.width = "1px";
+    sentinel.style.opacity = "0";
+    sentinel.style.pointerEvents = "none";
+
+    if (els.tableWrap && els.tableWrap.parentNode) {
+      els.tableWrap.parentNode.appendChild(sentinel);
+    } else {
+      document.body.appendChild(sentinel);
+    }
+
     let lock = false;
 
-    const onScroll = () => {
+    const loadMoreIfPossible = () => {
       if (lock) return;
-
-      const doc = document.documentElement;
-      const y = window.scrollY || doc.scrollTop || 0;
-      const viewportH = window.innerHeight || doc.clientHeight || 0;
-      const fullH = doc.scrollHeight || 0;
-
-      const nearBottom = (y + viewportH) >= (fullH - 200);
-      if (!nearBottom) return;
 
       const filtered = getFiltered();
       const sorted = sortList(filtered);
@@ -540,11 +486,23 @@ function wireEvents() {
       setTimeout(() => (lock = false), 80);
     };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
+    const obs = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) loadMoreIfPossible();
+        }
+      },
+      {
+        root: null,           // scroll page
+        rootMargin: "300px",  // déclenche avant d’être tout en bas
+        threshold: 0.01,
+      }
+    );
+
+    obs.observe(sentinel);
   }
 
   window.addEventListener("resize", () => {
-    // redraw only chart for performance
     const filtered = getFiltered();
     const sorted = sortList(filtered);
     drawChart(sorted);
@@ -552,4 +510,5 @@ function wireEvents() {
 }
 
 init();
+
 

@@ -18,17 +18,13 @@
 
       <div class="stats-controls">
         <input id="q" class="inp" placeholder="Rechercher (titre, tags, id…)" autocomplete="off" />
+
         <select id="metric" class="sel" title="Métrique du graphique">
           <option value="views">👁️ Vues</option>
           <option value="likes">❤️ Likes</option>
           <option value="mega">📥 MEGA</option>
         </select>
-        <select id="cat" class="sel" title="Catégorie">
-          <option value="">Toutes catégories</option>
-        </select>
-        <select id="eng" class="sel" title="Moteur">
-          <option value="">Tous moteurs</option>
-        </select>
+
         <select id="top" class="sel" title="Top">
           <option value="30">Top 30</option>
           <option value="50">Top 50</option>
@@ -44,6 +40,7 @@
           <div class="card-title">Graphique (Top)</div>
           <div class="card-note" id="status">Chargement…</div>
         </div>
+
         <div class="chart-wrap">
           <canvas id="chart" width="1400" height="560"></canvas>
         </div>
@@ -61,8 +58,6 @@
               <tr>
                 <th class="c-cover">Cover</th>
                 <th data-sort="title">Titre</th>
-                <th data-sort="cat">Cat</th>
-                <th data-sort="engine">Moteur</th>
                 <th data-sort="updatedAt">MAJ</th>
                 <th class="num" data-sort="views">👁️</th>
                 <th class="num" data-sort="likes">❤️</th>

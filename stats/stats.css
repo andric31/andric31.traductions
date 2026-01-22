@@ -35,8 +35,20 @@
 .card-title{font-weight:800}
 .card-note{color:var(--muted);font-size:12px}
 
-.chart-wrap{padding:10px 12px}
-.chart-wrap canvas{width:100%;height:auto;display:block;border:1px solid var(--border);border-radius:12px;background:rgba(0,0,0,.12)}
+/* ✅ le graphe devient scrollable si "Tout" (canvas peut être très haut) */
+.chart-wrap{
+  padding:10px 12px;
+  max-height: 620px;
+  overflow: auto;
+}
+.chart-wrap canvas{
+  width:100%;
+  height:auto; /* la hauteur est gérée en JS via canvas.style.height */
+  display:block;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:rgba(0,0,0,.12);
+}
 
 .table-wrap{overflow:auto}
 .tbl{width:100%;border-collapse:collapse;min-width:920px}

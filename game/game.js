@@ -841,7 +841,7 @@ async function initCounters(gameId, megaHref, archiveHref) {
   };
 
   bindDownload("btnMega", megaHref);
-  bindDownload("btn_archiveHost", archiveHref);
+  bindDownload("archiveLink", archiveHref);
 
   // 3) ❤️ Like toggle
   const btnLike = $("btnLike");
@@ -1266,28 +1266,33 @@ function renderVideoBlock({ id, videoUrl }) {
     if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction (MEGA)";
 
     // =========================
-    // 7) Notes (encadré sous MEGA)
+    // 7) Informations (encadré sous la notation)
     // =========================
-    // On place Notes APRÈS la .btnMainRow (celle du bouton MEGA)
-    const notesAnchor = btnMainRow || btnRow || ratingBox || document.body;
-    const notesHost = ensureBlockAfter(notesAnchor, "notesHost");
-    renderTextBlock({
-      id: "notesHost",
-      title: "🗒️ Notes",
-      text: (entry.notes || "").trim(),
-      muted: true,
-    });
+    const notes = (entry.notes || "").trim();
+    if (notes) {
+      setHtml("notesText", escapeHtml(notes).replace(/\n/g, "<br>"));
+      show("notesBox", true);
+    } else {
+      show("notesBox", false);
+    }
+    
+    // =========================
+    // 8) Archives (bouton HTML existant sous Notes) — SANS encadré
+    // =========================
+    setHref("archiveLink", archiveHref);
+    if ($("archiveLink")) $("archiveLink").textContent = "🗃️ Ouvrir les archives de traduction";
+    
+    const ab = $("archiveBox");
+    if (ab) ab.style.display = archiveHref ? "flex" : "none";
 
-    // =========================
-    // 8) Archives / dossier traduction (encadré sous Notes)
-    // =========================
-    const archiveHost = ensureBlockAfter(document.getElementById("notesHost"), "archiveHost");
-    renderLinkBlock({
-      id: "archiveHost",
-      title: "🗃️ Dossier / Archives de traduction",
-      href: (entry.translationsArchive || "").trim(),
-      label: "🗃️ Ouvrir les archives de traduction",
-    });
+    // ⛔ Bloquer clic droit sur ARCHIVES
+    const archiveLink = document.getElementById("archiveLink");
+    if (archiveLink) {
+      archiveLink.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        return false;
+      });
+    }
 
     // =========================
     // ✅ Analytics key (unique)
@@ -1310,6 +1315,16 @@ function renderVideoBlock({ id, videoUrl }) {
       const j = await rating4Get(analyticsKey);
       if (j?.ok) renderRating4UI(analyticsKey, j);
     } catch {}
+
+    // =========================
+    // ⭐ Déplacer la notation en bas de l'encadré principal
+    // =========================
+    const cardInner = document.querySelector(".cardInner");
+    const ratingBoxEl = document.getElementById("ratingBox");
+    if (cardInner && ratingBoxEl) {
+      cardInner.appendChild(ratingBoxEl);
+    }
+
   } catch (e) {
     showError(`Erreur: ${e?.message || e}`);
   }

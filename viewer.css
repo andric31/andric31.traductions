@@ -817,24 +817,3 @@ main{
 #notesBox #notesText{
   color: rgba(255,255,255,0.72);
 }
-
-/* =========================
-   ⭐ Rating (étoiles) - compact en haut
-   ========================= */
-
-/* 1) Supprime la marge top du 1er élément réel dans le bloc rating */
-#ratingHostInner > :first-child{
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-}
-
-/* 2) Si ton ratingMsg est un <p> ou a une margin par défaut */
-#ratingBox #ratingMsg{
-  margin-top: 0 !important;
-}
-
-/* 3) Optionnel : si tout le ratingBox est un peu trop "aéré" */
-#ratingHost .game-block{
-  padding-top: 8px;   /* au lieu de 12px */
-  padding-bottom: 10px;
-}

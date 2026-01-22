@@ -1228,15 +1228,16 @@ function renderVideoBlock({ id, videoUrl }) {
     // =========================
     // 3) Description (juste après related, avant vidéo)
     // =========================
-    // On crée un conteneur juste après relatedOut (si relatedOut existe),
-    // sinon juste après tags.
-    const descAnchor = relatedOut || tagsEl;
-    const descHost = ensureBlockAfter(descAnchor, "descriptionHost");
-    renderTextBlock({
-      id: "descriptionHost",
-      text: (entry.description || "").trim(),
-      muted: false,
-    });
+    const description = (entry.description || "").trim();
+    const descBox = document.getElementById("descriptionBox");
+    
+    if (description && descBox) {
+      document.getElementById("descriptionText").innerHTML =
+        escapeHtml(description).replace(/\n/g, "<br>");
+      descBox.style.display = "";
+    } else if (descBox) {
+      descBox.style.display = "none";
+    }
 
     // =========================
     // 4) Vidéo (si présent) sous description

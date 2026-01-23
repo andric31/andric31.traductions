@@ -459,17 +459,18 @@ function wireEvents() {
   const tryLoadMoreOnScroll = () => {
     const wrap = els.tableWrap;
     if (!wrap) return;
-
+  
+    // ✅ IMPORTANT : si le tableau ne scroll pas encore, on ne charge pas
+    if (wrap.scrollHeight <= wrap.clientHeight + 5) return;
+  
     const threshold = 220;
     const nearBottom = (wrap.scrollTop + wrap.clientHeight) >= (wrap.scrollHeight - threshold);
     if (!nearBottom) return;
-
+  
     const sorted = sortList(getFiltered());
     if (state.renderLimit >= sorted.length) return;
-
+  
     state.renderLimit = Math.min(state.renderLimit + state.renderStep, sorted.length);
-
-    // ✅ fluide : pas de redraw du chart
     rerender({ chart: false });
   };
 
@@ -480,8 +481,6 @@ function wireEvents() {
       raf = requestAnimationFrame(tryLoadMoreOnScroll);
     }, { passive: true });
 
-    // ✅ si la table est trop courte au départ
-    setTimeout(tryLoadMoreOnScroll, 0);
   }
 }
 

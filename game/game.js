@@ -885,14 +885,15 @@ async function initCounters(gameId, megaHref, archiveHref) {
   }
 }
 
-function buildCounterKey(idParam, uidParam) {
-  const id = String(idParam || "").trim();
-  const uid = String(uidParam || "").trim();
-
-  if (id && uid) return `id:${id}|uid:${uid}`;
-  if (id) return `id:${id}`;
-  if (uid) return `uid:${uid}`;
-  return "";
+// ============================================================================
+// ✅ COMPTEUR UID ONLY (OPTION A)
+// - id est ignoré pour les stats
+// - uid est TOUJOURS présent dans ta base
+// - garantit un compteur unique quel que soit l’URL
+// ============================================================================
+function buildCounterKeyFromEntry(entry) {
+  const uid = String(entry?.uid ?? "").trim();
+  return uid ? `uid:${uid}` : "";
 }
 
 // ====== Rating 4 ======
@@ -1152,8 +1153,6 @@ function renderVideoBlock({ id, videoUrl }) {
 
     const { id: idParam, uid: uidParam } = getParamsFromUrl();
 
-    const counterKey = buildCounterKey(idParam, uidParam);
-
     if (!idParam && !uidParam) {
       showError(
         "Aucun paramètre dans l’URL. Exemples : /game/?id=215277  ou  /game/?id=17373&uid=898  ou  /game/?uid=898"
@@ -1177,6 +1176,8 @@ function renderVideoBlock({ id, videoUrl }) {
 
     // display = données "jeu" (gameData si présent)
     const display = entry?.gameData ? entry.gameData : entry;
+
+    const counterKey = buildCounterKeyFromEntry(entry);
 
     const isCollectionChild = page.kind === "collectionChild" && entry && entry.gameData;
 

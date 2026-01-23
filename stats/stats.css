@@ -1,209 +1,202 @@
-/* ============================================================================
-   Stats — version compacte + FIX espace blanc en haut
-   Charge CE fichier APRÈS viewer.css
-   ============================================================================ */
+/* =========================================================
+   Stats — AUTONOME
+   Aucun lien avec viewer.css
+   ========================================================= */
 
-:root {
-  /* on réutilise les variables de viewer.css */
-  --stats-top-padding: 12px;   /* ← ajuste ici l'espace désiré en haut (8–16px souvent parfait) */
+/* ---------- Variables & base ---------- */
+:root{
+  --bg:#0f1117;
+  --fg:#e8eaf0;
+  --muted:rgba(232,234,240,.65);
+  --border:rgba(170,178,200,.18);
+  --card:rgba(20,24,38,.88);
+  --btn:rgba(30,36,55,.9);
+  --accent:rgba(90,162,255,.9);
 }
 
-/* Reset agressif pour tuer l'espace ajouté par viewer.css */
-body.stats-page,
-body.stats-page main,
-body.stats-page .stats-wrap,
-body.stats-page .stats-main,
-body.stats-page .card-top {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-  margin-bottom: 0 !important;
+*,
+*::before,
+*::after{
+  box-sizing:border-box;
 }
 
-body.stats-page {
-  margin: 0 !important;
-  padding: 0 !important;
-  min-height: auto !important;
+html,body{
+  margin:0;
+  padding:0;
+  background:var(--bg);
+  color:var(--fg);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
-/* Conteneur principal */
-.stats-wrap {
-  max-width: 1760px;
-  margin: 0 auto;
-  padding: var(--stats-top-padding) 10px 20px;   /* ← petit espace contrôlé en haut */
+/* ---------- Layout ---------- */
+.stats-wrap{
+  max-width:1760px;
+  margin:0 auto;
+  padding:12px;
 }
 
-/* Topbar intégrée (sticky dans la première card) */
-.card-h-topbar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: linear-gradient(180deg, rgba(15,17,23,.96), rgba(15,17,23,.86));
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--border);
-  padding: 8px 10px;
-  margin: 0;                    /* important */
+.stats-main{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
 
-/* On enlève tout margin/padding parasite autour de la première card */
-.card-top {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
+/* ---------- Card ---------- */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
 }
 
-/* Légère marge entre la topbar intégrée et le graphique (optionnel) */
-.card-top .chart-wrap {
-  margin-top: 4px;
+/* ---------- Headers ---------- */
+.card-h{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:8px 12px;
+  border-bottom:1px solid var(--border);
 }
 
-/* Le reste reste quasiment identique, juste un peu nettoyé */
-
-.stats-main {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;                    /* un peu plus lisible que 4–6px */
-  margin-top: 4px;             /* très léger espace après la topbar intégrée */
+.card-title{
+  font-weight:800;
 }
 
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  overflow: hidden;
-  margin: 0;
+.card-note{
+  font-size:12px;
+  color:var(--muted);
 }
 
-.card-h {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 10px;
-  border-bottom: 1px solid var(--border);
+/* ---------- Topbar intégrée ---------- */
+.card-h-topbar{
+  background:linear-gradient(
+    180deg,
+    rgba(15,17,23,.96),
+    rgba(15,17,23,.86)
+  );
 }
 
-.card-title {
-  font-weight: 800;
+/* ---------- Titre ---------- */
+.stats-title .h1{
+  font-size:19px;
+  font-weight:800;
 }
 
-.card-note {
-  color: var(--muted);
-  font-size: 12px;
+.stats-title .sub{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:2px;
 }
 
-.chart-wrap {
-  padding: 6px 10px 4px;
-  max-height: 620px;
-  overflow: auto;
-}
-
-.chart-wrap canvas {
-  width: 100%;
-  height: auto;
-  display: block;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: rgba(0,0,0,.12);
-}
-
-.table-wrap {
-  overflow: auto;
-}
-
-.tbl {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 0;
-}
-
-.tbl th,
-.tbl td {
-  padding: 8px 10px;
-  border-bottom: 1px solid var(--border);
-  vertical-align: middle;
-}
-
-.tbl thead th {
-  position: sticky;
-  top: 0;
-  background: rgba(20,24,38,.98);
-  backdrop-filter: blur(6px);
-  text-align: left;
-  font-size: 12px;
-  color: var(--muted);
-  cursor: pointer;
-  z-index: 5;
-}
-
-.tbl thead th.num {
-  text-align: right;
-}
-
-.tbl td.num {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-.tbl tbody tr:hover {
-  background: rgba(90,162,255,.08);
-  cursor: pointer;
-}
-
-/* Cover compact */
-.c-cover {
-  width: 64px;
-}
-
-.cover {
-  width: 50px;
-  height: 50px;
-  border-radius: 10px;
-  object-fit: cover;
-  border: 1px solid var(--border);
-  background: rgba(0,0,0,.14);
-}
-
-/* Controls */
-.stats-controls {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  align-items: center;
+/* ---------- Controls ---------- */
+.stats-controls{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  flex-wrap:wrap;
 }
 
 .inp,
-.sel {
-  height: 34px;
-  border: 1px solid var(--border);
-  background: var(--btn);
-  color: var(--fg);
-  border-radius: 10px;
-  padding: 0 10px;
-  outline: none;
+.sel{
+  height:34px;
+  padding:0 10px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:var(--btn);
+  color:var(--fg);
+  outline:none;
 }
 
-.inp {
-  min-width: 260px;
+.inp{ min-width:260px; }
+.sel{ min-width:120px; }
+
+.inp::placeholder{
+  color:var(--muted);
 }
 
-.sel {
-  min-width: 130px;
+/* ---------- Graphique ---------- */
+.chart-wrap{
+  padding:8px 12px 6px;
+  overflow:auto;
 }
 
-/* Responsive */
-@media (max-width: 900px) {
-  .stats-wrap {
-    padding: 10px 8px 16px;
-  }
-  .inp {
-    min-width: 200px;
-  }
-  .sel {
-    min-width: 120px;
-  }
+.chart-wrap canvas{
+  width:100%;
+  display:block;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:rgba(0,0,0,.15);
+}
+
+/* ---------- Tableau ---------- */
+.table-wrap{
+  overflow:auto;
+}
+
+.tbl{
+  width:100%;
+  border-collapse:collapse;
+}
+
+.tbl th,
+.tbl td{
+  padding:8px 10px;
+  border-bottom:1px solid var(--border);
+  vertical-align:middle;
+}
+
+.tbl thead th{
+  position:sticky;
+  top:0;
+  background:rgba(20,24,38,.96);
+  font-size:12px;
+  color:var(--muted);
+  text-align:left;
+  cursor:pointer;
+}
+
+.tbl thead th.num,
+.tbl td.num{
+  text-align:right;
+  font-variant-numeric: tabular-nums;
+}
+
+.tbl tbody tr:hover{
+  background:rgba(90,162,255,.08);
+  cursor:pointer;
+}
+
+/* ---------- Covers ---------- */
+.c-cover{ width:64px; }
+
+.cover{
+  width:50px;
+  height:50px;
+  border-radius:10px;
+  object-fit:cover;
+  border:1px solid var(--border);
+  background:rgba(0,0,0,.2);
+}
+
+/* ---------- Mini UI ---------- */
+.title-line{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+.small{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:2px;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width:900px){
+  .stats-wrap{ padding:8px; }
+  .inp{ min-width:200px; }
+  .sel{ min-width:110px; }
   .tbl th,
-  .tbl td {
-    padding: 8px;
-  }
+  .tbl td{ padding:8px; }
 }

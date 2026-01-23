@@ -136,7 +136,7 @@ function getFiltered() {
           g.cleanTitle,
           (g.tags || []).join(" "),
           g.collection || "",
-          g.updatedAt || "", // on laisse filtrable même si plus affiché
+          g.updatedAt || "", // filtrable même si plus affiché
         ].join("  ")
       );
       return hay.includes(q);
@@ -149,7 +149,7 @@ function getFiltered() {
     const s = state.statsByKey.get(key) || { views: 0, likes: 0, mega: 0 };
     g._views = s.views | 0;
     g._likes = s.likes | 0;
-    g._mega = s.mega | 0;
+    g._mega  = s.mega  | 0;
 
     const r = state.ratingByKey.get(key) || { avg: 0, count: 0, sum: 0 };
     g._ratingAvg = Number(r.avg || 0);
@@ -178,7 +178,6 @@ function sortList(list) {
   return list.slice().sort((a, b) => {
     const va = getv(a), vb = getv(b);
 
-    // ratingAvg : float (avec tie-breaker votes)
     if (key === "ratingAvg") {
       if (va !== vb) return (va - vb) * dir;
       const ca = a._ratingCount | 0, cb = b._ratingCount | 0;
@@ -186,7 +185,6 @@ function sortList(list) {
       return String(a.cleanTitle || a.title || "").localeCompare(String(b.cleanTitle || b.title || ""), "fr");
     }
 
-    // ratingCount : tie-breaker avg
     if (key === "ratingCount") {
       if (va !== vb) return (va - vb) * dir;
       const ra = Number(a._ratingAvg || 0), rb = Number(b._ratingAvg || 0);
@@ -287,7 +285,7 @@ function drawChart(list) {
 
   const rowPx = 26;
   const padT = 8;
-  const padB = 32;
+  const padB = 32; // ✅ place pour chiffres en bas
   const desiredCssH = padT + padB + items.length * rowPx;
 
   canvas.style.height = desiredCssH + "px";
@@ -302,7 +300,7 @@ function drawChart(list) {
 
   ctx.clearRect(0, 0, cssW, cssH);
 
-  const padL = 260, padR = 80;
+  const padL = 260, padR = 80; // ✅ marge droite pour gros chiffres
   const innerW = Math.max(50, cssW - padL - padR);
   const innerH = Math.max(50, cssH - padT - padB);
 
@@ -402,18 +400,89 @@ function resetLimit() {
   if (els.tableWrap) els.tableWrap.scrollTop = 0;
 }
 
-function rerender() {
+function rerender(opts = { chart: true }) {
   const filtered = getFiltered();
   const sorted = sortList(filtered);
 
   const visible = sorted.slice(0, state.renderLimit);
   renderTable(visible);
-  drawChart(sorted);
+
+  if (opts.chart) drawChart(sorted);
 
   const total = state.games.length;
   els.status.textContent = `${sorted.length}/${total} jeux (affichés: ${Math.min(
     state.renderLimit, sorted.length
   )}/${sorted.length})`;
+}
+
+function wireEvents() {
+  let t = null;
+  const deb = () => {
+    clearTimeout(t);
+    t = setTimeout(() => { resetLimit(); rerender(); }, 120);
+  };
+
+  els.q.addEventListener("input", deb);
+  els.metric.addEventListener("change", () => rerender());
+
+  els.top.addEventListener("change", () => {
+    if (els.chartWrap) els.chartWrap.scrollTop = 0;
+    rerender();
+  });
+
+  // ✅ tri (plus de updatedAt)
+  els.tbl.querySelectorAll("thead th[data-sort]").forEach((th) => {
+    th.addEventListener("click", () => {
+      const k = th.getAttribute("data-sort");
+      if (!k) return;
+
+      if (state.sortKey === k) state.sortDir = (state.sortDir === "asc") ? "desc" : "asc";
+      else {
+        state.sortKey = k;
+        state.sortDir = (k === "title") ? "asc" : "desc";
+      }
+
+      if (k === "ratingAvg") state.sortDir = "desc";
+      if (k === "ratingCount") state.sortDir = "desc";
+
+      resetLimit();
+      rerender();
+    });
+  });
+
+  // ✅ Resize (chart doit se recalculer)
+  window.addEventListener("resize", () => rerender());
+
+  // ==========================
+  // ✅ Scroll intelligent (table)
+  // ==========================
+  const tryLoadMoreOnScroll = () => {
+    const wrap = els.tableWrap;
+    if (!wrap) return;
+
+    const threshold = 220;
+    const nearBottom = (wrap.scrollTop + wrap.clientHeight) >= (wrap.scrollHeight - threshold);
+    if (!nearBottom) return;
+
+    const sorted = sortList(getFiltered());
+    if (state.renderLimit >= sorted.length) return;
+
+    state.renderLimit = Math.min(state.renderLimit + state.renderStep, sorted.length);
+
+    // ✅ fluide : pas de redraw du chart
+    rerender({ chart: false });
+  };
+
+  if (els.tableWrap) {
+    let raf = 0;
+    els.tableWrap.addEventListener("scroll", () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(tryLoadMoreOnScroll);
+    }, { passive: true });
+
+    // ✅ si la table est trop courte au départ
+    setTimeout(tryLoadMoreOnScroll, 0);
+  }
 }
 
 // -------- init --------
@@ -428,12 +497,10 @@ async function init() {
     return;
   }
 
-  const games = extractGames(raw).map((g) => ({ ...g }));
-  state.games = games;
-
+  state.games = extractGames(raw).map((g) => ({ ...g }));
   els.status.textContent = "Chargement stats…";
 
-  const keys = games.map(counterKeyOf).filter(Boolean);
+  const keys = state.games.map(counterKeyOf).filter(Boolean);
 
   // 1) counters
   const statsObj = await fetchGameStatsBulk(keys);
@@ -463,45 +530,6 @@ async function init() {
 
   wireEvents();
   rerender();
-}
-
-function wireEvents() {
-  let t = null;
-  const deb = () => {
-    clearTimeout(t);
-    t = setTimeout(() => { resetLimit(); rerender(); }, 120);
-  };
-
-  els.q.addEventListener("input", deb);
-  els.metric.addEventListener("change", rerender);
-
-  els.top.addEventListener("change", () => {
-    if (els.chartWrap) els.chartWrap.scrollTop = 0;
-    rerender();
-  });
-
-  // ✅ plus de updatedAt dans le HTML, donc rien à gérer ici
-  els.tbl.querySelectorAll("thead th[data-sort]").forEach((th) => {
-    th.addEventListener("click", () => {
-      const k = th.getAttribute("data-sort");
-      if (!k) return;
-
-      if (state.sortKey === k) state.sortDir = (state.sortDir === "asc") ? "desc" : "asc";
-      else {
-        state.sortKey = k;
-        state.sortDir = (k === "title") ? "asc" : "desc";
-      }
-
-      // rating: par défaut DESC (meilleurs)
-      if (k === "ratingAvg") state.sortDir = "desc";
-      if (k === "ratingCount") state.sortDir = "desc";
-
-      resetLimit();
-      rerender();
-    });
-  });
-
-  window.addEventListener("resize", rerender);
 }
 
 init();

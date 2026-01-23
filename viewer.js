@@ -1,35 +1,30 @@
 // viewer.js — Vignettes + filtres + tri dates + affichage progressif
 // (menu ☰ délégué à viewer.menu.js + modules viewer.menu.about.js / viewer.menu.extension.js)
 // + Tags multi (popover + save)
+// ✅ UID ONLY pour stats (aligné sur game.js)
 (() => {
   const DEFAULT_URL = "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json";
-  const GAME_BASE = "/game/?id="; // /game/?id=ID
 
-  const $ = sel => document.querySelector(sel);
+  const $ = (sel) => document.querySelector(sel);
 
+  // ✅ URL page jeu (id central + support collection child)
+  function buildGameUrl(g) {
+    const coll = (g.collection || "").toString().trim();
+    const id = (g.id || "").toString().trim();
+    const uid = (g.uid ?? "").toString().trim();
 
-// ✅ URL page jeu (id central + support collection child)
-function buildGameUrl(g) {
-  const coll = (g.collection || "").toString().trim();
-  const id = (g.id || "").toString().trim();
-  const uid = (g.uid ?? "").toString().trim();
-
-  // Sous-jeu de collection : /game/?id=<collection>&uid=<uid>
-  if (coll) {
-    return `/game/?id=${encodeURIComponent(coll)}&uid=${encodeURIComponent(uid)}`;
+    // Sous-jeu de collection : /game/?id=<collection>&uid=<uid>
+    if (coll) return `/game/?id=${encodeURIComponent(coll)}&uid=${encodeURIComponent(uid)}`;
+    // Jeu normal / collection parent : /game/?id=<id>
+    if (id) return `/game/?id=${encodeURIComponent(id)}`;
+    // Fallback uid seul
+    return `/game/?uid=${encodeURIComponent(uid)}`;
   }
-  // Jeu normal / collection parent : /game/?id=<id>
-  if (id) {
-    return `/game/?id=${encodeURIComponent(id)}`;
-  }
-  // Fallback uid seul
-  return `/game/?uid=${encodeURIComponent(uid)}`;
-}
 
-// ✅ Titre affiché (gameData prioritaire si présent)
-function getDisplayTitle(g) {
-  return (g.gameData?.title || g.cleanTitle || g.title || "").toString().trim() || "Sans titre";
-}
+  // ✅ Titre affiché (gameData prioritaire si présent)
+  function getDisplayTitle(g) {
+    return (g.gameData?.title || g.cleanTitle || g.title || "").toString().trim() || "Sans titre";
+  }
 
   const state = {
     all: [],
@@ -42,7 +37,7 @@ function getDisplayTitle(g) {
     filterTags: [], // ✅ multi tags
     cols: "auto",
     pageSize: 50,
-    visibleCount: 0
+    visibleCount: 0,
   };
 
   // =========================
@@ -55,8 +50,23 @@ function getDisplayTitle(g) {
   function formatInt(n) {
     const x = Number(n);
     if (!Number.isFinite(x)) return "0";
-    try { return x.toLocaleString("fr-FR"); }
-    catch { return String(Math.floor(x)); }
+    try {
+      return x.toLocaleString("fr-FR");
+    } catch {
+      return String(Math.floor(x));
+    }
+  }
+
+  // =========================
+  // ✅ UID ONLY — clés compteurs
+  // =========================
+  function counterKeyOfUid(uid) {
+    const u = String(uid ?? "").trim();
+    return u ? `uid:${u}` : "";
+  }
+
+  function counterKeyOfEntry(rawEntry) {
+    return counterKeyOfUid(rawEntry?.uid);
   }
 
   // =========================
@@ -64,10 +74,10 @@ function getDisplayTitle(g) {
   // =========================
 
   const GAME_STATS = {
-    views: new Map(),
+    views: new Map(), // key(uid:xxx) -> number
     mega: new Map(),
     likes: new Map(),
-    loaded: false
+    loaded: false,
   };
 
   async function fetchGameStatsBulk(ids) {
@@ -76,12 +86,12 @@ function getDisplayTitle(g) {
         method: "POST",
         cache: "no-store",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ ids })
+        body: JSON.stringify({ ids }),
       });
       if (!r.ok) return {};
       const j = await r.json();
       if (!j?.ok || !j.stats) return {};
-      return j.stats; // { id: {views, mega, likes}, ... }
+      return j.stats; // { key: {views, mega, likes}, ... }
     } catch {
       return {};
     }
@@ -90,14 +100,15 @@ function getDisplayTitle(g) {
   async function ensureGameStatsLoaded() {
     if (GAME_STATS.loaded) return;
 
-    const ids = state.all.map(g => g.id).filter(Boolean);
-    const stats = await fetchGameStatsBulk(ids);
+    // ✅ on envoie uid:<uid> (comme game.js)
+    const keys = state.all.map((g) => counterKeyOfUid(g.uid)).filter(Boolean);
+    const stats = await fetchGameStatsBulk(keys);
 
-    for (const id of ids) {
-      const s = stats[id] || {};
-      GAME_STATS.views.set(id, Number(s.views || 0));
-      GAME_STATS.mega.set(id, Number(s.mega || 0));
-      GAME_STATS.likes.set(id, Number(s.likes || 0));
+    for (const k of keys) {
+      const s = stats[k] || {};
+      GAME_STATS.views.set(k, Number(s.views || 0));
+      GAME_STATS.mega.set(k, Number(s.mega || 0));
+      GAME_STATS.likes.set(k, Number(s.likes || 0));
     }
 
     GAME_STATS.loaded = true;
@@ -127,16 +138,13 @@ function getDisplayTitle(g) {
       const j = await r.json();
       if (!j?.ok) return;
 
-      MAIN_VIEW_HIT_DONE = true; // ✅ verrou après le 1er hit
+      MAIN_VIEW_HIT_DONE = true;
       el.textContent = formatInt(j.views);
-    } catch {
-      // silencieux
-    }
+    } catch {}
   }
 
   // =========================
   // ☰ MENU (viewer.menu.js gère le contenu / items / modales)
-  // Ici on garde UNIQUEMENT: injection bouton + positionnement popover
   // =========================
 
   function positionPopover(pop, anchorBtn) {
@@ -156,25 +164,9 @@ function getDisplayTitle(g) {
     pop.style.top = top + "px";
   }
 
-  /**
-   * Injecte:
-   * - le bouton ☰ à gauche du titre
-   * - une zone "outils d’affichage" à droite du titre
-   * Et déplace dans cette zone:
-   * - le Total (uniquement)
-   * - #cols
-   * - #pageSize
-   *
-   * IMPORTANT:
-   * - viewer.menu.js chargé avant viewer.js (window.ViewerMenu.init + closeMenu)
-   * - viewer.menu.about.js expose window.ViewerMenuAbout.close()
-   * - viewer.menu.extension.js expose window.ViewerMenuExtension.close()
-   */
   function initHeaderMenuAndDisplayTools() {
     const row = document.querySelector(".top-title-row");
     if (!row) return;
-
-    // évite double init
     if (document.getElementById("hamburgerBtn")) return;
 
     const h1 = row.querySelector("h1");
@@ -182,7 +174,6 @@ function getDisplayTitle(g) {
 
     row.classList.add("top-title-flex");
 
-    // bouton hamburger
     const btn = document.createElement("button");
     btn.type = "button";
     btn.id = "hamburgerBtn";
@@ -196,15 +187,12 @@ function getDisplayTitle(g) {
       </span>
     `;
 
-    // outils à droite
     const tools = document.createElement("div");
     tools.className = "top-title-tools";
 
-    // inject
     row.insertBefore(btn, h1);
     row.appendChild(tools);
 
-    // ✅ Déplace seulement le Total (countTotal) vers la ligne du titre
     const total = document.querySelector("#countTotal")?.closest(".total-inline");
     const cols = document.getElementById("cols");
     const pageSize = document.getElementById("pageSize");
@@ -213,8 +201,9 @@ function getDisplayTitle(g) {
     if (cols) tools.appendChild(cols);
     if (pageSize) tools.appendChild(pageSize);
 
-    // ✅ Initialise le noyau menu (les items sont enregistrés par les modules)
-    try { window.ViewerMenu?.init?.(); } catch {}
+    try {
+      window.ViewerMenu?.init?.();
+    } catch {}
 
     btn.addEventListener("click", (e) => {
       e.preventDefault();
@@ -225,7 +214,11 @@ function getDisplayTitle(g) {
 
       const isOpen = !pop.classList.contains("hidden");
       if (isOpen) {
-        try { window.ViewerMenu?.closeMenu?.(); } catch { pop.classList.add("hidden"); }
+        try {
+          window.ViewerMenu?.closeMenu?.();
+        } catch {
+          pop.classList.add("hidden");
+        }
         return;
       }
 
@@ -234,14 +227,17 @@ function getDisplayTitle(g) {
       positionPopover(pop, btn);
     });
 
-    // clic dehors => fermer menu + tags
     document.addEventListener("click", (e) => {
       const pop = document.getElementById("topMenuPopover");
-      const hb  = document.getElementById("hamburgerBtn");
+      const hb = document.getElementById("hamburgerBtn");
       if (pop && hb) {
         const t = e.target;
         if (!pop.contains(t) && !hb.contains(t)) {
-          try { window.ViewerMenu?.closeMenu?.(); } catch { pop.classList.add("hidden"); }
+          try {
+            window.ViewerMenu?.closeMenu?.();
+          } catch {
+            pop.classList.add("hidden");
+          }
         }
       }
 
@@ -255,7 +251,7 @@ function getDisplayTitle(g) {
 
     window.addEventListener("resize", () => {
       const pop = document.getElementById("topMenuPopover");
-      const hb  = document.getElementById("hamburgerBtn");
+      const hb = document.getElementById("hamburgerBtn");
       if (pop && hb && !pop.classList.contains("hidden")) positionPopover(pop, hb);
 
       const tp = document.getElementById("tagsPopover");
@@ -263,12 +259,17 @@ function getDisplayTitle(g) {
       if (tp && tb && !tp.classList.contains("hidden")) positionTagsPopover(tp, tb);
     });
 
-    // ✅ Escape => ferme menu + modales menu + tags
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
-        try { window.ViewerMenu?.closeMenu?.(); } catch {}
-        try { window.ViewerMenuAbout?.close?.(); } catch {}
-        try { window.ViewerMenuExtension?.close?.(); } catch {}
+        try {
+          window.ViewerMenu?.closeMenu?.();
+        } catch {}
+        try {
+          window.ViewerMenuAbout?.close?.();
+        } catch {}
+        try {
+          window.ViewerMenuExtension?.close?.();
+        } catch {}
         closeTagsPopover();
       }
     });
@@ -281,12 +282,12 @@ function getDisplayTitle(g) {
   const TAGS_STORE_KEY = "viewerSelectedTags";
 
   function escapeHtml(s) {
-    return String(s || "").replace(/[&<>"']/g, m => ({
+    return String(s || "").replace(/[&<>"']/g, (m) => ({
       "&": "&amp;",
       "<": "&lt;",
       ">": "&gt;",
       '"': "&quot;",
-      "'": "&#39;"
+      "'": "&#39;",
     }[m]));
   }
 
@@ -301,11 +302,15 @@ function getDisplayTitle(g) {
   }
 
   function setSavedTags(tags) {
-    try { localStorage.setItem(TAGS_STORE_KEY, JSON.stringify(tags || [])); } catch {}
+    try {
+      localStorage.setItem(TAGS_STORE_KEY, JSON.stringify(tags || []));
+    } catch {}
   }
 
   function clearSavedTags() {
-    try { localStorage.removeItem(TAGS_STORE_KEY); } catch {}
+    try {
+      localStorage.removeItem(TAGS_STORE_KEY);
+    } catch {}
   }
 
   function ensureTagsDom() {
@@ -319,11 +324,8 @@ function getDisplayTitle(g) {
       btn.setAttribute("aria-expanded", "false");
       btn.innerHTML = `🏷️ Tags <span id="tagsCount" class="tags-count hidden">0</span>`;
       const anchor = document.getElementById("filterStatus");
-      if (anchor && anchor.parentElement) {
-        anchor.parentElement.insertBefore(btn, anchor.nextSibling);
-      } else {
-        document.querySelector(".top-actions")?.appendChild(btn);
-      }
+      if (anchor && anchor.parentElement) anchor.parentElement.insertBefore(btn, anchor.nextSibling);
+      else document.querySelector(".top-actions")?.appendChild(btn);
     }
 
     let pop = document.getElementById("tagsPopover");
@@ -349,7 +351,7 @@ function getDisplayTitle(g) {
     const margin = 8;
 
     let left = Math.round(r.left);
-    let top  = Math.round(r.bottom + margin);
+    let top = Math.round(r.bottom + margin);
 
     const w = pop.getBoundingClientRect().width || 320;
     const SCROLLBAR_GAP = 18;
@@ -364,7 +366,7 @@ function getDisplayTitle(g) {
     }
 
     pop.style.left = left + "px";
-    pop.style.top  = top + "px";
+    pop.style.top = top + "px";
   }
 
   function closeTagsPopover() {
@@ -427,7 +429,10 @@ function getDisplayTitle(g) {
         e.stopPropagation();
 
         const isOpen = !pop.classList.contains("hidden");
-        if (isOpen) { closeTagsPopover(); return; }
+        if (isOpen) {
+          closeTagsPopover();
+          return;
+        }
 
         pop.classList.remove("hidden");
         btn.setAttribute("aria-expanded", "true");
@@ -474,7 +479,9 @@ function getDisplayTitle(g) {
   }
 
   async function setViewerCols(v) {
-    try { localStorage.setItem("viewerCols", String(v)); } catch {}
+    try {
+      localStorage.setItem("viewerCols", String(v));
+    } catch {}
   }
 
   async function loadList() {
@@ -488,31 +495,31 @@ function getDisplayTitle(g) {
   // Title parsing / normalize
   // =========================
 
-  const CAT_ALLOWED    = ["VN", "Collection"];
+  const CAT_ALLOWED = ["VN", "Collection"];
   const ENGINE_ALLOWED = ["Ren'Py", "RPGM", "Unity", "Others", "Wolf RPG"];
   const STATUS_ALLOWED = ["Completed", "Abandoned", "Onhold"];
   const ENGINE_RAW = {
-    "renpy": "Ren'Py",
+    renpy: "Ren'Py",
     "ren'py": "Ren'Py",
-    "rpgm": "RPGM",
-    "rpg": "RPGM",
-    "rpgmaker": "RPGM",
-    "rpgmakerxp": "RPGM",
-    "rpgmakermv": "RPGM",
-    "rpgmakermz": "RPGM",
+    rpgm: "RPGM",
+    rpg: "RPGM",
+    rpgmaker: "RPGM",
+    rpgmakerxp: "RPGM",
+    rpgmakermv: "RPGM",
+    rpgmakermz: "RPGM",
     "rpg maker": "RPGM",
-    "unity": "Unity",
-    "others": "Others",
-    "other": "Others",
-    "html": "Others",
-    "wolf": null,
-    "wolfrpg": "Wolf RPG",
+    unity: "Unity",
+    others: "Others",
+    other: "Others",
+    html: "Others",
+    wolf: null,
+    wolfrpg: "Wolf RPG",
     "wolf rpg": "Wolf RPG",
-    "flash": null
+    flash: null,
   };
 
   const SEP_RE = /[\u2014\u2013\-:]/;
-  const ucFirst = s => s ? s[0].toUpperCase() + s.slice(1) : s;
+  const ucFirst = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
   function slug(s) {
     return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
@@ -522,18 +529,21 @@ function getDisplayTitle(g) {
     if (!str) return null;
     const s = String(str).trim().toLowerCase();
     const months = {
-      "janvier":0,
-      "fevrier":1, "février":1,
-      "mars":2,
-      "avril":3,
-      "mai":4,
-      "juin":5,
-      "juillet":6,
-      "aout":7, "août":7,
-      "septembre":8,
-      "octobre":9,
-      "novembre":10,
-      "decembre":11, "décembre":11
+      janvier: 0,
+      fevrier: 1,
+      février: 1,
+      mars: 2,
+      avril: 3,
+      mai: 4,
+      juin: 5,
+      juillet: 6,
+      aout: 7,
+      août: 7,
+      septembre: 8,
+      octobre: 9,
+      novembre: 10,
+      decembre: 11,
+      décembre: 11,
     };
     const m = s.match(/^(\d{1,2})\s+([a-zêéèûôîïùç]+)\s+(\d{4})$/i);
     if (!m) return null;
@@ -586,7 +596,10 @@ function getDisplayTitle(g) {
 
       if (norm === "wolf") break;
 
-      if (norm === "flash") { cut = i + 1; continue; }
+      if (norm === "flash") {
+        cut = i + 1;
+        continue;
+      }
 
       if (norm === "others" || norm === "other") {
         if (!engines.includes("Others")) engines.push("Others");
@@ -609,7 +622,10 @@ function getDisplayTitle(g) {
         continue;
       }
 
-      if (w === "&" || w === "and" || w === "/") { cut = i + 1; continue; }
+      if (w === "&" || w === "and" || w === "/") {
+        cut = i + 1;
+        continue;
+      }
 
       break;
     }
@@ -624,45 +640,48 @@ function getDisplayTitle(g) {
 
     const allowedCat = new Set(CAT_ALLOWED);
     const allowedEng = new Set(ENGINE_ALLOWED);
-    categories = categories.filter(c => allowedCat.has(c));
-    engines    = engines.filter(e => allowedEng.has(e));
+    categories = categories.filter((c) => allowedCat.has(c));
+    engines = engines.filter((e) => allowedEng.has(e));
 
-    if (!othersExplicit && engines.includes("Others") && engines.some(e => e !== "Others")) {
-      engines = engines.filter(e => e !== "Others");
+    if (!othersExplicit && engines.includes("Others") && engines.some((e) => e !== "Others")) {
+      engines = engines.filter((e) => e !== "Others");
     }
 
     return { title: t, categories, engines, status };
   }
 
-  function normalize(game) {
+  function normalizeGame(game) {
     const coll = String(game.collection || "");
-    const uid = (game.uid ?? "");
+    const uid = game.uid ?? "";
 
-    // ✅ Pour les jeux de collection (id vide), on affiche/filtre sur gameData (titre/image/tags/engine)
-    const displayTitleRaw = String((game.gameData && game.gameData.title) ? game.gameData.title : (game.title || ""));
-    const displayImageRaw = String((game.gameData && game.gameData.imageUrl) ? game.gameData.imageUrl : (game.imageUrl || ""));
+    const displayTitleRaw = String(
+      game.gameData && game.gameData.title ? game.gameData.title : game.title || ""
+    );
+    const displayImageRaw = String(
+      game.gameData && game.gameData.imageUrl ? game.gameData.imageUrl : game.imageUrl || ""
+    );
+
     const displayTags = Array.isArray(game.gameData?.tags)
       ? game.gameData.tags.slice()
-      : (Array.isArray(game.tags) ? game.tags.slice() : []);
+      : Array.isArray(game.tags)
+      ? game.tags.slice()
+      : [];
 
     const c = cleanTitle(displayTitleRaw);
-    const categories = Array.isArray(c.categories) ? c.categories : (game.category ? [game.category] : []);
-    // engines : priorité au champ explicite gameData.engine si présent,
-    // sinon fallback sur le parsing du titre.
-    let engines = Array.isArray(c.engines) ? c.engines : (game.engine ? [game.engine] : []);
-    
+    const categories = Array.isArray(c.categories) ? c.categories : game.category ? [game.category] : [];
+
+    let engines = Array.isArray(c.engines) ? c.engines : game.engine ? [game.engine] : [];
     if (game.gameData?.engine) {
       const engNorm = ENGINE_RAW[slug(game.gameData.engine)] || game.gameData.engine;
       engines = [engNorm];
     } else if (!engines || engines.length === 0) {
-      // fallback parent si enfant de collection et rien trouvé
       if (!String(game.id || "").trim() && String(game.collection || "").trim()) {
         const cp = cleanTitle(String(game.title || ""));
         engines = Array.isArray(cp.engines) ? cp.engines : [];
       }
     }
 
-    const updatedAtTs   = parseFrenchDate(game.updatedAt);
+    const updatedAtTs = parseFrenchDate(game.updatedAt);
     const releaseDateTs = parseFrenchDate(game.releaseDate);
 
     const updatedAtLocalRaw = game.updatedAtLocal || "";
@@ -673,8 +692,12 @@ function getDisplayTitle(g) {
     const updatedAtLocalTs = !Number.isNaN(updatedAtLocalParsed) ? updatedAtLocalParsed : 0;
     const createdAtLocalTs = !Number.isNaN(createdAtLocalParsed) ? createdAtLocalParsed : 0;
 
+    // ✅ clé compteur UID ONLY
+    const ckey = counterKeyOfUid(uid);
+
     return {
       uid,
+      ckey, // ✅ on garde la clé déjà calculée
       collection: coll,
       id: String(game.id || ""),
       rawTitle: displayTitleRaw,
@@ -684,22 +707,21 @@ function getDisplayTitle(g) {
       category: categories[0] || null,
       engines,
       engine: engines[0] || null,
-      status: (STATUS_ALLOWED.includes(c.status) || c.status === "En cours") ? c.status : "En cours",
+      status: STATUS_ALLOWED.includes(c.status) || c.status === "En cours" ? c.status : "En cours",
       discord: String(game.discordlink || ""),
       translation: String(game.translation || ""),
       image: displayImageRaw,
       url: String(game.url || game.threadUrl || ""),
       tags: displayTags,
-
       updatedAt: game.updatedAt || "",
       updatedAtTs,
       releaseDate: game.releaseDate || "",
       releaseDateTs,
-
       updatedAtLocal: updatedAtLocalRaw,
       updatedAtLocalTs,
       createdAtLocal: createdAtLocalRaw,
-      createdAtLocalTs
+      createdAtLocalTs,
+      __raw: game,
     };
   }
 
@@ -709,11 +731,10 @@ function getDisplayTitle(g) {
 
   function badgesLineHtml(g) {
     const out = [];
-    const cats = Array.isArray(g.categories) ? g.categories : (g.category ? [g.category] : []);
-    const engs = Array.isArray(g.engines)    ? g.engines    : (g.engine ? [g.engine] : []);
+    const cats = Array.isArray(g.categories) ? g.categories : g.category ? [g.category] : [];
+    const engs = Array.isArray(g.engines) ? g.engines : g.engine ? [g.engine] : [];
 
     for (const cat of cats) {
-      // ✅ FIX: ici c'était g.title chez toi -> ça affichait le titre dans le badge catégorie
       if (CAT_ALLOWED.includes(cat)) out.push(`<span class="badge cat cat-${slug(cat)}">${escapeHtml(cat)}</span>`);
     }
     for (const e of engs) {
@@ -726,7 +747,7 @@ function getDisplayTitle(g) {
   function buildDynamicFilters() {
     const tags = new Set();
     for (const g of state.all) {
-      if (Array.isArray(g.tags)) g.tags.forEach(t => { if (t) tags.add(t); });
+      if (Array.isArray(g.tags)) g.tags.forEach((t) => t && tags.add(t));
     }
     const allTags = Array.from(tags).sort((a, b) => a.localeCompare(b));
     initTagsUI(allTags);
@@ -747,10 +768,11 @@ function getDisplayTitle(g) {
       return;
     }
 
+    // ✅ tri stats = UID key
     if (k === "views") {
       state.filtered.sort((a, b) => {
-        const da = (GAME_STATS.views.get(a.id) || 0);
-        const db = (GAME_STATS.views.get(b.id) || 0);
+        const da = GAME_STATS.views.get(a.ckey) || 0;
+        const db = GAME_STATS.views.get(b.ckey) || 0;
         if (da !== db) return (da - db) * mul;
 
         const ta = a.updatedAtLocalTs || 0;
@@ -764,8 +786,8 @@ function getDisplayTitle(g) {
 
     if (k === "mega") {
       state.filtered.sort((a, b) => {
-        const da = (GAME_STATS.mega.get(a.id) || 0);
-        const db = (GAME_STATS.mega.get(b.id) || 0);
+        const da = GAME_STATS.mega.get(a.ckey) || 0;
+        const db = GAME_STATS.mega.get(b.ckey) || 0;
         if (da !== db) return (da - db) * mul;
 
         const ta = a.updatedAtLocalTs || 0;
@@ -779,8 +801,8 @@ function getDisplayTitle(g) {
 
     if (k === "likes") {
       state.filtered.sort((a, b) => {
-        const da = (GAME_STATS.likes.get(a.id) || 0);
-        const db = (GAME_STATS.likes.get(b.id) || 0);
+        const da = GAME_STATS.likes.get(a.ckey) || 0;
+        const db = GAME_STATS.likes.get(b.ckey) || 0;
         if (da !== db) return (da - db) * mul;
 
         const ta = a.updatedAtLocalTs || 0;
@@ -794,27 +816,27 @@ function getDisplayTitle(g) {
   }
 
   function applyFilters() {
-    const q  = state.q.toLowerCase();
+    const q = state.q.toLowerCase();
     const fc = state.filterCat;
     const fe = state.filterEngine;
     const fs = state.filterStatus;
     const ft = state.filterTags;
 
-    state.filtered = state.all.filter(g => {
-      const mq = !q || g.title.toLowerCase().includes(q) || g.id.includes(q);
+    state.filtered = state.all.filter((g) => {
+      const mq = !q || g.title.toLowerCase().includes(q) || String(g.id || "").includes(q) || String(g.uid || "").includes(q);
 
-      const mc = (fc === "all") ||
-        (Array.isArray(g.categories) ? g.categories.includes(fc) : g.category === fc);
+      const mc =
+        fc === "all" || (Array.isArray(g.categories) ? g.categories.includes(fc) : g.category === fc);
 
-      const me = (fe === "all") ||
-        (Array.isArray(g.engines) ? g.engines.includes(fe) : g.engine === fe);
+      const me =
+        fe === "all" || (Array.isArray(g.engines) ? g.engines.includes(fe) : g.engine === fe);
 
-      const ms = (fs === "all") || (g.status === fs);
+      const ms = fs === "all" || g.status === fs;
 
       let mt = true;
       if (ft && ft.length) {
         const tags = Array.isArray(g.tags) ? g.tags : [];
-        mt = ft.every(t => tags.includes(t));
+        mt = ft.every((t) => tags.includes(t));
       }
 
       return mq && mc && me && ms && mt;
@@ -849,7 +871,7 @@ function getDisplayTitle(g) {
   }
 
   function renderGrid() {
-    const grid  = $("#grid");
+    const grid = $("#grid");
     const empty = $("#gridEmpty");
     grid.innerHTML = "";
 
@@ -865,10 +887,10 @@ function getDisplayTitle(g) {
     const total = state.filtered.length;
 
     if (!state.visibleCount || state.visibleCount < 0) {
-      state.visibleCount = (state.pageSize === "all") ? total : Math.min(total, state.pageSize);
+      state.visibleCount = state.pageSize === "all" ? total : Math.min(total, state.pageSize);
     }
 
-    const limit = (state.pageSize === "all") ? total : Math.min(total, state.visibleCount);
+    const limit = state.pageSize === "all" ? total : Math.min(total, state.visibleCount);
 
     const frag = document.createDocumentFragment();
 
@@ -878,14 +900,14 @@ function getDisplayTitle(g) {
       card.className = "card";
 
       const imgSrc = (g.image || "").trim() || "/favicon.png";
-      const pageHref = buildGameUrl(g);
+      const pageHref = buildGameUrl(g.__raw || g);
 
       card.innerHTML = `
         <img src="${imgSrc}" class="thumb" alt=""
              referrerpolicy="no-referrer"
              onerror="this.onerror=null;this.src='/favicon.png';this.classList.add('is-fallback');">
         <div class="body">
-          <h3 class="name clamp-2">${escapeHtml(getDisplayTitle(g))}</h3>
+          <h3 class="name clamp-2">${escapeHtml(getDisplayTitle(g.__raw || g))}</h3>
           <div class="badges-line one-line">${badgesLineHtml(g)}</div>
           <div class="actions">
             <a class="btn btn-page" href="${pageHref}" target="_blank" rel="noopener">
@@ -927,17 +949,15 @@ function getDisplayTitle(g) {
   // Events
   // =========================
 
-  $("#search")?.addEventListener("input", e => { state.q = e.target.value || ""; applyFilters(); });
+  $("#search")?.addEventListener("input", (e) => {
+    state.q = e.target.value || "";
+    applyFilters();
+  });
 
-  $("#sort")?.addEventListener("change", async e => {
+  $("#sort")?.addEventListener("change", async (e) => {
     state.sort = e.target.value;
 
-    // 🔥 charge les stats seulement si nécessaire
-    if (
-      state.sort.startsWith("views") ||
-      state.sort.startsWith("mega")  ||
-      state.sort.startsWith("likes")
-    ) {
+    if (state.sort.startsWith("views") || state.sort.startsWith("mega") || state.sort.startsWith("likes")) {
       await forceReloadGameStats();
     }
 
@@ -946,23 +966,33 @@ function getDisplayTitle(g) {
     renderGrid();
   });
 
-  $("#filterCat")?.addEventListener("change", e => { state.filterCat = e.target.value || "all"; applyFilters(); });
-  $("#filterEngine")?.addEventListener("change", e => { state.filterEngine = e.target.value || "all"; applyFilters(); });
-  $("#filterStatus")?.addEventListener("change", e => { state.filterStatus = e.target.value || "all"; applyFilters(); });
-
-  const pageSizeSel = $("#pageSize");
-  if (pageSizeSel) pageSizeSel.addEventListener("change", e => {
-    const v = e.target.value;
-    if (v === "all") state.pageSize = "all";
-    else {
-      const n = parseInt(v, 10);
-      state.pageSize = (!isNaN(n) && n > 0) ? n : 50;
-    }
-    state.visibleCount = 0;
-    renderGrid();
+  $("#filterCat")?.addEventListener("change", (e) => {
+    state.filterCat = e.target.value || "all";
+    applyFilters();
+  });
+  $("#filterEngine")?.addEventListener("change", (e) => {
+    state.filterEngine = e.target.value || "all";
+    applyFilters();
+  });
+  $("#filterStatus")?.addEventListener("change", (e) => {
+    state.filterStatus = e.target.value || "all";
+    applyFilters();
   });
 
-  $("#cols")?.addEventListener("change", async e => {
+  const pageSizeSel = $("#pageSize");
+  if (pageSizeSel)
+    pageSizeSel.addEventListener("change", (e) => {
+      const v = e.target.value;
+      if (v === "all") state.pageSize = "all";
+      else {
+        const n = parseInt(v, 10);
+        state.pageSize = !isNaN(n) && n > 0 ? n : 50;
+      }
+      state.visibleCount = 0;
+      renderGrid();
+    });
+
+  $("#cols")?.addEventListener("change", async (e) => {
     state.cols = e.target.value || "auto";
     applyGridCols();
     await setViewerCols(state.cols);
@@ -996,16 +1026,21 @@ function getDisplayTitle(g) {
     updateTagsCountBadge();
     closeTagsPopover();
 
-    // ✅ ferme aussi le menu + modales (version modules)
-    try { window.ViewerMenu?.closeMenu?.(); } catch {}
-    try { window.ViewerMenuAbout?.close?.(); } catch {}
-    try { window.ViewerMenuExtension?.close?.(); } catch {}
+    try {
+      window.ViewerMenu?.closeMenu?.();
+    } catch {}
+    try {
+      window.ViewerMenuAbout?.close?.();
+    } catch {}
+    try {
+      window.ViewerMenuExtension?.close?.();
+    } catch {}
 
     state.pageSize = 50;
     const ps = $("#pageSize");
     if (ps) ps.value = "50";
 
-    // ✅ reset cache stats (sinon tri reste sur anciennes valeurs)
+    // ✅ reset cache stats
     GAME_STATS.loaded = false;
     GAME_STATS.views.clear();
     GAME_STATS.mega.clear();
@@ -1030,7 +1065,7 @@ function getDisplayTitle(g) {
       if (colsSel) colsSel.value = state.cols;
 
       const raw = await loadList();
-      state.all = Array.isArray(raw) ? raw.map(normalize) : [];
+      state.all = Array.isArray(raw) ? raw.map(normalizeGame) : [];
 
       if (!state.filterTags || !state.filterTags.length) {
         state.filterTags = getSavedTags();
@@ -1039,25 +1074,17 @@ function getDisplayTitle(g) {
 
       buildDynamicFilters();
 
-      if (
-        state.sort.startsWith("views") ||
-        state.sort.startsWith("mega")  ||
-        state.sort.startsWith("likes")
-      ) {
+      if (state.sort.startsWith("views") || state.sort.startsWith("mega") || state.sort.startsWith("likes")) {
         await ensureGameStatsLoaded();
       }
 
       applyFilters();
-
       initMainPageCounter();
     } catch (e) {
       console.error("[viewer] load error:", e);
 
-      // ✅ Bandeau maintenance (même si la grille ne charge pas)
       try {
-        window.viewerAnnonce?.setMaintenance?.(
-          "La liste est indisponible pour le moment."
-        );
+        window.viewerAnnonce?.setMaintenance?.("La liste est indisponible pour le moment.");
       } catch {}
 
       $("#grid").innerHTML = "";

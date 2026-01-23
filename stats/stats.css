@@ -1,178 +1,209 @@
-/* ===========================
-   Stats — compact (moins d’espace)
-   Remplace entièrement stats.css
-   =========================== */
+/* ============================================================================
+   Stats — version compacte + FIX espace blanc en haut
+   Charge CE fichier APRÈS viewer.css
+   ============================================================================ */
 
-.stats-wrap{
-  max-width: 1760px;      /* plus large */
+:root {
+  /* on réutilise les variables de viewer.css */
+  --stats-top-padding: 12px;   /* ← ajuste ici l'espace désiré en haut (8–16px souvent parfait) */
+}
+
+/* Reset agressif pour tuer l'espace ajouté par viewer.css */
+body.stats-page,
+body.stats-page main,
+body.stats-page .stats-wrap,
+body.stats-page .stats-main,
+body.stats-page .card-top {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+body.stats-page {
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: auto !important;
+}
+
+/* Conteneur principal */
+.stats-wrap {
+  max-width: 1760px;
   margin: 0 auto;
-  padding: 10px;          /* moins de padding */
+  padding: var(--stats-top-padding) 10px 20px;   /* ← petit espace contrôlé en haut */
 }
 
-/* --- Topbar : compacte --- */
-.stats-topbar{
-  position:sticky;
-  top:0;
-  z-index:5;
-
-  background:linear-gradient(180deg, rgba(15,17,23,.96), rgba(15,17,23,.86));
+/* Topbar intégrée (sticky dans la première card) */
+.card-h-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: linear-gradient(180deg, rgba(15,17,23,.96), rgba(15,17,23,.86));
   backdrop-filter: blur(8px);
-
-  border:1px solid var(--border);
-  border-radius:14px;
-
-  padding: 8px 10px;      /* réduit */
-  display:flex;
-  gap: 10px;              /* réduit */
-  align-items:center;
-  justify-content:space-between;
+  border-bottom: 1px solid var(--border);
+  padding: 8px 10px;
+  margin: 0;                    /* important */
 }
 
-.stats-title .h1{
-  font-size:19px;
-  font-weight:800;
-  letter-spacing:.2px;
-}
-.stats-title .sub{
-  font-size:12px;
-  color:var(--muted);
-  margin-top:1px;         /* réduit */
+/* On enlève tout margin/padding parasite autour de la première card */
+.card-top {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
-/* --- Controls : serrés --- */
-.stats-controls{
-  display:flex;
-  gap: 6px;               /* réduit */
-  flex-wrap:wrap;
-  justify-content:flex-end;
-  align-items:center;
+/* Légère marge entre la topbar intégrée et le graphique (optionnel) */
+.card-top .chart-wrap {
+  margin-top: 4px;
 }
 
-.inp,.sel{
-  height: 34px;           /* réduit */
-  border:1px solid var(--border);
-  background:var(--btn);
-  color:var(--fg);
-  border-radius:10px;
-  padding:0 10px;
-  outline:none;
-}
-.inp{ min-width: 260px; }
-.sel{ min-width: 130px; }
+/* Le reste reste quasiment identique, juste un peu nettoyé */
 
-/* --- Main : moins d’espace entre graph & tableau --- */
-.stats-main{
-  display:flex;
-  flex-direction:column;
-  gap: 6px;               /* ✅ réduit (clé) */
-  margin-top: 6px;        /* ✅ réduit (clé) */
+.stats-main {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;                    /* un peu plus lisible que 4–6px */
+  margin-top: 4px;             /* très léger espace après la topbar intégrée */
 }
 
-/* --- Cards --- */
-.card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:14px;
-  overflow:hidden;
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  margin: 0;
 }
 
-/* ✅ header de card plus petit */
-.card-h{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding: 6px 10px;      /* ✅ réduit (clé) */
-  border-bottom:1px solid var(--border);
+.card-h {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
 }
 
-.card-title{font-weight:800}
-.card-note{color:var(--muted);font-size:12px}
+.card-title {
+  font-weight: 800;
+}
 
-/* --- Chart : padding bas réduit, scroll OK --- */
-.chart-wrap{
-  padding: 6px 10px 4px;  /* ✅ top/sides/bottom réduit (clé) */
+.card-note {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.chart-wrap {
+  padding: 6px 10px 4px;
   max-height: 620px;
   overflow: auto;
 }
 
-.chart-wrap canvas{
-  width:100%;
-  height:auto;            /* la hauteur réelle est gérée en JS via canvas.style.height */
-  display:block;
-  border:1px solid var(--border);
-  border-radius:12px;
-  background:rgba(0,0,0,.12);
+.chart-wrap canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(0,0,0,.12);
 }
 
-/* --- Table --- */
-.table-wrap{ overflow:auto; }
-
-.tbl{
-  width:100%;
-  border-collapse:collapse;
-  min-width: 0;           /* plus besoin du 920px si tu veux éviter le scroll horizontal */
+.table-wrap {
+  overflow: auto;
 }
 
-.tbl th,.tbl td{
-  padding: 8px 10px;      /* un peu plus compact */
-  border-bottom:1px solid var(--border);
-  vertical-align:middle;
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 0;
 }
 
-.tbl thead th{
-  position:sticky;
-  top:0;
-  background:rgba(20,24,38,.98);
+.tbl th,
+.tbl td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.tbl thead th {
+  position: sticky;
+  top: 0;
+  background: rgba(20,24,38,.98);
   backdrop-filter: blur(6px);
-  text-align:left;
-  font-size:12px;
-  color:var(--muted);
-  cursor:pointer;
+  text-align: left;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+  z-index: 5;
 }
 
-.tbl thead th.num{ text-align:right; }
-.tbl td.num{
-  text-align:right;
+.tbl thead th.num {
+  text-align: right;
+}
+
+.tbl td.num {
+  text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-.tbl tbody tr:hover{
-  background:rgba(90,162,255,.08);
-  cursor:pointer;
+.tbl tbody tr:hover {
+  background: rgba(90,162,255,.08);
+  cursor: pointer;
 }
 
-/* --- Cover plus compact --- */
-.c-cover{ width:64px; }
-.cover{
-  width:50px;
-  height:50px;
-  border-radius:10px;
-  object-fit:cover;
-  border:1px solid var(--border);
-  background:rgba(0,0,0,.14);
+/* Cover compact */
+.c-cover {
+  width: 64px;
 }
 
-/* --- Mini UI --- */
-.badge-mini{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  height:18px;
-  padding:0 8px;
-  border-radius:999px;
-  font-size:11px;
-  border:1px solid var(--border);
-  background:rgba(0,0,0,.18);
-  color:var(--muted);
+.cover {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,.14);
 }
 
-.title-line{ display:flex; gap:8px; align-items:center; }
-.small{ font-size:12px; color:var(--muted); margin-top:1px; }
+/* Controls */
+.stats-controls {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+}
 
-/* --- Responsive --- */
-@media (max-width: 900px){
-  .stats-wrap{ padding:8px; }
-  .inp{ min-width:200px; }
-  .sel{ min-width:120px; }
-  .tbl th,.tbl td{ padding:8px 8px; }
+.inp,
+.sel {
+  height: 34px;
+  border: 1px solid var(--border);
+  background: var(--btn);
+  color: var(--fg);
+  border-radius: 10px;
+  padding: 0 10px;
+  outline: none;
+}
+
+.inp {
+  min-width: 260px;
+}
+
+.sel {
+  min-width: 130px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .stats-wrap {
+    padding: 10px 8px 16px;
+  }
+  .inp {
+    min-width: 200px;
+  }
+  .sel {
+    min-width: 120px;
+  }
+  .tbl th,
+  .tbl td {
+    padding: 8px;
+  }
 }

@@ -48,7 +48,7 @@ async function fetchGameStatsBulk(ids) {
     if (!r.ok) return {};
     const j = await r.json();
     if (!j?.ok || !j.stats) return {};
-    return j.stats; // { idKey: {views, mega, likes}, ... }
+    return j.stats;
   } catch {
     return {};
   }
@@ -66,7 +66,7 @@ async function fetchRatingsBulk(ids) {
     if (!r.ok) return {};
     const j = await r.json();
     if (!j?.ok || !j.stats) return {};
-    return j.stats; // { idKey: {avg,count,sum}, ... }
+    return j.stats;
   } catch {
     return {};
   }
@@ -89,7 +89,6 @@ const state = {
   srcUrl: getListUrl(),
   games: [],
 
-  // uid:<uid> -> stats
   statsByKey: new Map(),   // key -> {views,likes,mega}
   ratingByKey: new Map(),  // key -> {avg,count,sum}
 
@@ -137,6 +136,7 @@ function getFiltered() {
           g.cleanTitle,
           (g.tags || []).join(" "),
           g.collection || "",
+          g.updatedAt || "", // on laisse filtrable même si plus affiché
         ].join("  ")
       );
       return hay.includes(q);
@@ -167,7 +167,6 @@ function sortList(list) {
 
   const getv = (g) => {
     if (key === "title") return String(g.cleanTitle || g.title || "");
-    if (key === "updatedAt") return String(g.updatedAt || "");
     if (key === "views") return g._views | 0;
     if (key === "likes") return g._likes | 0;
     if (key === "mega") return g._mega | 0;
@@ -238,9 +237,6 @@ function renderTable(list) {
     sub.textContent = `${g._ckey || "(no key)"}`;
     titleTd.appendChild(sub);
 
-    const upTd = document.createElement("td");
-    upTd.textContent = g.updatedAt || "";
-
     const vTd = document.createElement("td");
     vTd.className = "num";
     vTd.textContent = (g._views | 0).toLocaleString("fr-FR");
@@ -253,7 +249,6 @@ function renderTable(list) {
     mTd.className = "num";
     mTd.textContent = (g._mega | 0).toLocaleString("fr-FR");
 
-    // ✅ ordre comme ton HTML : Votes puis Note
     const rcTd = document.createElement("td");
     rcTd.className = "num";
     rcTd.textContent = (g._ratingCount | 0).toLocaleString("fr-FR");
@@ -264,7 +259,6 @@ function renderTable(list) {
 
     tr.appendChild(imgTd);
     tr.appendChild(titleTd);
-    tr.appendChild(upTd);
     tr.appendChild(vTd);
     tr.appendChild(lTd);
     tr.appendChild(mTd);
@@ -485,6 +479,7 @@ function wireEvents() {
     rerender();
   });
 
+  // ✅ plus de updatedAt dans le HTML, donc rien à gérer ici
   els.tbl.querySelectorAll("thead th[data-sort]").forEach((th) => {
     th.addEventListener("click", () => {
       const k = th.getAttribute("data-sort");
@@ -493,7 +488,7 @@ function wireEvents() {
       if (state.sortKey === k) state.sortDir = (state.sortDir === "asc") ? "desc" : "asc";
       else {
         state.sortKey = k;
-        state.sortDir = (k === "title" || k === "updatedAt") ? "asc" : "desc";
+        state.sortDir = (k === "title") ? "asc" : "desc";
       }
 
       // rating: par défaut DESC (meilleurs)

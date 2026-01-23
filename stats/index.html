@@ -6,35 +6,24 @@
   <title>Stats — Traductions</title>
 
   <link rel="icon" href="/favicon.png" />
+  <!-- ✅ plus de viewer.css -->
   <link rel="stylesheet" href="/stats/stats.css" />
 </head>
 
 <body class="stats-page">
   <div class="stats-wrap">
-
     <main class="stats-main">
 
-      <!-- ==================================================
-           CARD UNIQUE : STATS + FILTRES + GRAPHIQUE
-           ================================================== -->
-      <section class="card card-top">
-
-        <!-- Topbar intégrée -->
-        <div class="card-h card-h-topbar">
+      <!-- 1) STATS -->
+      <section class="card">
+        <div class="card-h">
           <div class="stats-title">
             <div class="h1">📊 Stats</div>
-            <div class="sub">
-              Tableau + graphique, indépendants de la page principale
-            </div>
+            <div class="sub">Tableau + graphique, indépendants de la page principale</div>
           </div>
 
           <div class="stats-controls">
-            <input
-              id="q"
-              class="inp"
-              placeholder="Rechercher (titre, tags, id…)"
-              autocomplete="off"
-            />
+            <input id="q" class="inp" placeholder="Rechercher (titre, tags, id…)" autocomplete="off" />
 
             <select id="metric" class="sel" title="Métrique du graphique">
               <option value="views">👁️ Vues</option>
@@ -52,28 +41,25 @@
             </select>
           </div>
         </div>
+      </section>
 
-        <!-- Header graphique -->
+      <!-- 2) GRAPHIQUE -->
+      <section class="card">
         <div class="card-h">
           <div class="card-title">Graphique (Top)</div>
           <div class="card-note" id="status">Chargement…</div>
         </div>
 
-        <!-- Graphique -->
         <div class="chart-wrap">
           <canvas id="chart" width="1400" height="560"></canvas>
         </div>
       </section>
 
-      <!-- ==================================================
-           TABLEAU
-           ================================================== -->
+      <!-- 3) TABLEAU (sans MAJ) -->
       <section class="card">
         <div class="card-h">
           <div class="card-title">Tableau</div>
-          <div class="card-note">
-            Clique une ligne pour ouvrir la fiche du jeu
-          </div>
+          <div class="card-note">Clique une ligne pour ouvrir la fiche du jeu</div>
         </div>
 
         <div class="table-wrap">
@@ -82,7 +68,6 @@
               <tr>
                 <th class="c-cover">Cover</th>
                 <th data-sort="title">Titre</th>
-                <th data-sort="updatedAt">MAJ</th>
                 <th class="num" data-sort="views">👁️</th>
                 <th class="num" data-sort="likes">❤️</th>
                 <th class="num" data-sort="mega">📥</th>

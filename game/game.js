@@ -1289,7 +1289,7 @@ function renderVideoBlock({ id, videoUrl }) {
     // 8) Archives (bouton HTML existant sous Notes) — SANS encadré
     // =========================
     setHref("archiveLink", archiveHref);
-    if ($("archiveLink")) $("archiveLink").textContent = "🗃️ Ouvrir les archives de traduction";
+    if ($("archiveLink")) $("archiveLink").textContent = "📦 Archives de la traduction";
     
     const ab = $("archiveBox");
     if (ab) ab.style.display = archiveHref ? "flex" : "none";

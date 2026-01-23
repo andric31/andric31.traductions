@@ -209,3 +209,18 @@ main.stats-main{ margin-top: 0 !important; }
 .card-top{
   overflow: hidden;
 }
+
+/* ✅ Enlève le "vide" global au-dessus (hérité de viewer.css) */
+html, body{
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.stats-wrap{
+  padding-top: 10px !important;   /* garde juste ton padding propre */
+}
+
+/* certains thèmes mettent une marge en haut sur main */
+.stats-main{
+  margin-top: 0 !important;
+}

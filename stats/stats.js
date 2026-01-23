@@ -428,11 +428,11 @@ function applyChartExpandUI() {
   if (state.chartExpanded) {
     els.chartWrap.style.maxHeight = "none";
     els.chartWrap.style.overflow = "visible";
-    if (els.btnChartExpand) els.btnChartExpand.textContent = "⤡ Réduire";
+    if (els.btnChartExpand) els.btnChartExpand.textContent = "⤡";
   } else {
     els.chartWrap.style.maxHeight = ""; // revient au CSS
     els.chartWrap.style.overflow = "";  // revient au CSS
-    if (els.btnChartExpand) els.btnChartExpand.textContent = "⤢ Étendre";
+    if (els.btnChartExpand) els.btnChartExpand.textContent = "⤢";
   }
 }
 

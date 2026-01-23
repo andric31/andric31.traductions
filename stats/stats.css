@@ -240,7 +240,7 @@ html,body{
 .card-actions{
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:12px;
 
   margin-left:auto;
   min-width:0;            /* ellipsis */

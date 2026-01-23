@@ -48,7 +48,7 @@ async function fetchGameStatsBulk(ids) {
     if (!r.ok) return {};
     const j = await r.json();
     if (!j?.ok || !j.stats) return {};
-    return j.stats; // { id: {views, mega, likes}, ... }
+    return j.stats; // { idKey: {views, mega, likes}, ... }
   } catch {
     return {};
   }
@@ -70,35 +70,55 @@ const els = {
 const state = {
   srcUrl: getListUrl(),
   games: [],
-  statsById: new Map(), // counterKey -> {views,likes,mega}
+  statsByKey: new Map(), // key -> {views,likes,mega}
   sortKey: "views",
   sortDir: "desc",
 
-  // ✅ affichage limité (on charge tout mais on ne rend qu'une partie)
-  renderLimit: 50, // nb lignes visibles
-  renderStep: 50, // nb lignes ajoutées à chaque "bottom"
+  renderLimit: 50,
+  renderStep: 50,
 };
 
 // ============================================================================
-// ✅ IMPORTANT : clé canonique du compteur
-// - enfant de collection => g.collection (car sur /game/?id=<collection>&uid=<child>, le compteur est sur idParam)
-// - jeu normal => g.id
+// ✅ EXACTEMENT comme game.js : mêmes clés de compteur
+// - normal:            id:66273
+// - enfant collection: id:<collection>|uid:<uid>
+// - uid only:          uid:<uid>
 // ============================================================================
-function counterKeyOf(g) {
-  const col = String(g?.collection || "").trim();
-  const id = String(g?.id || "").trim();
-  return col || id; // jamais uid ici (le back incrémente par idParam)
+function buildCounterKey(idParam, uidParam) {
+  const id = String(idParam || "").trim();
+  const uid = String(uidParam || "").trim();
+  if (id && uid) return `id:${id}|uid:${uid}`;
+  if (id) return `id:${id}`;
+  if (uid) return `uid:${uid}`;
+  return "";
 }
 
-// URL de la page jeu correspondante (normal / enfant de collection / uid-only)
+// Déduire la clé compteur depuis un objet du f95list
+function counterKeyOf(g) {
+  const id = String(g?.id || "").trim();
+  const uid = String(g?.uid ?? "").trim();
+  const col = String(g?.collection || "").trim();
+
+  // enfant de collection
+  if (col && uid) return buildCounterKey(col, uid);
+
+  // normal
+  if (id) return buildCounterKey(id, "");
+
+  // uid-only fallback
+  if (uid) return buildCounterKey("", uid);
+
+  return "";
+}
+
+// URL de la page jeu correspondante
 function getGameUrlForEntry(g) {
   const u = new URL("/game/", location.origin);
 
-  const col = String(g?.collection || "").trim();
   const id = String(g?.id || "").trim();
   const uid = String(g?.uid ?? "").trim();
+  const col = String(g?.collection || "").trim();
 
-  // enfant de collection (souvent id vide + collection non vide)
   if (col && uid) {
     u.searchParams.set("id", col);
     u.searchParams.set("uid", uid);
@@ -108,7 +128,6 @@ function getGameUrlForEntry(g) {
     u.searchParams.set("uid", uid);
   }
 
-  // conserve src si présent
   const p = new URLSearchParams(location.search);
   const src = (p.get("src") || "").trim();
   if (src) u.searchParams.set("src", src);
@@ -137,14 +156,15 @@ function getFiltered() {
     });
   }
 
-  // attach numbers (avec clé canonique)
   for (const g of list) {
     const key = counterKeyOf(g);
-    const s = state.statsById.get(String(key)) || { views: 0, likes: 0, mega: 0 };
+    const s = state.statsByKey.get(key) || { views: 0, likes: 0, mega: 0 };
     g._views = s.views | 0;
     g._likes = s.likes | 0;
     g._mega = s.mega | 0;
+    g._ckey = key;
   }
+
   return list;
 }
 
@@ -161,14 +181,11 @@ function sortList(list) {
     return "";
   };
 
-  return list
-    .slice()
-    .sort((a, b) => {
-      const va = getv(a),
-        vb = getv(b);
-      if (typeof va === "number" && typeof vb === "number") return (va - vb) * dir;
-      return String(va).localeCompare(String(vb), "fr") * dir;
-    });
+  return list.slice().sort((a, b) => {
+    const va = getv(a), vb = getv(b);
+    if (typeof va === "number" && typeof vb === "number") return (va - vb) * dir;
+    return String(va).localeCompare(String(vb), "fr") * dir;
+  });
 }
 
 // -------- table render --------
@@ -199,9 +216,7 @@ function renderTable(list) {
 
     const sub = document.createElement("div");
     sub.className = "small";
-    const idTxt = String(g.id || "");
-    const colTxt = g.collection ? ` • collection: ${g.collection}` : "";
-    sub.textContent = `id: ${idTxt}${colTxt}`;
+    sub.textContent = `${g._ckey || "(no key)"}`;
     titleTd.appendChild(sub);
 
     const upTd = document.createElement("td");
@@ -232,20 +247,6 @@ function renderTable(list) {
   els.tbody.appendChild(frag);
 }
 
-function escapeHtml(s) {
-  return String(s || "").replace(
-    /[&<>"']/g,
-    (c) =>
-      ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;",
-      }[c])
-  );
-}
-
 // -------- Chart (canvas, sans lib) --------
 function drawChart(list) {
   const canvas = els.chart;
@@ -260,17 +261,13 @@ function drawChart(list) {
     .sort((a, b) => metricValue(b, metric) - metricValue(a, metric))
     .slice(0, take);
 
-  // ✅ APRÈS : hauteur STRICTEMENT nécessaire
-  const rowPx = 26; // hauteur par ligne
-  const padT = 8; // marge haute réduite
-  const padB = 12; // marge basse réduite
-
+  const rowPx = 26;
+  const padT = 8;
+  const padB = 12;
   const desiredCssH = padT + padB + items.length * rowPx;
 
-  // Important : on force une hauteur CSS pour que clientHeight soit correct
   canvas.style.height = desiredCssH + "px";
 
-  // width responsive
   const dpr = window.devicePixelRatio || 1;
   const cssW = canvas.clientWidth || 1200;
   const cssH = desiredCssH;
@@ -281,14 +278,10 @@ function drawChart(list) {
 
   ctx.clearRect(0, 0, cssW, cssH);
 
-  const padL = 260,
-    padR = 18;
+  const padL = 260, padR = 18;
   const innerW = Math.max(50, cssW - padL - padR);
   const innerH = Math.max(50, cssH - padT - padB);
 
-  // background grid
-  ctx.globalAlpha = 1;
-  ctx.fillStyle = "rgba(0,0,0,0)";
   ctx.strokeStyle = "rgba(170,178,200,.18)";
   ctx.lineWidth = 1;
 
@@ -309,7 +302,6 @@ function drawChart(list) {
     ctx.fillText(val.toLocaleString("fr-FR"), x, padT + innerH + 18);
   }
 
-  // bars
   const rowH = innerH / Math.max(1, items.length);
   const barH = Math.max(10, Math.min(18, rowH * 0.62));
   const y0 = padT + rowH / 2;
@@ -322,24 +314,20 @@ function drawChart(list) {
     const v = metricValue(it, metric);
     const w = Math.max(0, innerW * (v / maxV));
 
-    // label
     ctx.fillStyle = "rgba(232,234,240,.92)";
     ctx.textAlign = "right";
     const label = (it.cleanTitle || it.title || "").slice(0, 42);
     ctx.fillText(label, padL - 10, y);
 
-    // bar
     ctx.fillStyle = "rgba(90,162,255,.55)";
     roundRect(ctx, padL, y - barH / 2, w, barH, 8);
     ctx.fill();
 
-    // value
     ctx.fillStyle = "rgba(232,234,240,.86)";
     ctx.textAlign = "left";
     ctx.fillText(v.toLocaleString("fr-FR"), padL + w + 8, y);
   });
 
-  // click mapping (open game)
   canvas.onclick = (ev) => {
     const rect = canvas.getBoundingClientRect();
     const x = ev.clientX - rect.left;
@@ -370,36 +358,23 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-// ✅ reset du "renderLimit" quand on change filtres/tri
 function resetLimit() {
   state.renderLimit = state.renderStep;
   if (els.tableWrap) els.tableWrap.scrollTop = 0;
 }
 
-// -------- render --------
 function rerender() {
   const filtered = getFiltered();
   const sorted = sortList(filtered);
 
   const visible = sorted.slice(0, state.renderLimit);
   renderTable(visible);
-
   drawChart(sorted);
 
   const total = state.games.length;
   els.status.textContent = `${sorted.length}/${total} jeux (affichés: ${Math.min(
-    state.renderLimit,
-    sorted.length
-  )}/${sorted.length} • source: ${shortUrl(state.srcUrl)})`;
-}
-
-function shortUrl(u) {
-  try {
-    const url = new URL(u);
-    return url.hostname + url.pathname;
-  } catch {
-    return String(u || "");
-  }
+    state.renderLimit, sorted.length
+  )}/${sorted.length})`;
 }
 
 // -------- init --------
@@ -419,17 +394,13 @@ async function init() {
 
   els.status.textContent = "Chargement stats…";
 
-  // ✅ IMPORTANT : on demande les stats avec la clé canonique (collection ou id)
-  const ids = games
-    .map((g) => counterKeyOf(g))
-    .map((x) => String(x || "").trim())
-    .filter(Boolean);
+  // ✅ on envoie les vraies clés (id:..., id:...|uid:..., uid:...)
+  const keys = games.map(counterKeyOf).filter(Boolean);
+  const statsObj = await fetchGameStatsBulk(keys);
 
-  const statsObj = await fetchGameStatsBulk(ids);
-
-  for (const id of ids) {
-    const s = statsObj[id] || {};
-    state.statsById.set(String(id), {
+  for (const k of keys) {
+    const s = statsObj[k] || {};
+    state.statsByKey.set(String(k), {
       views: Number(s.views || 0),
       mega: Number(s.mega || 0),
       likes: Number(s.likes || 0),
@@ -446,39 +417,28 @@ async function init() {
 
 function wireEvents() {
   let t = null;
-
   const deb = () => {
     clearTimeout(t);
-    t = setTimeout(() => {
-      resetLimit();
-      rerender();
-    }, 120);
+    t = setTimeout(() => { resetLimit(); rerender(); }, 120);
   };
 
   els.q.addEventListener("input", deb);
-
-  els.metric.addEventListener("change", () => {
-    rerender();
-  });
+  els.metric.addEventListener("change", rerender);
 
   els.top.addEventListener("change", () => {
-    // ✅ quand tu passes en "Tout", le graphe devient scrollable (canvas + haut)
-    // on remonte le scroll du graphe en haut pour éviter l'effet "perdu"
     if (els.chartWrap) els.chartWrap.scrollTop = 0;
     rerender();
   });
 
-  // table sorting
   els.tbl.querySelectorAll("thead th[data-sort]").forEach((th) => {
     th.addEventListener("click", () => {
       const k = th.getAttribute("data-sort");
       if (!k) return;
 
-      if (state.sortKey === k) {
-        state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
-      } else {
+      if (state.sortKey === k) state.sortDir = (state.sortDir === "asc") ? "desc" : "asc";
+      else {
         state.sortKey = k;
-        state.sortDir = k === "title" || k === "updatedAt" ? "asc" : "desc";
+        state.sortDir = (k === "title" || k === "updatedAt") ? "asc" : "desc";
       }
 
       resetLimit();
@@ -486,58 +446,7 @@ function wireEvents() {
     });
   });
 
-  // ✅ "afficher plus" robuste via sentinel + IntersectionObserver
-  {
-    const sentinel = document.createElement("div");
-    sentinel.id = "stats-sentinel";
-    sentinel.style.height = "1px";
-    sentinel.style.width = "1px";
-    sentinel.style.opacity = "0";
-    sentinel.style.pointerEvents = "none";
-
-    if (els.tableWrap && els.tableWrap.parentNode) {
-      els.tableWrap.parentNode.appendChild(sentinel);
-    } else {
-      document.body.appendChild(sentinel);
-    }
-
-    let lock = false;
-
-    const loadMoreIfPossible = () => {
-      if (lock) return;
-
-      const filtered = getFiltered();
-      const sorted = sortList(filtered);
-
-      if (state.renderLimit >= sorted.length) return;
-
-      lock = true;
-      state.renderLimit += state.renderStep;
-      rerender();
-      setTimeout(() => (lock = false), 80);
-    };
-
-    const obs = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) loadMoreIfPossible();
-        }
-      },
-      {
-        root: null, // scroll page
-        rootMargin: "300px", // déclenche avant d’être tout en bas
-        threshold: 0.01,
-      }
-    );
-
-    obs.observe(sentinel);
-  }
-
-  window.addEventListener("resize", () => {
-    const filtered = getFiltered();
-    const sorted = sortList(filtered);
-    drawChart(sorted);
-  });
+  window.addEventListener("resize", rerender);
 }
 
 init();

@@ -77,11 +77,16 @@ const els = {
   q: document.getElementById("q"),
   metric: document.getElementById("metric"),
   top: document.getElementById("top"),
+
   statusChart: document.getElementById("statusChart"),
   statusTable: document.getElementById("statusTable"),
+
+  btnChartExpand: document.getElementById("btnChartExpand"),
+
   chart: document.getElementById("chart"),
   tbody: document.getElementById("tbody"),
   tbl: document.getElementById("tbl"),
+
   tableWrap: document.querySelector(".table-wrap"),
   chartWrap: document.querySelector(".chart-wrap"),
 };
@@ -98,6 +103,8 @@ const state = {
 
   renderLimit: 50,
   renderStep: 50,
+
+  chartExpanded: false,
 };
 
 // ============================================================================
@@ -144,7 +151,6 @@ function getFiltered() {
     });
   }
 
-  // hydrate valeurs calculées
   for (const g of list) {
     const key = counterKeyOf(g);
 
@@ -180,7 +186,7 @@ function sortList(list) {
   return list.slice().sort((a, b) => {
     const va = getv(a), vb = getv(b);
 
-    // ratingAvg : float (tie-break votes puis titre)
+    // ratingAvg : float (avec tie-breaker votes)
     if (key === "ratingAvg") {
       if (va !== vb) return (va - vb) * dir;
       const ca = a._ratingCount | 0, cb = b._ratingCount | 0;
@@ -188,7 +194,7 @@ function sortList(list) {
       return String(a.cleanTitle || a.title || "").localeCompare(String(b.cleanTitle || b.title || ""), "fr");
     }
 
-    // ratingCount : tie-break avg puis titre
+    // ratingCount : tie-breaker avg
     if (key === "ratingCount") {
       if (va !== vb) return (va - vb) * dir;
       const ra = Number(a._ratingAvg || 0), rb = Number(b._ratingAvg || 0);
@@ -276,25 +282,50 @@ function renderTable(list) {
 }
 
 // -------- Chart (canvas, sans lib) --------
-function drawChart(list) {
-  const canvas = els.chart;
-  if (!canvas) return;
+function metricValue(g, metric) {
+  if (metric === "views") return g._views | 0;
+  if (metric === "likes") return g._likes | 0;
+  if (metric === "mega") return g._mega | 0;
+  if (metric === "ratingCount") return g._ratingCount | 0;
+  if (metric === "ratingAvg") return Number(g._ratingAvg || 0);
+  return 0;
+}
 
+function roundRect(ctx, x, y, w, h, r) {
+  r = Math.min(r, h / 2, w / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function getChartTakeCount(sortedLen) {
+  const topN = Number(els.top?.value || 20);
+  if (!Number.isFinite(topN)) return Math.min(20, sortedLen);
+  if (topN <= 0) return sortedLen; // "Tout"
+  return Math.min(topN, sortedLen);
+}
+
+function drawChart(sorted) {
+  if (!els.chart) return;
+
+  const canvas = els.chart;
   const ctx = canvas.getContext("2d");
-  if (!ctx) return;
 
   const metric = els.metric?.value || "views";
-  const topN = Number(els.top?.value || 30);
-  const take = topN > 0 ? topN : list.length;
+  const take = getChartTakeCount(sorted.length);
 
-  const items = list
+  const items = sorted
     .slice()
     .sort((a, b) => metricValue(b, metric) - metricValue(a, metric))
     .slice(0, take);
 
   const rowPx = 26;
   const padT = 8;
-  const padB = 32; // place pour chiffres en bas
+  const padB = 32; // ✅ place pour chiffres en bas
   const desiredCssH = padT + padB + items.length * rowPx;
 
   canvas.style.height = desiredCssH + "px";
@@ -309,7 +340,7 @@ function drawChart(list) {
 
   ctx.clearRect(0, 0, cssW, cssH);
 
-  const padL = 260, padR = 80; // marge droite pour gros chiffres
+  const padL = 260, padR = 80; // ✅ marge droite pour gros chiffres
   const innerW = Math.max(50, cssW - padL - padR);
   const innerH = Math.max(50, cssH - padT - padB);
 
@@ -382,28 +413,38 @@ function drawChart(list) {
     const item = items[idx];
     if (item) location.href = getGameUrlForEntry(item);
   };
+
+  // ✅ status chart cohérent (Top sélectionné)
+  if (els.statusChart) {
+    const labelTop = (Number(els.top?.value || 20) <= 0) ? "Tout" : `Top ${take}`;
+    els.statusChart.textContent = `${labelTop} — ${take}/${sorted.length} jeux`;
+  }
 }
 
-function metricValue(g, metric) {
-  if (metric === "views") return g._views | 0;
-  if (metric === "likes") return g._likes | 0;
-  if (metric === "mega") return g._mega | 0;
-  if (metric === "ratingCount") return g._ratingCount | 0;
-  if (metric === "ratingAvg") return Number(g._ratingAvg || 0);
-  return 0;
+// -------- chart expand --------
+function applyChartExpandUI() {
+  if (!els.chartWrap) return;
+
+  if (state.chartExpanded) {
+    els.chartWrap.style.maxHeight = "none";
+    els.chartWrap.style.overflow = "visible";
+    if (els.btnChartExpand) els.btnChartExpand.textContent = "⤡ Réduire";
+  } else {
+    els.chartWrap.style.maxHeight = ""; // revient au CSS
+    els.chartWrap.style.overflow = "";  // revient au CSS
+    if (els.btnChartExpand) els.btnChartExpand.textContent = "⤢ Étendre";
+  }
 }
 
-function roundRect(ctx, x, y, w, h, r) {
-  r = Math.min(r, h / 2, w / 2);
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + w, y, x + w, y + h, r);
-  ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r);
-  ctx.arcTo(x, y, x + w, y, r);
-  ctx.closePath();
+function toggleChartExpand() {
+  state.chartExpanded = !state.chartExpanded;
+  applyChartExpandUI();
+
+  // ✅ recalcul du canvas (hauteur/largeur)
+  rerender({ chart: true });
 }
 
+// -------- rendering --------
 function resetLimit() {
   state.renderLimit = state.renderStep;
   if (els.tableWrap) els.tableWrap.scrollTop = 0;
@@ -413,69 +454,79 @@ function rerender(opts = { chart: true }) {
   const filtered = getFiltered();
   const sorted = sortList(filtered);
 
-  // TABLE
   const visible = sorted.slice(0, state.renderLimit);
   renderTable(visible);
 
-  // CHART (ne dépend PAS du renderLimit, dépend du "Top" du select)
   if (opts.chart) drawChart(sorted);
 
-  const total = state.games.length;
-
-  // ✅ status TABLE (cohérent avec renderLimit / scroll)
+  // ✅ status tableau (cohérent avec le tableau)
   if (els.statusTable) {
+    const total = state.games.length;
     els.statusTable.textContent =
-      `${sorted.length}/${total} jeux (table: ${Math.min(state.renderLimit, sorted.length)}/${sorted.length})`;
+      `${visible.length}/${sorted.length} affichés (filtrés) — total liste: ${total}`;
   }
 
-  // ✅ status CHART (cohérent avec le select Top)
-  if (els.statusChart) {
-    const topN = Number(els.top?.value || 30);
-    const chartShown = topN > 0 ? Math.min(topN, sorted.length) : sorted.length;
-    els.statusChart.textContent =
-      `${sorted.length}/${total} jeux (graph: ${chartShown}/${sorted.length})`;
-  }
+  // si drawChart n'a pas été appelé, on garde le status chart déjà affiché
 }
 
+// -------- events --------
 function wireEvents() {
   let t = null;
   const deb = () => {
     clearTimeout(t);
-    t = setTimeout(() => { resetLimit(); rerender(); }, 120);
-  };
-
-  els.q?.addEventListener("input", deb);
-  els.metric?.addEventListener("change", () => rerender());
-  els.top?.addEventListener("change", () => {
-    if (els.chartWrap) els.chartWrap.scrollTop = 0;
-    rerender();
-  });
-
-  // ✅ tri
-  els.tbl?.querySelectorAll("thead th[data-sort]")?.forEach((th) => {
-    th.addEventListener("click", () => {
-      const k = th.getAttribute("data-sort");
-      if (!k) return;
-
-      if (state.sortKey === k) state.sortDir = (state.sortDir === "asc") ? "desc" : "asc";
-      else {
-        state.sortKey = k;
-        state.sortDir = (k === "title") ? "asc" : "desc";
-      }
-
-      if (k === "ratingAvg") state.sortDir = "desc";
-      if (k === "ratingCount") state.sortDir = "desc";
-
+    t = setTimeout(() => {
       resetLimit();
       rerender();
+    }, 120);
+  };
+
+  if (els.q) els.q.addEventListener("input", deb);
+
+  if (els.metric) {
+    els.metric.addEventListener("change", () => {
+      // metric ne touche que le chart
+      rerender({ chart: true });
     });
-  });
+  }
+
+  if (els.top) {
+    els.top.addEventListener("change", () => {
+      if (els.chartWrap) els.chartWrap.scrollTop = 0;
+      rerender({ chart: true });
+    });
+  }
+
+  if (els.btnChartExpand) {
+    els.btnChartExpand.addEventListener("click", toggleChartExpand);
+  }
+
+  // ✅ tri
+  if (els.tbl) {
+    els.tbl.querySelectorAll("thead th[data-sort]").forEach((th) => {
+      th.addEventListener("click", () => {
+        const k = th.getAttribute("data-sort");
+        if (!k) return;
+
+        if (state.sortKey === k) state.sortDir = (state.sortDir === "asc") ? "desc" : "asc";
+        else {
+          state.sortKey = k;
+          state.sortDir = (k === "title") ? "asc" : "desc";
+        }
+
+        if (k === "ratingAvg") state.sortDir = "desc";
+        if (k === "ratingCount") state.sortDir = "desc";
+
+        resetLimit();
+        rerender();
+      });
+    });
+  }
 
   // ✅ Resize (chart doit se recalculer)
-  window.addEventListener("resize", () => rerender());
+  window.addEventListener("resize", () => rerender({ chart: true }));
 
   // ==========================
-  // ✅ Scroll intelligent (page OU table)
+  // ✅ Scroll intelligent (table)
   // ==========================
   const tryLoadMore = () => {
     const sorted = sortList(getFiltered());
@@ -501,7 +552,7 @@ function wireEvents() {
     }
 
     state.renderLimit = Math.min(state.renderLimit + state.renderStep, sorted.length);
-    rerender({ chart: false }); // fluide
+    rerender({ chart: false }); // ✅ fluide : pas de redraw chart
   };
 
   let raf = 0;
@@ -521,7 +572,7 @@ function wireEvents() {
 
 // -------- init --------
 async function init() {
-  if (els.statusChart) els.statusChart.textContent = "Chargement…";
+  if (els.statusChart) els.statusChart.textContent = "Chargement liste…";
   if (els.statusTable) els.statusTable.textContent = "Chargement…";
 
   let raw;
@@ -563,9 +614,11 @@ async function init() {
     });
   }
 
+  // defaults
   state.sortKey = "views";
   state.sortDir = "desc";
 
+  applyChartExpandUI();
   wireEvents();
   rerender();
 }

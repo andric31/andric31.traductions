@@ -244,7 +244,20 @@ function renderTable(list) {
 
     const sub = document.createElement("div");
     sub.className = "small";
-    sub.textContent = `${g._ckey || "(no key)"}`;
+    
+    const uid = String(g.uid ?? "").trim();
+    const id  = String(g.id  ?? "").trim();
+    
+    if (uid && id) {
+      sub.textContent = `uid:${uid} | id:${id}`;
+    } else if (uid) {
+      sub.textContent = `uid:${uid}`;
+    } else if (id) {
+      sub.textContent = `id:${id}`;
+    } else {
+      sub.textContent = "(no id)";
+    }
+    
     titleTd.appendChild(sub);
 
     const vTd = document.createElement("td");

@@ -1,4 +1,4 @@
-("use strict");
+"use strict";
 
 const DEFAULT_URL = "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json";
 
@@ -48,7 +48,25 @@ async function fetchGameStatsBulk(ids) {
     if (!r.ok) return {};
     const j = await r.json();
     if (!j?.ok || !j.stats) return {};
-    return j.stats; // { id: {views, mega, likes}, ... }
+    return j.stats; // { idKey: {views, mega, likes}, ... }
+  } catch {
+    return {};
+  }
+}
+
+// ✅ ratings bulk (doit exister côté backend)
+async function fetchRatingsBulk(ids) {
+  try {
+    const r = await fetch("/api/ratings4s", {
+      method: "POST",
+      cache: "no-store",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ ids }),
+    });
+    if (!r.ok) return {};
+    const j = await r.json();
+    if (!j?.ok || !j.stats) return {};
+    return j.stats; // { idKey: {avg,count,sum}, ... }
   } catch {
     return {};
   }
@@ -70,36 +88,33 @@ const els = {
 const state = {
   srcUrl: getListUrl(),
   games: [],
-  statsById: new Map(), // id -> {views,likes,mega}
+
+  // uid:<uid> -> stats
+  statsByKey: new Map(),   // key -> {views,likes,mega}
+  ratingByKey: new Map(),  // key -> {avg,count,sum}
+
   sortKey: "views",
   sortDir: "desc",
 
-  // ✅ affichage limité (on charge tout mais on ne rend qu'une partie)
   renderLimit: 50,
   renderStep: 50,
 };
 
-// -------- cache (évite recalculs filtre+tri) --------
-let cache = {
-  q: "",
-  sortKey: "",
-  sortDir: "",
-  list: [],
-};
-
-// -------- chart raf (évite redraws inutiles) --------
-let chartRaf = 0;
-
-function scheduleChart(list) {
-  cancelAnimationFrame(chartRaf);
-  chartRaf = requestAnimationFrame(() => drawChart(list));
+// ============================================================================
+// ✅ UID ONLY — clé unique
+// ============================================================================
+function counterKeyOf(g) {
+  const uid = String(g?.uid ?? "").trim();
+  return uid ? `uid:${uid}` : "";
 }
 
-function getGameUrl(id) {
+// URL de la page jeu correspondante (uid only)
+function getGameUrlForEntry(g) {
   const u = new URL("/game/", location.origin);
-  u.searchParams.set("id", String(id));
 
-  // conserve src si présent
+  const uid = String(g?.uid ?? "").trim();
+  if (uid) u.searchParams.set("uid", uid);
+
   const p = new URLSearchParams(location.search);
   const src = (p.get("src") || "").trim();
   if (src) u.searchParams.set("src", src);
@@ -107,6 +122,7 @@ function getGameUrl(id) {
   return u.toString();
 }
 
+// -------- filtering / sorting --------
 function getFiltered() {
   const q = normalize(els.q.value.trim());
   let list = state.games;
@@ -127,16 +143,19 @@ function getFiltered() {
     });
   }
 
-  // attach numbers (mutations OK, on garde du perf)
   for (const g of list) {
-    const s = state.statsById.get(String(g.id)) || {
-      views: 0,
-      likes: 0,
-      mega: 0,
-    };
+    const key = counterKeyOf(g);
+
+    const s = state.statsByKey.get(key) || { views: 0, likes: 0, mega: 0 };
     g._views = s.views | 0;
     g._likes = s.likes | 0;
     g._mega = s.mega | 0;
+
+    const r = state.ratingByKey.get(key) || { avg: 0, count: 0, sum: 0 };
+    g._ratingAvg = Number(r.avg || 0);
+    g._ratingCount = Number(r.count || 0);
+
+    g._ckey = key;
   }
 
   return list;
@@ -152,41 +171,41 @@ function sortList(list) {
     if (key === "views") return g._views | 0;
     if (key === "likes") return g._likes | 0;
     if (key === "mega") return g._mega | 0;
+    if (key === "ratingAvg") return Number(g._ratingAvg || 0);
+    if (key === "ratingCount") return g._ratingCount | 0;
     return "";
   };
 
-  return list
-    .slice()
-    .sort((a, b) => {
-      const va = getv(a),
-        vb = getv(b);
-      if (typeof va === "number" && typeof vb === "number")
-        return (va - vb) * dir;
-      return String(va).localeCompare(String(vb), "fr") * dir;
-    });
+  return list.slice().sort((a, b) => {
+    const va = getv(a), vb = getv(b);
+
+    // ratingAvg : float (avec tie-breaker votes)
+    if (key === "ratingAvg") {
+      if (va !== vb) return (va - vb) * dir;
+      const ca = a._ratingCount | 0, cb = b._ratingCount | 0;
+      if (ca !== cb) return (ca - cb) * dir;
+      return String(a.cleanTitle || a.title || "").localeCompare(String(b.cleanTitle || b.title || ""), "fr");
+    }
+
+    // ratingCount : tie-breaker avg
+    if (key === "ratingCount") {
+      if (va !== vb) return (va - vb) * dir;
+      const ra = Number(a._ratingAvg || 0), rb = Number(b._ratingAvg || 0);
+      if (ra !== rb) return (ra - rb) * dir;
+      return String(a.cleanTitle || a.title || "").localeCompare(String(b.cleanTitle || b.title || ""), "fr");
+    }
+
+    if (typeof va === "number" && typeof vb === "number") return (va - vb) * dir;
+    return String(va).localeCompare(String(vb), "fr") * dir;
+  });
 }
 
-function computeList() {
-  const q = els.q.value.trim();
-  if (
-    cache.q === q &&
-    cache.sortKey === state.sortKey &&
-    cache.sortDir === state.sortDir
-  ) {
-    return cache.list;
-  }
-
-  const filtered = getFiltered();
-  const sorted = sortList(filtered);
-
-  cache = {
-    q,
-    sortKey: state.sortKey,
-    sortDir: state.sortDir,
-    list: sorted,
-  };
-
-  return sorted;
+// -------- table render --------
+function fmtRating(avg, count) {
+  const a = Number(avg || 0);
+  const c = Number(count || 0);
+  if (c <= 0 || a <= 0) return "—";
+  return `${a.toFixed(1)}/4`;
 }
 
 function renderTable(list) {
@@ -195,7 +214,7 @@ function renderTable(list) {
 
   for (const g of list) {
     const tr = document.createElement("tr");
-    tr.dataset.id = String(g.id || "");
+    tr.addEventListener("click", () => (location.href = getGameUrlForEntry(g)));
 
     const imgTd = document.createElement("td");
     imgTd.className = "c-cover";
@@ -216,9 +235,7 @@ function renderTable(list) {
 
     const sub = document.createElement("div");
     sub.className = "small";
-    const idTxt = String(g.id || "");
-    const colTxt = g.collection ? ` • collection: ${g.collection}` : "";
-    sub.textContent = `id: ${idTxt}${colTxt}`;
+    sub.textContent = `${g._ckey || "(no key)"}`;
     titleTd.appendChild(sub);
 
     const upTd = document.createElement("td");
@@ -236,12 +253,23 @@ function renderTable(list) {
     mTd.className = "num";
     mTd.textContent = (g._mega | 0).toLocaleString("fr-FR");
 
+    // ✅ ordre comme ton HTML : Votes puis Note
+    const rcTd = document.createElement("td");
+    rcTd.className = "num";
+    rcTd.textContent = (g._ratingCount | 0).toLocaleString("fr-FR");
+
+    const raTd = document.createElement("td");
+    raTd.className = "num";
+    raTd.textContent = fmtRating(g._ratingAvg, g._ratingCount);
+
     tr.appendChild(imgTd);
     tr.appendChild(titleTd);
     tr.appendChild(upTd);
     tr.appendChild(vTd);
     tr.appendChild(lTd);
     tr.appendChild(mTd);
+    tr.appendChild(rcTd);
+    tr.appendChild(raTd);
 
     frag.appendChild(tr);
   }
@@ -263,7 +291,6 @@ function drawChart(list) {
     .sort((a, b) => metricValue(b, metric) - metricValue(a, metric))
     .slice(0, take);
 
-  // ✅ Hauteur STRICTEMENT nécessaire
   const rowPx = 26;
   const padT = 8;
   const padB = 12;
@@ -281,17 +308,14 @@ function drawChart(list) {
 
   ctx.clearRect(0, 0, cssW, cssH);
 
-  const padL = 260,
-    padR = 18;
+  const padL = 260, padR = 18;
   const innerW = Math.max(50, cssW - padL - padR);
   const innerH = Math.max(50, cssH - padT - padB);
 
-  // background grid
-  ctx.globalAlpha = 1;
   ctx.strokeStyle = "rgba(170,178,200,.18)";
   ctx.lineWidth = 1;
 
-  const maxV = Math.max(1, ...items.map((it) => metricValue(it, metric)));
+  const maxV = Math.max(1e-9, ...items.map((it) => metricValue(it, metric)));
   const gridN = 5;
 
   for (let i = 0; i <= gridN; i++) {
@@ -301,14 +325,19 @@ function drawChart(list) {
     ctx.lineTo(x, padT + innerH);
     ctx.stroke();
 
-    const val = Math.round((maxV * i) / gridN);
+    const val = (maxV * i) / gridN;
     ctx.fillStyle = "rgba(170,178,200,.7)";
     ctx.font = "12px system-ui";
     ctx.textAlign = "center";
-    ctx.fillText(val.toLocaleString("fr-FR"), x, padT + innerH + 18);
+
+    const label =
+      metric === "ratingAvg"
+        ? val.toFixed(1)
+        : Math.round(val).toLocaleString("fr-FR");
+
+    ctx.fillText(label, x, padT + innerH + 18);
   }
 
-  // bars
   const rowH = innerH / Math.max(1, items.length);
   const barH = Math.max(10, Math.min(18, rowH * 0.62));
   const y0 = padT + rowH / 2;
@@ -321,24 +350,26 @@ function drawChart(list) {
     const v = metricValue(it, metric);
     const w = Math.max(0, innerW * (v / maxV));
 
-    // label
     ctx.fillStyle = "rgba(232,234,240,.92)";
     ctx.textAlign = "right";
     const label = (it.cleanTitle || it.title || "").slice(0, 42);
     ctx.fillText(label, padL - 10, y);
 
-    // bar
     ctx.fillStyle = "rgba(90,162,255,.55)";
     roundRect(ctx, padL, y - barH / 2, w, barH, 8);
     ctx.fill();
 
-    // value
     ctx.fillStyle = "rgba(232,234,240,.86)";
     ctx.textAlign = "left";
-    ctx.fillText(v.toLocaleString("fr-FR"), padL + w + 8, y);
+
+    const txt =
+      metric === "ratingAvg"
+        ? (v > 0 ? v.toFixed(1) + "/4" : "—")
+        : Math.round(v).toLocaleString("fr-FR");
+
+    ctx.fillText(txt, padL + w + 8, y);
   });
 
-  // click mapping (open game)
   canvas.onclick = (ev) => {
     const rect = canvas.getBoundingClientRect();
     const x = ev.clientX - rect.left;
@@ -347,7 +378,7 @@ function drawChart(list) {
 
     const idx = Math.floor((y - padT) / rowH);
     const item = items[idx];
-    if (item?.id) location.href = getGameUrl(item.id);
+    if (item) location.href = getGameUrlForEntry(item);
   };
 }
 
@@ -355,6 +386,8 @@ function metricValue(g, metric) {
   if (metric === "views") return g._views | 0;
   if (metric === "likes") return g._likes | 0;
   if (metric === "mega") return g._mega | 0;
+  if (metric === "ratingCount") return g._ratingCount | 0;
+  if (metric === "ratingAvg") return Number(g._ratingAvg || 0);
   return 0;
 }
 
@@ -369,35 +402,23 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-// ✅ reset du "renderLimit" quand on change filtres/tri
 function resetLimit() {
   state.renderLimit = state.renderStep;
-  cache.q = "__invalidate__"; // invalide cache (simple/robuste)
   if (els.tableWrap) els.tableWrap.scrollTop = 0;
 }
 
-// -------- render --------
 function rerender() {
-  const sorted = computeList();
-  const visible = sorted.slice(0, state.renderLimit);
+  const filtered = getFiltered();
+  const sorted = sortList(filtered);
 
+  const visible = sorted.slice(0, state.renderLimit);
   renderTable(visible);
-  scheduleChart(sorted);
+  drawChart(sorted);
 
   const total = state.games.length;
   els.status.textContent = `${sorted.length}/${total} jeux (affichés: ${Math.min(
-    state.renderLimit,
-    sorted.length
-  )}/${sorted.length} • source: ${shortUrl(state.srcUrl)})`;
-}
-
-function shortUrl(u) {
-  try {
-    const url = new URL(u);
-    return url.hostname + url.pathname;
-  } catch {
-    return String(u || "");
-  }
+    state.renderLimit, sorted.length
+  )}/${sorted.length})`;
 }
 
 // -------- init --------
@@ -412,19 +433,32 @@ async function init() {
     return;
   }
 
-  state.games = extractGames(raw);
+  const games = extractGames(raw).map((g) => ({ ...g }));
+  state.games = games;
 
   els.status.textContent = "Chargement stats…";
 
-  const ids = state.games.map((g) => String(g.id || "")).filter(Boolean);
-  const statsObj = await fetchGameStatsBulk(ids);
+  const keys = games.map(counterKeyOf).filter(Boolean);
 
-  for (const id of ids) {
-    const s = statsObj[id] || {};
-    state.statsById.set(String(id), {
+  // 1) counters
+  const statsObj = await fetchGameStatsBulk(keys);
+  for (const k of keys) {
+    const s = statsObj[k] || {};
+    state.statsByKey.set(String(k), {
       views: Number(s.views || 0),
       mega: Number(s.mega || 0),
       likes: Number(s.likes || 0),
+    });
+  }
+
+  // 2) ratings4
+  const ratObj = await fetchRatingsBulk(keys);
+  for (const k of keys) {
+    const r = ratObj[k] || {};
+    state.ratingByKey.set(String(k), {
+      avg: Number(r.avg || 0),
+      count: Number(r.count || 0),
+      sum: Number(r.sum || 0),
     });
   }
 
@@ -438,102 +472,40 @@ async function init() {
 
 function wireEvents() {
   let t = null;
-
   const deb = () => {
     clearTimeout(t);
-    t = setTimeout(() => {
-      resetLimit();
-      rerender();
-    }, 120);
+    t = setTimeout(() => { resetLimit(); rerender(); }, 120);
   };
 
   els.q.addEventListener("input", deb);
-
-  els.metric.addEventListener("change", () => {
-    // ne change pas liste/table → juste le chart
-    scheduleChart(computeList());
-  });
+  els.metric.addEventListener("change", rerender);
 
   els.top.addEventListener("change", () => {
     if (els.chartWrap) els.chartWrap.scrollTop = 0;
-    scheduleChart(computeList());
+    rerender();
   });
 
-  // ✅ delegation click table (1 listener au lieu de N lignes)
-  els.tbody.addEventListener("click", (e) => {
-    const tr = e.target.closest("tr[data-id]");
-    if (!tr) return;
-    const id = tr.dataset.id;
-    if (id) location.href = getGameUrl(id);
-  });
-
-  // table sorting
   els.tbl.querySelectorAll("thead th[data-sort]").forEach((th) => {
     th.addEventListener("click", () => {
       const k = th.getAttribute("data-sort");
       if (!k) return;
 
-      if (state.sortKey === k) {
-        state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
-      } else {
+      if (state.sortKey === k) state.sortDir = (state.sortDir === "asc") ? "desc" : "asc";
+      else {
         state.sortKey = k;
-        state.sortDir = k === "title" || k === "updatedAt" ? "asc" : "desc";
+        state.sortDir = (k === "title" || k === "updatedAt") ? "asc" : "desc";
       }
+
+      // rating: par défaut DESC (meilleurs)
+      if (k === "ratingAvg") state.sortDir = "desc";
+      if (k === "ratingCount") state.sortDir = "desc";
 
       resetLimit();
       rerender();
     });
   });
 
-  // ✅ "afficher plus" robuste via sentinel + IntersectionObserver (dans .table-wrap)
-  {
-    const sentinel = document.createElement("div");
-    sentinel.id = "stats-sentinel";
-    sentinel.style.height = "1px";
-    sentinel.style.width = "1px";
-    sentinel.style.opacity = "0";
-    sentinel.style.pointerEvents = "none";
-
-    if (els.tableWrap) {
-      els.tableWrap.appendChild(sentinel);
-    } else {
-      document.body.appendChild(sentinel);
-    }
-
-    let lock = false;
-
-    const loadMoreIfPossible = () => {
-      if (lock) return;
-
-      const sorted = computeList();
-      if (state.renderLimit >= sorted.length) return;
-
-      lock = true;
-      state.renderLimit += state.renderStep;
-      rerender();
-      setTimeout(() => (lock = false), 80);
-    };
-
-    const obs = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) loadMoreIfPossible();
-        }
-      },
-      {
-        root: els.tableWrap || null, // ✅ observe le scroll du container
-        rootMargin: "300px",
-        threshold: 0.01,
-      }
-    );
-
-    obs.observe(sentinel);
-  }
-
-  // resize chart (throttlé)
-  window.addEventListener("resize", () => {
-    scheduleChart(computeList());
-  });
+  window.addEventListener("resize", rerender);
 }
 
 init();

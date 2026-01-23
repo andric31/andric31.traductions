@@ -1,113 +1,103 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta name="referrer" content="no-referrer">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>f95list_andric31_viewer</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Stats — Traductions</title>
 
   <link rel="icon" href="/favicon.png" />
-  <link rel="stylesheet" href="/viewer.css" />
+  <link rel="stylesheet" href="/stats/stats.css" />
 </head>
-<body>
 
-  <header class="topbar" role="banner">
-    <div class="top-title-row">
-      <h1>f95list_andric31_viewer</h1>
-    </div>
+<body class="stats-page">
+  <div class="stats-wrap">
 
-    <div class="top-actions">
-      <div class="search-wrap">
-        <input id="search" type="search" placeholder="Rechercher un jeu." autocomplete="off" />
-        <span class="stat-in-bar total-inline">Total : <strong id="countTotal">0</strong></span>
-      </div>
+    <main class="stats-main">
 
-      <select id="sort" title="Trier">
-        <option value="updatedAtLocal-desc">Date de la traduction</option>
-        <option value="views-desc">👁️ Vues</option>
-        <option value="likes-desc">❤️ J'aime</option>
-        <option value="mega-desc">📥 Téléchargements</option>
-        <option value="title-asc">Titre A→Z</option>
-        <option value="title-desc">Titre Z→A</option>
-        <option value="updatedAt-desc">Date Thread F95 (Maj)</option>
-      </select>
+      <!-- ==================================================
+           CARD UNIQUE : STATS + FILTRES + GRAPHIQUE
+           ================================================== -->
+      <section class="card card-top">
 
-      <select id="filterCat" title="Catégorie">
-        <option value="all">Catégorie : Toutes</option>
-        <option value="VN">VN</option>
-        <option value="Collection">Collection</option>
-      </select>
+        <!-- Topbar intégrée -->
+        <div class="card-h card-h-topbar">
+          <div class="stats-title">
+            <div class="h1">📊 Stats</div>
+            <div class="sub">
+              Tableau + graphique, indépendants de la page principale
+            </div>
+          </div>
 
-      <select id="filterEngine" title="Moteur">
-        <option value="all">Moteur : Tous</option>
-        <option value="Ren'Py">Ren'Py</option>
-        <option value="RPGM">RPGM</option>
-        <option value="Unity">Unity</option>
-        <option value="Others">Others</option>
-        <option value="Wolf RPG">Wolf RPG</option>
-      </select>
+          <div class="stats-controls">
+            <input
+              id="q"
+              class="inp"
+              placeholder="Rechercher (titre, tags, id…)"
+              autocomplete="off"
+            />
 
-      <select id="filterStatus" title="Statut">
-        <option value="all">Statut : Tous</option>
-        <option value="Completed">Completed</option>
-        <option value="Abandoned">Abandoned</option>
-        <option value="Onhold">Onhold</option>
-        <option value="En cours">En cours</option>
-      </select>
+            <select id="metric" class="sel" title="Métrique du graphique">
+              <option value="views">👁️ Vues</option>
+              <option value="likes">❤️ Likes</option>
+              <option value="mega">📥 MEGA</option>
+              <option value="ratingCount">⭐🗳️ Votes</option>
+              <option value="ratingAvg">⭐ Note (moy.)</option>
+            </select>
 
-      <button id="tagsBtn" type="button" class="tags-btn" aria-haspopup="menu" aria-expanded="false">
-        🏷️ Tags <span id="tagsCount" class="tags-count hidden">0</span>
-      </button>
+            <select id="top" class="sel" title="Top">
+              <option value="30">Top 30</option>
+              <option value="50">Top 50</option>
+              <option value="100">Top 100</option>
+              <option value="0">Tout</option>
+            </select>
+          </div>
+        </div>
 
-      <select id="cols" title="Vignettes par ligne">
-        <option value="auto">Vignettes/ligne : Auto</option>
-        <option value="1">1 par ligne</option>
-        <option value="2">2 par ligne</option>
-        <option value="3">3 par ligne</option>
-        <option value="4">4 par ligne</option>
-        <option value="5">5 par ligne</option>
-        <option value="6">6 par ligne</option>
-        <option value="7">7 par ligne</option>
-        <option value="8">8 par ligne</option>
-        <option value="9">9 par ligne</option>
-        <option value="10">10 par ligne</option>
-      </select>
+        <!-- Header graphique -->
+        <div class="card-h">
+          <div class="card-title">Graphique (Top)</div>
+          <div class="card-note" id="status">Chargement…</div>
+        </div>
 
-      <select id="pageSize" title="Affichage progressif">
-        <option value="50">Afficher par 50</option>
-        <option value="100">Afficher par 100</option>
-        <option value="all">Tout afficher</option>
-      </select>
+        <!-- Graphique -->
+        <div class="chart-wrap">
+          <canvas id="chart" width="1400" height="560"></canvas>
+        </div>
+      </section>
 
-      <button id="refresh" type="button">Rafraîchir</button>
-    </div>
-  </header>
+      <!-- ==================================================
+           TABLEAU
+           ================================================== -->
+      <section class="card">
+        <div class="card-h">
+          <div class="card-title">Tableau</div>
+          <div class="card-note">
+            Clique une ligne pour ouvrir la fiche du jeu
+          </div>
+        </div>
 
-  <main role="main">
-    <section id="gridMode" class="grid-wrap" aria-label="Vignettes des jeux">
+        <div class="table-wrap">
+          <table class="tbl" id="tbl">
+            <thead>
+              <tr>
+                <th class="c-cover">Cover</th>
+                <th data-sort="title">Titre</th>
+                <th data-sort="updatedAt">MAJ</th>
+                <th class="num" data-sort="views">👁️</th>
+                <th class="num" data-sort="likes">❤️</th>
+                <th class="num" data-sort="mega">📥</th>
+                <th class="num" data-sort="ratingCount">⭐🗳️</th>
+                <th class="num" data-sort="ratingAvg">⭐</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </section>
 
-      <!-- ✅ BANDEAU ANNONCE ICI (au-dessus des tuiles) -->
-      <div id="viewerAnnonceHost"></div>
+    </main>
+  </div>
 
-      <div id="grid" class="grid"></div>
-      <div id="gridEmpty" class="empty hidden">Aucun résultat.</div>
-    </section>
-
-    <!-- ✅ Footer stats -->
-    <footer class="viewer-footer">
-      👁️ Vues de la page : <strong id="mainViews">—</strong>
-    </footer>
-  </main>
-
-  <script src="/viewer.menu.js"></script>
-  <script src="/viewer.menu.about.js"></script>
-  <script src="/viewer.menu.extension.js"></script>
-
-  <!-- ✅ charge le bandeau (indépendant de f95list.json) -->
-  <script src="/viewer.annonce.js"></script>
-
-  <script src="/viewer.js"></script>
-
+  <script src="/stats/stats.js"></script>
 </body>
 </html>
-

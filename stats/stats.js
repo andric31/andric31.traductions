@@ -77,7 +77,8 @@ const els = {
   q: document.getElementById("q"),
   metric: document.getElementById("metric"),
   top: document.getElementById("top"),
-  status: document.getElementById("status"),
+  statusChart: document.getElementById("statusChart"),
+  statusTable: document.getElementById("statusTable"),
   chart: document.getElementById("chart"),
   tbody: document.getElementById("tbody"),
   tbl: document.getElementById("tbl"),
@@ -123,7 +124,7 @@ function getGameUrlForEntry(g) {
 
 // -------- filtering / sorting --------
 function getFiltered() {
-  const q = normalize(els.q.value.trim());
+  const q = normalize(els.q?.value?.trim() || "");
   let list = state.games;
 
   if (q) {
@@ -143,6 +144,7 @@ function getFiltered() {
     });
   }
 
+  // hydrate valeurs calculées
   for (const g of list) {
     const key = counterKeyOf(g);
 
@@ -178,6 +180,7 @@ function sortList(list) {
   return list.slice().sort((a, b) => {
     const va = getv(a), vb = getv(b);
 
+    // ratingAvg : float (tie-break votes puis titre)
     if (key === "ratingAvg") {
       if (va !== vb) return (va - vb) * dir;
       const ca = a._ratingCount | 0, cb = b._ratingCount | 0;
@@ -185,6 +188,7 @@ function sortList(list) {
       return String(a.cleanTitle || a.title || "").localeCompare(String(b.cleanTitle || b.title || ""), "fr");
     }
 
+    // ratingCount : tie-break avg puis titre
     if (key === "ratingCount") {
       if (va !== vb) return (va - vb) * dir;
       const ra = Number(a._ratingAvg || 0), rb = Number(b._ratingAvg || 0);
@@ -206,6 +210,8 @@ function fmtRating(avg, count) {
 }
 
 function renderTable(list) {
+  if (!els.tbody) return;
+
   els.tbody.innerHTML = "";
   const frag = document.createDocumentFragment();
 
@@ -272,10 +278,13 @@ function renderTable(list) {
 // -------- Chart (canvas, sans lib) --------
 function drawChart(list) {
   const canvas = els.chart;
-  const ctx = canvas.getContext("2d");
+  if (!canvas) return;
 
-  const metric = els.metric.value;
-  const topN = Number(els.top.value || 30);
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  const metric = els.metric?.value || "views";
+  const topN = Number(els.top?.value || 30);
   const take = topN > 0 ? topN : list.length;
 
   const items = list
@@ -285,7 +294,7 @@ function drawChart(list) {
 
   const rowPx = 26;
   const padT = 8;
-  const padB = 32; // ✅ place pour chiffres en bas
+  const padB = 32; // place pour chiffres en bas
   const desiredCssH = padT + padB + items.length * rowPx;
 
   canvas.style.height = desiredCssH + "px";
@@ -300,7 +309,7 @@ function drawChart(list) {
 
   ctx.clearRect(0, 0, cssW, cssH);
 
-  const padL = 260, padR = 80; // ✅ marge droite pour gros chiffres
+  const padL = 260, padR = 80; // marge droite pour gros chiffres
   const innerW = Math.max(50, cssW - padL - padR);
   const innerH = Math.max(50, cssH - padT - padB);
 
@@ -404,15 +413,28 @@ function rerender(opts = { chart: true }) {
   const filtered = getFiltered();
   const sorted = sortList(filtered);
 
+  // TABLE
   const visible = sorted.slice(0, state.renderLimit);
   renderTable(visible);
 
+  // CHART (ne dépend PAS du renderLimit, dépend du "Top" du select)
   if (opts.chart) drawChart(sorted);
 
   const total = state.games.length;
-  els.status.textContent = `${sorted.length}/${total} jeux (affichés: ${Math.min(
-    state.renderLimit, sorted.length
-  )}/${sorted.length})`;
+
+  // ✅ status TABLE (cohérent avec renderLimit / scroll)
+  if (els.statusTable) {
+    els.statusTable.textContent =
+      `${sorted.length}/${total} jeux (table: ${Math.min(state.renderLimit, sorted.length)}/${sorted.length})`;
+  }
+
+  // ✅ status CHART (cohérent avec le select Top)
+  if (els.statusChart) {
+    const topN = Number(els.top?.value || 30);
+    const chartShown = topN > 0 ? Math.min(topN, sorted.length) : sorted.length;
+    els.statusChart.textContent =
+      `${sorted.length}/${total} jeux (graph: ${chartShown}/${sorted.length})`;
+  }
 }
 
 function wireEvents() {
@@ -422,16 +444,15 @@ function wireEvents() {
     t = setTimeout(() => { resetLimit(); rerender(); }, 120);
   };
 
-  els.q.addEventListener("input", deb);
-  els.metric.addEventListener("change", () => rerender());
-
-  els.top.addEventListener("change", () => {
+  els.q?.addEventListener("input", deb);
+  els.metric?.addEventListener("change", () => rerender());
+  els.top?.addEventListener("change", () => {
     if (els.chartWrap) els.chartWrap.scrollTop = 0;
     rerender();
   });
 
-  // ✅ tri (plus de updatedAt)
-  els.tbl.querySelectorAll("thead th[data-sort]").forEach((th) => {
+  // ✅ tri
+  els.tbl?.querySelectorAll("thead th[data-sort]")?.forEach((th) => {
     th.addEventListener("click", () => {
       const k = th.getAttribute("data-sort");
       if (!k) return;
@@ -457,23 +478,19 @@ function wireEvents() {
   // ✅ Scroll intelligent (page OU table)
   // ==========================
   const tryLoadMore = () => {
-    // On calcule la liste triée une seule fois
     const sorted = sortList(getFiltered());
     if (state.renderLimit >= sorted.length) return;
 
     const threshold = 260;
 
-    // 1) Cas A : la table a son propre scroll (scroll interne)
     const wrap = els.tableWrap;
     const tableIsScrollable = wrap && wrap.scrollHeight > wrap.clientHeight + 5;
 
     if (tableIsScrollable) {
       const nearBottomTable =
         (wrap.scrollTop + wrap.clientHeight) >= (wrap.scrollHeight - threshold);
-
       if (!nearBottomTable) return;
     } else {
-      // 2) Cas B : scroll global de la page
       const doc = document.documentElement;
       const scrollTop = window.scrollY || doc.scrollTop || 0;
       const winH = window.innerHeight || doc.clientHeight || 0;
@@ -483,21 +500,17 @@ function wireEvents() {
       if (!nearBottomPage) return;
     }
 
-    // ✅ On charge un lot de plus
     state.renderLimit = Math.min(state.renderLimit + state.renderStep, sorted.length);
     rerender({ chart: false }); // fluide
   };
 
-  // listeners
   let raf = 0;
 
-  // scroll global
   window.addEventListener("scroll", () => {
     cancelAnimationFrame(raf);
     raf = requestAnimationFrame(tryLoadMore);
   }, { passive: true });
 
-  // scroll interne si jamais tu mets plus tard un max-height à table-wrap
   if (els.tableWrap) {
     els.tableWrap.addEventListener("scroll", () => {
       cancelAnimationFrame(raf);
@@ -508,18 +521,23 @@ function wireEvents() {
 
 // -------- init --------
 async function init() {
-  els.status.textContent = "Chargement liste…";
+  if (els.statusChart) els.statusChart.textContent = "Chargement…";
+  if (els.statusTable) els.statusTable.textContent = "Chargement…";
+
   let raw;
   try {
     raw = await fetchJson(state.srcUrl);
   } catch (e) {
-    els.status.textContent = "Erreur: impossible de charger la liste";
+    if (els.statusChart) els.statusChart.textContent = "Erreur: impossible de charger la liste";
+    if (els.statusTable) els.statusTable.textContent = "Erreur: impossible de charger la liste";
     console.error(e);
     return;
   }
 
   state.games = extractGames(raw).map((g) => ({ ...g }));
-  els.status.textContent = "Chargement stats…";
+
+  if (els.statusChart) els.statusChart.textContent = "Chargement stats…";
+  if (els.statusTable) els.statusTable.textContent = "Chargement stats…";
 
   const keys = state.games.map(counterKeyOf).filter(Boolean);
 
@@ -545,7 +563,6 @@ async function init() {
     });
   }
 
-  els.status.textContent = "OK";
   state.sortKey = "views";
   state.sortDir = "desc";
 

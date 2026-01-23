@@ -1,4 +1,4 @@
-"use strict";
+("use strict");
 
 const DEFAULT_URL = "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json";
 
@@ -48,7 +48,24 @@ async function fetchGameStatsBulk(ids) {
     if (!r.ok) return {};
     const j = await r.json();
     if (!j?.ok || !j.stats) return {};
-    return j.stats; // { key: {views, mega, likes}, ... }
+    return j.stats; // { idKey: {views, mega, likes}, ... }
+  } catch {
+    return {};
+  }
+}
+
+async function fetchRatingsBulk(ids) {
+  try {
+    const r = await fetch("/api/ratings4s", {
+      method: "POST",
+      cache: "no-store",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ ids }),
+    });
+    if (!r.ok) return {};
+    const j = await r.json();
+    if (!j?.ok || !j.stats) return {};
+    return j.stats; // { idKey: {avg,count,sum}, ... }
   } catch {
     return {};
   }
@@ -70,7 +87,11 @@ const els = {
 const state = {
   srcUrl: getListUrl(),
   games: [],
-  statsByKey: new Map(), // key -> {views,likes,mega}
+
+  // uid:<uid> -> stats
+  statsByKey: new Map(),   // key -> {views,likes,mega}
+  ratingByKey: new Map(),  // key -> {avg,count,sum}
+
   sortKey: "views",
   sortDir: "desc",
 
@@ -79,8 +100,7 @@ const state = {
 };
 
 // ============================================================================
-// ✅ COMPTEUR UID ONLY (cohérent avec game.js)
-// - la clé est TOUJOURS: uid:<uid>
+// ✅ UID ONLY — clé compteur unique
 // ============================================================================
 function counterKeyOf(g) {
   const uid = String(g?.uid ?? "").trim();
@@ -124,10 +144,16 @@ function getFiltered() {
 
   for (const g of list) {
     const key = counterKeyOf(g);
+
     const s = state.statsByKey.get(key) || { views: 0, likes: 0, mega: 0 };
     g._views = s.views | 0;
     g._likes = s.likes | 0;
     g._mega = s.mega | 0;
+
+    const r = state.ratingByKey.get(key) || { avg: 0, count: 0, sum: 0 };
+    g._rating = Number(r.avg || 0);
+    g._votes = Number(r.count || 0);
+
     g._ckey = key;
   }
 
@@ -144,17 +170,36 @@ function sortList(list) {
     if (key === "views") return g._views | 0;
     if (key === "likes") return g._likes | 0;
     if (key === "mega") return g._mega | 0;
+    if (key === "rating") return Number(g._rating || 0);
+    if (key === "votes") return g._votes | 0;
     return "";
   };
 
   return list.slice().sort((a, b) => {
     const va = getv(a), vb = getv(b);
+
+    // rating = float
+    if (key === "rating") {
+      if (va !== vb) return (va - vb) * dir;
+      // tie-breaker : votes
+      const da = a._votes | 0, db = b._votes | 0;
+      if (da !== db) return (da - db) * dir;
+      return String(a.cleanTitle || a.title || "").localeCompare(String(b.cleanTitle || b.title || ""), "fr");
+    }
+
     if (typeof va === "number" && typeof vb === "number") return (va - vb) * dir;
     return String(va).localeCompare(String(vb), "fr") * dir;
   });
 }
 
 // -------- table render --------
+function fmtRating(avg, count) {
+  const a = Number(avg || 0);
+  const c = Number(count || 0);
+  if (c <= 0 || a <= 0) return "—";
+  return `${a.toFixed(1)}/4`;
+}
+
 function renderTable(list) {
   els.tbody.innerHTML = "";
   const frag = document.createDocumentFragment();
@@ -200,12 +245,22 @@ function renderTable(list) {
     mTd.className = "num";
     mTd.textContent = (g._mega | 0).toLocaleString("fr-FR");
 
+    const rTd = document.createElement("td");
+    rTd.className = "num";
+    rTd.textContent = fmtRating(g._rating, g._votes);
+
+    const cTd = document.createElement("td");
+    cTd.className = "num";
+    cTd.textContent = (g._votes | 0).toLocaleString("fr-FR");
+
     tr.appendChild(imgTd);
     tr.appendChild(titleTd);
     tr.appendChild(upTd);
     tr.appendChild(vTd);
     tr.appendChild(lTd);
     tr.appendChild(mTd);
+    tr.appendChild(rTd);
+    tr.appendChild(cTd);
 
     frag.appendChild(tr);
   }
@@ -251,7 +306,7 @@ function drawChart(list) {
   ctx.strokeStyle = "rgba(170,178,200,.18)";
   ctx.lineWidth = 1;
 
-  const maxV = Math.max(1, ...items.map((it) => metricValue(it, metric)));
+  const maxV = Math.max(1e-9, ...items.map((it) => metricValue(it, metric)));
   const gridN = 5;
 
   for (let i = 0; i <= gridN; i++) {
@@ -261,11 +316,17 @@ function drawChart(list) {
     ctx.lineTo(x, padT + innerH);
     ctx.stroke();
 
-    const val = Math.round((maxV * i) / gridN);
+    const val = (maxV * i) / gridN;
     ctx.fillStyle = "rgba(170,178,200,.7)";
     ctx.font = "12px system-ui";
     ctx.textAlign = "center";
-    ctx.fillText(val.toLocaleString("fr-FR"), x, padT + innerH + 18);
+
+    const label =
+      metric === "rating"
+        ? val.toFixed(1)
+        : Math.round(val).toLocaleString("fr-FR");
+
+    ctx.fillText(label, x, padT + innerH + 18);
   }
 
   const rowH = innerH / Math.max(1, items.length);
@@ -291,7 +352,13 @@ function drawChart(list) {
 
     ctx.fillStyle = "rgba(232,234,240,.86)";
     ctx.textAlign = "left";
-    ctx.fillText(v.toLocaleString("fr-FR"), padL + w + 8, y);
+
+    const txt =
+      metric === "rating"
+        ? (v > 0 ? v.toFixed(1) + "/4" : "—")
+        : Math.round(v).toLocaleString("fr-FR");
+
+    ctx.fillText(txt, padL + w + 8, y);
   });
 
   canvas.onclick = (ev) => {
@@ -310,6 +377,8 @@ function metricValue(g, metric) {
   if (metric === "views") return g._views | 0;
   if (metric === "likes") return g._likes | 0;
   if (metric === "mega") return g._mega | 0;
+  if (metric === "rating") return Number(g._rating || 0);
+  if (metric === "votes") return g._votes | 0;
   return 0;
 }
 
@@ -339,8 +408,7 @@ function rerender() {
 
   const total = state.games.length;
   els.status.textContent = `${sorted.length}/${total} jeux (affichés: ${Math.min(
-    state.renderLimit,
-    sorted.length
+    state.renderLimit, sorted.length
   )}/${sorted.length})`;
 }
 
@@ -361,17 +429,27 @@ async function init() {
 
   els.status.textContent = "Chargement stats…";
 
-  // ✅ UID-only : on envoie uniquement des clés uid:<uid>, dédupliquées
-  const keys = [...new Set(games.map(counterKeyOf).filter(Boolean))];
+  const keys = games.map(counterKeyOf).filter(Boolean);
 
+  // 1) counters
   const statsObj = await fetchGameStatsBulk(keys);
-
   for (const k of keys) {
     const s = statsObj[k] || {};
     state.statsByKey.set(String(k), {
       views: Number(s.views || 0),
       mega: Number(s.mega || 0),
       likes: Number(s.likes || 0),
+    });
+  }
+
+  // 2) ratings4
+  const ratObj = await fetchRatingsBulk(keys);
+  for (const k of keys) {
+    const r = ratObj[k] || {};
+    state.ratingByKey.set(String(k), {
+      avg: Number(r.avg || 0),
+      count: Number(r.count || 0),
+      sum: Number(r.sum || 0),
     });
   }
 
@@ -387,10 +465,7 @@ function wireEvents() {
   let t = null;
   const deb = () => {
     clearTimeout(t);
-    t = setTimeout(() => {
-      resetLimit();
-      rerender();
-    }, 120);
+    t = setTimeout(() => { resetLimit(); rerender(); }, 120);
   };
 
   els.q.addEventListener("input", deb);
@@ -406,11 +481,15 @@ function wireEvents() {
       const k = th.getAttribute("data-sort");
       if (!k) return;
 
-      if (state.sortKey === k) state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
+      if (state.sortKey === k) state.sortDir = (state.sortDir === "asc") ? "desc" : "asc";
       else {
         state.sortKey = k;
-        state.sortDir = k === "title" || k === "updatedAt" ? "asc" : "desc";
+        state.sortDir = (k === "title" || k === "updatedAt") ? "asc" : "desc";
       }
+
+      // rating: par défaut DESC (meilleures notes)
+      if (k === "rating") state.sortDir = "desc";
+      if (k === "votes") state.sortDir = "desc";
 
       resetLimit();
       rerender();

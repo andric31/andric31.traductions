@@ -70,28 +70,55 @@ const els = {
 const state = {
   srcUrl: getListUrl(),
   games: [],
-  statsById: new Map(), // id -> {views,likes,mega}
+  statsById: new Map(), // counterKey -> {views,likes,mega}
   sortKey: "views",
   sortDir: "desc",
 
   // ✅ affichage limité (on charge tout mais on ne rend qu'une partie)
   renderLimit: 50, // nb lignes visibles
-  renderStep: 50,  // nb lignes ajoutées à chaque "bottom"
+  renderStep: 50, // nb lignes ajoutées à chaque "bottom"
 };
 
-function getGameUrl(id) {
+// ============================================================================
+// ✅ IMPORTANT : clé canonique du compteur
+// - enfant de collection => g.collection (car sur /game/?id=<collection>&uid=<child>, le compteur est sur idParam)
+// - jeu normal => g.id
+// ============================================================================
+function counterKeyOf(g) {
+  const col = String(g?.collection || "").trim();
+  const id = String(g?.id || "").trim();
+  return col || id; // jamais uid ici (le back incrémente par idParam)
+}
+
+// URL de la page jeu correspondante (normal / enfant de collection / uid-only)
+function getGameUrlForEntry(g) {
   const u = new URL("/game/", location.origin);
-  u.searchParams.set("id", String(id));
+
+  const col = String(g?.collection || "").trim();
+  const id = String(g?.id || "").trim();
+  const uid = String(g?.uid ?? "").trim();
+
+  // enfant de collection (souvent id vide + collection non vide)
+  if (col && uid) {
+    u.searchParams.set("id", col);
+    u.searchParams.set("uid", uid);
+  } else if (id) {
+    u.searchParams.set("id", id);
+  } else if (uid) {
+    u.searchParams.set("uid", uid);
+  }
+
   // conserve src si présent
   const p = new URLSearchParams(location.search);
   const src = (p.get("src") || "").trim();
   if (src) u.searchParams.set("src", src);
+
   return u.toString();
 }
 
+// -------- filtering / sorting --------
 function getFiltered() {
   const q = normalize(els.q.value.trim());
-
   let list = state.games;
 
   if (q) {
@@ -110,13 +137,10 @@ function getFiltered() {
     });
   }
 
-  // attach numbers
+  // attach numbers (avec clé canonique)
   for (const g of list) {
-    const s = state.statsById.get(String(g.id)) || {
-      views: 0,
-      likes: 0,
-      mega: 0,
-    };
+    const key = counterKeyOf(g);
+    const s = state.statsById.get(String(key)) || { views: 0, likes: 0, mega: 0 };
     g._views = s.views | 0;
     g._likes = s.likes | 0;
     g._mega = s.mega | 0;
@@ -142,19 +166,19 @@ function sortList(list) {
     .sort((a, b) => {
       const va = getv(a),
         vb = getv(b);
-      if (typeof va === "number" && typeof vb === "number")
-        return (va - vb) * dir;
+      if (typeof va === "number" && typeof vb === "number") return (va - vb) * dir;
       return String(va).localeCompare(String(vb), "fr") * dir;
     });
 }
 
+// -------- table render --------
 function renderTable(list) {
   els.tbody.innerHTML = "";
   const frag = document.createDocumentFragment();
 
   for (const g of list) {
     const tr = document.createElement("tr");
-    tr.addEventListener("click", () => (location.href = getGameUrl(g.id)));
+    tr.addEventListener("click", () => (location.href = getGameUrlForEntry(g)));
 
     const imgTd = document.createElement("td");
     imgTd.className = "c-cover";
@@ -237,10 +261,10 @@ function drawChart(list) {
     .slice(0, take);
 
   // ✅ APRÈS : hauteur STRICTEMENT nécessaire
-  const rowPx = 26;        // hauteur par ligne
-  const padT = 8;          // marge haute réduite
-  const padB = 12;         // marge basse réduite
-  
+  const rowPx = 26; // hauteur par ligne
+  const padT = 8; // marge haute réduite
+  const padB = 12; // marge basse réduite
+
   const desiredCssH = padT + padB + items.length * rowPx;
 
   // Important : on force une hauteur CSS pour que clientHeight soit correct
@@ -257,7 +281,8 @@ function drawChart(list) {
 
   ctx.clearRect(0, 0, cssW, cssH);
 
-  const padL = 260, padR = 18;
+  const padL = 260,
+    padR = 18;
   const innerW = Math.max(50, cssW - padL - padR);
   const innerH = Math.max(50, cssH - padT - padB);
 
@@ -323,7 +348,7 @@ function drawChart(list) {
 
     const idx = Math.floor((y - padT) / rowH);
     const item = items[idx];
-    if (item?.id) location.href = getGameUrl(item.id);
+    if (item) location.href = getGameUrlForEntry(item);
   };
 }
 
@@ -394,7 +419,12 @@ async function init() {
 
   els.status.textContent = "Chargement stats…";
 
-  const ids = games.map((g) => String(g.id || "")).filter(Boolean);
+  // ✅ IMPORTANT : on demande les stats avec la clé canonique (collection ou id)
+  const ids = games
+    .map((g) => counterKeyOf(g))
+    .map((x) => String(x || "").trim())
+    .filter(Boolean);
+
   const statsObj = await fetchGameStatsBulk(ids);
 
   for (const id of ids) {
@@ -448,7 +478,7 @@ function wireEvents() {
         state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
       } else {
         state.sortKey = k;
-        state.sortDir = (k === "title" || k === "updatedAt") ? "asc" : "desc";
+        state.sortDir = k === "title" || k === "updatedAt" ? "asc" : "desc";
       }
 
       resetLimit();
@@ -494,8 +524,8 @@ function wireEvents() {
         }
       },
       {
-        root: null,           // scroll page
-        rootMargin: "300px",  // déclenche avant d’être tout en bas
+        root: null, // scroll page
+        rootMargin: "300px", // déclenche avant d’être tout en bas
         threshold: 0.01,
       }
     );
@@ -511,5 +541,3 @@ function wireEvents() {
 }
 
 init();
-
-

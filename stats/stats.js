@@ -287,7 +287,7 @@ function drawChart(list) {
 
   const rowPx = 26;
   const padT = 8;
-  const padB = 12;
+  const padB = 32;
   const desiredCssH = padT + padB + items.length * rowPx;
 
   canvas.style.height = desiredCssH + "px";
@@ -302,7 +302,7 @@ function drawChart(list) {
 
   ctx.clearRect(0, 0, cssW, cssH);
 
-  const padL = 260, padR = 18;
+  const padL = 260, padR = 80;
   const innerW = Math.max(50, cssW - padL - padR);
   const innerH = Math.max(50, cssH - padT - padB);
 
@@ -361,7 +361,8 @@ function drawChart(list) {
         ? (v > 0 ? v.toFixed(1) + "/4" : "—")
         : Math.round(v).toLocaleString("fr-FR");
 
-    ctx.fillText(txt, padL + w + 8, y);
+    const tx = Math.min(padL + w + 8, cssW - padR + 4);
+    ctx.fillText(txt, tx, y);
   });
 
   canvas.onclick = (ev) => {

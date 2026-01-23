@@ -270,8 +270,8 @@ function renderTable(list) {
     tr.appendChild(imgTd);
     tr.appendChild(titleTd);
     tr.appendChild(vTd);
-    tr.appendChild(lTd);
-    tr.appendChild(mTd);
+    tr.appendChild(mTd); // 📥
+    tr.appendChild(lTd); // ❤️
     tr.appendChild(rcTd);
     tr.appendChild(raTd);
 

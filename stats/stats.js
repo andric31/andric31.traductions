@@ -230,8 +230,20 @@ function renderTable(list) {
     const img = document.createElement("img");
     img.className = "cover";
     img.loading = "lazy";
+    img.decoding = "async";
     img.alt = "";
-    img.src = g.imageUrl || "/favicon.png";
+    
+    // ✅ comme viewer : évite certains refus d’affichage
+    img.referrerPolicy = "no-referrer";
+    
+    img.src = (g.imageUrl || "").trim() || "/favicon.png";
+    
+    // ✅ fallback si hotlink/bad url
+    img.onerror = () => {
+      img.onerror = null;
+      img.src = "/favicon.png";
+      img.classList.add("is-fallback");
+    };
     imgTd.appendChild(img);
 
     const titleTd = document.createElement("td");

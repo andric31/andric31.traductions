@@ -4,25 +4,38 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Stats — Traductions</title>
+
   <link rel="icon" href="/favicon.png" />
   <link rel="stylesheet" href="/viewer.css" />
   <link rel="stylesheet" href="/stats/stats.css" />
 </head>
-<body>
+
+<body class="stats-page">
   <div class="stats-wrap">
 
     <main class="stats-main">
 
-      <!-- ✅ CARD UNIQUE : TOPBAR + GRAPHIQUE -->
+      <!-- ==================================================
+           CARD UNIQUE : STATS + FILTRES + GRAPHIQUE
+           ================================================== -->
       <section class="card card-top">
+
+        <!-- Topbar intégrée -->
         <div class="card-h card-h-topbar">
           <div class="stats-title">
             <div class="h1">📊 Stats</div>
-            <div class="sub">Tableau + graphique, indépendants de la page principale</div>
+            <div class="sub">
+              Tableau + graphique, indépendants de la page principale
+            </div>
           </div>
 
           <div class="stats-controls">
-            <input id="q" class="inp" placeholder="Rechercher (titre, tags, id…)" autocomplete="off" />
+            <input
+              id="q"
+              class="inp"
+              placeholder="Rechercher (titre, tags, id…)"
+              autocomplete="off"
+            />
 
             <select id="metric" class="sel" title="Métrique du graphique">
               <option value="views">👁️ Vues</option>
@@ -41,21 +54,27 @@
           </div>
         </div>
 
+        <!-- Header graphique -->
         <div class="card-h">
           <div class="card-title">Graphique (Top)</div>
           <div class="card-note" id="status">Chargement…</div>
         </div>
 
+        <!-- Graphique -->
         <div class="chart-wrap">
           <canvas id="chart" width="1400" height="560"></canvas>
         </div>
       </section>
 
-      <!-- TABLEAU (inchangé) -->
+      <!-- ==================================================
+           TABLEAU
+           ================================================== -->
       <section class="card">
         <div class="card-h">
           <div class="card-title">Tableau</div>
-          <div class="card-note">Clique une ligne pour ouvrir la fiche du jeu</div>
+          <div class="card-note">
+            Clique une ligne pour ouvrir la fiche du jeu
+          </div>
         </div>
 
         <div class="table-wrap">
@@ -83,5 +102,3 @@
   <script src="/stats/stats.js"></script>
 </body>
 </html>
-
-

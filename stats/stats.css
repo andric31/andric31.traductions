@@ -224,3 +224,26 @@ html, body{
 .stats-main{
   margin-top: 0 !important;
 }
+
+/* ===========================
+   FIX : gros espace en haut (hérité de viewer.css)
+   Ciblé UNIQUEMENT sur /stats/
+   =========================== */
+body.stats-page{
+  margin: 0 !important;
+  padding: 0 !important;
+  padding-top: 0 !important;      /* ✅ le plus fréquent */
+}
+
+/* si viewer.css ajoute un “spacer” via pseudo-élément */
+body.stats-page::before,
+body.stats-page::after{
+  content: none !important;
+  display: none !important;
+}
+
+/* au cas où un wrapper global ajoute de l’espace */
+body.stats-page .stats-wrap{
+  margin-top: 0 !important;
+  padding-top: 10px !important;   /* garde juste ton padding voulu */
+}

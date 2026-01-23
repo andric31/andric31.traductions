@@ -247,3 +247,27 @@ body.stats-page .stats-wrap{
   margin-top: 0 !important;
   padding-top: 10px !important;   /* garde juste ton padding voulu */
 }
+
+/* ===========================
+   FIX : viewer.css centre la page (gros vide en haut)
+   On force /stats/ à démarrer en haut
+   =========================== */
+body.stats-page{
+  /* si viewer.css met body en flex + centré */
+  display: block !important;
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
+
+  /* si viewer.css met une hauteur minimum qui pousse le centrage */
+  min-height: 0 !important;
+
+  /* au cas où */
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+/* parfois le flex/centrage est sur un wrapper global */
+body.stats-page > .stats-wrap{
+  margin-top: 0 !important;
+  align-self: flex-start !important;
+}

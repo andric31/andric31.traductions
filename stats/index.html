@@ -10,35 +10,37 @@
 </head>
 <body>
   <div class="stats-wrap">
-    <header class="stats-topbar">
-      <div class="stats-title">
-        <div class="h1">📊 Stats</div>
-        <div class="sub">Tableau + graphique, indépendants de la page principale</div>
-      </div>
-
-      <div class="stats-controls">
-        <input id="q" class="inp" placeholder="Rechercher (titre, tags, id…)" autocomplete="off" />
-
-        <select id="metric" class="sel" title="Métrique du graphique">
-          <option value="views">👁️ Vues</option>
-          <option value="likes">❤️ Likes</option>
-          <option value="mega">📥 MEGA</option>
-          <option value="ratingCount">⭐🗳️ Votes</option>
-          <option value="ratingAvg">⭐ Note (moy.)</option>
-
-        </select>
-
-        <select id="top" class="sel" title="Top">
-          <option value="30">Top 30</option>
-          <option value="50">Top 50</option>
-          <option value="100">Top 100</option>
-          <option value="0">Tout</option>
-        </select>
-      </div>
-    </header>
 
     <main class="stats-main">
-      <section class="card">
+
+      <!-- ✅ CARD UNIQUE : TOPBAR + GRAPHIQUE -->
+      <section class="card card-top">
+        <div class="card-h card-h-topbar">
+          <div class="stats-title">
+            <div class="h1">📊 Stats</div>
+            <div class="sub">Tableau + graphique, indépendants de la page principale</div>
+          </div>
+
+          <div class="stats-controls">
+            <input id="q" class="inp" placeholder="Rechercher (titre, tags, id…)" autocomplete="off" />
+
+            <select id="metric" class="sel" title="Métrique du graphique">
+              <option value="views">👁️ Vues</option>
+              <option value="likes">❤️ Likes</option>
+              <option value="mega">📥 MEGA</option>
+              <option value="ratingCount">⭐🗳️ Votes</option>
+              <option value="ratingAvg">⭐ Note (moy.)</option>
+            </select>
+
+            <select id="top" class="sel" title="Top">
+              <option value="30">Top 30</option>
+              <option value="50">Top 50</option>
+              <option value="100">Top 100</option>
+              <option value="0">Tout</option>
+            </select>
+          </div>
+        </div>
+
         <div class="card-h">
           <div class="card-title">Graphique (Top)</div>
           <div class="card-note" id="status">Chargement…</div>
@@ -49,6 +51,7 @@
         </div>
       </section>
 
+      <!-- TABLEAU (inchangé) -->
       <section class="card">
         <div class="card-h">
           <div class="card-title">Tableau</div>
@@ -73,10 +76,12 @@
           </table>
         </div>
       </section>
+
     </main>
   </div>
 
   <script src="/stats/stats.js"></script>
 </body>
 </html>
+
 

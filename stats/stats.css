@@ -190,3 +190,22 @@
 /* parfois un style global met des marges sur header/main */
 header.stats-topbar{ margin-top: 0 !important; }
 main.stats-main{ margin-top: 0 !important; }
+
+/* ✅ Topbar intégrée dans la card (sticky propre) */
+.card-h-topbar{
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
+  background: linear-gradient(180deg, rgba(15,17,23,.96), rgba(15,17,23,.86));
+  backdrop-filter: blur(8px);
+
+  /* même style que ton ancienne topbar */
+  border-bottom: 1px solid var(--border);
+  padding: 8px 10px;
+}
+
+/* ✅ Comme c’est dans une card, on gère l’arrondi uniquement en haut */
+.card-top{
+  overflow: hidden;
+}

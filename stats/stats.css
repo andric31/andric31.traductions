@@ -176,3 +176,17 @@
   .sel{ min-width:120px; }
   .tbl th,.tbl td{ padding:8px 8px; }
 }
+
+/* 🔥 Force le rapprochement topbar -> graphique (écrase viewer.css) */
+.stats-topbar{
+  margin-bottom: 4px !important;
+}
+
+.stats-main{
+  margin-top: 0 !important;   /* au lieu de 6px */
+  gap: 4px !important;        /* si tu veux encore plus serré */
+}
+
+/* parfois un style global met des marges sur header/main */
+header.stats-topbar{ margin-top: 0 !important; }
+main.stats-main{ margin-top: 0 !important; }

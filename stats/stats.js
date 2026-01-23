@@ -1,4 +1,4 @@
-("use strict");
+"use strict";
 
 const DEFAULT_URL = "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json";
 
@@ -48,7 +48,7 @@ async function fetchGameStatsBulk(ids) {
     if (!r.ok) return {};
     const j = await r.json();
     if (!j?.ok || !j.stats) return {};
-    return j.stats; // { idKey: {views, mega, likes}, ... }
+    return j.stats; // { key: {views, mega, likes}, ... }
   } catch {
     return {};
   }
@@ -79,54 +79,20 @@ const state = {
 };
 
 // ============================================================================
-// ✅ EXACTEMENT comme game.js : mêmes clés de compteur
-// - normal:            id:66273
-// - enfant collection: id:<collection>|uid:<uid>
-// - uid only:          uid:<uid>
+// ✅ COMPTEUR UID ONLY (cohérent avec game.js)
+// - la clé est TOUJOURS: uid:<uid>
 // ============================================================================
-function buildCounterKey(idParam, uidParam) {
-  const id = String(idParam || "").trim();
-  const uid = String(uidParam || "").trim();
-  if (id && uid) return `id:${id}|uid:${uid}`;
-  if (id) return `id:${id}`;
-  if (uid) return `uid:${uid}`;
-  return "";
-}
-
-// Déduire la clé compteur depuis un objet du f95list
 function counterKeyOf(g) {
-  const id = String(g?.id || "").trim();
   const uid = String(g?.uid ?? "").trim();
-  const col = String(g?.collection || "").trim();
-
-  // enfant de collection
-  if (col && uid) return buildCounterKey(col, uid);
-
-  // normal
-  if (id) return buildCounterKey(id, "");
-
-  // uid-only fallback
-  if (uid) return buildCounterKey("", uid);
-
-  return "";
+  return uid ? `uid:${uid}` : "";
 }
 
 // URL de la page jeu correspondante
 function getGameUrlForEntry(g) {
   const u = new URL("/game/", location.origin);
 
-  const id = String(g?.id || "").trim();
   const uid = String(g?.uid ?? "").trim();
-  const col = String(g?.collection || "").trim();
-
-  if (col && uid) {
-    u.searchParams.set("id", col);
-    u.searchParams.set("uid", uid);
-  } else if (id) {
-    u.searchParams.set("id", id);
-  } else if (uid) {
-    u.searchParams.set("uid", uid);
-  }
+  if (uid) u.searchParams.set("uid", uid);
 
   const p = new URLSearchParams(location.search);
   const src = (p.get("src") || "").trim();
@@ -373,7 +339,8 @@ function rerender() {
 
   const total = state.games.length;
   els.status.textContent = `${sorted.length}/${total} jeux (affichés: ${Math.min(
-    state.renderLimit, sorted.length
+    state.renderLimit,
+    sorted.length
   )}/${sorted.length})`;
 }
 
@@ -394,8 +361,9 @@ async function init() {
 
   els.status.textContent = "Chargement stats…";
 
-  // ✅ on envoie les vraies clés (id:..., id:...|uid:..., uid:...)
-  const keys = games.map(counterKeyOf).filter(Boolean);
+  // ✅ UID-only : on envoie uniquement des clés uid:<uid>, dédupliquées
+  const keys = [...new Set(games.map(counterKeyOf).filter(Boolean))];
+
   const statsObj = await fetchGameStatsBulk(keys);
 
   for (const k of keys) {
@@ -419,7 +387,10 @@ function wireEvents() {
   let t = null;
   const deb = () => {
     clearTimeout(t);
-    t = setTimeout(() => { resetLimit(); rerender(); }, 120);
+    t = setTimeout(() => {
+      resetLimit();
+      rerender();
+    }, 120);
   };
 
   els.q.addEventListener("input", deb);
@@ -435,10 +406,10 @@ function wireEvents() {
       const k = th.getAttribute("data-sort");
       if (!k) return;
 
-      if (state.sortKey === k) state.sortDir = (state.sortDir === "asc") ? "desc" : "asc";
+      if (state.sortKey === k) state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
       else {
         state.sortKey = k;
-        state.sortDir = (k === "title" || k === "updatedAt") ? "asc" : "desc";
+        state.sortDir = k === "title" || k === "updatedAt" ? "asc" : "desc";
       }
 
       resetLimit();

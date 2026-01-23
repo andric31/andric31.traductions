@@ -454,33 +454,55 @@ function wireEvents() {
   window.addEventListener("resize", () => rerender());
 
   // ==========================
-  // ✅ Scroll intelligent (table)
+  // ✅ Scroll intelligent (page OU table)
   // ==========================
-  const tryLoadMoreOnScroll = () => {
-    const wrap = els.tableWrap;
-    if (!wrap) return;
-  
-    // ✅ IMPORTANT : si le tableau ne scroll pas encore, on ne charge pas
-    if (wrap.scrollHeight <= wrap.clientHeight + 5) return;
-  
-    const threshold = 220;
-    const nearBottom = (wrap.scrollTop + wrap.clientHeight) >= (wrap.scrollHeight - threshold);
-    if (!nearBottom) return;
-  
+  const tryLoadMore = () => {
+    // On calcule la liste triée une seule fois
     const sorted = sortList(getFiltered());
     if (state.renderLimit >= sorted.length) return;
-  
+
+    const threshold = 260;
+
+    // 1) Cas A : la table a son propre scroll (scroll interne)
+    const wrap = els.tableWrap;
+    const tableIsScrollable = wrap && wrap.scrollHeight > wrap.clientHeight + 5;
+
+    if (tableIsScrollable) {
+      const nearBottomTable =
+        (wrap.scrollTop + wrap.clientHeight) >= (wrap.scrollHeight - threshold);
+
+      if (!nearBottomTable) return;
+    } else {
+      // 2) Cas B : scroll global de la page
+      const doc = document.documentElement;
+      const scrollTop = window.scrollY || doc.scrollTop || 0;
+      const winH = window.innerHeight || doc.clientHeight || 0;
+      const fullH = Math.max(doc.scrollHeight, document.body.scrollHeight);
+
+      const nearBottomPage = (scrollTop + winH) >= (fullH - threshold);
+      if (!nearBottomPage) return;
+    }
+
+    // ✅ On charge un lot de plus
     state.renderLimit = Math.min(state.renderLimit + state.renderStep, sorted.length);
-    rerender({ chart: false });
+    rerender({ chart: false }); // fluide
   };
 
+  // listeners
+  let raf = 0;
+
+  // scroll global
+  window.addEventListener("scroll", () => {
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(tryLoadMore);
+  }, { passive: true });
+
+  // scroll interne si jamais tu mets plus tard un max-height à table-wrap
   if (els.tableWrap) {
-    let raf = 0;
     els.tableWrap.addEventListener("scroll", () => {
       cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(tryLoadMoreOnScroll);
+      raf = requestAnimationFrame(tryLoadMore);
     }, { passive: true });
-
   }
 }
 

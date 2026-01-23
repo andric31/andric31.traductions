@@ -1,4 +1,4 @@
-("use strict");
+"use strict";
 
 const DEFAULT_URL = "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json";
 
@@ -54,6 +54,7 @@ async function fetchGameStatsBulk(ids) {
   }
 }
 
+// ✅ ratings bulk (doit exister côté backend)
 async function fetchRatingsBulk(ids) {
   try {
     const r = await fetch("/api/ratings4s", {
@@ -100,14 +101,14 @@ const state = {
 };
 
 // ============================================================================
-// ✅ UID ONLY — clé compteur unique
+// ✅ UID ONLY — clé unique
 // ============================================================================
 function counterKeyOf(g) {
   const uid = String(g?.uid ?? "").trim();
   return uid ? `uid:${uid}` : "";
 }
 
-// URL de la page jeu correspondante
+// URL de la page jeu correspondante (uid only)
 function getGameUrlForEntry(g) {
   const u = new URL("/game/", location.origin);
 
@@ -151,8 +152,8 @@ function getFiltered() {
     g._mega = s.mega | 0;
 
     const r = state.ratingByKey.get(key) || { avg: 0, count: 0, sum: 0 };
-    g._rating = Number(r.avg || 0);
-    g._votes = Number(r.count || 0);
+    g._ratingAvg = Number(r.avg || 0);
+    g._ratingCount = Number(r.count || 0);
 
     g._ckey = key;
   }
@@ -170,20 +171,27 @@ function sortList(list) {
     if (key === "views") return g._views | 0;
     if (key === "likes") return g._likes | 0;
     if (key === "mega") return g._mega | 0;
-    if (key === "rating") return Number(g._rating || 0);
-    if (key === "votes") return g._votes | 0;
+    if (key === "ratingAvg") return Number(g._ratingAvg || 0);
+    if (key === "ratingCount") return g._ratingCount | 0;
     return "";
   };
 
   return list.slice().sort((a, b) => {
     const va = getv(a), vb = getv(b);
 
-    // rating = float
-    if (key === "rating") {
+    // ratingAvg : float (avec tie-breaker votes)
+    if (key === "ratingAvg") {
       if (va !== vb) return (va - vb) * dir;
-      // tie-breaker : votes
-      const da = a._votes | 0, db = b._votes | 0;
-      if (da !== db) return (da - db) * dir;
+      const ca = a._ratingCount | 0, cb = b._ratingCount | 0;
+      if (ca !== cb) return (ca - cb) * dir;
+      return String(a.cleanTitle || a.title || "").localeCompare(String(b.cleanTitle || b.title || ""), "fr");
+    }
+
+    // ratingCount : tie-breaker avg
+    if (key === "ratingCount") {
+      if (va !== vb) return (va - vb) * dir;
+      const ra = Number(a._ratingAvg || 0), rb = Number(b._ratingAvg || 0);
+      if (ra !== rb) return (ra - rb) * dir;
       return String(a.cleanTitle || a.title || "").localeCompare(String(b.cleanTitle || b.title || ""), "fr");
     }
 
@@ -245,13 +253,14 @@ function renderTable(list) {
     mTd.className = "num";
     mTd.textContent = (g._mega | 0).toLocaleString("fr-FR");
 
-    const rTd = document.createElement("td");
-    rTd.className = "num";
-    rTd.textContent = fmtRating(g._rating, g._votes);
+    // ✅ ordre comme ton HTML : Votes puis Note
+    const rcTd = document.createElement("td");
+    rcTd.className = "num";
+    rcTd.textContent = (g._ratingCount | 0).toLocaleString("fr-FR");
 
-    const cTd = document.createElement("td");
-    cTd.className = "num";
-    cTd.textContent = (g._votes | 0).toLocaleString("fr-FR");
+    const raTd = document.createElement("td");
+    raTd.className = "num";
+    raTd.textContent = fmtRating(g._ratingAvg, g._ratingCount);
 
     tr.appendChild(imgTd);
     tr.appendChild(titleTd);
@@ -259,8 +268,8 @@ function renderTable(list) {
     tr.appendChild(vTd);
     tr.appendChild(lTd);
     tr.appendChild(mTd);
-    tr.appendChild(rTd);
-    tr.appendChild(cTd);
+    tr.appendChild(rcTd);
+    tr.appendChild(raTd);
 
     frag.appendChild(tr);
   }
@@ -322,7 +331,7 @@ function drawChart(list) {
     ctx.textAlign = "center";
 
     const label =
-      metric === "rating"
+      metric === "ratingAvg"
         ? val.toFixed(1)
         : Math.round(val).toLocaleString("fr-FR");
 
@@ -354,7 +363,7 @@ function drawChart(list) {
     ctx.textAlign = "left";
 
     const txt =
-      metric === "rating"
+      metric === "ratingAvg"
         ? (v > 0 ? v.toFixed(1) + "/4" : "—")
         : Math.round(v).toLocaleString("fr-FR");
 
@@ -377,8 +386,8 @@ function metricValue(g, metric) {
   if (metric === "views") return g._views | 0;
   if (metric === "likes") return g._likes | 0;
   if (metric === "mega") return g._mega | 0;
-  if (metric === "rating") return Number(g._rating || 0);
-  if (metric === "votes") return g._votes | 0;
+  if (metric === "ratingCount") return g._ratingCount | 0;
+  if (metric === "ratingAvg") return Number(g._ratingAvg || 0);
   return 0;
 }
 
@@ -487,9 +496,9 @@ function wireEvents() {
         state.sortDir = (k === "title" || k === "updatedAt") ? "asc" : "desc";
       }
 
-      // rating: par défaut DESC (meilleures notes)
-      if (k === "rating") state.sortDir = "desc";
-      if (k === "votes") state.sortDir = "desc";
+      // rating: par défaut DESC (meilleurs)
+      if (k === "ratingAvg") state.sortDir = "desc";
+      if (k === "ratingCount") state.sortDir = "desc";
 
       resetLimit();
       rerender();

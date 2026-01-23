@@ -53,8 +53,14 @@ html,body{
   border-bottom:1px solid var(--border);
 }
 
-.card-title{ font-weight:800; }
-.card-note{ font-size:12px; color:var(--muted); }
+.card-title{
+  font-weight:800;
+}
+
+.card-note{
+  font-size:12px;
+  color:var(--muted);
+}
 
 /* ----- Titre stats ----- */
 .stats-title .h1{
@@ -170,16 +176,7 @@ html,body{
 }
 
 /* =========================
-   Actions header (droite)
-   ========================= */
-.card-actions{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-/* =========================
-   Bouton graphique
+   Bouton graphique (moderne)
    ========================= */
 .btn-chart{
   appearance:none;
@@ -223,4 +220,44 @@ html,body{
   background:rgba(90,162,255,0.22);
   border-color:rgba(90,162,255,0.6);
   color:#fff;
+}
+
+/* =========================
+   Fix chevauchement header (Graph)
+   ========================= */
+
+/* le header peut wrap si besoin (mobile / petits écrans) */
+.card-h{
+  flex-wrap: wrap;
+}
+
+/* IMPORTANT : autorise aussi le bloc gauche à rétrécir */
+.card-title{
+  min-width: 0;
+}
+
+/* zone droite : bien à droite + ellipsis possible */
+.card-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+
+  margin-left:auto;
+  min-width:0;            /* ellipsis */
+  flex: 1 1 auto;         /* prend la place dispo */
+  justify-content:flex-end;
+}
+
+/* le compteur ne doit pas pousser le bouton hors cadre */
+#statusChart{
+  min-width:0;
+  max-width:min(60vw, 520px);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* le bouton ne rétrécit jamais */
+.btn-chart{
+  flex:0 0 auto;
 }

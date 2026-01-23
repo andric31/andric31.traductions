@@ -1,6 +1,6 @@
 /* =========================================================
-   Stats — AUTONOME
-   Aucun lien avec viewer.css
+   Stats — AUTONOME (sans viewer.css)
+   Look dark/compact + layout simple (pas de sticky/collage)
    ========================================================= */
 
 /* ---------- Variables & base ---------- */
@@ -38,10 +38,10 @@ html,body{
 .stats-main{
   display:flex;
   flex-direction:column;
-  gap:8px;
+  gap:10px; /* espace naturel entre Graphique et Tableau */
 }
 
-/* ---------- Card ---------- */
+/* ---------- Cards ---------- */
 .card{
   background:var(--card);
   border:1px solid var(--border);
@@ -68,7 +68,7 @@ html,body{
   color:var(--muted);
 }
 
-/* ---------- Topbar intégrée ---------- */
+/* ---------- Zone titre + filtres (dans la card) ---------- */
 .card-h-topbar{
   background:linear-gradient(
     180deg,
@@ -81,6 +81,7 @@ html,body{
 .stats-title .h1{
   font-size:19px;
   font-weight:800;
+  letter-spacing:.2px;
 }
 
 .stats-title .sub{
@@ -94,6 +95,7 @@ html,body{
   display:flex;
   gap:6px;
   align-items:center;
+  justify-content:flex-end;
   flex-wrap:wrap;
 }
 
@@ -119,10 +121,12 @@ html,body{
 .chart-wrap{
   padding:8px 12px 6px;
   overflow:auto;
+  max-height:620px;
 }
 
 .chart-wrap canvas{
   width:100%;
+  height:auto;
   display:block;
   border:1px solid var(--border);
   border-radius:12px;

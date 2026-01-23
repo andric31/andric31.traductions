@@ -141,16 +141,17 @@ html,body{
   cursor:pointer;
 }
 
-/* ✅ Covers x4 : 50px -> 200px */
-.c-cover{ width:220px; }           /* colonne plus large */
+/* ✅ Covers : hauteur inchangée, largeur x4 */
+.c-cover{ width: 220px; }   /* colonne plus large */
+
 .cover{
-  width:200px;
-  height:200px;
-  border-radius:14px;
-  object-fit:cover;
-  border:1px solid var(--border);
-  background:rgba(0,0,0,.2);
-  display:block;
+  width: 200px;             /* ✅ largeur x4 (50 -> 200) */
+  height: 50px;             /* ✅ hauteur IDENTIQUE à avant */
+  border-radius: 10px;
+  object-fit: cover;        /* coupe proprement */
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,.2);
+  display: block;
 }
 
 /* ---- Petits textes sous titre ---- */

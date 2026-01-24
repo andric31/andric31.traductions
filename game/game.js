@@ -1135,8 +1135,10 @@ function renderVideoBlock({ id, videoUrl }) {
       <h3>📺 Vidéo</h3>
       <iframe
         src="${escapeHtml(u)}"
+        referrerpolicy="strict-origin-when-cross-origin"
         style="width:100%; aspect-ratio:16/9; border-radius:12px; border:1px solid var(--border);"
         loading="lazy"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowfullscreen>
       </iframe>
     </div>

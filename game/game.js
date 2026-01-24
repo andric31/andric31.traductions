@@ -1132,7 +1132,6 @@ function renderVideoBlock({ id, videoUrl }) {
     id,
     `
     <div class="game-block">
-      <h3>📺 Vidéo</h3>
       <iframe
         src="${escapeHtml(u)}"
         referrerpolicy="strict-origin-when-cross-origin"

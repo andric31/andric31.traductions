@@ -287,25 +287,40 @@
       border-color:#4752C4;
     }
     
+    /* 🌐 F95Zone — noir adouci (intérieur plus lisible, fixe) */
     #btnF95.btn-f95{
       position: relative;
-      background: #303030;
-      border-color: rgba(255,255,255,.14);
-      color:#fff;
-      box-shadow: 0 10px 22px rgba(0,0,0,.35);
+      background: linear-gradient(
+        180deg,
+        #1a1a1a 0%,
+        #111111 100%
+      );
+      border-color: rgba(255,255,255,.18);
+      color:#ffffff;
+      box-shadow: 0 8px 18px rgba(0,0,0,.35);
       overflow: hidden;
       transform: none;
     }
+    
+    /* Bande rouge F95 */
     #btnF95.btn-f95::before{
       content:"";
       position:absolute;
-      left:0; top:0; bottom:0;
+      left:0;
+      top:0;
+      bottom:0;
       width:6px;
       background: linear-gradient(180deg, #ff3b30, #b71c1c);
     }
+    
+    /* Hover : éclaircissement léger, sans mouvement */
     #btnF95.btn-f95:hover{
-      background:#141414;
-      border-color: rgba(255,255,255,.22);
+      background: linear-gradient(
+        180deg,
+        #222222 0%,
+        #161616 100%
+      );
+      border-color: rgba(255,255,255,.28);
       transform: none;
     }
 

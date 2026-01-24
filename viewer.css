@@ -845,6 +845,11 @@ main{
 }
 
 /* 🔒 Supprimer l’espace interne UNIQUEMENT pour F95 */
+/* Micro espace contrôlé entre F95 et Zone */
 #btnF95{
-  gap: 1 !important;
+  gap: 0 !important;
+}
+
+#btnF95 .f95-red{
+  margin-left: 1px;   /* 🔥 parfait */
 }

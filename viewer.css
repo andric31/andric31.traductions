@@ -843,3 +843,8 @@ main{
   background: #1a1a1a;
   border-color: #d32f2f;
 }
+
+/* 🔒 Supprimer l’espace interne UNIQUEMENT pour F95 */
+#btnF95{
+  gap: 0 !important;
+}

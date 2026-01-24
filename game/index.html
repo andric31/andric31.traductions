@@ -287,24 +287,52 @@
       border-color:#4752C4;
     }
 
+    /* Texte F95Zone bicolore (logo-like) */
+    #btnF95 .f95-white{
+      color:#ffffff;
+      font-weight:800;
+    }
+    #btnF95 .f95-red{
+      color:#8b2d2d;
+      font-weight:800;
+    }
+
     #btnF95.btn-f95{
+      position: relative;
       background: linear-gradient(
         180deg,
         #222222 0%,
         #161616 100%
       );
-      border: none;
+      border-color: rgba(255,255,255,.6);
       color:#ffffff;
-      box-shadow: none;
+      box-shadow: 0 8px 18px rgba(0,0,0,.35);
+      overflow: hidden;
       transform: none;
+    }
+    
+    /* Bande rouge F95 */
+    #btnF95.btn-f95::before{
+      content:"";
+      position:absolute;
+      left:0;
+      top:0;
+      bottom:0;
+      width:6px;
+      background: linear-gradient(
+        180deg,
+        #8b2d2d 0%,
+        #6e1f1f 100%
+      );
     }
     
     #btnF95.btn-f95:hover{
       background: linear-gradient(
         180deg,
-        #1f1f1f 0%,
-        #141414 100%
+        #1a1a1a 0%,
+        #111111 100%
       );
+      border-color: rgba(255,255,255,.18);
       transform: none;
     }
 

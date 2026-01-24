@@ -287,18 +287,40 @@
       border-color:#4752C4;
     }
     
-    /* 🌐 F95Zone — simple, lisible, pas prise de tête */
+    /* 🌐 F95Zone — noir adouci (couleurs inversées) */
     #btnF95.btn-f95{
-      background: #1e1e1e;
-      border: 1px solid rgba(229,57,53,.6);
-      color:#fff;
-      box-shadow: none;
+      position: relative;
+      background: linear-gradient(
+        180deg,
+        #222222 0%,
+        #161616 100%
+      );
+      border-color: rgba(255,255,255,.28);
+      color:#ffffff;
+      box-shadow: 0 8px 18px rgba(0,0,0,.35);
+      overflow: hidden;
       transform: none;
     }
     
+    /* Bande rouge F95 */
+    #btnF95.btn-f95::before{
+      content:"";
+      position:absolute;
+      left:0;
+      top:0;
+      bottom:0;
+      width:6px;
+      background: linear-gradient(180deg, #ff3b30, #b71c1c);
+    }
+    
+    /* Hover : retour plus sombre, sans mouvement */
     #btnF95.btn-f95:hover{
-      background: #242424;
-      border-color: #e53935;
+      background: linear-gradient(
+        180deg,
+        #1a1a1a 0%,
+        #111111 100%
+      );
+      border-color: rgba(255,255,255,.18);
       transform: none;
     }
 

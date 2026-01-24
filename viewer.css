@@ -846,5 +846,5 @@ main{
 
 /* 🔒 Supprimer l’espace interne UNIQUEMENT pour F95 */
 #btnF95{
-  gap: 0 !important;
+  gap: 2 !important;
 }

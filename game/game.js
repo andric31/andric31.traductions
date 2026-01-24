@@ -1262,10 +1262,16 @@ function renderVideoBlock({ id, videoUrl }) {
     // 5) Boutons Discord + F95 (inchangés)
     // =========================
     setHref("btnDiscord", (entry.discordlink || "").trim());
-    if ($("btnDiscord")) $("btnDiscord").textContent = "💬 Discord";
-
+    if ($("btnDiscord")) {
+      $("btnDiscord").textContent = "💬 Discord";
+      $("btnDiscord").classList.add("btn-discord");
+    }
+    
     setHref("btnF95", (entry.url || "").trim());
-    if ($("btnF95")) $("btnF95").textContent = "🌐 F95Zone";
+    if ($("btnF95")) {
+      $("btnF95").textContent = "🌐 F95Zone";
+      $("btnF95").classList.add("btn-f95");
+    }
 
     // =========================
     // 6) MEGA (bouton existant)

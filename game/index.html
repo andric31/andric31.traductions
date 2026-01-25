@@ -296,37 +296,33 @@
       color:#8b2d2d;
       font-weight:800;
     }
-
+    
+    /* Style bouton (comme avant) */
     #btnF95.btn-f95{
       position: relative;
+      background: linear-gradient(180deg, #222222 0%, #161616 100%);
+      border-color: rgba(255,255,255,.07);
+      color:#ffffff;
+      box-shadow: 0 8px 18px rgba(0,0,0,.35);
+      overflow: hidden;
+      transform: none;
     }
     
+    /* Assure que le texte reste au-dessus */
     #btnF95.btn-f95 span{
       position: relative;
       z-index: 1;
     }
     
-    /* Bande rouge F95 */
+    /* ✅ SUPPRIME la languette rouge */
     #btnF95.btn-f95::before{
-      content:"";
-      position:absolute;
-      left:0;
-      top:0;
-      bottom:0;
-      width:6px;
-      background: linear-gradient(
-        180deg,
-        #8b2d2d 0%,
-        #6e1f1f 100%
-      );
+      content: none !important;
+      display: none !important;
     }
     
+    /* Hover (comme avant) */
     #btnF95.btn-f95:hover{
-      background: linear-gradient(
-        180deg,
-        #1a1a1a 0%,
-        #111111 100%
-      );
+      background: linear-gradient(180deg, #1a1a1a 0%, #111111 100%);
       border-color: rgba(255,255,255,.07);
       transform: none;
     }

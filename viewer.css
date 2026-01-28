@@ -853,3 +853,47 @@ main{
 #btnF95 .f95-red{
   margin-left: 2px;   /* 🔥 parfait */
 }
+
+/* ===== AGE GATE ===== */
+#age-gate {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.88);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.age-box {
+  background: #111;
+  color: #fff;
+  padding: 28px;
+  max-width: 440px;
+  text-align: center;
+  border-radius: 12px;
+  box-shadow: 0 0 30px rgba(0,0,0,0.7);
+}
+
+.age-box h2 {
+  margin-top: 0;
+}
+
+.age-box button {
+  margin: 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#age-yes {
+  background: #4CAF50;
+  color: #000;
+}
+
+#age-no {
+  background: #f44336;
+  color: #fff;
+}

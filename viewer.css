@@ -897,3 +897,12 @@ main{
   background: #f44336;
   color: #fff;
 }
+
+/* ===== Flou contenu tant que age-gate actif ===== */
+body.age-gate-active main,
+body.age-gate-active header,
+body.age-gate-active footer {
+  filter: blur(8px);
+  pointer-events: none;
+  user-select: none;
+}

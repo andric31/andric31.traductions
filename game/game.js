@@ -208,7 +208,7 @@ function resolveGamePage(params, games) {
 // ✅ Ton ordre final: tags -> related -> description -> video -> boutons -> mega -> notes -> archive
 function ensureRelatedContainer() {
   // ✅ s'insère dans l'encadré Tags+Résumé (mainInfoBox)
-  const anchor = document.getElementById("tags");
+  const anchor = document.getElementById("mainInfoBox");
   if (!anchor) return null;
 
   let out = document.getElementById("relatedOut");
@@ -1261,9 +1261,16 @@ function renderVideoBlock({ id, videoUrl }) {
     }
 
     // =========================
-    // 4) Vidéo (si présent) sous description
+    // 4) Vidéo (si présent) sous description (et sous related si présent)
     // =========================
-    const videoAnchor = (mainInfoBox && mainInfoBox.style.display !== "none") ? mainInfoBox : (relatedOut || tagsEl);
+    const mainInfoBox = document.getElementById("mainInfoBox");
+    
+    // ✅ si related existe et contient quelque chose → vidéo sous related
+    // sinon → vidéo sous mainInfoBox (qui contient tags + résumé)
+    const videoAnchor =
+      (relatedOut && relatedOut.innerHTML.trim())
+        ? relatedOut
+        : mainInfoBox;
     
     const videoHost = ensureBlockAfter(videoAnchor, "videoHost");
     renderVideoBlock({

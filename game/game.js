@@ -207,9 +207,10 @@ function resolveGamePage(params, games) {
 // ====== Related container: on va l'insérer après les tags OU après description (selon ton ordre)
 // ✅ Ton ordre final: tags -> related -> description -> video -> boutons -> mega -> notes -> archive
 function ensureRelatedContainer() {
-  // ✅ s'insère dans l'encadré Tags+Résumé (mainInfoBox)
-  const anchor = document.getElementById("mainInfoBox");
-  if (!anchor) return null;
+  const main = document.getElementById("mainInfoBox");
+  const tags = document.getElementById("tags");
+  const descInner = document.getElementById("descInnerBox");
+  if (!main || !tags) return null;
 
   let out = document.getElementById("relatedOut");
   if (!out) {
@@ -218,7 +219,13 @@ function ensureRelatedContainer() {
     out.style.marginTop = "12px";
     out.style.display = "grid";
     out.style.gap = "10px";
-    anchor.parentNode.insertBefore(out, anchor.nextSibling);
+
+    // ✅ on insère ENTRE tags et résumé (encadré interne)
+    if (descInner && descInner.parentNode === main) {
+      main.insertBefore(out, descInner);
+    } else {
+      main.appendChild(out);
+    }
   }
   return out;
 }
@@ -1261,12 +1268,8 @@ function renderVideoBlock({ id, videoUrl }) {
     }
 
     // =========================
-    // 4) Vidéo (si présent) sous description (et sous related si présent)
+    // 4) Vidéo (si présent) sous le bloc principal
     // =========================
-    const mainInfoBox = document.getElementById("mainInfoBox");
-    
-    // ✅ si related existe et contient quelque chose → vidéo sous related
-    // sinon → vidéo sous mainInfoBox (qui contient tags + résumé)
     const videoAnchor =
       (relatedOut && relatedOut.innerHTML.trim())
         ? relatedOut

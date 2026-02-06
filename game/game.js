@@ -1282,6 +1282,41 @@ function renderVideoBlock({ id, videoUrl }) {
     });
 
     // =========================
+    // ✅ Forcer l'ordre : mainInfoBox -> vidéo -> boutons -> MEGA -> archives
+    // (sans toucher au HTML)
+    // =========================
+    (function enforceButtonsOrder(){
+      const cardInner = document.querySelector(".cardInner");
+      if (!cardInner) return;
+    
+      const btnRow = document.querySelector(".btnRow");
+      const btnMainRow = document.querySelector(".btnMainRow");
+      const archiveBox = document.getElementById("archiveBox");
+    
+      // ancre = vidéo si présente, sinon mainInfoBox, sinon descriptionBox
+      const videoEl = document.getElementById("videoHost") || document.getElementById("videoBox");
+      const mainInfoBox = document.getElementById("mainInfoBox");
+      const descBox = document.getElementById("descriptionBox");
+    
+      const anchor = (videoEl && videoEl.style.display !== "none") ? videoEl
+                   : (mainInfoBox && mainInfoBox.style.display !== "none") ? mainInfoBox
+                   : (descBox && descBox.style.display !== "none") ? descBox
+                   : null;
+    
+      if (!anchor) return;
+    
+      const insertAfter = (ref, el) => {
+        if (!ref || !el || !ref.parentNode) return;
+        ref.parentNode.insertBefore(el, ref.nextSibling);
+      };
+    
+      // ✅ ordre exact
+      if (btnRow) insertAfter(anchor, btnRow);
+      if (btnMainRow) insertAfter(btnRow || anchor, btnMainRow);
+      if (archiveBox) insertAfter(btnMainRow || btnRow || anchor, archiveBox);
+    })();
+
+    // =========================
     // 5) Boutons Discord + F95 (inchangés)
     // =========================
     setHref("btnDiscord", (entry.discordlink || "").trim());

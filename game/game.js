@@ -207,6 +207,7 @@ function resolveGamePage(params, games) {
 // ====== Related container: on va l'insérer après les tags OU après description (selon ton ordre)
 // ✅ Ton ordre final: tags -> related -> description -> video -> boutons -> mega -> notes -> archive
 function ensureRelatedContainer() {
+  // ✅ s'insère dans l'encadré Tags+Résumé (mainInfoBox)
   const anchor = document.getElementById("tags");
   if (!anchor) return null;
 
@@ -217,7 +218,6 @@ function ensureRelatedContainer() {
     out.style.marginTop = "12px";
     out.style.display = "grid";
     out.style.gap = "10px";
-    // insertion juste après tags (ordre demandé)
     anchor.parentNode.insertBefore(out, anchor.nextSibling);
   }
   return out;
@@ -1228,29 +1228,29 @@ function renderVideoBlock({ id, videoUrl }) {
     }
 
     // =========================
-    // 3) Description (juste après related, avant vidéo)
+    // 3) ✅ Encadré principal : Tags + Résumé (+ related entre les 2 si présent)
     // =========================
-    const descAnchor = relatedOut || tagsEl;
-    const descBox = document.getElementById("descriptionBox");
+    const mainInfoBox = document.getElementById("mainInfoBox");
     const descTextEl = document.getElementById("descriptionText");
     
-    if (descBox && descAnchor && descAnchor.parentNode) {
-      // ✅ force la position: juste après related/tags (donc AVANT les liens)
-      descAnchor.parentNode.insertBefore(descBox, descAnchor.nextSibling);
-    }
-    
     const description = (entry.description || "").trim();
-    if (description && descBox && descTextEl) {
-      descTextEl.innerHTML = escapeHtml(description).replace(/\n/g, "<br>");
-      descBox.style.display = "";
-    } else if (descBox) {
-      descBox.style.display = "none";
+    
+    if (mainInfoBox) {
+      // on affiche l'encadré seulement si tags OU description
+      const hasTags = Array.isArray(display.tags || entry.tags) && (display.tags || entry.tags).length > 0;
+      const hasDesc = !!description;
+    
+      if (hasDesc && descTextEl) {
+        descTextEl.innerHTML = escapeHtml(description).replace(/\n/g, "<br>");
+      }
+    
+      mainInfoBox.style.display = (hasTags || hasDesc) ? "" : "none";
     }
 
     // =========================
     // 4) Vidéo (si présent) sous description
     // =========================
-    const videoAnchor = (descBox && descBox.style.display !== "none") ? descBox : (relatedOut || tagsEl);
+    const videoAnchor = (mainInfoBox && mainInfoBox.style.display !== "none") ? mainInfoBox : (relatedOut || tagsEl);
     
     const videoHost = ensureBlockAfter(videoAnchor, "videoHost");
     renderVideoBlock({

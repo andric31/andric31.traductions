@@ -1231,19 +1231,32 @@ function renderVideoBlock({ id, videoUrl }) {
     // 3) ✅ Encadré principal : Tags + Résumé (+ related entre les 2 si présent)
     // =========================
     const mainInfoBox = document.getElementById("mainInfoBox");
+    const descInnerBox = document.getElementById("descInnerBox"); // ⭐ AJOUT
     const descTextEl = document.getElementById("descriptionText");
     
     const description = (entry.description || "").trim();
     
     if (mainInfoBox) {
-      // on affiche l'encadré seulement si tags OU description
-      const hasTags = Array.isArray(display.tags || entry.tags) && (display.tags || entry.tags).length > 0;
+    
+      const hasTags =
+        Array.isArray(display.tags || entry.tags) &&
+        (display.tags || entry.tags).length > 0;
+    
       const hasDesc = !!description;
     
-      if (hasDesc && descTextEl) {
-        descTextEl.innerHTML = escapeHtml(description).replace(/\n/g, "<br>");
+      // ✅ Remplit le résumé
+      if (descTextEl) {
+        descTextEl.innerHTML = hasDesc
+          ? escapeHtml(description).replace(/\n/g, "<br>")
+          : "";
       }
     
+      // ✅ Affiche / masque l'encadré interne
+      if (descInnerBox) {
+        descInnerBox.style.display = hasDesc ? "" : "none";
+      }
+    
+      // ✅ Affiche / masque le grand encadré
       mainInfoBox.style.display = (hasTags || hasDesc) ? "" : "none";
     }
 

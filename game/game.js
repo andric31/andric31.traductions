@@ -1337,7 +1337,7 @@ function renderVideoBlock({ id, videoUrl }) {
     const megaHref = (entry.translation || "").trim();
     const archiveHref = (entry.translationsArchive || "").trim();
     setHref("btnMega", megaHref);
-    if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction (MEGA)";
+    if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction · MEGA";
     // ⭐⭐⭐⭐⭐ FIX IMPORTANT ⭐⭐⭐⭐⭐
     // Cache aussi la ligne entière sinon le margin crée un trou quand MEGA est vide
     const megaRow = document.getElementById("btnMega")?.closest(".btnMainRow");

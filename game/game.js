@@ -1292,7 +1292,7 @@ function renderVideoBlock({ id, videoUrl }) {
     
     setHref("btnF95", (entry.url || "").trim());
     if ($("btnF95")) {
-      $("btnF95").innerHTML = '<span class="f95-white"> F95</span><span class="f95-red">Zone</span>';
+      $("btnF95").innerHTML = '<span class="f95-white">F95</span><span class="f95-red">Zone</span>';
       $("btnF95").classList.add("btn-f95");
     }
 
@@ -1355,7 +1355,7 @@ function renderVideoBlock({ id, videoUrl }) {
 
         // libellé (F95 bicolore identique)
         if (hostCls === "btn-f95" && /f95\s*zone/i.test(name)) {
-          a.innerHTML = `📥 Télécharger la traduction · <span class="f95-white"> F95</span><span class="f95-red">Zone</span>`;
+          a.innerHTML = `📥 Télécharger la traduction · <span class="f95-white">F95</span><span class="f95-red">Zone</span>`;
         } else {
           a.textContent = `📥 Télécharger la traduction · ${name}`;
         }

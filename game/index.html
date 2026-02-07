@@ -14,10 +14,10 @@
       min-height: 100vh;
       margin: 0;
       display:flex;
-      align-items:flex-start;   /* ✅ plus de center vertical */
+      align-items:flex-start;
       justify-content:center;
-      overflow-y:auto;          /* ✅ scroll global */
-      padding: 18px 0;          /* ✅ marge haut/bas pour éviter coupure */
+      overflow-y:auto;
+      padding: 18px 0;
     }
 
     .wrap{
@@ -38,7 +38,6 @@
       padding: 16px 16px 18px 16px;
     }
 
-    /* ✅ Ligne du haut : bouton ☰ + badges */
     .headRow{
       display:flex;
       align-items:center;
@@ -55,7 +54,6 @@
       margin:0;
     }
 
-    /* ✅ bouton hamburger (page game) */
     .hamburger-btn{
       width:34px;
       height:34px;
@@ -87,7 +85,6 @@
       opacity:0.92;
     }
 
-    /* ✅ popover menu */
     .menu-popover{
       position:fixed;
       z-index:2000;
@@ -116,7 +113,6 @@
       border-color: rgba(255,255,255,0.06);
     }
 
-    /* ✅ modal À propos */
     .modal-overlay{
       position:fixed;
       inset:0;
@@ -193,7 +189,6 @@
     }
     .modal-btn:hover{ filter: brightness(1.08); }
 
-    /* ✅ Etat MAJ (comme extension) */
     .majState{
       margin-top: -2px;
       margin-bottom: 8px;
@@ -213,7 +208,6 @@
       color: #fff;
     }
 
-    /* Cover */
     .cover{
       width:100%;
       height: 190px;
@@ -287,17 +281,9 @@
       border-color:#4752C4;
     }
 
-    /* Texte F95Zone bicolore (logo-like) */
-    .btnLike .f95-white{
-      color:#ffffff;
-      font-weight:800;
-    }
-    .btnLike .f95-red{
-      color:#8b2d2d;
-      font-weight:800;
-    }
-    
-    /* Style bouton (comme avant) */
+    .btnLike .f95-white{ color:#ffffff; font-weight:800; }
+    .btnLike .f95-red{ color:#8b2d2d; font-weight:800; }
+
     .btnLike.btn-f95,
     #btnF95.btn-f95{
       position: relative;
@@ -308,22 +294,19 @@
       overflow: hidden;
       transform: none;
     }
-    
-    /* Assure que le texte reste au-dessus */
+
     .btnLike.btn-f95 span,
     #btnF95.btn-f95 span{
       position: relative;
       z-index: 1;
     }
-    
-    /* ✅ SUPPRIME la languette rouge */
+
     .btnLike.btn-f95::before,
     #btnF95.btn-f95::before{
       content: none !important;
       display: none !important;
     }
-    
-    /* Hover (comme avant) */
+
     .btnLike.btn-f95:hover,
     #btnF95.btn-f95:hover{
       background: linear-gradient(180deg, #1a1a1a 0%, #111111 100%);
@@ -333,52 +316,36 @@
 
     .btnLike.btnMega,
     #btnMega{
-      background: linear-gradient(
-        180deg,
-        #b71c1c 0%,
-        #8e0e0e 100%
-      );
+      background: linear-gradient(180deg,#b71c1c 0%,#8e0e0e 100%);
       border: 1px solid rgba(255,255,255,.04);
       color:#ffffff;
       box-shadow: 0 8px 18px rgba(0,0,0,.40);
       transform: none;
     }
-    
-    /* Hover : léger éclaircissement, sans mouvement */
+
     .btnLike.btnMega:hover,
     #btnMega:hover{
-      background: linear-gradient(
-        180deg,
-        #c62828 0%,
-        #9f1b1b 100%
-      );
+      background: linear-gradient(180deg,#c62828 0%,#9f1b1b 100%);
       border-color: rgba(255,255,255,.04);
       transform: none;
     }
 
-    /* ⭐ Notation (étoiles + croix) */
     .ratingStar,
     .ratingCancel{
       display:inline-flex;
       align-items:center;
       justify-content:center;
-
       width: 40px;
       height: 34px;
-
       background: rgba(255,255,255,0.035);
       border: 1px solid var(--border);
       border-radius: 10px;
-
       cursor: pointer;
       user-select: none;
-
       font-size: 26px;
       line-height: 1;
       color: #ffd36b;
-
       opacity: 0.7;
-
       transition:
         opacity 220ms cubic-bezier(.4,0,.2,1),
         transform 220ms cubic-bezier(.4,0,.2,1),
@@ -407,7 +374,6 @@
 
     #ratingChoices{ flex-wrap: nowrap; }
 
-    /* ✨ Fade doux sur le texte (ratingMsg) */
     #ratingMsg{
       opacity: 0.82;
       transition: opacity 220ms cubic-bezier(.4,0,.2,1);
@@ -421,7 +387,6 @@
       animation: ratingMsgFade 520ms cubic-bezier(.4,0,.2,1);
     }
 
-    /* 📊 Stats */
     .statsOut{
       margin-top: 10px;
       padding: 10px 12px;
@@ -455,7 +420,6 @@
 
     .topbar{ display:none !important; }
 
-    /* ✅ Encadrés séparés pour chaque champ */
     .infoBlock{
       margin-top: 12px;
       border: 1px solid rgba(255,255,255,.18);
@@ -463,9 +427,7 @@
       padding: 10px 12px;
       background: rgba(0,0,0,.15);
     }
-    .infoBlock h3{
-      margin: 0 0 6px 0;
-    }
+    .infoBlock h3{ margin: 0 0 6px 0; }
     .infoBlock .infoText{
       color: var(--fg);
       font-size: 14px;
@@ -484,26 +446,22 @@
     <div class="cardPreview" id="card" aria-live="polite">
       <div class="cardInner">
 
-        <!-- ✅ Bouton ☰ + badges -->
         <div class="headRow">
           <button type="button" class="hamburger-btn" id="hamburgerBtn" aria-label="Ouvrir le menu" aria-haspopup="menu" aria-expanded="false">
             <span class="ham-lines" aria-hidden="true"><span></span><span></span><span></span></span>
           </button>
 
-          <!-- ❤️ Like bouton (entre ☰ et badges) -->
           <button class="btnLike like-btn" id="btnLike" type="button" aria-label="J’aime">🤍</button>
 
           <div class="badgesRow" id="badges"></div>
         </div>
 
-        <!-- ✅ Etat MAJ (affiché par game.js) -->
         <div class="majState" id="majState" style="display:none;"></div>
 
         <h1 class="title" id="title">Chargement…</h1>
 
         <img id="cover" class="cover is-placeholder" alt="" referrerpolicy="no-referrer">
 
-        <!-- 📺 Vidéo (encadré séparé) -->
         <div id="videoBox" class="infoBlock" style="display:none;">
           <h3>📺 Vidéo</h3>
           <iframe id="videoFrame"
@@ -513,11 +471,9 @@
           </iframe>
         </div>
 
-        <!-- ✅ Bloc principal : Tags + Résumé (même encadré) -->
         <div id="mainInfoBox" class="infoBlock" style="display:none;">
           <div class="tagsRow" id="tags"></div>
 
-          <!-- ✅ encadré interne résumé -->
           <div id="descInnerBox" class="descInnerBox" style="display:none;">
             <div id="descriptionText" class="infoText"></div>
           </div>
@@ -531,7 +487,7 @@
 
         <div class="btnMainRow">
           <a class="btnLike btnMega" id="btnMega" target="_blank" rel="noopener" style="display:none;">📥 Télécharger la traduction · MEGA</a>
-          <!-- translationsExtra est injecté ici par game.js -->
+          <!-- translationsExtra injecté ici -->
         </div>
 
         <div id="archiveBox" style="display:none; margin-top:12px; justify-content:center;">
@@ -540,9 +496,14 @@
           </a>
         </div>
 
+        <!-- ✅ ℹ️ Informations AU-DESSUS des étoiles -->
+        <div id="notesBox" class="infoBlock" style="display:none;">
+          <h3>ℹ️ Informations</h3>
+          <div id="notesText" class="infoTextMuted"></div>
+        </div>
+
         <!-- ⭐ Notation -->
         <div id="ratingBox" class="infoBlock" style="text-align:center;">
-
           <div style="color:var(--muted); font-size:12px; margin-bottom:6px;">
             Note de la traduction :
             <strong id="ratingAvg">—</strong>
@@ -553,16 +514,9 @@
           <div id="ratingMsg" style="margin-top:6px; color:var(--muted); font-size:12px;"></div>
         </div>
 
-        <!-- ✅ NOTES sous MEGA -->
-        <div id="notesBox" class="infoBlock" style="display:none;">
-          <h3>ℹ️ Informations</h3>
-          <div id="notesText" class="infoTextMuted"></div>
-        </div>
-
       </div>
     </div>
 
-    <!-- 📊 Stats globales -->
     <div class="statsOut" id="statsOut" style="display:none;">
       👁️ Vues : <strong id="statViews">0</strong>
       ·
@@ -574,7 +528,6 @@
     <div class="err" id="errBox"></div>
   </div>
 
-  <!-- ✅ Observer : mini fade sur #ratingMsg à chaque changement -->
   <script>
     (function(){
       const msg = document.getElementById("ratingMsg");

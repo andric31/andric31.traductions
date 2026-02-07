@@ -288,16 +288,17 @@
     }
 
     /* Texte F95Zone bicolore (logo-like) */
-    #btnF95 .f95-white{
+    .btnLike .f95-white{
       color:#ffffff;
       font-weight:800;
     }
-    #btnF95 .f95-red{
+    .btnLike .f95-red{
       color:#8b2d2d;
       font-weight:800;
     }
     
     /* Style bouton (comme avant) */
+    .btnLike.btn-f95,
     #btnF95.btn-f95{
       position: relative;
       background: linear-gradient(180deg, #222222 0%, #161616 100%);
@@ -309,24 +310,28 @@
     }
     
     /* Assure que le texte reste au-dessus */
+    .btnLike.btn-f95 span,
     #btnF95.btn-f95 span{
       position: relative;
       z-index: 1;
     }
     
     /* ✅ SUPPRIME la languette rouge */
+    .btnLike.btn-f95::before,
     #btnF95.btn-f95::before{
       content: none !important;
       display: none !important;
     }
     
     /* Hover (comme avant) */
+    .btnLike.btn-f95:hover,
     #btnF95.btn-f95:hover{
       background: linear-gradient(180deg, #1a1a1a 0%, #111111 100%);
       border-color: rgba(255,255,255,.04);
       transform: none;
     }
 
+    .btnLike.btnMega,
     #btnMega{
       background: linear-gradient(
         180deg,
@@ -340,6 +345,7 @@
     }
     
     /* Hover : léger éclaircissement, sans mouvement */
+    .btnLike.btnMega:hover,
     #btnMega:hover{
       background: linear-gradient(
         180deg,

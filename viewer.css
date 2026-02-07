@@ -389,26 +389,26 @@ main{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  padding:6px 8px;
-  border-radius:8px;
+  padding:6px 8px;              /* ⬅ moins haut */
+  border-radius:8px;            /* ⬅ un peu plus fin */
   background:#2e3652;
   color:#ffffff;
   border:1px solid #3c466a;
   text-decoration:none;
-  font-size:13px;
-  font-weight:600;
+  font-size:13px;               /* ⬅ texte plus petit */
+  font-weight:600;              /* ⬅ moins “bold” */
   transition:0.15s ease;
 }
 
 .btn:hover{
   background:#3b4568;
   border-color:#4d5a84;
-  filter:brightness(1.05);
+  filter:brightness(1.05);      /* ⬅ hover plus doux */
 }
 
 .btn.btn-page{
   width:100%;
-  padding:6px 8px;
+  padding:6px 8px;              /* cohérent */
 }
 
 .btn[aria-disabled="true"]{ opacity:.6; pointer-events:none }
@@ -559,7 +559,7 @@ main{
   align-items:center;
   justify-content:center;
   font-size:12px;
-  color: transparent;
+  color: transparent; /* invisible quand inactif */
 }
 
 .tag-item.active{
@@ -605,47 +605,80 @@ main{
   align-items: center;
   justify-content: center;
 
-  color: #9aa0b4;
+  color: #9aa0b4; /* gris */
   cursor: pointer;
 
   transition: transform .1s ease, filter .15s ease;
 }
 
-.like-btn:hover{ filter: brightness(1.15); }
-.like-btn:active{ transform: scale(0.95); }
+.like-btn:hover{
+  filter: brightness(1.15);
+}
+
+.like-btn:active{
+  transform: scale(0.95);
+}
 
 /* =========================
    Scrollbar sombre (modales & page)
    ========================= */
 
-::-webkit-scrollbar{ width: 16px; height: 16px; }
-::-webkit-scrollbar-track{ background: #0f1117; }
+/* Chrome / Edge / Brave */
+::-webkit-scrollbar{
+  width: 16px;   /* ⬅ rail légèrement plus large */
+  height: 16px;
+}
+
+::-webkit-scrollbar-track{
+  background: #0f1117;
+}
+
 ::-webkit-scrollbar-thumb{
   background: #2a314b;
   border-radius: 999px;
+
+  /* ⬅ crée l’effet “thumb plus petit que le rail” */
   border: 4px solid #0f1117;
 }
-::-webkit-scrollbar-thumb:hover{ background: #3b4568; }
+
+::-webkit-scrollbar-thumb:hover{
+  background: #3b4568;
+}
 
 /* Scrollbar spécifique aux modales */
 .modal-body{
-  scrollbar-width: thin;
-  scrollbar-color: #2a314b #0f1117;
+  scrollbar-width: thin;                 /* Firefox */
+  scrollbar-color: #2a314b #0f1117;       /* Firefox */
 }
 
+/* =========================
+   Scrollbar LARGE pour la modale Extension
+   ========================= */
+
 /* Chrome / Edge / Brave */
-.modal-body::-webkit-scrollbar{ width: 16px; }
-.modal-body::-webkit-scrollbar-track{ background: #0f1117; }
+.modal-body::-webkit-scrollbar{
+  width: 16px;
+}
+
+.modal-body::-webkit-scrollbar-track{
+  background: #0f1117;
+}
+
 .modal-body::-webkit-scrollbar-thumb{
   background: #2a314b;
   border-radius: 999px;
+
+  /* thumb plus fin que le rail */
   border: 4px solid #0f1117;
 }
-.modal-body::-webkit-scrollbar-thumb:hover{ background: #3b4568; }
+
+.modal-body::-webkit-scrollbar-thumb:hover{
+  background: #3b4568;
+}
 
 /* Firefox */
 .modal-body{
-  scrollbar-width: auto;
+  scrollbar-width: auto;               /* ⬅ plus large que thin */
   scrollbar-color: #2a314b #0f1117;
 }
 
@@ -653,7 +686,9 @@ main{
    📢 Viewer Annonce (bandeau)
    ========================= */
 
-#viewerAnnonceHost { margin: 12px 0; }
+#viewerAnnonceHost {
+  margin: 12px 0;
+}
 
 .viewer-annonce{
   border: 1px solid rgba(255,255,255,.15);
@@ -666,46 +701,84 @@ main{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:4px 8px;
+  padding:4px 8px; /* ⬅️ hauteur de la barre */
   background: rgba(255,255,255,.06);
 }
 
-.viewer-annonce__title{ font-weight: 800; }
+.viewer-annonce__title{
+  font-weight: 800;
+}
 
 .viewer-annonce__btn{
   cursor:pointer;
-  padding:6px 10px;
+  padding:6px 10px; /* bouton */
   border-radius:10px;
   border: 1px solid rgba(255,255,255,.18);
   background: rgba(255,255,255,.06);
   color: inherit;
 }
-.viewer-annonce__btn:hover{ background: rgba(255,255,255,.10); }
+
+.viewer-annonce__btn:hover{
+  background: rgba(255,255,255,.10);
+}
 
 .viewer-annonce__body{
-  padding: 12px;
+  padding: 12px; /* ⬅️ hauteur du contenu */
   line-height: 1.35;
 }
-.viewer-annonce.is-min .viewer-annonce__body{ display:none; }
 
+.viewer-annonce.is-min .viewer-annonce__body{
+  display:none;
+}
+
+/* Centrage du texte */
 .viewer-annonce__title,
-.viewer-annonce__body { text-align: center; }
+.viewer-annonce__body {
+  text-align: center;
+}
 
-.viewer-annonce.is-locked .viewer-annonce__body { text-align: center; }
+/* Centrage en maintenance */
+.viewer-annonce.is-locked .viewer-annonce__body {
+  text-align: center;
+}
+
 
 /* Collection parent (page /game/?id=...) */
-.collection-block,
-.collection-child-block,
-.serie-block{
+.collection-block {
   border: 1px solid rgba(255,255,255,.25);
   padding: 12px;
   border-radius: 8px;
   margin: 16px 0;
   background: rgba(0,0,0,.15);
 }
-.collection-block h3,
-.collection-child-block h3,
-.serie-block h3{ margin-top: 0; }
+.collection-block h3 {
+  margin-top: 0;
+}
+
+/* Collection child (page /game/?id=...&uid=...) */
+.collection-child-block {
+  border: 1px solid rgba(255,255,255,.25);
+  padding: 12px;
+  border-radius: 8px;
+  margin: 16px 0;
+  background: rgba(0,0,0,.15);
+}
+.collection-child-block h3 {
+  margin-top: 0;
+}
+
+
+/* Serie block */
+.serie-block {
+  border: 1px solid rgba(255,255,255,.25);
+  padding: 12px;
+  border-radius: 8px;
+  margin: 16px 0;
+  background: rgba(0,0,0,.15);
+}
+.serie-block h3 {
+  margin-top: 0;
+}
 
 /* ✅ Bloc générique (page game + autres) */
 .game-block{
@@ -715,139 +788,111 @@ main{
   margin: 12px 0;
   background: rgba(0,0,0,.15);
 }
-.game-block h3{ margin: 0 0 8px 0; }
+.game-block h3{
+  margin: 0 0 8px 0;
+}
 
-/* ✅ "Informations" */
+/* ✅ "Informations" plus petit + encadré bi-ton (haut/bas) */
 #notesBox{
-  background: linear-gradient(
-    180deg,
-    rgba(255,255,255,0.05) 0%,
-    rgba(0,0,0,0.18) 100%
-  );
+  /* bi-ton : haut légèrement plus clair, bas légèrement plus sombre */
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.05) 0%,
+      rgba(0,0,0,0.18) 100%
+    );
   border-color: rgba(255,255,255,0.14);
 }
+
+/* ✅ Titre "ℹ️ Informations" plus petit + couleur un peu différente */
 #notesBox h3{
-  font-size: 13px;
+  font-size: 13px;              /* plus petit */
   font-weight: 800;
   letter-spacing: .2px;
-  color: rgba(255,255,255,0.78);
+  color: rgba(255,255,255,0.78); /* légèrement différent */
   margin-bottom: 6px;
 }
-#notesBox #notesText{ color: rgba(255,255,255,0.72); }
+
+/* (optionnel) texte un peu plus doux */
+#notesBox #notesText{
+  color: rgba(255,255,255,0.72);
+}
 
 /* =========================
-   ✅ Boutons page /game
+   Boutons liens externes
    ========================= */
 
-/* ligne de boutons (MEGA / extras / archives...) */
-.btnMainRow{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:10px;
-  margin-top:12px;
-}
-
-/* socle commun pour TOUS les boutons générés en JS */
-.btnLike{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-
-  padding: 10px 14px;
-  border-radius: 14px;
-  text-decoration:none;
-
-  font-size: 14px;
-  font-weight: 800;
-  line-height: 1;
-
-  border: 1px solid rgba(255,255,255,.10);
-  background: rgba(255,255,255,0.06);
-  color: #fff;
-
-  box-shadow: 0 8px 18px rgba(0,0,0,.30);
-  transition: filter .15s ease, transform .08s ease;
-}
-.btnLike:hover{ filter: brightness(1.08); }
-.btnLike:active{ transform: translateY(1px); }
-
-/* 💬 Discord */
-.btnLike.btn-discord{
+/* 💬 Discord — bleu Discord */
+.btn-discord{
   background: #5865F2;
   border-color: #5865F2;
   color: #fff;
 }
-.btnLike.btn-discord:hover{
+.btn-discord:hover{
   background: #4752C4;
   border-color: #4752C4;
 }
 
-/* 🌐 F95Zone */
-.btnLike.btn-f95{
-  background: linear-gradient(180deg, #121212 0%, #0b0b0b 100%);
+/* 🌐 F95Zone — noir / rouge */
+.btn-f95{
+  background: #0b0b0b;
   border-color: #b71c1c;
-  color:#fff;
+  color: #ffffff;
 }
-.btnLike.btn-f95:hover{
-  background: linear-gradient(180deg, #1a1a1a 0%, #111111 100%);
+.btn-f95:hover{
+  background: #1a1a1a;
   border-color: #d32f2f;
 }
 
-/* 📥 MEGA */
-.btnLike.btn-mega,
-.btnLike.btnMega{
+
+
+/* 📥 MEGA — rouge (utilisable aussi pour les liens extra) */
+.btnMega,
+.btn-mega{
   background: linear-gradient(180deg,#b71c1c 0%,#8e0e0e 100%);
   border: 1px solid rgba(255,255,255,.04);
   color:#ffffff;
   box-shadow: 0 8px 18px rgba(0,0,0,.40);
   transform:none;
 }
-.btnLike.btn-mega:hover,
-.btnLike.btnMega:hover{
+.btnMega:hover,
+.btn-mega:hover{
   background: linear-gradient(180deg,#c62828 0%,#9f1b1b 100%);
   border-color: rgba(255,255,255,.04);
   transform:none;
 }
 
 /* ☁️ Google Drive */
-.btnLike.btn-host-drive{
+.btn-host-drive{
   background: linear-gradient(180deg,#1a73e8 0%,#1558b0 100%);
   border: 1px solid rgba(255,255,255,.04);
   color:#ffffff;
 }
-.btnLike.btn-host-drive:hover{ filter: brightness(1.08); }
+.btn-host-drive:hover{ filter: brightness(1.08); }
 
 /* 🗄️ GoFile */
-.btnLike.btn-host-gofile{
+.btn-host-gofile{
   background: linear-gradient(180deg,#2e7d32 0%,#1b5e20 100%);
   border: 1px solid rgba(255,255,255,.04);
   color:#ffffff;
 }
-.btnLike.btn-host-gofile:hover{ filter: brightness(1.08); }
+.btn-host-gofile:hover{ filter: brightness(1.08); }
 
-/* 🔗 Autres hosts */
-.btnLike.btn-host-default{
+/* 🔗 Autres hosts (neutre) */
+.btn-host-default{
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,.16);
   color:#ffffff;
 }
-.btnLike.btn-host-default:hover{ filter: brightness(1.08); }
+.btn-host-default:hover{ filter: brightness(1.08); }
+/* 🔒 Supprimer l’espace interne UNIQUEMENT pour F95 */
+/* Micro espace contrôlé entre F95 et Zone */
+#btnF95{
+  gap: 0 !important;
+}
 
-/* ✅ Rendu F95Zone bicolore (utilisé aussi par translationsExtra) */
-.f95-word{
-  display:inline-flex;
-  align-items:baseline;
-  gap:2px;
-}
-.f95-white{
-  color:#fff;
-  font-weight:800;
-}
-.f95-red{
-  color:#8b2d2d;
-  font-weight:800;
+#btnF95 .f95-red{
+  margin-left: 2px;   /* 🔥 parfait */
 }
 
 /* ===== AGE GATE ===== */
@@ -871,7 +916,9 @@ main{
   box-shadow: 0 0 30px rgba(0,0,0,0.7);
 }
 
-.age-box h2 { margin-top: 0; }
+.age-box h2 {
+  margin-top: 0;
+}
 
 .age-box button {
   margin: 10px;
@@ -882,8 +929,15 @@ main{
   font-weight: bold;
 }
 
-#age-yes { background: #4CAF50; color: #000; }
-#age-no { background: #f44336; color: #fff; }
+#age-yes {
+  background: #4CAF50;
+  color: #000;
+}
+
+#age-no {
+  background: #f44336;
+  color: #fff;
+}
 
 /* ===== Flou contenu tant que age-gate actif ===== */
 body.age-gate-active main,
@@ -908,3 +962,4 @@ body.age-gate-active footer {
     inset 0 1px 0 rgba(255,255,255,0.06),
     0 8px 18px rgba(0,0,0,0.22);
 }
+

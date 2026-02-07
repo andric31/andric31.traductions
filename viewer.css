@@ -844,6 +844,47 @@ main{
   border-color: #d32f2f;
 }
 
+
+
+/* 📥 MEGA — rouge (utilisable aussi pour les liens extra) */
+.btnMega,
+.btn-mega{
+  background: linear-gradient(180deg,#b71c1c 0%,#8e0e0e 100%);
+  border: 1px solid rgba(255,255,255,.04);
+  color:#ffffff;
+  box-shadow: 0 8px 18px rgba(0,0,0,.40);
+  transform:none;
+}
+.btnMega:hover,
+.btn-mega:hover{
+  background: linear-gradient(180deg,#c62828 0%,#9f1b1b 100%);
+  border-color: rgba(255,255,255,.04);
+  transform:none;
+}
+
+/* ☁️ Google Drive */
+.btn-host-drive{
+  background: linear-gradient(180deg,#1a73e8 0%,#1558b0 100%);
+  border: 1px solid rgba(255,255,255,.04);
+  color:#ffffff;
+}
+.btn-host-drive:hover{ filter: brightness(1.08); }
+
+/* 🗄️ GoFile */
+.btn-host-gofile{
+  background: linear-gradient(180deg,#2e7d32 0%,#1b5e20 100%);
+  border: 1px solid rgba(255,255,255,.04);
+  color:#ffffff;
+}
+.btn-host-gofile:hover{ filter: brightness(1.08); }
+
+/* 🔗 Autres hosts (neutre) */
+.btn-host-default{
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,.16);
+  color:#ffffff;
+}
+.btn-host-default:hover{ filter: brightness(1.08); }
 /* 🔒 Supprimer l’espace interne UNIQUEMENT pour F95 */
 /* Micro espace contrôlé entre F95 et Zone */
 #btnF95{

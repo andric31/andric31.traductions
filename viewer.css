@@ -891,12 +891,8 @@ main{
   gap: 0 !important;
 }
 
-.f95-red{
-  margin-left: 1px;
-}
-
-.btnLike{
- gap:1px;
+#btnF95 .f95-red{
+  margin-left: 2px;   /* 🔥 parfait */
 }
 
 /* ===== AGE GATE ===== */

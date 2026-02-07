@@ -885,14 +885,14 @@ main{
   color:#ffffff;
 }
 .btn-host-default:hover{ filter: brightness(1.08); }
-/* 🔒 Supprimer l’espace interne UNIQUEMENT pour F95 */
-/* Micro espace contrôlé entre F95 et Zone */
-#btnF95{
+
+/* ✅ Corrige l'espace F95/Zone sur TOUS les boutons F95 (principal + extra) */
+body.mode-game .btnLike.btn-f95{
   gap: 0 !important;
 }
 
-#btnF95 .f95-red{
-  margin-left: 2px;   /* 🔥 parfait */
+body.mode-game .btnLike.btn-f95 .f95-red{
+  margin-left: 2px; /* micro-espace comme sur ton site multi-traducteurs */
 }
 
 /* ===== AGE GATE ===== */

@@ -833,15 +833,30 @@ main{
   border-color: #4752C4;
 }
 
-/* 🌐 F95Zone — noir / rouge */
+/* 🌐 F95Zone — noir / rouge (✅ FIX: bloc unique + gap contrôlé) */
 .btn-f95{
   background: #0b0b0b;
   border-color: #b71c1c;
   color: #ffffff;
+
+  display: inline-flex;     /* ✅ garantit que gap marche partout */
+  align-items: center;
+  justify-content: center;
+  gap: 1px;                 /* ✅ espace F95/Zone (0/1/2) */
 }
 .btn-f95:hover{
   background: #1a1a1a;
   border-color: #d32f2f;
+}
+
+/* ✅ aucune marge/padding parasite sur les spans du logo */
+.btn-f95 .f95-white,
+.btn-f95 .f95-red{
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.btn-f95 .f95-red{
+  margin-left: 0 !important;
 }
 
 
@@ -886,14 +901,6 @@ main{
 }
 .btn-host-default:hover{ filter: brightness(1.08); }
 
-/* ✅ Corrige l'espace F95/Zone sur TOUS les boutons F95 (peu importe la classe du bouton) */
-.btn-f95{
-  gap: 2px !important; /* ← ajuste: 1px / 2px / 3px */
-}
-
-.btn-f95 .f95-red{
-  margin-left: 0 !important; /* ← on enlève la marge qui amplifie l'écart */
-}
 
 /* ===== AGE GATE ===== */
 #age-gate {
@@ -962,4 +969,3 @@ body.age-gate-active footer {
     inset 0 1px 0 rgba(255,255,255,0.06),
     0 8px 18px rgba(0,0,0,0.22);
 }
-

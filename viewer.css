@@ -855,7 +855,7 @@ main{
 .f95-logo{
   display:inline-flex;
   align-items:center;
-  gap: 1px;              /* ← contrôle UNIQUEMENT F95 / Zone */
+  gap: 2px;              /* ← Espace entre F95 et Zone */
   white-space:nowrap;
 }
 

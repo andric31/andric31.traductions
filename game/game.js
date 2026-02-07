@@ -1344,34 +1344,21 @@ function renderVideoBlock({ id, videoUrl }) {
     if (megaRow){
       megaRow.style.display = megaHref ? "flex" : "none";
     }
-
     // =========================
-    // 6b) Extra links (translationsExtra) — boutons sous MEGA (avant Notes)
+    // 6b) Extra links (translationsExtra) — boutons ENTRE MEGA et Archives
     // =========================
-    const extraRaw = entry.translationsExtra;
+    // Supporte aussi le cas "gameData" (collection child) :
+    // - entry.translationsExtra (normal)
+    // - display.translationsExtra (si tu ranges ça dans gameData)
+    const extraRaw = (display && display.translationsExtra !== undefined)
+      ? display.translationsExtra
+      : entry.translationsExtra;
 
     // Accepte: Array[{name,link}] / Object{name,link} / String(url)
     let extraList = [];
     if (Array.isArray(extraRaw)) extraList = extraRaw.slice();
     else if (extraRaw && typeof extraRaw === "object") extraList = [extraRaw];
     else if (typeof extraRaw === "string" && extraRaw.trim()) extraList = [{ name: "Lien", link: extraRaw.trim() }];
-
-    // zone d'insertion: juste AVANT notesBox (donc après MEGA)
-    let extraRow = document.getElementById("extraLinksRow");
-    if (!extraRow) {
-      extraRow = document.createElement("div");
-      extraRow.id = "extraLinksRow";
-      extraRow.className = "btnMainRow";
-
-      const notesBox = document.getElementById("notesBox");
-      if (notesBox && notesBox.parentNode) {
-        notesBox.parentNode.insertBefore(extraRow, notesBox);
-      } else {
-        // fallback: avant archiveBox
-        const archiveBox = document.getElementById("archiveBox");
-        if (archiveBox && archiveBox.parentNode) archiveBox.parentNode.insertBefore(extraRow, archiveBox);
-      }
-    }
 
     function normalizeExtraItem(x){
       if (!x) return null;
@@ -1387,18 +1374,36 @@ function renderVideoBlock({ id, videoUrl }) {
 
     const extraValid = extraList.map(normalizeExtraItem).filter(Boolean);
 
+    // zone d'insertion: juste AVANT archiveBox (donc après MEGA)
+    let extraRow = document.getElementById("extraLinksRow");
+    const archiveBox = document.getElementById("archiveBox");
+
+    if (!extraRow) {
+      extraRow = document.createElement("div");
+      extraRow.id = "extraLinksRow";
+      extraRow.className = "btnMainRow";
+      if (archiveBox && archiveBox.parentNode) {
+        archiveBox.parentNode.insertBefore(extraRow, archiveBox);
+      }
+    } else {
+      // si déjà existant, s'assurer qu'il est bien placé
+      if (archiveBox && archiveBox.parentNode && extraRow.parentNode === archiveBox.parentNode && extraRow.nextSibling !== archiveBox) {
+        archiveBox.parentNode.insertBefore(extraRow, archiveBox);
+      }
+    }
+
     if (extraRow) {
       if (extraValid.length) {
         extraRow.innerHTML = extraValid.map((x) => {
           const name = String(x.name || "Lien").trim();
           const link = String(x.link || "").trim();
 
-          // ✅ libellé : "📥 Télécharger" + nom
+          // libellé : "📥 Télécharger" + nom
           let labelHtml = `📥 Télécharger la traduction · ${escapeHtml(name)}`;
 
-          // ✅ F95Zone : bicolore (sans dépendre du CSS du #btnF95)
+          // F95Zone : bicolore (sans dépendre du CSS du #btnF95)
           if (/f95\s*zone/i.test(name)) {
-            labelHtml = `📥 Télécharger la traduction · <span style="font-weight:800;color:#fff;">F95</span><span style="font-weight:800;color:#8b2d2d;">Zone</span>`;
+            labelHtml = `📥 Télécharger la traduction · <span class="f95-word"><span class="f95-white">F95</span><span class="f95-red">Zone</span></span>`;
           }
 
           return `
@@ -1421,9 +1426,9 @@ function renderVideoBlock({ id, videoUrl }) {
       }
     }
 
-
     // =========================
     // 7) Informations (encadré sous la notation)
+    // =========================
     // =========================
     const notes = (entry.notes || "").trim();
     if (notes) {

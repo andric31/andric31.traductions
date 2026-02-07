@@ -503,21 +503,6 @@
 
         <img id="cover" class="cover is-placeholder" alt="" referrerpolicy="no-referrer">
 
-        <div class="btnRow">
-          <a class="btnLike" id="btnDiscord" target="_blank" rel="noopener" style="display:none;">💬 Discord</a>
-          <a class="btnLike" id="btnF95" target="_blank" rel="noopener" style="display:none;">F95Zone</a>
-        </div>
-
-        <div class="btnMainRow">
-          <a class="btnLike btnMega" id="btnMega" target="_blank" rel="noopener" style="display:none;">📥 Télécharger la traduction · MEGA</a>
-        </div>
-
-        <div id="archiveBox" style="display:none; margin-top:12px; justify-content:center;">
-          <a id="archiveLink" class="btnLike" target="_blank" rel="noopener" style="justify-content:center;">
-            📦 Archives de la traduction
-          </a>
-        </div>
-
         <!-- 📺 Vidéo (encadré séparé) -->
         <div id="videoBox" class="infoBlock" style="display:none;">
           <h3>📺 Vidéo</h3>
@@ -531,11 +516,28 @@
         <!-- ✅ Bloc principal : Tags + Résumé (même encadré) -->
         <div id="mainInfoBox" class="infoBlock" style="display:none;">
           <div class="tagsRow" id="tags"></div>
-        
+
           <!-- ✅ encadré interne résumé -->
           <div id="descInnerBox" class="descInnerBox" style="display:none;">
             <div id="descriptionText" class="infoText"></div>
           </div>
+        </div>
+
+        <!-- ✅ BOUTONS : juste AU-DESSUS des étoiles -->
+        <div class="btnRow">
+          <a class="btnLike" id="btnDiscord" target="_blank" rel="noopener" style="display:none;">💬 Discord</a>
+          <a class="btnLike" id="btnF95" target="_blank" rel="noopener" style="display:none;">F95Zone</a>
+        </div>
+
+        <div class="btnMainRow">
+          <a class="btnLike btnMega" id="btnMega" target="_blank" rel="noopener" style="display:none;">📥 Télécharger la traduction · MEGA</a>
+          <!-- translationsExtra est injecté ici par game.js -->
+        </div>
+
+        <div id="archiveBox" style="display:none; margin-top:12px; justify-content:center;">
+          <a id="archiveLink" class="btnLike" target="_blank" rel="noopener" style="justify-content:center;">
+            📦 Archives de la traduction
+          </a>
         </div>
 
         <!-- ⭐ Notation -->
@@ -546,7 +548,7 @@
             <strong id="ratingAvg">—</strong>
             (<span id="ratingCount">0</span> votes)
           </div>
-        
+
           <div id="ratingChoices" style="display:flex; justify-content:center; gap:8px;"></div>
           <div id="ratingMsg" style="margin-top:6px; color:var(--muted); font-size:12px;"></div>
         </div>

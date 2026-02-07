@@ -1337,7 +1337,7 @@ function renderVideoBlock({ id, videoUrl }) {
     const megaHref = (entry.translation || "").trim();
     const archiveHref = (entry.translationsArchive || "").trim();
     setHref("btnMega", megaHref);
-    if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction · MEGA";
+    if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction (MEGA)";
     // ⭐⭐⭐⭐⭐ FIX IMPORTANT ⭐⭐⭐⭐⭐
     // Cache aussi la ligne entière sinon le margin crée un trou quand MEGA est vide
     const megaRow = document.getElementById("btnMega")?.closest(".btnMainRow");
@@ -1349,102 +1349,78 @@ function renderVideoBlock({ id, videoUrl }) {
     // 6b) Extra links (translationsExtra) — boutons sous MEGA (avant Notes)
     // =========================
     const extraRaw = entry.translationsExtra;
-    
+
     // Accepte: Array[{name,link}] / Object{name,link} / String(url)
     let extraList = [];
     if (Array.isArray(extraRaw)) extraList = extraRaw.slice();
     else if (extraRaw && typeof extraRaw === "object") extraList = [extraRaw];
-    else if (typeof extraRaw === "string" && extraRaw.trim()) {
-      extraList = [{ name: "Lien", link: extraRaw.trim() }];
-    }
-    
+    else if (typeof extraRaw === "string" && extraRaw.trim()) extraList = [{ name: "Lien", link: extraRaw.trim() }];
+
     // zone d'insertion: juste AVANT notesBox (donc après MEGA)
     let extraRow = document.getElementById("extraLinksRow");
     if (!extraRow) {
       extraRow = document.createElement("div");
       extraRow.id = "extraLinksRow";
       extraRow.className = "btnMainRow";
-    
+
       const notesBox = document.getElementById("notesBox");
       if (notesBox && notesBox.parentNode) {
         notesBox.parentNode.insertBefore(extraRow, notesBox);
       } else {
+        // fallback: avant archiveBox
         const archiveBox = document.getElementById("archiveBox");
-        if (archiveBox && archiveBox.parentNode) {
-          archiveBox.parentNode.insertBefore(extraRow, archiveBox);
-        }
+        if (archiveBox && archiveBox.parentNode) archiveBox.parentNode.insertBefore(extraRow, archiveBox);
       }
     }
-    
+
     function normalizeExtraItem(x){
       if (!x) return null;
-    
       if (typeof x === "string") {
         const u = x.trim();
         return u ? { name: "Lien", link: u } : null;
       }
-    
       if (typeof x !== "object") return null;
-    
       const name = String(x.name || "Lien").trim();
       const link = String(x.link || x.url || "").trim();
-    
       return link ? { name, link } : null;
     }
-    
-    // 🔥 Détection host (IMPORTANT pour le CSS)
-    function getHostClass(url){
-      const u = url.toLowerCase();
-    
-      if (u.includes("mega.nz")) return "btn-mega";
-      if (u.includes("f95zone")) return "btn-f95";
-      if (u.includes("drive.google")) return "btn-host-drive";
-      if (u.includes("gofile")) return "btn-host-gofile";
-    
-      return "btn-host-default";
-    }
-    
+
     const extraValid = extraList.map(normalizeExtraItem).filter(Boolean);
-    
+
     if (extraRow) {
       if (extraValid.length) {
-    
         extraRow.innerHTML = extraValid.map((x) => {
-    
           const name = String(x.name || "Lien").trim();
           const link = String(x.link || "").trim();
-          const hostCls = getHostClass(link);
-    
-          // libellé
+
+          // ✅ libellé : "📥 Télécharger" + nom
           let labelHtml = `📥 Télécharger la traduction · ${escapeHtml(name)}`;
-    
-          // F95Zone bicolore
-          if (hostCls === "btn-f95") {
-            labelHtml =
-              `📥 Télécharger la traduction · 
-               <span class="f95-white">F95</span><span class="f95-red">Zone</span>`;
+
+          // ✅ F95Zone : bicolore (sans dépendre du CSS du #btnF95)
+          if (/f95\s*zone/i.test(name)) {
+            labelHtml = `📥 Télécharger la traduction · <span style="font-weight:800;color:#fff;">F95</span><span style="font-weight:800;color:#8b2d2d;">Zone</span>`;
           }
-    
+
           return `
-            <a class="btnLike ${hostCls}"
+            <a class="btnLike"
                target="_blank" rel="noopener"
                href="${escapeHtml(link)}">
               ${labelHtml}
             </a>
           `;
         }).join("");
-    
+
         extraRow.style.display = "flex";
         extraRow.style.flexWrap = "wrap";
         extraRow.style.gap = "10px";
         extraRow.style.justifyContent = "center";
         extraRow.style.marginTop = "12px";
-    
       } else {
         extraRow.style.display = "none";
         extraRow.innerHTML = "";
       }
     }
+
 
     // =========================
     // 7) Informations (encadré sous la notation)

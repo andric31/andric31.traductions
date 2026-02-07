@@ -1340,6 +1340,76 @@ function renderVideoBlock({ id, videoUrl }) {
     if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction (MEGA)";
 
     // =========================
+    // 6b) Liens supplémentaires (translationsExtra) — entre MEGA et Archives
+    // =========================
+    function getHostClass(url){
+      const u = (url || "").toLowerCase();
+      if (u.includes("mega.nz")) return "btnMega";        // même style que MEGA
+      if (u.includes("f95zone")) return "btn-f95";        // style F95
+      if (u.includes("drive.google")) return "btn-host-drive";
+      if (u.includes("gofile")) return "btn-host-gofile";
+      return "btn-host-default";
+    }
+
+    const extra = Array.isArray(entry.translationsExtra) ? entry.translationsExtra : [];
+
+    // ligne de boutons (même emplacement que MEGA)
+    let extraRow = document.getElementById("extraLinksRow");
+    if (!extraRow) {
+      extraRow = document.createElement("div");
+      extraRow.id = "extraLinksRow";
+      extraRow.className = "btnMainRow";
+
+      // ✅ insérer JUSTE AVANT archiveBox (donc après MEGA)
+      const archiveBox = document.getElementById("archiveBox");
+      if (archiveBox && archiveBox.parentNode) {
+        archiveBox.parentNode.insertBefore(extraRow, archiveBox);
+      } else {
+        // fallback : juste après la ligne MEGA
+        const megaRow = document.getElementById("btnMega")?.closest(".btnMainRow");
+        if (megaRow && megaRow.parentNode) megaRow.parentNode.insertBefore(extraRow, megaRow.nextSibling);
+      }
+    }
+
+    // rendu (boutons)
+    if (extraRow) {
+      const valid = extra.filter(x => x && (x.link || "").trim());
+      if (valid.length) {
+        extraRow.innerHTML = valid.map((x) => {
+          const name = (x.name || "Lien").trim();
+          const link = (x.link || "").trim();
+          const hostCls = getHostClass(link);
+
+          // libellé
+          let labelHtml = `📥 Télécharger la traduction · ${escapeHtml(name)}`;
+
+          // ✅ F95Zone : bicolore
+          if (hostCls === "btn-f95" && /f95\s*zone/i.test(name)) {
+            labelHtml = `📥 Télécharger la traduction · <span class="f95-white">F95</span><span class="f95-red" style="margin-left:2px;">Zone</span>`;
+          }
+
+          return `
+            <a class="btnLike ${hostCls}"
+               target="_blank" rel="noopener"
+               href="${escapeHtml(link)}">
+              ${labelHtml}
+            </a>
+          `;
+        }).join("");
+
+        extraRow.style.display = "flex";
+        extraRow.style.flexWrap = "wrap";
+        extraRow.style.gap = "10px";
+        extraRow.style.justifyContent = "center";
+        extraRow.style.marginTop = "12px";
+      } else {
+        extraRow.style.display = "none";
+        extraRow.innerHTML = "";
+      }
+    }
+
+
+    // =========================
     // 7) Informations (encadré sous la notation)
     // =========================
     const notes = (entry.notes || "").trim();

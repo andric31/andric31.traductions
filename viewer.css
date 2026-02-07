@@ -833,33 +833,37 @@ main{
   border-color: #4752C4;
 }
 
-/* 🌐 F95Zone — noir / rouge (✅ FIX: bloc unique + gap contrôlé) */
+/* 🌐 F95Zone — noir / rouge (FIX spacing) */
 .btn-f95{
   background: #0b0b0b;
   border-color: #b71c1c;
   color: #ffffff;
 
-  display: inline-flex;     /* ✅ garantit que gap marche partout */
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 1px;                 /* ✅ espace F95/Zone (0/1/2) */
+
+  gap: 0; /* 🔥 IMPORTANT : jamais de gap sur le bouton */
 }
+
 .btn-f95:hover{
   background: #1a1a1a;
   border-color: #d32f2f;
 }
 
-/* ✅ aucune marge/padding parasite sur les spans du logo */
-.btn-f95 .f95-white,
-.btn-f95 .f95-red{
-  margin: 0 !important;
-  padding: 0 !important;
-}
-.btn-f95 .f95-red{
-  margin-left: 0 !important;
+/* ✅ Logo F95Zone compact */
+.f95-logo{
+  display:inline-flex;
+  align-items:center;
+  gap: 1px;              /* ← contrôle UNIQUEMENT F95 / Zone */
+  white-space:nowrap;
 }
 
-
+/* supprime tout espace parasite */
+.f95-logo span{
+  margin:0 !important;
+  padding:0 !important;
+}
 
 /* 📥 MEGA — rouge (utilisable aussi pour les liens extra) */
 .btnMega,

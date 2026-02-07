@@ -886,13 +886,13 @@ main{
 }
 .btn-host-default:hover{ filter: brightness(1.08); }
 
-/* ✅ Corrige l'espace F95/Zone sur TOUS les boutons F95 (principal + extra) */
-body.mode-game .btnLike.btn-f95{
-  gap: 0 !important;
+/* ✅ Corrige l'espace F95/Zone sur TOUS les boutons F95 (peu importe la classe du bouton) */
+.btn-f95{
+  gap: 2px !important; /* ← ajuste: 1px / 2px / 3px */
 }
 
-body.mode-game .btnLike.btn-f95 .f95-red{
-  margin-left: 2px; /* micro-espace comme sur ton site multi-traducteurs */
+.btn-f95 .f95-red{
+  margin-left: 0 !important; /* ← on enlève la marge qui amplifie l'écart */
 }
 
 /* ===== AGE GATE ===== */

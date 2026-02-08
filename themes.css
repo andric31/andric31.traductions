@@ -125,67 +125,104 @@
 }
 
 /* =========================================================
-   NOËL
+   NOËL (sapin + rouge + neige visible)
    ========================================================= */
 :root[data-theme="noel"]{
-  --bg:#071a12;
-  --bg2:#0b2419;
-  --fg:#eafff2;
-  --muted:#a7d8b8;
-  --primary:#27c07d;
-  --accent:#e53935;
-  --border:#0f3a27;
-  --card:#0d2a1e;
-  --btn:#103425;
+
+  /* 🌌 fond nuit hivernale */
+  --bg:#061611;
+  --bg2:#0a2018;
+
+  /* ❄️ texte neige */
+  --fg:#f4fff9;
+  --muted:#c7e6d6;
+
+  /* 🎄 vert sapin (moins fluo) */
+  --primary:#1faa59;
+
+  /* 🎅 rouge BIEN visible */
+  --accent:#ff3b3b;
+
+  /* bordures */
+  --border:#1f5a43;
+
+  /* ⭐ IMPORTANT :
+     cartes NON vertes pour créer du contraste */
+  --card:#112d22;
+
+  --btn:#163a2c;
 
   --title: var(--fg);
-  --topbar-bg: rgba(10,28,20,.88);
 
-  --body-grad-1:#05140e;
-  --body-grad-2:#071a12;
-  --body-grad-3:#071a12;
+  /* 🔥 Topbar avec reflet rouge */
+  --topbar-bg: linear-gradient(
+      90deg,
+      rgba(6,22,17,.95),
+      rgba(120,20,20,.35)
+  );
 
-  --popover-bg: rgba(11,36,25,0.98);
-  --hover-bg: rgba(255,255,255,0.06);
+  /* fond légèrement vivant */
+  --body-grad-1:#040d0a;
+  --body-grad-2:#061611;
+  --body-grad-3:#0b2219;
 
-  --scrollbar-thumb:#1f5a3f;
-  --scrollbar-track:#04110c;
-  --scrollbar-track-webkit: var(--scrollbar-track);
-  --scrollbar-thumb-webkit: var(--scrollbar-thumb);
-  --scrollbar-thumb-webkit-hover:#2a6e4e;
+  /* popovers */
+  --popover-bg: rgba(17,45,34,.98);
+  --hover-bg: rgba(255,255,255,0.08);
+
+  /* scrollbar */
+  --scrollbar-thumb:#2f8f68;
+  --scrollbar-track:#030a07;
+  --scrollbar-thumb-webkit-hover:#3fb07c;
 
   color-scheme: dark;
 }
 
 /* =========================================================
-   HALLOWEEN
+   HALLOWEEN (cinematic pumpkin)
    ========================================================= */
 :root[data-theme="halloween"]{
-  --bg:#120a16;
-  --bg2:#1a0f21;
-  --fg:#f6e9ff;
-  --muted:#cbb6dd;
-  --primary:#b56dff;
-  --accent:#ff8c00;
-  --border:#2a1636;
-  --card:#1a1022;
-  --btn:#21142b;
+
+  /* 🖤 noir profond */
+  --bg:#08050c;
+  --bg2:#110916;
+
+  /* 👻 texte brume */
+  --fg:#fff3e6;
+  --muted:#e4c9a6;
+
+  /* 🎃 ORANGE DOMINANT */
+  --primary:#ff7a00;
+
+  /* 🔮 violet magique */
+  --accent:#9c6bff;
+
+  --border:#3a1f4d;
+
+  /* ⭐ cartes légèrement prune */
+  --card:#140a1a;
+
+  --btn:#1c0f25;
 
   --title: var(--fg);
-  --topbar-bg: rgba(18,10,22,.88);
 
-  --body-grad-1:#0f0714;
-  --body-grad-2:#120a16;
-  --body-grad-3:#120a16;
+  /* 🔥 topbar pumpkin glow */
+  --topbar-bg: linear-gradient(
+      90deg,
+      rgba(8,5,12,.95),
+      rgba(255,122,0,.25)
+  );
 
-  --popover-bg: rgba(26,15,33,0.98);
+  --body-grad-1:#050308;
+  --body-grad-2:#08050c;
+  --body-grad-3:#120816;
+
+  --popover-bg: rgba(20,10,26,.98);
   --hover-bg: rgba(255,255,255,0.06);
 
-  --scrollbar-thumb:#4a2a63;
-  --scrollbar-track:#09040d;
-  --scrollbar-track-webkit: var(--scrollbar-track);
-  --scrollbar-thumb-webkit: var(--scrollbar-thumb);
-  --scrollbar-thumb-webkit-hover:#5a3476;
+  --scrollbar-thumb:#6a35a0;
+  --scrollbar-track:#030205;
+  --scrollbar-thumb-webkit-hover:#8446c8;
 
   color-scheme: dark;
 }

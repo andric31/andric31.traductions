@@ -243,12 +243,9 @@ body{
   width:100%;
 
   overflow-x:auto;
-  overflow-y:hidden; /* évite une micro barre verticale */
-}
+  overflow-y:hidden;
 
-.top-actions::after{
-  content:"";
-  flex: 0 0 34px; /* largeur safe scrollbar Windows */
+  scrollbar-gutter: stable;
 }
 
 /* Barre de recherche stretch */

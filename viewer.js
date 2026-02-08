@@ -907,14 +907,14 @@
       card.target = "_blank";
       card.rel = "noopener";
       card.setAttribute("aria-label", `Ouvrir : ${getDisplayTitle(g.__raw || g)}`);
-card.innerHTML = `
+
+      card.innerHTML = `
         <img src="${imgSrc}" class="thumb" alt=""
              referrerpolicy="no-referrer"
              onerror="this.onerror=null;this.src='/favicon.png';this.classList.add('is-fallback');">
         <div class="body">
           <h3 class="name clamp-2">${escapeHtml(getDisplayTitle(g.__raw || g))}</h3>
           <div class="badges-line one-line">${badgesLineHtml(g)}</div>
-          <div class="actions"><span class="btn btn-page btn-page--ghost">📄 Ouvrir</span></div>
         </div>
       `;
 

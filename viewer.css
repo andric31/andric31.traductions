@@ -10,19 +10,12 @@
   --btn:#1e2437;
 
   --thumb-h: 140px;
-  --name-lh: 1.25re
+  --name-lh: 1.25rem;
+  --name-lines: 2;
+  --badges-h: 28px;
 
-/* ✅ Surélévation au survol (tuile) */
-.card:hover{
-  border-color: rgba(255,255,255,0.22);
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,0.18),
-    0 0 22px -6px rgba(255,255,255,0.18),
-    0 14px 38px rgba(0,0,0,0.45);
-  transform: translateY(-3px);
-}
-.card:active{
-  transform: translateY(-1px);
+  /* ✅ un peu plus compact qu’avant */
+  --topbar-h: 78px;
 }
 
 /* ✅ Carte cliquable */
@@ -331,6 +324,43 @@ main{
   display:grid;
   grid-template-rows: var(--thumb-h) 1fr;
   min-height: calc(var(--thumb-h) + 160px);
+}
+
+/* ✅ Tuile entièrement cliquable : pas de violet, pas de souligné */
+a.card.card-link,
+a.card.card-link:visited,
+a.card.card-link:hover,
+a.card.card-link:active{
+  color: inherit;
+  text-decoration: none;
+}
+
+/* évite que des éléments internes réintroduisent un soulignement/couleur */
+a.card.card-link *{
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ✅ Surélévation au survol */
+.card{
+  transition: border-color .18s ease, box-shadow .18s ease, transform .12s ease, filter .12s ease;
+  will-change: transform;
+}
+.card:hover{
+  border-color: rgba(255,255,255,0.22);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.18),
+    0 0 22px -6px rgba(255,255,255,0.18),
+    0 14px 38px rgba(0,0,0,0.45);
+  transform: translateY(-3px);
+}
+.card:active{
+  transform: translateY(-1px);
+}
+
+/* mini "bouton" indicatif (sans lien interne) */
+.btn-page--ghost{
+  pointer-events: none;
 }
 
 .thumb{

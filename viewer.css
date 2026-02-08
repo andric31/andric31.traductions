@@ -245,9 +245,6 @@ a.card.card-link:focus-visible{
 
   overflow-x:auto;
   overflow-y:hidden;
-
-  /* ✅ propre: réserve le gutter du scrollbar dans ce conteneur */
-  scrollbar-gutter: stable;
 }
 
 /* Barre de recherche stretch */

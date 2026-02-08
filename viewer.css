@@ -241,7 +241,14 @@ body{
   padding:6px 12px 8px;
   border-top:1px solid rgba(255,255,255,0.03);
   width:100%;
+
   overflow-x:auto;
+  overflow-y:hidden; /* évite une micro barre verticale */
+}
+
+.top-actions::after{
+  content:"";
+  flex: 0 0 34px; /* largeur safe scrollbar Windows */
 }
 
 /* Barre de recherche stretch */

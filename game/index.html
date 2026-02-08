@@ -10,20 +10,34 @@
   <link rel="stylesheet" href="../viewer.css" />
 
   <style>
+    html{
+      height:100%;
+      overflow-y: scroll; /* garde la réserve, évite le “zoom” */
+    }
+    
     body{
-      min-height: 100vh;
-      margin: 0;
+      height:100%;
+      margin:0;
+    
       display:flex;
       align-items:flex-start;
       justify-content:center;
-      overflow-y:auto;
+    
+      overflow: hidden; /* ✅ IMPORTANT : body ne scroll plus => plus de double scrollbar */
       padding: 18px 0;
     }
-
+    
+    /* c’est .wrap qui scrolle si besoin */
     .wrap{
       width: 820px;
       max-width: 92vw;
+    
+      height:100%;
+      overflow-y: auto;  /* ✅ un seul scroll */
       padding: 18px;
+    
+      /* optionnel: évite micro “saut” si contenu pile à la limite */
+      scrollbar-gutter: stable;
     }
 
     .cardPreview{

@@ -125,67 +125,88 @@
 }
 
 /* =========================================================
-   NOËL
+   NOËL (sapin + neige + rouge)
    ========================================================= */
 :root[data-theme="noel"]{
-  --bg:#071a12;
-  --bg2:#0b2419;
-  --fg:#eafff2;
-  --muted:#a7d8b8;
-  --primary:#27c07d;
-  --accent:#e53935;
-  --border:#0f3a27;
-  --card:#0d2a1e;
-  --btn:#103425;
+  /* fond “nuit d’hiver” */
+  --bg:#07130f;
+  --bg2:#0b1e16;
+
+  /* texte + muted plus “neige” */
+  --fg:#f2fff7;
+  --muted:#b9e7cb;
+
+  /* vert sapin + rouge Noël */
+  --primary:#2bd27a;   /* boutons/links */
+  --accent:#e53935;    /* accent secondaire */
+
+  /* bordures + cartes “sapin” */
+  --border:#164333;
+  --card:#0e241b;
+  --btn:#123225;
 
   --title: var(--fg);
-  --topbar-bg: rgba(10,28,20,.88);
+  --topbar-bg: rgba(7,19,15,.88);
 
-  --body-grad-1:#05140e;
-  --body-grad-2:#071a12;
-  --body-grad-3:#071a12;
+  /* gradient plus marqué (hiver) */
+  --body-grad-1:#050e0b;
+  --body-grad-2:#07130f;
+  --body-grad-3:#0a1b14;
 
-  --popover-bg: rgba(11,36,25,0.98);
-  --hover-bg: rgba(255,255,255,0.06);
+  /* popovers */
+  --popover-bg: rgba(14,36,27,.98);
+  --hover-bg: rgba(255,255,255,0.07);
 
-  --scrollbar-thumb:#1f5a3f;
-  --scrollbar-track:#04110c;
+  /* scrollbar */
+  --scrollbar-thumb:#2a7a55;
+  --scrollbar-track:#040c09;
   --scrollbar-track-webkit: var(--scrollbar-track);
   --scrollbar-thumb-webkit: var(--scrollbar-thumb);
-  --scrollbar-thumb-webkit-hover:#2a6e4e;
+  --scrollbar-thumb-webkit-hover:#35a06f;
 
   color-scheme: dark;
 }
 
 /* =========================================================
-   HALLOWEEN
+   HALLOWEEN (violet nuit + orange citrouille)
    ========================================================= */
 :root[data-theme="halloween"]{
-  --bg:#120a16;
-  --bg2:#1a0f21;
-  --fg:#f6e9ff;
-  --muted:#cbb6dd;
-  --primary:#b56dff;
-  --accent:#ff8c00;
-  --border:#2a1636;
-  --card:#1a1022;
-  --btn:#21142b;
+  /* fond “nuit violette” */
+  --bg:#0b0711;
+  --bg2:#120a1a;
+
+  /* texte “brume” */
+  --fg:#f7ecff;
+  --muted:#d5bfe6;
+
+  /* orange citrouille + violet magique */
+  --primary:#ff8c00;   /* CTA / liens (pumpkin) */
+  --accent:#b56dff;    /* accent (magic) */
+
+  /* bordures + cartes */
+  --border:#2a1838;
+  --card:#140c1d;
+  --btn:#1b1127;
 
   --title: var(--fg);
-  --topbar-bg: rgba(18,10,22,.88);
+  --topbar-bg: rgba(11,7,17,.88);
 
-  --body-grad-1:#0f0714;
-  --body-grad-2:#120a16;
-  --body-grad-3:#120a16;
+  /* gradient plus “spooky” */
+  --body-grad-1:#07040c;
+  --body-grad-2:#0b0711;
+  --body-grad-3:#120a1a;
 
-  --popover-bg: rgba(26,15,33,0.98);
-  --hover-bg: rgba(255,255,255,0.06);
+  /* popovers */
+  --popover-bg: rgba(20,12,29,.98);
+  --hover-bg: rgba(255,255,255,0.07);
 
-  --scrollbar-thumb:#4a2a63;
-  --scrollbar-track:#09040d;
+  /* scrollbar */
+  --scrollbar-thumb:#5a2d86;
+  --scrollbar-track:#05030a;
   --scrollbar-track-webkit: var(--scrollbar-track);
   --scrollbar-thumb-webkit: var(--scrollbar-thumb);
-  --scrollbar-thumb-webkit-hover:#5a3476;
+  --scrollbar-thumb-webkit-hover:#743bb0;
 
   color-scheme: dark;
 }
+

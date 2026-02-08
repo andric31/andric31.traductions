@@ -322,8 +322,8 @@ main{
   overflow:hidden;
 
   display:grid;
-  grid-template-rows: var(--thumb-h) 1fr;
-  min-height: calc(var(--thumb-h) + 160px);
+  grid-template-rows: var(--thumb-h) auto;
+  min-height: auto;
 }
 
 /* ✅ Tuile entièrement cliquable : pas de violet, pas de souligné */

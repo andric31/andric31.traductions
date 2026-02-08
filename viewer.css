@@ -247,6 +247,10 @@ a.card.card-link:focus-visible{
   overflow-y:hidden;
 }
 
+.top-actions::-webkit-scrollbar{
+  height: 0;                  /* Chrome/Edge */
+}
+
 /* Barre de recherche stretch */
 .search-wrap{
   display:flex;

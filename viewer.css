@@ -245,15 +245,10 @@ a.card.card-link:focus-visible{
 
   overflow-x:auto;
   overflow-y:hidden;
-
-  /* ✅ cache la scrollbar (Firefox + vieux Edge) */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 }
 
-/* ✅ cache la scrollbar (Chrome / Edge / Brave) */
 .top-actions::-webkit-scrollbar{
-  display: none;
+  height: 0;
 }
 
 /* Barre de recherche stretch */
@@ -697,13 +692,17 @@ a.card.card-link *{
 }
 
 /* =========================
-   Scrollbar sombre (modales & page)
+   Scrollbar sombre (PROPRE)
    ========================= */
 
-/* Chrome / Edge / Brave */
+/* NE PAS forcer la height globale */
 ::-webkit-scrollbar{
-  width: 16px;   /* ⬅ rail légèrement plus large */
-  height: 16px;
+  width: 16px;
+}
+
+/* seulement quand il y a un scroll horizontal */
+::-webkit-scrollbar:horizontal{
+  height: 12px;
 }
 
 ::-webkit-scrollbar-track{
@@ -713,19 +712,11 @@ a.card.card-link *{
 ::-webkit-scrollbar-thumb{
   background: #2a314b;
   border-radius: 999px;
-
-  /* ⬅ crée l’effet “thumb plus petit que le rail” */
   border: 4px solid #0f1117;
 }
 
 ::-webkit-scrollbar-thumb:hover{
   background: #3b4568;
-}
-
-/* Scrollbar spécifique aux modales */
-.modal-body{
-  scrollbar-width: thin;                 /* Firefox */
-  scrollbar-color: #2a314b #0f1117;       /* Firefox */
 }
 
 /* =========================

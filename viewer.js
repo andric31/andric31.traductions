@@ -165,7 +165,7 @@
   }
 
   // =========================
-  // 🎨 Thème (Auto par défaut) — applique sur <html> ( :root )
+  // 🎨 Thème (Auto par défaut) — FIX: applique sur <html> aussi
   // =========================
   async function getViewerTheme() {
     try {
@@ -174,25 +174,28 @@
       return "auto";
     }
   }
-  
+
   async function setViewerTheme(v) {
     try {
       localStorage.setItem("viewerTheme", String(v || "auto"));
     } catch {}
   }
-  
+
   function applyViewerTheme(t) {
     const v = (t || "auto").toString().trim() || "auto";
-    const root = document.documentElement; // ✅ <html> (=> :root)
-  
-    // ✅ reset propre
-    root.removeAttribute("data-theme");
-  
-    // ✅ auto = laisse prefers-color-scheme gérer (media query)
-    if (v === "auto") return;
-  
-    // ✅ force un thème : :root[data-theme="..."]
+    const root = document.documentElement; // ✅ <html>
+    const body = document.body;
+
+    if (v === "auto") {
+      // auto = aucun data-theme forcé => :root media query prend la main
+      root.removeAttribute("data-theme");
+      body.removeAttribute("data-theme");
+      return;
+    }
+
+    // ✅ on force sur html (et body en bonus si tu as des vieux sélecteurs)
     root.setAttribute("data-theme", v);
+    body.setAttribute("data-theme", v);
   }
 
   // =========================

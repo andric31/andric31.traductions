@@ -245,10 +245,15 @@ a.card.card-link:focus-visible{
 
   overflow-x:auto;
   overflow-y:hidden;
+
+  /* ✅ cache la scrollbar (Firefox + vieux Edge) */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
+/* ✅ cache la scrollbar (Chrome / Edge / Brave) */
 .top-actions::-webkit-scrollbar{
-  height: 0;                  /* Chrome/Edge */
+  display: none;
 }
 
 /* Barre de recherche stretch */

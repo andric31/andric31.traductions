@@ -15,25 +15,33 @@
   --badges-h: 28px;
 
   --topbar-h: 78px;
+
+  /* ✅ dit aux navigateurs que ton site est dark */
+  color-scheme: dark;
 }
 
 *{ box-sizing:border-box; }
 html,body{ height:100%; }
 
+/* ✅ empêche le "zoom" quand la scrollbar apparaît */
 html{
   background: var(--bg);
-  color-scheme: dark;
-
-  /* ✅ empêche l'effet "agrandissement/rétrécissement" au chargement */
   overflow-y: scroll;
+
+  /* 🔥 Firefox scrollbar */
+  scrollbar-color: #303a57 #0b0e14;
+  scrollbar-width: auto; /* ← largeur normale, plus premium */
 }
 
+/* Firefox peut parfois utiliser body */
 body{
   margin:0;
   min-height:100%;
   font-family:system-ui,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial;
   color:var(--fg);
   background:linear-gradient(180deg,#0d1018,#101425 30%,#0f1117);
+
+  scrollbar-color: #303a57 #0b0e14;
 }
 
 /* ✅ Carte cliquable (anti violet/souligné + visited inclus) */
@@ -693,31 +701,33 @@ a.card.card-link *{
 }
 
 /* =========================
-   Scrollbar sombre (PROPRE)
+   Scrollbar PREMIUM
    ========================= */
 
-/* NE PAS forcer la height globale */
+/* largeur verticale */
 ::-webkit-scrollbar{
-  width: 16px;
+  width: 14px;
 }
 
-/* seulement quand il y a un scroll horizontal */
+/* horizontale un peu plus fine */
 ::-webkit-scrollbar:horizontal{
-  height: 12px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track{
-  background: #0f1117;
+  background: #0b0e14; /* plus profond que ton bg */
 }
 
 ::-webkit-scrollbar-thumb{
-  background: #2a314b;
+  background: #303a57;
   border-radius: 999px;
-  border: 4px solid #0f1117;
+
+  /* crée l'effet flottant sans bouffer la largeur */
+  border: 3px solid #0b0e14;
 }
 
 ::-webkit-scrollbar-thumb:hover{
-  background: #3b4568;
+  background: #3f4b6b;
 }
 
 /* =========================

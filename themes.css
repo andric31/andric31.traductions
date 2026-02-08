@@ -1,11 +1,15 @@
 /* themes.css — Thèmes via variables (viewer.css reste propre)
    Auto (par défaut) suit le thème Windows via prefers-color-scheme.
+
+   ✅ IMPORTANT :
+   - Les variables utilisées par html{ background: var(--bg) } doivent être sur :root (= html)
+   - Donc on force les thèmes sur :root[data-theme="..."] (et non body)
 */
 
 /* =========================================================
    AUTO (Windows) : mode clair
    - S'applique quand AUCUN data-theme n'est forcé
-   - Si tu forces un thème (body[data-theme="..."]), il override.
+   - Si tu forces un thème (:root[data-theme="..."]), il override.
    ========================================================= */
 @media (prefers-color-scheme: light){
   :root{
@@ -52,7 +56,7 @@
 /* =========================================================
    FORCÉ : sombre (identique à ton style actuel)
    ========================================================= */
-body[data-theme="dark"]{
+:root[data-theme="dark"]{
   --bg:#0f1117;
   --bg2:#141826;
   --fg:#e8eaf0;
@@ -85,7 +89,7 @@ body[data-theme="dark"]{
 /* =========================================================
    FORCÉ : blanc (même rendu que auto light, mais forcé)
    ========================================================= */
-body[data-theme="white"]{
+:root[data-theme="white"]{
   --bg:#ffffff;
   --bg2:#ffffff;
   --fg:#111318;
@@ -123,7 +127,7 @@ body[data-theme="white"]{
 /* =========================================================
    NOËL
    ========================================================= */
-body[data-theme="noel"]{
+:root[data-theme="noel"]{
   --bg:#071a12;
   --bg2:#0b2419;
   --fg:#eafff2;
@@ -156,7 +160,7 @@ body[data-theme="noel"]{
 /* =========================================================
    HALLOWEEN
    ========================================================= */
-body[data-theme="halloween"]{
+:root[data-theme="halloween"]{
   --bg:#120a16;
   --bg2:#1a0f21;
   --fg:#f6e9ff;

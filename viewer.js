@@ -164,6 +164,43 @@
     pop.style.top = top + "px";
   }
 
+  // =========================
+  // 🎨 Thème (Auto par défaut) — FIX: applique sur <html> aussi
+  // =========================
+  async function getViewerTheme() {
+    try {
+      return (localStorage.getItem("viewerTheme") || "auto").trim() || "auto";
+    } catch {
+      return "auto";
+    }
+  }
+
+  async function setViewerTheme(v) {
+    try {
+      localStorage.setItem("viewerTheme", String(v || "auto"));
+    } catch {}
+  }
+
+  function applyViewerTheme(t) {
+    const v = (t || "auto").toString().trim() || "auto";
+    const root = document.documentElement; // ✅ <html>
+    const body = document.body;
+
+    if (v === "auto") {
+      // auto = aucun data-theme forcé => :root media query prend la main
+      root.removeAttribute("data-theme");
+      body.removeAttribute("data-theme");
+      return;
+    }
+
+    // ✅ on force sur html (et body en bonus si tu as des vieux sélecteurs)
+    root.setAttribute("data-theme", v);
+    body.setAttribute("data-theme", v);
+  }
+
+  // =========================
+  // Header tools
+  // =========================
   function initHeaderMenuAndDisplayTools() {
     const row = document.querySelector(".top-title-row");
     if (!row) return;
@@ -207,22 +244,22 @@
       window.ViewerMenu?.init?.();
     } catch {}
 
-// ✅ init thème
-(async () => {
-  try {
-    const t = await getViewerTheme();
-    applyViewerTheme(t);
-    if (themeSel) themeSel.value = t;
-    if (themeSel) {
-      themeSel.addEventListener("change", async (e) => {
-        const v = (e.target?.value || "auto").trim() || "auto";
-        await setViewerTheme(v);
-        applyViewerTheme(v);
-      });
-    }
-  } catch {}
-})();
+    // ✅ init thème (maintenant propre)
+    (async () => {
+      try {
+        const t = await getViewerTheme();
+        applyViewerTheme(t);
+        if (themeSel) themeSel.value = t;
 
+        if (themeSel) {
+          themeSel.addEventListener("change", async (e) => {
+            const v = (e.target?.value || "auto").trim() || "auto";
+            await setViewerTheme(v);
+            applyViewerTheme(v);
+          });
+        }
+      } catch {}
+    })();
 
     btn.addEventListener("click", (e) => {
       e.preventDefault();
@@ -489,25 +526,7 @@
     }
   }
 
-  
-
-// =========================
-// 🎨 Thème (Auto par défaut)
-// =========================
-async function getViewerTheme(){
-  try { return (localStorage.getItem("viewerTheme") || "auto").trim() || "auto"; }
-  catch { return "auto"; }
-}
-async function setViewerTheme(v){
-  try { localStorage.setItem("viewerTheme", String(v || "auto")); } catch {}
-}
-function applyViewerTheme(t){
-  const v = (t || "auto").toString().trim() || "auto";
-  if (v === "auto") document.body.removeAttribute("data-theme");
-  else document.body.setAttribute("data-theme", v);
-}
-
-async function getViewerCols() {
+  async function getViewerCols() {
     try {
       return (localStorage.getItem("viewerCols") || "auto").trim() || "auto";
     } catch {

@@ -10,7 +10,38 @@
   --btn:#1e2437;
 
   --thumb-h: 140px;
-  --name-lh: 1.25rem;
+  --name-lh: 1.25re
+
+/* ✅ Surélévation au survol (tuile) */
+.card:hover{
+  border-color: rgba(255,255,255,0.22);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.18),
+    0 0 22px -6px rgba(255,255,255,0.18),
+    0 14px 38px rgba(0,0,0,0.45);
+  transform: translateY(-3px);
+}
+.card:active{
+  transform: translateY(-1px);
+}
+
+/* ✅ Carte cliquable */
+a.card.card-link{
+  text-decoration:none;
+  color:inherit;
+  cursor:pointer;
+  display:grid; /* garde la mise en page */
+}
+a.card.card-link:focus-visible{
+  outline: 2px solid rgba(255,255,255,0.35);
+  outline-offset: 3px;
+}
+
+/* mini "bouton" indicatif (sans lien interne) */
+.btn-page--ghost{
+  pointer-events:none;
+}
+m;
   --name-lines: 2;
   --badges-h: 28px;
 
@@ -290,6 +321,10 @@ main{
 .card{
   background:var(--card);
   border:1px solid var(--border);
+
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.25) inset;
+  transition: border-color .18s ease, box-shadow .18s ease, transform .12s ease, filter .12s ease;
+  will-change: transform;
   border-radius:14px;
   overflow:hidden;
 

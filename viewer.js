@@ -896,24 +896,25 @@
 
     for (let i = 0; i < limit; i++) {
       const g = state.filtered[i];
-      const card = document.createElement("article");
-      card.className = "card";
+      const card = document.createElement("a");
+      card.className = "card card-link";
 
       const imgSrc = (g.image || "").trim() || "/favicon.png";
       const pageHref = buildGameUrl(g.__raw || g);
 
-      card.innerHTML = `
+      // ✅ Tuile entièrement cliquable
+      card.href = pageHref;
+      card.target = "_blank";
+      card.rel = "noopener";
+      card.setAttribute("aria-label", `Ouvrir : ${getDisplayTitle(g.__raw || g)}`);
+card.innerHTML = `
         <img src="${imgSrc}" class="thumb" alt=""
              referrerpolicy="no-referrer"
              onerror="this.onerror=null;this.src='/favicon.png';this.classList.add('is-fallback');">
         <div class="body">
           <h3 class="name clamp-2">${escapeHtml(getDisplayTitle(g.__raw || g))}</h3>
           <div class="badges-line one-line">${badgesLineHtml(g)}</div>
-          <div class="actions">
-            <a class="btn btn-page" href="${pageHref}" target="_blank" rel="noopener">
-              📄 Ouvrir la page
-            </a>
-          </div>
+          <div class="actions"><span class="btn btn-page btn-page--ghost">📄 Ouvrir</span></div>
         </div>
       `;
 

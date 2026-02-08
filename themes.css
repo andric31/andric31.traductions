@@ -2,33 +2,56 @@
    Auto (par défaut) suit le thème Windows via prefers-color-scheme.
 */
 
-/* =========================
+/* =========================================================
    AUTO (Windows) : mode clair
-   ========================= */
+   - S'applique quand AUCUN data-theme n'est forcé
+   - Si tu forces un thème (body[data-theme="..."]), il override.
+   ========================================================= */
 @media (prefers-color-scheme: light){
   :root{
-    --bg:#f6f7fb;
+    --bg:#ffffff;
     --bg2:#ffffff;
-    --fg:#12131a;
+    --fg:#111318;
     --muted:#4c556a;
+
     --primary:#2d6cdf;
     --accent:#0f7b50;
+
     --border:#d6dae6;
-    --card:#ffffff;
+
+    /* ✅ tuiles grisées, pas blanches */
+    --card:#f2f4f8;
     --btn:#eef1f8;
+
+    /* ✅ titres */
+    --title:#111318;
+
+    /* ✅ topbar claire */
+    --topbar-bg: rgba(255,255,255,.92);
+
+    /* ✅ gradient body = blanc */
+    --body-grad-1:#ffffff;
+    --body-grad-2:#ffffff;
+    --body-grad-3:#ffffff;
+
+    /* ✅ popovers + hover */
+    --popover-bg: rgba(255,255,255,0.96);
+    --hover-bg: rgba(0,0,0,0.06);
+
+    /* ✅ scrollbars */
+    --scrollbar-thumb:#c4c9d6;
+    --scrollbar-track:#f1f3f7;
+    --scrollbar-track-webkit: var(--scrollbar-track);
+    --scrollbar-thumb-webkit: var(--scrollbar-thumb);
+    --scrollbar-thumb-webkit-hover:#b0b6c6;
 
     color-scheme: light;
   }
-
-  html{
-    /* Firefox scrollbar (plus cohérent en clair) */
-    scrollbar-color: #b9c0d6 #f6f7fb;
-  }
 }
 
-/* =========================
+/* =========================================================
    FORCÉ : sombre (identique à ton style actuel)
-   ========================= */
+   ========================================================= */
 body[data-theme="dark"]{
   --bg:#0f1117;
   --bg2:#141826;
@@ -40,35 +63,66 @@ body[data-theme="dark"]{
   --card:#171b29;
   --btn:#1e2437;
 
+  --title: var(--fg);
+  --topbar-bg: rgba(16,20,37,.9);
+
+  --body-grad-1:#0d1018;
+  --body-grad-2:#101425;
+  --body-grad-3:#0f1117;
+
+  --popover-bg: rgba(20,24,38,0.98);
+  --hover-bg: rgba(255,255,255,0.06);
+
+  --scrollbar-thumb:#303a57;
+  --scrollbar-track:#0b0e14;
+  --scrollbar-track-webkit: var(--scrollbar-track);
+  --scrollbar-thumb-webkit: var(--scrollbar-thumb);
+  --scrollbar-thumb-webkit-hover:#3f4b6b;
+
   color-scheme: dark;
 }
-body[data-theme="dark"] html{
-  scrollbar-color: #303a57 #0b0e14;
-}
 
-/* =========================
-   FORCÉ : blanc
-   ========================= */
+/* =========================================================
+   FORCÉ : blanc (même rendu que auto light, mais forcé)
+   ========================================================= */
 body[data-theme="white"]{
   --bg:#ffffff;
-  --bg2:#f6f7fb;
+  --bg2:#ffffff;
   --fg:#111318;
   --muted:#4c556a;
+
   --primary:#2d6cdf;
   --accent:#0f7b50;
+
   --border:#d6dae6;
-  --card:#ffffff;
+
+  /* ✅ tuiles grisées */
+  --card:#f2f4f8;
   --btn:#eef1f8;
+
+  --title:#111318;
+
+  --topbar-bg: rgba(255,255,255,.92);
+
+  --body-grad-1:#ffffff;
+  --body-grad-2:#ffffff;
+  --body-grad-3:#ffffff;
+
+  --popover-bg: rgba(255,255,255,0.96);
+  --hover-bg: rgba(0,0,0,0.06);
+
+  --scrollbar-thumb:#c4c9d6;
+  --scrollbar-track:#f1f3f7;
+  --scrollbar-track-webkit: var(--scrollbar-track);
+  --scrollbar-thumb-webkit: var(--scrollbar-thumb);
+  --scrollbar-thumb-webkit-hover:#b0b6c6;
 
   color-scheme: light;
 }
-body[data-theme="white"] html{
-  scrollbar-color: #b9c0d6 #ffffff;
-}
 
-/* =========================
+/* =========================================================
    NOËL
-   ========================= */
+   ========================================================= */
 body[data-theme="noel"]{
   --bg:#071a12;
   --bg2:#0b2419;
@@ -80,12 +134,28 @@ body[data-theme="noel"]{
   --card:#0d2a1e;
   --btn:#103425;
 
+  --title: var(--fg);
+  --topbar-bg: rgba(10,28,20,.88);
+
+  --body-grad-1:#05140e;
+  --body-grad-2:#071a12;
+  --body-grad-3:#071a12;
+
+  --popover-bg: rgba(11,36,25,0.98);
+  --hover-bg: rgba(255,255,255,0.06);
+
+  --scrollbar-thumb:#1f5a3f;
+  --scrollbar-track:#04110c;
+  --scrollbar-track-webkit: var(--scrollbar-track);
+  --scrollbar-thumb-webkit: var(--scrollbar-thumb);
+  --scrollbar-thumb-webkit-hover:#2a6e4e;
+
   color-scheme: dark;
 }
 
-/* =========================
+/* =========================================================
    HALLOWEEN
-   ========================= */
+   ========================================================= */
 body[data-theme="halloween"]{
   --bg:#120a16;
   --bg2:#1a0f21;
@@ -96,6 +166,22 @@ body[data-theme="halloween"]{
   --border:#2a1636;
   --card:#1a1022;
   --btn:#21142b;
+
+  --title: var(--fg);
+  --topbar-bg: rgba(18,10,22,.88);
+
+  --body-grad-1:#0f0714;
+  --body-grad-2:#120a16;
+  --body-grad-3:#120a16;
+
+  --popover-bg: rgba(26,15,33,0.98);
+  --hover-bg: rgba(255,255,255,0.06);
+
+  --scrollbar-thumb:#4a2a63;
+  --scrollbar-track:#09040d;
+  --scrollbar-track-webkit: var(--scrollbar-track);
+  --scrollbar-thumb-webkit: var(--scrollbar-thumb);
+  --scrollbar-thumb-webkit-hover:#5a3476;
 
   color-scheme: dark;
 }

@@ -18,13 +18,30 @@
   --topbar-h: 78px;
 }
 
-/* ✅ Carte cliquable */
-a.card.card-link{
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+
+/* ✅ PROPRE : réserve la place de la scrollbar (alignement header/main) */
+html{ scrollbar-gutter: stable; }
+
+body{
+  margin:0;
+  font-family:system-ui,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial;
+  color:var(--fg);
+  background:linear-gradient(180deg,#0d1018,#101425 30%,#0f1117);
+}
+
+/* ✅ Carte cliquable (anti violet/souligné + visited inclus) */
+a.card.card-link,
+a.card.card-link:visited,
+a.card.card-link:hover,
+a.card.card-link:active{
   text-decoration:none;
   color:inherit;
   cursor:pointer;
   display:grid; /* garde la mise en page */
 }
+
 a.card.card-link:focus-visible{
   outline: 2px solid rgba(255,255,255,0.35);
   outline-offset: 3px;
@@ -33,22 +50,6 @@ a.card.card-link:focus-visible{
 /* mini "bouton" indicatif (sans lien interne) */
 .btn-page--ghost{
   pointer-events:none;
-}
-m;
-  --name-lines: 2;
-  --badges-h: 28px;
-
-  /* ✅ un peu plus compact qu’avant */
-  --topbar-h: 78px;
-}
-
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;
-  font-family:system-ui,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial;
-  color:var(--fg);
-  background:linear-gradient(180deg,#0d1018,#101425 30%,#0f1117);
 }
 
 /* ---------- TOPBAR FIXE ---------- */
@@ -245,6 +246,7 @@ body{
   overflow-x:auto;
   overflow-y:hidden;
 
+  /* ✅ propre: réserve le gutter du scrollbar dans ce conteneur */
   scrollbar-gutter: stable;
 }
 

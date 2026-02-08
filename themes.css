@@ -1,0 +1,101 @@
+/* themes.css — Thèmes via variables (viewer.css reste propre)
+   Auto (par défaut) suit le thème Windows via prefers-color-scheme.
+*/
+
+/* =========================
+   AUTO (Windows) : mode clair
+   ========================= */
+@media (prefers-color-scheme: light){
+  :root{
+    --bg:#f6f7fb;
+    --bg2:#ffffff;
+    --fg:#12131a;
+    --muted:#4c556a;
+    --primary:#2d6cdf;
+    --accent:#0f7b50;
+    --border:#d6dae6;
+    --card:#ffffff;
+    --btn:#eef1f8;
+
+    color-scheme: light;
+  }
+
+  html{
+    /* Firefox scrollbar (plus cohérent en clair) */
+    scrollbar-color: #b9c0d6 #f6f7fb;
+  }
+}
+
+/* =========================
+   FORCÉ : sombre (identique à ton style actuel)
+   ========================= */
+body[data-theme="dark"]{
+  --bg:#0f1117;
+  --bg2:#141826;
+  --fg:#e8eaf0;
+  --muted:#aab2c8;
+  --primary:#5aa2ff;
+  --accent:#6ce0b0;
+  --border:#23283b;
+  --card:#171b29;
+  --btn:#1e2437;
+
+  color-scheme: dark;
+}
+body[data-theme="dark"] html{
+  scrollbar-color: #303a57 #0b0e14;
+}
+
+/* =========================
+   FORCÉ : blanc
+   ========================= */
+body[data-theme="white"]{
+  --bg:#ffffff;
+  --bg2:#f6f7fb;
+  --fg:#111318;
+  --muted:#4c556a;
+  --primary:#2d6cdf;
+  --accent:#0f7b50;
+  --border:#d6dae6;
+  --card:#ffffff;
+  --btn:#eef1f8;
+
+  color-scheme: light;
+}
+body[data-theme="white"] html{
+  scrollbar-color: #b9c0d6 #ffffff;
+}
+
+/* =========================
+   NOËL
+   ========================= */
+body[data-theme="noel"]{
+  --bg:#071a12;
+  --bg2:#0b2419;
+  --fg:#eafff2;
+  --muted:#a7d8b8;
+  --primary:#27c07d;
+  --accent:#e53935;
+  --border:#0f3a27;
+  --card:#0d2a1e;
+  --btn:#103425;
+
+  color-scheme: dark;
+}
+
+/* =========================
+   HALLOWEEN
+   ========================= */
+body[data-theme="halloween"]{
+  --bg:#120a16;
+  --bg2:#1a0f21;
+  --fg:#f6e9ff;
+  --muted:#cbb6dd;
+  --primary:#b56dff;
+  --accent:#ff8c00;
+  --border:#2a1636;
+  --card:#1a1022;
+  --btn:#21142b;
+
+  color-scheme: dark;
+}

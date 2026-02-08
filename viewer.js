@@ -196,14 +196,33 @@
     const total = document.querySelector("#countTotal")?.closest(".total-inline");
     const cols = document.getElementById("cols");
     const pageSize = document.getElementById("pageSize");
+    const themeSel = document.getElementById("theme");
 
     if (total) tools.appendChild(total);
     if (cols) tools.appendChild(cols);
     if (pageSize) tools.appendChild(pageSize);
+    if (themeSel) tools.appendChild(themeSel);
 
     try {
       window.ViewerMenu?.init?.();
     } catch {}
+
+// ✅ init thème
+(async () => {
+  try {
+    const t = await getViewerTheme();
+    applyViewerTheme(t);
+    if (themeSel) themeSel.value = t;
+    if (themeSel) {
+      themeSel.addEventListener("change", async (e) => {
+        const v = (e.target?.value || "auto").trim() || "auto";
+        await setViewerTheme(v);
+        applyViewerTheme(v);
+      });
+    }
+  } catch {}
+})();
+
 
     btn.addEventListener("click", (e) => {
       e.preventDefault();
@@ -470,7 +489,25 @@
     }
   }
 
-  async function getViewerCols() {
+  
+
+// =========================
+// 🎨 Thème (Auto par défaut)
+// =========================
+async function getViewerTheme(){
+  try { return (localStorage.getItem("viewerTheme") || "auto").trim() || "auto"; }
+  catch { return "auto"; }
+}
+async function setViewerTheme(v){
+  try { localStorage.setItem("viewerTheme", String(v || "auto")); } catch {}
+}
+function applyViewerTheme(t){
+  const v = (t || "auto").toString().trim() || "auto";
+  if (v === "auto") document.body.removeAttribute("data-theme");
+  else document.body.setAttribute("data-theme", v);
+}
+
+async function getViewerCols() {
     try {
       return (localStorage.getItem("viewerCols") || "auto").trim() || "auto";
     } catch {

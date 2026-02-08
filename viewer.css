@@ -20,11 +20,12 @@
 *{ box-sizing:border-box; }
 html,body{ height:100%; }
 
-/* ✅ IMPORTANT : évite le flash blanc (gutter/scrollbar/controls) */
 html{
   background: var(--bg);
   color-scheme: dark;
-  scrollbar-gutter: stable;
+
+  /* ✅ empêche l'effet "agrandissement/rétrécissement" au chargement */
+  overflow-y: scroll;
 }
 
 body{

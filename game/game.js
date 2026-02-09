@@ -1342,16 +1342,19 @@ function renderVideoBlock({ id, videoUrl }) {
       const oldWrap = megaRow.querySelector(".extraLinksCol");
       if (oldWrap) oldWrap.remove();
     
-      // ✅ La ligne devient une colonne : MEGA puis extras
+      // ✅ Colonne : MEGA puis extras (mais CENTRÉ, pas full width)
       megaRow.style.display = "flex";
       megaRow.style.flexDirection = "column";
       megaRow.style.flexWrap = "nowrap";
       megaRow.style.gap = "10px";
-      megaRow.style.alignItems = "stretch";
+      megaRow.style.alignItems = "center";        // ✅ au lieu de stretch
       megaRow.style.justifyContent = "flex-start";
     
-      // (optionnel mais propre) MEGA full width
-      if (megaBtn) megaBtn.style.width = "100%";
+      // ✅ bouton MEGA : revient comme avant (pas 100%)
+      if (megaBtn) {
+        megaBtn.style.width = "auto";
+        megaBtn.style.margin = "0 auto";
+      }
     
       // wrapper colonne pour les extras (sous MEGA)
       const wrap = document.createElement("div");
@@ -1359,8 +1362,8 @@ function renderVideoBlock({ id, videoUrl }) {
       wrap.style.display = "flex";
       wrap.style.flexDirection = "column";
       wrap.style.gap = "10px";
-      wrap.style.alignItems = "stretch";
-      wrap.style.width = "100%";
+      wrap.style.alignItems = "center";           // ✅ centré
+      wrap.style.width = "auto";                  // ✅ au lieu de 100%
     
       // insère wrapper juste après MEGA si possible, sinon à la fin
       if (megaBtn && megaBtn.parentNode === megaRow) {
@@ -1380,7 +1383,10 @@ function renderVideoBlock({ id, videoUrl }) {
         a.target = "_blank";
         a.rel = "noopener";
         a.href = link;
-        a.style.width = "100%";
+    
+        // ✅ plus plein largeur
+        a.style.width = "auto";
+        a.style.margin = "0 auto";
         a.style.justifyContent = "center";
     
         // ✅ Patch : texte spécial uniquement si name === "Patch"

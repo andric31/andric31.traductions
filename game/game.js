@@ -1305,18 +1305,17 @@ function renderVideoBlock({ id, videoUrl }) {
     if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction · MEGA";
 
     // =========================
-    // 6b) Liens supplémentaires (translationsExtra) — dans la même ligne que MEGA
-    // (AVANT la notation, comme ton autre site)
+    // 6b) Liens supplémentaires (translationsExtra) — SOUS MEGA (1 par ligne)
     // =========================
     function getHostClass(url){
       const u = (url || "").toLowerCase();
-      if (u.includes("mega.nz")) return "btnMega";        // même style que MEGA
+      if (u.includes("mega.nz")) return "btnMega";        // rouge MEGA (garde)
       if (u.includes("f95zone")) return "btn-f95";        // style F95
       if (u.includes("drive.google")) return "btn-host-drive";
       if (u.includes("gofile")) return "btn-host-gofile";
       return "btn-host-default";
     }
-
+    
     const extraRaw = entry.translationsExtra;
     const extraList = Array.isArray(extraRaw) ? extraRaw : (extraRaw ? [extraRaw] : []);
     const extraValid = extraList
@@ -1332,49 +1331,77 @@ function renderVideoBlock({ id, videoUrl }) {
         return link ? { name, link } : null;
       })
       .filter(Boolean);
-
-    // ✅ On réutilise la ligne MEGA existante (même rendu, zéro décalage)
+    
+    // ✅ On réutilise la ligne MEGA existante
     const megaRow = document.querySelector(".btnMainRow");
     const megaBtn = document.getElementById("btnMega");
-
+    
     if (megaRow) {
-      // retire les anciens boutons extra (si rechargement / navigation)
+      // retire anciens extras + wrapper (si rechargement / navigation)
       [...megaRow.querySelectorAll(".extraLinkBtn")].forEach(el => el.remove());
-
-      // ajoute les nouveaux
+      const oldWrap = megaRow.querySelector(".extraLinksCol");
+      if (oldWrap) oldWrap.remove();
+    
+      // ✅ La ligne devient une colonne : MEGA puis extras
+      megaRow.style.display = "flex";
+      megaRow.style.flexDirection = "column";
+      megaRow.style.flexWrap = "nowrap";
+      megaRow.style.gap = "10px";
+      megaRow.style.alignItems = "stretch";
+      megaRow.style.justifyContent = "flex-start";
+    
+      // (optionnel mais propre) MEGA full width
+      if (megaBtn) megaBtn.style.width = "100%";
+    
+      // wrapper colonne pour les extras (sous MEGA)
+      const wrap = document.createElement("div");
+      wrap.className = "extraLinksCol";
+      wrap.style.display = "flex";
+      wrap.style.flexDirection = "column";
+      wrap.style.gap = "10px";
+      wrap.style.alignItems = "stretch";
+      wrap.style.width = "100%";
+    
+      // insère wrapper juste après MEGA si possible, sinon à la fin
+      if (megaBtn && megaBtn.parentNode === megaRow) {
+        megaRow.insertBefore(wrap, megaBtn.nextSibling);
+      } else {
+        megaRow.appendChild(wrap);
+      }
+    
+      // ajoute les extras (en colonne)
       extraValid.forEach((x) => {
         const name = String(x.name || "Lien").trim();
         const link = String(x.link || "").trim();
         const hostCls = getHostClass(link);
-
+    
         const a = document.createElement("a");
         a.className = `btnLike ${hostCls} extraLinkBtn`;
         a.target = "_blank";
         a.rel = "noopener";
         a.href = link;
-
-        // libellé (F95 bicolore identique)
-        if (hostCls === "btn-f95" && /f95\s*zone/i.test(name)) {
-          a.innerHTML = `📥 Télécharger la traduction · <span class="f95-logo"><span class="f95-white">F95</span><span class="f95-red">Zone</span></span>`;
+        a.style.width = "100%";
+        a.style.justifyContent = "center";
+    
+        // ✅ Patch : texte spécial uniquement si name === "Patch"
+        if (name.toLowerCase() === "patch") {
+          a.textContent = "📥 Télécharger · Patch";
         } else {
-          a.textContent = `📥 Télécharger la traduction · ${name}`;
+          // libellé (F95 bicolore identique)
+          if (hostCls === "btn-f95" && /f95\s*zone/i.test(name)) {
+            a.innerHTML = `📥 Télécharger la traduction · <span class="f95-logo"><span class="f95-white">F95</span><span class="f95-red">Zone</span></span>`;
+          } else {
+            a.textContent = `📥 Télécharger la traduction · ${name}`;
+          }
         }
-
-        // insère après le bouton MEGA si présent, sinon à la fin
-        if (megaBtn && megaBtn.parentNode === megaRow) {
-          megaRow.insertBefore(a, megaBtn.nextSibling);
-        } else {
-          megaRow.appendChild(a);
-        }
+    
+        wrap.appendChild(a);
       });
-
+    
       // ✅ Cache la ligne si rien (évite l'espace vide)
       const hasMega = !!megaHref;
       const hasExtra = extraValid.length > 0;
       megaRow.style.display = (hasMega || hasExtra) ? "flex" : "none";
-      megaRow.style.flexWrap = "wrap";
-      megaRow.style.gap = "10px";
-      megaRow.style.justifyContent = "center";
     }
 
     // =========================

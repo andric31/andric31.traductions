@@ -195,138 +195,159 @@
     root.setAttribute("data-theme", v);
   }
 
-  // =========================
-  // Header tools
-  // =========================
-  function initHeaderMenuAndDisplayTools() {
-    const row = document.querySelector(".top-title-row");
-    if (!row) return;
-    if (document.getElementById("hamburgerBtn")) return;
-
-    const h1 = row.querySelector("h1");
-    if (!h1) return;
-
-    row.classList.add("top-title-flex");
-
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.id = "hamburgerBtn";
-    btn.className = "hamburger-btn";
-    btn.setAttribute("aria-label", "Ouvrir le menu");
-    btn.setAttribute("aria-haspopup", "menu");
-    btn.setAttribute("aria-expanded", "false");
-    btn.innerHTML = `
-      <span class="ham-lines" aria-hidden="true">
-        <span></span><span></span><span></span>
-      </span>
-    `;
-
-    const tools = document.createElement("div");
-    tools.className = "top-title-tools";
-
-    row.insertBefore(btn, h1);
-    row.appendChild(tools);
-
-    const total = document.querySelector("#countTotal")?.closest(".total-inline");
-    const cols = document.getElementById("cols");
-    const pageSize = document.getElementById("pageSize");
-    const themeSel = document.getElementById("theme");
-
-    if (total) tools.appendChild(total);
-    if (cols) tools.appendChild(cols);
-    if (pageSize) tools.appendChild(pageSize);
-    if (themeSel) tools.appendChild(themeSel);
-
-    try {
-      window.ViewerMenu?.init?.();
-    } catch {}
-
-    // ✅ init thème (maintenant propre)
-    (async () => {
-      try {
-        const t = await getViewerTheme();
-        applyViewerTheme(t);
-        if (themeSel) themeSel.value = t;
-
-        if (themeSel) {
-          themeSel.addEventListener("change", async (e) => {
-            const v = (e.target?.value || "auto").trim() || "auto";
-            await setViewerTheme(v);
-            applyViewerTheme(v);
-          });
-        }
-      } catch {}
-    })();
-
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      const pop = document.getElementById("topMenuPopover");
-      if (!pop) return;
-
-      const isOpen = !pop.classList.contains("hidden");
-      if (isOpen) {
-        try {
-          window.ViewerMenu?.closeMenu?.();
-        } catch {
-          pop.classList.add("hidden");
-        }
-        return;
-      }
-
-      pop.classList.remove("hidden");
-      btn.setAttribute("aria-expanded", "true");
-      positionPopover(pop, btn);
-    });
-
-    document.addEventListener("click", (e) => {
-      const pop = document.getElementById("topMenuPopover");
-      const hb = document.getElementById("hamburgerBtn");
-      if (pop && hb) {
-        const t = e.target;
-        if (!pop.contains(t) && !hb.contains(t)) {
-          try {
-            window.ViewerMenu?.closeMenu?.();
-          } catch {
-            pop.classList.add("hidden");
-          }
-        }
-      }
-
-      const tagsPop = document.getElementById("tagsPopover");
-      const tagsBtn = document.getElementById("tagsBtn");
-      if (tagsPop && tagsBtn) {
-        const t = e.target;
-        if (!tagsPop.contains(t) && !tagsBtn.contains(t)) closeTagsPopover();
-      }
-    });
-
-    window.addEventListener("resize", () => {
-      const pop = document.getElementById("topMenuPopover");
-      const hb = document.getElementById("hamburgerBtn");
-      if (pop && hb && !pop.classList.contains("hidden")) positionPopover(pop, hb);
-
-      const tp = document.getElementById("tagsPopover");
-      const tb = document.getElementById("tagsBtn");
-      if (tp && tb && !tp.classList.contains("hidden")) positionTagsPopover(tp, tb);
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        try {
-          window.ViewerMenu?.closeMenu?.();
-        } catch {}
-        try {
-          window.ViewerMenuAbout?.close?.();
-        } catch {}
-        try {
-          window.ViewerMenuExtension?.close?.();
-        } catch {}
-        closeTagsPopover();
-      }
-    });
-  }
+   // =========================
+   // Header tools
+   // =========================
+   let THEME_MQ_BOUND = false;
+   
+   function initHeaderMenuAndDisplayTools() {
+     const row = document.querySelector(".top-title-row");
+     if (!row) return;
+     if (document.getElementById("hamburgerBtn")) return;
+   
+     const h1 = row.querySelector("h1");
+     if (!h1) return;
+   
+     row.classList.add("top-title-flex");
+   
+     const btn = document.createElement("button");
+     btn.type = "button";
+     btn.id = "hamburgerBtn";
+     btn.className = "hamburger-btn";
+     btn.setAttribute("aria-label", "Ouvrir le menu");
+     btn.setAttribute("aria-haspopup", "menu");
+     btn.setAttribute("aria-expanded", "false");
+     btn.innerHTML = `
+       <span class="ham-lines" aria-hidden="true">
+         <span></span><span></span><span></span>
+       </span>
+     `;
+   
+     const tools = document.createElement("div");
+     tools.className = "top-title-tools";
+   
+     row.insertBefore(btn, h1);
+     row.appendChild(tools);
+   
+     const total = document.querySelector("#countTotal")?.closest(".total-inline");
+     const cols = document.getElementById("cols");
+     const pageSize = document.getElementById("pageSize");
+     const themeSel = document.getElementById("theme");
+   
+     if (total) tools.appendChild(total);
+     if (cols) tools.appendChild(cols);
+     if (pageSize) tools.appendChild(pageSize);
+     if (themeSel) tools.appendChild(themeSel);
+   
+     try {
+       window.ViewerMenu?.init?.();
+     } catch {}
+   
+     // ✅ helper : fermer menu proprement + aria
+     function closeTopMenu() {
+       const pop = document.getElementById("topMenuPopover");
+       if (pop) pop.classList.add("hidden");
+       btn.setAttribute("aria-expanded", "false");
+       try {
+         window.ViewerMenu?.closeMenu?.();
+       } catch {}
+     }
+   
+     // ✅ binder Windows theme watcher (une seule fois)
+     function bindAutoThemeWatcher() {
+       if (THEME_MQ_BOUND) return;
+       THEME_MQ_BOUND = true;
+   
+       const mq = window.matchMedia("(prefers-color-scheme: dark)");
+       mq.addEventListener("change", async () => {
+         try {
+           const t = await getViewerTheme();
+           if ((t || "auto") === "auto") {
+             // Auto = pas de data-theme, le CSS suit Windows
+             applyViewerTheme("auto");
+             if (themeSel) themeSel.value = "auto";
+           }
+         } catch {}
+       });
+     }
+   
+     // ✅ init thème + UI select
+     (async () => {
+       try {
+         const t = await getViewerTheme();
+         applyViewerTheme(t);
+         if (themeSel) themeSel.value = t;
+   
+         // ✅ watch Windows (seulement utile en auto)
+         bindAutoThemeWatcher();
+   
+         if (themeSel) {
+           themeSel.addEventListener("change", async (e) => {
+             const v = (e.target?.value || "auto").trim() || "auto";
+             await setViewerTheme(v);
+             applyViewerTheme(v);
+             // si l'utilisateur revient sur auto, on est bien sync Windows
+             if (v === "auto") bindAutoThemeWatcher();
+           });
+         }
+       } catch {}
+     })();
+   
+     btn.addEventListener("click", (e) => {
+       e.preventDefault();
+       e.stopPropagation();
+   
+       const pop = document.getElementById("topMenuPopover");
+       if (!pop) return;
+   
+       const isOpen = !pop.classList.contains("hidden");
+       if (isOpen) {
+         closeTopMenu();
+         return;
+       }
+   
+       pop.classList.remove("hidden");
+       btn.setAttribute("aria-expanded", "true");
+       positionPopover(pop, btn);
+     });
+   
+     document.addEventListener("click", (e) => {
+       // menu principal
+       const pop = document.getElementById("topMenuPopover");
+       const hb = document.getElementById("hamburgerBtn");
+       if (pop && hb) {
+         const t = e.target;
+         if (!pop.contains(t) && !hb.contains(t)) closeTopMenu();
+       }
+   
+       // tags popover
+       const tagsPop = document.getElementById("tagsPopover");
+       const tagsBtn = document.getElementById("tagsBtn");
+       if (tagsPop && tagsBtn) {
+         const t = e.target;
+         if (!tagsPop.contains(t) && !tagsBtn.contains(t)) closeTagsPopover();
+       }
+     });
+   
+     window.addEventListener("resize", () => {
+       const pop = document.getElementById("topMenuPopover");
+       const hb = document.getElementById("hamburgerBtn");
+       if (pop && hb && !pop.classList.contains("hidden")) positionPopover(pop, hb);
+   
+       const tp = document.getElementById("tagsPopover");
+       const tb = document.getElementById("tagsBtn");
+       if (tp && tb && !tp.classList.contains("hidden")) positionTagsPopover(tp, tb);
+     });
+   
+     document.addEventListener("keydown", (e) => {
+       if (e.key === "Escape") {
+         closeTopMenu();
+         try { window.ViewerMenuAbout?.close?.(); } catch {}
+         try { window.ViewerMenuExtension?.close?.(); } catch {}
+         closeTagsPopover();
+       }
+     });
+   }
 
   // =========================
   // ✅ TAGS MULTI (popover + save)

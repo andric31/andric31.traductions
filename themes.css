@@ -77,6 +77,24 @@
   color-scheme: light;
 }
 
+/* gradient uniquement quand c'est clair (auto clair, clair, white) */
+:root:not([data-theme]) body,
+:root[data-theme="clair"] body,
+:root[data-theme="white"] body{
+  background:
+    radial-gradient(1200px 600px at 18% 0%, rgba(45,108,223,0.10), transparent 60%),
+    radial-gradient(900px 500px at 90% 10%, rgba(15,123,80,0.08), transparent 55%),
+    linear-gradient(180deg, var(--body-grad-1), var(--body-grad-2) 30%, var(--body-grad-3));
+  background-attachment: fixed;
+}
+
+/* auto + Windows sombre => pas de gradient clair */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme]) body{
+    background: none;
+  }
+}
+
 
 /* =========================================================
    AUTO + Windows sombre = TON THÈME SOMBRE
@@ -169,11 +187,7 @@
    FORCÉ : clair (alias : white) — clair premium, pas “blanc pur”
    ========================================================= */
 :root[data-theme="clair"],
-html[data-theme="clair"],
-body[data-theme="clair"],
-:root[data-theme="white"],
-html[data-theme="white"],
-body[data-theme="white"]{
+:root[data-theme="white"]{
   --bg:#f6f7fb;
   --bg2:#ffffff;
   --fg:#141824;
@@ -221,16 +235,6 @@ body[data-theme="white"]{
 
   color-scheme: light;
 }
-
-:root[data-theme="clair"] body,
-:root[data-theme="white"] body{
-  background:
-    radial-gradient(1200px 600px at 18% 0%, rgba(45,108,223,0.10), transparent 60%),
-    radial-gradient(900px 500px at 90% 10%, rgba(15,123,80,0.08), transparent 55%),
-    linear-gradient(180deg, var(--body-grad-1), var(--body-grad-2) 30%, var(--body-grad-3));
-  background-attachment: fixed;
-}
-
 
 /* =========================================================
    NOËL (sapin + rouge + neige visible)

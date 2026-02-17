@@ -6,13 +6,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Jeu</title>
 
+  <!-- ✅ Applique le même thème que le viewer (localStorage.viewerTheme) -->
+  <script>
+  (function(){
+    try{
+      const t = (localStorage.getItem("viewerTheme") || "auto").trim() || "auto";
+      const root = document.documentElement; // <html>
+      root.removeAttribute("data-theme");
+      if (t !== "auto") root.setAttribute("data-theme", t);
+    }catch{}
+  })();
+  </script>
+
   <link rel="icon" href="/favicon.png" />
   <link rel="stylesheet" href="../viewer.css" />
   <link rel="stylesheet" href="../themes.css" />
   <link rel="stylesheet" href="./game.css" />
 </head>
 
-<body>
+<body class="mode-game">
   <div class="wrap">
     <div class="cardPreview" id="card" aria-live="polite">
       <div class="cardInner">
@@ -115,6 +127,19 @@
 
       if ((msg.textContent || "").trim()) flash();
     })();
+  </script>
+
+  <!-- ✅ Si le thème change dans un autre onglet (viewer), la page jeu suit -->
+  <script>
+  window.addEventListener("storage", (e) => {
+    if (e.key !== "viewerTheme") return;
+    try{
+      const t = (localStorage.getItem("viewerTheme") || "auto").trim() || "auto";
+      const root = document.documentElement;
+      root.removeAttribute("data-theme");
+      if (t !== "auto") root.setAttribute("data-theme", t);
+    }catch{}
+  });
   </script>
 
   <script src="../viewer.menu.js"></script>

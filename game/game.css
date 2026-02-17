@@ -448,21 +448,23 @@ html{
       line-height: 1.45;
     }
 
-/* ===== Fix lisibilité bloc Informations (theme clair) ===== */
-html[data-theme="white"] .infoBlock{
-  background: #f4f6f8;
-  border-color: #d6dbe1;
-}
+/* ===== Fix lisibilité bloc Informations en clair (white + auto clair) ===== */
 
-html[data-theme="white"] .infoBlock h3{
-  color: #1a1a1a;
+/* 1) Thème "Clair" explicite */
+html[data-theme="white"] #notesBox{
+  background:#f4f6f8;
+  border-color:#d6dbe1;
 }
+html[data-theme="white"] #notesBox h3{ color:#1a1a1a; }
+html[data-theme="white"] #notesBox .infoTextMuted{ color:#444; }
 
-html[data-theme="white"] .infoBlock .infoText{
-  color: #222;
-}
-
-html[data-theme="white"] .infoBlock .infoTextMuted{
-  color: #444;
+/* 2) Thème "Auto" (pas de data-theme) + Windows en clair */
+@media (prefers-color-scheme: light){
+  html:not([data-theme]) #notesBox{
+    background:#f4f6f8;
+    border-color:#d6dbe1;
+  }
+  html:not([data-theme]) #notesBox h3{ color:#1a1a1a; }
+  html:not([data-theme]) #notesBox .infoTextMuted{ color:#444; }
 }
 

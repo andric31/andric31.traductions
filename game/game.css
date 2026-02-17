@@ -448,23 +448,30 @@ html{
       line-height: 1.45;
     }
 
-/* ===== Fix lisibilité bloc Informations en clair (white + auto clair) ===== */
+/* ✅ FORCE lisibilité bloc ℹ️ Informations (clair + auto clair) */
 
-/* 1) Thème "Clair" explicite */
-html[data-theme="white"] #notesBox{
-  background:#f4f6f8;
-  border-color:#d6dbe1;
-}
-html[data-theme="white"] #notesBox h3{ color:#1a1a1a; }
-html[data-theme="white"] #notesBox .infoTextMuted{ color:#444; }
-
-/* 2) Thème "Auto" (pas de data-theme) + Windows en clair */
+html[data-theme="white"] #notesBox,
 @media (prefers-color-scheme: light){
   html:not([data-theme]) #notesBox{
-    background:#f4f6f8;
-    border-color:#d6dbe1;
+    background:#f4f6f8 !important;
+    border-color:#d6dbe1 !important;
   }
-  html:not([data-theme]) #notesBox h3{ color:#1a1a1a; }
-  html:not([data-theme]) #notesBox .infoTextMuted{ color:#444; }
+}
+
+html[data-theme="white"] #notesBox h3,
+@media (prefers-color-scheme: light){
+  html:not([data-theme]) #notesBox h3{
+    color:#111 !important;
+    opacity: 1 !important;
+  }
+}
+
+/* le vrai texte */
+html[data-theme="white"] #notesText,
+@media (prefers-color-scheme: light){
+  html:not([data-theme]) #notesText{
+    color:#333 !important;
+    opacity: 1 !important;
+  }
 }
 

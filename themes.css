@@ -8,6 +8,11 @@
 
 html, body { min-height: 100%; }
 
+:root{
+  --game-rating-color: #f6c945;   /* ⭐ jaune */
+  --game-rating-opacity: .85;
+}
+
 /* =========================================================
    BASE : petits overrides communs (tous thèmes)
    ========================================================= */
@@ -234,6 +239,10 @@ html, body { min-height: 100%; }
     0 0 0 1px rgba(45,108,223,0.18),
     0 14px 38px rgba(17,19,24,0.12);
   --card-hover-bg: var(--card);
+
+  /* ⭐ couleur des étoiles */
+  --game-rating-color: #f1b90b;
+  --game-rating-opacity: .95;
 
   color-scheme: light;
 }

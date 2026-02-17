@@ -2,563 +2,337 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Jeu</title>
+  <title>f95list_viewer</title>
 
-  <link rel="icon" href="/favicon.png" />
+  <link id="dynamic-favicon" rel="icon" type="image/png" href="./avatar.png">
+  <script>
+  (function(){
+    const fav = document.getElementById("dynamic-favicon");
+    const testUrl = "./avatar.png?v=" + Date.now(); // anti-cache
+
+    const img = new Image();
+    img.onload  = () => fav.href = testUrl;
+    img.onerror = () => fav.href = "/favicon.png?v=" + Date.now(); // fallback
+    img.src = testUrl;
+  })();
+  </script>
+
   <link rel="stylesheet" href="../viewer.css" />
-
-  <style>
-    html{
-      height:auto;          /* ou tu peux carrément enlever height */
-      overflow-y: scroll;   /* garde la réserve si tu veux */
-    }
-    
-    body{
-      margin:0;
-      min-height:100dvh;    /* mieux que 100% / 100vh */
-      overflow-y: visible;  /* IMPORTANT: pas de scroll interne */
-      display:flex;
-      align-items:flex-start;
-      justify-content:center;
-      padding: 18px 0;
-    }
-    
-    /* ✅ NE DOIT PAS SCROLLER */
-    .wrap{
-      width: 820px;
-      max-width: 92vw;
-    
-      height: auto;         /* important */
-      overflow: visible;    /* important */
-      padding: 18px;        /* garde ton padding */
-    }
-
-    .cardPreview{
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      overflow:hidden;
-      box-shadow: 0 10px 40px rgba(0,0,0,.35);
-    }
-
-    .cardInner{
-      padding: 16px 16px 18px 16px;
-    }
-
-    .headRow{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      margin-bottom:10px;
-      flex-wrap:wrap;
-    }
-
-    .badgesRow{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      align-items:center;
-      margin:0;
-    }
-
-    .hamburger-btn{
-      width:34px;
-      height:34px;
-      border-radius:10px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,0.05);
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-      user-select:none;
-      flex:0 0 auto;
-    }
-    .hamburger-btn:hover{ filter: brightness(1.10); }
-    .hamburger-btn:active{ transform: translateY(1px); }
-
-    .ham-lines{
-      width:16px;
-      height:12px;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-    }
-    .ham-lines span{
-      display:block;
-      height:2px;
-      border-radius:999px;
-      background:#ffffff;
-      opacity:0.92;
-    }
-
-    .menu-popover{
-      position:fixed;
-      z-index:2000;
-      min-width: 220px;
-      background: rgba(20,24,38,0.98);
-      border:1px solid var(--border);
-      border-radius:12px;
-      box-shadow: 0 18px 45px rgba(0,0,0,.45);
-      padding:6px;
-    }
-    .menu-popover.hidden{ display:none !important; }
-
-    .menu-item{
-      width:100%;
-      text-align:left;
-      padding:10px 10px;
-      border-radius:10px;
-      border:1px solid transparent;
-      background: transparent;
-      color: var(--fg);
-      cursor:pointer;
-      font-weight:700;
-    }
-    .menu-item:hover{
-      background: rgba(255,255,255,0.06);
-      border-color: rgba(255,255,255,0.06);
-    }
-
-    .modal-overlay{
-      position:fixed;
-      inset:0;
-      z-index:3000;
-      background: rgba(0,0,0,0.55);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding: 18px;
-    }
-    .modal-overlay.hidden{ display:none !important; }
-
-    .modal{
-      width: 680px;
-      max-width: 92vw;
-      background: var(--card);
-      border:1px solid var(--border);
-      border-radius: 16px;
-      box-shadow: 0 18px 55px rgba(0,0,0,.55);
-      overflow:hidden;
-    }
-
-    .modal-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding: 12px 14px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      background: rgba(255,255,255,0.02);
-    }
-    .modal-title{
-      font-weight: 900;
-      color:#fff;
-    }
-    .modal-close{
-      width:32px;
-      height:32px;
-      border-radius:10px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,0.05);
-      color: var(--fg);
-      cursor:pointer;
-    }
-    .modal-close:hover{ filter: brightness(1.10); }
-
-    .modal-body{
-      padding: 14px;
-      color: var(--fg);
-      font-size: 14px;
-      line-height: 1.45;
-    }
-    .aboutText a{
-      color: var(--primary);
-      text-decoration:none;
-    }
-    .aboutText a:hover{ text-decoration:underline; }
-
-    .modal-foot{
-      padding: 12px 14px 14px;
-      display:flex;
-      justify-content:flex-end;
-      gap:10px;
-      border-top: 1px solid rgba(255,255,255,0.06);
-    }
-    .modal-btn{
-      padding: 10px 14px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.05);
-      color:#fff;
-      font-weight:800;
-      cursor:pointer;
-      user-select:none;
-    }
-    .modal-btn:hover{ filter: brightness(1.08); }
-
-    .majState{
-      margin-top: -2px;
-      margin-bottom: 8px;
-      text-align: left;
-      font-size: 13px;
-      color: var(--muted);
-      user-select:none;
-    }
-    .majState .ok{ color:#4ade80; font-weight:800; }
-    .majState .no{ color:#f97316; font-weight:800; }
-    .majState .wait{ color:#cbd5e1; font-weight:700; }
-
-    .title{
-      margin: 0 0 12px 0;
-      font-size: 22px;
-      line-height: 1.2;
-      color: #fff;
-    }
-
-    .cover{
-      width:100%;
-      height: 190px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: #0f121a;
-      object-fit: cover;
-      display:block;
-    }
-    .cover.is-placeholder{
-      background:
-        radial-gradient(1200px 300px at 20% 0%, rgba(255,255,255,0.06), rgba(0,0,0,0)),
-        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0));
-    }
-
-    .tagsRow{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      margin-top: 12px;
-    }
-
-    .tagPill{
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.04);
-      color:#fff;
-      border-radius: 999px;
-      font-size: 12px;
-      padding: 6px 10px;
-      user-select:none;
-    }
-
-    .btnRow{
-      display:flex;
-      gap:10px;
-      justify-content:center;
-      flex-wrap:wrap;
-      margin-top: 16px;
-    }
-
-    .btnMainRow{
-      display:flex;
-      justify-content:center;
-      margin-top: 12px;
-    }
-
-    .btnLike{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      padding: 10px 14px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.05);
-      color:#fff;
-      text-decoration:none;
-      font-weight: 700;
-      cursor:pointer;
-      user-select:none;
-    }
-    .btnLike:hover{ filter: brightness(1.08); }
-
-    #btnDiscord.btn-discord{
-      background:#5865F2;
-      border-color:#5865F2;
-      color:#fff;
-    }
-    #btnDiscord.btn-discord:hover{
-      background:#4752C4;
-      border-color:#4752C4;
-    }
-
-    .btnLike .f95-white{ color:#ffffff; font-weight:800; }
-    .btnLike .f95-red{ color:#8b2d2d; font-weight:800; }
-
-    .btnLike.btn-f95,
-    #btnF95.btn-f95{
-      position: relative;
-      background: linear-gradient(180deg, #222222 0%, #161616 100%);
-      border-color: rgba(255,255,255,.04);
-      color:#ffffff;
-      box-shadow: 0 8px 18px rgba(0,0,0,.35);
-      overflow: hidden;
-      transform: none;
-    }
-
-    .btnLike.btn-f95 span,
-    #btnF95.btn-f95 span{
-      position: relative;
-      z-index: 1;
-    }
-
-    .btnLike.btn-f95::before,
-    #btnF95.btn-f95::before{
-      content: none !important;
-      display: none !important;
-    }
-
-    .btnLike.btn-f95:hover,
-    #btnF95.btn-f95:hover{
-      background: linear-gradient(180deg, #1a1a1a 0%, #111111 100%);
-      border-color: rgba(255,255,255,.04);
-      transform: none;
-    }
-
-    .btnLike.btnMega,
-    #btnMega{
-      background: linear-gradient(180deg,#b71c1c 0%,#8e0e0e 100%);
-      border: 1px solid rgba(255,255,255,.04);
-      color:#ffffff;
-      box-shadow: 0 8px 18px rgba(0,0,0,.40);
-      transform: none;
-    }
-
-    .btnLike.btnMega:hover,
-    #btnMega:hover{
-      background: linear-gradient(180deg,#c62828 0%,#9f1b1b 100%);
-      border-color: rgba(255,255,255,.04);
-      transform: none;
-    }
-
-    .ratingStar,
-    .ratingCancel{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      width: 40px;
-      height: 34px;
-      background: rgba(255,255,255,0.035);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      cursor: pointer;
-      user-select: none;
-      font-size: 26px;
-      line-height: 1;
-      color: #ffd36b;
-      opacity: 0.7;
-      transition:
-        opacity 220ms cubic-bezier(.4,0,.2,1),
-        transform 220ms cubic-bezier(.4,0,.2,1),
-        filter 220ms cubic-bezier(.4,0,.2,1);
-    }
-
-    .ratingStar:hover,
-    .ratingCancel:hover,
-    .ratingStar:focus-visible,
-    .ratingCancel:focus-visible{
-      opacity: 0.92;
-      filter: brightness(1.04);
-      transform: scale(1.02);
-    }
-
-    .ratingCancel{
-      font-size: 16px;
-      color: #fff;
-      opacity: 0.75;
-    }
-
-    .ratingCancel:hover{
-      color: #ff9a9a;
-      opacity: 0.95;
-    }
-
-    #ratingChoices{ flex-wrap: nowrap; }
-
-    #ratingMsg{
-      opacity: 0.82;
-      transition: opacity 220ms cubic-bezier(.4,0,.2,1);
-      will-change: opacity;
-    }
-    @keyframes ratingMsgFade {
-      from { opacity: 0.35; }
-      to   { opacity: 0.82; }
-    }
-    #ratingMsg.msgFade{
-      animation: ratingMsgFade 520ms cubic-bezier(.4,0,.2,1);
-    }
-
-    .statsOut{
-      margin-top: 10px;
-      padding: 10px 12px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: rgba(255,255,255,0.03);
-      color: var(--muted);
-      font-size: 12px;
-      display:flex;
-      gap:10px;
-      justify-content:center;
-      flex-wrap:wrap;
-      user-select:none;
-    }
-    .statsOut strong{
-      color: var(--fg);
-      font-weight: 800;
-    }
-
-    .err{
-      margin: 14px auto 0;
-      max-width: 820px;
-      color: #ffd6d6;
-      background: rgba(255, 0, 0, 0.08);
-      border: 1px solid rgba(255, 0, 0, 0.2);
-      padding: 12px 14px;
-      border-radius: 12px;
-      display:none;
-      white-space: pre-wrap;
-    }
-
-    .topbar{ display:none !important; }
-
-    .infoBlock{
-      margin-top: 12px;
-      border: 1px solid rgba(255,255,255,.18);
-      border-radius: 12px;
-      padding: 10px 12px;
-      background: rgba(0,0,0,.15);
-    }
-    .infoBlock h3{ margin: 0 0 6px 0; }
-    .infoBlock .infoText{
-      color: var(--fg);
-      font-size: 14px;
-      line-height: 1.45;
-    }
-    .infoBlock .infoTextMuted{
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.45;
-    }
-  </style>
+  <link rel="stylesheet" href="./game.css" />
+  <link rel="stylesheet" href="../themes.css" />
 </head>
-
 <body>
-  <div class="wrap">
-    <div class="cardPreview" id="card" aria-live="polite">
-      <div class="cardInner">
 
-        <div class="headRow">
-          <button type="button" class="hamburger-btn" id="hamburgerBtn" aria-label="Ouvrir le menu" aria-haspopup="menu" aria-expanded="false">
-            <span class="ham-lines" aria-hidden="true"><span></span><span></span><span></span></span>
-          </button>
+  <!-- ✅ Nom affiché via manifest (casse exacte), fallback slug — SANS BOUCLE -->
+  <script>
+  (async function(){
+    function detectSlug(){
+      try{
+        const forced = (window.__SITE_SLUG__ || "").toString().trim();
+        if(forced) return forced.toLowerCase();
+      }catch{}
+      const segs = (location.pathname || "/").split("/").filter(Boolean);
+      return String(segs[0] || "").trim().toLowerCase();
+    }
 
-          <button class="btnLike like-btn" id="btnLike" type="button" aria-label="J’aime">🤍</button>
+    const slug = detectSlug();
+    window.__SITE_SLUG__ = slug;
 
-          <div class="badgesRow" id="badges"></div>
-        </div>
+    let nice = slug ? (slug[0].toUpperCase() + slug.slice(1)) : "";
 
-        <div class="majState" id="majState" style="display:none;"></div>
+    try{
+      const r = await fetch("/traducteurs_manifest.json", { cache:"no-store" });
+      if (r.ok){
+        const list = await r.json();
+        const found = Array.isArray(list)
+          ? list.find(x => String(x?.key||"").toLowerCase() === slug)
+          : null;
+        if (found && found.name) nice = String(found.name);
+      }
+    }catch(e){}
 
-        <h1 class="title" id="title">Chargement…</h1>
+    window.__SITE_NAME__ = nice;
 
-        <img id="cover" class="cover is-placeholder" alt="" referrerpolicy="no-referrer">
+    const txt = nice || slug || "";
+    document.title = txt;
 
-        <div id="videoBox" class="infoBlock" style="display:none;">
-          <h3>📺 Vidéo</h3>
-          <iframe id="videoFrame"
-            style="width:100%; aspect-ratio:16/9; border-radius:12px; border:1px solid var(--border);"
-            loading="lazy"
-            allowfullscreen>
-          </iframe>
-        </div>
+    function applyH1(){
+      const h1 = document.getElementById("viewerTitle");
+      if (h1) h1.textContent = txt;
+      return !!h1;
+    }
 
-        <div id="mainInfoBox" class="infoBlock" style="display:none;">
-          <div class="tagsRow" id="tags"></div>
+    if (applyH1()) return;
 
-          <div id="descInnerBox" class="descInnerBox" style="display:none;">
-            <div id="descriptionText" class="infoText"></div>
-          </div>
-        </div>
+    window.addEventListener("DOMContentLoaded", () => {
+      if (applyH1()) return;
 
-        <!-- ✅ BOUTONS : juste AU-DESSUS des étoiles -->
-        <div class="btnRow">
-          <a class="btnLike" id="btnDiscord" target="_blank" rel="noopener" style="display:none;">💬 Discord</a>
-          <a class="btnLike" id="btnF95" target="_blank" rel="noopener" style="display:none;">F95Zone</a>
-        </div>
+      let tries = 0;
+      const timer = setInterval(() => {
+        tries++;
+        if (applyH1() || tries >= 20) clearInterval(timer);
+      }, 100);
+    });
+  })();
+  </script>
 
-        <div class="btnMainRow">
-          <a class="btnLike btnMega" id="btnMega" target="_blank" rel="noopener" style="display:none;">📥 Télécharger la traduction · MEGA</a>
-          <!-- translationsExtra injecté ici -->
-        </div>
+  <!-- PAGE VIEWER -->
+  <div id="page-viewer">
 
-        <div id="archiveBox" style="display:none; margin-top:12px; justify-content:center;">
-          <a id="archiveLink" class="btnLike" target="_blank" rel="noopener" style="justify-content:center;">
-            📦 Archives de la traduction
-          </a>
-        </div>
+    <!-- 🔞 AGE GATE -->
+    <div id="age-gate" style="display:none;">
+      <div class="age-box">
+        <h2>🔞 Contenu réservé aux adultes</h2>
+        <p>
+          Ce site contient des images et contenus destinés à un public majeur.<br>
+          En continuant, vous confirmez avoir <strong>18 ans ou plus</strong>.
+        </p>
 
-        <!-- ✅ ℹ️ Informations AU-DESSUS des étoiles -->
-        <div id="notesBox" class="infoBlock" style="display:none;">
-          <h3>ℹ️ Informations</h3>
-          <div id="notesText" class="infoTextMuted"></div>
-        </div>
-
-        <!-- ⭐ Notation -->
-        <div id="ratingBox" class="infoBlock" style="text-align:center;">
-          <div style="color:var(--muted); font-size:12px; margin-bottom:6px;">
-            Note de la traduction :
-            <strong id="ratingAvg">—</strong>
-            (<span id="ratingCount">0</span> votes)
-          </div>
-
-          <div id="ratingChoices" style="display:flex; justify-content:center; gap:8px;"></div>
-          <div id="ratingMsg" style="margin-top:6px; color:var(--muted); font-size:12px;"></div>
-        </div>
-
+        <button id="age-yes">J’ai 18 ans</button>
+        <button id="age-no">Quitter</button>
       </div>
     </div>
 
-    <div class="statsOut" id="statsOut" style="display:none;">
-      👁️ Vues : <strong id="statViews">0</strong>
-      ·
-      ❤️ J’aime : <strong id="statLikes">0</strong>
-      ·
-      📥 Téléchargements : <strong id="statMegaClicks">0</strong>
+    <header class="topbar" role="banner">
+      <div class="top-title-row top-title-flex">
+        <button id="hamburgerBtnViewer" class="hamburger-btn" type="button"
+                aria-label="Menu" title="Menu" aria-expanded="false">
+          <span class="ham-lines" aria-hidden="true"><span></span><span></span><span></span></span>
+        </button>
+
+        <h1 id="viewerTitle">f95list_viewer</h1>
+
+        <div id="topTitleTools" class="top-title-tools">
+          <span class="total-inline">Total : <strong id="countTotal">0</strong></span>
+
+          <select id="cols" title="Vignettes par ligne">
+            <option value="auto">Vignettes/ligne : Auto</option>
+            <option value="1">1 par ligne</option>
+            <option value="2">2 par ligne</option>
+            <option value="3">3 par ligne</option>
+            <option value="4">4 par ligne</option>
+            <option value="5">5 par ligne</option>
+            <option value="6">6 par ligne</option>
+            <option value="7">7 par ligne</option>
+            <option value="8">8 par ligne</option>
+            <option value="9">9 par ligne</option>
+            <option value="10">10 par ligne</option>
+          </select>
+
+          <select id="pageSize" title="Affichage progressif">
+            <option value="50">Afficher par 50</option>
+            <option value="100">Afficher par 100</option>
+            <option value="all">Tout afficher</option>
+          </select>
+
+          <select id="theme" title="Thème">
+            <option value="auto">Thème : Auto (Windows)</option>
+            <option value="dark">Thème : Sombre</option>
+            <option value="white">Thème : Clair</option>
+            <option value="noel">Thème : Noël</option>
+            <option value="halloween">Thème : Halloween</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <div class="search-wrap">
+          <input id="search" type="search" placeholder="Rechercher un jeu." autocomplete="off" />
+        </div>
+
+        <select id="sort" title="Trier">
+          <option value="updatedAtLocal-desc">Date de la traduction</option>
+          <option value="mega-desc">📥 Téléchargements</option>
+          <option value="views-desc">👁️ Vues</option>
+          <option value="likes-desc">❤️ J'aime</option>
+          <option value="title-asc">Titre A→Z</option>
+          <option value="title-desc">Titre Z→A</option>
+          <option value="updatedAt-desc">Date Thread F95 (Maj)</option>
+        </select>
+
+        <select id="filterCat" title="Catégorie">
+          <option value="all">Catégorie : Toutes</option>
+          <option value="VN">VN</option>
+          <option value="Collection">Collection</option>
+        </select>
+
+        <select id="filterEngine" title="Moteur">
+          <option value="all">Moteur : Tous</option>
+          <option value="Ren'Py">Ren'Py</option>
+          <option value="RPGM">RPGM</option>
+          <option value="Unity">Unity</option>
+          <option value="Others">Others</option>
+          <option value="Wolf RPG">Wolf RPG</option>
+        </select>
+
+        <select id="filterStatus" title="Statut">
+          <option value="all">Statut : Tous</option>
+          <option value="Completed">Completed</option>
+          <option value="Abandoned">Abandoned</option>
+          <option value="Onhold">Onhold</option>
+          <option value="En cours">En cours</option>
+        </select>
+
+        <button id="tagsBtn" type="button" class="tags-btn" aria-haspopup="menu" aria-expanded="false">
+          🏷️ Tags <span id="tagsCount" class="tags-count hidden">0</span>
+        </button>
+
+        <button id="refresh" type="button">Rafraîchir</button>
+      </div>
+    </header>
+
+    <main role="main">
+      <section id="gridMode" class="grid-wrap" aria-label="Vignettes des jeux">
+        <div id="viewerAnnonceHost"></div>
+        <div id="grid" class="grid"></div>
+        <div id="gridEmpty" class="empty hidden">Aucun résultat.</div>
+      </section>
+
+      <footer class="viewer-footer">
+        👁️ Vues de la page : <strong id="mainViews">—</strong>
+      </footer>
+    </main>
+  </div>
+
+  <!-- PAGE JEU -->
+  <div id="page-game" style="display:none;">
+    <div class="wrap">
+      <div class="cardPreview" id="card" aria-live="polite">
+        <div class="cardInner">
+
+          <div class="headRow">
+            <button type="button" class="hamburger-btn" id="hamburgerBtnGame"
+                    aria-label="Ouvrir le menu" aria-haspopup="menu" aria-expanded="false">
+              <span class="ham-lines" aria-hidden="true"><span></span><span></span><span></span></span>
+            </button>
+
+            <button class="btnLike like-btn" id="btnLike" type="button" aria-label="J’aime">🤍</button>
+            <div class="badgesRow" id="badges"></div>
+          </div>
+
+          <div class="majState" id="majState" style="display:none;"></div>
+
+          <h1 class="title" id="title">Chargement…</h1>
+
+          <img id="cover" class="cover is-placeholder" alt="" referrerpolicy="no-referrer">
+
+          <div class="infoBlock tagsBox" id="tagsBox">
+            <div class="tagsRow" id="tags"></div>
+          </div>
+
+          <div id="descriptionBox" class="infoBlock" style="display:none;">
+            <div id="descriptionText" class="infoText"></div>
+          </div>
+
+          <div class="btnRow">
+            <a class="btnLike btn-discord" id="btnDiscord" target="_blank" rel="noopener" style="display:none;">💬 Discord</a>
+            <a class="btnLike btn-f95" id="btnF95" target="_blank" rel="noopener" style="display:none;">
+              <span class="f95-white">F95</span><span class="f95-red">Zone</span>
+            </a>
+          </div>
+
+          <div class="btnMainRow">
+            <a class="btnLike btnMega" id="btnMega" target="_blank" rel="noopener" style="display:none;">📥 Télécharger la traduction · MEGA</a>
+          </div>
+
+          <div id="archiveBox" style="display:none; margin-top:12px; justify-content:center;">
+            <a id="archiveLink" class="btnLike" target="_blank" rel="noopener" style="justify-content:center;">
+              📦 Archives de la traduction
+            </a>
+          </div>
+
+          <div id="ratingBox" class="infoBlock" style="text-align:center;">
+            <div class="ratingTitle">Note de la traduction : <strong id="ratingAvg">—</strong> (<span id="ratingCount">0</span> votes)</div>
+            <div id="ratingChoices" style="display:flex; justify-content:center; gap:8px;"></div>
+            <div id="ratingMsg" style="margin-top:6px; color:var(--muted); font-size:12px;"></div>
+          </div>
+
+          <div id="notesBox" class="infoBlock" style="display:none;">
+            <h3>ℹ️ Informations</h3>
+            <div id="notesText" class="infoTextMuted"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="statsOut infoBlock" id="statsOut" style="display:none; text-align:center; margin-top:14px;">
+        👁️ Vues : <strong id="statViews">0</strong>
+        · ❤️ J’aime : <strong id="statLikes">0</strong>
+        · 📥 Téléchargements : <strong id="statMegaClicks">0</strong>
+      </div>
+
+      <div class="err" id="errBox"></div>
     </div>
 
-    <div class="err" id="errBox"></div>
+    <script>
+      (function(){
+        const msg = document.getElementById("ratingMsg");
+        if (!msg) return;
+
+        const flash = () => {
+          msg.classList.remove("msgFade");
+          void msg.offsetWidth;
+          msg.classList.add("msgFade");
+        };
+
+        const obs = new MutationObserver(() => flash());
+        obs.observe(msg, { childList: true, characterData: true, subtree: true });
+
+        if ((msg.textContent || "").trim()) flash();
+      })();
+    </script>
   </div>
+
+  <script src="../viewer.menu.js" defer></script>
+  <script src="../viewer.menu.about.js" defer></script>
+  <script src="../viewer.menu.extension.js" defer></script>
+  <script src="../viewer.annonce.js" defer></script>
+  <script src="../viewer.agegate.js" defer></script>
+
+  <script src="../viewer.js" defer></script>
+  <script src="./game.js" defer></script>
 
   <script>
     (function(){
-      const msg = document.getElementById("ratingMsg");
-      if (!msg) return;
-
-      const flash = () => {
-        msg.classList.remove("msgFade");
-        void msg.offsetWidth;
-        msg.classList.add("msgFade");
-      };
-
-      const obs = new MutationObserver(() => flash());
-      obs.observe(msg, { childList: true, characterData: true, subtree: true });
-
-      if ((msg.textContent || "").trim()) flash();
+      const p = new URLSearchParams(location.search);
+      const hasGame = (p.get("id")||"").trim() || (p.get("uid")||"").trim();
+      const v = document.getElementById("page-viewer");
+      const g = document.getElementById("page-game");
+      if (hasGame) {
+        document.body.classList.add("mode-game");
+        if (v) v.style.display = "none";
+        if (g) g.style.display = "";
+      } else {
+        document.body.classList.remove("mode-game");
+        if (g) g.style.display = "none";
+        if (v) v.style.display = "";
+      }
     })();
   </script>
 
-  <script src="../viewer.menu.js"></script>
-  <script src="../viewer.menu.about.js"></script>
-  <script src="../viewer.menu.extension.js"></script>
-  <script src="./game.js"></script>
+  <script>
+    (function(){
+      function ensureAlias(){
+        const hasAlias = document.getElementById("hamburgerBtn");
+        if (hasAlias) return;
+
+        const p = new URLSearchParams(location.search);
+        const hasGame = (p.get("id")||"").trim() || (p.get("uid")||"").trim();
+
+        const src = document.getElementById(hasGame ? "hamburgerBtnGame" : "hamburgerBtnViewer");
+        if (!src) return;
+
+        const alias = src.cloneNode(true);
+        alias.id = "hamburgerBtn";
+        alias.style.display = "none";
+        alias.addEventListener("click", (e)=>{ e.preventDefault(); e.stopPropagation(); src.click(); });
+        document.body.appendChild(alias);
+      }
+      window.addEventListener("DOMContentLoaded", ensureAlias);
+    })();
+  </script>
 
 </body>
 </html>

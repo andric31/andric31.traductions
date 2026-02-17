@@ -448,30 +448,34 @@ html{
       line-height: 1.45;
     }
 
-/* ✅ FORCE lisibilité bloc ℹ️ Informations (clair + auto clair) */
+/* ✅ Lisibilité bloc ℹ️ Informations */
 
-html[data-theme="white"] #notesBox,
+/* 1) Thème "white" explicite */
+html[data-theme="white"] #notesBox{
+  background:#f4f6f8 !important;
+  border-color:#d6dbe1 !important;
+}
+html[data-theme="white"] #notesBox h3{
+  color:#111 !important;
+  opacity:1 !important;
+}
+html[data-theme="white"] #notesBox #notesText{
+  color:#333 !important;
+  opacity:1 !important;
+}
+
+/* 2) Thème "auto" (pas de data-theme) + système en clair */
 @media (prefers-color-scheme: light){
   html:not([data-theme]) #notesBox{
     background:#f4f6f8 !important;
     border-color:#d6dbe1 !important;
   }
-}
-
-html[data-theme="white"] #notesBox h3,
-@media (prefers-color-scheme: light){
   html:not([data-theme]) #notesBox h3{
     color:#111 !important;
-    opacity: 1 !important;
+    opacity:1 !important;
   }
-}
-
-/* le vrai texte */
-html[data-theme="white"] #notesText,
-@media (prefers-color-scheme: light){
-  html:not([data-theme]) #notesText{
+  html:not([data-theme]) #notesBox #notesText{
     color:#333 !important;
-    opacity: 1 !important;
+    opacity:1 !important;
   }
 }
-

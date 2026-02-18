@@ -639,3 +639,9 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
   html:not([data-theme]) .infoBlock .infoText{ color:#222 !important; opacity:1 !important; }
   html:not([data-theme]) .infoBlock .infoTextMuted{ color:#555 !important; opacity:1 !important; }
 }
+
+
+#ratingBox:hover{
+  border-color: #555 !important;
+}
+

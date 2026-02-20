@@ -151,23 +151,25 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
 
         <div style="height:22px;"></div>
 
-        <!-- ✅ Installation Firefox (ajouté) -->
+        <!-- ✅ Installation Firefox -->
         <div style="font-weight:900;margin-bottom:6px;">
           ✅ Installation dans Firefox
         </div>
-        <div style="opacity:.95;margin-bottom:8px;">
-          1. Glisse-dépose le fichier <code>.xpi</code> dans la fenêtre Firefox.<br>
-          <i>Fichier signé par Mozilla</i>
-        </div>
-        <div style="opacity:.95;margin-bottom:8px;">
-          2. Confirme l’installation :
-        </div>
-        <ul style="padding-left:18px;line-height:1.6;margin:0;">
-          <li>Clique sur <b>Ajouter</b>.</li>
-          <li>Clique sur <b>Ok</b>.</li>
-        </ul>
+        
+        <ol style="padding-left:18px;line-height:1.6;margin:0;">
+          <li>Glissez-déposez le fichier <code>.xpi</code> dans la fenêtre Firefox.<br>
+              <i>Fichier signé par Mozilla.</i>
+          </li>
+          <li>Confirmez l’installation :
+            <ul style="padding-left:18px;line-height:1.6;margin-top:6px;">
+              <li>Cliquez sur <b>Ajouter</b>.</li>
+              <li>Cliquez sur <b>OK</b>.</li>
+            </ul>
+          </li>
+        </ol>
+        
         <div style="opacity:.95;margin-top:8px;">
-          <i>Pense à cocher <code>Épingler l'extention</code> pour accéder facilement aux réglages de l’extension</i>
+          <i>Pensez à cocher <code>Épingler l’extension</code> afin d’accéder facilement aux réglages de l’extension.</i>
         </div>
 
         <div style="height:22px;"></div>

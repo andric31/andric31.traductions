@@ -1,4 +1,4 @@
-// viewer.menu.extension.js — Entrée menu : Extension (image + bouton Mega + compteur + install + réglages)
+// viewer.menu.extension.js — Entrée menu : Extension (images + bouton Mega + compteur + install + réglages)
 (() => {
   "use strict";
 
@@ -6,17 +6,25 @@
 C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
 `.trim();
 
-  const DOWNLOAD_URL = "https://mega.nz/folder/zFsCQJbJ#PkeQbqOCla9RCwoy9sK4tw";
+  const DOWNLOAD_URL = "https://mega.nz/folder/zFsCQJbJ#PkeQbqOCla9RCwoy9sK4tw".replace("qO","qO"); // (no-op, garde ton URL si tu veux)
   const EXT_DL_ID = "__viewer_extension_download__";
 
-  const IMAGES = [
-    "/img/f95list_extension.png",
-    "/img/f95list_extension_param.png"
-  ];
+  // ✅ 4 images (2 “avant”, 2 “après”)
+  const IMAGES = {
+    before: [
+      "/img/f95list_extension_vignette_icon_multi.png",
+      "/img/f95list_extension_thread_icon_multi.png"
+    ],
+    after: [
+      "/img/f95list_extension_vignette_multi.png",
+      "/img/f95list_extension_thread_multi.png"
+    ],
+    settings: "/img/f95list_extension_param.png"
+  };
 
   function escapeHtml(s) {
     return String(s || "").replace(/[&<>"']/g, m => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
     }[m]));
   }
 
@@ -31,13 +39,11 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
     try {
       const r = await fetch(
         `/api/counter?op=${op}&kind=mega&id=${EXT_DL_ID}`,
-        { cache:"no-store" }
+        { cache: "no-store" }
       );
       if (!r.ok) return null;
       const j = await r.json();
-      return Number(
-        j.megaClicks ?? j.downloads ?? j.count ?? j.value ?? j.mega ?? 0
-      );
+      return Number(j.megaClicks ?? j.downloads ?? j.count ?? j.value ?? j.mega ?? 0);
     } catch { return null; }
   }
 
@@ -66,13 +72,16 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
     overlay.onclick = e => { if (e.target.id === "extOverlay") close(); };
   }
 
+  // ✅ Image centrée, une par ligne
   function imageBlock(src) {
     return `
       <div style="margin:14px 0;text-align:center;">
         <img src="${escapeHtml(src)}"
           draggable="false"
           style="
+            display:block;
             max-width:100%;
+            margin:0 auto;
             border-radius:14px;
             border:1px solid rgba(255,255,255,.08);
             pointer-events:none;
@@ -93,12 +102,22 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
 
         <div style="text-align:center;opacity:.95;margin-bottom:12px;">
           ${escapeHtml("Voici mon extension qui ajoute une icône directement sur les threads et les vignettes de F95Zone.")}
-          <br><br>
+        </div>
+
+        <!-- ✅ Images “avant” : une sous l'autre -->
+        ${imageBlock(IMAGES.before[0])}
+        ${imageBlock(IMAGES.before[1])}
+
+        <!-- ✅ Phrase après la 2e image -->
+        <div style="text-align:center;margin:12px 0;">
           ${escapeHtml("L’icône est cliquable et permet d’accéder aux informations de la traduction.")}
         </div>
 
-        ${imageBlock(IMAGES[0])}
+        <!-- ✅ Images “après” : une sous l'autre -->
+        ${imageBlock(IMAGES.after[0])}
+        ${imageBlock(IMAGES.after[1])}
 
+        <!-- ✅ Phrase après la 4e image -->
         <div style="text-align:center;margin:12px 0;">
           ${escapeHtml(EXT_TEXT_BOTTOM)}
         </div>
@@ -149,7 +168,7 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
           <li>Cliquez sur l’icône <b>f95list_andric31_viewer</b> dans la barre du navigateur.</li>
         </ol>
 
-        ${imageBlock(IMAGES[1])}
+        ${imageBlock(IMAGES.settings)}
 
         <div style="height:22px;"></div>
 
@@ -157,7 +176,7 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
         <div style="font-weight:900;margin-bottom:6px;">
           ✅ Installation dans Firefox
         </div>
-        
+
         <ol style="padding-left:18px;line-height:1.6;margin:0;">
           <li>
             Glissez-déposez le fichier <b>.xpi</b> dans la fenêtre Firefox.<br>
@@ -168,7 +187,7 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
             Cliquez sur <b>Ajouter</b>, puis sur <b>OK</b>.
           </li>
         </ol>
-        
+
         <div style="opacity:.95;margin-top:8px;">
           <i>Pensez à cocher <b>Épingler l’extension</b> afin d’accéder facilement aux réglages.</i>
         </div>
@@ -219,8 +238,10 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
     updateCount("get");
 
     const btn = document.getElementById("extDownloadBtn");
-    btn.onclick = () => updateCount("hit");
-    btn.oncontextmenu = e => e.preventDefault();
+    if (btn) {
+      btn.onclick = () => updateCount("hit");
+      btn.oncontextmenu = e => e.preventDefault();
+    }
   }
 
   function close() {

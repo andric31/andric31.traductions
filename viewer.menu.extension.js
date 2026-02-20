@@ -137,11 +137,10 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
 
         <!-- Réglages -->
         <div style="font-weight:900;margin-bottom:6px;">
-          🛠️ Réglages de l’icône sur les vignettes et du clic sur les icones
+          🛠️ Réglages de l’icône sur les vignettes
         </div>
         <div style="opacity:.95;margin-bottom:8px;">
           Vous pouvez modifier la taille de l’icône affichée sur les vignettes.<br>
-          Vous pouvez également définir le comportement du clic sur l’icône.
         </div>
         <ol style="padding-left:18px;line-height:1.6;margin:0;">
           <li>Épinglez l’extension : Icône puzzle 🧩 → épingle 📌</li>
@@ -149,6 +148,27 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
         </ol>
 
         ${imageBlock(IMAGES[1])}
+
+        <div style="height:22px;"></div>
+
+        <!-- ✅ Installation Firefox (ajouté) -->
+        <div style="font-weight:900;margin-bottom:6px;">
+          ✅ Installation dans Firefox
+        </div>
+        <div style="opacity:.95;margin-bottom:8px;">
+          Glisse-dépose le fichier <code>.xpi</code> dans la fenêtre Firefox.<br>
+          <i>Fichier signé par Mozilla</i>
+        </div>
+        <div style="opacity:.95;margin-bottom:8px;">
+          Confirme l’installation :
+        </div>
+        <ul style="padding-left:18px;line-height:1.6;margin:0;">
+          <li>Clique sur <b>Ajouter</b>.</li>
+          <li>Clique sur <b>Ok</b>.</li>
+        </ul>
+        <div style="opacity:.95;margin-top:8px;">
+          <i>Pense à cocher <code>Épingler l'extention</code> pour accéder facilement aux réglages de l’extension</i>
+        </div>
 
         <div style="height:22px;"></div>
 

@@ -157,7 +157,7 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
         </div>
         
         <ol style="padding-left:18px;line-height:1.6;margin:0;">
-          <li>Glissez-déposez le fichier <code>.xpi</code> dans la fenêtre Firefox.<br>
+          <li>Glissez-déposez le fichier <b>.xpi</b> dans la fenêtre Firefox.<br>
               <i>Fichier signé par Mozilla.</i>
           </li>
           <li>Confirmez l’installation :
@@ -169,7 +169,7 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
         </ol>
         
         <div style="opacity:.95;margin-top:8px;">
-          <i>Pensez à cocher <code>Épingler l’extension</code> afin d’accéder facilement aux réglages de l’extension.</i>
+          <i>Pensez à cocher <b>Épingler l’extension</b> afin d’accéder facilement aux réglages de l’extension.</i>
         </div>
 
         <div style="height:22px;"></div>

@@ -156,11 +156,11 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
           ✅ Installation dans Firefox
         </div>
         <div style="opacity:.95;margin-bottom:8px;">
-          Glisse-dépose le fichier <code>.xpi</code> dans la fenêtre Firefox.<br>
+          1. Glisse-dépose le fichier <code>.xpi</code> dans la fenêtre Firefox.<br>
           <i>Fichier signé par Mozilla</i>
         </div>
         <div style="opacity:.95;margin-bottom:8px;">
-          Confirme l’installation :
+          2. Confirme l’installation :
         </div>
         <ul style="padding-left:18px;line-height:1.6;margin:0;">
           <li>Clique sur <b>Ajouter</b>.</li>

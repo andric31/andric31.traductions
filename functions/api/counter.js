@@ -2,8 +2,8 @@ export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
 
-  const op = (url.searchParams.get("op") || "get").trim();   // get | hit | unhit
-  const kind = (url.searchParams.get("kind") || "").trim();  // view | mega | like
+  const op = (url.searchParams.get("op") || "get").trim().toLowerCase();   // get | hit | unhit
+  const kind = (url.searchParams.get("kind") || "").trim().toLowerCase();  // view | mega | like
   const id = (url.searchParams.get("id") || "").trim();
 
   const headers = {
@@ -24,7 +24,7 @@ export async function onRequest(context) {
     return new Response(JSON.stringify({ ok: false, error: "ID invalide" }), { status: 400, headers });
   }
 
-  // ✅ Table (avec likes)
+  // ✅ Table counters (avec likes)
   await env.DB.prepare(`
     CREATE TABLE IF NOT EXISTS counters (
       id TEXT PRIMARY KEY,
@@ -35,17 +35,33 @@ export async function onRequest(context) {
     );
   `).run();
 
-  // ✅ Migration douce: si ancienne table sans likes, on tente 1 fois et on ignore si déjà OK
-  // (D1: ALTER TABLE échoue si la colonne existe)
+  // ✅ Events (pour fenêtres 24h/7j)
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS counter_events (
+      id TEXT NOT NULL,
+      kind TEXT NOT NULL,
+      ts INTEGER NOT NULL DEFAULT (unixepoch())
+    );
+  `).run();
+
+  // ✅ Migration douce: si ancienne table sans likes, on tente et on ignore si déjà OK
   try {
-    // on vérifie les colonnes vite fait
     const info = await env.DB.prepare(`PRAGMA table_info(counters);`).all();
     const cols = (info?.results || []).map(r => String(r?.name || "").toLowerCase());
     if (!cols.includes("likes")) {
       await env.DB.prepare(`ALTER TABLE counters ADD COLUMN likes INTEGER NOT NULL DEFAULT 0;`).run();
     }
   } catch {
-    // silencieux (au pire, ta table est déjà bonne)
+    // silencieux
+  }
+
+  // ✅ Nettoyage doux events (on garde ~8 jours)
+  try {
+    const nowSec = Math.floor(Date.now() / 1000);
+    const pruneBefore = nowSec - (8 * 24 * 60 * 60);
+    await env.DB.prepare(`DELETE FROM counter_events WHERE ts < ?1`).bind(pruneBefore).run();
+  } catch {
+    // silencieux
   }
 
   async function getRow() {
@@ -54,6 +70,14 @@ export async function onRequest(context) {
       .bind(id)
       .first();
     return row || { id, views: 0, mega: 0, likes: 0 };
+  }
+
+  async function addEvent(evKind) {
+    // evKind: 'view' | 'mega' | 'like' | 'unlike'
+    await env.DB
+      .prepare(`INSERT INTO counter_events (id, kind, ts) VALUES (?1, ?2, unixepoch())`)
+      .bind(id, evKind)
+      .run();
   }
 
   if (op === "get") {
@@ -71,6 +95,9 @@ export async function onRequest(context) {
           updated_at = unixepoch()
       `).bind(id).run();
 
+      // ✅ event pour 24h/7j
+      await addEvent("view");
+
     } else if (kind === "mega") {
       await env.DB.prepare(`
         INSERT INTO counters (id, views, mega, likes, updated_at)
@@ -80,6 +107,9 @@ export async function onRequest(context) {
           updated_at = unixepoch()
       `).bind(id).run();
 
+      // ✅ event pour 24h/7j
+      await addEvent("mega");
+
     } else if (kind === "like") {
       await env.DB.prepare(`
         INSERT INTO counters (id, views, mega, likes, updated_at)
@@ -88,6 +118,9 @@ export async function onRequest(context) {
           likes = likes + 1,
           updated_at = unixepoch()
       `).bind(id).run();
+
+      // ✅ event pour 24h/7j
+      await addEvent("like");
 
     } else {
       return new Response(JSON.stringify({ ok: false, error: "kind invalide" }), { status: 400, headers });
@@ -109,6 +142,9 @@ export async function onRequest(context) {
         likes = CASE WHEN likes > 0 THEN likes - 1 ELSE 0 END,
         updated_at = unixepoch()
     `).bind(id).run();
+
+    // ✅ event inverse (sert à likes24h/likes7d = like - unlike)
+    await addEvent("unlike");
 
     const row = await getRow();
     return new Response(JSON.stringify({ ok: true, ...row }), { headers });

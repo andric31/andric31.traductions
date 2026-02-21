@@ -211,21 +211,58 @@ function setText(el, v) {
   el.textContent = (Number.isFinite(n) ? n : 0).toLocaleString("fr-FR");
 }
 
+// ============================================================================
+// ✅ TOTALS jeux (somme de tous les uid:xxx)
+// ============================================================================
+function computeTotalsAllGames() {
+  // Somme sur les jeux uniquement (uid:xxx), pas le compteur site "__viewer_main__"
+  let mega = 0, likes = 0;
+  let mega24h = 0, likes24h = 0;
+  let mega7d = 0, likes7d = 0;
+
+  for (const [k, s] of state.statsByKey.entries()) {
+    if (!k || k === MAIN_SITE_ID) continue;
+    if (!String(k).startsWith("uid:")) continue;
+
+    mega += (s.mega | 0);
+    likes += (s.likes | 0);
+
+    mega24h += (s.mega24h | 0);
+    likes24h += (s.likes24h | 0);
+
+    mega7d += (s.mega7d | 0);
+    likes7d += (s.likes7d | 0);
+  }
+
+  return { mega, likes, mega24h, likes24h, mega7d, likes7d };
+}
+
+// ============================================================================
+// ✅ KPI site : Vues = compteur site, Téléch./Likes = somme jeux
+// ============================================================================
 function renderSiteKpis() {
-  const s = state.statsByKey.get(MAIN_SITE_ID);
-  if (!s) return;
+  // 1) VUES SITE = compteur principal
+  const site = state.statsByKey.get(MAIN_SITE_ID);
+  if (site) {
+    setText(els.siteViews, site.views);
+    setText(els.siteViews24h, site.views24h);
+    setText(els.siteViews7d, site.views7d);
+  } else {
+    setText(els.siteViews, 0);
+    setText(els.siteViews24h, 0);
+    setText(els.siteViews7d, 0);
+  }
 
-  setText(els.siteViews, s.views);
-  setText(els.siteViews24h, s.views24h);
-  setText(els.siteViews7d, s.views7d);
+  // 2) TELECHARGEMENTS + LIKES = total de tous les jeux
+  const all = computeTotalsAllGames();
 
-  setText(els.siteMega, s.mega);
-  setText(els.siteMega24h, s.mega24h);
-  setText(els.siteMega7d, s.mega7d);
+  setText(els.siteMega, all.mega);
+  setText(els.siteMega24h, all.mega24h);
+  setText(els.siteMega7d, all.mega7d);
 
-  setText(els.siteLikes, s.likes);
-  setText(els.siteLikes24h, Math.max(0, s.likes24h));
-  setText(els.siteLikes7d, Math.max(0, s.likes7d));
+  setText(els.siteLikes, all.likes);
+  setText(els.siteLikes24h, Math.max(0, all.likes24h));
+  setText(els.siteLikes7d, Math.max(0, all.likes7d));
 }
 
 function sortList(list) {

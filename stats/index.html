@@ -25,6 +25,12 @@
           <div class="stats-controls">
             <input id="q" class="inp" placeholder="Rechercher (titre, tags, id…)" autocomplete="off" />
 
+            <select id="range" class="sel" title="Période">
+              <option value="total" selected>Total</option>
+              <option value="24h">24h</option>
+              <option value="7d">7j</option>
+            </select>
+
             <select id="metric" class="sel" title="Métrique du graphique">
               <option value="views">👁️ Vues</option>
               <option value="mega">📥 Téléchargements</option>
@@ -53,6 +59,13 @@
             </select>
 
           </div>
+        </div>
+
+        <!-- ✅ compteur principal du site (inclu dans stats) -->
+        <div class="site-kpis" id="siteKpis" aria-label="Stats du site">
+          <div class="kpi"><span class="kpi-l">👁️ Vues site</span><span class="kpi-v" id="siteViews">—</span></div>
+          <div class="kpi"><span class="kpi-l">👁️ 24h</span><span class="kpi-v" id="siteViews24h">—</span></div>
+          <div class="kpi"><span class="kpi-l">👁️ 7j</span><span class="kpi-v" id="siteViews7d">—</span></div>
         </div>
       </section>
 

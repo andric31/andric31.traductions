@@ -75,8 +75,6 @@ function buildGameUrl(g) {
 }
 
 function getDisplayTitle(g) {
-  // Règle: si c'est un enfant de collection (id vide + collection non vide),
-  // on affiche UNIQUEMENT le titre du gameData (le title principal est celui de la collection).
   const id = (g?.id || "").toString().trim();
   const col = (g?.collection || "").toString().trim();
   if (!id && col) {
@@ -86,7 +84,6 @@ function getDisplayTitle(g) {
 }
 
 function getCollectionChildTitle(g) {
-  // Strict: pas de fallback vers g.title (sinon doublons "Collection ...")
   return (g?.gameData?.title || "").toString().trim();
 }
 
@@ -99,7 +96,7 @@ function getEntryRefs(g) {
 }
 
 function buildSeriesIndex(games) {
-  const map = new Map(); // ref => [serieObj]
+  const map = new Map();
   for (const owner of games || []) {
     const s = owner?.serie;
     if (!s?.name || !Array.isArray(s.refs)) continue;
@@ -111,13 +108,11 @@ function buildSeriesIndex(games) {
       ownerId: owner?.id || "",
     };
 
-    // refs déclarées
     for (const ref of serieObj.refs) {
       if (!map.has(ref)) map.set(ref, []);
       map.get(ref).push(serieObj);
     }
 
-    // rendre visible sur la page du owner (id central)
     for (const selfRef of getEntryRefs(owner)) {
       if (!map.has(selfRef)) map.set(selfRef, []);
       map.get(selfRef).push(serieObj);
@@ -165,7 +160,6 @@ function resolveGamePage(params, games) {
   const id = (params?.id || "").toString().trim();
   const uid = (params?.uid || "").toString().trim();
 
-  // 1) Sous-jeu de collection
   if (id && uid) {
     const child = (games || []).find(
       (g) => String(g?.uid) === String(uid) && String(g?.collection) === String(id)
@@ -180,7 +174,6 @@ function resolveGamePage(params, games) {
     return { kind: "collectionChild", idParam: id, uidParam: uid, entry: child, parent, siblings };
   }
 
-  // 2) id seul
   if (id) {
     const parentOrGame =
       (games || []).find((g) => String(g?.id) === String(id) && !g?.collection) || null;
@@ -194,7 +187,6 @@ function resolveGamePage(params, games) {
     return { kind: "normal", idParam: id, entry: parentOrGame };
   }
 
-  // 3) uid seul
   if (uid) {
     const g = (games || []).find((x) => String(x?.uid) === String(uid)) || null;
     if (!g) return { kind: "notfound" };
@@ -204,8 +196,8 @@ function resolveGamePage(params, games) {
   return { kind: "notfound" };
 }
 
-// ====== Related container: on va l'insérer après les tags OU après description (selon ton ordre)
-// ✅ Ton ordre final: tags -> related -> description -> video -> boutons -> mega -> notes -> archive
+// ====== Related container ======
+
 function ensureRelatedContainer() {
   const main = document.getElementById("mainInfoBox");
   const tags = document.getElementById("tags");
@@ -220,7 +212,6 @@ function ensureRelatedContainer() {
     out.style.display = "grid";
     out.style.gap = "10px";
 
-    // ✅ on insère ENTRE tags et résumé (encadré interne)
     if (descInner && descInner.parentNode === main) {
       main.insertBefore(out, descInner);
     } else {
@@ -344,11 +335,6 @@ function setHref(id, href) {
   }
 }
 
-/**
- * IMPORTANT:
- * - Si pas d'image => on laisse la cover en "placeholder" (PAS de favicon)
- * - Si image cassée => on repasse en placeholder (PAS de favicon)
- */
 function setCover(url) {
   const img = $("cover");
   if (!img) return;
@@ -424,7 +410,7 @@ function slug(s) {
   return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
 }
 
-const SEP_RE = /[\u2014\u2013\-:]/; // — – - :
+const SEP_RE = /[\u2014\u2013\-:]/;
 const ucFirst = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
 function cleanTitle(raw) {
@@ -537,24 +523,20 @@ function renderBadgesFromGame(display, entry, isCollectionChild) {
   const childTitle = String(display?.title || "");
   const parentTitle = String(entry?.title || "");
 
-  // ✅ Enfant => badge Collection
   if (isCollectionChild) {
     wrap.appendChild(makeBadge("cat", "Collection"));
   }
 
   let c = cleanTitle(isCollectionChild ? childTitle : parentTitle);
 
-  // Parent collection => badge Collection
   if (!isCollectionChild && c.categories.includes("Collection")) {
     wrap.appendChild(makeBadge("cat", "Collection"));
   }
 
-  // VN seulement si pas enfant
   if (!isCollectionChild && c.categories.includes("VN")) {
     wrap.appendChild(makeBadge("cat", "VN"));
   }
 
-  // Enfant => moteur/status priorité gameData
   if (isCollectionChild) {
     if (display?.engine) {
       const eng = ENGINE_RAW[slug(display.engine)] || display.engine;
@@ -578,9 +560,6 @@ function renderBadgesFromGame(display, entry, isCollectionChild) {
   if (c.status) wrap.appendChild(makeBadge("status", c.status));
 }
 
-/**
- * ✅ Traduction status : badge uniquement (dans #badges)
- */
 async function renderTranslationStatus(game) {
   if (!game?.url || !game?.title) return;
 
@@ -607,13 +586,11 @@ async function renderTranslationStatus(game) {
 
     const wrap = $("badges");
     if (wrap) wrap.appendChild(badge);
-  } catch {
-    // silencieux
-  }
+  } catch {}
 }
 
 // ============================================================================
-// ✅ MENU ☰ (page game) — réutilise menu racine
+// ✅ MENU ☰ (page game)
 // ============================================================================
 
 function positionPopover(pop, anchorBtn) {
@@ -686,18 +663,10 @@ function initHamburgerMenu() {
 
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
-    try {
-      window.ViewerMenu?.closeMenu?.();
-    } catch {}
-    try {
-      window.ViewerMenu?.closeAbout?.();
-    } catch {}
-    try {
-      window.ViewerMenu?.closeExtension?.();
-    } catch {}
-    try {
-      window.ViewerMenuExtension?.close?.();
-    } catch {}
+    try { window.ViewerMenu?.closeMenu?.(); } catch {}
+    try { window.ViewerMenu?.closeAbout?.(); } catch {}
+    try { window.ViewerMenu?.closeExtension?.(); } catch {}
+    try { window.ViewerMenuExtension?.close?.(); } catch {}
   });
 }
 
@@ -724,20 +693,18 @@ async function counterGet(id) {
   return await r.json();
 }
 
+// ✅ plus fiable (quand on quitte la page vite) : keepalive
 async function counterHit(id, kind) {
-  const r = await fetch(
-    `/api/counter?op=hit&kind=${encodeURIComponent(kind)}&id=${encodeURIComponent(id)}`,
-    { cache: "no-store" }
-  );
+  const url = `/api/counter?op=hit&kind=${encodeURIComponent(kind)}&id=${encodeURIComponent(id)}`;
+  const r = await fetch(url, { cache: "no-store", keepalive: true });
   if (!r.ok) throw new Error("counter hit HTTP " + r.status);
   return await r.json();
 }
 
+// ✅ plus fiable (quand on quitte la page vite) : keepalive
 async function counterUnhit(id, kind) {
-  const r = await fetch(
-    `/api/counter?op=unhit&kind=${encodeURIComponent(kind)}&id=${encodeURIComponent(id)}`,
-    { cache: "no-store" }
-  );
+  const url = `/api/counter?op=unhit&kind=${encodeURIComponent(kind)}&id=${encodeURIComponent(id)}`;
+  const r = await fetch(url, { cache: "no-store", keepalive: true });
   if (!r.ok) throw new Error("counter unhit HTTP " + r.status);
   return await r.json();
 }
@@ -782,14 +749,35 @@ function inCooldown(kind, gameId, ms) {
     localStorage.setItem(k, String(now));
     return false;
   } catch {
-    // si localStorage bloqué, on ne bloque pas
     return false;
   }
 }
 
+// ✅ bind download sur un <a> (ou bouton) quelconque
+function bindDownloadClick(el, gameId, MEGA_COOLDOWN_MS) {
+  if (!el) return;
+  if (el.dataset.boundMega === "1") return;
+  el.dataset.boundMega = "1";
+
+  el.addEventListener(
+    "click",
+    async () => {
+      if (inCooldown("megaClick", gameId, MEGA_COOLDOWN_MS)) return;
+      try {
+        const j = await counterHit(gameId, "mega");
+        if (j?.ok) {
+          setText("statMegaClicks", formatInt(j.mega));
+          showStatsBox();
+        }
+      } catch {}
+    },
+    { passive: true }
+  );
+}
+
 async function initCounters(gameId, megaHref, archiveHref) {
   const VIEW_COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
-  const MEGA_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
+  const MEGA_COOLDOWN_MS = 5 * 60 * 1000;  // 5 minutes
 
   // 1) Vue (anti-refresh abusif)
   const skipViewHit = inCooldown("view", gameId, VIEW_COOLDOWN_MS);
@@ -803,7 +791,6 @@ async function initCounters(gameId, megaHref, archiveHref) {
       showStatsBox();
     }
   } catch {
-    // fallback basique
     try {
       const j = await counterGet(gameId);
       if (j?.ok) {
@@ -820,47 +807,30 @@ async function initCounters(gameId, megaHref, archiveHref) {
     }
   }
 
-  // 2) 📥 Téléchargements (MEGA + Archives → même compteur)
-  const bindDownload = (btnId, href) => {
-    if (!href) return;
-    const btn = $(btnId);
-    if (!btn) return;
+  // 2) 📥 Téléchargements
+  // - MEGA (btnMega)
+  // - Archives (archiveLink)
+  // - ✅ ET tous les liens extra (extraLinkBtn)
+  const btnMega = $("btnMega");
+  const archiveLink = $("archiveLink");
 
-    if (btn.dataset.boundMega === "1") return; // ✅ anti-double bind
-    btn.dataset.boundMega = "1";
+  if (megaHref && btnMega) bindDownloadClick(btnMega, gameId, MEGA_COOLDOWN_MS);
+  if (archiveHref && archiveLink) bindDownloadClick(archiveLink, gameId, MEGA_COOLDOWN_MS);
 
-    btn.addEventListener(
-      "click",
-      async () => {
-        // ✅ anti spam clic (local)
-        if (inCooldown("megaClick", gameId, MEGA_COOLDOWN_MS)) return;
-
-        try {
-          const j = await counterHit(gameId, "mega");
-          if (j?.ok) {
-            setText("statMegaClicks", formatInt(j.mega));
-            showStatsBox();
-          }
-        } catch {}
-      },
-      { passive: true }
-    );
-  };
-
-  bindDownload("btnMega", megaHref);
-  bindDownload("archiveLink", archiveHref);
+  // ✅ extra links (translationsExtra)
+  document.querySelectorAll("a.extraLinkBtn").forEach((a) => {
+    bindDownloadClick(a, gameId, MEGA_COOLDOWN_MS);
+  });
 
   // 3) ❤️ Like toggle
   const btnLike = $("btnLike");
   if (btnLike && $("statLikes")) {
     updateLikeBtn(gameId);
 
-    // ✅ anti double bind (si initCounters est rappelée)
     if (btnLike.dataset.boundLike === "1") return;
     btnLike.dataset.boundLike = "1";
 
     btnLike.addEventListener("click", async () => {
-      // ✅ anti spam like (local)
       if (inCooldown("likeClick", gameId, 1500)) return;
 
       const liked = getMyLike(gameId);
@@ -885,18 +855,13 @@ async function initCounters(gameId, megaHref, archiveHref) {
           updateLikeBtn(gameId);
           showStatsBox();
         }
-      } catch {
-        // silencieux (unhit pas supporté)
-      }
+      } catch {}
     });
   }
 }
 
 // ============================================================================
-// ✅ COMPTEUR UID ONLY (OPTION A)
-// - id est ignoré pour les stats
-// - uid est TOUJOURS présent dans ta base
-// - garantit un compteur unique quel que soit l’URL
+// ✅ COMPTEUR UID ONLY
 // ============================================================================
 function buildCounterKeyFromEntry(entry) {
   const uid = String(entry?.uid ?? "").trim();
@@ -1056,8 +1021,7 @@ function renderRating4UI(gameId, data) {
 }
 
 // =========================
-// ✅ Blocs "nouveaux champs" (ordre demandé)
-// Chaque champ = son encadré (game-block)
+// ✅ Blocs nouveaux champs
 // =========================
 
 function ensureBlockAfter(anchorEl, id) {
@@ -1070,63 +1034,6 @@ function ensureBlockAfter(anchorEl, id) {
     anchorEl.parentNode.insertBefore(el, anchorEl.nextSibling);
   }
   return el;
-}
-
-function ensureBlockBefore(anchorEl, id) {
-  if (!anchorEl || !anchorEl.parentNode) return null;
-
-  let el = document.getElementById(id);
-  if (!el) {
-    el = document.createElement("div");
-    el.id = id;
-    anchorEl.parentNode.insertBefore(el, anchorEl);
-  }
-  return el;
-}
-
-function renderTextBlock({ id, title, text, muted }) {
-  const t = (text || "").trim();
-  if (!t) {
-    show(id, false);
-    return;
-  }
-  const htmlText = escapeHtml(t).replace(/\n/g, "<br>");
-  setHtml(
-    id,
-    `
-    <div class="game-block">
-      <h3>${escapeHtml(title)}</h3>
-      <div style="color:${muted ? "var(--muted)" : "var(--fg)"}; font-size:${muted ? "13px" : "14px"}; line-height:1.45;">
-        ${htmlText}
-      </div>
-    </div>
-  `
-  );
-  show(id, true);
-}
-
-function renderLinkBlock({ id, title, href, label }) {
-  const u = (href || "").trim();
-  if (!u) {
-    show(id, false);
-    return;
-  }
-
-  const linkId = `btn_${id}`; // ex: btn_archiveHost
-
-  setHtml(
-    id,
-    `
-    <div class="game-block">
-      <h3>${escapeHtml(title)}</h3>
-      <a id="${linkId}" class="btnLike" target="_blank" rel="noopener"
-         href="${escapeHtml(u)}" style="display:inline-flex;">
-        ${escapeHtml(label)}
-      </a>
-    </div>
-  `
-  );
-  show(id, true);
 }
 
 function renderVideoBlock({ id, videoUrl }) {
@@ -1179,10 +1086,7 @@ function renderVideoBlock({ id, videoUrl }) {
       return;
     }
 
-    // entry = objet principal (discord/mega/notes/description)
     const entry = page.entry;
-
-    // display = données "jeu" (gameData si présent)
     const display = entry?.gameData ? entry.gameData : entry;
 
     const counterKey = buildCounterKeyFromEntry(entry);
@@ -1192,24 +1096,13 @@ function renderVideoBlock({ id, videoUrl }) {
     const title = (getDisplayTitle(entry) || getDisplayTitle(display) || `Jeu ${idParam || uidParam}`).trim();
     document.title = title;
 
-    // 1) Titre + cover + tags
     setText("title", title);
     setCover(display.imageUrl || entry.imageUrl || "");
     renderTags(display.tags || entry.tags || []);
 
-    // badges
     renderBadgesFromGame(display, entry, isCollectionChild);
     renderTranslationStatus(entry);
 
-    // ✅ ANCRAGES HTML existants
-    const tagsEl = document.getElementById("tags");
-    const btnRow = document.querySelector(".btnRow");
-    const btnMainRow = document.querySelector(".btnMainRow");
-    const ratingBox = document.getElementById("ratingBox");
-
-    // =========================
-    // 2) Related (après tags)
-    // =========================
     const relatedOut = ensureRelatedContainer();
     if (relatedOut) {
       const parts = [];
@@ -1234,79 +1127,59 @@ function renderVideoBlock({ id, videoUrl }) {
       relatedOut.innerHTML = parts.filter(Boolean).join("");
     }
 
-    // =========================
-    // 3) ✅ Encadré principal : Tags + Résumé (+ related entre les 2 si présent)
-    // =========================
     const mainInfoBox = document.getElementById("mainInfoBox");
-    const descInnerBox = document.getElementById("descInnerBox"); // ⭐ AJOUT
+    const descInnerBox = document.getElementById("descInnerBox");
     const descTextEl = document.getElementById("descriptionText");
-    
+
     const description = (entry.description || "").trim();
-    
+
     if (mainInfoBox) {
-    
       const hasTags =
         Array.isArray(display.tags || entry.tags) &&
         (display.tags || entry.tags).length > 0;
-    
+
       const hasDesc = !!description;
-    
-      // ✅ Remplit le résumé
+
       if (descTextEl) {
-        descTextEl.innerHTML = hasDesc
-          ? escapeHtml(description).replace(/\n/g, "<br>")
-          : "";
+        descTextEl.innerHTML = hasDesc ? escapeHtml(description).replace(/\n/g, "<br>") : "";
       }
-    
-      // ✅ Affiche / masque l'encadré interne
+
       if (descInnerBox) {
         descInnerBox.style.display = hasDesc ? "" : "none";
       }
-    
-      // ✅ Affiche / masque le grand encadré
+
       mainInfoBox.style.display = (hasTags || hasDesc) ? "" : "none";
     }
 
-    // =========================
-    // 4) Vidéo (si présent) sous le bloc principal
-    // =========================
     const videoAnchor =
       (relatedOut && relatedOut.innerHTML.trim())
         ? relatedOut
         : mainInfoBox;
-    
+
     const videoHost = ensureBlockAfter(videoAnchor, "videoHost");
     renderVideoBlock({
       id: "videoHost",
       videoUrl: (entry.videoUrl || "").trim(),
     });
 
-    // =========================
-    // 5) Boutons Discord + F95 (inchangés)
-    // =========================
     setHref("btnDiscord", (entry.discordlink || "").trim());
     if ($("btnDiscord")) {
       $("btnDiscord").textContent = "💬 Discord";
       $("btnDiscord").classList.add("btn-discord");
     }
-    
+
     setHref("btnF95", (entry.url || "").trim());
     if ($("btnF95")) {
       $("btnF95").innerHTML = '<span class="f95-logo"><span class="f95-white">F95</span><span class="f95-red">Zone</span></span>';
       $("btnF95").classList.add("btn-f95");
     }
 
-    // =========================
-    // 6) MEGA (bouton existant)
-    // =========================
     const megaHref = (entry.translation || "").trim();
     const archiveHref = (entry.translationsArchive || "").trim();
+
     setHref("btnMega", megaHref);
     if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction · MEGA";
 
-    // =========================
-    // 6b) Liens supplémentaires (translationsExtra) — SOUS MEGA (1 par ligne)
-    // =========================
     function getHostClass(url){
       const u = (url || "").toLowerCase();
       if (u.includes("mega.nz")) return "btnMega";
@@ -1315,7 +1188,7 @@ function renderVideoBlock({ id, videoUrl }) {
       if (u.includes("gofile")) return "btn-host-gofile";
       return "btn-host-default";
     }
-    
+
     const extraRaw = entry.translationsExtra;
     const extraList = Array.isArray(extraRaw) ? extraRaw : (extraRaw ? [extraRaw] : []);
     const extraValid = extraList
@@ -1331,55 +1204,47 @@ function renderVideoBlock({ id, videoUrl }) {
         return link ? { name, link } : null;
       })
       .filter(Boolean);
-    
-    // ✅ On réutilise la ligne MEGA existante
+
     const megaRow = document.querySelector(".btnMainRow");
     const megaBtn = document.getElementById("btnMega");
-    
-    // ✅ on relit l'état réel du bouton MEGA (après setHref)
+
     const megaHrefNow = (megaBtn && megaBtn.getAttribute("href")) ? megaBtn.getAttribute("href").trim() : "";
     const hasMega  = !!megaHrefNow;
     const hasExtra = extraValid.length > 0;
-    
+
     if (megaRow) {
-      // retire anciens extras + wrapper (si rechargement / navigation)
       [...megaRow.querySelectorAll(".extraLinkBtn")].forEach(el => el.remove());
       const oldWrap = megaRow.querySelector(".extraLinksCol");
       if (oldWrap) oldWrap.remove();
-    
-      // ✅ Si rien du tout -> cache la ligne (évite l'espace vide)
+
       if (!hasMega && !hasExtra) {
         megaRow.style.display = "none";
       } else {
         megaRow.style.display = "flex";
-    
-        // ✅ CAS 1: PAS d'extras => ligne MEGA compacte (comme template)
+
         if (!hasExtra) {
           megaRow.style.flexDirection = "row";
           megaRow.style.flexWrap = "wrap";
           megaRow.style.gap = "0";
           megaRow.style.alignItems = "center";
           megaRow.style.justifyContent = "center";
-    
+
           if (megaBtn) {
             megaBtn.style.width = "auto";
             megaBtn.style.margin = "0 auto";
           }
-        }
-    
-        // ✅ CAS 2: extras présents => colonne (MEGA puis extras)
-        else {
+        } else {
           megaRow.style.flexDirection = "column";
           megaRow.style.flexWrap = "nowrap";
           megaRow.style.gap = "10px";
           megaRow.style.alignItems = "center";
           megaRow.style.justifyContent = "flex-start";
-    
+
           if (megaBtn) {
             megaBtn.style.width = "auto";
             megaBtn.style.margin = "0 auto";
           }
-    
+
           const wrap = document.createElement("div");
           wrap.className = "extraLinksCol";
           wrap.style.display = "flex";
@@ -1387,28 +1252,28 @@ function renderVideoBlock({ id, videoUrl }) {
           wrap.style.gap = "10px";
           wrap.style.alignItems = "center";
           wrap.style.width = "auto";
-    
+
           if (megaBtn && megaBtn.parentNode === megaRow) {
             megaRow.insertBefore(wrap, megaBtn.nextSibling);
           } else {
             megaRow.appendChild(wrap);
           }
-    
+
           extraValid.forEach((x) => {
             const name = String(x.name || "Lien").trim();
             const link = String(x.link || "").trim();
             const hostCls = getHostClass(link);
-    
+
             const a = document.createElement("a");
-            a.className = `btnLike ${hostCls} extraLinkBtn`;
+            a.className = `btnLike ${hostCls} extraLinkBtn`; // ✅ important: extraLinkBtn
             a.target = "_blank";
             a.rel = "noopener";
             a.href = link;
-    
+
             a.style.width = "auto";
             a.style.margin = "0 auto";
             a.style.justifyContent = "center";
-    
+
             if (name.toLowerCase() === "patch") {
               a.textContent = "📥 Télécharger · Patch";
             } else {
@@ -1418,16 +1283,13 @@ function renderVideoBlock({ id, videoUrl }) {
                 a.textContent = `📥 Télécharger la traduction · ${name}`;
               }
             }
-    
+
             wrap.appendChild(a);
           });
         }
       }
     }
 
-    // =========================
-    // 7) Informations (encadré sous la notation)
-    // =========================
     const notes = (entry.notes || "").trim();
     if (notes) {
       setHtml("notesText", escapeHtml(notes).replace(/\n/g, "<br>"));
@@ -1435,17 +1297,13 @@ function renderVideoBlock({ id, videoUrl }) {
     } else {
       show("notesBox", false);
     }
-    
-    // =========================
-    // 8) Archives (bouton HTML existant sous Notes) — SANS encadré
-    // =========================
+
     setHref("archiveLink", archiveHref);
     if ($("archiveLink")) $("archiveLink").textContent = "📦 Archives de la traduction";
-    
+
     const ab = $("archiveBox");
     if (ab) ab.style.display = archiveHref ? "flex" : "none";
 
-    // ⛔ Bloquer clic droit sur ARCHIVES
     const archiveLink = document.getElementById("archiveLink");
     if (archiveLink) {
       archiveLink.addEventListener("contextmenu", (e) => {
@@ -1454,23 +1312,20 @@ function renderVideoBlock({ id, videoUrl }) {
       });
     }
 
-    // =========================
-    // ✅ Analytics key (unique)
-    // =========================
+    // ✅ key unique uid-only
     const analyticsKey = counterKey;
-    
+
+    // ✅ IMPORTANT : initCounters après création des extraLinkBtn → maintenant ça compte aussi
     await initCounters(counterKey, megaHref, archiveHref);
 
-    // ⛔ Bloquer clic droit sur MEGA
-    const btnMega = document.getElementById("btnMega");
-    if (btnMega) {
-      btnMega.addEventListener("contextmenu", (e) => {
+    const btnMega2 = document.getElementById("btnMega");
+    if (btnMega2) {
+      btnMega2.addEventListener("contextmenu", (e) => {
         e.preventDefault();
         return false;
       });
     }
 
-    // Rating
     try {
       const j = await rating4Get(analyticsKey);
       if (j?.ok) renderRating4UI(analyticsKey, j);

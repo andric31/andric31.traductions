@@ -75,6 +75,7 @@ async function fetchRatingsBulk(ids) {
 // -------- UI state --------
 const els = {
   q: document.getElementById("q"),
+  range: document.getElementById("range"),
   metric: document.getElementById("metric"),
   top: document.getElementById("top"),
 
@@ -89,13 +90,27 @@ const els = {
 
   tableWrap: document.querySelector(".table-wrap"),
   chartWrap: document.querySelector(".chart-wrap"),
+
+  // KPIs site
+  siteViews: document.getElementById("siteViews"),
+  siteViews24h: document.getElementById("siteViews24h"),
+  siteViews7d: document.getElementById("siteViews7d"),
+
+  siteMega: document.getElementById("siteMega"),
+  siteMega24h: document.getElementById("siteMega24h"),
+  siteMega7d: document.getElementById("siteMega7d"),
+
+  siteLikes: document.getElementById("siteLikes"),
+  siteLikes24h: document.getElementById("siteLikes24h"),
+  siteLikes7d: document.getElementById("siteLikes7d"),
 };
 
 const state = {
   srcUrl: getListUrl(),
   games: [],
 
-  statsByKey: new Map(),   // key -> {views,likes,mega}
+  // key -> {views,mega,likes, views24h,mega24h,likes24h, views7d,mega7d,likes7d}
+  statsByKey: new Map(),
   ratingByKey: new Map(),  // key -> {avg,count,sum}
 
   sortKey: "views",
@@ -106,6 +121,9 @@ const state = {
 
   chartExpanded: false,
 };
+
+// compteur principal du site (home)
+const MAIN_SITE_ID = "__viewer_main__";
 
 // ============================================================================
 // ✅ UID ONLY — clé unique
@@ -134,6 +152,8 @@ function getFiltered() {
   const q = normalize(els.q?.value?.trim() || "");
   let list = state.games;
 
+  const range = String(els.range?.value || "total").toLowerCase();
+
   if (q) {
     list = list.filter((g) => {
       const hay = normalize(
@@ -154,10 +174,26 @@ function getFiltered() {
   for (const g of list) {
     const key = counterKeyOf(g);
 
-    const s = state.statsByKey.get(key) || { views: 0, likes: 0, mega: 0 };
-    g._views = s.views | 0;
-    g._likes = s.likes | 0;
-    g._mega  = s.mega  | 0;
+    const s = state.statsByKey.get(key) || {
+      views: 0, mega: 0, likes: 0,
+      views24h: 0, mega24h: 0, likes24h: 0,
+      views7d: 0, mega7d: 0, likes7d: 0,
+    };
+
+    // ✅ applique la période au tableau + au graphique
+    if (range === "24h") {
+      g._views = s.views24h | 0;
+      g._mega  = s.mega24h | 0;
+      g._likes = Math.max(0, (s.likes24h | 0));
+    } else if (range === "7d" || range === "7j") {
+      g._views = s.views7d | 0;
+      g._mega  = s.mega7d | 0;
+      g._likes = Math.max(0, (s.likes7d | 0));
+    } else {
+      g._views = s.views | 0;
+      g._mega  = s.mega  | 0;
+      g._likes = Math.max(0, (s.likes | 0));
+    }
 
     const r = state.ratingByKey.get(key) || { avg: 0, count: 0, sum: 0 };
     g._ratingAvg = Number(r.avg || 0);
@@ -167,6 +203,29 @@ function getFiltered() {
   }
 
   return list;
+}
+
+function setText(el, v) {
+  if (!el) return;
+  const n = Number(v || 0);
+  el.textContent = (Number.isFinite(n) ? n : 0).toLocaleString("fr-FR");
+}
+
+function renderSiteKpis() {
+  const s = state.statsByKey.get(MAIN_SITE_ID);
+  if (!s) return;
+
+  setText(els.siteViews, s.views);
+  setText(els.siteViews24h, s.views24h);
+  setText(els.siteViews7d, s.views7d);
+
+  setText(els.siteMega, s.mega);
+  setText(els.siteMega24h, s.mega24h);
+  setText(els.siteMega7d, s.mega7d);
+
+  setText(els.siteLikes, s.likes);
+  setText(els.siteLikes24h, Math.max(0, s.likes24h));
+  setText(els.siteLikes7d, Math.max(0, s.likes7d));
 }
 
 function sortList(list) {
@@ -442,7 +501,8 @@ function drawChart(sorted) {
   // ✅ status chart cohérent (Top sélectionné)
   if (els.statusChart) {
     const labelTop = (Number(els.top?.value || 20) <= 0) ? "Tout" : `Top ${take}`;
-    els.statusChart.textContent = `${labelTop} — ${take}/${sorted.length} jeux`;
+    const range = String(els.range?.value || "total");
+    els.statusChart.textContent = `${labelTop} — ${take}/${sorted.length} jeux — période: ${range}`;
   }
 }
 
@@ -487,8 +547,9 @@ function rerender(opts = { chart: true }) {
   // ✅ status tableau (cohérent avec le tableau)
   if (els.statusTable) {
     const total = state.games.length;
+    const range = String(els.range?.value || "total");
     els.statusTable.textContent =
-      `${visible.length}/${sorted.length} affichés (filtrés) — total liste: ${total}`;
+      `${visible.length}/${sorted.length} affichés (filtrés) — total liste: ${total} — période: ${range}`;
   }
 
   // si drawChart n'a pas été appelé, on garde le status chart déjà affiché
@@ -510,6 +571,14 @@ function wireEvents() {
   if (els.metric) {
     els.metric.addEventListener("change", () => {
       // metric ne touche que le chart
+      rerender({ chart: true });
+    });
+  }
+
+  // ✅ Période : affecte tableau + chart + tri
+  if (els.range) {
+    els.range.addEventListener("change", () => {
+      resetLimit();
       rerender({ chart: true });
     });
   }
@@ -617,14 +686,25 @@ async function init() {
 
   const keys = state.games.map(counterKeyOf).filter(Boolean);
 
+  // ✅ inclut le compteur principal du site dans la requête
+  const keysPlus = keys.includes(MAIN_SITE_ID) ? keys : keys.concat([MAIN_SITE_ID]);
+
   // 1) counters
-  const statsObj = await fetchGameStatsBulk(keys);
-  for (const k of keys) {
+  const statsObj = await fetchGameStatsBulk(keysPlus);
+  for (const k of keysPlus) {
     const s = statsObj[k] || {};
     state.statsByKey.set(String(k), {
       views: Number(s.views || 0),
       mega: Number(s.mega || 0),
       likes: Number(s.likes || 0),
+
+      views24h: Number(s.views24h || 0),
+      mega24h: Number(s.mega24h || 0),
+      likes24h: Number(s.likes24h || 0),
+
+      views7d: Number(s.views7d || 0),
+      mega7d: Number(s.mega7d || 0),
+      likes7d: Number(s.likes7d || 0),
     });
   }
 
@@ -645,6 +725,7 @@ async function init() {
 
   applyChartExpandUI();
   wireEvents();
+  renderSiteKpis();
   rerender();
 }
 

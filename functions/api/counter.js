@@ -24,7 +24,7 @@ export async function onRequest(context) {
     return new Response(JSON.stringify({ ok: false, error: "ID invalide" }), { status: 400, headers });
   }
 
-  // ✅ Table principale (totaux)
+  // ✅ Table (avec likes)
   await env.DB.prepare(`
     CREATE TABLE IF NOT EXISTS counters (
       id TEXT PRIMARY KEY,
@@ -35,62 +35,17 @@ export async function onRequest(context) {
     );
   `).run();
 
-  // ✅ Migration douce: ancienne table sans likes
+  // ✅ Migration douce: si ancienne table sans likes, on tente 1 fois et on ignore si déjà OK
+  // (D1: ALTER TABLE échoue si la colonne existe)
   try {
+    // on vérifie les colonnes vite fait
     const info = await env.DB.prepare(`PRAGMA table_info(counters);`).all();
     const cols = (info?.results || []).map(r => String(r?.name || "").toLowerCase());
     if (!cols.includes("likes")) {
       await env.DB.prepare(`ALTER TABLE counters ADD COLUMN likes INTEGER NOT NULL DEFAULT 0;`).run();
     }
-  } catch { /* silencieux */ }
-
-  // ✅ Historique (bucket par heure / par jour) → pour 24h / 7j
-  await env.DB.prepare(`
-    CREATE TABLE IF NOT EXISTS counter_hourly (
-      id   TEXT NOT NULL,
-      kind TEXT NOT NULL,        -- view|mega|like
-      hour INTEGER NOT NULL,     -- floor(unixepoch/3600)
-      count INTEGER NOT NULL DEFAULT 0,
-      PRIMARY KEY (id, kind, hour)
-    );
-  `).run();
-
-  await env.DB.prepare(`
-    CREATE TABLE IF NOT EXISTS counter_daily (
-      id   TEXT NOT NULL,
-      kind TEXT NOT NULL,        -- view|mega|like
-      day  INTEGER NOT NULL,     -- floor(unixepoch/86400)
-      count INTEGER NOT NULL DEFAULT 0,
-      PRIMARY KEY (id, kind, day)
-    );
-  `).run();
-
-  const now = Math.floor(Date.now() / 1000);
-  const hour = Math.floor(now / 3600);
-  const day  = Math.floor(now / 86400);
-
-  async function bumpHistory(delta) {
-    // On met à jour les 2 buckets, en empêchant le négatif
-    // (utile pour unhit like)
-    await env.DB.prepare(`
-      INSERT INTO counter_hourly (id, kind, hour, count)
-      VALUES (?1, ?2, ?3, ?4)
-      ON CONFLICT(id, kind, hour) DO UPDATE SET
-        count = CASE
-          WHEN (count + ?4) < 0 THEN 0
-          ELSE (count + ?4)
-        END
-    `).bind(id, kind, hour, delta).run();
-
-    await env.DB.prepare(`
-      INSERT INTO counter_daily (id, kind, day, count)
-      VALUES (?1, ?2, ?3, ?4)
-      ON CONFLICT(id, kind, day) DO UPDATE SET
-        count = CASE
-          WHEN (count + ?4) < 0 THEN 0
-          ELSE (count + ?4)
-        END
-    `).bind(id, kind, day, delta).run();
+  } catch {
+    // silencieux (au pire, ta table est déjà bonne)
   }
 
   async function getRow() {
@@ -116,8 +71,6 @@ export async function onRequest(context) {
           updated_at = unixepoch()
       `).bind(id).run();
 
-      await bumpHistory(1);
-
     } else if (kind === "mega") {
       await env.DB.prepare(`
         INSERT INTO counters (id, views, mega, likes, updated_at)
@@ -127,8 +80,6 @@ export async function onRequest(context) {
           updated_at = unixepoch()
       `).bind(id).run();
 
-      await bumpHistory(1);
-
     } else if (kind === "like") {
       await env.DB.prepare(`
         INSERT INTO counters (id, views, mega, likes, updated_at)
@@ -137,8 +88,6 @@ export async function onRequest(context) {
           likes = likes + 1,
           updated_at = unixepoch()
       `).bind(id).run();
-
-      await bumpHistory(1);
 
     } else {
       return new Response(JSON.stringify({ ok: false, error: "kind invalide" }), { status: 400, headers });
@@ -160,8 +109,6 @@ export async function onRequest(context) {
         likes = CASE WHEN likes > 0 THEN likes - 1 ELSE 0 END,
         updated_at = unixepoch()
     `).bind(id).run();
-
-    await bumpHistory(-1);
 
     const row = await getRow();
     return new Response(JSON.stringify({ ok: true, ...row }), { headers });

@@ -13,54 +13,64 @@ export async function onRequest(context) {
     "access-control-allow-headers": "content-type",
   };
 
+  const json = (obj, status = 200) =>
+    new Response(JSON.stringify(obj), { status, headers });
+
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers });
 
-  // ✅ Supporte GET (querystring) + POST (JSON body)
   if (request.method !== "GET" && request.method !== "POST") {
-    return new Response(JSON.stringify({ ok: false, error: "Méthode invalide" }), { status: 405, headers });
+    return json({ ok: false, error: "Méthode invalide" }, 405);
   }
 
   try {
-    if (!env?.DB) {
-      return new Response(JSON.stringify({ ok: false, error: "DB non liée" }), { status: 500, headers });
-    }
+    if (!env?.DB) return json({ ok: false, error: "DB non liée" }, 500);
 
+    // --------- helpers ---------
+    const normId = (x) => String(x || "").trim().slice(0, 80);
+    const normType = (x) => String(x || "").trim().toLowerCase();
+
+    // --------- parse input (GET/POST) ---------
+    let op = "get";
+    let type = "view";
+    let id = "";
     let ids = [];
 
     if (request.method === "POST") {
-      let body;
+      let body = null;
       try { body = await request.json(); }
-      catch { return new Response(JSON.stringify({ ok: false, error: "JSON invalide" }), { status: 400, headers }); }
+      catch { return json({ ok: false, error: "JSON invalide" }, 400); }
+
+      op = String(body?.op || "get").trim().toLowerCase();
+      type = normType(body?.type || "view");
+      id = normId(body?.id || "");
 
       const idsRaw = Array.isArray(body?.ids) ? body.ids : [];
-      ids = idsRaw
-        .map(x => String(x || "").trim())
-        .filter(id => id && id.length <= 80);
+      ids = idsRaw.map(normId).filter(x => x);
+
+      // compat POST: si pas ids mais id → on le met dans ids pour get
+      if (!ids.length && id) ids = [id];
 
     } else {
       const u = new URL(request.url);
-      const op = (u.searchParams.get("op") || "").trim().toLowerCase();
-      // compat ancien format: ?op=get&id=xxx
-      const single = (u.searchParams.get("id") || "").trim();
-      // nouveau: ?ids=a,b,c  (ou plusieurs ids=)
+      op = (u.searchParams.get("op") || "get").trim().toLowerCase();
+      type = normType(u.searchParams.get("type") || "view");
+      id = normId(u.searchParams.get("id") || "");
+
       const idsParam = u.searchParams.getAll("ids").flatMap(v => String(v || "").split(","));
-      const merged = []
-        .concat(single ? [single] : [])
-        .concat(idsParam);
-
-      // si op est présent et pas "get", on refuse (évite erreurs silencieuses)
-      if (op && op !== "get") {
-        return new Response(JSON.stringify({ ok: false, error: "op invalide" }), { status: 400, headers });
-      }
-
-      ids = merged
-        .map(x => String(x || "").trim())
-        .filter(id => id && id.length <= 80);
+      ids = []
+        .concat(id ? [id] : [])
+        .concat(idsParam.map(normId))
+        .filter(x => x);
     }
 
-    if (!ids.length) return new Response(JSON.stringify({ ok: true, stats: {} }), { headers });
+    // --------- validate op/type ---------
+    const OPS = new Set(["get", "hit", "unhit"]);
+    if (!OPS.has(op)) return json({ ok: false, error: "op invalide" }, 400);
 
-    // ✅ table si jamais
+    const TYPES = new Set(["view", "mega", "like"]);
+    if (!TYPES.has(type)) return json({ ok: false, error: "type invalide" }, 400);
+
+    // --------- ensure tables ---------
     await env.DB.prepare(`
       CREATE TABLE IF NOT EXISTS counters (
         id TEXT PRIMARY KEY,
@@ -71,7 +81,6 @@ export async function onRequest(context) {
       );
     `).run();
 
-    // ✅ events (pour fenêtres 24h/7j)
     await env.DB.prepare(`
       CREATE TABLE IF NOT EXISTS counter_events (
         id TEXT NOT NULL,
@@ -80,119 +89,170 @@ export async function onRequest(context) {
       );
     `).run();
 
-    // ✅ nettoyage doux (on garde ~8 jours)
+    // si table existait sans likes
+    try {
+      await env.DB.prepare(`ALTER TABLE counters ADD COLUMN likes INTEGER NOT NULL DEFAULT 0;`).run();
+    } catch {}
+
+    // prune events (>8 jours)
     try {
       const pruneBefore = nowSec - (8 * 24 * 60 * 60);
       await env.DB.prepare(`DELETE FROM counter_events WHERE ts < ?1`).bind(pruneBefore).run();
-    } catch { /* silencieux */ }
+    } catch {}
 
-    // ✅ si table existait sans likes → on tente d'ajouter la colonne (ignore si déjà là)
-    try {
-      await env.DB.prepare(`ALTER TABLE counters ADD COLUMN likes INTEGER NOT NULL DEFAULT 0;`).run();
-    } catch { /* déjà présent */ }
+    // ===================== op=hit / op=unhit =====================
+    if (op === "hit" || op === "unhit") {
+      if (!id) return json({ ok: false, error: "id manquant" }, 400);
 
-    // ✅ IMPORTANT : lot petit pour éviter limites D1
+      // on crée l'entrée si absente
+      await env.DB.prepare(`
+        INSERT INTO counters (id, views, mega, likes, updated_at)
+        VALUES (?1, 0, 0, 0, unixepoch())
+        ON CONFLICT(id) DO NOTHING;
+      `).bind(id).run();
+
+      if (op === "hit") {
+        if (type === "view") {
+          await env.DB.prepare(`UPDATE counters SET views = views + 1, updated_at = unixepoch() WHERE id = ?1`).bind(id).run();
+          await env.DB.prepare(`INSERT INTO counter_events (id, kind, ts) VALUES (?1, 'view', unixepoch())`).bind(id).run();
+        } else if (type === "mega") {
+          await env.DB.prepare(`UPDATE counters SET mega = mega + 1, updated_at = unixepoch() WHERE id = ?1`).bind(id).run();
+          await env.DB.prepare(`INSERT INTO counter_events (id, kind, ts) VALUES (?1, 'mega', unixepoch())`).bind(id).run();
+        } else if (type === "like") {
+          await env.DB.prepare(`UPDATE counters SET likes = likes + 1, updated_at = unixepoch() WHERE id = ?1`).bind(id).run();
+          await env.DB.prepare(`INSERT INTO counter_events (id, kind, ts) VALUES (?1, 'like', unixepoch())`).bind(id).run();
+        }
+
+        return json({ ok: true, op, id, type });
+      }
+
+      // op=unhit
+      // Important: pour les fenêtres 24h/7j on ne soustrait que les likes via 'unlike'
+      if (type === "like") {
+        await env.DB.prepare(`
+          UPDATE counters
+          SET likes = CASE WHEN likes > 0 THEN likes - 1 ELSE 0 END,
+              updated_at = unixepoch()
+          WHERE id = ?1
+        `).bind(id).run();
+        await env.DB.prepare(`INSERT INTO counter_events (id, kind, ts) VALUES (?1, 'unlike', unixepoch())`).bind(id).run();
+        return json({ ok: true, op, id, type });
+      }
+
+      // pour view/mega: on décrémente (optionnel) mais pas de kind inverse compté
+      if (type === "view") {
+        await env.DB.prepare(`
+          UPDATE counters
+          SET views = CASE WHEN views > 0 THEN views - 1 ELSE 0 END,
+              updated_at = unixepoch()
+          WHERE id = ?1
+        `).bind(id).run();
+      } else if (type === "mega") {
+        await env.DB.prepare(`
+          UPDATE counters
+          SET mega = CASE WHEN mega > 0 THEN mega - 1 ELSE 0 END,
+              updated_at = unixepoch()
+          WHERE id = ?1
+        `).bind(id).run();
+      }
+      return json({ ok: true, op, id, type, note: "unhit view/mega: pas d'event inverse compté" });
+    }
+
+    // ===================== op=get =====================
+    if (!ids.length) return json({ ok: true, stats: {} });
+
+    // chunk pour D1
     const CHUNK = 90;
     const stats = {};
 
     for (let i = 0; i < ids.length; i += CHUNK) {
       const batch = ids.slice(i, i + CHUNK);
-      const placeholders = batch.map((_, i) => `?${i + 1}`).join(", ");
-      const placeholdersEv = batch.map((_, i) => `?${i + 2}`).join(", ");
-      const stmt = env.DB
+
+      const placeholders = batch.map((_, k) => `?${k + 1}`).join(", ");
+      const placeholdersEv = batch.map((_, k) => `?${k + 2}`).join(", ");
+
+      // totaux
+      const res = await env.DB
         .prepare(`SELECT id, views, mega, likes FROM counters WHERE id IN (${placeholders})`)
-        .bind(...batch);
+        .bind(...batch)
+        .all();
 
-      const res = await stmt.all();
-      const rows = res?.results || [];
-
-      for (const row of rows) {
+      for (const row of (res?.results || [])) {
         stats[row.id] = {
           views: Number(row.views || 0),
           mega: Number(row.mega || 0),
           likes: Number(row.likes || 0),
-          views24h: 0,
-          mega24h: 0,
-          likes24h: 0,
-          views7d: 0,
-          mega7d: 0,
-          likes7d: 0,
+          views24h: 0, mega24h: 0, likes24h: 0,
+          views7d: 0,  mega7d: 0,  likes7d: 0,
         };
       }
 
-      // ✅ init à zéro même si pas dans la table counters
-      for (const id of batch) {
-        if (!stats[id]) {
-          stats[id] = {
+      // init zéro si absent
+      for (const gid of batch) {
+        if (!stats[gid]) {
+          stats[gid] = {
             views: 0, mega: 0, likes: 0,
             views24h: 0, mega24h: 0, likes24h: 0,
-            views7d: 0, mega7d: 0, likes7d: 0,
+            views7d: 0,  mega7d: 0,  likes7d: 0,
           };
         }
       }
 
-      // ✅ fenêtres 24h
+      // 24h
       try {
         const since24 = nowSec - T_24H;
-        const stmt24 = env.DB
-          .prepare(`
-            SELECT id,
-              SUM(CASE WHEN kind='view' THEN 1 ELSE 0 END) AS views,
-              SUM(CASE WHEN kind='mega' THEN 1 ELSE 0 END) AS mega,
-              SUM(CASE WHEN kind='like' THEN 1 ELSE 0 END) AS likes_in,
-              SUM(CASE WHEN kind='unlike' THEN 1 ELSE 0 END) AS unlikes
-            FROM counter_events
-            WHERE ts >= ?1 AND id IN (${placeholdersEv})
-            GROUP BY id
-          `)
-          .bind(since24, ...batch);
+        const r24 = await env.DB.prepare(`
+          SELECT id,
+            SUM(CASE WHEN kind='view' THEN 1 ELSE 0 END) AS views,
+            SUM(CASE WHEN kind='mega' THEN 1 ELSE 0 END) AS mega,
+            SUM(CASE WHEN kind='like' THEN 1 ELSE 0 END) AS likes_in,
+            SUM(CASE WHEN kind='unlike' THEN 1 ELSE 0 END) AS unlikes
+          FROM counter_events
+          WHERE ts >= ?1 AND id IN (${placeholdersEv})
+          GROUP BY id
+        `).bind(since24, ...batch).all();
 
-        const r24 = await stmt24.all();
         for (const row of (r24?.results || [])) {
-          const s = stats[row.id] || (stats[row.id] = { views: 0, mega: 0, likes: 0 });
+          const s = stats[row.id];
           const li = Number(row.likes_in || 0);
           const ul = Number(row.unlikes || 0);
           s.views24h = Number(row.views || 0);
           s.mega24h  = Number(row.mega || 0);
           s.likes24h = li - ul;
         }
-      } catch { /* silencieux */ }
+      } catch {}
 
-      // ✅ fenêtres 7j
+      // 7j
       try {
         const since7 = nowSec - T_7D;
-        const stmt7 = env.DB
-          .prepare(`
-            SELECT id,
-              SUM(CASE WHEN kind='view' THEN 1 ELSE 0 END) AS views,
-              SUM(CASE WHEN kind='mega' THEN 1 ELSE 0 END) AS mega,
-              SUM(CASE WHEN kind='like' THEN 1 ELSE 0 END) AS likes_in,
-              SUM(CASE WHEN kind='unlike' THEN 1 ELSE 0 END) AS unlikes
-            FROM counter_events
-            WHERE ts >= ?1 AND id IN (${placeholdersEv})
-            GROUP BY id
-          `)
-          .bind(since7, ...batch);
+        const r7 = await env.DB.prepare(`
+          SELECT id,
+            SUM(CASE WHEN kind='view' THEN 1 ELSE 0 END) AS views,
+            SUM(CASE WHEN kind='mega' THEN 1 ELSE 0 END) AS mega,
+            SUM(CASE WHEN kind='like' THEN 1 ELSE 0 END) AS likes_in,
+            SUM(CASE WHEN kind='unlike' THEN 1 ELSE 0 END) AS unlikes
+          FROM counter_events
+          WHERE ts >= ?1 AND id IN (${placeholdersEv})
+          GROUP BY id
+        `).bind(since7, ...batch).all();
 
-        const r7 = await stmt7.all();
         for (const row of (r7?.results || [])) {
-          const s = stats[row.id] || (stats[row.id] = { views: 0, mega: 0, likes: 0 });
+          const s = stats[row.id];
           const li = Number(row.likes_in || 0);
           const ul = Number(row.unlikes || 0);
           s.views7d = Number(row.views || 0);
           s.mega7d  = Number(row.mega || 0);
           s.likes7d = li - ul;
         }
-      } catch { /* silencieux */ }
+      } catch {}
     }
 
-    return new Response(JSON.stringify({ ok: true, stats }), { headers });
+    return json({ ok: true, stats });
 
   } catch (e) {
-    return new Response(
-      JSON.stringify({ ok: false, error: "Erreur serveur", details: String(e?.message || e) }),
-      { status: 500, headers }
+    return json(
+      { ok: false, error: "Erreur serveur", details: String(e?.message || e) },
+      500
     );
   }
 }
-

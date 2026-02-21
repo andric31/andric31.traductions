@@ -9,12 +9,14 @@ export async function onRequest(context) {
     "content-type": "application/json; charset=utf-8",
     "cache-control": "no-store",
     "access-control-allow-origin": "*",
-    "access-control-allow-methods": "POST,OPTIONS",
+    "access-control-allow-methods": "GET,POST,OPTIONS",
     "access-control-allow-headers": "content-type",
   };
 
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers });
-  if (request.method !== "POST") {
+
+  // ✅ Supporte GET (querystring) + POST (JSON body)
+  if (request.method !== "GET" && request.method !== "POST") {
     return new Response(JSON.stringify({ ok: false, error: "Méthode invalide" }), { status: 405, headers });
   }
 
@@ -23,14 +25,38 @@ export async function onRequest(context) {
       return new Response(JSON.stringify({ ok: false, error: "DB non liée" }), { status: 500, headers });
     }
 
-    let body;
-    try { body = await request.json(); }
-    catch { return new Response(JSON.stringify({ ok: false, error: "JSON invalide" }), { status: 400, headers }); }
+    let ids = [];
 
-    const idsRaw = Array.isArray(body?.ids) ? body.ids : [];
-    const ids = idsRaw
-      .map(x => String(x || "").trim())
-      .filter(id => id && id.length <= 80);
+    if (request.method === "POST") {
+      let body;
+      try { body = await request.json(); }
+      catch { return new Response(JSON.stringify({ ok: false, error: "JSON invalide" }), { status: 400, headers }); }
+
+      const idsRaw = Array.isArray(body?.ids) ? body.ids : [];
+      ids = idsRaw
+        .map(x => String(x || "").trim())
+        .filter(id => id && id.length <= 80);
+
+    } else {
+      const u = new URL(request.url);
+      const op = (u.searchParams.get("op") || "").trim().toLowerCase();
+      // compat ancien format: ?op=get&id=xxx
+      const single = (u.searchParams.get("id") || "").trim();
+      // nouveau: ?ids=a,b,c  (ou plusieurs ids=)
+      const idsParam = u.searchParams.getAll("ids").flatMap(v => String(v || "").split(","));
+      const merged = []
+        .concat(single ? [single] : [])
+        .concat(idsParam);
+
+      // si op est présent et pas "get", on refuse (évite erreurs silencieuses)
+      if (op && op !== "get") {
+        return new Response(JSON.stringify({ ok: false, error: "op invalide" }), { status: 400, headers });
+      }
+
+      ids = merged
+        .map(x => String(x || "").trim())
+        .filter(id => id && id.length <= 80);
+    }
 
     if (!ids.length) return new Response(JSON.stringify({ ok: true, stats: {} }), { headers });
 

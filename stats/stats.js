@@ -91,15 +91,22 @@ const els = {
   tableWrap: document.querySelector(".table-wrap"),
   chartWrap: document.querySelector(".chart-wrap"),
 
-  // KPIs site
+  // KPIs page principale
   siteViews: document.getElementById("siteViews"),
   siteViews24h: document.getElementById("siteViews24h"),
   siteViews7d: document.getElementById("siteViews7d"),
 
+  // KPIs pages de jeu (somme)
+  gamesViews: document.getElementById("gamesViews"),
+  gamesViews24h: document.getElementById("gamesViews24h"),
+  gamesViews7d: document.getElementById("gamesViews7d"),
+
+  // KPIs Téléchargements (somme)
   siteMega: document.getElementById("siteMega"),
   siteMega24h: document.getElementById("siteMega24h"),
   siteMega7d: document.getElementById("siteMega7d"),
 
+  // KPIs Likes (somme)
   siteLikes: document.getElementById("siteLikes"),
   siteLikes24h: document.getElementById("siteLikes24h"),
   siteLikes7d: document.getElementById("siteLikes7d"),
@@ -111,7 +118,7 @@ const state = {
 
   // key -> {views,mega,likes, views24h,mega24h,likes24h, views7d,mega7d,likes7d}
   statsByKey: new Map(),
-  ratingByKey: new Map(),  // key -> {avg,count,sum}
+  ratingByKey: new Map(), // key -> {avg,count,sum}
 
   sortKey: "views",
   sortDir: "desc",
@@ -216,32 +223,35 @@ function setText(el, v) {
 // ============================================================================
 function computeTotalsAllGames() {
   // Somme sur les jeux uniquement (uid:xxx), pas le compteur site "__viewer_main__"
-  let mega = 0, likes = 0;
-  let mega24h = 0, likes24h = 0;
-  let mega7d = 0, likes7d = 0;
+  let views = 0, mega = 0, likes = 0;
+  let views24h = 0, mega24h = 0, likes24h = 0;
+  let views7d = 0, mega7d = 0, likes7d = 0;
 
   for (const [k, s] of state.statsByKey.entries()) {
     if (!k || k === MAIN_SITE_ID) continue;
     if (!String(k).startsWith("uid:")) continue;
 
-    mega += (s.mega | 0);
+    views += (s.views | 0);
+    mega  += (s.mega | 0);
     likes += (s.likes | 0);
 
-    mega24h += (s.mega24h | 0);
+    views24h += (s.views24h | 0);
+    mega24h  += (s.mega24h | 0);
     likes24h += (s.likes24h | 0);
 
-    mega7d += (s.mega7d | 0);
+    views7d += (s.views7d | 0);
+    mega7d  += (s.mega7d | 0);
     likes7d += (s.likes7d | 0);
   }
 
-  return { mega, likes, mega24h, likes24h, mega7d, likes7d };
+  return { views, mega, likes, views24h, mega24h, likes24h, views7d, mega7d, likes7d };
 }
 
 // ============================================================================
-// ✅ KPI site : Vues = compteur site, Téléch./Likes = somme jeux
+// ✅ KPI : page principale + pages de jeu + totals
 // ============================================================================
 function renderSiteKpis() {
-  // 1) VUES SITE = compteur principal
+  // 1) 👁️ Vues page principale = compteur principal
   const site = state.statsByKey.get(MAIN_SITE_ID);
   if (site) {
     setText(els.siteViews, site.views);
@@ -253,13 +263,20 @@ function renderSiteKpis() {
     setText(els.siteViews7d, 0);
   }
 
-  // 2) TELECHARGEMENTS + LIKES = total de tous les jeux
+  // 2) 🎮 + 📥 + ❤️ = sommes sur tous les jeux
   const all = computeTotalsAllGames();
 
+  // 🎮 vues pages de jeu
+  setText(els.gamesViews, all.views);
+  setText(els.gamesViews24h, all.views24h);
+  setText(els.gamesViews7d, all.views7d);
+
+  // 📥 téléchargements jeux
   setText(els.siteMega, all.mega);
   setText(els.siteMega24h, all.mega24h);
   setText(els.siteMega7d, all.mega7d);
 
+  // ❤️ likes jeux
   setText(els.siteLikes, all.likes);
   setText(els.siteLikes24h, Math.max(0, all.likes24h));
   setText(els.siteLikes7d, Math.max(0, all.likes7d));
@@ -328,12 +345,12 @@ function renderTable(list) {
     img.loading = "lazy";
     img.decoding = "async";
     img.alt = "";
-    
+
     // ✅ comme viewer : évite certains refus d’affichage
     img.referrerPolicy = "no-referrer";
-    
+
     img.src = (g.imageUrl || "").trim() || "/favicon.png";
-    
+
     // ✅ fallback si hotlink/bad url
     img.onerror = () => {
       img.onerror = null;
@@ -352,10 +369,10 @@ function renderTable(list) {
 
     const sub = document.createElement("div");
     sub.className = "small";
-    
+
     const uid = String(g.uid ?? "").trim();
     const id  = String(g.id  ?? "").trim();
-    
+
     if (uid && id) {
       sub.textContent = `uid:${uid} | id:${id}`;
     } else if (uid) {
@@ -365,7 +382,7 @@ function renderTable(list) {
     } else {
       sub.textContent = "(no id)";
     }
-    
+
     titleTd.appendChild(sub);
 
     const vTd = document.createElement("td");

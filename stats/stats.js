@@ -154,10 +154,16 @@ function getFiltered() {
   for (const g of list) {
     const key = counterKeyOf(g);
 
-    const s = state.statsByKey.get(key) || { views: 0, likes: 0, mega: 0 };
+    const s = state.statsByKey.get(key) || { views: 0, likes: 0, mega: 0, views24h:0, views7d:0, mega24h:0, mega7d:0, likes24h:0, likes7d:0 };
     g._views = s.views | 0;
     g._likes = s.likes | 0;
     g._mega  = s.mega  | 0;
+    g._views24h = s.views24h | 0;
+    g._views7d  = s.views7d  | 0;
+    g._mega24h  = s.mega24h  | 0;
+    g._mega7d   = s.mega7d   | 0;
+    g._likes24h = s.likes24h | 0;
+    g._likes7d  = s.likes7d  | 0;
 
     const r = state.ratingByKey.get(key) || { avg: 0, count: 0, sum: 0 };
     g._ratingAvg = Number(r.avg || 0);
@@ -176,6 +182,8 @@ function sortList(list) {
   const getv = (g) => {
     if (key === "title") return String(g.cleanTitle || g.title || "");
     if (key === "views") return g._views | 0;
+    if (key === "views24h") return g._views24h | 0;
+    if (key === "views7d") return g._views7d | 0;
     if (key === "likes") return g._likes | 0;
     if (key === "mega") return g._mega | 0;
     if (key === "ratingAvg") return Number(g._ratingAvg || 0);
@@ -275,6 +283,14 @@ function renderTable(list) {
     const vTd = document.createElement("td");
     vTd.className = "num";
     vTd.textContent = (g._views | 0).toLocaleString("fr-FR");
+    const v24Td = document.createElement("td");
+    v24Td.className = "num";
+    v24Td.textContent = (g._views24h | 0).toLocaleString("fr-FR");
+
+    const v7Td = document.createElement("td");
+    v7Td.className = "num";
+    v7Td.textContent = (g._views7d | 0).toLocaleString("fr-FR");
+
 
     const lTd = document.createElement("td");
     lTd.className = "num";
@@ -295,6 +311,8 @@ function renderTable(list) {
     tr.appendChild(imgTd);
     tr.appendChild(titleTd);
     tr.appendChild(vTd);
+    tr.appendChild(v24Td);
+    tr.appendChild(v7Td);
     tr.appendChild(mTd); // 📥
     tr.appendChild(lTd); // ❤️
     tr.appendChild(rcTd);
@@ -309,6 +327,8 @@ function renderTable(list) {
 // -------- Chart (canvas, sans lib) --------
 function metricValue(g, metric) {
   if (metric === "views") return g._views | 0;
+  if (metric === "views24h") return g._views24h | 0;
+  if (metric === "views7d") return g._views7d | 0;
   if (metric === "likes") return g._likes | 0;
   if (metric === "mega") return g._mega | 0;
   if (metric === "ratingCount") return g._ratingCount | 0;
@@ -612,6 +632,18 @@ async function init() {
 
   state.games = extractGames(raw).map((g) => ({ ...g }));
 
+  // ✅ Entrée "Accueil" (compteur global du site)
+  state.games.unshift({
+    uid: "site_home",
+    id: "",
+    title: "🏠 Accueil (site)",
+    cleanTitle: "🏠 Accueil (site)",
+    tags: ["site"],
+    imageUrl: "",
+    url: "/",
+  });
+
+
   if (els.statusChart) els.statusChart.textContent = "Chargement stats…";
   if (els.statusTable) els.statusTable.textContent = "Chargement stats…";
 
@@ -625,6 +657,13 @@ async function init() {
       views: Number(s.views || 0),
       mega: Number(s.mega || 0),
       likes: Number(s.likes || 0),
+
+      views24h: Number(s.views24h || 0),
+      views7d: Number(s.views7d || 0),
+      mega24h: Number(s.mega24h || 0),
+      mega7d: Number(s.mega7d || 0),
+      likes24h: Number(s.likes24h || 0),
+      likes7d: Number(s.likes7d || 0),
     });
   }
 

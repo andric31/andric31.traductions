@@ -36,8 +36,6 @@ async function fetchJson(url) {
   if (!r.ok) throw new Error("HTTP " + r.status);
   return await r.json();
 
-}
-
 // -------- small helpers --------
 const fmtInt = (n)=> Number(n||0).toLocaleString("fr-FR");
 
@@ -90,6 +88,8 @@ function discordTopText(title, rows, metric){
     out += `${medals[i]} ${r.title || r.id} — ${fmtInt(r.total)} ${lab}\n`;
   });
   return out.trim();
+}
+
 }
 
 async function fetchGameStatsBulk(ids) {
@@ -200,7 +200,6 @@ const els = {
   trendStatusLine: document.getElementById("trendStatusLine"),
   trendTbody: document.getElementById("trendTbody"),
   trendTableStatus: document.getElementById("trendTableStatus"),
-  btnTrendDiscord: document.getElementById("btnTrendDiscord"),
 
   // Hot (weekly)
   hotMetric: document.getElementById("hotMetric"),
@@ -261,9 +260,6 @@ const state = {
 
   // Weekly API cache (Hot / Progression)
   weeklyCache: new Map(), // key: `${metric}|${weeks}|${top}` -> { weeks: [...] }
-
-  // Export helpers
-  lastTrendExport: null,
 
   // caches for CSV export
   lastExport: {
@@ -923,15 +919,13 @@ function renderTrending() {
     const maxShow = getChartTakeCount(rows.length, 200);
     const viewRows = rows.slice(0, maxShow);
 
-    for (let i = 0; i < viewRows.length; i++) {
-      const x = viewRows[i];
+    for (const x of viewRows) {
       const tr = document.createElement("tr");
       tr.addEventListener("click", () => (location.href = getGameUrlForEntry(x.g)));
 
       const tdImg = document.createElement("td"); tdImg.className="c-cover"; tdImg.appendChild(makeCoverImg(x.g));
       const tdT = document.createElement("td");
-      const title = x.g.cleanTitle || x.g.title || "";
-      tdT.innerHTML = `${getRankBadge(i)}${escapeHtml(title)}`;
+      tdT.textContent = x.g.cleanTitle || x.g.title || "";
 
       const tdScore = document.createElement("td"); tdScore.className="num"; tdScore.textContent = fmt(x.score);
       const tdWin = document.createElement("td"); tdWin.className="num"; tdWin.textContent = fmt(x.score);
@@ -941,13 +935,6 @@ function renderTrending() {
       frag.appendChild(tr);
     }
     els.trendTbody.appendChild(frag);
-
-    // cache export (Top 3)
-    state.lastTrendExport = {
-      metric,
-      window,
-      rows: viewRows.map(v => ({ id: String(v.g.id || v.g.uid || v.g.url || ""), title: (v.g.cleanTitle || v.g.title || ""), total: Number(v.score || 0) }))
-    };
 
     if (els.trendTableStatus) els.trendTableStatus.textContent = `Top ${Math.min(maxShow, rows.length)} / ${rows.length} (score > 0)`;
 
@@ -1524,23 +1511,6 @@ function wireEvents() {
   if (els.trendEngine) els.trendEngine.addEventListener("change", trendRerender);
   if (els.trendStatus) els.trendStatus.addEventListener("change", trendRerender);
   if (els.trendTag) els.trendTag.addEventListener("input", () => setTimeout(trendRerender, 80));
-
-  // Trending -> export Discord (Top 3)
-  if (els.btnTrendDiscord) {
-    els.btnTrendDiscord.addEventListener("click", async () => {
-      // ensure data is fresh
-      if (state.currentTab === "trending") renderTrending();
-      const pack = state.lastTrendExport;
-      if (!pack || !Array.isArray(pack.rows) || !pack.rows.length) {
-        alert("Aucune donnée Trending à exporter.");
-        return;
-      }
-      const title = `Trending ${pack.window} (${metricLabel(pack.metric)})`;
-      const txt = discordTopText(title, pack.rows, pack.metric);
-      await copyText(txt);
-      alert("Copié pour Discord ✅");
-    });
-  }
 
   // hot controls
   const hotRerender = () => {

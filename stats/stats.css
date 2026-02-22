@@ -377,12 +377,3 @@ html,body{
 .delta-up{ color:#3fb950; font-weight:700; }
 .delta-down{ color:#f85149; font-weight:700; }
 .delta-new{ color:#2ea043; font-weight:700; }
-
-
-.stats-actions{
-  display:flex;
-  gap:8px;
-  align-items:center;
-  justify-content:flex-end;
-  flex-wrap:wrap;
-}

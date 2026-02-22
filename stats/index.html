@@ -8,7 +8,9 @@
   <link rel="icon" href="/favicon.png" />
   <link rel="stylesheet" href="/stats/stats.css" />
 <style>
-/* ===== Help Tooltip ===== */
+/* ===== Help Tooltip (clean) ===== */
+.card.tooltip-safe{ overflow: visible; } /* évite le découpage dû au overflow:hidden */
+
 .help-tip{
   position: relative;
   display: inline-flex;
@@ -16,14 +18,19 @@
   justify-content: center;
   width: 18px;
   height: 18px;
-  margin-left: 6px;
+  margin-left: 8px;
   border-radius: 999px;
-  font-weight: 700;
+  font-weight: 800;
   font-size: 12px;
+  line-height: 1;
   cursor: help;
   user-select: none;
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.22);
+}
+
+.help-tip:hover{
+  background: rgba(255,255,255,0.14);
 }
 
 .help-tip:focus{
@@ -33,42 +40,48 @@
 
 .help-bubble{
   position: absolute;
-  left: 50%;
+  left: 0;
   top: calc(100% + 10px);
-  transform: translateX(-50%);
-  width: min(340px, 80vw);
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(20,20,25,0.98);
-  border: 1px solid rgba(255,255,255,0.15);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-  color: #fff;
+  transform: translateX(-10px);
+  width: min(420px, 86vw);
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(16, 18, 24, 0.98);
+  border: 1px solid rgba(255,255,255,0.16);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.45);
+  color: rgba(255,255,255,0.94);
   font-size: 13px;
-  line-height: 1.35;
-  z-index: 9999;
+  line-height: 1.45;
+  text-align: left;
+  z-index: 99999;
 
   opacity: 0;
   pointer-events: none;
-  transition: opacity .12s ease, transform .12s ease;
+  transition: opacity .14s ease, transform .14s ease;
+}
+
+.help-bubble b{
+  color: #fff;
 }
 
 .help-bubble::before{
   content: "";
   position: absolute;
   top: -6px;
-  left: 50%;
-  transform: translateX(-50%) rotate(45deg);
+  left: 22px;
   width: 10px;
   height: 10px;
-  background: rgba(20,20,25,0.98);
-  border-left: 1px solid rgba(255,255,255,0.15);
-  border-top: 1px solid rgba(255,255,255,0.15);
+  background: rgba(16, 18, 24, 0.98);
+  border-left: 1px solid rgba(255,255,255,0.16);
+  border-top: 1px solid rgba(255,255,255,0.16);
+  transform: rotate(45deg);
 }
 
 .help-tip:hover .help-bubble,
 .help-tip:focus .help-bubble{
   opacity: 1;
   pointer-events: auto;
+  transform: translateX(-10px) translateY(0);
 }
 </style>
 </head>
@@ -193,7 +206,7 @@
       </section>
 
       <section class="tab-section" id="tab_trending" style="display:none;">
-        <section class="card">
+        <section class="card" tooltip-safe>
           <div class="card-h">
             <div class="card-title">
 🔥 Trending
@@ -268,7 +281,7 @@
       </section>
 
       <section class="tab-section" id="tab_timeline" style="display:none;">
-        <section class="card">
+        <section class="card" tooltip-safe>
           <div class="card-h">
             <div class="card-title">
 🕒 Timeline (rapide)

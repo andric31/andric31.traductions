@@ -25,27 +25,53 @@ export async function onRequest(context) {
     const METRICS = new Set(["views", "mega", "likes"]);
     if (!METRICS.has(metric)) return json({ ok: false, error: "metric invalide" }, 400);
 
-    // top N (par semaine)
+    // top N
     let top = Number(u.searchParams.get("top") || 10);
     if (!Number.isFinite(top)) top = 10;
     top = Math.max(1, Math.min(50, Math.floor(top)));
 
-    // weeks = 4 par défaut
+    // weeks
     let weeksCount = Number(u.searchParams.get("weeks") || 4);
     if (!Number.isFinite(weeksCount)) weeksCount = 4;
     weeksCount = Math.max(1, Math.min(8, Math.floor(weeksCount)));
 
-    // weekStart = monday|sunday (par défaut monday)
+    // monday|sunday
     const weekStart = (u.searchParams.get("weekStart") || "monday").trim().toLowerCase();
     const startMonday = weekStart !== "sunday";
 
+    // ---- détecte les colonnes réelles de counter_daily ----
+    const info = await env.DB.prepare(`PRAGMA table_info(counter_daily)`).all();
+    const cols = new Set((info?.results || []).map(r => String(r.name || "").toLowerCase()));
+
+    // on accepte plusieurs noms possibles (au cas où)
+    const pick = (...candidates) => candidates.find(c => cols.has(c)) || null;
+
+    const colViews = pick("views", "view", "vues", "vue");
+    const colMega  = pick("mega", "megas", "dl", "downloads");
+    const colLikes = pick("likes", "like");
+
+    if (!colViews || !colMega || !colLikes) {
+      return json({
+        ok: false,
+        error: "Schéma counter_daily inattendu",
+        details: {
+          found: Array.from(cols).sort(),
+          expectedOneOf: {
+            views: ["views","view","vues","vue"],
+            mega:  ["mega","megas","dl","downloads"],
+            likes: ["likes","like"]
+          }
+        }
+      }, 500);
+    }
+
     // ---- helpers dates (UTC) ----
-    const isoDay = (d) => d.toISOString().slice(0, 10); // YYYY-MM-DD
+    const isoDay = (d) => d.toISOString().slice(0, 10);
     const utcMidnight = (d) => new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
 
     const startOfWeekUTC = (dateUTC00) => {
       const dow = dateUTC00.getUTCDay(); // 0=dim ... 6=sam
-      const offset = startMonday ? ((dow + 6) % 7) : dow; // monday: lundi=0 ; sunday: dimanche=0
+      const offset = startMonday ? ((dow + 6) % 7) : dow;
       const s = new Date(dateUTC00);
       s.setUTCDate(s.getUTCDate() - offset);
       return utcMidnight(s);
@@ -54,11 +80,11 @@ export async function onRequest(context) {
     const todayUTC = utcMidnight(new Date());
     const thisWeekStart = startOfWeekUTC(todayUTC);
 
-    // ✅ order expr (pas d’alias, sinon D1 peut râler)
+    // ORDER BY expression (sur les vraies colonnes)
     const orderExpr =
-      metric === "views" ? "SUM(views)" :
-      metric === "mega"  ? "SUM(mega)"  :
-                           "SUM(likes)";
+      metric === "views" ? `SUM(${colViews})` :
+      metric === "mega"  ? `SUM(${colMega})`  :
+                           `SUM(${colLikes})`;
 
     const weeks = [];
 
@@ -74,9 +100,9 @@ export async function onRequest(context) {
       const rows = await env.DB.prepare(`
         SELECT
           id,
-          SUM(views) AS views,
-          SUM(mega)  AS mega,
-          SUM(likes) AS likes
+          SUM(${colViews}) AS views,
+          SUM(${colMega})  AS mega,
+          SUM(${colLikes}) AS likes
         FROM counter_daily
         WHERE day BETWEEN ?1 AND ?2
         GROUP BY id

@@ -29,8 +29,8 @@ export async function onRequest(context) {
     const normId = (x) => String(x || "").trim().slice(0, 80);
     const normType = (x) => String(x || "").trim().toLowerCase();
 
-    // ===== Daily rollup helper (YYYY-MM-DD) =====
-    const todayStr = () => new Date().toISOString().slice(0, 10);
+    // ✅ ton format "day" : nombre de jours depuis epoch
+    const dayNum = () => Math.floor(Date.now() / 86400000);
 
     // --------- parse input (GET/POST) ---------
     let op = "get";
@@ -50,7 +50,6 @@ export async function onRequest(context) {
       const idsRaw = Array.isArray(body?.ids) ? body.ids : [];
       ids = idsRaw.map(normId).filter(x => x);
 
-      // compat POST: si pas ids mais id → on le met dans ids pour get
       if (!ids.length && id) ids = [id];
 
     } else {
@@ -92,22 +91,22 @@ export async function onRequest(context) {
       );
     `).run();
 
-    // ===== NEW: daily rollup table (30 jours / 4 semaines) =====
+    // ✅ daily rollup : ton schéma réel (id/kind/day/count)
     await env.DB.prepare(`
       CREATE TABLE IF NOT EXISTS counter_daily (
         id TEXT NOT NULL,
-        day TEXT NOT NULL,
-        views INTEGER DEFAULT 0,
-        mega INTEGER DEFAULT 0,
-        likes INTEGER DEFAULT 0,
-        PRIMARY KEY (id, day)
+        kind TEXT NOT NULL,
+        day INTEGER NOT NULL,
+        count INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY (id, kind, day)
       );
     `).run();
 
-    // indexes (si déjà créés, OK)
+    // indexes
     try {
       await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_counter_daily_day ON counter_daily(day);`).run();
-      await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_counter_daily_id_day ON counter_daily(id, day);`).run();
+      await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_counter_daily_kind_day ON counter_daily(kind, day);`).run();
+      await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_counter_daily_id_kind_day ON counter_daily(id, kind, day);`).run();
     } catch {}
 
     // si table counters existait sans likes
@@ -132,39 +131,26 @@ export async function onRequest(context) {
         ON CONFLICT(id) DO NOTHING;
       `).bind(id).run();
 
-      const day = todayStr();
+      const day = dayNum();
 
       if (op === "hit") {
         if (type === "view") {
           await env.DB.prepare(`UPDATE counters SET views = views + 1, updated_at = unixepoch() WHERE id = ?1`).bind(id).run();
           await env.DB.prepare(`INSERT INTO counter_events (id, kind, ts) VALUES (?1, 'view', unixepoch())`).bind(id).run();
-
-          // daily +1 views
-          await env.DB.prepare(`
-            INSERT INTO counter_daily (id, day, views) VALUES (?1, ?2, 1)
-            ON CONFLICT(id, day) DO UPDATE SET views = views + 1
-          `).bind(id, day).run();
-
         } else if (type === "mega") {
           await env.DB.prepare(`UPDATE counters SET mega = mega + 1, updated_at = unixepoch() WHERE id = ?1`).bind(id).run();
           await env.DB.prepare(`INSERT INTO counter_events (id, kind, ts) VALUES (?1, 'mega', unixepoch())`).bind(id).run();
-
-          // daily +1 mega
-          await env.DB.prepare(`
-            INSERT INTO counter_daily (id, day, mega) VALUES (?1, ?2, 1)
-            ON CONFLICT(id, day) DO UPDATE SET mega = mega + 1
-          `).bind(id, day).run();
-
         } else if (type === "like") {
           await env.DB.prepare(`UPDATE counters SET likes = likes + 1, updated_at = unixepoch() WHERE id = ?1`).bind(id).run();
           await env.DB.prepare(`INSERT INTO counter_events (id, kind, ts) VALUES (?1, 'like', unixepoch())`).bind(id).run();
-
-          // daily +1 like
-          await env.DB.prepare(`
-            INSERT INTO counter_daily (id, day, likes) VALUES (?1, ?2, 1)
-            ON CONFLICT(id, day) DO UPDATE SET likes = likes + 1
-          `).bind(id, day).run();
         }
+
+        // ✅ daily +1 (view/mega/like) via kind/type
+        await env.DB.prepare(`
+          INSERT INTO counter_daily (id, kind, day, count)
+          VALUES (?1, ?2, ?3, 1)
+          ON CONFLICT(id, kind, day) DO UPDATE SET count = count + 1
+        `).bind(id, type, day).run();
 
         return json({ ok: true, op, id, type });
       }
@@ -178,26 +164,27 @@ export async function onRequest(context) {
               updated_at = unixepoch()
           WHERE id = ?1
         `).bind(id).run();
+
         await env.DB.prepare(`INSERT INTO counter_events (id, kind, ts) VALUES (?1, 'unlike', unixepoch())`).bind(id).run();
 
-        // daily -1 like (clamp à 0)
-        // On s’assure que la ligne du jour existe, puis on décrémente
+        // ✅ daily -1 like (clamp à 0)
         await env.DB.prepare(`
-          INSERT INTO counter_daily (id, day, likes) VALUES (?1, ?2, 0)
-          ON CONFLICT(id, day) DO NOTHING
+          INSERT INTO counter_daily (id, kind, day, count)
+          VALUES (?1, 'like', ?2, 0)
+          ON CONFLICT(id, kind, day) DO NOTHING
         `).bind(id, day).run();
 
         await env.DB.prepare(`
           UPDATE counter_daily
-          SET likes = CASE WHEN likes > 0 THEN likes - 1 ELSE 0 END
-          WHERE id = ?1 AND day = ?2
+          SET count = CASE WHEN count > 0 THEN count - 1 ELSE 0 END
+          WHERE id = ?1 AND kind = 'like' AND day = ?2
         `).bind(id, day).run();
 
         return json({ ok: true, op, id, type });
       }
 
-      // pour view/mega: on décrémente (optionnel) mais pas de kind inverse compté
-      // (on NE touche PAS au daily pour view/mega afin de rester cohérent avec ton système actuel basé sur events)
+      // pour view/mega: on décrémente (optionnel) mais pas d'event inverse compté
+      // et on NE touche PAS au daily (choix cohérent avec ton système)
       if (type === "view") {
         await env.DB.prepare(`
           UPDATE counters
@@ -213,6 +200,7 @@ export async function onRequest(context) {
           WHERE id = ?1
         `).bind(id).run();
       }
+
       return json({ ok: true, op, id, type, note: "unhit view/mega: pas d'event inverse compté" });
     }
 

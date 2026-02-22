@@ -28,19 +28,16 @@ export async function onRequest(context) {
     const top = Math.max(1, Math.min(50, Number(u.searchParams.get("top") || 10)));
     const weeksCount = Math.max(1, Math.min(8, Number(u.searchParams.get("weeks") || 4)));
 
-    const kindMap = {
-      views: "view",
-      mega: "mega",
-      likes: "like"
-    };
-
+    const kindMap = { views: "view", mega: "mega", likes: "like" };
     const kind = kindMap[metric];
-    if (!kind)
-      return json({ ok: false, error: "metric invalide" }, 400);
+    if (!kind) return json({ ok: false, error: "metric invalide" }, 400);
 
-    const isoDay = (d) => d.toISOString().slice(0, 10);
+    // ---- helpers dates (UTC semaine lundi->dimanche) ----
     const utcMidnight = (d) =>
       new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+
+    // IMPORTANT: ton "day" = Math.floor(ms / 86400000)
+    const toDayNumber = (dUTC00) => Math.floor(dUTC00.getTime() / 86400000);
 
     const startOfWeekUTC = (dateUTC00) => {
       const dow = dateUTC00.getUTCDay();
@@ -49,6 +46,8 @@ export async function onRequest(context) {
       s.setUTCDate(s.getUTCDate() - offset);
       return utcMidnight(s);
     };
+
+    const isoDay = (d) => d.toISOString().slice(0, 10);
 
     const todayUTC = utcMidnight(new Date());
     const thisWeekStart = startOfWeekUTC(todayUTC);
@@ -64,18 +63,18 @@ export async function onRequest(context) {
       const startStr = isoDay(start);
       const endStr = isoDay(end);
 
+      const startDayNum = toDayNumber(start);
+      const endDayNum = toDayNumber(end);
+
       const rows = await env.DB.prepare(`
-        SELECT
-          id,
-          SUM(count) as total
+        SELECT id, SUM(count) as total
         FROM counter_daily
         WHERE kind = ?1
-          AND day BETWEEN CAST(julianday(?2) AS INTEGER)
-                      AND CAST(julianday(?3) AS INTEGER)
+          AND day BETWEEN ?2 AND ?3
         GROUP BY id
         ORDER BY total DESC
         LIMIT ?4
-      `).bind(kind, startStr, endStr, top).all();
+      `).bind(kind, startDayNum, endDayNum, top).all();
 
       weeks.push({
         weekStart: startStr,
@@ -83,8 +82,8 @@ export async function onRequest(context) {
         metric,
         rows: (rows?.results || []).map(r => ({
           id: String(r.id),
-          total: Number(r.total || 0)
-        }))
+          total: Number(r.total || 0),
+        })),
       });
     }
 

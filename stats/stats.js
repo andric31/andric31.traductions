@@ -1331,11 +1331,37 @@ function wireEvents() {
   if (els.bayesM) els.bayesM.addEventListener("change", ratingsRerender);
   if (els.ratingsTop) els.ratingsTop.addEventListener("change", ratingsRerender);
 
+  // hot (4 semaines) controls
+  if (els.hotSubBtns && els.hotSubBtns.length) {
+    els.hotSubBtns.forEach(btn => btn.addEventListener("click", () => {
+      els.hotSubBtns.forEach(b => b.classList.toggle("is-active", b === btn));
+      state.hotMode = String(btn.dataset.hot || "week");
+      if (state.currentTab === "hot") renderHot();
+    }));
+  }
+  if (els.hotMetric) els.hotMetric.addEventListener("change", () => {
+    if (state.currentTab === "hot") renderHot();
+  });
+  if (els.hotTop) els.hotTop.addEventListener("change", () => {
+    if (state.currentTab === "hot") renderHot();
+  });
+
+  // progression controls
+  if (els.progMetric) els.progMetric.addEventListener("change", () => {
+    if (state.currentTab === "progression") renderProgression();
+  });
+  if (els.progTop) els.progTop.addEventListener("change", () => {
+    if (state.currentTab === "progression") renderProgression();
+  });
+
   // Resize (charts)
   window.addEventListener("resize", () => {
     if (state.currentTab === "overview") rerenderOverview({ chart: true });
     else if (state.currentTab === "trending") renderTrending();
     else if (state.currentTab === "ratings") renderRatings();
+    else if (state.currentTab === "hot") renderHot();
+    else if (state.currentTab === "progression") renderProgression();
+    else if (state.currentTab === "timeline") renderTimeline();
   });
 
   // Infinite scroll (overview table)
@@ -1447,18 +1473,5 @@ async function init() {
 }
 
 init();
-  // Hot tab
-  els.hotSubBtns.forEach(btn => btn.addEventListener("click", () => {
-    els.hotSubBtns.forEach(b => b.classList.toggle("is-active", b === btn));
-    state.hotMode = String(btn.dataset.hot || "week");
-    renderHot();
-  }));
-  if (els.hotMetric) els.hotMetric.addEventListener("change", () => renderHot());
-  if (els.hotTop) els.hotTop.addEventListener("change", () => renderHot());
 
-  // Progression tab
-  if (els.progMetric) els.progMetric.addEventListener("change", () => renderProgression());
-  if (els.progTop) els.progTop.addEventListener("change", () => renderProgression());
-
-}
 

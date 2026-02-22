@@ -1,8 +1,196 @@
 "use strict";
 
-const DEFAULT_URL = "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json";
+/*
+  Stats — ultra clean refactor (v2)
+  ---------------------------------
+  Objectifs:
+  - mêmes fonctionnalités/IDs HTML
+  - API centralisée + cache léger + timeout fetch
+  - helpers homogènes (normalize, escape, clamp, etc.)
+*/
 
-// -------- URL helpers (comme viewer) --------
+const CFG = Object.freeze({
+  LIST_URL_KEY: "f95listUrl",
+  DEFAULT_LIST_URL: "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json",
+  API: Object.freeze({
+    COUNTERS: "/api/counters",
+    COUNTERS_WEEKLY: "/api/counters_weekly",
+    RATINGS_4S: "/api/ratings4s",
+  }),
+  // D1 limite la taille des IN() / bind : on reste safe
+  CHUNK_IDS: 90,
+  FETCH_TIMEOUT_MS: 15000,
+  CACHE_TTL_MS: 15000,
+});
+
+const memCache = new Map(); // key -> { t:number, v:any }
+
+/** Cache simple (ttl en ms). */
+function cacheGet(key, ttlMs = CFG.CACHE_TTL_MS) {
+  const it = memCache.get(key);
+  if (!it) return null;
+  if (Date.now() - it.t > ttlMs) { memCache.delete(key); return null; }
+  return it.v;
+}
+function cacheSet(key, value) { memCache.set(key, { t: Date.now(), v: value }); }
+
+/** fetch JSON avec timeout + message d'erreur propre. */
+async function fetchJson(url, opts = {}) {
+  const {
+    method = "GET",
+    headers,
+    body,
+    cacheKey = null,
+    cacheTtlMs = CFG.CACHE_TTL_MS,
+  } = opts;
+
+  if (cacheKey) {
+    const hit = cacheGet(cacheKey, cacheTtlMs);
+    if (hit !== null) return hit;
+  }
+
+  const ac = new AbortController();
+  const to = setTimeout(() => ac.abort(), CFG.FETCH_TIMEOUT_MS);
+
+  try {
+    const r = await fetch(url, {
+      method,
+      headers: headers || (method === "POST" ? { "content-type": "application/json" } : undefined),
+      body,
+      cache: "no-store",
+      signal: ac.signal,
+    });
+
+    if (!r.ok) {
+      let details = "";
+      try { details = JSON.stringify(await r.json()); }
+      catch { try { details = await r.text(); } catch {} }
+      throw new Error(`HTTP ${r.status}${details ? " — " + details : ""}`);
+    }
+
+    const data = await r.json();
+    if (cacheKey) cacheSet(cacheKey, data);
+    return data;
+
+  } finally {
+    clearTimeout(to);
+  }
+}
+
+/** Normalisation pour filtre/recherche (sans diacritiques). */
+function norm(s) {
+  return String(s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "");
+}
+
+/** Sécurité ID (table D1) */
+function normId(x) {
+  return String(x || "").trim().slice(0, 80);
+}
+
+function clamp(n, min, max) {
+  n = Number(n);
+  if (!Number.isFinite(n)) n = min;
+  return Math.max(min, Math.min(max, n));
+}
+
+function escapeHtml(s) {
+  return String(s ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function fmtInt(n) {
+  const v = Number(n || 0);
+  return v.toLocaleString("fr-FR");
+}
+
+function qs(sel, root = document) { return root.querySelector(sel); }
+function qsa(sel, root = document) { return Array.from(root.querySelectorAll(sel)); }
+
+// ---- DOM ----
+const dom = {
+  tabs: qsa("[data-tab]"),
+  tabPanels: qsa("[data-panel]"),
+
+  // header
+  listUrlLabel: qs("#listUrlLabel"),
+  btnReload: qs("#btnReload"),
+  btnCsv: qs("#btnCsv"),
+
+  // filters (common)
+  search: qs("#search"),
+  scope: qs("#scope"),
+  metric: qs("#metric"),
+  top: qs("#top"),
+
+  // overview totals
+  ov_main_total: qs("#ov_main_total"),
+  ov_main_24h: qs("#ov_main_24h"),
+  ov_main_7d: qs("#ov_main_7d"),
+  ov_games_total: qs("#ov_games_total"),
+  ov_games_24h: qs("#ov_games_24h"),
+  ov_games_7d: qs("#ov_games_7d"),
+  ov_mega_total: qs("#ov_mega_total"),
+  ov_mega_24h: qs("#ov_mega_24h"),
+  ov_mega_7d: qs("#ov_mega_7d"),
+  ov_likes_total: qs("#ov_likes_total"),
+  ov_likes_24h: qs("#ov_likes_24h"),
+  ov_likes_7d: qs("#ov_likes_7d"),
+
+  chartTitle: qs("#chartTitle"),
+  chartBars: qs("#chartBars"),
+
+  // trending
+  tr_window: qs("#tr_window"),
+  tr_metric: qs("#tr_metric"),
+  tr_engine: qs("#tr_engine"),
+  tr_status: qs("#tr_status"),
+  tr_tag: qs("#tr_tag"),
+  tr_total: qs("#tr_total"),
+  tr_visible: qs("#tr_visible"),
+  tr_chartTitle: qs("#tr_chartTitle"),
+  tr_chartBars: qs("#tr_chartBars"),
+  tr_tableBody: qs("#tr_tableBody"),
+
+  // timeline
+  tl_views_24h: qs("#tl_views_24h"),
+  tl_views_7d: qs("#tl_views_7d"),
+  tl_mega_24h: qs("#tl_mega_24h"),
+  tl_mega_7d: qs("#tl_mega_7d"),
+  tl_likes_24h: qs("#tl_likes_24h"),
+  tl_likes_7d: qs("#tl_likes_7d"),
+  tl_tableBody: qs("#tl_tableBody"),
+
+  // hot (4 semaines)
+  hot_metric: qs("#hot_metric"),
+  hot_top: qs("#hot_top"),
+  hot_weeks: qs("#hot_weeks"),
+  hot_status: qs("#hot_status"),
+  hot_tableBody: qs("#hot_tableBody"),
+
+  // progression
+  pr_metric: qs("#pr_metric"),
+  pr_top: qs("#pr_top"),
+  pr_baseMin: qs("#pr_baseMin"),
+  pr_status: qs("#pr_status"),
+  pr_tableBody: qs("#pr_tableBody"),
+
+  // ratings
+  rt_period: qs("#rt_period"),
+  rt_scope: qs("#rt_scope"),
+  rt_top: qs("#rt_top"),
+  rt_tableBody: qs("#rt_tableBody"),
+
+  // help tooltips
+  helpIcons: qsa(".help"),
+};
+
 function getListUrl() {
   try {
     const p = new URLSearchParams(location.search);
@@ -10,176 +198,12 @@ function getListUrl() {
     if (src) return src;
   } catch {}
   try {
-    return (localStorage.getItem("f95listUrl") || "").trim() || DEFAULT_URL;
+    return (localStorage.getItem(CFG.LIST_URL_KEY) || "").trim() || CFG.DEFAULT_LIST_URL;
   } catch {
-    return DEFAULT_URL;
+    return CFG.DEFAULT_LIST_URL;
   }
 }
 
-function extractGames(raw) {
-  if (Array.isArray(raw)) return raw;
-  if (!raw || typeof raw !== "object") return [];
-  if (Array.isArray(raw.games)) return raw.games;
-  if (Array.isArray(raw.items)) return raw.items;
-  return [];
-}
-
-function normalize(s) {
-  return String(s || "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "");
-}
-
-async function fetchJson(url) {
-  const r = await fetch(url, { cache: "no-store" });
-  if (!r.ok) throw new Error("HTTP " + r.status);
-  return await r.json();
-}
-
-async function fetchGameStatsBulk(ids) {
-  try {
-    const r = await fetch("/api/counters", {
-      method: "POST",
-      cache: "no-store",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ids }),
-    });
-    if (!r.ok) return {};
-    const j = await r.json();
-    if (!j?.ok || !j.stats) return {};
-    return j.stats;
-  } catch {
-    return {};
-  }
-}
-
-// ✅ ratings bulk (doit exister côté backend)
-async function fetchRatingsBulk(ids) {
-  try {
-    const r = await fetch("/api/ratings4s", {
-      method: "POST",
-      cache: "no-store",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ids }),
-    });
-    if (!r.ok) return {};
-    const j = await r.json();
-    if (!j?.ok || !j.stats) return {};
-    return j.stats;
-  } catch {
-    return {};
-  }
-}
-
-// ===== Weekly API (counter_daily) — Hot / Progression =====
-async function fetchWeekly(metric, weeks = 4, top = 20) {
-  const m = String(metric || "views").toLowerCase();
-  const w = Math.max(1, Math.min(8, Number(weeks || 4)));
-  const t = Math.max(1, Math.min(50, Number(top || 20)));
-  const key = `${m}|${w}|${t}`;
-  if (state.weeklyCache.has(key)) return state.weeklyCache.get(key);
-
-  const url = `/api/counters_weekly?metric=${encodeURIComponent(m)}&weeks=${w}&top=${t}`;
-  const data = await fetchJson(url);
-  if (!data?.ok) throw new Error(data?.error || "Weekly API: erreur");
-  const out = { weeks: Array.isArray(data.weeks) ? data.weeks : [] };
-  state.weeklyCache.set(key, out);
-  return out;
-}
-
-// -------- UI state --------
-const els = {
-  // Tabs
-  tabBtns: [...document.querySelectorAll(".tab-btn")],
-  tabOverview: document.getElementById("tab_overview"),
-  tabTrending: document.getElementById("tab_trending"),
-  tabTimeline: document.getElementById("tab_timeline"),
-  tabHot: document.getElementById("tab_hot"),
-  tabProgression: document.getElementById("tab_progression"),
-  tabRatings: document.getElementById("tab_ratings"),
-  btnExportCsv: document.getElementById("btnExportCsv"),
-
-  // Overview controls
-  q: document.getElementById("q"),
-  range: document.getElementById("range"),
-  metric: document.getElementById("metric"),
-  top: document.getElementById("top"),
-
-  statusChart: document.getElementById("statusChart"),
-  statusTable: document.getElementById("statusTable"),
-  btnChartExpand: document.getElementById("btnChartExpand"),
-
-  chart: document.getElementById("chart"),
-  tbody: document.getElementById("tbody"),
-  tbl: document.getElementById("tbl"),
-  tableWrap: document.querySelector("#tab_overview .table-wrap"),
-  chartWrap: document.querySelector("#tab_overview .chart-wrap"),
-
-  // KPIs overview
-  siteViews: document.getElementById("siteViews"),
-  siteViews24h: document.getElementById("siteViews24h"),
-  siteViews7d: document.getElementById("siteViews7d"),
-
-  gamesViews: document.getElementById("gamesViews"),
-  gamesViews24h: document.getElementById("gamesViews24h"),
-  gamesViews7d: document.getElementById("gamesViews7d"),
-
-  gamesMega: document.getElementById("gamesMega"),
-  gamesMega24h: document.getElementById("gamesMega24h"),
-  gamesMega7d: document.getElementById("gamesMega7d"),
-
-  gamesLikes: document.getElementById("gamesLikes"),
-  gamesLikes24h: document.getElementById("gamesLikes24h"),
-  gamesLikes7d: document.getElementById("gamesLikes7d"),
-
-  // Trending controls
-  trendWindow: document.getElementById("trendWindow"),
-  trendMetric: document.getElementById("trendMetric"),
-  trendEngine: document.getElementById("trendEngine"),
-  trendStatus: document.getElementById("trendStatus"),
-  trendTag: document.getElementById("trendTag"),
-  trendTotal: document.getElementById("trendTotal"),
-  trendCount: document.getElementById("trendCount"),
-  trendChart: document.getElementById("trendChart"),
-  trendStatusLine: document.getElementById("trendStatusLine"),
-  trendTbody: document.getElementById("trendTbody"),
-  trendTableStatus: document.getElementById("trendTableStatus"),
-
-  // Hot (weekly)
-  hotMetric: document.getElementById("hotMetric"),
-  hotTop: document.getElementById("hotTop"),
-  hotWeeks: document.getElementById("hotWeeks"),
-  hotStatus: document.getElementById("hotStatus"),
-  hotTbody: document.getElementById("hotTbody"),
-
-  // Progression (weekly)
-  progMetric: document.getElementById("progMetric"),
-  progTop: document.getElementById("progTop"),
-  progMinBase: document.getElementById("progMinBase"),
-  progStatus: document.getElementById("progStatus"),
-  progTbody: document.getElementById("progTbody"),
-
-  // Timeline
-  tlViews24h: document.getElementById("tlViews24h"),
-  tlMega24h: document.getElementById("tlMega24h"),
-  tlLikes24h: document.getElementById("tlLikes24h"),
-  tlViews7d: document.getElementById("tlViews7d"),
-  tlMega7d: document.getElementById("tlMega7d"),
-  tlLikes7d: document.getElementById("tlLikes7d"),
-  tlTbody: document.getElementById("tlTbody"),
-  tlMoversStatus: document.getElementById("tlMoversStatus"),
-
-  // Ratings
-  bayesM: document.getElementById("bayesM"),
-  ratingsTop: document.getElementById("ratingsTop"),
-  bayesC: document.getElementById("bayesC"),
-  ratedCount: document.getElementById("ratedCount"),
-  ratingsChart: document.getElementById("ratingsChart"),
-  ratingsStatusLine: document.getElementById("ratingsStatusLine"),
-  ratingsTbody: document.getElementById("ratingsTbody"),
-  ratingsTableStatus: document.getElementById("ratingsTableStatus"),
-};
 
 const state = {
   srcUrl: getListUrl(),

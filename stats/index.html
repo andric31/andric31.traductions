@@ -392,7 +392,14 @@
       <section class="tab-section" id="tab_hot" style="display:none;">
         <div class="section-title-row">
           <h2>🔥 Hot (4 semaines)
-            <button class="help-icon" type="button" data-tooltip="Hot = Top sur les 4 dernières semaines (regroupé par semaine).\nIdéal pour sortir un Top jeux chaque semaine pour Discord.">?</button>
+            <span class="help-tip" tabindex="0" aria-label="Aide Hot">
+              <span class="help-circle">?</span>
+              <span class="help-bubble">
+                <b>Hot (4 semaines)</b><br/>
+                Top <b>cumul</b> sur les <b>4 dernières semaines</b> (lundi→dimanche) basé sur <code>counter_daily</code>.<br/>
+                ✅ Idéal pour sortir un Top hebdo (Discord) sans dépendre de l'historique <code>counter_events</code>.
+              </span>
+            </span>
           </h2>
         </div>
 
@@ -449,7 +456,16 @@
       <section class="tab-section" id="tab_progression" style="display:none;">
         <div class="section-title-row">
           <h2>📈 Progression
-            <button class="help-icon" type="button" data-tooltip="Progression = évolution relative (en %) d'une semaine à l'autre.\nEx: 2 → 8 vues = +300%.\nUtile pour repérer les vrais boosts sur des petits jeux.">?</button>
+            <span class="help-tip" tabindex="0" aria-label="Aide Progression">
+              <span class="help-circle">?</span>
+              <span class="help-bubble">
+                <b>Progression</b><br/>
+                Compare la <b>semaine</b> avec <b>semaine-1</b> :<br/>
+                • <b>Δ</b> = (semaine − semaine-1)<br/>
+                • <b>%Δ</b> = évolution en % (sur la base semaine-1)<br/>
+                🔎 <i>Base min (semaine-1)</i> évite les % énormes quand la base est trop faible.
+              </span>
+            </span>
           </h2>
         </div>
 

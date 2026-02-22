@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="/stats/stats.css" />
 <style>
 /* ===== Help Tooltip (clean) ===== */
+.tab-section.tooltip-safe{ overflow: visible; }
 .card.tooltip-safe{ overflow: visible; } /* évite le découpage dû au overflow:hidden */
 
 .help-tip{
@@ -27,6 +28,7 @@
   user-select: none;
   background: rgba(255,255,255,0.10);
   border: 1px solid rgba(255,255,255,0.22);
+  z-index: 999998;
 }
 
 .help-tip:hover{
@@ -58,6 +60,7 @@
   opacity: 0;
   pointer-events: none;
   transition: opacity .14s ease, transform .14s ease;
+  z-index: 999999;
 }
 
 .help-bubble b{
@@ -82,6 +85,7 @@
   opacity: 1;
   pointer-events: auto;
   transform: translateX(-10px) translateY(0);
+  z-index: 999999;
 }
 </style>
 </head>

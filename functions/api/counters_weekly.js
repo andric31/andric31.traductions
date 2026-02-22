@@ -70,7 +70,8 @@ export async function onRequest(context) {
           SUM(count) as total
         FROM counter_daily
         WHERE kind = ?1
-          AND day BETWEEN ?2 AND ?3
+          AND day BETWEEN CAST(julianday(?2) AS INTEGER)
+                      AND CAST(julianday(?3) AS INTEGER)
         GROUP BY id
         ORDER BY total DESC
         LIMIT ?4

@@ -36,6 +36,8 @@ async function fetchJson(url) {
   if (!r.ok) throw new Error("HTTP " + r.status);
   return await r.json();
 
+}
+
 // -------- small helpers --------
 const fmtInt = (n)=> Number(n||0).toLocaleString("fr-FR");
 
@@ -88,8 +90,6 @@ function discordTopText(title, rows, metric){
     out += `${medals[i]} ${r.title || r.id} — ${fmtInt(r.total)} ${lab}\n`;
   });
   return out.trim();
-}
-
 }
 
 async function fetchGameStatsBulk(ids) {

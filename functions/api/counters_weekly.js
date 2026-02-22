@@ -12,66 +12,39 @@ export async function onRequest(context) {
   const json = (obj, status = 200) =>
     new Response(JSON.stringify(obj), { status, headers });
 
-  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers });
-  if (request.method !== "GET") return json({ ok: false, error: "Méthode invalide" }, 405);
+  if (request.method === "OPTIONS")
+    return new Response(null, { status: 204, headers });
+
+  if (request.method !== "GET")
+    return json({ ok: false, error: "Méthode invalide" }, 405);
 
   try {
-    if (!env?.DB) return json({ ok: false, error: "DB non liée" }, 500);
+    if (!env?.DB)
+      return json({ ok: false, error: "DB non liée" }, 500);
 
     const u = new URL(request.url);
 
-    // metric = views | mega | likes
-    const metric = (u.searchParams.get("metric") || "views").trim().toLowerCase();
-    const METRICS = new Set(["views", "mega", "likes"]);
-    if (!METRICS.has(metric)) return json({ ok: false, error: "metric invalide" }, 400);
+    const metric = (u.searchParams.get("metric") || "views").toLowerCase();
+    const top = Math.max(1, Math.min(50, Number(u.searchParams.get("top") || 10)));
+    const weeksCount = Math.max(1, Math.min(8, Number(u.searchParams.get("weeks") || 4)));
 
-    // top N
-    let top = Number(u.searchParams.get("top") || 10);
-    if (!Number.isFinite(top)) top = 10;
-    top = Math.max(1, Math.min(50, Math.floor(top)));
+    const kindMap = {
+      views: "view",
+      mega: "mega",
+      likes: "like"
+    };
 
-    // weeks
-    let weeksCount = Number(u.searchParams.get("weeks") || 4);
-    if (!Number.isFinite(weeksCount)) weeksCount = 4;
-    weeksCount = Math.max(1, Math.min(8, Math.floor(weeksCount)));
+    const kind = kindMap[metric];
+    if (!kind)
+      return json({ ok: false, error: "metric invalide" }, 400);
 
-    // monday|sunday
-    const weekStart = (u.searchParams.get("weekStart") || "monday").trim().toLowerCase();
-    const startMonday = weekStart !== "sunday";
-
-    // ---- détecte les colonnes réelles de counter_daily ----
-    const info = await env.DB.prepare(`PRAGMA table_info(counter_daily)`).all();
-    const cols = new Set((info?.results || []).map(r => String(r.name || "").toLowerCase()));
-
-    // on accepte plusieurs noms possibles (au cas où)
-    const pick = (...candidates) => candidates.find(c => cols.has(c)) || null;
-
-    const colViews = pick("views", "view", "vues", "vue");
-    const colMega  = pick("mega", "megas", "dl", "downloads");
-    const colLikes = pick("likes", "like");
-
-    if (!colViews || !colMega || !colLikes) {
-      return json({
-        ok: false,
-        error: "Schéma counter_daily inattendu",
-        details: {
-          found: Array.from(cols).sort(),
-          expectedOneOf: {
-            views: ["views","view","vues","vue"],
-            mega:  ["mega","megas","dl","downloads"],
-            likes: ["likes","like"]
-          }
-        }
-      }, 500);
-    }
-
-    // ---- helpers dates (UTC) ----
     const isoDay = (d) => d.toISOString().slice(0, 10);
-    const utcMidnight = (d) => new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+    const utcMidnight = (d) =>
+      new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
 
     const startOfWeekUTC = (dateUTC00) => {
-      const dow = dateUTC00.getUTCDay(); // 0=dim ... 6=sam
-      const offset = startMonday ? ((dow + 6) % 7) : dow;
+      const dow = dateUTC00.getUTCDay();
+      const offset = (dow + 6) % 7; // lundi
       const s = new Date(dateUTC00);
       s.setUTCDate(s.getUTCDate() - offset);
       return utcMidnight(s);
@@ -79,12 +52,6 @@ export async function onRequest(context) {
 
     const todayUTC = utcMidnight(new Date());
     const thisWeekStart = startOfWeekUTC(todayUTC);
-
-    // ORDER BY expression (sur les vraies colonnes)
-    const orderExpr =
-      metric === "views" ? `SUM(${colViews})` :
-      metric === "mega"  ? `SUM(${colMega})`  :
-                           `SUM(${colLikes})`;
 
     const weeks = [];
 
@@ -100,27 +67,23 @@ export async function onRequest(context) {
       const rows = await env.DB.prepare(`
         SELECT
           id,
-          SUM(${colViews}) AS views,
-          SUM(${colMega})  AS mega,
-          SUM(${colLikes}) AS likes
+          SUM(count) as total
         FROM counter_daily
-        WHERE day BETWEEN ?1 AND ?2
+        WHERE kind = ?1
+          AND day BETWEEN ?2 AND ?3
         GROUP BY id
-        ORDER BY ${orderExpr} DESC
-        LIMIT ?3
-      `).bind(startStr, endStr, top).all();
+        ORDER BY total DESC
+        LIMIT ?4
+      `).bind(kind, startStr, endStr, top).all();
 
       weeks.push({
         weekStart: startStr,
         weekEnd: endStr,
         metric,
-        top,
         rows: (rows?.results || []).map(r => ({
           id: String(r.id),
-          views: Number(r.views || 0),
-          mega: Number(r.mega || 0),
-          likes: Number(r.likes || 0),
-        })),
+          total: Number(r.total || 0)
+        }))
       });
     }
 

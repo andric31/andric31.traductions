@@ -87,16 +87,7 @@
             <div class="kpi"><span class="kpi-l">❤️ Likes (total jeux)</span><span class="kpi-v" id="gamesLikes">—</span></div>
             <div class="kpi"><span class="kpi-l">⏱️ 24h</span><span class="kpi-v" id="gamesLikes24h">—</span></div>
             <div class="kpi"><span class="kpi-l">📅 7j</span><span class="kpi-v" id="gamesLikes7d">—</span></div>
-          
-        <details class="help">
-          <summary>ℹ️ À quoi servent ces stats ?</summary>
-          <div class="help-body">
-            <p><b>👁️ Vues site</b> = compteur de la page principale (<code>/</code>) — utile pour mesurer l’audience globale.</p>
-            <p><b>🎮 Vues page de jeu</b>, <b>📥 Téléchargements</b>, <b>❤️ Likes</b> = <u>somme de tous les jeux</u> (toutes les pages <code>/game/</code>). Les valeurs <b>24h</b> et <b>7j</b> viennent du journal d’événements côté API (pas juste le total).</p>
-            <p><b>Top / Graphiques / Tableaux</b> : clique sur une ligne ou une barre pour ouvrir la page du jeu. Le champ “Période” applique la fenêtre (<i>Total / 24h / 7j</i>) aux tris et aux classements.</p>
           </div>
-        </details>
-</div>
         </section>
 
         <section class="card">
@@ -151,7 +142,6 @@
                 <option value="views" selected>👁️ Vues</option>
                 <option value="mega">📥 Téléchargements</option>
                 <option value="likes">❤️ Likes</option>
-                <option value="score">🔥 Score trending</option>
               </select>
 
               <select id="trendEngine" class="sel" title="Moteur">
@@ -169,30 +159,6 @@
           <div class="mini-kpis">
             <div class="kpi"><span class="kpi-l">Total fenêtre</span><span class="kpi-v" id="trendTotal">—</span></div>
             <div class="kpi"><span class="kpi-l">Jeux visibles</span><span class="kpi-v" id="trendCount">—</span></div>
-
-          <div class="chip-groups">
-            <div class="chip-group">
-              <div class="chip-title">🎮 Moteurs qui montent</div>
-              <div class="chips" id="trendEngChips"></div>
-            </div>
-            <div class="chip-group">
-              <div class="chip-title">📌 Statuts</div>
-              <div class="chips" id="trendStatusChips"></div>
-            </div>
-            <div class="chip-group">
-              <div class="chip-title">🏷️ Tags (clique pour filtrer)</div>
-              <div class="chips" id="trendTagChips"></div>
-            </div>
-          </div>
-
-          <details class="help">
-            <summary>ℹ️ Comment lire “Trending” ?</summary>
-            <div class="help-body">
-              <p>Ce bloc sert à voir <b>ce qui bouge</b> sur une fenêtre courte (<b>24h</b> ou <b>7j</b>).</p>
-              <p><b>🔥 Score trending</b> = <code>vues + 3×téléchargements + 2×likes</code> (sur la fenêtre). C’est pratique pour détecter un jeu “chaud” même si ses vues seules ne sont pas énormes.</p>
-              <p>Les “chips” te proposent des filtres rapides (moteur / statut / tag) basés sur la fenêtre choisie.</p>
-            </div>
-          </details>
           </div>
         </section>
 

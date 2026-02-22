@@ -7,6 +7,70 @@
 
   <link rel="icon" href="/favicon.png" />
   <link rel="stylesheet" href="/stats/stats.css" />
+<style>
+/* ===== Help Tooltip ===== */
+.help-tip{
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-left: 6px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: help;
+  user-select: none;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.help-tip:focus{
+  outline: 2px solid rgba(255,255,255,0.35);
+  outline-offset: 2px;
+}
+
+.help-bubble{
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 10px);
+  transform: translateX(-50%);
+  width: min(340px, 80vw);
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(20,20,25,0.98);
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  color: #fff;
+  font-size: 13px;
+  line-height: 1.35;
+  z-index: 9999;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .12s ease, transform .12s ease;
+}
+
+.help-bubble::before{
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 10px;
+  height: 10px;
+  background: rgba(20,20,25,0.98);
+  border-left: 1px solid rgba(255,255,255,0.15);
+  border-top: 1px solid rgba(255,255,255,0.15);
+}
+
+.help-tip:hover .help-bubble,
+.help-tip:focus .help-bubble{
+  opacity: 1;
+  pointer-events: auto;
+}
+</style>
 </head>
 
 <body class="stats-page">
@@ -131,7 +195,16 @@
       <section class="tab-section" id="tab_trending" style="display:none;">
         <section class="card">
           <div class="card-h">
-            <div class="card-title">🔥 Trending</div>
+            <div class="card-title">
+🔥 Trending
+<span class="help-tip" tabindex="0">?
+  <span class="help-bubble">
+    <b>Trending</b> = ce qui monte vite en ce moment 📈<br>
+    Classement basé sur la progression récente (vues / likes / clics Mega).<br><br>
+    👉 Indicateur de momentum, pas du total historique.
+  </span>
+</span>
+</div>
             <div class="stats-controls">
               <select id="trendWindow" class="sel" title="Fenêtre">
                 <option value="24h" selected>24h</option>
@@ -197,7 +270,16 @@
       <section class="tab-section" id="tab_timeline" style="display:none;">
         <section class="card">
           <div class="card-h">
-            <div class="card-title">🕒 Timeline (rapide)</div>
+            <div class="card-title">
+🕒 Timeline (rapide)
+<span class="help-tip" tabindex="0">?
+  <span class="help-bubble">
+    <b>Timeline</b> = quand l’activité arrive 🕒<br>
+    Vue chronologique des événements récents (vues / likes / téléchargements).<br><br>
+    👉 Permet de repérer les pics après une mise à jour ou un post Discord.
+  </span>
+</span>
+</div>
             <div class="card-note">Pas une vraie courbe/jour (pas d'historique D1), mais un résumé “activité récente”.</div>
           </div>
 

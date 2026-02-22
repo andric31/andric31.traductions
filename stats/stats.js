@@ -227,22 +227,28 @@ function computeTotalsAllGames() {
   let views24h = 0, mega24h = 0, likes24h = 0;
   let views7d = 0, mega7d = 0, likes7d = 0;
 
-  for (const [k, s] of state.statsByKey.entries()) {
-    if (!k || k === MAIN_SITE_ID) continue;
-    if (!String(k).startsWith("uid:")) continue;
+  for (const [k, s0] of state.statsByKey.entries()) {
+    const kStr = String(k || "");
+    if (!kStr || kStr === MAIN_SITE_ID) continue;
+    if (!kStr.startsWith("uid:")) continue;
 
-    views += (s.views | 0);
-    mega  += (s.mega | 0);
-    likes += (s.likes | 0);
+    const s = s0 || {};
+    views += Number(s.views || 0);
+    mega  += Number(s.mega || 0);
+    likes += Number(s.likes || 0);
 
-    views24h += (s.views24h | 0);
-    mega24h  += (s.mega24h | 0);
-    likes24h += (s.likes24h | 0);
+    views24h += Number(s.views24h || 0);
+    mega24h  += Number(s.mega24h || 0);
+    likes24h += Number(s.likes24h || 0);
 
-    views7d += (s.views7d | 0);
-    mega7d  += (s.mega7d | 0);
-    likes7d += (s.likes7d | 0);
+    views7d += Number(s.views7d || 0);
+    mega7d  += Number(s.mega7d || 0);
+    likes7d += Number(s.likes7d || 0);
   }
+
+  // likes24h / likes7d peuvent être négatifs (unlike > like) → on clamp à 0 pour l'affichage KPI
+  likes24h = Math.max(0, likes24h);
+  likes7d  = Math.max(0, likes7d);
 
   return { views, mega, likes, views24h, mega24h, likes24h, views7d, mega7d, likes7d };
 }
@@ -738,7 +744,7 @@ async function init() {
   if (els.statusChart) els.statusChart.textContent = "Chargement stats…";
   if (els.statusTable) els.statusTable.textContent = "Chargement stats…";
 
-  const keys = state.games.map(counterKeyOf).filter(Boolean);
+  const keys = [...new Set(state.games.map(counterKeyOf).filter(Boolean))];
 
   // ✅ inclut le compteur principal du site dans la requête
   const keysPlus = keys.includes(MAIN_SITE_ID) ? keys : keys.concat([MAIN_SITE_ID]);

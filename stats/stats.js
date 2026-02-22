@@ -1,196 +1,8 @@
 "use strict";
 
-/*
-  Stats — ultra clean refactor (v2)
-  ---------------------------------
-  Objectifs:
-  - mêmes fonctionnalités/IDs HTML
-  - API centralisée + cache léger + timeout fetch
-  - helpers homogènes (normalize, escape, clamp, etc.)
-*/
+const DEFAULT_URL = "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json";
 
-const CFG = Object.freeze({
-  LIST_URL_KEY: "f95listUrl",
-  DEFAULT_LIST_URL: "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json",
-  API: Object.freeze({
-    COUNTERS: "/api/counters",
-    COUNTERS_WEEKLY: "/api/counters_weekly",
-    RATINGS_4S: "/api/ratings4s",
-  }),
-  // D1 limite la taille des IN() / bind : on reste safe
-  CHUNK_IDS: 90,
-  FETCH_TIMEOUT_MS: 15000,
-  CACHE_TTL_MS: 15000,
-});
-
-const memCache = new Map(); // key -> { t:number, v:any }
-
-/** Cache simple (ttl en ms). */
-function cacheGet(key, ttlMs = CFG.CACHE_TTL_MS) {
-  const it = memCache.get(key);
-  if (!it) return null;
-  if (Date.now() - it.t > ttlMs) { memCache.delete(key); return null; }
-  return it.v;
-}
-function cacheSet(key, value) { memCache.set(key, { t: Date.now(), v: value }); }
-
-/** fetch JSON avec timeout + message d'erreur propre. */
-async function fetchJson(url, opts = {}) {
-  const {
-    method = "GET",
-    headers,
-    body,
-    cacheKey = null,
-    cacheTtlMs = CFG.CACHE_TTL_MS,
-  } = opts;
-
-  if (cacheKey) {
-    const hit = cacheGet(cacheKey, cacheTtlMs);
-    if (hit !== null) return hit;
-  }
-
-  const ac = new AbortController();
-  const to = setTimeout(() => ac.abort(), CFG.FETCH_TIMEOUT_MS);
-
-  try {
-    const r = await fetch(url, {
-      method,
-      headers: headers || (method === "POST" ? { "content-type": "application/json" } : undefined),
-      body,
-      cache: "no-store",
-      signal: ac.signal,
-    });
-
-    if (!r.ok) {
-      let details = "";
-      try { details = JSON.stringify(await r.json()); }
-      catch { try { details = await r.text(); } catch {} }
-      throw new Error(`HTTP ${r.status}${details ? " — " + details : ""}`);
-    }
-
-    const data = await r.json();
-    if (cacheKey) cacheSet(cacheKey, data);
-    return data;
-
-  } finally {
-    clearTimeout(to);
-  }
-}
-
-/** Normalisation pour filtre/recherche (sans diacritiques). */
-function norm(s) {
-  return String(s || "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "");
-}
-
-/** Sécurité ID (table D1) */
-function normId(x) {
-  return String(x || "").trim().slice(0, 80);
-}
-
-function clamp(n, min, max) {
-  n = Number(n);
-  if (!Number.isFinite(n)) n = min;
-  return Math.max(min, Math.min(max, n));
-}
-
-function escapeHtml(s) {
-  return String(s ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
-
-function fmtInt(n) {
-  const v = Number(n || 0);
-  return v.toLocaleString("fr-FR");
-}
-
-function qs(sel, root = document) { return root.querySelector(sel); }
-function qsa(sel, root = document) { return Array.from(root.querySelectorAll(sel)); }
-
-// ---- DOM ----
-const dom = {
-  tabs: qsa("[data-tab]"),
-  tabPanels: qsa("[data-panel]"),
-
-  // header
-  listUrlLabel: qs("#listUrlLabel"),
-  btnReload: qs("#btnReload"),
-  btnCsv: qs("#btnCsv"),
-
-  // filters (common)
-  search: qs("#search"),
-  scope: qs("#scope"),
-  metric: qs("#metric"),
-  top: qs("#top"),
-
-  // overview totals
-  ov_main_total: qs("#ov_main_total"),
-  ov_main_24h: qs("#ov_main_24h"),
-  ov_main_7d: qs("#ov_main_7d"),
-  ov_games_total: qs("#ov_games_total"),
-  ov_games_24h: qs("#ov_games_24h"),
-  ov_games_7d: qs("#ov_games_7d"),
-  ov_mega_total: qs("#ov_mega_total"),
-  ov_mega_24h: qs("#ov_mega_24h"),
-  ov_mega_7d: qs("#ov_mega_7d"),
-  ov_likes_total: qs("#ov_likes_total"),
-  ov_likes_24h: qs("#ov_likes_24h"),
-  ov_likes_7d: qs("#ov_likes_7d"),
-
-  chartTitle: qs("#chartTitle"),
-  chartBars: qs("#chartBars"),
-
-  // trending
-  tr_window: qs("#tr_window"),
-  tr_metric: qs("#tr_metric"),
-  tr_engine: qs("#tr_engine"),
-  tr_status: qs("#tr_status"),
-  tr_tag: qs("#tr_tag"),
-  tr_total: qs("#tr_total"),
-  tr_visible: qs("#tr_visible"),
-  tr_chartTitle: qs("#tr_chartTitle"),
-  tr_chartBars: qs("#tr_chartBars"),
-  tr_tableBody: qs("#tr_tableBody"),
-
-  // timeline
-  tl_views_24h: qs("#tl_views_24h"),
-  tl_views_7d: qs("#tl_views_7d"),
-  tl_mega_24h: qs("#tl_mega_24h"),
-  tl_mega_7d: qs("#tl_mega_7d"),
-  tl_likes_24h: qs("#tl_likes_24h"),
-  tl_likes_7d: qs("#tl_likes_7d"),
-  tl_tableBody: qs("#tl_tableBody"),
-
-  // hot (4 semaines)
-  hot_metric: qs("#hot_metric"),
-  hot_top: qs("#hot_top"),
-  hot_weeks: qs("#hot_weeks"),
-  hot_status: qs("#hot_status"),
-  hot_tableBody: qs("#hot_tableBody"),
-
-  // progression
-  pr_metric: qs("#pr_metric"),
-  pr_top: qs("#pr_top"),
-  pr_baseMin: qs("#pr_baseMin"),
-  pr_status: qs("#pr_status"),
-  pr_tableBody: qs("#pr_tableBody"),
-
-  // ratings
-  rt_period: qs("#rt_period"),
-  rt_scope: qs("#rt_scope"),
-  rt_top: qs("#rt_top"),
-  rt_tableBody: qs("#rt_tableBody"),
-
-  // help tooltips
-  helpIcons: qsa(".help"),
-};
-
+// -------- URL helpers (comme viewer) --------
 function getListUrl() {
   try {
     const p = new URLSearchParams(location.search);
@@ -198,12 +10,234 @@ function getListUrl() {
     if (src) return src;
   } catch {}
   try {
-    return (localStorage.getItem(CFG.LIST_URL_KEY) || "").trim() || CFG.DEFAULT_LIST_URL;
+    return (localStorage.getItem("f95listUrl") || "").trim() || DEFAULT_URL;
   } catch {
-    return CFG.DEFAULT_LIST_URL;
+    return DEFAULT_URL;
   }
 }
 
+function extractGames(raw) {
+  if (Array.isArray(raw)) return raw;
+  if (!raw || typeof raw !== "object") return [];
+  if (Array.isArray(raw.games)) return raw.games;
+  if (Array.isArray(raw.items)) return raw.items;
+  return [];
+}
+
+function normalize(s) {
+  return String(s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "");
+}
+
+async function fetchJson(url) {
+  const r = await fetch(url, { cache: "no-store" });
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  return await r.json();
+
+// -------- small helpers --------
+const fmtInt = (n)=> Number(n||0).toLocaleString("fr-FR");
+
+function getRankBadge(i){
+  if(i===0) return '<span class="rank-badge rank-1">🏆</span>';
+  if(i===1) return '<span class="rank-badge rank-2">🥈</span>';
+  if(i===2) return '<span class="rank-badge rank-3">🥉</span>';
+  return "";
+}
+
+function formatDeltaPct(pct, isNew=false){
+  if(isNew) return '<span class="delta-new">🟢 Nouveau</span>';
+  const p = Number(pct||0);
+  if(p>0) return `<span class="delta-up">🔺 +${p}%</span>`;
+  if(p<0) return `<span class="delta-down">🔻 ${p}%</span>`;
+  return `<span>${p}%</span>`;
+}
+
+async function copyText(txt){
+  try{
+    await navigator.clipboard.writeText(txt);
+    return true;
+  }catch{
+    // fallback
+    const ta=document.createElement("textarea");
+    ta.value=txt;
+    ta.style.position="fixed";
+    ta.style.left="-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand("copy"); }catch{}
+    document.body.removeChild(ta);
+    return true;
+  }
+}
+
+function metricLabel(metric){
+  const m=String(metric||"views");
+  if(m==="mega") return "téléchargements";
+  if(m==="likes") return "likes";
+  return "vues";
+}
+
+function discordTopText(title, rows, metric){
+  const lab = metricLabel(metric);
+  let out = `🔥 **${title}**\n\n`;
+  const top3 = rows.slice(0,3);
+  const medals = ["🥇","🥈","🥉"];
+  top3.forEach((r,i)=>{
+    out += `${medals[i]} ${r.title || r.id} — ${fmtInt(r.total)} ${lab}\n`;
+  });
+  return out.trim();
+}
+
+}
+
+async function fetchGameStatsBulk(ids) {
+  try {
+    const r = await fetch("/api/counters", {
+      method: "POST",
+      cache: "no-store",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ ids }),
+    });
+    if (!r.ok) return {};
+    const j = await r.json();
+    if (!j?.ok || !j.stats) return {};
+    return j.stats;
+  } catch {
+    return {};
+  }
+}
+
+// ✅ ratings bulk (doit exister côté backend)
+async function fetchRatingsBulk(ids) {
+  try {
+    const r = await fetch("/api/ratings4s", {
+      method: "POST",
+      cache: "no-store",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ ids }),
+    });
+    if (!r.ok) return {};
+    const j = await r.json();
+    if (!j?.ok || !j.stats) return {};
+    return j.stats;
+  } catch {
+    return {};
+  }
+}
+
+// ===== Weekly API (counter_daily) — Hot / Progression =====
+async function fetchWeekly(metric, weeks = 4, top = 20) {
+  const m = String(metric || "views").toLowerCase();
+  const w = Math.max(1, Math.min(8, Number(weeks || 4)));
+  const t = Math.max(1, Math.min(50, Number(top || 20)));
+  const key = `${m}|${w}|${t}`;
+  if (state.weeklyCache.has(key)) return state.weeklyCache.get(key);
+
+  const url = `/api/counters_weekly?metric=${encodeURIComponent(m)}&weeks=${w}&top=${t}`;
+  const data = await fetchJson(url);
+  if (!data?.ok) throw new Error(data?.error || "Weekly API: erreur");
+  const out = { weeks: Array.isArray(data.weeks) ? data.weeks : [] };
+  state.weeklyCache.set(key, out);
+  return out;
+}
+
+// -------- UI state --------
+const els = {
+  // Tabs
+  tabBtns: [...document.querySelectorAll(".tab-btn")],
+  tabOverview: document.getElementById("tab_overview"),
+  tabTrending: document.getElementById("tab_trending"),
+  tabTimeline: document.getElementById("tab_timeline"),
+  tabHot: document.getElementById("tab_hot"),
+  tabProgression: document.getElementById("tab_progression"),
+  tabRatings: document.getElementById("tab_ratings"),
+  btnExportCsv: document.getElementById("btnExportCsv"),
+
+  // Overview controls
+  q: document.getElementById("q"),
+  range: document.getElementById("range"),
+  metric: document.getElementById("metric"),
+  top: document.getElementById("top"),
+
+  statusChart: document.getElementById("statusChart"),
+  statusTable: document.getElementById("statusTable"),
+  btnChartExpand: document.getElementById("btnChartExpand"),
+
+  chart: document.getElementById("chart"),
+  tbody: document.getElementById("tbody"),
+  tbl: document.getElementById("tbl"),
+  tableWrap: document.querySelector("#tab_overview .table-wrap"),
+  chartWrap: document.querySelector("#tab_overview .chart-wrap"),
+
+  // KPIs overview
+  siteViews: document.getElementById("siteViews"),
+  siteViews24h: document.getElementById("siteViews24h"),
+  siteViews7d: document.getElementById("siteViews7d"),
+
+  gamesViews: document.getElementById("gamesViews"),
+  gamesViews24h: document.getElementById("gamesViews24h"),
+  gamesViews7d: document.getElementById("gamesViews7d"),
+
+  gamesMega: document.getElementById("gamesMega"),
+  gamesMega24h: document.getElementById("gamesMega24h"),
+  gamesMega7d: document.getElementById("gamesMega7d"),
+
+  gamesLikes: document.getElementById("gamesLikes"),
+  gamesLikes24h: document.getElementById("gamesLikes24h"),
+  gamesLikes7d: document.getElementById("gamesLikes7d"),
+
+  // Trending controls
+  trendWindow: document.getElementById("trendWindow"),
+  trendMetric: document.getElementById("trendMetric"),
+  trendEngine: document.getElementById("trendEngine"),
+  trendStatus: document.getElementById("trendStatus"),
+  trendTag: document.getElementById("trendTag"),
+  trendTotal: document.getElementById("trendTotal"),
+  trendCount: document.getElementById("trendCount"),
+  trendChart: document.getElementById("trendChart"),
+  trendStatusLine: document.getElementById("trendStatusLine"),
+  trendTbody: document.getElementById("trendTbody"),
+  trendTableStatus: document.getElementById("trendTableStatus"),
+
+  // Hot (weekly)
+  hotMetric: document.getElementById("hotMetric"),
+  hotTop: document.getElementById("hotTop"),
+  hotWeeks: document.getElementById("hotWeeks"),
+  hotMode: document.getElementById("hotMode"),
+  hotExportDiscord: document.getElementById("hotExportDiscord"),
+  hotStatus: document.getElementById("hotStatus"),
+  hotTbody: document.getElementById("hotTbody"),
+
+  // Progression (weekly)
+  progMetric: document.getElementById("progMetric"),
+  progTop: document.getElementById("progTop"),
+  progMinBase: document.getElementById("progMinBase"),
+  progExportDiscord: document.getElementById("progExportDiscord"),
+  progStatus: document.getElementById("progStatus"),
+  progTbody: document.getElementById("progTbody"),
+
+  // Timeline
+  tlViews24h: document.getElementById("tlViews24h"),
+  tlMega24h: document.getElementById("tlMega24h"),
+  tlLikes24h: document.getElementById("tlLikes24h"),
+  tlViews7d: document.getElementById("tlViews7d"),
+  tlMega7d: document.getElementById("tlMega7d"),
+  tlLikes7d: document.getElementById("tlLikes7d"),
+  tlTbody: document.getElementById("tlTbody"),
+  tlMoversStatus: document.getElementById("tlMoversStatus"),
+
+  // Ratings
+  bayesM: document.getElementById("bayesM"),
+  ratingsTop: document.getElementById("ratingsTop"),
+  bayesC: document.getElementById("bayesC"),
+  ratedCount: document.getElementById("ratedCount"),
+  ratingsChart: document.getElementById("ratingsChart"),
+  ratingsStatusLine: document.getElementById("ratingsStatusLine"),
+  ratingsTbody: document.getElementById("ratingsTbody"),
+  ratingsTableStatus: document.getElementById("ratingsTableStatus"),
+};
 
 const state = {
   srcUrl: getListUrl(),
@@ -987,6 +1021,7 @@ async function renderHot() {
   const metric = String(els.hotMetric?.value || "views");
   const top = Number(els.hotTop?.value || 20);
   const weeks = Number(els.hotWeeks?.value || 4);
+  const mode = String(els.hotMode?.value || "weekly"); // weekly | global
 
   setText(els.hotStatus, "Chargement...");
   els.hotTbody.innerHTML = "";
@@ -995,7 +1030,82 @@ async function renderHot() {
     const data = await fetchWeekly(metric, weeks, top);
     const weeksArr = data.weeks || [];
 
-    // Flatten (most recent week first)
+    if (!weeksArr.length) {
+      setText(els.hotStatus, "Aucune donnée (daily rollup). Fais quelques hits et réessaie.");
+      state.lastExport = { tab:"hot", rows:[], columns:[], filename:`hot_${weeks}w_${metric}.csv` };
+      return;
+    }
+
+    const fmt = fmtInt;
+
+    // ---- Mode GLOBAL : cumul sur N semaines ----
+    if (mode === "global") {
+      const map = new Map(); // id -> total
+      for (const w of weeksArr) {
+        const rows = Array.isArray(w.rows) ? w.rows : [];
+        for (const r of rows) {
+          const gid = String(r.id);
+          map.set(gid, (map.get(gid) || 0) + Number(r.total || 0));
+        }
+      }
+
+      const merged = [...map.entries()]
+        .map(([id, total]) => ({ id, total }))
+        .sort((a, b) => b.total - a.total)
+        .slice(0, top);
+
+      if (!merged.length) {
+        setText(els.hotStatus, "Aucune donnée (cumul).");
+        state.lastExport = { tab:"hot", rows:[], columns:[], filename:`hot_${weeks}w_${metric}.csv` };
+        return;
+      }
+
+      const frag = document.createDocumentFragment();
+      const outRows = [];
+
+      merged.forEach((x, i) => {
+        const g = getGameByCounterId(x.id);
+        const tr = document.createElement("tr");
+        if (g) tr.addEventListener("click", () => (location.href = getGameUrlForEntry(g)));
+
+        const title = g ? (g.cleanTitle || g.title || x.id) : x.id;
+
+        const tdImg = document.createElement("td"); tdImg.className = "c-cover";
+        tdImg.appendChild(g ? makeCoverImg(g) : makeFallbackCover());
+
+        const tdT = document.createElement("td");
+        tdT.innerHTML = `${getRankBadge(i)}${escapeHtml(title)}`;
+
+        const tdW = document.createElement("td"); tdW.className = "num";
+        tdW.textContent = `Cumul ${weeks} sem.`;
+
+        const tdTot = document.createElement("td"); tdTot.className = "num";
+        tdTot.textContent = fmt(x.total);
+
+        tr.appendChild(tdImg); tr.appendChild(tdT); tr.appendChild(tdW); tr.appendChild(tdTot);
+        frag.appendChild(tr);
+
+        outRows.push({ id: x.id, title, week: `Cumul ${weeks} sem.`, total: Number(x.total || 0) });
+      });
+
+      els.hotTbody.appendChild(frag);
+      setText(els.hotStatus, `OK · Global · ${merged.length} jeux · ${metric}`);
+
+      // CSV cache
+      state.lastExport = {
+        tab: "hot",
+        filename: `hot_global_${weeks}w_${metric}.csv`,
+        columns: ["id", "title", "week", "total"],
+        rows: outRows,
+      };
+
+      // Discord cache (top 3)
+      state.hotLastForDiscord = { metric, title: `TOP ${weeks} semaines (${metricLabel(metric)})`, rows: outRows };
+
+      return;
+    }
+
+    // ---- Mode WEEKLY : liste par semaine (comme avant) ----
     const flat = [];
     for (let wi = 0; wi < weeksArr.length; wi++) {
       const w = weeksArr[wi];
@@ -1007,80 +1117,95 @@ async function renderHot() {
     }
 
     if (!flat.length) {
-      setText(els.hotStatus, "Aucune donnée (daily rollup). Fais quelques hits et réessaie.");
+      setText(els.hotStatus, "Aucune donnée (daily rollup).");
+      state.lastExport = { tab:"hot", rows:[], columns:[], filename:`hot_${weeks}w_${metric}.csv` };
       return;
     }
 
-    // Keep only top*N per week already, but we can sort for stable display
     flat.sort((a,b)=> (b.weekStart.localeCompare(a.weekStart)) || (b.total - a.total));
 
     const frag = document.createDocumentFragment();
-    const fmt = (n)=>Number(n||0).toLocaleString("fr-FR");
+    const outRows = [];
+    let currentWeek = "";
+    let rankInWeek = 0;
 
     for (const x of flat) {
+      if (x.week !== currentWeek) { currentWeek = x.week; rankInWeek = 0; }
+
       const g = getGameByCounterId(x.id);
       const tr = document.createElement("tr");
-
       if (g) tr.addEventListener("click", () => (location.href = getGameUrlForEntry(g)));
+
+      const title = g ? (g.cleanTitle || g.title || x.id) : x.id;
 
       const tdImg = document.createElement("td"); tdImg.className = "c-cover";
       tdImg.appendChild(g ? makeCoverImg(g) : makeFallbackCover());
 
       const tdT = document.createElement("td");
-      tdT.textContent = g ? (g.cleanTitle || g.title || x.id) : x.id;
+      tdT.innerHTML = `${getRankBadge(rankInWeek)}${escapeHtml(title)}`;
 
       const tdW = document.createElement("td"); tdW.className="num"; tdW.textContent = x.week;
       const tdTot = document.createElement("td"); tdTot.className="num"; tdTot.textContent = fmt(x.total);
 
       tr.appendChild(tdImg); tr.appendChild(tdT); tr.appendChild(tdW); tr.appendChild(tdTot);
       frag.appendChild(tr);
-    }
-    els.hotTbody.appendChild(frag);
-    setText(els.hotStatus, `OK · ${flat.length} lignes · ${metric}`);
 
-    // CSV cache
+      outRows.push({ id: x.id, title, week: x.week, total: Number(x.total || 0) });
+      rankInWeek++;
+    }
+
+    els.hotTbody.appendChild(frag);
+    setText(els.hotStatus, `OK · Weekly · ${flat.length} lignes · ${metric}`);
+
     state.lastExport = {
       tab: "hot",
       filename: `hot_${weeks}w_${metric}.csv`,
       columns: ["id", "title", "week", "total"],
-      rows: flat.map(x => {
-        const g = getGameByCounterId(x.id);
-        return {
-          id: x.id,
-          title: g ? String(g.cleanTitle || g.title || "") : "",
-          week: x.week,
-          total: Number(x.total || 0),
-        };
-      }),
+      rows: outRows,
     };
+
+    // pour Discord : on prend la semaine la plus récente
+    const firstWeek = weeksArr[0];
+    if (firstWeek && Array.isArray(firstWeek.rows)) {
+      const topRows = firstWeek.rows
+        .map(r => {
+          const gid = String(r.id);
+          const g = getGameByCounterId(gid);
+          return { id: gid, title: g ? (g.cleanTitle || g.title || gid) : gid, total: Number(r.total||0) };
+        })
+        .sort((a,b)=>b.total-a.total);
+      state.hotLastForDiscord = { metric, title: `TOP SEMAINE (${metricLabel(metric)})`, rows: topRows };
+    }
+
   } catch (e) {
     setText(els.hotStatus, `Erreur: ${String(e?.message || e)}`);
   }
 }
 
-// ============================================================================
-// ✅ Progression (weekly, compare semaine N vs N-1)
+ // ============================================================================
+ // ✅ Progression (weekly, compare semaine N vs N-1)
 // ============================================================================
 async function renderProgression() {
   if (!els.tabProgression) return;
   if (!els.progTbody) return;
 
   const metric = String(els.progMetric?.value || "views");
-  const top = Number(els.progTop?.value || 20);
-  const minBase = Number(els.progMinBase?.value || 1);
+  const top = Math.max(1, Math.min(50, Number(els.progTop?.value || 20)));
+  const minBase = Math.max(0, Number(els.progMinBase?.value || 1));
 
   setText(els.progStatus, "Chargement...");
   els.progTbody.innerHTML = "";
 
   try {
-    const data = await fetchWeekly(metric, 2, 200); // need enough rows to compute progression properly
+    const data = await fetchWeekly(metric, 2, 250); // assez large pour comparer
     const weeksArr = data.weeks || [];
 
-    const w0 = weeksArr[0] || null; // current week
-    const w1 = weeksArr[1] || null; // previous week
+    const w0 = weeksArr[0] || null; // semaine courante
+    const w1 = weeksArr[1] || null; // semaine précédente
 
     if (!w0 || !w1) {
-      setText(els.progStatus, "Pas assez d'historique (il faut au moins 2 semaines). ");
+      setText(els.progStatus, "Pas assez d'historique (il faut au moins 2 semaines).");
+      state.lastExport = { tab:"progression", rows:[], columns:[], filename:`progression_${metric}.csv` };
       return;
     }
 
@@ -1089,79 +1214,89 @@ async function renderProgression() {
     for (const r of (w0.rows || [])) map0.set(String(r.id), Number(r.total || 0));
     for (const r of (w1.rows || [])) map1.set(String(r.id), Number(r.total || 0));
 
-    // Union ids
     const ids = new Set([...map0.keys(), ...map1.keys()]);
     let rows = [];
+
     for (const id of ids) {
-      const a = map0.get(id) || 0;
-      const b = map1.get(id) || 0;
-      if (b < minBase) continue;
+      const a = map0.get(id) || 0; // current
+      const b = map1.get(id) || 0; // prev
+
+      const isNew = (b < minBase) && (a >= minBase);
+      if (!isNew && b < minBase) continue;
+
       const delta = a - b;
-      const pct = b > 0 ? (delta / b) * 100 : 0;
-      rows.push({ id, a, b, delta, pct });
+      const pct = (b > 0) ? (delta / b) * 100 : (isNew ? 999999 : 0);
+
+      rows.push({ id, a, b, delta, pct, isNew });
     }
 
-    rows.sort((x,y)=> (y.pct - x.pct) || (y.delta - x.delta));
-    rows = rows.slice(0, Math.max(1, Math.min(50, top)));
+    rows.sort((x,y)=> (y.pct - x.pct) || (y.delta - x.delta) || (y.a - x.a));
+    rows = rows.slice(0, top);
 
     if (!rows.length) {
       setText(els.progStatus, "Aucune donnée pour cette base min / métrique.");
+      state.lastExport = { tab:"progression", rows:[], columns:[], filename:`progression_${metric}.csv` };
       return;
     }
 
     const frag = document.createDocumentFragment();
-    const fmt = (n)=>Number(n||0).toLocaleString("fr-FR");
-    const fmtPct = (n)=>{
-      const v = Number(n||0);
-      const sign = v > 0 ? "+" : "";
-      return sign + v.toFixed(0) + "%";
-    };
+    const outRows = [];
 
     for (const x of rows) {
       const g = getGameByCounterId(x.id);
       const tr = document.createElement("tr");
       if (g) tr.addEventListener("click", () => (location.href = getGameUrlForEntry(g)));
 
+      const title = g ? (g.cleanTitle || g.title || x.id) : x.id;
+
       const tdImg = document.createElement("td"); tdImg.className = "c-cover";
       tdImg.appendChild(g ? makeCoverImg(g) : makeFallbackCover());
 
       const tdT = document.createElement("td");
-      tdT.textContent = g ? (g.cleanTitle || g.title || x.id) : x.id;
+      tdT.innerHTML = `${getRankBadge(outRows.length)}${escapeHtml(title)}`;
 
-      const tdPct = document.createElement("td"); tdPct.className="num"; tdPct.textContent = fmtPct(x.pct);
-      const tdD = document.createElement("td"); tdD.className="num"; tdD.textContent = (x.delta>=0?"+":"") + fmt(x.delta);
-      const tdA = document.createElement("td"); tdA.className="num"; tdA.textContent = fmt(x.a);
-      const tdB = document.createElement("td"); tdB.className="num"; tdB.textContent = fmt(x.b);
+      const tdPct = document.createElement("td"); tdPct.className="num";
+      tdPct.innerHTML = formatDeltaPct(x.isNew ? 0 : Math.round(x.pct), x.isNew);
+
+      const tdD = document.createElement("td"); tdD.className="num";
+      tdD.textContent = (x.delta>=0?"+":"") + fmtInt(x.delta);
+
+      const tdA = document.createElement("td"); tdA.className="num"; tdA.textContent = fmtInt(x.a);
+      const tdB = document.createElement("td"); tdB.className="num"; tdB.textContent = fmtInt(x.b);
 
       tr.appendChild(tdImg); tr.appendChild(tdT); tr.appendChild(tdPct); tr.appendChild(tdD); tr.appendChild(tdA); tr.appendChild(tdB);
       frag.appendChild(tr);
+
+      outRows.push({
+        id: x.id,
+        title,
+        pct: x.isNew ? null : Math.round(x.pct),
+        delta: Number(x.delta||0),
+        week: Number(x.a||0),
+        prevWeek: Number(x.b||0),
+        isNew: !!x.isNew
+      });
     }
+
     els.progTbody.appendChild(frag);
     setText(els.progStatus, `OK · ${w0.weekStart}→${w0.weekEnd} vs ${w1.weekStart}→${w1.weekEnd} · ${metric}`);
 
     state.lastExport = {
       tab: "progression",
       filename: `progression_${metric}.csv`,
-      columns: ["id", "title", "pct", "delta", "week", "prevWeek"],
-      rows: rows.map(x => {
-        const g = getGameByCounterId(x.id);
-        return {
-          id: x.id,
-          title: g ? String(g.cleanTitle || g.title || "") : "",
-          pct: Number(x.pct || 0),
-          delta: Number(x.delta || 0),
-          week: Number(x.a || 0),
-          prevWeek: Number(x.b || 0),
-        };
-      }),
+      columns: ["id", "title", "pct", "delta", "week", "prevWeek", "isNew"],
+      rows: outRows,
     };
+
+    state.progLastForDiscord = { metric, title: `PROGRESSION SEMAINE (${metricLabel(metric)})`, rows: outRows };
+
   } catch (e) {
     setText(els.progStatus, `Erreur: ${String(e?.message || e)}`);
   }
 }
 
-// ============================================================================
-// ✅ Ratings tab (Bayesian)
+ // ============================================================================
+ // ✅ Ratings tab (Bayesian)
 // ============================================================================
 function computeGlobalRatingAverageC() {
   // moyenne pondérée par votes
@@ -1387,6 +1522,15 @@ function wireEvents() {
   if (els.hotTop) els.hotTop.addEventListener("change", hotRerender);
   if (els.hotWeeks) els.hotWeeks.addEventListener("change", hotRerender);
 
+  if (els.hotMode) els.hotMode.addEventListener("change", hotRerender);
+  if (els.hotExportDiscord) els.hotExportDiscord.addEventListener("click", async () => {
+    const pack = state.hotLastForDiscord;
+    if (!pack || !pack.rows || !pack.rows.length) return alert("Rien à exporter (Hot).");
+    const txt = discordTopText(pack.title, pack.rows, pack.metric);
+    await copyText(txt);
+    alert("Copié pour Discord ✅");
+  });
+
   // progression controls
   const progRerender = () => {
     if (state.currentTab !== "progression") return;
@@ -1395,6 +1539,21 @@ function wireEvents() {
   if (els.progMetric) els.progMetric.addEventListener("change", progRerender);
   if (els.progTop) els.progTop.addEventListener("change", progRerender);
   if (els.progMinBase) els.progMinBase.addEventListener("change", progRerender);
+  if (els.progExportDiscord) els.progExportDiscord.addEventListener("click", async () => {
+    const pack = state.progLastForDiscord;
+    if (!pack || !pack.rows || !pack.rows.length) return alert("Rien à exporter (Progression).");
+    // pour progression, on exporte le top 10 lignes (même si plus)
+    const lab = metricLabel(pack.metric);
+    let out = `📈 **${pack.title}**\n\n`;
+    const lines = pack.rows.slice(0, 10);
+    lines.forEach((r,i)=>{
+      const badge = (i===0?"🏆":i===1?"🥈":i===2?"🥉":"•");
+      const deltaTxt = r.isNew ? "🟢 Nouveau" : ((r.pct||0)>=0?`🔺 +${r.pct}%`:`🔻 ${r.pct}%`);
+      out += `${badge} ${r.title||r.id} — ${deltaTxt} (${fmtInt(r.week)} ${lab})\n`;
+    });
+    await copyText(out.trim());
+    alert("Copié pour Discord ✅");
+  });
 
   // ratings controls
   const ratingsRerender = () => {

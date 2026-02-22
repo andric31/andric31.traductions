@@ -311,6 +311,41 @@ html,body{
 }
 .tabs-actions{ display:flex; gap:8px; align-items:center; }
 
+/* ---------- Generic controls row (Hot / Progression) ---------- */
+.controls-row{
+  display:flex;
+  gap:12px;
+  align-items:flex-end;
+  flex-wrap:wrap;
+  margin: 10px 0 14px;
+}
+.control{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-width: 160px;
+}
+.control.grow{ flex:1; min-width: 240px; }
+.control label{ opacity:.85; font-size: 12px; }
+.control select{
+  background:rgba(20,24,38,.55);
+  border:1px solid var(--border);
+  color:var(--fg);
+  border-radius:12px;
+  padding:8px 10px;
+  outline:none;
+}
+.mini-status{
+  background:rgba(20,24,38,.55);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:8px 10px;
+  min-height: 36px;
+  display:flex;
+  align-items:center;
+  opacity:.95;
+}
+
 .btn{
   appearance:none; border:1px solid var(--border);
   background:rgba(30,36,55,.65);
@@ -330,64 +365,3 @@ html,body{
 @media (max-width: 820px){
   .mini-kpis{ grid-template-columns:1fr; }
 }
-
-
-/* ===================== Hot / Progression tabs ===================== */
-.subtabs-row{
-  display:flex;
-  gap:12px;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:10px;
-  flex-wrap:wrap;
-}
-.subtabs{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-}
-.subtab-btn{
-  padding:6px 10px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.14);
-  background:rgba(255,255,255,.05);
-  color:rgba(255,255,255,.9);
-  cursor:pointer;
-  font-weight:600;
-  font-size:12px;
-}
-.subtab-btn:hover{ background:rgba(255,255,255,.07); }
-.subtab-btn.is-active{
-  background:rgba(110,168,255,.18);
-  border-color:rgba(110,168,255,.35);
-}
-.subtabs-right{
-  display:flex;
-  gap:8px;
-  align-items:center;
-  flex-wrap:wrap;
-}
-.lbl{
-  font-size:12px;
-  color:rgba(255,255,255,.72);
-}
-.rank-badge{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  min-width:28px;
-  height:22px;
-  padding:0 8px;
-  border-radius:999px;
-  font-weight:800;
-  font-size:12px;
-  border:1px solid rgba(255,255,255,.18);
-  background:rgba(255,255,255,.06);
-}
-.rank-1{ background:rgba(255,215,0,.20); border-color:rgba(255,215,0,.45); color:#ffd54d; }
-.rank-2{ background:rgba(192,192,192,.18); border-color:rgba(192,192,192,.45); color:#e0e0e0; }
-.rank-3{ background:rgba(205,127,50,.20); border-color:rgba(205,127,50,.45); color:#ffbf80; }
-
-.kpi-up{ color:rgba(120, 255, 170, .92); font-weight:800; }
-.kpi-down{ color:rgba(255, 120, 120, .92); font-weight:800; }
-.kpi-flat{ color:rgba(255,255,255,.72); font-weight:800; }

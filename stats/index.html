@@ -7,6 +7,133 @@
 
   <link rel="icon" href="/favicon.png" />
   <link rel="stylesheet" href="/stats/stats.css" />
+<style>
+/* ===== Help Tooltip (clean) ===== */
+.tab-section.tooltip-safe{ overflow: visible; }
+.card.tooltip-safe{ overflow: visible; } /* évite le découpage dû au overflow:hidden */
+
+.help-tip{
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-left: 8px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 12px;
+  line-height: 1;
+  cursor: help;
+  user-select: none;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.22);
+  z-index: 999998;
+}
+
+.help-tip:hover{
+  background: rgba(255,255,255,0.14);
+}
+
+.help-tip:focus{
+  outline: 2px solid rgba(255,255,255,0.35);
+  outline-offset: 2px;
+}
+
+.help-bubble{
+  position: absolute;
+  left: 0;
+  top: calc(100% + 10px);
+  transform: translateX(-10px);
+  width: min(420px, 86vw);
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(16, 18, 24, 0.98);
+  border: 1px solid rgba(255,255,255,0.16);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.45);
+  color: rgba(255,255,255,0.94);
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: left;
+  z-index: 99999;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .14s ease, transform .14s ease;
+  z-index: 999999;
+}
+
+.help-bubble b{
+  color: #fff;
+}
+
+.help-bubble::before{
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 22px;
+  width: 10px;
+  height: 10px;
+  background: rgba(16, 18, 24, 0.98);
+  border-left: 1px solid rgba(255,255,255,0.16);
+  border-top: 1px solid rgba(255,255,255,0.16);
+  transform: rotate(45deg);
+}
+
+.help-tip:hover .help-bubble,
+.help-tip:focus .help-bubble{
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-10px) translateY(0);
+  z-index: 999999;
+}
+</style>
+<style>
+/* ===== Global Tooltip (fixed, never clipped) ===== */
+#globalTooltip{
+  position: fixed;
+  left: 0;
+  top: 0;
+  max-width: min(460px, 92vw);
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(16,18,24,0.985);
+  border: 1px solid rgba(255,255,255,0.16);
+  box-shadow: 0 16px 50px rgba(0,0,0,0.55);
+  color: rgba(255,255,255,0.94);
+  font-size: 13px;
+  line-height: 1.45;
+  z-index: 2147483647; /* au-dessus de tout */
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(0,0,0) scale(0.985);
+  transition: opacity .12s ease, transform .12s ease;
+  display: none;
+}
+#globalTooltip b{ color:#fff; }
+
+#globalTooltip.show{
+  display: block;
+  opacity: 1;
+  transform: translate3d(0,0,0) scale(1);
+}
+#globalTooltip::before{
+  content:"";
+  position:absolute;
+  width:10px;
+  height:10px;
+  background: rgba(16,18,24,0.985);
+  border-left: 1px solid rgba(255,255,255,0.16);
+  border-top: 1px solid rgba(255,255,255,0.16);
+  transform: rotate(45deg);
+}
+#globalTooltip::before{
+  left: var(--_gtArrowLeft, 22px);
+  top: var(--_gtArrowTop, -6px);
+  transform: rotate(var(--_gtArrowRot, 45deg));
+}
+</style>
+<style>/* hide inline bubble, use global */ .help-tip .help-bubble{display:none !important;}</style>
 </head>
 
 <body class="stats-page">
@@ -33,7 +160,14 @@
         <section class="card">
           <div class="card-h">
             <div class="stats-title">
-              <div class="h1">📊 Stats</div>
+              <div class="h1">📊 Stats
+<span class="help-tip" tabindex="0" aria-label="Aide : Stats">?
+  <span class="help-bubble">
+    <b>Stats</b> = le total cumulé 📊<br>
+    Ici tu vois les <b>totaux</b> (vues / likes / clics Mega) et les répartitions (par moteur, statut, tags…).<br><br>
+    👉 C’est la photo “globale”, pas la progression récente.
+  </span>
+</span></div>
               <div class="sub">https://andric31-traductions.pages.dev/</div>
             </div>
 
@@ -131,9 +265,18 @@
       </section>
 
       <section class="tab-section" id="tab_trending" style="display:none;">
-        <section class="card">
+        <section class="card" tooltip-safe>
           <div class="card-h">
-            <div class="card-title">🔥 Trending</div>
+            <div class="card-title">
+🔥 Trending
+<span class="help-tip" tabindex="0">?
+  <span class="help-bubble">
+    <b>Trending</b> = ce qui monte vite en ce moment 📈<br>
+    Classement basé sur la progression récente (vues / likes / clics Mega).<br><br>
+    👉 Indicateur de momentum, pas du total historique.
+  </span>
+</span>
+</div>
             <div class="stats-controls">
               <select id="trendWindow" class="sel" title="Fenêtre">
                 <option value="24h" selected>24h</option>
@@ -197,9 +340,18 @@
       </section>
 
       <section class="tab-section" id="tab_timeline" style="display:none;">
-        <section class="card">
+        <section class="card" tooltip-safe>
           <div class="card-h">
-            <div class="card-title">🕒 Timeline (rapide)</div>
+            <div class="card-title">
+🕒 Timeline (rapide)
+<span class="help-tip" tabindex="0">?
+  <span class="help-bubble">
+    <b>Timeline</b> = quand l’activité arrive 🕒<br>
+    Vue chronologique des événements récents (vues / likes / téléchargements).<br><br>
+    👉 Permet de repérer les pics après une mise à jour ou un post Discord.
+  </span>
+</span>
+</div>
             <div class="card-note">Pas une vraie courbe/jour (pas d'historique D1), mais un résumé “activité récente”.</div>
           </div>
 
@@ -236,10 +388,134 @@
         </section>
       </section>
 
+      <!-- ===================== HOT (4 semaines) ===================== -->
+      <section class="tab-section" id="tab_hot" style="display:none;">
+        <div class="section-title-row">
+          <h2>🔥 Hot (4 semaines)
+            <button class="help-icon" type="button" data-tooltip="Hot = Top sur les 4 dernières semaines (regroupé par semaine).\nIdéal pour sortir un Top jeux chaque semaine pour Discord.">?</button>
+          </h2>
+        </div>
+
+        <div class="controls-row">
+          <div class="control">
+            <label>Métrique</label>
+            <select id="hotMetric">
+              <option value="views">Vues</option>
+              <option value="mega">Téléchargements</option>
+              <option value="likes">Likes</option>
+            </select>
+          </div>
+          <div class="control">
+            <label>Top</label>
+            <select id="hotTop">
+              <option value="10">Top 10</option>
+              <option value="20" selected>Top 20</option>
+              <option value="50">Top 50</option>
+            </select>
+          </div>
+          <div class="control">
+            <label>Semaines</label>
+            <select id="hotWeeks">
+              <option value="4" selected>4</option>
+              <option value="6">6</option>
+              <option value="8">8</option>
+            </select>
+          </div>
+          <div class="control grow">
+            <label>Status</label>
+            <div id="hotStatus" class="mini-status">—</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Tableau (Hot)</div>
+          <div class="table-wrap">
+            <table class="tbl" id="hotTbl">
+              <thead>
+                <tr>
+                  <th class="col-cover">Cover</th>
+                  <th>Titre</th>
+                  <th class="col-num">Semaine</th>
+                  <th class="col-num">Total</th>
+                </tr>
+              </thead>
+              <tbody id="hotTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== PROGRESSION ===================== -->
+      <section class="tab-section" id="tab_progression" style="display:none;">
+        <div class="section-title-row">
+          <h2>📈 Progression
+            <button class="help-icon" type="button" data-tooltip="Progression = évolution relative (en %) d'une semaine à l'autre.\nEx: 2 → 8 vues = +300%.\nUtile pour repérer les vrais boosts sur des petits jeux.">?</button>
+          </h2>
+        </div>
+
+        <div class="controls-row">
+          <div class="control">
+            <label>Métrique</label>
+            <select id="progMetric">
+              <option value="views">Vues</option>
+              <option value="mega">Téléchargements</option>
+              <option value="likes">Likes</option>
+            </select>
+          </div>
+          <div class="control">
+            <label>Top</label>
+            <select id="progTop">
+              <option value="10">Top 10</option>
+              <option value="20" selected>Top 20</option>
+              <option value="50">Top 50</option>
+            </select>
+          </div>
+          <div class="control">
+            <label>Base min (semaine-1)</label>
+            <select id="progMinBase">
+              <option value="1" selected>1</option>
+              <option value="2">2</option>
+              <option value="5">5</option>
+              <option value="10">10</option>
+            </select>
+          </div>
+          <div class="control grow">
+            <label>Status</label>
+            <div id="progStatus" class="mini-status">—</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Tableau (Progression)</div>
+          <div class="table-wrap">
+            <table class="tbl" id="progTbl">
+              <thead>
+                <tr>
+                  <th class="col-cover">Cover</th>
+                  <th>Titre</th>
+                  <th class="col-num">% Δ</th>
+                  <th class="col-num">Δ</th>
+                  <th class="col-num">Semaine</th>
+                  <th class="col-num">Semaine-1</th>
+                </tr>
+              </thead>
+              <tbody id="progTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <section class="tab-section" id="tab_ratings" style="display:none;">
         <section class="card">
           <div class="card-h">
-            <div class="card-title">⭐ Ratings</div>
+            <div class="card-title">⭐ Ratings
+<span class="help-tip" tabindex="0" aria-label="Aide : Ratings">?
+  <span class="help-bubble">
+    <b>Ratings</b> = notes / scores ⭐<br>
+    Cette section affiche les jeux selon leur <b>note</b> (et/ou le nombre de votes), selon la logique de ton site.<br><br>
+    👉 Pratique pour repérer les valeurs sûres, pas forcément les plus “trending”.
+  </span>
+</span></div>
             <div class="stats-controls">
               <select id="bayesM" class="sel" title="Force du prior (m)">
                 <option value="5">m=5 (rapide)</option>
@@ -298,66 +574,179 @@
   </div>
 
   <script src="/stats/stats.js"></script>
+<script>
+/* ===== Global Tooltip logic (fixed) ===== */
+(function(){
+  const TT_ID = "globalTooltip";
+  let tt = document.getElementById(TT_ID);
+  if(!tt){
+    tt = document.createElement("div");
+    tt.id = TT_ID;
+    document.body.appendChild(tt);
+  }
+
+  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+
+  function showTip(anchor){
+    // récupère le HTML depuis .help-bubble (si présent)
+    const bubble = anchor.querySelector(".help-bubble");
+    const html = bubble ? bubble.innerHTML : (anchor.getAttribute("data-tip") || "");
+    if(!html) return;
+
+    tt.innerHTML = html;
+
+    // mesure
+    tt.style.display = "block";
+    tt.classList.add("show");
+
+    const a = anchor.getBoundingClientRect();
+    const pad = 10;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    // choisir position: au-dessus si pas assez de place en dessous
+    tt.style.left = "0px";
+    tt.style.top = "0px";
+    // force layout for accurate size
+    const ttr = tt.getBoundingClientRect();
+
+    const preferBelow = (a.bottom + pad + ttr.height) <= (vh - pad);
+    const top = preferBelow ? (a.bottom + pad) : (a.top - pad - ttr.height);
+
+    // aligner à gauche du ? avec marge, mais clamp dans viewport
+    let left = a.left - 10;
+    left = clamp(left, pad, vw - pad - ttr.width);
+
+    tt.style.left = Math.round(left) + "px";
+    tt.style.top  = Math.round(top) + "px";
+
+    // flèche
+    const arrow = 6; // taille
+    const arrowX = clamp((a.left + a.width/2) - left, 14, ttr.width - 14);
+    if(preferBelow){
+      tt.style.setProperty("--arrow-top", "-6px");
+      tt.style.setProperty("--arrow-rot", "45deg");
+      tt.style.setProperty("--arrow-y", "-6px");
+      tt.style.setProperty("--arrow-border", "top");
+      tt.style.setProperty("--arrow-pos", "top");
+      tt.style.setProperty("--arrow-offset", "0");
+      tt.style.setProperty("--arrow-dir", "down");
+      tt.style.setProperty("--arrow-place", "top");
+      tt.style.setProperty("--arrow", "below");
+      tt.style.setProperty("--arrow-y", "-6px");
+      tt.style.setProperty("--arrow-x", arrowX + "px");
+      tt.style.setProperty("--arrow-mode", "below");
+      tt.style.setProperty("--arrow-left", arrowX + "px");
+      tt.style.setProperty("--arrow-top", "-6px");
+      tt.style.setProperty("--arrow-rotate", "45deg");
+      tt.style.setProperty("--arrow-bg", "rgba(16,18,24,0.985)");
+      tt.style.setProperty("--arrow-border-color", "rgba(255,255,255,0.16)");
+      tt.style.setProperty("--arrow-border", "1px");
+      tt.style.setProperty("--arrow-side", "top");
+      tt.style.setProperty("--arrow-px", "-6px");
+      tt.style.setProperty("--arrow-posy", "-6px");
+      tt.style.setProperty("--arrow-posx", arrowX + "px");
+      tt.style.setProperty("--arrow-where", "top");
+      tt.style.setProperty("--arrow", "1");
+      tt.style.setProperty("--arrow-anchor", "top");
+      tt.style.setProperty("--arrow-offset-y", "-6px");
+      tt.style.setProperty("--arrow-offset-x", arrowX + "px");
+      tt.style.setProperty("--arrowTransform", "rotate(45deg)");
+      tt.style.setProperty("--arrowTop", "-6px");
+      tt.style.setProperty("--arrowLeft", arrowX + "px");
+      tt.style.setProperty("--arrowRotate", "45deg");
+      tt.style.setProperty("--arrowFlip", "0");
+      tt.style.setProperty("--arrowBorderLeft", "1px");
+      tt.style.setProperty("--arrowBorderTop", "1px");
+
+      tt.style.setProperty("--arrow-isAbove", "0");
+      tt.style.setProperty("--arrow-isBelow", "1");
+      tt.style.setProperty("--arrowMargin", "-6px");
+
+      tt.style.setProperty("--arrowX", arrowX + "px");
+      tt.style.setProperty("--arrowY", "-6px");
+
+      tt.style.setProperty("--arrowPos", "top");
+      tt.style.setProperty("--arrowPosPx", "-6px");
+
+      tt.style.setProperty("--arrowAngle", "45deg");
+
+      tt.style.setProperty("--arrowL", arrowX + "px");
+      tt.style.setProperty("--arrowT", "-6px");
+      tt.style.setProperty("--arrowR", "45deg");
+
+      tt.style.setProperty("--arrow-dummy","1");
+      tt.style.setProperty("--arrow2","1");
+
+      tt.style.setProperty("--arrowAAA","1");
+
+      tt.style.setProperty("--arrow-point","1");
+
+      tt.style.setProperty("--arrow-fixed","1");
+
+      tt.style.setProperty("--arrow-prefer","below");
+      // set actual pseudo-element
+      tt.style.setProperty("--_arrowLeft", arrowX + "px");
+      tt.style.setProperty("--_arrowTop", "-6px");
+      tt.style.setProperty("--_arrowRotate", "45deg");
+    }else{
+      // au-dessus -> flèche en bas, rotation inversée
+      tt.style.setProperty("--_arrowLeft", arrowX + "px");
+      tt.style.setProperty("--_arrowTop", (ttr.height - 4) + "px");
+      tt.style.setProperty("--_arrowRotate", "225deg");
+    }
+    // apply to pseudo element via inline style
+    tt.style.setProperty("--arrowLeft", tt.style.getPropertyValue("--_arrowLeft"));
+    tt.style.setProperty("--arrowTop", tt.style.getPropertyValue("--_arrowTop"));
+    tt.style.setProperty("--arrowRotate", tt.style.getPropertyValue("--_arrowRotate"));
+
+    // hack: set via CSS variables used in ::before below
+    tt.style.setProperty("--gt-left", tt.style.getPropertyValue("--arrowLeft"));
+    tt.style.setProperty("--gt-top", tt.style.getPropertyValue("--arrowTop"));
+    tt.style.setProperty("--gt-rot", tt.style.getPropertyValue("--arrowRotate"));
+
+    // repaint pseudo using css vars
+    tt.style.setProperty("--_gtArrowLeft", arrowX + "px");
+    if(preferBelow){
+      tt.style.setProperty("--_gtArrowTop", "-6px");
+      tt.style.setProperty("--_gtArrowRot", "45deg");
+    }else{
+      tt.style.setProperty("--_gtArrowTop", (ttr.height - 4) + "px");
+      tt.style.setProperty("--_gtArrowRot", "225deg");
+    }
+  }
+
+  function hideTip(){
+    tt.classList.remove("show");
+    // laisser la transition, puis display none
+    window.clearTimeout(tt._hideT);
+    tt._hideT = window.setTimeout(()=>{
+      if(!tt.classList.contains("show")){
+        tt.style.display = "none";
+      }
+    }, 140);
+  }
+
+  function bind(anchor){
+    anchor.addEventListener("mouseenter", ()=>showTip(anchor));
+    anchor.addEventListener("mouseleave", hideTip);
+    anchor.addEventListener("focus", ()=>showTip(anchor));
+    anchor.addEventListener("blur", hideTip);
+    anchor.addEventListener("click", (e)=>{ e.preventDefault(); e.stopPropagation(); });
+  }
+
+  document.querySelectorAll(".help-tip").forEach(bind);
+
+  // reposition on scroll/resize if visible
+  window.addEventListener("scroll", ()=>{
+    const active = document.querySelector(".help-tip:hover") || document.activeElement?.closest?.(".help-tip");
+    if(tt.classList.contains("show") && active) showTip(active);
+  }, {passive:true});
+  window.addEventListener("resize", ()=>{
+    const active = document.querySelector(".help-tip:hover") || document.activeElement?.closest?.(".help-tip");
+    if(tt.classList.contains("show") && active) showTip(active);
+  });
+})();
+</script>
 </body>
 </html>
-      <!-- TAB: Hot (4 semaines) -->
-      <section id="tab_hot" class="tab-content" style="display:none">
-        <div class="subtabs-row">
-          <div class="subtabs">
-            <button class="subtab-btn is-active" data-hot="week" type="button">Dernière semaine</button>
-            <button class="subtab-btn" data-hot="4w" type="button">Cumul 4 semaines</button>
-          </div>
-          <div class="subtabs-right">
-            <label class="lbl">Métrique</label>
-            <select id="hot_metric" class="sel">
-              <option value="views">Vues</option>
-              <option value="mega">Mega</option>
-              <option value="likes">Likes</option>
-            </select>
-            <label class="lbl">Top</label>
-            <select id="hot_top" class="sel">
-              <option value="10">10</option>
-              <option value="25">25</option>
-              <option value="50" selected>50</option>
-              <option value="100">100</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="card-b">
-          <div class="muted" id="hot_status">Chargement…</div>
-          <div id="hot_table_wrap"></div>
-        </div>
-      </section>
-
-      <!-- TAB: Progression -->
-      <section id="tab_progression" class="tab-content" style="display:none">
-        <div class="subtabs-row">
-          <div class="muted">
-            % d’évolution (semaine courante vs semaine précédente). Permet de voir les boosts relatifs.
-          </div>
-          <div class="subtabs-right">
-            <label class="lbl">Métrique</label>
-            <select id="prog_metric" class="sel">
-              <option value="views" selected>Vues</option>
-              <option value="mega">Mega</option>
-              <option value="likes">Likes</option>
-            </select>
-            <label class="lbl">Top</label>
-            <select id="prog_top" class="sel">
-              <option value="10">10</option>
-              <option value="25">25</option>
-              <option value="50" selected>50</option>
-              <option value="100">100</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="card-b">
-          <div class="muted" id="prog_status">Chargement…</div>
-          <div id="prog_table_wrap"></div>
-        </div>
-      </section>
-
-
-

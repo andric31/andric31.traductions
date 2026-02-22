@@ -54,19 +54,6 @@ async function fetchGameStatsBulk(ids) {
   }
 }
 
-
-async function fetchWeekly(metric = "views", weeks = 4, top = 50) {
-  const key = `${metric}|${weeks}|${top}`;
-  if (state.weeklyCache.has(key)) return state.weeklyCache.get(key);
-
-  const url = `/api/counters_weekly?metric=${encodeURIComponent(metric)}&weeks=${encodeURIComponent(weeks)}&top=${encodeURIComponent(top)}`;
-  const j = await fetchJson(url);
-  const w = Array.isArray(j?.weeks) ? j.weeks : [];
-  state.weeklyCache.set(key, w);
-  return w;
-}
-
-
 // ✅ ratings bulk (doit exister côté backend)
 async function fetchRatingsBulk(ids) {
   try {
@@ -83,6 +70,22 @@ async function fetchRatingsBulk(ids) {
   } catch {
     return {};
   }
+}
+
+// ===== Weekly API (counter_daily) — Hot / Progression =====
+async function fetchWeekly(metric, weeks = 4, top = 20) {
+  const m = String(metric || "views").toLowerCase();
+  const w = Math.max(1, Math.min(8, Number(weeks || 4)));
+  const t = Math.max(1, Math.min(50, Number(top || 20)));
+  const key = `${m}|${w}|${t}`;
+  if (state.weeklyCache.has(key)) return state.weeklyCache.get(key);
+
+  const url = `/api/counters_weekly?metric=${encodeURIComponent(m)}&weeks=${w}&top=${t}`;
+  const data = await fetchJson(url);
+  if (!data?.ok) throw new Error(data?.error || "Weekly API: erreur");
+  const out = { weeks: Array.isArray(data.weeks) ? data.weeks : [] };
+  state.weeklyCache.set(key, out);
+  return out;
 }
 
 // -------- UI state --------
@@ -143,6 +146,20 @@ const els = {
   trendTbody: document.getElementById("trendTbody"),
   trendTableStatus: document.getElementById("trendTableStatus"),
 
+  // Hot (weekly)
+  hotMetric: document.getElementById("hotMetric"),
+  hotTop: document.getElementById("hotTop"),
+  hotWeeks: document.getElementById("hotWeeks"),
+  hotStatus: document.getElementById("hotStatus"),
+  hotTbody: document.getElementById("hotTbody"),
+
+  // Progression (weekly)
+  progMetric: document.getElementById("progMetric"),
+  progTop: document.getElementById("progTop"),
+  progMinBase: document.getElementById("progMinBase"),
+  progStatus: document.getElementById("progStatus"),
+  progTbody: document.getElementById("progTbody"),
+
   // Timeline
   tlViews24h: document.getElementById("tlViews24h"),
   tlMega24h: document.getElementById("tlMega24h"),
@@ -153,21 +170,7 @@ const els = {
   tlTbody: document.getElementById("tlTbody"),
   tlMoversStatus: document.getElementById("tlMoversStatus"),
 
-  
-  // Hot controls
-  hotMetric: document.getElementById("hot_metric"),
-  hotTop: document.getElementById("hot_top"),
-  hotStatus: document.getElementById("hot_status"),
-  hotTableWrap: document.getElementById("hot_table_wrap"),
-  hotSubBtns: [...document.querySelectorAll(".subtab-btn[data-hot]")],
-
-  // Progression controls
-  progMetric: document.getElementById("prog_metric"),
-  progTop: document.getElementById("prog_top"),
-  progStatus: document.getElementById("prog_status"),
-  progTableWrap: document.getElementById("prog_table_wrap"),
-
-// Ratings
+  // Ratings
   bayesM: document.getElementById("bayesM"),
   ratingsTop: document.getElementById("ratingsTop"),
   bayesC: document.getElementById("bayesC"),
@@ -197,9 +200,8 @@ const state = {
   // Tabs
   currentTab: "overview",
 
-  // Weekly cache (api /api/counters_weekly)
-  weeklyCache: new Map(), // key -> weeks array
-  hotMode: "week",
+  // Weekly API cache (Hot / Progression)
+  weeklyCache: new Map(), // key: `${metric}|${weeks}|${top}` -> { weeks: [...] }
 
   // caches for CSV export
   lastExport: {
@@ -233,6 +235,21 @@ function getGameUrlForEntry(g) {
   if (src) u.searchParams.set("src", src);
 
   return u.toString();
+}
+
+// Counter id -> game
+// - "uid:123" (recommandé)
+// - "123" (fallback) ou F95 id (fallback)
+function getGameByCounterId(counterId) {
+  const s = String(counterId || "").trim();
+  if (!s) return null;
+  if (s.startsWith("__")) return null;
+  if (s.startsWith("uid:")) {
+    const u = s.slice(4);
+    return state.games.find(g => String(g?.uid ?? "") === u) || null;
+  }
+  // fallback: ancien format
+  return state.games.find(g => String(g?.uid ?? "") === s || String(g?.id ?? "") === s) || null;
 }
 
 function setText(el, v) {
@@ -417,6 +434,16 @@ function makeCoverImg(g) {
     img.src = "/favicon.png";
     img.classList.add("is-fallback");
   };
+  return img;
+}
+
+function makeFallbackCover() {
+  const img = document.createElement("img");
+  img.className = "cover";
+  img.loading = "lazy";
+  img.referrerPolicy = "no-referrer";
+  img.src = "/favicon.png";
+  img.alt = "";
   return img;
 }
 
@@ -927,6 +954,189 @@ function renderTimeline() {
 }
 
 // ============================================================================
+// ✅ Hot (weekly, counter_daily)
+// ============================================================================
+async function renderHot() {
+  if (!els.tabHot) return;
+  if (!els.hotTbody) return;
+
+  const metric = String(els.hotMetric?.value || "views");
+  const top = Number(els.hotTop?.value || 20);
+  const weeks = Number(els.hotWeeks?.value || 4);
+
+  setText(els.hotStatus, "Chargement...");
+  els.hotTbody.innerHTML = "";
+
+  try {
+    const data = await fetchWeekly(metric, weeks, top);
+    const weeksArr = data.weeks || [];
+
+    // Flatten (most recent week first)
+    const flat = [];
+    for (let wi = 0; wi < weeksArr.length; wi++) {
+      const w = weeksArr[wi];
+      const label = `${w.weekStart} → ${w.weekEnd}`;
+      const rows = Array.isArray(w.rows) ? w.rows : [];
+      for (const r of rows) {
+        flat.push({ id: String(r.id), total: Number(r.total || 0), week: label, weekStart: w.weekStart });
+      }
+    }
+
+    if (!flat.length) {
+      setText(els.hotStatus, "Aucune donnée (daily rollup). Fais quelques hits et réessaie.");
+      return;
+    }
+
+    // Keep only top*N per week already, but we can sort for stable display
+    flat.sort((a,b)=> (b.weekStart.localeCompare(a.weekStart)) || (b.total - a.total));
+
+    const frag = document.createDocumentFragment();
+    const fmt = (n)=>Number(n||0).toLocaleString("fr-FR");
+
+    for (const x of flat) {
+      const g = getGameByCounterId(x.id);
+      const tr = document.createElement("tr");
+
+      if (g) tr.addEventListener("click", () => (location.href = getGameUrlForEntry(g)));
+
+      const tdImg = document.createElement("td"); tdImg.className = "c-cover";
+      tdImg.appendChild(g ? makeCoverImg(g) : makeFallbackCover());
+
+      const tdT = document.createElement("td");
+      tdT.textContent = g ? (g.cleanTitle || g.title || x.id) : x.id;
+
+      const tdW = document.createElement("td"); tdW.className="num"; tdW.textContent = x.week;
+      const tdTot = document.createElement("td"); tdTot.className="num"; tdTot.textContent = fmt(x.total);
+
+      tr.appendChild(tdImg); tr.appendChild(tdT); tr.appendChild(tdW); tr.appendChild(tdTot);
+      frag.appendChild(tr);
+    }
+    els.hotTbody.appendChild(frag);
+    setText(els.hotStatus, `OK · ${flat.length} lignes · ${metric}`);
+
+    // CSV cache
+    state.lastExport = {
+      tab: "hot",
+      filename: `hot_${weeks}w_${metric}.csv`,
+      columns: ["id", "title", "week", "total"],
+      rows: flat.map(x => {
+        const g = getGameByCounterId(x.id);
+        return {
+          id: x.id,
+          title: g ? String(g.cleanTitle || g.title || "") : "",
+          week: x.week,
+          total: Number(x.total || 0),
+        };
+      }),
+    };
+  } catch (e) {
+    setText(els.hotStatus, `Erreur: ${String(e?.message || e)}`);
+  }
+}
+
+// ============================================================================
+// ✅ Progression (weekly, compare semaine N vs N-1)
+// ============================================================================
+async function renderProgression() {
+  if (!els.tabProgression) return;
+  if (!els.progTbody) return;
+
+  const metric = String(els.progMetric?.value || "views");
+  const top = Number(els.progTop?.value || 20);
+  const minBase = Number(els.progMinBase?.value || 1);
+
+  setText(els.progStatus, "Chargement...");
+  els.progTbody.innerHTML = "";
+
+  try {
+    const data = await fetchWeekly(metric, 2, 200); // need enough rows to compute progression properly
+    const weeksArr = data.weeks || [];
+
+    const w0 = weeksArr[0] || null; // current week
+    const w1 = weeksArr[1] || null; // previous week
+
+    if (!w0 || !w1) {
+      setText(els.progStatus, "Pas assez d'historique (il faut au moins 2 semaines). ");
+      return;
+    }
+
+    const map0 = new Map();
+    const map1 = new Map();
+    for (const r of (w0.rows || [])) map0.set(String(r.id), Number(r.total || 0));
+    for (const r of (w1.rows || [])) map1.set(String(r.id), Number(r.total || 0));
+
+    // Union ids
+    const ids = new Set([...map0.keys(), ...map1.keys()]);
+    let rows = [];
+    for (const id of ids) {
+      const a = map0.get(id) || 0;
+      const b = map1.get(id) || 0;
+      if (b < minBase) continue;
+      const delta = a - b;
+      const pct = b > 0 ? (delta / b) * 100 : 0;
+      rows.push({ id, a, b, delta, pct });
+    }
+
+    rows.sort((x,y)=> (y.pct - x.pct) || (y.delta - x.delta));
+    rows = rows.slice(0, Math.max(1, Math.min(50, top)));
+
+    if (!rows.length) {
+      setText(els.progStatus, "Aucune donnée pour cette base min / métrique.");
+      return;
+    }
+
+    const frag = document.createDocumentFragment();
+    const fmt = (n)=>Number(n||0).toLocaleString("fr-FR");
+    const fmtPct = (n)=>{
+      const v = Number(n||0);
+      const sign = v > 0 ? "+" : "";
+      return sign + v.toFixed(0) + "%";
+    };
+
+    for (const x of rows) {
+      const g = getGameByCounterId(x.id);
+      const tr = document.createElement("tr");
+      if (g) tr.addEventListener("click", () => (location.href = getGameUrlForEntry(g)));
+
+      const tdImg = document.createElement("td"); tdImg.className = "c-cover";
+      tdImg.appendChild(g ? makeCoverImg(g) : makeFallbackCover());
+
+      const tdT = document.createElement("td");
+      tdT.textContent = g ? (g.cleanTitle || g.title || x.id) : x.id;
+
+      const tdPct = document.createElement("td"); tdPct.className="num"; tdPct.textContent = fmtPct(x.pct);
+      const tdD = document.createElement("td"); tdD.className="num"; tdD.textContent = (x.delta>=0?"+":"") + fmt(x.delta);
+      const tdA = document.createElement("td"); tdA.className="num"; tdA.textContent = fmt(x.a);
+      const tdB = document.createElement("td"); tdB.className="num"; tdB.textContent = fmt(x.b);
+
+      tr.appendChild(tdImg); tr.appendChild(tdT); tr.appendChild(tdPct); tr.appendChild(tdD); tr.appendChild(tdA); tr.appendChild(tdB);
+      frag.appendChild(tr);
+    }
+    els.progTbody.appendChild(frag);
+    setText(els.progStatus, `OK · ${w0.weekStart}→${w0.weekEnd} vs ${w1.weekStart}→${w1.weekEnd} · ${metric}`);
+
+    state.lastExport = {
+      tab: "progression",
+      filename: `progression_${metric}.csv`,
+      columns: ["id", "title", "pct", "delta", "week", "prevWeek"],
+      rows: rows.map(x => {
+        const g = getGameByCounterId(x.id);
+        return {
+          id: x.id,
+          title: g ? String(g.cleanTitle || g.title || "") : "",
+          pct: Number(x.pct || 0),
+          delta: Number(x.delta || 0),
+          week: Number(x.a || 0),
+          prevWeek: Number(x.b || 0),
+        };
+      }),
+    };
+  } catch (e) {
+    setText(els.progStatus, `Erreur: ${String(e?.message || e)}`);
+  }
+}
+
+// ============================================================================
 // ✅ Ratings tab (Bayesian)
 // ============================================================================
 function computeGlobalRatingAverageC() {
@@ -951,186 +1161,6 @@ function bayesScore(R, v, C, m) {
   if (vv <= 0) return 0;
   return (vv / (vv + mm)) * Number(R || 0) + (mm / (vv + mm)) * Number(C || 0);
 }
-
-
-function gameByKey(key) {
-  const k = String(key || "");
-  if (!k) return null;
-  if (!state._gameByKey) {
-    const m = new Map();
-    for (const g of state.games) {
-      const ck = counterKeyOf(g);
-      if (ck) m.set(String(ck), g);
-    }
-    // include main site pseudo-id (if any)
-    m.set(MAIN_SITE_ID, { id: MAIN_SITE_ID, title: "Site (viewer)", url: "/" });
-    state._gameByKey = m;
-  }
-  return state._gameByKey.get(k) || null;
-}
-
-function formatPct(pct) {
-  if (!isFinite(pct)) return "+∞%";
-  const s = pct >= 0 ? "+" : "";
-  return s + pct.toFixed(0) + "%";
-}
-
-function renderRowsTable({ wrap, rows, metricLabel, valueLabel, extraCols = [] }) {
-  if (!wrap) return;
-  const escape = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
-  const thExtra = extraCols.map(c => `<th class="th-num">${escape(c.label)}</th>`).join("");
-  const tdExtra = (r) => extraCols.map(c => `<td class="td-num">${c.render(r)}</td>`).join("");
-
-  wrap.innerHTML = `
-    <table class="table">
-      <thead>
-        <tr>
-          <th style="width:64px">Top</th>
-          <th>Jeu</th>
-          <th class="th-num">${escape(valueLabel)}</th>
-          ${thExtra}
-        </tr>
-      </thead>
-      <tbody>
-        ${rows.map((r, i) => {
-          const g = gameByKey(r.id);
-          const title = g?.title || g?.cleanTitle || r.id;
-          const url = g?.url || "";
-          const rank = i + 1;
-          const rankCls = rank === 1 ? "rank-badge rank-1" : rank === 2 ? "rank-badge rank-2" : rank === 3 ? "rank-badge rank-3" : "rank-badge";
-          const titleHtml = url ? `<a class="link" href="${escape(url)}" target="_blank" rel="noreferrer">${escape(title)}</a>` : escape(title);
-          return `
-            <tr>
-              <td><span class="${rankCls}">${rank}</span></td>
-              <td>${titleHtml}</td>
-              <td class="td-num"><strong>${Number(r.total || 0)}</strong></td>
-              ${tdExtra(r)}
-            </tr>
-          `;
-        }).join("")}
-      </tbody>
-    </table>
-  `;
-}
-
-async function renderHot() {
-  if (!els.hotStatus || !els.hotTableWrap) return;
-  els.hotStatus.textContent = "Chargement…";
-  els.hotTableWrap.innerHTML = "";
-
-  const metric = (els.hotMetric?.value || "views");
-  const top = Math.max(1, Math.min(200, Number(els.hotTop?.value || 50)));
-
-  let weeks;
-  try {
-    // on prend large pour avoir un classement plus fiable
-    const fetchTop = Math.max(top, 100);
-    weeks = await fetchWeekly(metric, 4, fetchTop);
-  } catch (e) {
-    els.hotStatus.textContent = "Erreur: impossible de charger /api/counters_weekly";
-    console.error(e);
-    return;
-  }
-
-  if (!weeks.length) {
-    els.hotStatus.textContent = "Aucune donnée (pas assez d'historique).";
-    return;
-  }
-
-  const mode = state.hotMode || "week";
-  let rows = [];
-
-  if (mode === "week") {
-    const w0 = weeks[0];
-    rows = (w0?.rows || []).slice(0, top);
-    els.hotStatus.textContent = `Dernière semaine (${w0.weekStart} → ${w0.weekEnd}) · ${metric}`;
-    state.lastExport = { tab: "hot-week", rows, columns: ["id","total"], filename: `hot_week_${metric}.csv` };
-  } else {
-    // cumul 4 semaines
-    const acc = new Map();
-    for (const w of weeks) {
-      for (const r of (w.rows || [])) {
-        const k = String(r.id);
-        acc.set(k, (acc.get(k) || 0) + Number(r.total || 0));
-      }
-    }
-    rows = [...acc.entries()].map(([id,total]) => ({ id, total }))
-      .sort((a,b) => b.total - a.total)
-      .slice(0, top);
-
-    const wLast = weeks[0], wOld = weeks[weeks.length-1];
-    els.hotStatus.textContent = `Cumul 4 semaines (${wOld.weekStart} → ${wLast.weekEnd}) · ${metric}`;
-    state.lastExport = { tab: "hot-4w", rows, columns: ["id","total"], filename: `hot_4w_${metric}.csv` };
-  }
-
-  renderRowsTable({
-    wrap: els.hotTableWrap,
-    rows,
-    metricLabel: metric,
-    valueLabel: "Total",
-  });
-}
-
-async function renderProgression() {
-  if (!els.progStatus || !els.progTableWrap) return;
-  els.progStatus.textContent = "Chargement…";
-  els.progTableWrap.innerHTML = "";
-
-  const metric = (els.progMetric?.value || "views");
-  const top = Math.max(1, Math.min(200, Number(els.progTop?.value || 50)));
-
-  let weeks;
-  try {
-    // on veut assez de données pour comparer
-    const fetchTop = Math.max(top * 4, 100);
-    weeks = await fetchWeekly(metric, 2, fetchTop);
-  } catch (e) {
-    els.progStatus.textContent = "Erreur: impossible de charger /api/counters_weekly";
-    console.error(e);
-    return;
-  }
-
-  if (weeks.length < 2) {
-    els.progStatus.textContent = "Pas assez d'historique (il faut au moins 2 semaines).";
-    return;
-  }
-
-  const cur = weeks[0], prev = weeks[1];
-  const curMap = new Map((cur.rows || []).map(r => [String(r.id), Number(r.total || 0)]));
-  const prevMap = new Map((prev.rows || []).map(r => [String(r.id), Number(r.total || 0)]));
-  const ids = new Set([...curMap.keys(), ...prevMap.keys()]);
-
-  const rows = [];
-  for (const id of ids) {
-    const a = curMap.get(id) || 0;
-    const b = prevMap.get(id) || 0;
-    if (a <= 0 && b <= 0) continue;
-    const pct = b > 0 ? ((a - b) / b) * 100 : (a > 0 ? Infinity : 0);
-    rows.push({ id, total: a, prev: b, pct });
-  }
-
-  rows.sort((x,y) => (y.pct - x.pct) || (y.total - x.total));
-  const out = rows.slice(0, top);
-
-  els.progStatus.textContent = `Semaine ${cur.weekStart}→${cur.weekEnd} vs ${prev.weekStart}→${prev.weekEnd} · ${metric}`;
-  state.lastExport = { tab: "progression", rows: out, columns: ["id","total","prev","pct"], filename: `progression_${metric}.csv` };
-
-  renderRowsTable({
-    wrap: els.progTableWrap,
-    rows: out,
-    metricLabel: metric,
-    valueLabel: "Cette semaine",
-    extraCols: [
-      { label: "Semaine -1", render: (r) => `<span class="muted">${Number(r.prev || 0)}</span>` },
-      { label: "%", render: (r) => {
-          const cls = !isFinite(r.pct) ? "kpi-up" : r.pct > 0 ? "kpi-up" : r.pct < 0 ? "kpi-down" : "kpi-flat";
-          return `<span class="${cls}">${formatPct(r.pct)}</span>`;
-        }
-      },
-    ]
-  });
-}
-
 
 function renderRatings() {
   const C = computeGlobalRatingAverageC();
@@ -1323,6 +1353,25 @@ function wireEvents() {
   if (els.trendStatus) els.trendStatus.addEventListener("change", trendRerender);
   if (els.trendTag) els.trendTag.addEventListener("input", () => setTimeout(trendRerender, 80));
 
+  // hot controls
+  const hotRerender = () => {
+    if (state.currentTab !== "hot") return;
+    // cache dépend du couple (metric,weeks,top)
+    renderHot();
+  };
+  if (els.hotMetric) els.hotMetric.addEventListener("change", hotRerender);
+  if (els.hotTop) els.hotTop.addEventListener("change", hotRerender);
+  if (els.hotWeeks) els.hotWeeks.addEventListener("change", hotRerender);
+
+  // progression controls
+  const progRerender = () => {
+    if (state.currentTab !== "progression") return;
+    renderProgression();
+  };
+  if (els.progMetric) els.progMetric.addEventListener("change", progRerender);
+  if (els.progTop) els.progTop.addEventListener("change", progRerender);
+  if (els.progMinBase) els.progMinBase.addEventListener("change", progRerender);
+
   // ratings controls
   const ratingsRerender = () => {
     if (state.currentTab !== "ratings") return;
@@ -1331,37 +1380,11 @@ function wireEvents() {
   if (els.bayesM) els.bayesM.addEventListener("change", ratingsRerender);
   if (els.ratingsTop) els.ratingsTop.addEventListener("change", ratingsRerender);
 
-  // hot (4 semaines) controls
-  if (els.hotSubBtns && els.hotSubBtns.length) {
-    els.hotSubBtns.forEach(btn => btn.addEventListener("click", () => {
-      els.hotSubBtns.forEach(b => b.classList.toggle("is-active", b === btn));
-      state.hotMode = String(btn.dataset.hot || "week");
-      if (state.currentTab === "hot") renderHot();
-    }));
-  }
-  if (els.hotMetric) els.hotMetric.addEventListener("change", () => {
-    if (state.currentTab === "hot") renderHot();
-  });
-  if (els.hotTop) els.hotTop.addEventListener("change", () => {
-    if (state.currentTab === "hot") renderHot();
-  });
-
-  // progression controls
-  if (els.progMetric) els.progMetric.addEventListener("change", () => {
-    if (state.currentTab === "progression") renderProgression();
-  });
-  if (els.progTop) els.progTop.addEventListener("change", () => {
-    if (state.currentTab === "progression") renderProgression();
-  });
-
   // Resize (charts)
   window.addEventListener("resize", () => {
     if (state.currentTab === "overview") rerenderOverview({ chart: true });
     else if (state.currentTab === "trending") renderTrending();
     else if (state.currentTab === "ratings") renderRatings();
-    else if (state.currentTab === "hot") renderHot();
-    else if (state.currentTab === "progression") renderProgression();
-    else if (state.currentTab === "timeline") renderTimeline();
   });
 
   // Infinite scroll (overview table)
@@ -1421,8 +1444,6 @@ async function init() {
   }
 
   state.games = extractGames(raw).map((g) => ({ ...g }));
-  state.weeklyCache = new Map();
-  state._gameByKey = null;
 
   if (els.statusChart) els.statusChart.textContent = "Chargement stats…";
   if (els.statusTable) els.statusTable.textContent = "Chargement stats…";
@@ -1473,5 +1494,3 @@ async function init() {
 }
 
 init();
-
-

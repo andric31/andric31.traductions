@@ -30,7 +30,7 @@ export async function onRequest(context) {
     if (!Number.isFinite(top)) top = 10;
     top = Math.max(1, Math.min(50, Math.floor(top)));
 
-    // weeks = 4 par défaut (4 dernières semaines)
+    // weeks = 4 par défaut
     let weeksCount = Number(u.searchParams.get("weeks") || 4);
     if (!Number.isFinite(weeksCount)) weeksCount = 4;
     weeksCount = Math.max(1, Math.min(8, Math.floor(weeksCount)));
@@ -41,11 +41,8 @@ export async function onRequest(context) {
 
     // ---- helpers dates (UTC) ----
     const isoDay = (d) => d.toISOString().slice(0, 10); // YYYY-MM-DD
-
-    // retourne une nouvelle Date à 00:00:00 UTC
     const utcMidnight = (d) => new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
 
-    // calcule début de semaine (lundi ou dimanche) en UTC
     const startOfWeekUTC = (dateUTC00) => {
       const dow = dateUTC00.getUTCDay(); // 0=dim ... 6=sam
       const offset = startMonday ? ((dow + 6) % 7) : dow; // monday: lundi=0 ; sunday: dimanche=0
@@ -56,6 +53,12 @@ export async function onRequest(context) {
 
     const todayUTC = utcMidnight(new Date());
     const thisWeekStart = startOfWeekUTC(todayUTC);
+
+    // ✅ order expr (pas d’alias, sinon D1 peut râler)
+    const orderExpr =
+      metric === "views" ? "SUM(views)" :
+      metric === "mega"  ? "SUM(mega)"  :
+                           "SUM(likes)";
 
     const weeks = [];
 
@@ -77,7 +80,7 @@ export async function onRequest(context) {
         FROM counter_daily
         WHERE day BETWEEN ?1 AND ?2
         GROUP BY id
-        ORDER BY ${metric} DESC
+        ORDER BY ${orderExpr} DESC
         LIMIT ?3
       `).bind(startStr, endStr, top).all();
 

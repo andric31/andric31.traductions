@@ -121,6 +121,9 @@ const els = {
   trendEngine: document.getElementById("trendEngine"),
   trendStatus: document.getElementById("trendStatus"),
   trendTag: document.getElementById("trendTag"),
+  trendEngChips: document.getElementById("trendEngChips"),
+  trendStatusChips: document.getElementById("trendStatusChips"),
+  trendTagChips: document.getElementById("trendTagChips"),
   trendTotal: document.getElementById("trendTotal"),
   trendCount: document.getElementById("trendCount"),
   trendChart: document.getElementById("trendChart"),
@@ -729,13 +732,79 @@ function trendValueOf(g, metric, window) {
   return 0;
 }
 
+function totalScoreOf(g){
+  const v = totalValueOf(g, "views");
+  const m = totalValueOf(g, "mega");
+  const l = Math.max(0, totalValueOf(g, "likes"));
+  return (v | 0) + 3 * (m | 0) + 2 * (l | 0);
+}
+
 function totalValueOf(g, metric) {
   const key = counterKeyOf(g);
   const s = state.statsByKey.get(key) || {};
+  if (metric === "score") return totalScoreOf(g);
   if (metric === "views") return Number(s.views || 0);
   if (metric === "mega") return Number(s.mega || 0);
   if (metric === "likes") return Math.max(0, Number(s.likes || 0));
   return 0;
+}
+
+
+function renderChips(el, items, activeValue, onClick){
+  if (!el) return;
+  el.innerHTML = "";
+  const frag = document.createDocumentFragment();
+  for (const it of items) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip" + (activeValue && it.value === activeValue ? " is-active" : "");
+    b.textContent = it.label;
+    if (Number.isFinite(it.sum)) {
+      const s = document.createElement("small");
+      s.textContent = formatInt(it.sum);
+      b.appendChild(s);
+    }
+    b.addEventListener("click", () => onClick(it.value), { passive: true });
+    frag.appendChild(b);
+  }
+  el.appendChild(frag);
+}
+
+function buildTrendingChips(rows, win){
+  // chips basées sur le score trending (fenêtre)
+  const byEng = new Map();
+  const byStatus = new Map();
+  const byTag = new Map();
+
+  for (const g of rows) {
+    const score = trendScoreOf(g, win);
+    if (!score) continue;
+
+    const eng = inferEngine(g);
+    if (eng) byEng.set(eng, (byEng.get(eng) || 0) + score);
+
+    const st = inferStatus(g);
+    if (st) byStatus.set(st, (byStatus.get(st) || 0) + score);
+
+    const tags = Array.isArray(g.tags) ? g.tags : [];
+    for (const t of tags) {
+      const tag = String(t || "").trim();
+      if (!tag) continue;
+      byTag.set(tag, (byTag.get(tag) || 0) + score);
+    }
+  }
+
+  const toTop = (map, n) =>
+    [...map.entries()]
+      .map(([k, v]) => ({ label: k, value: k, sum: v|0 }))
+      .sort((a, b) => (b.sum - a.sum))
+      .slice(0, n);
+
+  return {
+    eng: toTop(byEng, 14),
+    status: toTop(byStatus, 10),
+    tag: toTop(byTag, 22),
+  };
 }
 
 function renderTrending() {
@@ -780,6 +849,29 @@ function renderTrending() {
     els.trendStatusLine.textContent =
       `${window} · ${metric} · filtres: ${eng || "tous moteurs"} / ${st || "tous statuts"} / ${tagQ ? "tag:" + (els.trendTag.value || "").trim() : "tags:—"} · ${rows.length} jeux`;
   }
+
+
+  // Chips (moteur / statut / tags) — basés sur score trending
+  const chipRows = rows.map(x => x.g);
+  const chips = buildTrendingChips(chipRows, window);
+
+  renderChips(els.trendEngChips, chips.eng, eng, (v) => {
+    const cur = String(els.trendEng?.value || "");
+    els.trendEng.value = (cur === v) ? "" : v;
+    renderTrending();
+  });
+
+  renderChips(els.trendStatusChips, chips.status, st, (v) => {
+    const cur = String(els.trendStatus?.value || "");
+    els.trendStatus.value = (cur === v) ? "" : v;
+    renderTrending();
+  });
+
+  renderChips(els.trendTagChips, chips.tag, (tagQ ? String((els.trendTag?.value||"").trim()) : ""), (v) => {
+    const cur = String((els.trendTag?.value || "").trim());
+    els.trendTag.value = (cur === v) ? "" : v;
+    renderTrending();
+  });
 
   // Chart
   drawBarChart({

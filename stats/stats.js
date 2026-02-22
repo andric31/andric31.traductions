@@ -87,6 +87,7 @@ const els = {
   range: document.getElementById("range"),
   metric: document.getElementById("metric"),
   top: document.getElementById("top"),
+  compare: document.getElementById("compare"),
 
   statusChart: document.getElementById("statusChart"),
   statusTable: document.getElementById("statusTable"),
@@ -202,6 +203,19 @@ function getGameUrlForEntry(g) {
   return u.toString();
 }
 
+function fmtDelta(n){
+  const x = Number(n||0);
+  if (!Number.isFinite(x) || x===0) return "0";
+  return (x>0? "+" : "") + x.toLocaleString("fr-FR");
+}
+
+function buildCompareLine(v24, v7, d){
+  const dd = Number(d||0);
+  const cls = dd>0 ? "pos" : (dd<0 ? "neg" : "");
+  const deltaTxt = fmtDelta(dd);
+  return `<div class="subnum">24h: ${Number(v24||0).toLocaleString("fr-FR")} · 7j: ${Number(v7||0).toLocaleString("fr-FR")} · <span class="${cls}">Δ ${deltaTxt}</span></div>`;
+}
+
 function setText(el, v) {
   if (!el) return;
   const n = Number(v || 0);
@@ -279,6 +293,20 @@ function applyRangeToGame(g, range) {
     views24h: 0, mega24h: 0, likes24h: 0,
     views7d: 0, mega7d: 0, likes7d: 0,
   };
+
+    // ✅ garde aussi les valeurs brutes 24h/7j pour le mode comparaison
+    g._views24h = (s.views24h | 0);
+    g._mega24h  = (s.mega24h  | 0);
+    g._likes24h = Math.max(0, (s.likes24h | 0));
+
+    g._views7d = (s.views7d | 0);
+    g._mega7d  = (s.mega7d  | 0);
+    g._likes7d = Math.max(0, (s.likes7d | 0));
+
+    g._dViews = (g._views7d - g._views24h) | 0;
+    g._dMega  = (g._mega7d  - g._mega24h)  | 0;
+    g._dLikes = (g._likes7d - g._likes24h) | 0;
+
 
   if (range === "24h") {
     g._views = s.views24h | 0;
@@ -419,9 +447,27 @@ function renderTableOverview(list) {
     else sub.textContent = "(no id)";
     titleTd.appendChild(sub);
 
-    const vTd = document.createElement("td"); vTd.className = "num"; vTd.textContent = (g._views | 0).toLocaleString("fr-FR");
-    const mTd = document.createElement("td"); mTd.className = "num"; mTd.textContent = (g._mega  | 0).toLocaleString("fr-FR");
-    const lTd = document.createElement("td"); lTd.className = "num"; lTd.textContent = (g._likes | 0).toLocaleString("fr-FR");
+    const vTd = document.createElement("td");
+    vTd.className = "num";
+    if (state.compare) {
+      vTd.innerHTML = (g._views | 0).toLocaleString("fr-FR") + buildCompareLine(g._views24h, g._views7d, g._dViews);
+    } else {
+      vTd.textContent = (g._views | 0).toLocaleString("fr-FR");
+    }
+    const mTd = document.createElement("td");
+    mTd.className = "num";
+    if (state.compare) {
+      mTd.innerHTML = (g._mega | 0).toLocaleString("fr-FR") + buildCompareLine(g._mega24h, g._mega7d, g._dMega);
+    } else {
+      mTd.textContent = (g._mega | 0).toLocaleString("fr-FR");
+    }
+    const lTd = document.createElement("td");
+    lTd.className = "num";
+    if (state.compare) {
+      lTd.innerHTML = (g._likes | 0).toLocaleString("fr-FR") + buildCompareLine(g._likes24h, g._likes7d, g._dLikes);
+    } else {
+      lTd.textContent = (g._likes | 0).toLocaleString("fr-FR");
+    }
 
     const rcTd = document.createElement("td"); rcTd.className = "num"; rcTd.textContent = (g._ratingCount | 0).toLocaleString("fr-FR");
     const raTd = document.createElement("td"); raTd.className = "num"; raTd.textContent = fmtRating(g._ratingAvg, g._ratingCount);
@@ -628,6 +674,7 @@ function resetLimit() {
 }
 
 function rerenderOverview(opts = { chart: true }) {
+  state.compare = !!(els.compare && els.compare.checked);
   const filtered = getFilteredOverview();
   const sorted = sortListOverview(filtered);
 
@@ -1221,6 +1268,7 @@ async function init() {
   applyChartExpandUI();
   ensureTrendOptions();
   wireEvents();
+  state.compare = !!(els.compare && els.compare.checked);
   renderGlobalKpis();
 
   // default tab

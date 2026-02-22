@@ -44,6 +44,16 @@
                 <option value="7d">7j</option>
               </select>
 
+
+              <div class="ctrl-compare">
+                <label class="chk" title="Affiche 24h + 7j + Δ (7j - 24h) sur les valeurs (tableau + labels).">
+                  <input id="compare" type="checkbox" />
+                  <span>Comparer 24h ↔ 7j</span>
+                </label>
+                <button class="tip" type="button" aria-label="Infos comparaison"
+                  data-tip="Mode comparaison : affiche 24h + 7j et le Δ (7j - 24h). Utile pour voir ce qui progresse vite.">?</button>
+              </div>
+
               <select id="metric" class="sel" title="Métrique du graphique">
                 <option value="views">👁️ Vues</option>
                 <option value="mega">📥 Téléchargements</option>
@@ -72,11 +82,11 @@
           </div>
 
           <div class="site-kpis" id="siteKpis" aria-label="Stats du site">
-            <div class="kpi"><span class="kpi-l">👁️ Vues page principale</span><span class="kpi-v" id="siteViews">—</span></div>
+            <div class="kpi"><span class="kpi-l">👁️ Vues page principale <button class="tip" type="button" aria-label="Info" data-tip="Compteur de la page d’accueil (homepage).">?</button></span><span class="kpi-v" id="siteViews">—</span></div>
             <div class="kpi"><span class="kpi-l">⏱️ 24h</span><span class="kpi-v" id="siteViews24h">—</span></div>
             <div class="kpi"><span class="kpi-l">📅 7j</span><span class="kpi-v" id="siteViews7d">—</span></div>
 
-            <div class="kpi"><span class="kpi-l">🎮 Vues pages de jeu (total)</span><span class="kpi-v" id="gamesViews">—</span></div>
+            <div class="kpi"><span class="kpi-l">🎮 Vues pages de jeu (total) <button class="tip" type="button" aria-label="Info" data-tip="Somme des vues sur toutes les pages de jeux (tous les uid:xxx).">?</button></span><span class="kpi-v" id="gamesViews">—</span></div>
             <div class="kpi"><span class="kpi-l">⏱️ 24h</span><span class="kpi-v" id="gamesViews24h">—</span></div>
             <div class="kpi"><span class="kpi-l">📅 7j</span><span class="kpi-v" id="gamesViews7d">—</span></div>
 

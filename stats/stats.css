@@ -330,3 +330,83 @@ html,body{
 @media (max-width: 820px){
   .mini-kpis{ grid-template-columns:1fr; }
 }
+
+
+/* =====================
+   Tooltips (boutons ?)
+   ===================== */
+.tip{
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-left: 6px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.06);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1;
+  cursor: help;
+}
+.tip:focus{ outline: 2px solid rgba(90,162,255,.45); outline-offset: 2px; }
+.tip::before{
+  content:"";
+  position:absolute;
+  left: 10px;
+  top: 24px;
+  border: 7px solid transparent;
+  border-bottom-color: rgba(15,18,26,.96);
+  opacity:0;
+  transform: translateY(4px);
+  pointer-events:none;
+  z-index: 20;
+}
+.tip::after{
+  content: attr(data-tip);
+  position:absolute;
+  left: 0;
+  top: 30px;
+  width: min(320px, 70vw);
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(15,18,26,.96);
+  color: rgba(232,234,240,.92);
+  font-size: 12px;
+  line-height: 1.35;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  opacity:0;
+  transform: translateY(4px);
+  pointer-events:none;
+  z-index: 20;
+}
+.tip:hover::after,
+.tip:hover::before,
+.tip:focus::after,
+.tip:focus::before{
+  opacity:1;
+  transform: translateY(0);
+}
+
+/* Compare control */
+.ctrl-compare{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 6px;
+}
+.chk{ display:inline-flex; align-items:center; gap:8px; font-size:13px; color: var(--muted); user-select:none; }
+.chk input{ width: 16px; height: 16px; accent-color: rgb(90,162,255); }
+
+/* Sub numbers in table cells */
+.subnum{
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.subnum .pos{ color: rgba(120, 220, 140, .95); }
+.subnum .neg{ color: rgba(255, 120, 120, .95); }

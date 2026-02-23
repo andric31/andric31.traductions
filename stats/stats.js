@@ -1067,6 +1067,7 @@ async function renderHot() {
         const rows = Array.isArray(w.rows) ? w.rows : [];
         for (const r of rows) {
           const gid = String(r.id);
+          if (gid === MAIN_SITE_ID) continue;
           map.set(gid, (map.get(gid) || 0) + Number(r.total || 0));
         }
       }
@@ -1134,7 +1135,9 @@ async function renderHot() {
       const label = `${w.weekStart} → ${w.weekEnd}`;
       const rows = Array.isArray(w.rows) ? w.rows : [];
       for (const r of rows) {
-        flat.push({ id: String(r.id), total: Number(r.total || 0), week: label, weekStart: w.weekStart });
+        const gid = String(r.id);
+        if (gid === MAIN_SITE_ID) continue;
+        flat.push({ id: gid, total: Number(r.total || 0), week: label, weekStart: w.weekStart });
       }
     }
 
@@ -1240,6 +1243,7 @@ async function renderProgression() {
     let rows = [];
 
     for (const id of ids) {
+      if (id === MAIN_SITE_ID) continue;
       const a = map0.get(id) || 0; // current
       const b = map1.get(id) || 0; // prev
 

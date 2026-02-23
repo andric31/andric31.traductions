@@ -31,6 +31,16 @@ function normalize(s) {
     .replace(/\p{Diacritic}/gu, "");
 }
 
+
+function escapeHtml(s){
+  return String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 async function fetchJson(url) {
   const r = await fetch(url, { cache: "no-store" });
   if (!r.ok) throw new Error("HTTP " + r.status);
@@ -312,8 +322,20 @@ function getGameByCounterId(counterId) {
 
 function setText(el, v) {
   if (!el) return;
-  const n = Number(v || 0);
-  el.textContent = (Number.isFinite(n) ? n : 0).toLocaleString("fr-FR");
+
+  const raw = (v ?? "");
+  const s = String(raw);
+
+  // number-like? (pour KPIs)
+  const isNum =
+    (typeof raw === "number" && Number.isFinite(raw)) ||
+    (typeof raw === "string" && /^-?\d+(?:[\.,]\d+)?$/.test(raw.trim()));
+
+  const out = isNum ? Number(String(raw).replace(",", ".")).toLocaleString("fr-FR") : s;
+
+  // support input/textarea
+  if ("value" in el) el.value = out;
+  else el.textContent = out;
 }
 
 // ============================================================================

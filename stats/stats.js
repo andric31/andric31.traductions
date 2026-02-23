@@ -35,6 +35,7 @@ async function fetchJson(url) {
   const r = await fetch(url, { cache: "no-store" });
   if (!r.ok) throw new Error("HTTP " + r.status);
   return await r.json();
+}
 
 // -------- small helpers --------
 const fmtInt = (n)=> Number(n||0).toLocaleString("fr-FR");
@@ -90,7 +91,6 @@ function discordTopText(title, rows, metric){
   return out.trim();
 }
 
-}
 
 async function fetchGameStatsBulk(ids) {
   try {

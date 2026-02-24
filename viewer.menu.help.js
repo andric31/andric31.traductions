@@ -126,7 +126,7 @@
                 <img class="menu-help-img" src="img/menu/Menu_barre_haut.png" alt="Barre du haut" loading="lazy">
               </div>
               <dl class="menu-help-dl">
-                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></span><span>Hamburger</span></dt><dd>Ouvre/ferme le menu latéral.</dd></div>
+                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></span><span>Hamburger</span></dt><dd>Ouvre/ferme le menu latéral.<br> ├─ ℹ️ À propos — Informations de contact.<br> └─ 🧩 Extension — Description de l’extension.</dd></div>
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="8"/></svg></span><span>Aide</span></dt><dd>Affiche cette fenêtre d’aide.</dd></div>
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/><path d="M8 4v16"/></svg></span><span>Total</span></dt><dd>Nombre total de jeux référencés.</dd></div>
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg></span><span>Vignettes par ligne</span></dt><dd>Change le nombre de vignettes par ligne.</dd></div>
@@ -136,16 +136,6 @@
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/></svg></span><span>Thème</span></dt><dd>Change l’apparence (clair, sombre, etc.).</dd></div>
               </dl>
               </div>
-          </section>
-
-          <section class="menu-help-section">
-            <h3 class="menu-help-h3">Menu latéral</h3>
-            <div class="menu-help-grid">
-              <dl class="menu-help-dl">
-                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span><span>À propos</span></dt><dd>Informations de contact.</dd></div>
-                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10 13a5 5 0 0 1 0-7l1-1a5 5 0 0 1 7 7l-1 1"/><path d="M14 11a5 5 0 0 1 0 7l-1 1a5 5 0 0 1-7-7l1-1"/></svg></span><span>Extension</span></dt><dd>Description de l’extension.</dd></div>
-              </dl>
-            </div>
           </section>
 
           <section class="menu-help-section">

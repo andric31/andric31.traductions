@@ -1092,3 +1092,88 @@ body.age-gate-active footer {
     inset 0 1px 0 rgba(255,255,255,0.06),
     0 8px 18px rgba(0,0,0,0.22);
 }
+
+
+/* ✅ bouton d'aide (à droite du hamburger, page principale) */
+.help-btn{
+  width:34px;
+  height:34px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background: var(--btn);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  user-select:none;
+  flex:0 0 auto;
+  font-weight:700;
+  font-size:16px;
+  line-height:1;
+}
+.help-btn:hover{ filter: brightness(1.12); }
+.help-btn:active{ transform: translateY(1px); }
+
+/* ✅ popover d'aide */
+.help-popover{
+  position:fixed;
+  top:64px;
+  left:12px;
+  right:12px;
+  z-index:9999;
+  display:block;
+}
+.help-popover.hidden{ display:none; }
+
+.help-popover-inner{
+  max-width: 900px;
+  margin: 0 auto;
+  border:1px solid var(--border);
+  background: var(--panel, var(--bg));
+  border-radius:14px;
+  box-shadow: 0 12px 28px rgba(0,0,0,.25);
+  padding: 12px 12px 14px;
+}
+
+.help-popover-head{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px;
+}
+.help-popover-title{
+  font-weight:700;
+  color: var(--title);
+}
+.help-close{
+  margin-left:auto;
+  width:32px;
+  height:32px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background: var(--btn);
+  cursor:pointer;
+}
+.help-close:hover{ filter: brightness(1.12); }
+
+.help-section{
+  margin-top:12px;
+}
+.help-img-wrap{
+  display:flex;
+  justify-content:center;
+  margin: 8px 0 8px;
+}
+.help-img-wrap img{
+  max-width:100%;
+  height:auto;
+  border-radius:12px;
+  border:1px solid var(--border);
+}
+.help-list{
+  margin: 0 0 0 18px;
+  padding: 0;
+}
+.help-list li{
+  margin: 4px 0;
+}

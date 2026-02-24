@@ -228,6 +228,113 @@
    
      row.insertBefore(btn, h1);
      row.appendChild(tools);
+
+
+// ✅ bouton d'aide (page principale uniquement)
+const isMainPage =
+  location.pathname === "/" ||
+  location.pathname.endsWith("/index.html") ||
+  location.pathname.endsWith("/");
+
+let helpBtn = null;
+
+if (isMainPage && !document.getElementById("menuHelpBtn")) {
+  helpBtn = document.createElement("button");
+  helpBtn.type = "button";
+  helpBtn.id = "menuHelpBtn";
+  helpBtn.className = "help-btn";
+  helpBtn.setAttribute("aria-label", "Aide du menu");
+  helpBtn.setAttribute("aria-haspopup", "dialog");
+  helpBtn.setAttribute("aria-expanded", "false");
+  helpBtn.textContent = "?";
+  row.insertBefore(helpBtn, h1);
+
+  // Popover d'aide (injecté dans <body>)
+  if (!document.getElementById("menuHelpPopover")) {
+    const pop = document.createElement("div");
+    pop.id = "menuHelpPopover";
+    pop.className = "help-popover hidden";
+    pop.setAttribute("role", "dialog");
+    pop.setAttribute("aria-label", "Présentation des différentes options du menu");
+    pop.innerHTML = `
+      <div class="help-popover-inner">
+        <div class="help-popover-head">
+          <div class="help-popover-title">Présentation des différentes options du menu.</div>
+          <button type="button" class="help-close" aria-label="Fermer l'aide">✕</button>
+        </div>
+
+        <div class="help-section">
+          <div class="help-img-wrap">
+            <img src="/img/menu/Menu_barre_haut.png" alt="Menu barre haut" loading="lazy" />
+          </div>
+          <ul class="help-list">
+            <li>Hamburger pour ouvrir le menu</li>
+            <li>icon d'aide du menu</li>
+            <li>Total du nombre de jeux réferencer</li>
+            <li>affiche du nombre de vignette par ligne</li>
+            <li>affichage du nombre de vignette simultanément</li>
+            <li>Theme pour customiser l'apparence</li>
+          </ul>
+        </div>
+
+        <div class="help-section">
+          <div class="help-img-wrap">
+            <img src="/img/menu/Menu_barre_haut2.png" alt="Menu barre haut 2" loading="lazy" />
+          </div>
+          <ul class="help-list">
+            <li>Barre de recherche de jeu</li>
+            <li>Tris des trdauction par date, vue, telechargement...</li>
+            <li>Catégorie</li>
+            <li>Moteur</li>
+            <li>statut</li>
+            <li>tags</li>
+            <li>remise a 0 des choix de recherche</li>
+          </ul>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(pop);
+  }
+
+  const pop = document.getElementById("menuHelpPopover");
+  const closeBtn = pop.querySelector(".help-close");
+
+  function closeHelp() {
+    pop.classList.add("hidden");
+    helpBtn.setAttribute("aria-expanded", "false");
+  }
+  function openHelp() {
+    pop.classList.remove("hidden");
+    helpBtn.setAttribute("aria-expanded", "true");
+  }
+  function toggleHelp() {
+    pop.classList.contains("hidden") ? openHelp() : closeHelp();
+  }
+
+  helpBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleHelp();
+  });
+
+  closeBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    closeHelp();
+  });
+
+  // click dehors => fermer
+  document.addEventListener("click", (e) => {
+    if (pop.classList.contains("hidden")) return;
+    const t = e.target;
+    if (t === helpBtn || helpBtn.contains(t)) return;
+    if (pop.contains(t)) return;
+    closeHelp();
+  });
+
+  // ESC => fermer
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeHelp();
+  });
+}
    
      const total = document.querySelector("#countTotal")?.closest(".total-inline");
      const cols = document.getElementById("cols");

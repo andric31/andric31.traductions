@@ -15,31 +15,50 @@
     overlay.innerHTML = `
       <div class="menu-help-card" role="document">
         <div class="menu-help-header">
-          <div class="menu-help-title">Présentation des différentes options du menu.</div>
+          <div>
+            <div class="menu-help-title">Aide rapide</div>
+            <div class="menu-help-subtitle">Présentation des options disponibles sur la page principale.</div>
+          </div>
           <button type="button" class="menu-help-close" aria-label="Fermer">✕</button>
         </div>
 
         <div class="menu-help-body">
-          <img class="menu-help-img" src="img/menu/Menu_barre_haut.png" alt="Menu barre haut" loading="lazy">
-          <ul class="menu-help-list">
-            <li>Hamburger pour ouvrir le menu</li>
-            <li>icon d'aide du menu</li>
-            <li>Total du nombre de jeux réferencer</li>
-            <li>affiche du nombre de vignette par ligne</li>
-            <li>affichage du nombre de vignette simultanément</li>
-            <li>Theme pour customiser l'apparence</li>
-          </ul>
+          <div class="menu-help-tip">Astuce : cliquez en dehors de la fenêtre ou appuyez sur <kbd>Échap</kbd> pour fermer.</div>
 
-          <img class="menu-help-img" src="img/menu/Menu_barre_haut2.png" alt="Menu barre haut 2" loading="lazy">
-          <ul class="menu-help-list">
-            <li>Barre de recherche de jeu</li>
-            <li>Tris des trdauction par date, vue, telechargement...</li>
-            <li>Catégorie</li>
-            <li>Moteur</li>
-            <li>statut</li>
-            <li>tags</li>
-            <li>remise a 0 des choix de recherche</li>
-          </ul>
+          <section class="menu-help-section">
+            <h3 class="menu-help-h3">Barre du haut</h3>
+            <div class="menu-help-grid">
+              <div class="menu-help-media">
+                <img class="menu-help-img" src="img/menu/Menu_barre_haut.png" alt="Barre du haut" loading="lazy">
+              </div>
+              <dl class="menu-help-dl">
+                <div class="menu-help-row"><dt>☰ Hamburger</dt><dd>Ouvre/ferme le menu latéral.</dd></div>
+                <div class="menu-help-row"><dt>ⓘ Aide</dt><dd>Affiche cette fenêtre d’aide.</dd></div>
+                <div class="menu-help-row"><dt>Total</dt><dd>Nombre total de jeux référencés.</dd></div>
+                <div class="menu-help-row"><dt>Vignettes par ligne</dt><dd>Change le nombre de vignettes par ligne.</dd></div>
+                <div class="menu-help-row"><dt>Affichage progressif</dt><dd>Nombre de vignettes chargées/affichées (50, 100, tout…).</dd></div>
+                <div class="menu-help-row"><dt>Thème</dt><dd>Change l’apparence (clair, sombre, etc.).</dd></div>
+              </dl>
+            </div>
+          </section>
+
+          <section class="menu-help-section">
+            <h3 class="menu-help-h3">Recherche & filtres</h3>
+            <div class="menu-help-grid">
+              <div class="menu-help-media">
+                <img class="menu-help-img" src="img/menu/Menu_barre_haut2.png" alt="Recherche et filtres" loading="lazy">
+              </div>
+              <dl class="menu-help-dl">
+                <div class="menu-help-row"><dt>Recherche</dt><dd>Champ « Rechercher un jeu. » pour trouver un jeu.</dd></div>
+                <div class="menu-help-row"><dt>Trier</dt><dd>Trie par date de traduction, vues, téléchargements…</dd></div>
+                <div class="menu-help-row"><dt>Catégorie</dt><dd>Filtre (VN, Collection…).</dd></div>
+                <div class="menu-help-row"><dt>Moteur</dt><dd>Filtre (Ren'Py, RPGM, Unity…).</dd></div>
+                <div class="menu-help-row"><dt>Statut</dt><dd>Filtre (Completed, En cours…).</dd></div>
+                <div class="menu-help-row"><dt>Tags</dt><dd>Ouvre la liste des tags pour affiner la recherche.</dd></div>
+                <div class="menu-help-row"><dt>Rafraîchir</dt><dd>Remet les filtres à zéro et recharge la liste.</dd></div>
+              </dl>
+            </div>
+          </section>
         </div>
 
         <div class="menu-help-footer">

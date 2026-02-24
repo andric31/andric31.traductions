@@ -103,12 +103,17 @@
 .menu-help-btn:active{ transform: translateY(1px); }
 
 
-/* Force circular help button */
-#menu-help-btn {
-    border-radius: 50% !important;
-    aspect-ratio: 1 / 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
+/* Make the help icon button circular (still theme-proof) */
+#menuHelpBtn{
+  border-radius: 9999px !important;
+  aspect-ratio: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+/* Ensure the SVG icon aligns nicely */
+#menuHelpBtn svg{
+  display: block;
 }

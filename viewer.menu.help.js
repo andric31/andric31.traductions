@@ -78,7 +78,14 @@
     btn.className = nextToEl.className; // typically "hamburger-btn"
     btn.setAttribute("aria-label", "Aide du menu");
     btn.title = "Aide du menu";
-    btn.innerHTML = `<span class="menu-help-q">?</span>`;
+    btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+  width="18" height="18" fill="none" stroke="currentColor"
+  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+  aria-hidden="true" focusable="false">
+  <circle cx="12" cy="12" r="10"></circle>
+  <line x1="12" y1="16" x2="12" y2="12"></line>
+  <line x1="12" y1="8" x2="12" y2="8"></line>
+</svg>`;
     nextToEl.insertAdjacentElement("afterend", btn);
 
     btn.addEventListener("click", openModal);

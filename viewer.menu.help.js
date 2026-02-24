@@ -2,8 +2,71 @@
   const HELP_BTN_ID = "menuHelpBtn";
   const HELP_MODAL_ID = "menuHelpModal";
 
+  const HELP_STYLE_ID = "menuHelpStyles";
+
+  function injectStyles() {
+    if (document.getElementById(HELP_STYLE_ID)) return;
+    const style = document.createElement("style");
+    style.id = HELP_STYLE_ID;
+    style.textContent = `
+      .menu-help-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.55);z-index:9999}
+      .menu-help-overlay.is-open{display:flex}
+      .menu-help-card{width:min(980px,100%);max-height:min(86vh,900px);overflow:auto;border-radius:16px;
+        background:var(--menu-help-bg, var(--panel-bg, #fff));
+        color:var(--menu-help-fg, var(--text-color, #111));
+        box-shadow:0 18px 60px rgba(0,0,0,.35); border:1px solid rgba(0,0,0,.10)}
+      @media (prefers-color-scheme: dark){
+        .menu-help-card{border-color:rgba(255,255,255,.12); box-shadow:0 18px 70px rgba(0,0,0,.6)}
+      }
+      .menu-help-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:18px 18px 14px;border-bottom:1px solid rgba(0,0,0,.10)}
+      @media (prefers-color-scheme: dark){.menu-help-header{border-bottom-color:rgba(255,255,255,.12)}}
+      .menu-help-title{font-size:20px;font-weight:800;letter-spacing:.2px;line-height:1.2}
+      .menu-help-subtitle{margin-top:6px;font-size:13px;opacity:.75;line-height:1.35}
+      .menu-help-close{appearance:none;border:0;background:transparent;color:inherit;font-size:18px;line-height:1;padding:8px;border-radius:10px;cursor:pointer;opacity:.8}
+      .menu-help-close:hover{background:rgba(0,0,0,.06);opacity:1}
+      @media (prefers-color-scheme: dark){.menu-help-close:hover{background:rgba(255,255,255,.08)}}
+
+      .menu-help-body{padding:16px 18px 6px}
+      .menu-help-tip{font-size:13px;line-height:1.4;padding:12px 12px;border-radius:12px;
+        background:rgba(0,0,0,.05);margin-bottom:14px}
+      @media (prefers-color-scheme: dark){.menu-help-tip{background:rgba(255,255,255,.08)}}
+      .menu-help-tip kbd{font:inherit;font-weight:700;padding:2px 6px;border-radius:8px;border:1px solid rgba(0,0,0,.18);background:rgba(255,255,255,.55)}
+      @media (prefers-color-scheme: dark){.menu-help-tip kbd{border-color:rgba(255,255,255,.22);background:rgba(0,0,0,.25)}}
+
+      .menu-help-section{margin:14px 0 18px}
+      .menu-help-h3{margin:0 0 10px;font-size:15px;font-weight:800;letter-spacing:.2px}
+      .menu-help-grid{display:grid;grid-template-columns: 1fr 1.2fr;gap:14px;align-items:start}
+      @media (max-width: 820px){.menu-help-grid{grid-template-columns:1fr}}
+
+      .menu-help-media{border-radius:14px;overflow:hidden;border:1px solid rgba(0,0,0,.10);background:rgba(0,0,0,.03)}
+      @media (prefers-color-scheme: dark){.menu-help-media{border-color:rgba(255,255,255,.12);background:rgba(255,255,255,.06)}}
+      .menu-help-img{display:block;width:100%;height:auto}
+
+      .menu-help-dl{margin:0;display:flex;flex-direction:column;gap:10px}
+      .menu-help-row{display:grid;grid-template-columns: 170px 1fr;gap:12px;align-items:start;
+        padding:10px 12px;border-radius:12px;background:rgba(0,0,0,.03);border:1px solid rgba(0,0,0,.08)}
+      @media (prefers-color-scheme: dark){.menu-help-row{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.10)}}
+      @media (max-width: 520px){.menu-help-row{grid-template-columns:1fr;gap:6px}}
+      .menu-help-row dt{margin:0;font-weight:800}
+      .menu-help-row dd{margin:0;opacity:.9;line-height:1.45}
+
+      .menu-help-footer{display:flex;justify-content:flex-end;gap:10px;padding:12px 18px 18px;border-top:1px solid rgba(0,0,0,.10)}
+      @media (prefers-color-scheme: dark){.menu-help-footer{border-top-color:rgba(255,255,255,.12)}}
+      .menu-help-btn{appearance:none;border:0;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;
+        background:rgba(0,0,0,.08);color:inherit}
+      .menu-help-btn:hover{background:rgba(0,0,0,.12)}
+      @media (prefers-color-scheme: dark){
+        .menu-help-btn{background:rgba(255,255,255,.10)}
+        .menu-help-btn:hover{background:rgba(255,255,255,.14)}
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+
   function buildModal() {
     if (document.getElementById(HELP_MODAL_ID)) return;
+    injectStyles();
 
     const overlay = document.createElement("div");
     overlay.id = HELP_MODAL_ID;

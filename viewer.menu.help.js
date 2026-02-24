@@ -139,6 +139,16 @@
           </section>
 
           <section class="menu-help-section">
+            <h3 class="menu-help-h3">Menu latéral</h3>
+            <div class="menu-help-grid">
+              <dl class="menu-help-dl">
+                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span><span>À propos</span></dt><dd>Informations de contact.</dd></div>
+                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10 13a5 5 0 0 1 0-7l1-1a5 5 0 0 1 7 7l-1 1"/><path d="M14 11a5 5 0 0 1 0 7l-1 1a5 5 0 0 1-7-7l1-1"/></svg></span><span>Extension</span></dt><dd>Description de l’extension.</dd></div>
+              </dl>
+            </div>
+          </section>
+
+          <section class="menu-help-section">
             <h3 class="menu-help-h3">Recherche & filtres</h3>
             <div class="menu-help-grid">
               <div class="menu-help-media">

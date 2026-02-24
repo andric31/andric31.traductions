@@ -105,24 +105,6 @@
   <line x1="12" y1="16" x2="12" y2="12"></line>
   <line x1="12" y1="8" x2="12" y2="8"></line>
 </svg>`;
-    
-    // Match the hamburger size precisely (prevents any deformation across themes)
-    try {
-      const r = nextToEl.getBoundingClientRect();
-      const w = Math.round(r.width || r.height || 32);
-      const h = Math.round(r.height || r.width || 32);
-      const s = Math.max(28, Math.min(w, h));
-      btn.style.width = s + "px";
-      btn.style.height = s + "px";
-      btn.style.minWidth = s + "px";
-      btn.style.minHeight = s + "px";
-      btn.style.borderRadius = "9999px";
-      btn.style.display = "inline-flex";
-      btn.style.alignItems = "center";
-      btn.style.justifyContent = "center";
-      btn.style.padding = "0";
-      btn.style.lineHeight = "0";
-    } catch(e) {}
     nextToEl.insertAdjacentElement("afterend", btn);
 
     btn.addEventListener("click", openModal);

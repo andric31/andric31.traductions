@@ -46,28 +46,54 @@
       .menu-help-img{display:block;width:100%;max-width:100%;height:auto}
 
       .menu-help-dl{margin:0;display:flex;flex-direction:column;gap:10px}
-      .menu-help-row{display:grid;grid-template-columns: 170px 1fr;gap:12px;align-items:start;
+
+      /* ✅ Lignes: icône | titre (plus large) | description */
+      .menu-help-row{
+        display:grid;
+        grid-template-columns: 18px 210px 1fr; /* <- élargit la colonne titre */
+        gap:16px;
+        align-items:center;
         padding:10px 12px;border-radius:12px;
         background:var(--soft-04, var(--hover-bg, rgba(0,0,0,.03)));
-        border:1px solid var(--border-soft, rgba(0,0,0,.08))}
-      @media (max-width: 520px){.menu-help-row{grid-template-columns:1fr;gap:6px}}
+        border:1px solid var(--border-soft, rgba(0,0,0,.08))
+      }
 
-      .menu-help-row dt{margin:0;font-weight:900;display:flex;align-items:center;gap:10px}
-      .menu-help-row dd{margin:0;opacity:.92;line-height:1.45}
-      .menu-help-row .mh-ico{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;flex:0 0 18px;
-        color:var(--muted, currentColor);opacity:.95}
+      /* dt devient "transparent" pour placer icône + titre dans la grid */
+      .menu-help-row dt{margin:0;font-weight:900;display:contents}
+      .menu-help-row dd{margin:0;opacity:.92;line-height:1.45;grid-column:3}
+
+      .menu-help-row .mh-ico{
+        display:inline-flex;align-items:center;justify-content:center;
+        width:18px;height:18px;flex:0 0 18px;
+        color:var(--muted, currentColor);opacity:.95;
+        grid-column:1
+      }
       .menu-help-row .mh-ico svg{width:18px;height:18px;display:block;stroke:currentColor;fill:none}
+
+      /* Le 2e span dans dt = titre -> colonne 2 + pas de wrap */
+      .menu-help-row dt span:last-child{
+        grid-column:2;
+        white-space:nowrap;
+      }
+
+      /* ✅ Mobile: icône + titre sur la 1ère ligne, description dessous */
+      @media (max-width: 520px){
+        .menu-help-row{
+          grid-template-columns: 18px 1fr;
+          row-gap:6px;
+          align-items:start;
+        }
+        .menu-help-row dd{grid-column:1 / -1}
+      }
 
       .menu-help-footer{display:flex;justify-content:flex-end;gap:10px;padding:12px 18px 18px;
         border-top:1px solid var(--border-soft, rgba(0,0,0,.10))}
       .menu-help-btn{appearance:none;border:1px solid var(--border-soft, rgba(0,0,0,.10));border-radius:12px;padding:10px 14px;
         font-weight:900;cursor:pointer;background:var(--btn, rgba(0,0,0,.08));color:inherit}
       .menu-help-btn:hover{background:var(--hover-bg, rgba(0,0,0,.12))}
-
     `;
     document.head.appendChild(style);
   }
-
 
   function buildModal() {
     if (document.getElementById(HELP_MODAL_ID)) return;

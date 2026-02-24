@@ -15,7 +15,7 @@
 
       
       .mh-subpanel{
-        margin:1px 0 4px 42px;
+        margin:0.5px 0 2px 42px;
         padding:10px 14px;
         border-radius:10px;
         background:rgba(255,255,255,0.04);

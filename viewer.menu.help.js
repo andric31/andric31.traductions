@@ -1,4 +1,4 @@
-((() => {
+(() => {
   const HELP_BTN_ID = "menuHelpBtn";
   const HELP_MODAL_ID = "menuHelpModal";
 
@@ -13,9 +13,9 @@
         background:var(--overlay-bg, rgba(0,0,0,.55));z-index:9999}
       .menu-help-overlay.is-open{display:flex}
 
-      /* ✅ Sous-encadré dans le <dd> (évite les grands espaces entre lignes) */
+      /* ✅ Encadré "dans" l'encadré Hamburger (donc DANS le <dd>) */
       .mh-subpanel{
-        margin-top:8px; /* espace entre la phrase et l'encadré */
+        margin-top:8px;          /* espace entre la phrase et le sous-encadré */
         padding:10px 14px;
         border-radius:10px;
         background:rgba(255,255,255,0.04);
@@ -138,9 +138,17 @@
                 <img class="menu-help-img" src="img/menu/Menu_barre_haut.png" alt="Barre du haut" loading="lazy">
               </div>
               <dl class="menu-help-dl">
+
+                <!-- ✅ Hamburger: sous-encadré DANS l'encadré (dans le <dd>) -->
                 <div class="menu-help-row">
                   <dt>
-                    <span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></span>
+                    <span class="mh-ico">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <line x1="4" y1="6" x2="20" y2="6"/>
+                        <line x1="4" y1="12" x2="20" y2="12"/>
+                        <line x1="4" y1="18" x2="20" y2="18"/>
+                      </svg>
+                    </span>
                     <span>Hamburger</span>
                   </dt>
                   <dd>
@@ -157,8 +165,9 @@
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg></span><span>Vignettes par ligne</span></dt><dd>Change le nombre de vignettes par ligne.</dd></div>
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2l9 5-9 5-9-5 9-5z"/><path d="M3 12l9 5 9-5"/><path d="M3 17l9 5 9-5"/></svg></span><span>Affichage progressif</span></dt><dd>Nombre de vignettes chargées/affichées (50, 100, tout…).</dd></div>
 
-                <!-- ✅ Thème: icône palette Lucide propre -->
+                <!-- ✅ Thème -->
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/></svg></span><span>Thème</span></dt><dd>Change l’apparence (clair, sombre, etc.).</dd></div>
+
               </dl>
               </div>
           </section>
@@ -174,7 +183,7 @@
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M11 5h10"/><path d="M11 9h7"/><path d="M11 13h4"/><path d="M3 7l3-3 3 3"/><path d="M6 4v16"/><path d="M3 17l3 3 3-3"/></svg></span><span>Trier</span></dt><dd>Trie par date de traduction, vues, téléchargements…</dd></div>
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 7h18"/><path d="M6 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/><rect x="4" y="7" width="16" height="14" rx="2"/></svg></span><span>Catégorie</span></dt><dd>Filtre (VN, Collection…).</dd></div>
 
-                <!-- ✅ Moteur: icône corrigée -->
+                <!-- ✅ Moteur -->
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6" rx="1"></rect><line x1="9" y1="2" x2="9" y2="4"></line><line x1="15" y1="2" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="22"></line><line x1="15" y1="20" x2="15" y2="22"></line><line x1="20" y1="9" x2="22" y2="9"></line><line x1="20" y1="15" x2="22" y2="15"></line><line x1="2" y1="9" x2="4" y2="9"></line><line x1="2" y1="15" x2="4" y2="15"></line></svg></span><span>Moteur</span></dt><dd>Filtre (Ren'Py, RPGM, Unity…).</dd></div>
 
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9"/></svg></span><span>Statut</span></dt><dd>Filtre (Completed, En cours…).</dd></div>

@@ -13,6 +13,15 @@
         background:var(--overlay-bg, rgba(0,0,0,.55));z-index:9999}
       .menu-help-overlay.is-open{display:flex}
 
+      
+      .mh-desc{margin-bottom:6px}
+      .mh-tree{margin:0;padding-left:18px;list-style:none}
+      .mh-tree li{position:relative;margin:3px 0;padding-left:14px}
+      .mh-tree li::before{content:"";position:absolute;left:0;top:.6em;width:10px;border-top:1px solid rgba(0,0,0,.25)}
+      .mh-emoji{margin-right:6px}
+      .mh-label{font-weight:600}
+      .mh-sep{margin:0 6px;opacity:.7}
+
       .menu-help-card{width:min(980px,100%);max-height:min(86vh,900px);overflow:auto;border-radius:16px;
         background:var(--card, var(--bg2, #fff));
         color:var(--fg, #111);
@@ -126,7 +135,11 @@
                 <img class="menu-help-img" src="img/menu/Menu_barre_haut.png" alt="Barre du haut" loading="lazy">
               </div>
               <dl class="menu-help-dl">
-                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></span><span>Hamburger</span></dt><dd>Ouvre/ferme le menu latéral.<br> ├─ ℹ️ À propos — Informations de contact.<br> └─ 🧩 Extension — Description de l’extension.</dd></div>
+                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></span><span>Hamburger</span></dt><dd><div class="mh-desc">Ouvre/ferme le menu latéral.</div>
+  <ul class="mh-tree" aria-label="Éléments du menu latéral">
+    <li><span class="mh-emoji">ℹ️</span><span class="mh-label">À propos</span><span class="mh-sep">—</span>Informations de contact.</li>
+    <li><span class="mh-emoji">🧩</span><span class="mh-label">Extension</span><span class="mh-sep">—</span>Description de l’extension.</li>
+  </ul></dd></div>
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="8"/></svg></span><span>Aide</span></dt><dd>Affiche cette fenêtre d’aide.</dd></div>
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/><path d="M8 4v16"/></svg></span><span>Total</span></dt><dd>Nombre total de jeux référencés.</dd></div>
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg></span><span>Vignettes par ligne</span></dt><dd>Change le nombre de vignettes par ligne.</dd></div>

@@ -101,3 +101,14 @@
 }
 .menu-help-btn:hover{ background: var(--hover-bg, rgba(255,255,255,0.08)); }
 .menu-help-btn:active{ transform: translateY(1px); }
+
+
+/* Force circular help button */
+#menu-help-btn {
+    border-radius: 50% !important;
+    aspect-ratio: 1 / 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}

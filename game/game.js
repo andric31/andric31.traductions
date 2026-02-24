@@ -618,6 +618,14 @@ function initHamburgerMenu() {
     window.ViewerMenu?.init?.();
   } catch {}
 
+  // ✅ Ajout item : retour page principale (viewer)
+  try {
+    if (!window.__homeMenuAdded && window.ViewerMenu?.addItem) {
+      window.__homeMenuAdded = true;
+      window.ViewerMenu.addItem("Retout liste (viewer)", () => { window.location.href = "../"; });
+    }
+  } catch {}
+
   btn.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();

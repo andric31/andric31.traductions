@@ -64,7 +64,7 @@
         display:grid;
         grid-template-columns: 18px 210px 1fr; /* <- élargit la colonne titre */
         gap:16px;
-        align-items:center;
+        align-items:start; /* ✅ au lieu de center : Hamburger en haut face à sa description */
         padding:10px 12px;border-radius:12px;
         background:var(--soft-04, var(--hover-bg, rgba(0,0,0,.03)));
         border:1px solid var(--border-soft, rgba(0,0,0,.08))
@@ -78,7 +78,9 @@
         display:inline-flex;align-items:center;justify-content:center;
         width:18px;height:18px;flex:0 0 18px;
         color:var(--muted, currentColor);opacity:.95;
-        grid-column:1
+        grid-column:1;
+        align-self:start;   /* ✅ */
+        margin-top:2px;     /* ✅ petit ajustement visuel */
       }
       .menu-help-row .mh-ico svg{width:18px;height:18px;display:block;stroke:currentColor;fill:none}
 
@@ -86,6 +88,8 @@
       .menu-help-row dt span:last-child{
         grid-column:2;
         white-space:nowrap;
+        align-self:start;   /* ✅ */
+        margin-top:1px;     /* ✅ */
       }
 
       /* ✅ Mobile: icône + titre sur la 1ère ligne, description dessous */

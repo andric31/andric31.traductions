@@ -51,8 +51,12 @@
         background:var(--soft-04, var(--hover-bg, rgba(0,0,0,.03)));
         border:1px solid var(--border-soft, rgba(0,0,0,.08))}
       @media (max-width: 520px){.menu-help-row{grid-template-columns:1fr;gap:6px}}
-      .menu-help-row dt{margin:0;font-weight:900}
+
+      .menu-help-row dt{margin:0;font-weight:900;display:flex;align-items:center;gap:10px}
       .menu-help-row dd{margin:0;opacity:.92;line-height:1.45}
+      .menu-help-row .mh-ico{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;flex:0 0 18px;
+        color:var(--muted, currentColor);opacity:.95}
+      .menu-help-row .mh-ico svg{width:18px;height:18px;display:block;stroke:currentColor;fill:none}
 
       .menu-help-footer{display:flex;justify-content:flex-end;gap:10px;padding:12px 18px 18px;
         border-top:1px solid var(--border-soft, rgba(0,0,0,.10))}
@@ -96,12 +100,12 @@
                 <img class="menu-help-img" src="img/menu/Menu_barre_haut.png" alt="Barre du haut" loading="lazy">
               </div>
               <dl class="menu-help-dl">
-                <div class="menu-help-row"><dt>☰ Hamburger</dt><dd>Ouvre/ferme le menu latéral.</dd></div>
-                <div class="menu-help-row"><dt>ⓘ Aide</dt><dd>Affiche cette fenêtre d’aide.</dd></div>
-                <div class="menu-help-row"><dt>Total</dt><dd>Nombre total de jeux référencés.</dd></div>
-                <div class="menu-help-row"><dt>Vignettes par ligne</dt><dd>Change le nombre de vignettes par ligne.</dd></div>
-                <div class="menu-help-row"><dt>Affichage progressif</dt><dd>Nombre de vignettes chargées/affichées (50, 100, tout…).</dd></div>
-                <div class="menu-help-row"><dt>Thème</dt><dd>Change l’apparence (clair, sombre, etc.).</dd></div>
+                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></span><span>Hamburger</span></dt><dd>Ouvre/ferme le menu latéral.</dd></div>
+                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="8"/></svg></span><span>Aide</span></dt><dd>Affiche cette fenêtre d’aide.</dd></div>
+                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/><path d="M8 4v16"/></svg></span><span>Total</span></dt><dd>Nombre total de jeux référencés.</dd></div>
+                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg></span><span>Vignettes par ligne</span></dt><dd>Change le nombre de vignettes par ligne.</dd></div>
+                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2l9 5-9 5-9-5 9-5z"/><path d="M3 12l9 5 9-5"/><path d="M3 17l9 5 9-5"/></svg></span><span>Affichage progressif</span></dt><dd>Nombre de vignettes chargées/affichées (50, 100, tout…).</dd></div>
+                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3a9 9 0 0 0 0 18h1a2 2 0 0 0 0-4h-1a2 2 0 0 1 0-4h2a3 3 0 0 0 0-6h-1a9 9 0 0 0-1-4z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="9.5" cy="7.5" r="1"/><circle cx="14.5" cy="7.5" r="1"/><circle cx="16.5" cy="10.5" r="1"/></svg></span><span>Thème</span></dt><dd>Change l’apparence (clair, sombre, etc.).</dd></div>
               </dl>
             </div>
           </section>
@@ -113,13 +117,13 @@
                 <img class="menu-help-img" src="img/menu/Menu_barre_haut2.png" alt="Recherche et filtres" loading="lazy">
               </div>
               <dl class="menu-help-dl">
-                <div class="menu-help-row"><dt>Recherche</dt><dd>Champ « Rechercher un jeu. » pour trouver un jeu.</dd></div>
-                <div class="menu-help-row"><dt>Trier</dt><dd>Trie par date de traduction, vues, téléchargements…</dd></div>
-                <div class="menu-help-row"><dt>Catégorie</dt><dd>Filtre (VN, Collection…).</dd></div>
-                <div class="menu-help-row"><dt>Moteur</dt><dd>Filtre (Ren'Py, RPGM, Unity…).</dd></div>
-                <div class="menu-help-row"><dt>Statut</dt><dd>Filtre (Completed, En cours…).</dd></div>
-                <div class="menu-help-row"><dt>Tags</dt><dd>Ouvre la liste des tags pour affiner la recherche.</dd></div>
-                <div class="menu-help-row"><dt>Rafraîchir</dt><dd>Remet les filtres à zéro et recharge la liste.</dd></div>
+                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span><span>Recherche</span></dt><dd>Champ « Rechercher un jeu. » pour trouver un jeu.</dd></div>
+                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M11 5h10"/><path d="M11 9h7"/><path d="M11 13h4"/><path d="M3 7l3-3 3 3"/><path d="M6 4v16"/><path d="M3 17l3 3 3-3"/></svg></span><span>Trier</span></dt><dd>Trie par date de traduction, vues, téléchargements…</dd></div>
+                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 7h18"/><path d="M6 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/><rect x="4" y="7" width="16" height="14" rx="2"/></svg></span><span>Catégorie</span></dt><dd>Filtre (VN, Collection…).</dd></div>
+                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a7.8 7.8 0 0 0 .1-6l2-1-2-3-2 1a8 8 0 0 0-5-2V2H10v2a8 8 0 0 0-5 2L3 5 1 8l2 1a7.8 7.8 0 0 0 .1 6l-2 1 2 3 2-1a8 8 0 0 0 5 2v2h4v-2a8 8 0 0 0 5-2l2 1 2-3-2-1z"/></svg></span><span>Moteur</span></dt><dd>Filtre (Ren'Py, RPGM, Unity…).</dd></div>
+                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9"/></svg></span><span>Statut</span></dt><dd>Filtre (Completed, En cours…).</dd></div>
+                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 10V4H14L4 14l6 6 10-10z"/><circle cx="16" cy="8" r="1"/></svg></span><span>Tags</span></dt><dd>Ouvre la liste des tags pour affiner la recherche.</dd></div>
+                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg></span><span>Rafraîchir</span></dt><dd>Remet les filtres à zéro et recharge la liste.</dd></div>
               </dl>
             </div>
           </section>

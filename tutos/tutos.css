@@ -118,3 +118,134 @@ code{
   border-top: 1px solid #333;
   opacity: 0.7;
 }
+/* --- Pretty layout helpers (optional) --- */
+.card{
+  background: #2b2d31;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 18px 18px;
+  margin: 14px 0;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+
+.hero{
+  padding: 18px;
+}
+
+.hero-head{
+  display:flex;
+  gap: 14px;
+  align-items:flex-start;
+}
+
+.hero-icon{
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(78,161,255,0.14);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: 22px;
+  border: 1px solid rgba(78,161,255,0.25);
+  flex: 0 0 auto;
+}
+
+.eyebrow{
+  margin: 0 0 6px;
+  font-size: 12px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  opacity: .75;
+}
+
+.hero-text{
+  margin: 0;
+  opacity: .92;
+  line-height: 1.5;
+}
+
+.grid2{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+@media (max-width: 720px){
+  .grid2{ grid-template-columns: 1fr; }
+}
+
+.mini{
+  background: rgba(17,18,20,0.55);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.mini h3{
+  margin: 0 0 10px;
+}
+
+.list{
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.kpi-row{
+  display:grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+  margin: 12px 0;
+}
+
+@media (max-width: 820px){
+  .kpi-row{ grid-template-columns: 1fr; }
+}
+
+.kpi{
+  background: rgba(17,18,20,0.55);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.kpi-emoji{
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+
+.kpi-title{
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.kpi-text{
+  opacity: .85;
+  line-height: 1.4;
+}
+
+.badge{
+  display:inline-block;
+  padding: 4px 10px;
+  margin: 6px 6px 0 0;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.10);
+  font-size: 12px;
+  opacity: .9;
+}
+
+/* callout variants */
+.callout.warn{
+  border-left-color: #f0c36d;
+  background: rgba(240,195,109,0.12);
+}
+.callout.tip{
+  border-left-color: #7bd389;
+  background: rgba(123,211,137,0.10);
+}
+.callout.danger{
+  border-left-color: #ff6b6b;
+  background: rgba(255,107,107,0.10);
+}

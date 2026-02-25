@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Extraire une traduction Ren'Py (Windows)</title>
+</head>
+<body>
+
+  <header>
+    <p><a href="index.html">⬅ Retour</a></p>
+    <h1>🛠 Extraire une traduction Ren'Py (Windows)</h1>
+    <p>Ce guide explique comment installer une traduction pour un jeu développé avec <strong>Ren'Py</strong>, sous Windows.</p>
+    <hr>
+  </header>
+
+  <main>
+
+    <h2>📦 1) Télécharger la traduction</h2>
+    <p>La traduction est généralement fournie sous forme d’archive (souvent <code>.rar</code> ou <code>.zip</code>) :</p>
+    <pre><code>nom_du_jeu_traduction.rar</code></pre>
+
+    <h2>🗂 2) Extraire l’archive au bon endroit</h2>
+    <p>Sous Windows :</p>
+    <ol>
+      <li>Clique droit sur l’archive <code>.rar</code></li>
+      <li>Choisis <strong>“Extraire ici”</strong> ou <strong>“Extraire vers…”</strong></li>
+      <li>Sélectionne le <strong>dossier principal du jeu</strong>, celui où se trouve l’exécutable <code>.exe</code></li>
+    </ol>
+
+    <p><strong>📌 Important :</strong> il faut extraire <strong>à la racine du jeu</strong>, pas dans un sous-dossier au hasard.</p>
+
+    <p>Exemple d’emplacement attendu :</p>
+    <pre><code>Nom_du_jeu.exe</code></pre>
+
+    <h2>📁 3) Vérifier l’emplacement final</h2>
+    <p>Une fois l’extraction terminée, le fichier doit se trouver ici :</p>
+    <pre><code>.\Nom_du_jeu\game\tl\fr_zenpy_DeepL_andric31\x.rpy</code></pre>
+
+    <p>Structure typique :</p>
+    <pre><code>Nom_du_jeu
+├── Nom_du_jeu.exe
+└── game
+    ├── script.rpy
+    └── tl
+        └── fr_zenpy_DeepL_andric31
+            └── x.rpy</code></pre>
+
+    <p>Si le dossier <code>fr_zenpy_DeepL_andric31</code> apparaît bien dans <code>game\tl\</code>, alors l’installation est correcte ✅</p>
+
+    <h2>▶️ 4) Lancer le jeu</h2>
+    <p>Lance simplement :</p>
+    <pre><code>Nom_du_jeu.exe</code></pre>
+
+    <p>Si la traduction est bien installée :</p>
+    <ul>
+      <li>Le jeu se lance en français automatiquement ✅</li>
+      <li>ou le français apparaît dans les options de langue ✅</li>
+    </ul>
+
+    <h2>❗ Problèmes fréquents</h2>
+
+    <h3>❌ La traduction ne s’affiche pas</h3>
+    <p>Vérifie :</p>
+    <ul>
+      <li>Que tu n’as pas un dossier du type <code>Nom_du_jeu\Nom_du_jeu\game\...</code> (double dossier)</li>
+      <li>Que le dossier <code>fr_zenpy_DeepL_andric31</code> est bien dans <code>game\tl\</code></li>
+      <li>Que tu as bien remplacé les anciens fichiers si une version précédente existait</li>
+    </ul>
+
+    <h3>❌ Erreur au lancement</h3>
+    <p>Supprime l’ancienne version de la traduction puis réinstalle proprement.</p>
+
+    <h2>💡 Astuce Andric31</h2>
+    <p>Si tu avais déjà une ancienne version :</p>
+    <ol>
+      <li>Supprime entièrement :</li>
+    </ol>
+    <pre><code>game\tl\fr_zenpy_DeepL_andric31</code></pre>
+    <ol start="2">
+      <li>Réinstalle la nouvelle archive proprement</li>
+    </ol>
+
+    <p>Ça évite les conflits de fichiers ✅</p>
+
+  </main>
+
+  <footer>
+    <hr>
+    <p style="opacity:0.7;">© Andric31 — Tutos & Aide</p>
+  </footer>
+
+</body>
+</html>

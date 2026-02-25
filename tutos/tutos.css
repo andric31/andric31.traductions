@@ -1,3 +1,11 @@
+:root{
+  color-scheme: dark;
+}
+
+html, body{
+  height: 100%;
+}
+
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -5,9 +13,37 @@ body {
   color: #fff;
 }
 
+a{
+  color: #4ea1ff;
+  text-decoration: none;
+}
+
+a:hover{
+  text-decoration: underline;
+}
+
 .topbar {
   padding: 20px;
   border-bottom: 1px solid #333;
+}
+
+.topbar h1{
+  margin: 10px 0 6px;
+}
+
+.subtitle{
+  margin: 0;
+  opacity: 0.85;
+}
+
+.back{
+  display: inline-block;
+  margin-bottom: 6px;
+}
+
+.page{
+  padding: 20px;
+  max-width: 920px;
 }
 
 .tuto-row {
@@ -25,6 +61,7 @@ body {
   text-decoration: none;
   color: white;
   transition: 0.2s ease;
+  border: 1px solid rgba(255,255,255,0.06);
 }
 
 .tuto-card:hover {
@@ -50,4 +87,34 @@ body {
 .disabled {
   opacity: 0.4;
   pointer-events: none;
+}
+
+h2{
+  margin-top: 28px;
+}
+
+pre{
+  background: #111214;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 14px;
+  overflow: auto;
+}
+
+code{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.callout{
+  margin: 14px 0;
+  padding: 12px 14px;
+  border-left: 4px solid #4ea1ff;
+  background: rgba(78,161,255,0.10);
+  border-radius: 10px;
+}
+
+.footer{
+  padding: 18px 20px;
+  border-top: 1px solid #333;
+  opacity: 0.7;
 }

@@ -1,1 +1,53 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #1e1f22;
+  color: #fff;
+}
 
+.topbar {
+  padding: 20px;
+  border-bottom: 1px solid #333;
+}
+
+.tuto-row {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  overflow-x: auto;
+}
+
+.tuto-card {
+  min-width: 260px;
+  background: #2b2d31;
+  border-radius: 12px;
+  padding: 20px;
+  text-decoration: none;
+  color: white;
+  transition: 0.2s ease;
+}
+
+.tuto-card:hover {
+  background: #383a40;
+  transform: translateY(-4px);
+}
+
+.tuto-card .icon {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.tuto-card .title {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.tuto-card .desc {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}

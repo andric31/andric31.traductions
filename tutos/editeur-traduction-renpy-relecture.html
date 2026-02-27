@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Éditeur de Traductions Ren'Py pour Relecture</title>
+
+<link rel="stylesheet" href="tutos.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <a class="back" href="index.html">⬅ Retour</a>
+  <h1>🛠️ Éditeur de Traductions Ren'Py pour Relecture</h1>
+  <p class="subtitle">Outil dédié à la correction et relecture de mes traductions</p>
+</header>
+
+<main class="page">
+
+<div class="image-wrap">
+  <img src="img/Editeur_Relecture_Renpy/fr_relecture_4.webp" alt="Éditeur Ren'Py Relecture" class="tutorial-img">
+</div>
+
+<section class="card">
+  <h2>🛠️ 📝 Présentation</h2>
+
+  <p>
+    Je propose un petit outil destiné aux personnes qui ne savent pas,
+    ou ne souhaitent pas, modifier directement les fichiers de traduction.
+  </p>
+
+  <p>
+    Ce projet a été développé à l’origine pour répondre à une demande
+    visant une solution simple et accessible.
+  </p>
+
+  <div class="callout warning">
+    ❗ Version exclusive à <strong>mes traductions</strong>.<br>
+    Elle ne fonctionne pas avec un dossier <code>french</code> ni avec d'autres dossiers de traduction.
+  </div>
+
+  <p>
+    🔗 Téléchargement :
+    <a href="https://mega.nz/folder/jMdBSBrB#hN1MaMhfeA5d6ucuajt5AQ" target="_blank">
+      Télécharger l’éditeur
+    </a>
+  </p>
+
+  <div class="callout warning">
+    ⚠️ Version en test — Pensez à effectuer des sauvegardes régulières.
+  </div>
+
+  <p><strong>Compatibilité :</strong> Ren'Py 8 (Ren'Py 7 partiellement compatible)</p>
+</section>
+
+<div class="sep"></div>
+
+<section class="card">
+  <h2>🚀 Installation</h2>
+
+  <ol>
+    <li>Extraire l’archive .rar dans le dossier du jeu (là où se trouve le .exe)</li>
+    <li>Ne lancez pas le jeu avant extraction</li>
+  </ol>
+
+  <div class="image-wrap">
+    <img src="img/Editeur_Relecture_Renpy/01.webp" class="tutorial-img">
+  </div>
+
+  <h3>📂 Fichiers créés</h3>
+  <pre>
+./fr_relecture.exe
+./game/fr_relecture.rpyc
+  </pre>
+
+  <p>
+    Le fichier <code>fr_relecture.rpyc</code> doit être présent dans le dossier <code>game</code>.
+  </p>
+</section>
+
+<div class="sep"></div>
+
+<section class="card">
+  <h2>🖥️ Utilisation</h2>
+
+  <h3>1️⃣ Lancer fr_relecture.exe</h3>
+  <p>L’éditeur peut être lancé avant, pendant ou après le jeu.</p>
+
+  <div class="image-wrap">
+    <img src="img/Editeur_Relecture_Renpy/Dialogue.webp" class="tutorial-img">
+  </div>
+
+  <p>
+    Un fichier temporaire <code>fr_relecture_temp.json</code> sera créé.
+  </p>
+
+  <h3>2️⃣ Modifier les dialogues</h3>
+  <p>
+    L’éditeur affiche en temps réel la ligne visible à l’écran.
+  </p>
+
+  <div class="image-wrap">
+    <img src="img/Editeur_Relecture_Renpy/Dialogue_edit.webp" class="tutorial-img">
+  </div>
+
+  <div class="callout warning">
+    ⚠️ Les modifications sont visibles uniquement dans l’éditeur tant que vous
+    n’avez pas cliqué sur <strong>Enregistrer la correction</strong>.
+  </div>
+
+  <p>
+    Le bouton enregistre définitivement dans les fichiers .rpy.
+  </p>
+</section>
+
+<div class="sep"></div>
+
+<section class="card">
+  <h2>🔄 Activation du rechargement automatique</h2>
+
+  <div class="image-wrap">
+    <img src="img/Editeur_Relecture_Renpy/04_Recharge.webp" class="tutorial-img">
+  </div>
+
+  <p>
+    En jeu, appuyez sur <strong>Maj + R</strong> une première fois.
+  </p>
+
+  <p>
+    Ensuite, chaque clic sur “Enregistrer la correction”
+    rechargera automatiquement le jeu.
+  </p>
+</section>
+
+<div class="sep"></div>
+
+<section class="card">
+  <h2>⚙️ Fonctionnalités principales</h2>
+
+  <ul>
+    <li>Protection automatique des balises []</li>
+    <li>Protection automatique des guillemets \"</li>
+    <li>Boutons DeepL & Google</li>
+    <li>Notes personnelles (fr_relecture_notes.txt)</li>
+    <li>Export des corrections en .zip</li>
+    <li>Mode fenêtre toujours au-dessus</li>
+    <li>Réglage d’opacité</li>
+  </ul>
+</section>
+
+<div class="sep"></div>
+
+<section class="card">
+  <h2>🧠 Informations techniques importantes</h2>
+
+  <p><strong>Balises protégées :</strong></p>
+  <pre>
+[mc] [mom.name] [penny.name!c]
+  </pre>
+
+  <p><strong>Balises non protégées :</strong></p>
+  <pre>
+{b}{/b} {i}{/i} {color=#FF0000}{/color}
+  </pre>
+
+  <p><strong>Saut de ligne :</strong> utilisez \n</p>
+
+  <p><strong>Pause :</strong> {w}</p>
+</section>
+
+<div class="sep"></div>
+
+<section class="card">
+  <h2>💡 Bonnes pratiques</h2>
+
+  <ul>
+    <li>Relire toujours en contexte</li>
+    <li>Ne pas modifier les balises si incertain</li>
+    <li>Sauvegarder régulièrement</li>
+  </ul>
+</section>
+
+<div class="sep"></div>
+
+<section class="card">
+  <h2>🚧 État actuel</h2>
+
+  <p>
+    ✅ Outil pleinement opérationnel et en phase de test.
+    Des mises à jour viendront améliorer l’expérience.
+  </p>
+</section>
+
+</main>
+
+<footer class="footer">
+  <p>© andric31 — Outils de traduction</p>
+</footer>
+
+</body>
+</html>

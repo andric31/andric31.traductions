@@ -206,7 +206,7 @@ a.card.card-link:focus-visible{
   position: relative;
   height: 1px;
   margin: 8px 6px;
-  background: rgba(255,255,255,0.12);
+  background: var(--menu-divider-line);
   overflow: hidden;
   border-radius: 999px;
 }
@@ -217,7 +217,7 @@ a.card.card-link:focus-visible{
   left:-45%;
   width:45%;
   height:3px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+  background: linear-gradient(90deg, transparent, var(--menu-divider-sweep), transparent);
   opacity: 0.0;
   animation: menuDividerSweep 1.15s ease-in-out 1;
 }

@@ -91,15 +91,17 @@ code{
   border-color: rgba(78,161,255,0.55);
 }
 
-.tuto-row {
-  display: flex;
+.tuto-row{
+  /* ✅ Responsive : les cartes passent automatiquement à la ligne */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 20px;
   padding: 20px;
-  overflow-x: auto;
 }
 
-.tuto-card {
-  min-width: 260px;
+.tuto-card{
+  width: 100%;
+  height: 100%;
   background: #2b2d31;
   border-radius: 12px;
   padding: 20px;

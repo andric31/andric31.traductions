@@ -579,6 +579,283 @@ html, body { min-height: 100%; }
 }
 
 
+/* =========================================================
+   SAINT-VALENTIN (romantique dark + cœurs discrets)
+   ========================================================= */
+:root[data-theme="valentine"]{
+  position: relative;
+
+  --bg:#120012;
+  --bg2:#1a001a;
+
+  --fg:#fff0f7;
+  --muted:#f0b9d5;
+
+  --primary:#ff3b8d;
+  --accent:#ff5ad6;
+
+  --border:#4a0b34;
+  --card:#1a0a18;
+  --btn:#240c22;
+
+  --title: var(--fg);
+
+  --topbar-bg: linear-gradient(
+      90deg,
+      rgba(18,0,18,.95),
+      rgba(255,59,141,.18)
+  );
+
+  --popover-bg: rgba(26,10,24,.98);
+  --hover-bg: rgba(255,255,255,0.06);
+
+  --scrollbar-thumb:#7a1e57;
+  --scrollbar-track:#070007;
+  --scrollbar-thumb-webkit-hover:#9c2a70;
+
+  --card-hover-border: #ff3b8d;
+  --card-hover-glow: rgba(255,59,141,.22);
+  --card-hover-shadow:
+    0 0 0 1px rgba(255,59,141,.62),
+    0 0 28px rgba(255,90,214,.18),
+    0 18px 44px rgba(0,0,0,.60);
+  --card-hover-bg:
+    linear-gradient(145deg, rgba(255,59,141,.10), rgba(255,90,214,.08));
+
+  color-scheme: dark;
+
+  background:
+    radial-gradient(circle at 14% 20%, rgba(255,90,214,0.16) 0 1px, transparent 2px),
+    radial-gradient(circle at 32% 78%, rgba(255,59,141,0.14) 0 1px, transparent 2px),
+    radial-gradient(circle at 70% 35%, rgba(255,90,214,0.14) 0 1px, transparent 2px),
+    radial-gradient(circle at 86% 72%, rgba(255,59,141,0.12) 0 1px, transparent 2px),
+
+    radial-gradient(1200px 700px at 18% 8%, rgba(255,59,141,0.18), transparent 60%),
+    radial-gradient(900px 520px at 85% 12%, rgba(255,90,214,0.14), transparent 55%),
+    radial-gradient(1100px 800px at 50% 92%, rgba(255,59,141,0.10), transparent 60%),
+
+    linear-gradient(180deg, #070007 0%, #0d000d 40%, #120012 100%);
+
+  background-attachment: fixed;
+}
+
+:root[data-theme="valentine"] body{
+  background: transparent !important;
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+}
+
+:root[data-theme="valentine"]::before,
+:root[data-theme="valentine"]::after{
+  content:"";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-repeat: repeat;
+  will-change: transform, opacity, background-position;
+}
+
+/* cœurs “bokeh” ultra discrets */
+:root[data-theme="valentine"]::before{
+  opacity: .22;
+  background-size: 220px 220px;
+  background-image:
+    radial-gradient(circle at 25% 30%, rgba(255,59,141,.55) 0 2px, transparent 3px),
+    radial-gradient(circle at 62% 68%, rgba(255,90,214,.45) 0 2px, transparent 3px),
+    radial-gradient(circle at 80% 22%, rgba(255,59,141,.35) 0 1.6px, transparent 2.6px);
+  filter: blur(10px);
+  animation: valentineGlow 12s ease-in-out infinite alternate;
+}
+
+/* “confettis” très légers façon paillettes */
+:root[data-theme="valentine"]::after{
+  opacity: .10;
+  background-size: 260px 220px, 320px 280px;
+  background-image:
+    radial-gradient(circle, rgba(255,240,247,.80) 0 1px, transparent 1.8px),
+    radial-gradient(circle, rgba(255,59,141,.75) 0 1px, transparent 1.8px);
+  animation: valentineDrift 16s linear infinite;
+}
+
+@keyframes valentineGlow{
+  from{ transform: translate3d(-2%, -1%, 0) scale(1.02); opacity: .18; }
+  to  { transform: translate3d( 2%,  1%, 0) scale(1.06); opacity: .26; }
+}
+
+@keyframes valentineDrift{
+  0%{ background-position: 0 -160px, 60px -220px; }
+  100%{ background-position: 0 520px, 60px 480px; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  :root[data-theme="valentine"]::before,
+  :root[data-theme="valentine"]::after{
+    animation: none !important;
+  }
+}
+
+
+/* =========================================================
+   CARNAVAL (violet/vert/or + confettis)
+   ========================================================= */
+:root[data-theme="carnaval"]{
+  position: relative;
+
+  --bg:#07050f;
+  --bg2:#0f0a1b;
+
+  --fg:#f6f1ff;
+  --muted:#d0c7f6;
+
+  --primary:#ffcc00;   /* or */
+  --accent:#00cc66;    /* vert */
+
+  --border:#2b1b5a;
+  --card:#120d24;
+  --btn:#1a1236;
+
+  --title: var(--fg);
+
+  --topbar-bg: linear-gradient(
+      90deg,
+      rgba(7,5,15,.95),
+      rgba(106,0,255,.18)
+  );
+
+  --popover-bg: rgba(18,13,36,.98);
+  --hover-bg: rgba(255,255,255,0.06);
+
+  --scrollbar-thumb:#5a37c8;
+  --scrollbar-track:#04030a;
+  --scrollbar-thumb-webkit-hover:#6f47f0;
+
+  --card-hover-border: #ffcc00;
+  --card-hover-glow: rgba(255,204,0,.22);
+  --card-hover-shadow:
+    0 0 0 1px rgba(255,204,0,.62),
+    0 0 30px rgba(0,204,102,.16),
+    0 18px 44px rgba(0,0,0,.62);
+  --card-hover-bg:
+    linear-gradient(145deg, rgba(255,204,0,.10), rgba(0,204,102,.07));
+
+  color-scheme: dark;
+
+  background:
+    radial-gradient(circle at 12% 18%, rgba(106,0,255,0.18) 0 1px, transparent 2px),
+    radial-gradient(circle at 30% 82%, rgba(0,204,102,0.14) 0 1px, transparent 2px),
+    radial-gradient(circle at 70% 35%, rgba(255,204,0,0.16) 0 1px, transparent 2px),
+    radial-gradient(circle at 86% 72%, rgba(106,0,255,0.14) 0 1px, transparent 2px),
+
+    radial-gradient(1200px 700px at 18% 8%, rgba(106,0,255,0.18), transparent 60%),
+    radial-gradient(900px 520px at 85% 12%, rgba(0,204,102,0.14), transparent 55%),
+    radial-gradient(1100px 800px at 55% 92%, rgba(255,204,0,0.12), transparent 60%),
+
+    linear-gradient(180deg, #04030a 0%, #07050f 40%, #0f0a1b 100%);
+
+  background-attachment: fixed;
+}
+
+:root[data-theme="carnaval"] body{
+  background: transparent !important;
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+}
+
+:root[data-theme="carnaval"]::before,
+:root[data-theme="carnaval"]::after{
+  content:"";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  will-change: transform, opacity, background-position;
+}
+
+/* halo festif */
+:root[data-theme="carnaval"]::before{
+  opacity: .34;
+  background:
+    radial-gradient(520px 520px at 88% 12%, rgba(255,204,0,.18), transparent 62%),
+    radial-gradient(900px 520px at 18% 22%, rgba(106,0,255,.16), transparent 62%),
+    radial-gradient(1200px 700px at 40% 90%, rgba(0,204,102,.12), transparent 62%);
+  filter: blur(12px);
+  animation: carnavalAura 14s ease-in-out infinite alternate;
+}
+
+/* confettis */
+:root[data-theme="carnaval"]::after{
+  opacity: .14;
+  background-repeat: repeat;
+  background-image:
+    radial-gradient(circle, rgba(255,204,0,.90) 0 1px, transparent 1.8px),
+    radial-gradient(circle, rgba(0,204,102,.85) 0 1px, transparent 1.8px),
+    radial-gradient(circle, rgba(106,0,255,.80) 0 1px, transparent 1.8px);
+  background-size:
+    220px 180px,
+    260px 240px,
+    320px 260px;
+  background-position:
+    0 -240px,
+    80px -180px,
+    40px -320px;
+  filter: blur(.15px);
+  animation: carnavalConfetti 15.5s linear infinite;
+}
+
+@keyframes carnavalAura{
+  from{ transform: translate3d(-2%, -1%, 0) scale(1.02); opacity: .28; }
+  to  { transform: translate3d( 2%,  1%, 0) scale(1.06); opacity: .40; }
+}
+
+@keyframes carnavalConfetti{
+  0%{
+    background-position:
+      0 -240px,
+      80px -180px,
+      40px -320px;
+    transform: translateX(0);
+  }
+  25%{
+    background-position:
+      18px -40px,
+      60px  60px,
+      56px -140px;
+    transform: translateX(6px);
+  }
+  55%{
+    background-position:
+      -10px 180px,
+      95px  280px,
+      28px  140px;
+    transform: translateX(-5px);
+  }
+  80%{
+    background-position:
+      22px 360px,
+      70px  420px,
+      50px  360px;
+    transform: translateX(4px);
+  }
+  100%{
+    background-position:
+      8px 560px,
+      78px  520px,
+      44px  560px;
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  :root[data-theme="carnaval"]::before,
+  :root[data-theme="carnaval"]::after{
+    animation: none !important;
+  }
+}
+
+
 /* =====================================================
    THEME HOVER ENGINE (1 seule fois)
    ===================================================== */

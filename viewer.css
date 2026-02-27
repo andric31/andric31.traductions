@@ -201,6 +201,38 @@ a.card.card-link:focus-visible{
   border-color: var(--hover-bg);
 }
 
+/* ===== Séparateur (hamburger) ===== */
+.menu-divider{
+  position: relative;
+  height: 1px;
+  margin: 8px 6px;
+  background: rgba(255,255,255,0.12);
+  overflow: hidden;
+  border-radius: 999px;
+}
+.menu-divider::after{
+  content:"";
+  position:absolute;
+  top:-1px;
+  left:-45%;
+  width:45%;
+  height:3px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+  opacity: 0.0;
+  animation: menuDividerSweep 1.15s ease-in-out 1;
+}
+.menu-popover:not(.hidden) .menu-divider::after{
+  opacity: 0.85;
+  animation: menuDividerSweep 1.15s ease-in-out 1;
+}
+@keyframes menuDividerSweep{
+  0%   { transform: translateX(0); opacity: 0; }
+  15%  { opacity: 0.9; }
+  70%  { opacity: 0.9; }
+  100% { transform: translateX(260%); opacity: 0; }
+}
+
+
 /* ✅ modal À propos */
 .modal-overlay{
   position:fixed;

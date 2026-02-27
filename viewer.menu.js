@@ -36,6 +36,9 @@
     }
 
     pop.innerHTML = ITEMS.map((it, i) => {
+      if (it && it.type === "divider") {
+        return `<div class="menu-divider" aria-hidden="true"></div>`;
+      }
       const label = escapeHtml(it.label || "");
       return `<button type="button" class="menu-item" data-menu-idx="${i}">${label}</button>`;
     }).join("");
@@ -50,8 +53,13 @@
     });
   }
 
-  function addItem(label, onClick) {
+function addItem(label, onClick) {
     ITEMS.push({ label: String(label || ""), onClick });
+    renderMenuItems();
+  }
+
+  function addDivider() {
+    ITEMS.push({ type: "divider" });
     renderMenuItems();
   }
 
@@ -82,6 +90,7 @@
   window.ViewerMenu = {
     init,
     addItem,
+    addDivider,
     clearItems,
     closeMenu
   };

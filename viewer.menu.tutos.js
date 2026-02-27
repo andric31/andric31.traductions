@@ -1,4 +1,4 @@
-// viewer.menu.tutos.js — Entrée menu : Tutos & Aide
+// viewer.menu.tutos.js — Entrée menu : Tutos & Aide (+ séparateur)
 (() => {
   "use strict";
 
@@ -12,6 +12,15 @@
 
   function register() {
     if (!window.ViewerMenu?.addItem) return false;
+
+    // ✅ Séparation visuelle avant la section Tutos
+    if (typeof window.ViewerMenu.addDivider === "function") {
+      window.ViewerMenu.addDivider();
+    } else {
+      // fallback si jamais addDivider n'existe pas
+      window.ViewerMenu.addItem("────────────", () => {});
+    }
+
     window.ViewerMenu.addItem("🛠️ Tutos & Aide", open);
     return true;
   }

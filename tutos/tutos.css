@@ -396,3 +396,73 @@ code{
 .index-list a:hover {
   color: #ffffff;
 }
+
+/* =========================
+   PATCH : page "fr_relecture"
+   ========================= */
+
+/* Topbar: aligne proprement titre + sous-titre si wrapper présent */
+.topbar-inner{
+  margin-top: 6px;
+}
+
+/* Sommaire */
+.toc{
+  margin: 10px 0 0;
+  padding-left: 18px;
+  line-height: 1.55;
+}
+.toc li{
+  margin: 6px 0;
+}
+.toc a{
+  display: inline-block;
+  padding: 4px 6px;
+  border-radius: 8px;
+}
+.toc a:hover{
+  background: rgba(78,161,255,0.08);
+  text-decoration: none;
+}
+
+/* Espace entre blocs dans les listes */
+.mt{
+  margin-top: 12px;
+}
+
+/* Callout variants — compat HTML (.warning/.info) + compat ancienne (.warn/.tip/.danger) */
+.callout.warning,
+.callout.warn{
+  border-left-color: #f0c36d;
+  background: rgba(240,195,109,0.12);
+}
+.callout.info{
+  border-left-color: #4ea1ff;
+  background: rgba(78,161,255,0.10);
+}
+.callout.tip{
+  border-left-color: #7bd389;
+  background: rgba(123,211,137,0.10);
+}
+.callout.danger{
+  border-left-color: #ff6b6b;
+  background: rgba(255,107,107,0.10);
+}
+
+/* Ancres : évite que le header masque le titre quand on clique dans le sommaire */
+section[id]{
+  scroll-margin-top: 88px; /* ajuste si tu changes la hauteur du header */
+}
+
+/* Lisibilité des titres */
+.card h2{
+  margin-top: 0;
+}
+.card h3{
+  margin-top: 18px;
+}
+
+/* Petits détails (optionnel) */
+pre{
+  line-height: 1.45;
+}

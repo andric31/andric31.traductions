@@ -369,3 +369,28 @@ code{
   margin-top: 10px;
   opacity: .9;
 }
+
+.index-card {
+  text-align: center;
+}
+
+.index-list {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 0;
+}
+
+.index-list li {
+  margin: 10px 0;
+}
+
+.index-list a {
+  text-decoration: none;
+  color: #6ec1ff;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.index-list a:hover {
+  color: #ffffff;
+}

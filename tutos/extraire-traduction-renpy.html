@@ -11,29 +11,47 @@
   <header class="topbar">
     <a class="back" href="index.html">⬅ Retour</a>
     <h1>🛠 Extraire une traduction Ren'Py (Windows)</h1>
-    <p class="subtitle">Ce guide explique comment installer une traduction pour un jeu développé avec <strong>Ren'Py</strong>, sous Windows.</p>
+    <p class="subtitle">
+      Ce guide explique comment installer une traduction pour un jeu développé avec 
+      <strong>Ren'Py</strong>, sous Windows.
+    </p>
   </header>
 
   <main class="page">
 
-    <h2>📦 1) Télécharger la traduction</h2>
-    <p>La traduction est généralement fournie sous forme d’archive (souvent <code>.rar</code> ou <code>.zip</code>) :</p>
+    <!-- IMAGE INTRO -->
+    <div class="image-wrap">
+      <img src="img/RenpyDep.png" 
+           alt="Dépendance Ren'Py" 
+           class="tutorial-img">
+    </div>
+
+    <h2>📦 1) Télécharge la traduction adaptée à ton jeu</h2>
+    <p>
+      La traduction est généralement fournie sous forme d’archive 
+      (souvent <code>.rar</code> ou <code>.zip</code>) :
+    </p>
+
     <pre><code>nom_du_jeu_fr_zenpy_DeepL_andric31.rar</code></pre>
 
     <h2>🗂 2) Extraire l’archive au bon endroit</h2>
+
     <p>Sous Windows :</p>
+
     <ol>
       <li>Clique droit sur l’archive <code>.rar</code></li>
-      <li>Choisis <strong>« Extraire ici »</strong></strong></li>
-      <li>Extraire dans le dossier du jeu, où se trouve l’exécutable <code>.exe</code> du jeu.</li>
+      <li>Choisis <strong>« Extraire ici »</strong></li>
+      <li>Extraire dans le dossier du jeu, où se trouve l’exécutable <code>.exe</code></li>
     </ol>
 
     <div class="callout">
-      <strong>📌 Important :</strong> il faut extraire <strong>à la racine du jeu</strong>, pas dans un sous-dossier au hasard.
+      <strong>📌 Important :</strong> il faut extraire 
+      <strong>à la racine du jeu</strong>, 
+      pas dans un sous-dossier au hasard.
     </div>
 
     <p>Exemple d’emplacement attendu :</p>
-    
+
     <div class="image-wrap">
       <img src="img/fr_extraire_ici.png" 
            alt="Exemple : extraire ici dans le dossier du jeu" 
@@ -41,10 +59,13 @@
     </div>
 
     <h2>📁 3) Vérifier l’emplacement final</h2>
+
     <p>Une fois l’extraction terminée, le fichier doit se trouver ici :</p>
+
     <pre><code>.\Nom_du_jeu\game\tl\fr_zenpy_DeepL_andric31\x.rpy</code></pre>
 
     <p>Structure typique :</p>
+
     <pre><code>Nom_du_jeu
 ├── Nom_du_jeu.exe
 └── game
@@ -53,22 +74,46 @@
         └── fr_zenpy_DeepL_andric31
             └── x.rpy</code></pre>
 
-    <p>Si le dossier <code>fr_zenpy_DeepL_andric31</code> apparaît bien dans <code>game\tl\</code>, alors l’installation est correcte ✅</p>
+    <p>
+      Si le dossier <code>fr_zenpy_DeepL_andric31</code> apparaît bien dans 
+      <code>game\tl\</code>, alors l’installation est correcte ✅
+    </p>
 
     <h2>▶️ 4) Lancer le jeu</h2>
+
     <p>Lance simplement :</p>
+
     <pre><code>Nom_du_jeu.exe</code></pre>
 
     <p>Si la traduction est bien installée :</p>
+
     <ul>
       <li>Le jeu se lance en français automatiquement ✅</li>
       <li>ou le français apparaît dans les options de langue ✅</li>
     </ul>
 
+    <!-- ERREURS A EVITER -->
+    <h2>⚠️ Erreurs à éviter</h2>
+    <p><strong>🛠️ Ce qu’il ne faut pas faire (et quoi faire à la place)</strong></p>
+
+    <div class="callout warn">
+      ❌ <strong>Ne pas installer une traduction d’une autre version !</strong><br>
+      ✅ Télécharge toujours la même version de traduction que la version du jeu 
+      pour éviter les problèmes de compatibilité.
+    </div>
+
+    <div class="callout warn">
+      ❌ <strong>Ne pas extraire les fichiers n’importe où !</strong><br>
+      ✅ Toujours extraire dans le dossier du jeu et non ailleurs sur ton PC.
+    </div>
+
+    <!-- PROBLEMES FREQUENTS -->
     <h2>❗ Problèmes fréquents</h2>
 
     <h3>❌ La traduction ne s’affiche pas</h3>
+
     <p>Vérifie :</p>
+
     <ul>
       <li>Que tu n’as pas un dossier du type <code>Nom_du_jeu\Nom_du_jeu\game\...</code> (double dossier)</li>
       <li>Que le dossier <code>fr_zenpy_DeepL_andric31</code> est bien dans <code>game\tl\</code></li>
@@ -76,14 +121,19 @@
     </ul>
 
     <h3>❌ Erreur au lancement</h3>
+
     <p>Supprime l’ancienne version de la traduction puis réinstalle proprement.</p>
 
     <h2>💡 Astuce</h2>
+
     <p>Si tu avais déjà une ancienne version :</p>
+
     <ol>
       <li>Supprime entièrement :</li>
     </ol>
+
     <pre><code>game\tl\fr_zenpy_DeepL_andric31</code></pre>
+
     <ol start="2">
       <li>Réinstalle la nouvelle archive proprement</li>
     </ol>

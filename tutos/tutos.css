@@ -249,3 +249,20 @@ code{
   border-left-color: #ff6b6b;
   background: rgba(255,107,107,0.10);
 }
+
+
+/* =====================
+   Sections (index)
+   ===================== */
+.big-separator{
+  height: 1px;
+  background: rgba(255,255,255,0.10);
+  margin: 22px 20px 14px;
+}
+
+.section-title{
+  margin: 0 20px 6px;
+  font-size: 18px;
+  font-weight: 700;
+  opacity: 0.85;
+}

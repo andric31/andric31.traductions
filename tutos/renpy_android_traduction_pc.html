@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mettre une traduction Ren'Py sur Android (avec un ordinateur)</title>
+  <link rel="stylesheet" href="tutos.css" />
+
+  <!-- (Optionnel) si pas déjà présent dans tutos.css -->
+</head>
+<body>
+
+  <header class="topbar">
+    <a class="back" href="index.html">⬅ Retour</a>
+    <h1>📱 Mettre une traduction Ren'Py sur Android (avec un ordinateur)</h1>
+    <p class="subtitle">
+      Ce guide explique comment installer une traduction Ren’Py sur Android en copiant les fichiers
+      depuis un ordinateur (via USB) ✅
+    </p>
+  </header>
+
+  <main class="page">
+
+    <!-- IMAGE INTRO -->
+    <div class="image-wrap">
+      <img src="img/Renpy_Android_ordinateur/FR_sur_apk_android.webp"
+           alt="Installer une traduction Ren’Py sur Android (avec un ordinateur)"
+           class="tutorial-img">
+    </div>
+
+    <section class="card hero">
+      <div class="hero-head">
+        <div class="hero-icon">🧩</div>
+        <div>
+          <p class="eyebrow">Objectif</p>
+          <p class="hero-text">
+            Tu vas : <strong>installer l’APK</strong>, lancer le jeu une fois (pour créer les dossiers),
+            puis <strong>copier la traduction</strong> dans le bon emplacement depuis ton PC.
+          </p>
+        </div>
+      </div>
+
+      <div class="callout">
+        ✅ Astuce : garde toujours la même <strong>version du jeu</strong> et la même <strong>version de traduction</strong>.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>1️⃣ Installer XXX.apk sur Android</h2>
+      <p>
+        Avant tout, assure-toi de télécharger l’APK de ton jeu depuis une source fiable.
+      </p>
+
+      <div class="callout tip">
+        💡 Certains systèmes Android bloquent l'installation d'APK provenant de sources extérieures à Google Play.
+        Active le mode d'installation d'applications inconnues dans :<br>
+        <strong>Paramètres → Sécurité et confidentialité → Autres paramètres de sécurité → Installation d’applis inconnues</strong>
+      </div>
+
+      <p class="note">
+        Pour plus d'informations, consulte le mode d'emploi du système Android utilisé.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>2️⃣ Lancer le jeu une fois et quitter</h2>
+      <p>
+        Lance le jeu une première fois puis quitte. Ça permet la mise en place de certains dossiers.
+      </p>
+
+      <div class="callout tip">
+        💡 Si le jeu demande une autorisation (accès au stockage, par exemple), il faut l'autoriser,
+        sinon pas de sauvegarde !<br>
+        Ferme bien le jeu après cette première ouverture, même en arrière-plan, hein 😉
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>3️⃣ Connecter le système Android à un ordinateur</h2>
+
+      <div class="callout warn">
+        ⚠️ Attention à Android 15 : l'accès n'est plus possible par USB ! 🔌🚫
+      </div>
+
+      <p>
+        Branche ton appareil Android à l’ordinateur avec un câble USB.
+      </p>
+
+      <div class="callout tip">
+        💡 Sélectionne le mode <strong>« Transfert de fichiers »</strong> lorsque l’invite apparaît sur ton téléphone.<br>
+        Cela permettra à l’ordinateur d’accéder au stockage de l’appareil.
+      </div>
+
+      <p class="note">
+        Pour plus d'informations, consulte le mode d'emploi du système Android utilisé.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>4️⃣ Accès au dossier du jeu Android sur l'ordinateur</h2>
+
+      <div class="callout warn">
+        ⚠️ Attention à Android 15 : l'accès n'est plus possible par USB ! 🔌🚫
+      </div>
+
+      <p>
+        Une fois ton appareil connecté en mode transfert de fichiers, explore son stockage pour trouver le dossier du jeu.
+      </p>
+
+      <p><strong>Par défaut</strong>, le jeu se trouve dans :</p>
+      <pre><code>Ce PC\...\Stockage interne\Android\data</code></pre>
+
+      <p><strong>Si le jeu est sur carte SD</strong> :</p>
+      <pre><code>Ce PC\...\Carte SD\Android\data</code></pre>
+
+      <h3>🔎 Cas particuliers</h3>
+      <ul class="list">
+        <li>
+          Si c'est un apk non officiel (modifié ou fourni par un tiers), la structure de dossiers peut être différente.
+          Les fichiers peuvent aussi être ailleurs (ex : dossier <code>Documents</code>).
+        </li>
+        <li>
+          ⚠️ Le dossier peut se nommer différemment du jeu.<br>
+          Pour le trouver plus facilement : trie par <strong>« Modifié le »</strong> et repère le dernier dossier créé/modifié.
+        </li>
+      </ul>
+
+      <div class="image-wrap">
+        <img src="img/Renpy_Android_ordinateur/01.webp"
+             alt="Accès au dossier Android/data depuis l’ordinateur"
+             class="tutorial-img">
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>5️⃣ Ajouter la traduction</h2>
+      <p>
+        Pour appliquer la traduction, copie les fichiers de traduction dans le bon emplacement.
+      </p>
+
+      <div class="callout">
+        ✅ Copier la traduction dans le dossier <strong>files</strong> :
+      </div>
+
+      <pre><code>...\files\game\tl\[dossier_de_traduction]\fichiers_de_traduction.rpy</code></pre>
+
+      <div class="callout warn">
+        ⚠️ Méthodes alternatives selon le traducteur :<br>
+        Suivant le traducteur, la méthode peut être différente.
+      </div>
+
+      <pre><code># soit
+Copier le dossier "game" de la traduction dans "files"
+(dans "game", le dossier "tl" doit être présent)
+
+# soit
+Créer un dossier "game" puis copier ou créer le dossier "tl" dans "game"
+
+# et soit
+Si pas de dossier "tl" :
+Créer le dossier "tl" dans "game"
+Puis copier le dossier de traduction :
+"fr" ou "french" ou "fr_XXX_andric31" dans "tl"</code></pre>
+
+      <div class="image-wrap">
+        <img src="img/Renpy_Android_ordinateur/02.webp"
+             alt="Copie des fichiers de traduction dans le dossier files/game/tl"
+             class="tutorial-img">
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>6️⃣ Lancer le jeu sur Android</h2>
+      <p>
+        Ouvre le jeu normalement.
+      </p>
+
+      <div class="callout tip">
+        💡 Au besoin, va dans les paramètres du jeu pour changer la langue.
+      </div>
+
+      <div class="image-wrap">
+        <img src="img/Renpy_Android_ordinateur/03.webp"
+             alt="Lancer le jeu et vérifier la traduction"
+             class="tutorial-img">
+      </div>
+
+      <div class="callout">
+        🎮 Bon jeu !
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>© andric31 — Tutos & Aide</p>
+  </footer>
+
+</body>
+</html>

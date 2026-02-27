@@ -2,6 +2,10 @@
   color-scheme: dark;
 }
 
+*, *::before, *::after{
+  box-sizing: border-box;
+}
+
 html, body{
   height: 100%;
 }
@@ -43,7 +47,48 @@ a:hover{
 
 .page{
   padding: 20px;
-  max-width: 920px;
+  /* Pleine largeur (évite la grosse marge vide à droite) */
+  width: 100%;
+  max-width: none;
+}
+
+/* Assure que les textes longs ne débordent jamais */
+.lex-item,
+.card,
+pre,
+code{
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Navigation A–Z : occupe toute la largeur et se répartit automatiquement */
+.az-nav{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(42px, 1fr));
+  gap: 8px;
+  width: 100%;
+  margin: 12px 0;
+}
+
+.az-nav button{
+  width: 100%;
+  padding: 8px 0;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 8px;
+  background: rgba(17,18,20,0.55);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.az-nav button:hover{
+  background: rgba(78,161,255,0.18);
+  border-color: rgba(78,161,255,0.35);
+}
+
+.az-nav button.active{
+  background: rgba(78,161,255,0.28);
+  border-color: rgba(78,161,255,0.55);
 }
 
 .tuto-row {
@@ -251,18 +296,76 @@ code{
 }
 
 
-/* =====================
-   Sections (index)
-   ===================== */
-.big-separator{
-  height: 1px;
-  background: rgba(255,255,255,0.10);
-  margin: 22px 20px 14px;
+/* ===== Shared tutorial images ===== */
+.image-wrap{
+  margin: 16px 0;
+  text-align: center;
+}
+.tutorial-img{
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
 }
 
-.section-title{
-  margin: 0 20px 6px;
-  font-size: 18px;
-  font-weight: 700;
-  opacity: 0.85;
+/* ===== Separators used in long pages ===== */
+.sep{
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+  margin: 30px 0;
+}
+
+/* ===== Lexicon helpers ===== */
+.lex-item{
+  margin-bottom: 12px;
+}
+.lex-item strong{
+  color: #6ec1ff;
+}
+
+/* ===== A–Z dictionary helpers (Petit Larousse) ===== */
+.az-search{
+  margin-top: 12px;
+}
+.az-search input{
+  width: 100%;
+  max-width: 520px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(0,0,0,0.25);
+  color: inherit;
+}
+.az-block{ display: none; }
+.az-block.active{ display: block; }
+
+.az-results{
+  margin-top: 18px;
+  display: none;
+}
+.az-results.active{ display: block; }
+
+.az-result{
+  padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.az-result:hover{
+  border-color: rgba(78,161,255,0.55);
+  background: rgba(78,161,255,0.06);
+}
+
+.az-highlight{
+  background: rgba(110,193,255,0.15);
+  border-radius: 8px;
+  padding: 6px;
+}
+
+/* Small note line */
+.note{
+  margin-top: 10px;
+  opacity: .9;
 }

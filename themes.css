@@ -269,6 +269,10 @@ html, body { min-height: 100%; }
   /* ⭐ couleur des étoiles */
   --game-rating-color: #f1b90b;
   --game-rating-opacity: .95;
+  /* ✅ Menu: séparateur hamburger (clair) */
+  --menu-divider-line: rgba(20,24,36,0.14);
+  --menu-divider-sweep: rgba(20,24,36,0.35);
+
 
   color-scheme: light;
 }

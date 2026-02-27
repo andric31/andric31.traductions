@@ -1171,6 +1171,161 @@ html, body { min-height: 100%; }
   100%{ transform: translateX(0); opacity:.08; }
 }
 
+/* =========================
+   GOTHIC
+========================= */
+[data-theme="gothic"]{
+  --bg: #0b0b0f;
+  --card: #14141c;
+  --text: #e6e6e6;
+  --muted: #9a8fa3;
+  --accent: #a100ff;
+  --accent-2: #ff0055;
+}
+
+[data-theme="gothic"] body{
+  background: radial-gradient(circle at 20% 20%, #1a001f 0%, #0b0b0f 60%);
+}
+
+[data-theme="gothic"] .card{
+  box-shadow: 0 0 20px rgba(161,0,255,0.2);
+}
+
+/* =========================
+   GALAXY
+========================= */
+[data-theme="galaxy"]{
+  --bg: #050510;
+  --card: #0f1020;
+  --text: #ffffff;
+  --muted: #9aa3ff;
+  --accent: #6a00ff;
+  --accent-2: #00e0ff;
+}
+
+[data-theme="galaxy"] body{
+  background: radial-gradient(circle at 70% 30%, #1a0033 0%, #050510 60%);
+}
+
+/* =========================
+   LAVA
+========================= */
+[data-theme="lava"]{
+  --bg: #120000;
+  --card: #1f0a0a;
+  --text: #ffe6e6;
+  --muted: #ff9999;
+  --accent: #ff3300;
+  --accent-2: #ffcc00;
+}
+
+[data-theme="lava"] body{
+  background: linear-gradient(135deg,#120000,#330000);
+}
+
+/* =========================
+   MATRIX
+========================= */
+[data-theme="matrix"]{
+  --bg: #000000;
+  --card: #0a0a0a;
+  --text: #00ff66;
+  --muted: #009933;
+  --accent: #00ff00;
+  --accent-2: #66ff99;
+}
+
+[data-theme="matrix"] body{
+  background: #000;
+}
+
+/* =========================
+   ICE
+========================= */
+[data-theme="ice"]{
+  --bg: #07141f;
+  --card: #0f2433;
+  --text: #e6faff;
+  --muted: #9ed8ff;
+  --accent: #00ccff;
+  --accent-2: #66ffff;
+}
+
+[data-theme="ice"] body{
+  background: linear-gradient(180deg,#07141f,#0f2433);
+}
+
+/* =========================
+   SUNSET
+========================= */
+[data-theme="sunset"]{
+  --bg: #1a0d0d;
+  --card: #261414;
+  --text: #fff0e6;
+  --muted: #ffb399;
+  --accent: #ff6600;
+  --accent-2: #ff1a75;
+}
+
+[data-theme="sunset"] body{
+  background: linear-gradient(135deg,#1a0d0d,#4d0000);
+}
+
+/* =========================
+   RETRO
+========================= */
+[data-theme="retro"]{
+  --bg: #0d0d0d;
+  --card: #1a1a1a;
+  --text: #ffffff;
+  --muted: #cccccc;
+  --accent: #ff00ff;
+  --accent-2: #00ffff;
+}
+
+[data-theme="retro"] .card{
+  border: 2px solid var(--accent);
+}
+
+/* =========================
+   TROPICAL
+========================= */
+[data-theme="tropical"]{
+  --bg: #001f1f;
+  --card: #003333;
+  --text: #e6ffff;
+  --muted: #66ffff;
+  --accent: #00ffcc;
+  --accent-2: #ffcc00;
+}
+
+[data-theme="tropical"] body{
+  background: linear-gradient(135deg,#001f1f,#004d4d);
+}
+
+/* =========================
+   CRIMSON
+========================= */
+[data-theme="crimson"]{
+  --bg: #100000;
+  --card: #1a0000;
+  --text: #ffe6e6;
+  --muted: #cc6666;
+  --accent: #cc0000;
+  --accent-2: #990000;
+}
+
+/* =========================
+   STEAM
+========================= */
+[data-theme="steam"]{
+  --bg: #1a1a1a;
+  --card: #262626;
+  --text: #f2f2f2;
+  --muted: #cccc99;
+  --accent: #b8860b;
+  --accent-2: #ffcc00;
+}
 
 /* =====================================================
    THEME HOVER ENGINE (1 seule fois)

@@ -1980,6 +1980,173 @@ html, body { min-height: 100%; }
 }
 :root[data-theme="coffee"] body{ background: transparent !important; }
 
+/* =========================================================
+   THÈME : 🐣 Pâques (v2 premium)
+   - pastel + confettis discrets
+   - hover engine complet + scrollbar
+   - body transparent + FX doux
+   ========================================================= */
+
+:root[data-theme="paques"]{
+  --bg:#fff8f2;
+  --bg2:#ffffff;
+
+  --fg:#1e1b20;
+  --muted:#6b5a6d;
+
+  --primary:#ffb347;  /* jaune poussin */
+  --accent:#a26bff;   /* violet pastel */
+
+  --border:#f0e2d9;
+  --border-soft: rgba(30,27,32,0.10);
+
+  --card:#ffffff;
+  --btn:#fff2e8;
+
+  --title:#1a151d;
+  --topbar-bg: rgba(255,248,242,.92);
+
+  --body-grad-1:#fff5ec;
+  --body-grad-2:#fff8f2;
+  --body-grad-3:#ffffff;
+
+  --popover-bg: rgba(255,255,255,.95);
+  --hover-bg: rgba(30,27,32,0.06);
+
+  --overlay-bg: rgba(12,14,18,0.35);
+
+  --thumb-bg: rgba(255,179,71,0.10);
+  --thumb-fallback-bg: rgba(30,27,32,0.06);
+
+  --scrollbar-thumb:#e9d2c6;
+  --scrollbar-track:#fff2e8;
+  --scrollbar-track-webkit: var(--scrollbar-track);
+  --scrollbar-thumb-webkit: var(--scrollbar-thumb);
+  --scrollbar-thumb-webkit-hover:#dcbfaf;
+
+  /* ✅ hover tuiles : premium clair */
+  --card-hover-border: rgba(0,0,0,0.14);
+  --card-hover-glow: rgba(0,0,0,0.08);
+  --card-hover-shadow:
+    0 1px 2px rgba(0,0,0,0.05),
+    0 10px 28px rgba(0,0,0,0.12);
+  --card-hover-bg:
+    linear-gradient(145deg, rgba(255,179,71,0.08), rgba(162,107,255,0.06));
+
+  /* ✅ Menu séparateur (clair) */
+  --menu-divider-line: rgba(30,27,32,0.14);
+  --menu-divider-sweep: rgba(255,179,71,0.30);
+
+  color-scheme: light;
+
+  background:
+    radial-gradient(1200px 650px at 18% 0%, rgba(255,179,71,0.16), transparent 60%),
+    radial-gradient(1000px 600px at 88% 10%, rgba(162,107,255,0.12), transparent 60%),
+    radial-gradient(900px 520px at 50% 95%, rgba(255,77,166,0.06), transparent 60%),
+    linear-gradient(180deg, var(--body-grad-1) 0%, var(--body-grad-2) 35%, var(--body-grad-3) 100%);
+  background-attachment: fixed;
+}
+
+/* Pas de coupure en bas + FX sur html */
+:root[data-theme="paques"] body{
+  background: transparent !important;
+  position: relative;
+  isolation: isolate;
+}
+
+/* Confettis/pastels (très léger) */
+:root[data-theme="paques"]::after{
+  content:"";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  opacity: .10;
+  background:
+    radial-gradient(circle at 12% 20%, rgba(255,179,71,.70) 0 2px, transparent 3px),
+    radial-gradient(circle at 22% 72%, rgba(162,107,255,.65) 0 2px, transparent 3px),
+    radial-gradient(circle at 48% 38%, rgba(255,77,166,.55) 0 2px, transparent 3px),
+    radial-gradient(circle at 70% 24%, rgba(45,180,120,.55) 0 2px, transparent 3px),
+    radial-gradient(circle at 84% 66%, rgba(0,163,255,.55) 0 2px, transparent 3px),
+    radial-gradient(circle at 62% 82%, rgba(255,209,102,.60) 0 2px, transparent 3px);
+  filter: blur(.15px);
+  animation: paquesFloat 10s ease-in-out infinite;
+}
+
+@keyframes paquesFloat{
+  0%{ transform: translateY(0); opacity:.08; }
+  50%{ transform: translateY(-10px); opacity:.12; }
+  100%{ transform: translateY(0); opacity:.08; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  :root[data-theme="paques"]::after{ animation:none !important; }
+}
+
+/* =========================================================
+   THÈME : Nouvel An 🎆
+   ========================================================= */
+:root[data-theme="nouvelan"]{
+  --bg:#050510;
+  --bg2:#0c0c1f;
+
+  --fg:#f6f7ff;
+  --muted:#c2c6ff;
+
+  --primary:#ffd700;
+  --accent:#ff4da6;
+
+  --border:#2a2a55;
+  --card:#0f1025;
+  --btn:#16173a;
+
+  --title:var(--fg);
+  --topbar-bg:linear-gradient(90deg, rgba(5,5,16,.95), rgba(255,215,0,.25));
+
+  --popover-bg:rgba(15,16,37,.98);
+  --hover-bg:rgba(255,255,255,0.06);
+
+  --scrollbar-thumb:#3b3b88;
+  --scrollbar-track:#020208;
+
+  --card-hover-border:#ffd700;
+  --card-hover-glow:rgba(255,215,0,.25);
+
+  color-scheme: dark;
+
+  background:
+    radial-gradient(1200px 700px at 15% 0%, rgba(255,215,0,0.18), transparent 60%),
+    radial-gradient(1100px 650px at 85% 10%, rgba(255,77,166,0.12), transparent 55%),
+    linear-gradient(180deg, #020208 0%, #050510 100%);
+  background-attachment: fixed;
+}
+
+:root[data-theme="nouvelan"] body{
+  background: transparent !important;
+  position: relative;
+  isolation: isolate;
+}
+
+:root[data-theme="nouvelan"]::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:-1;
+  opacity:.15;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,215,0,.9) 0 2px, transparent 4px),
+    radial-gradient(circle at 60% 50%, rgba(255,77,166,.8) 0 2px, transparent 4px),
+    radial-gradient(circle at 80% 20%, rgba(0,245,255,.8) 0 2px, transparent 4px);
+  animation: fireworkFloat 6s ease-in-out infinite;
+}
+
+@keyframes fireworkFloat{
+  0%{ transform: scale(1) translateY(0); opacity:.10; }
+  50%{ transform: scale(1.1) translateY(-8px); opacity:.18; }
+  100%{ transform: scale(1) translateY(0); opacity:.10; }
+}
+
 /* =====================================================
    THEME HOVER ENGINE (1 seule fois)
    ===================================================== */

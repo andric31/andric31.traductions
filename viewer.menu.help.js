@@ -1,7 +1,6 @@
 (() => {
   const HELP_BTN_ID = "menuHelpBtn";
   const HELP_MODAL_ID = "menuHelpModal";
-
   const HELP_STYLE_ID = "menuHelpStyles";
 
   function injectStyles() {
@@ -15,15 +14,13 @@
 
       /* ✅ Encadré "dans" l'encadré Hamburger (donc DANS le <dd>) */
       .mh-subpanel{
-        margin-top:8px;          /* espace entre la phrase et le sous-encadré */
+        margin-top:8px;
         padding:10px 14px;
         border-radius:10px;
         background:rgba(255,255,255,0.04);
         border:1px solid rgba(255,255,255,0.06);
       }
-      .mh-subitem{
-        margin:4px 0;
-      }
+      .mh-subitem{ margin:4px 0; }
 
       .menu-help-card{width:min(980px,100%);max-height:min(86vh,900px);overflow:auto;border-radius:16px;
         background:var(--card, var(--bg2, #fff));
@@ -49,7 +46,6 @@
       .menu-help-section{margin:14px 0 18px}
       .menu-help-h3{margin:0 0 10px;font-size:15px;font-weight:800;letter-spacing:.2px;color:var(--title, inherit)}
 
-      /* ✅ Images en pleine largeur + contenu dessous */
       .menu-help-grid{display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
       .menu-help-media{width:100%;border-radius:14px;overflow:hidden;
         border:1px solid var(--border-soft, rgba(0,0,0,.10));
@@ -59,18 +55,16 @@
 
       .menu-help-dl{margin:0;display:flex;flex-direction:column;gap:10px}
 
-      /* ✅ Lignes: icône | titre (plus large) | description */
       .menu-help-row{
         display:grid;
-        grid-template-columns: 18px 210px 1fr; /* <- élargit la colonne titre */
+        grid-template-columns: 18px 210px 1fr;
         gap:16px;
-        align-items:start; /* ✅ au lieu de center : Hamburger en haut face à sa description */
+        align-items:start;
         padding:10px 12px;border-radius:12px;
         background:var(--soft-04, var(--hover-bg, rgba(0,0,0,.03)));
         border:1px solid var(--border-soft, rgba(0,0,0,.08))
       }
 
-      /* dt devient "transparent" pour placer icône + titre dans la grid */
       .menu-help-row dt{margin:0;font-weight:900;display:contents}
       .menu-help-row dd{margin:0;opacity:.92;line-height:1.45;grid-column:3}
 
@@ -79,26 +73,20 @@
         width:18px;height:18px;flex:0 0 18px;
         color:var(--muted, currentColor);opacity:.95;
         grid-column:1;
-        align-self:start;   /* ✅ */
-        margin-top:2px;     /* ✅ petit ajustement visuel */
+        align-self:start;
+        margin-top:2px;
       }
       .menu-help-row .mh-ico svg{width:18px;height:18px;display:block;stroke:currentColor;fill:none}
 
-      /* Le 2e span dans dt = titre -> colonne 2 + pas de wrap */
       .menu-help-row dt span:last-child{
         grid-column:2;
         white-space:nowrap;
-        align-self:start;   /* ✅ */
-        margin-top:1px;     /* ✅ */
+        align-self:start;
+        margin-top:1px;
       }
 
-      /* ✅ Mobile: icône + titre sur la 1ère ligne, description dessous */
       @media (max-width: 520px){
-        .menu-help-row{
-          grid-template-columns: 18px 1fr;
-          row-gap:6px;
-          align-items:start;
-        }
+        .menu-help-row{ grid-template-columns: 18px 1fr; row-gap:6px; align-items:start; }
         .menu-help-row dd{grid-column:1 / -1}
       }
 
@@ -107,6 +95,11 @@
       .menu-help-btn{appearance:none;border:1px solid var(--border-soft, rgba(0,0,0,.10));border-radius:12px;padding:10px 14px;
         font-weight:900;cursor:pointer;background:var(--btn, rgba(0,0,0,.08));color:inherit}
       .menu-help-btn:hover{background:var(--hover-bg, rgba(0,0,0,.12))}
+
+      /* ✅ IMPORTANT : force l’icône du bouton aide à suivre le thème (Matrix, etc.) */
+      #${HELP_BTN_ID}{ color: var(--fg, currentColor) !important; }
+      #${HELP_BTN_ID} svg{ stroke: var(--fg, currentColor) !important; fill: none !important; }
+      #${HELP_BTN_ID} svg *{ stroke: var(--fg, currentColor) !important; }
     `;
     document.head.appendChild(style);
   }
@@ -143,7 +136,6 @@
               </div>
               <dl class="menu-help-dl">
 
-                <!-- ✅ Hamburger: sous-encadré DANS l'encadré (dans le <dd>) -->
                 <div class="menu-help-row">
                   <dt>
                     <span class="mh-ico">
@@ -165,35 +157,17 @@
                 </div>
 
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="8"/></svg></span><span>Aide</span></dt><dd>Affiche cette fenêtre d’aide.</dd></div>
+
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span>Profil</span></dt><dd>Nom de la liste.</dd></div>
+
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/><path d="M8 4v16"/></svg></span><span>Total</span></dt><dd>Nombre total de jeux référencés.</dd></div>
+
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg></span><span>Vignettes par ligne</span></dt><dd>Change le nombre de vignettes par ligne.</dd></div>
+
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2l9 5-9 5-9-5 9-5z"/><path d="M3 12l9 5 9-5"/><path d="M3 17l9 5 9-5"/></svg></span><span>Affichage progressif</span></dt><dd>Nombre de vignettes chargées/affichées (50, 100, tout…).</dd></div>
 
-                <!-- ✅ Thème -->
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/></svg></span><span>Thème</span></dt><dd>Change l’apparence (clair, sombre, etc.).</dd></div>
 
-              </dl>
-              </div>
-          </section>
-
-          <section class="menu-help-section">
-            <h3 class="menu-help-h3">Recherche & filtres</h3>
-            <div class="menu-help-grid">
-              <div class="menu-help-media">
-                <img class="menu-help-img" src="img/menu/Menu_barre_haut2.png" alt="Recherche et filtres" loading="lazy">
-              </div>
-              <dl class="menu-help-dl">
-                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span><span>Recherche</span></dt><dd>Champ « Rechercher un jeu. » pour trouver un jeu.</dd></div>
-                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M11 5h10"/><path d="M11 9h7"/><path d="M11 13h4"/><path d="M3 7l3-3 3 3"/><path d="M6 4v16"/><path d="M3 17l3 3 3-3"/></svg></span><span>Trier</span></dt><dd>Trie par date de traduction, vues, téléchargements…</dd></div>
-                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 7h18"/><path d="M6 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/><rect x="4" y="7" width="16" height="14" rx="2"/></svg></span><span>Catégorie</span></dt><dd>Filtre (VN, Collection…).</dd></div>
-
-                <!-- ✅ Moteur -->
-                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6" rx="1"></rect><line x1="9" y1="2" x2="9" y2="4"></line><line x1="15" y1="2" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="22"></line><line x1="15" y1="20" x2="15" y2="22"></line><line x1="20" y1="9" x2="22" y2="9"></line><line x1="20" y1="15" x2="22" y2="15"></line><line x1="2" y1="9" x2="4" y2="9"></line><line x1="2" y1="15" x2="4" y2="15"></line></svg></span><span>Moteur</span></dt><dd>Filtre (Ren'Py, RPGM, Unity…).</dd></div>
-
-                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9"/></svg></span><span>Statut</span></dt><dd>Filtre (Completed, En cours…).</dd></div>
-                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 10V4H14L4 14l6 6 10-10z"/><circle cx="16" cy="8" r="1"/></svg></span><span>Tags</span></dt><dd>Ouvre la liste des tags pour affiner la recherche.</dd></div>
-                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg></span><span>Rafraîchir</span></dt><dd>Remet les filtres à zéro et recharge la liste.</dd></div>
               </dl>
               </div>
           </section>
@@ -208,9 +182,7 @@
     document.body.appendChild(overlay);
 
     const close = () => overlay.classList.remove("is-open");
-    overlay.addEventListener("click", (e) => {
-      if (e.target === overlay) close();
-    });
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
     overlay.querySelector(".menu-help-close").addEventListener("click", close);
     overlay.querySelector(".menu-help-btn").addEventListener("click", close);
 
@@ -221,20 +193,24 @@
 
   function openModal() {
     buildModal();
-    const overlay = document.getElementById(HELP_MODAL_ID);
-    overlay.classList.add("is-open");
+    document.getElementById(HELP_MODAL_ID).classList.add("is-open");
   }
 
   function insertHelpButton(nextToEl) {
     if (document.getElementById(HELP_BTN_ID)) return;
 
+    // ✅ injectStyles ici aussi, comme ça les règles de couleur du bouton sont actives dès l’affichage
+    injectStyles();
+
     const btn = document.createElement("button");
     btn.type = "button";
     btn.id = HELP_BTN_ID;
+
     // Reuse exact same base styles as hamburger to auto-match themes.css
     btn.className = nextToEl.className; // typically "hamburger-btn"
     btn.setAttribute("aria-label", "Aide du menu");
     btn.title = "Aide du menu";
+
     btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
   width="18" height="18" fill="none" stroke="currentColor"
   stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -243,8 +219,8 @@
   <line x1="12" y1="16" x2="12" y2="12"></line>
   <line x1="12" y1="8" x2="12" y2="8"></line>
 </svg>`;
-    nextToEl.insertAdjacentElement("afterend", btn);
 
+    nextToEl.insertAdjacentElement("afterend", btn);
     btn.addEventListener("click", openModal);
   }
 
@@ -252,7 +228,6 @@
     const hb = document.getElementById("hamburgerBtn");
     if (hb) return insertHelpButton(hb);
 
-    // If the header/menu is built after load, wait for it
     const obs = new MutationObserver(() => {
       const hb2 = document.getElementById("hamburgerBtn");
       if (hb2) {

@@ -335,11 +335,6 @@ html, body { min-height: 100%; }
   color-scheme: dark;
 
   background:
-    radial-gradient(circle at 10% 20%, rgba(255,255,255,0.22) 0 1px, transparent 2px),
-    radial-gradient(circle at 30% 80%, rgba(255,255,255,0.18) 0 1px, transparent 2px),
-    radial-gradient(circle at 70% 35%, rgba(255,255,255,0.20) 0 1px, transparent 2px),
-    radial-gradient(circle at 85% 70%, rgba(255,255,255,0.16) 0 1px, transparent 2px),
-
     radial-gradient(1200px 700px at 15% 0%, rgba(24,195,122,0.18), transparent 60%),
     radial-gradient(1100px 650px at 85% 10%, rgba(255,47,67,0.12), transparent 55%),
     radial-gradient(900px 600px at 60% 0%, rgba(72,155,255,0.12), transparent 60%),
@@ -374,10 +369,7 @@ html, body { min-height: 100%; }
   background:
     radial-gradient(1200px 700px at 15% 0%, rgba(24,195,122,0.22), transparent 60%),
     radial-gradient(1100px 650px at 85% 10%, rgba(255,47,67,0.16), transparent 55%),
-    radial-gradient(900px 600px at 60% 0%, rgba(72,155,255,0.16), transparent 60%),
-    radial-gradient(circle at 12% 18%, rgba(255,255,255,.10) 0 1px, transparent 2px),
-    radial-gradient(circle at 72% 28%, rgba(255,255,255,.08) 0 1px, transparent 2px),
-    radial-gradient(circle at 34% 74%, rgba(255,255,255,.06) 0 1px, transparent 2px);
+    radial-gradient(900px 600px at 60% 0%, rgba(72,155,255,0.16), transparent 60%);
   filter: blur(14px);
   animation: noelAurora 14s ease-in-out infinite alternate, noelTwinkle 3.8s steps(2,end) infinite;
 }
@@ -518,11 +510,6 @@ html, body { min-height: 100%; }
   color-scheme: dark;
 
   background:
-    radial-gradient(circle at 12% 18%, rgba(255,140,0,0.20) 0 1px, transparent 2px),
-    radial-gradient(circle at 30% 82%, rgba(255,120,0,0.16) 0 1px, transparent 2px),
-    radial-gradient(circle at 70% 35%, rgba(180,120,255,0.18) 0 1px, transparent 2px),
-    radial-gradient(circle at 85% 70%, rgba(255,90,0,0.14) 0 1px, transparent 2px),
-
     radial-gradient(1200px 700px at 20% 10%, rgba(156,107,255,0.16), transparent 60%),
     radial-gradient(900px 500px at 85% 15%, rgba(255,122,0,0.18), transparent 55%),
     radial-gradient(1100px 800px at 50% 90%, rgba(120,0,255,0.10), transparent 60%),
@@ -583,8 +570,6 @@ html, body { min-height: 100%; }
   68%{ opacity:.10; }
   100%{ opacity:.12; }
 }
-
-
 
 
 /* =========================================================
@@ -2130,9 +2115,27 @@ html, body { min-height: 100%; }
   z-index:-1;
   opacity:.15;
   background:
-    radial-gradient(circle at 20% 30%, rgba(255,215,0,.9) 0 2px, transparent 4px),
-    radial-gradient(circle at 60% 50%, rgba(255,77,166,.8) 0 2px, transparent 4px),
-    radial-gradient(circle at 80% 20%, rgba(0,245,255,.8) 0 2px, transparent 4px);
+    /* Or */
+    radial-gradient(circle at 12% 22%, rgba(255,215,0,.85) 0 2px, transparent 5px),
+    radial-gradient(circle at 18% 70%, rgba(255,215,0,.70) 0 1.5px, transparent 4px),
+    radial-gradient(circle at 42% 18%, rgba(255,215,0,.75) 0 2px, transparent 5px),
+    radial-gradient(circle at 76% 62%, rgba(255,215,0,.65) 0 1.5px, transparent 4px),
+
+    /* Rose */
+    radial-gradient(circle at 28% 40%, rgba(255,77,166,.75) 0 2px, transparent 5px),
+    radial-gradient(circle at 55% 28%, rgba(255,77,166,.65) 0 1.5px, transparent 4px),
+    radial-gradient(circle at 64% 78%, rgba(255,77,166,.70) 0 2px, transparent 5px),
+
+    /* Cyan */
+    radial-gradient(circle at 70% 20%, rgba(0,245,255,.75) 0 2px, transparent 5px),
+    radial-gradient(circle at 86% 34%, rgba(0,245,255,.60) 0 1.5px, transparent 4px),
+    radial-gradient(circle at 90% 72%, rgba(0,245,255,.70) 0 2px, transparent 5px),
+
+    /* Quelques petits “sparkles” blancs */
+    radial-gradient(circle at 8% 55%, rgba(255,255,255,.45) 0 1px, transparent 3px),
+    radial-gradient(circle at 48% 55%, rgba(255,255,255,.35) 0 1px, transparent 3px),
+    radial-gradient(circle at 82% 48%, rgba(255,255,255,.40) 0 1px, transparent 3px);
+
   animation: fireworkFloat 6s ease-in-out infinite;
 }
 

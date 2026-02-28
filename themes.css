@@ -96,6 +96,13 @@ html, body { min-height: 100%; }
   --menu-divider-line: rgba(20,24,36,0.14);
   --menu-divider-sweep: rgba(20,24,36,0.35);
 
+  --game-rating-color: var(--muted);
+
+
+  --game-rating-opacity: .75;
+
+
+
   color-scheme: light;
 }
 
@@ -163,6 +170,13 @@ html, body { min-height: 100%; }
     /* ✅ Menu: séparateur hamburger (sombre) */
     --menu-divider-line: rgba(255,255,255,0.12);
     --menu-divider-sweep: rgba(255,255,255,0.55);
+
+    --game-rating-color: #f6c945;
+
+
+    --game-rating-opacity: .85;
+
+
 
     color-scheme: dark;
   }
@@ -2215,9 +2229,8 @@ html, body { min-height: 100%; }
 :root[data-theme="desert"] .tagPill,
 :root[data-theme="paques"] .tagPill,
 :root[data-theme="soleil"] .tagPill{
-  background: var(--btn, rgba(0,0,0,0.07)) !important;
-  border-color: var(--border) !important;
-  color: var(--fg) !important;
+  background: var(--thumb-bg, var(--thumb-fallback-bg, rgba(0,0,0,0.06))) !important;
+  border-color: var(--border-soft, rgba(0,0,0,0.12)) !important;
 }
 
 /* Boutons neutres uniquement (on laisse Discord/F95/MEGA comme avant) */

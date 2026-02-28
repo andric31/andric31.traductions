@@ -96,6 +96,10 @@ html, body { min-height: 100%; }
   --menu-divider-line: rgba(20,24,36,0.14);
   --menu-divider-sweep: rgba(20,24,36,0.35);
 
+  /* ⭐ AJOUTE ÇA */
+  --game-rating-color: var(--muted);
+  --game-rating-opacity: .9;
+
   color-scheme: light;
 }
 

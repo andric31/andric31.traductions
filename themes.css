@@ -2361,3 +2361,19 @@ html, body { min-height: 100%; }
   color: #777 !important;   /* gris plus léger */
 }
 
+/* =========================================================
+   Résumé = même fond que tags (tous thèmes clairs)
+   ========================================================= */
+
+:root:not([data-theme]) .game-summary,
+:root[data-theme="white"] .game-summary,
+:root[data-theme="clair"] .game-summary,
+:root[data-theme="printemps"] .game-summary,
+:root[data-theme="ete"] .game-summary,
+:root[data-theme="paques"] .game-summary,
+:root[data-theme="desert"] .game-summary,
+:root[data-theme="sakura"] .game-summary,
+:root[data-theme="soleil"] .game-summary{
+  background: var(--thumb-bg) !important;
+  border: 1px solid var(--border);
+}

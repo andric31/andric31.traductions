@@ -16,12 +16,10 @@ body:not(.mode-game){
   overflow-y:auto;
 }
 
-
 /* ✅ NE DOIT PAS SCROLLER */
 .wrap{
   width: 820px;
   max-width: 92vw;
-
   height: auto;         /* important */
   overflow: visible;    /* important */
   padding: 18px;        /* garde ton padding */
@@ -55,12 +53,16 @@ body:not(.mode-game){
   margin:0;
 }
 
+/* =========================================================
+   ✅ BOUTONS / MENU (ne plus dépendre de couleurs "blanches")
+   ========================================================= */
+
 .hamburger-btn{
   width:34px;
   height:34px;
   border-radius:10px;
   border:1px solid var(--border);
-  background: rgba(255,255,255,0.05);
+  background: var(--btn, rgba(255,255,255,0.05));
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -82,7 +84,7 @@ body:not(.mode-game){
   display:block;
   height:2px;
   border-radius:999px;
-  background:#ffffff;
+  background: var(--fg);   /* ✅ au lieu de #fff */
   opacity:0.92;
 }
 
@@ -110,15 +112,19 @@ body:not(.mode-game){
   font-weight:700;
 }
 .menu-item:hover{
-  background: rgba(255,255,255,0.06);
-  border-color: rgba(255,255,255,0.06);
+  background: var(--hover-bg, rgba(255,255,255,0.06)); /* ✅ variable */
+  border-color: var(--border-soft, rgba(255,255,255,0.06));
 }
+
+/* =========================================================
+   ✅ MODAL (texte auto selon thème)
+   ========================================================= */
 
 .modal-overlay{
   position:fixed;
   inset:0;
   z-index:3000;
-  background: rgba(0,0,0,0.55);
+  background: var(--overlay-bg, rgba(0,0,0,0.55)); /* ✅ variable */
   display:flex;
   align-items:center;
   justify-content:center;
@@ -141,19 +147,19 @@ body:not(.mode-game){
   align-items:center;
   justify-content:space-between;
   padding: 12px 14px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  background: rgba(255,255,255,0.02);
+  border-bottom: 1px solid var(--soft-05, rgba(255,255,255,0.06)); /* ✅ variable */
+  background: var(--soft-04, rgba(255,255,255,0.02));              /* ✅ variable */
 }
 .modal-title{
   font-weight: 900;
-  color:#fff;
+  color: var(--title, var(--fg)); /* ✅ au lieu de #fff */
 }
 .modal-close{
   width:32px;
   height:32px;
   border-radius:10px;
   border:1px solid var(--border);
-  background: rgba(255,255,255,0.05);
+  background: var(--btn, rgba(255,255,255,0.05));
   color: var(--fg);
   cursor:pointer;
 }
@@ -176,19 +182,23 @@ body:not(.mode-game){
   display:flex;
   justify-content:flex-end;
   gap:10px;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid var(--soft-05, rgba(255,255,255,0.06)); /* ✅ variable */
 }
 .modal-btn{
   padding: 10px 14px;
   border-radius: 12px;
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.05);
-  color:#fff;
+  background: var(--btn, rgba(255,255,255,0.05));
+  color: var(--fg); /* ✅ au lieu de #fff */
   font-weight:800;
   cursor:pointer;
   user-select:none;
 }
 .modal-btn:hover{ filter: brightness(1.08); }
+
+/* =========================================================
+   ✅ CONTENU
+   ========================================================= */
 
 .majState{
   margin-top: -2px;
@@ -206,7 +216,7 @@ body:not(.mode-game){
   margin: 0 0 12px 0;
   font-size: 22px;
   line-height: 1.2;
-  color: #fff;
+  color: var(--title, var(--fg)); /* ✅ au lieu de #fff */
 }
 
 .cover{
@@ -214,14 +224,14 @@ body:not(.mode-game){
   height: 190px;
   border-radius: 14px;
   border: 1px solid var(--border);
-  background: #0f121a;
+  background: var(--thumb-fallback-bg, rgba(0,0,0,0.15)); /* ✅ variable */
   object-fit: cover;
   display:block;
 }
 .cover.is-placeholder{
   background:
-    radial-gradient(1200px 300px at 20% 0%, rgba(255,255,255,0.06), rgba(0,0,0,0)),
-    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0));
+    radial-gradient(1200px 300px at 20% 0%, var(--soft-05, rgba(255,255,255,0.06)), rgba(0,0,0,0)),
+    linear-gradient(180deg, var(--soft-04, rgba(255,255,255,0.04)), rgba(0,0,0,0));
 }
 
 .tagsRow{
@@ -233,8 +243,8 @@ body:not(.mode-game){
 
 .tagPill{
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.04);
-  color:#fff;
+  background: var(--thumb-bg, rgba(255,255,255,0.04)); /* ✅ variable */
+  color: var(--fg); /* ✅ au lieu de #fff */
   border-radius: 999px;
   font-size: 12px;
   padding: 6px 10px;
@@ -263,8 +273,8 @@ body:not(.mode-game){
   padding: 10px 14px;
   border-radius: 12px;
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.05);
-  color:#fff;
+  background: var(--btn, rgba(255,255,255,0.05)); /* ✅ variable */
+  color: var(--fg); /* ✅ au lieu de #fff */
   text-decoration:none;
   font-weight: 700;
   cursor:pointer;
@@ -272,6 +282,7 @@ body:not(.mode-game){
 }
 .btnLike:hover{ filter: brightness(1.08); }
 
+/* Spéciaux (on garde en dur) */
 #btnDiscord.btn-discord{
   background:#5865F2;
   border-color:#5865F2;
@@ -282,6 +293,7 @@ body:not(.mode-game){
   border-color:#4752C4;
 }
 
+/* Les spans F95 restent (c'est du branding) */
 .btnLike .f95-white{ color:#ffffff; font-weight:800; }
 .btnLike .f95-red{ color:#8b2d2d; font-weight:800; }
 
@@ -331,6 +343,10 @@ body:not(.mode-game){
   transform: none;
 }
 
+/* =========================================================
+   ✅ RATING (cancel lisible en clair)
+   ========================================================= */
+
 .ratingStar,
 .ratingCancel{
   display:inline-flex;
@@ -338,15 +354,15 @@ body:not(.mode-game){
   justify-content:center;
   width: 40px;
   height: 34px;
-  background: rgba(255,255,255,0.035);
+  background: var(--soft-04, rgba(255,255,255,0.035)); /* ✅ variable */
   border: 1px solid var(--border);
   border-radius: 10px;
   cursor: pointer;
   user-select: none;
   font-size: 26px;
   line-height: 1;
-  color: #ffd36b;
-  opacity: 0.7;
+  color: var(--game-rating-color, #ffd36b); /* ✅ variable si dispo */
+  opacity: var(--game-rating-opacity, 0.7);
 }
 
 .ratingStar:hover,
@@ -360,10 +376,9 @@ body:not(.mode-game){
 
 .ratingCancel{
   font-size: 16px;
-  color: #fff;
-  opacity: 0.75;
+  color: var(--muted, var(--fg)); /* ✅ au lieu de #fff */
+  opacity: 0.85;
 }
-
 .ratingCancel:hover{
   color: #ff9a9a;
   opacity: 0.95;
@@ -384,12 +399,16 @@ body:not(.mode-game){
   animation: ratingMsgFade 520ms cubic-bezier(.4,0,.2,1);
 }
 
+/* =========================================================
+   ✅ STATS / ERR
+   ========================================================= */
+
 .statsOut{
   margin-top: 10px;
   padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: rgba(255,255,255,0.03);
+  background: var(--soft-04, rgba(255,255,255,0.03)); /* ✅ variable */
   color: var(--muted);
   font-size: 12px;
   display:flex;
@@ -420,14 +439,21 @@ body.mode-game .topbar{
   display:none !important;
 }
 
+/* =========================================================
+   ✅ INFO BLOCK (plus sombre "en clair" avant -> maintenant variable)
+   ========================================================= */
+
 .infoBlock{
   margin-top: 12px;
-  border: 1px solid rgba(255,255,255,.18);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 10px 12px;
-  background: rgba(0,0,0,.15);
+  background: var(--soft-04, rgba(0,0,0,0.04)); /* ✅ variable */
 }
-.infoBlock h3{ margin: 0 0 6px 0; }
+.infoBlock h3{
+  margin: 0 0 6px 0;
+  color: var(--title, var(--fg));
+}
 .infoBlock .infoText{
   color: var(--fg);
   font-size: 14px;
@@ -439,213 +465,10 @@ body.mode-game .topbar{
   line-height: 1.45;
 }
 
-/* =========================================================
-   ✅ FIX LISIBILITÉ EN CLAIR (white/clair/light + AUTO système)
-   - Ne change PAS le layout
-   - Corrige : title / tags / boutons / hamburger / menu popover / modal / rating cancel / infoBlock
-   ========================================================= */
-
-/* Thèmes clairs explicites (selon où est le data-theme) */
-html[data-theme="white"], html[data-theme="clair"], html[data-theme="light"],
-:root[data-theme="white"], :root[data-theme="clair"], :root[data-theme="light"]{
-  /* rien : on cible les éléments ci-dessous */
-}
-
-html[data-theme="white"] .title,
-html[data-theme="clair"] .title,
-html[data-theme="light"] .title,
-:root[data-theme="white"] .title,
-:root[data-theme="clair"] .title,
-:root[data-theme="light"] .title{
-  color: var(--title, var(--fg)) !important;
-}
-
-html[data-theme="white"] .tagPill,
-html[data-theme="clair"] .tagPill,
-html[data-theme="light"] .tagPill,
-:root[data-theme="white"] .tagPill,
-:root[data-theme="clair"] .tagPill,
-:root[data-theme="light"] .tagPill{
-  color: var(--fg) !important;
-  background: var(--thumb-bg, rgba(0,0,0,0.06)) !important;
-  border-color: var(--border) !important;
-}
-
-/* Boutons neutres (laisser F95/MEGA/Discord) */
-html[data-theme="white"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord),
-html[data-theme="clair"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord),
-html[data-theme="light"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord),
-:root[data-theme="white"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord),
-:root[data-theme="clair"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord),
-:root[data-theme="light"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord){
-  color: var(--fg) !important;
-  background: var(--btn, rgba(0,0,0,0.06)) !important;
-  border-color: var(--border) !important;
-}
-
-/* Hamburger visible */
-html[data-theme="white"] .ham-lines span,
-html[data-theme="clair"] .ham-lines span,
-html[data-theme="light"] .ham-lines span,
-:root[data-theme="white"] .ham-lines span,
-:root[data-theme="clair"] .ham-lines span,
-:root[data-theme="light"] .ham-lines span{
-  background: var(--fg) !important;
-}
-
-/* Popover lisible en clair */
-html[data-theme="white"] .menu-popover,
-html[data-theme="clair"] .menu-popover,
-html[data-theme="light"] .menu-popover,
-:root[data-theme="white"] .menu-popover,
-:root[data-theme="clair"] .menu-popover,
-:root[data-theme="light"] .menu-popover{
-  background: var(--popover-bg, rgba(255,255,255,0.92)) !important;
-  border-color: var(--border) !important;
-}
-
-html[data-theme="white"] .menu-item:hover,
-html[data-theme="clair"] .menu-item:hover,
-html[data-theme="light"] .menu-item:hover,
-:root[data-theme="white"] .menu-item:hover,
-:root[data-theme="clair"] .menu-item:hover,
-:root[data-theme="light"] .menu-item:hover{
-  background: var(--hover-bg, rgba(0,0,0,0.06)) !important;
-  border-color: var(--border-soft, rgba(0,0,0,0.10)) !important;
-}
-
-/* Modal lisible */
-html[data-theme="white"] .modal-title,
-html[data-theme="clair"] .modal-title,
-html[data-theme="light"] .modal-title,
-:root[data-theme="white"] .modal-title,
-:root[data-theme="clair"] .modal-title,
-:root[data-theme="light"] .modal-title{
-  color: var(--title, var(--fg)) !important;
-}
-
-html[data-theme="white"] .modal-btn,
-html[data-theme="clair"] .modal-btn,
-html[data-theme="light"] .modal-btn,
-:root[data-theme="white"] .modal-btn,
-:root[data-theme="clair"] .modal-btn,
-:root[data-theme="light"] .modal-btn{
-  color: var(--fg) !important;
-  background: var(--btn, rgba(0,0,0,0.06)) !important;
-  border-color: var(--border) !important;
-}
-
-/* Rating cancel visible */
-html[data-theme="white"] .ratingCancel,
-html[data-theme="clair"] .ratingCancel,
-html[data-theme="light"] .ratingCancel,
-:root[data-theme="white"] .ratingCancel,
-:root[data-theme="clair"] .ratingCancel,
-:root[data-theme="light"] .ratingCancel{
-  color: var(--muted, var(--fg)) !important;
-}
-
-/* Info block lisible */
-html[data-theme="white"] .infoBlock,
-html[data-theme="clair"] .infoBlock,
-html[data-theme="light"] .infoBlock,
-:root[data-theme="white"] .infoBlock,
-:root[data-theme="clair"] .infoBlock,
-:root[data-theme="light"] .infoBlock{
-  border-color: var(--border) !important;
-  background: var(--panel, rgba(0,0,0,0.04)) !important;
-}
-
-/* ===== AUTO système (pas de data-theme) ===== */
-@media (prefers-color-scheme: light){
-  html:not([data-theme]) .title{ color: var(--title, var(--fg)) !important; }
-
-  html:not([data-theme]) .tagPill{
-    color: var(--fg) !important;
-    background: var(--thumb-bg, rgba(0,0,0,0.06)) !important;
-    border-color: var(--border) !important;
-  }
-
-  html:not([data-theme]) .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord){
-    color: var(--fg) !important;
-    background: var(--btn, rgba(0,0,0,0.06)) !important;
-    border-color: var(--border) !important;
-  }
-
-  html:not([data-theme]) .ham-lines span{ background: var(--fg) !important; }
-
-  html:not([data-theme]) .menu-popover{
-    background: var(--popover-bg, rgba(255,255,255,0.92)) !important;
-    border-color: var(--border) !important;
-  }
-  html:not([data-theme]) .menu-item:hover{
-    background: var(--hover-bg, rgba(0,0,0,0.06)) !important;
-    border-color: var(--border-soft, rgba(0,0,0,0.10)) !important;
-  }
-
-  html:not([data-theme]) .modal-title{ color: var(--title, var(--fg)) !important; }
-  html:not([data-theme]) .modal-btn{
-    color: var(--fg) !important;
-    background: var(--btn, rgba(0,0,0,0.06)) !important;
-    border-color: var(--border) !important;
-  }
-
-  html:not([data-theme]) .ratingCancel{ color: var(--muted, var(--fg)) !important; }
-
-  html:not([data-theme]) .infoBlock{
-    border-color: var(--border) !important;
-    background: var(--panel, rgba(0,0,0,0.04)) !important;
-  }
-}
-
-/* ✅ Lisibilité bloc ℹ️ Informations (infoBlock) */
-
-/* 1) Thème clair explicite */
-html[data-theme="white"] .infoBlock,
-html[data-theme="clair"] .infoBlock,
-html[data-theme="light"] .infoBlock{
-  background:#f4f6f8 !important;
-  border-color:#d6dbe1 !important;
-}
-
-html[data-theme="white"] .infoBlock h3,
-html[data-theme="clair"] .infoBlock h3,
-html[data-theme="light"] .infoBlock h3{
-  color:#111 !important;
-  opacity:1 !important;
-}
-
-html[data-theme="white"] .infoBlock .infoText,
-html[data-theme="clair"] .infoBlock .infoText,
-html[data-theme="light"] .infoBlock .infoText{
-  color:#222 !important;
-  opacity:1 !important;
-}
-
-html[data-theme="white"] .infoBlock .infoTextMuted,
-html[data-theme="clair"] .infoBlock .infoTextMuted,
-html[data-theme="light"] .infoBlock .infoTextMuted{
-  color:#555 !important;
-  opacity:1 !important;
-}
-
-/* 2) Mode auto (pas de data-theme) + système en clair */
-@media (prefers-color-scheme: light){
-  html:not([data-theme]) .infoBlock{
-    background:#f4f6f8 !important;
-    border-color:#d6dbe1 !important;
-  }
-  html:not([data-theme]) .infoBlock h3{ color:#111 !important; opacity:1 !important; }
-  html:not([data-theme]) .infoBlock .infoText{ color:#222 !important; opacity:1 !important; }
-  html:not([data-theme]) .infoBlock .infoTextMuted{ color:#555 !important; opacity:1 !important; }
-}
-
-
 /* ✅ hover léger MAIS fixe (pas de surélévation) */
 #ratingBox:hover{
-  border-color: #555 !important;
+  border-color: var(--card-hover-border, #555) !important;
 }
-
 
 #mainInfoBox,
 .tagsBox,
@@ -662,5 +485,3 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
   transform: translateY(-2px);
   box-shadow: 0 10px 26px rgba(0,0,0,0.45);
 }
-
-

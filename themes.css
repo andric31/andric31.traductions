@@ -854,7 +854,7 @@ html, body { min-height: 100%; }
 
 
 /* =========================================================
-   THÈME : Hiver ❄️
+   THÈME : Hiver ❄️ (neige dense + vent + rafales)
    ========================================================= */
 :root[data-theme="hiver"]{
   --bg:#071019;
@@ -883,80 +883,129 @@ html, body { min-height: 100%; }
 
   color-scheme: dark;
 
+  /* fond froid (sans points fixes) */
   background:
     radial-gradient(1200px 700px at 15% 0%, rgba(90,162,255,0.16), transparent 60%),
     radial-gradient(1100px 650px at 85% 10%, rgba(155,231,255,0.10), transparent 55%),
     linear-gradient(180deg, #02060b 0%, #06111d 45%, #071019 100%);
   background-attachment: fixed;
+
+  position: relative;
 }
-:root[data-theme="hiver"] body{ background: transparent !important; position:relative; isolation:isolate; }
+
+:root[data-theme="hiver"] body{
+  background: transparent !important;
+  position: relative;
+  isolation: isolate;
+}
+
+/* 2 couches : neige + rafales (plus “vrai hiver”) */
+:root[data-theme="hiver"]::before,
 :root[data-theme="hiver"]::after{
   content:"";
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: -1;
-  opacity: .55;
-
-  /* ❄️ Neige dense (4 couches) */
-  background-image:
-    radial-gradient(circle, rgba(255,255,255,.85) 0 1.2px, transparent 1.9px),
-    radial-gradient(circle, rgba(255,255,255,.55) 0 1.0px, transparent 1.7px),
-    radial-gradient(circle, rgba(255,255,255,.40) 0 0.8px, transparent 1.4px),
-    radial-gradient(circle, rgba(255,255,255,.28) 0 0.6px, transparent 1.2px);
-
-  background-size:
-    110px 140px,
-    180px 130px,
-    220px 240px,
-    320px 260px;
-
-  background-position:
-    0   -220px,
-    80px -140px,
-    40px -320px,
-    160px -240px;
-
-  filter: blur(.15px);
-  animation: hiverSnow 12s linear infinite;
+  will-change: background-position, transform, opacity;
 }
 
-/* ❄️ chute + léger vent */
-@keyframes hiverSnow{
+/* ❄️ Neige dense (flocons) */
+:root[data-theme="hiver"]::after{
+  opacity: .70;
+
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,.92) 0 1.35px, transparent 2.0px),
+    radial-gradient(circle, rgba(255,255,255,.70) 0 1.10px, transparent 1.85px),
+    radial-gradient(circle, rgba(255,255,255,.50) 0 0.90px, transparent 1.55px),
+    radial-gradient(circle, rgba(255,255,255,.32) 0 0.70px, transparent 1.30px);
+
+  background-size:
+    90px 120px,
+    150px 120px,
+    220px 240px,
+    340px 280px;
+
+  background-position:
+    0   -260px,
+    80px -180px,
+    40px -360px,
+    160px -280px;
+
+  filter: blur(.12px);
+  animation: hiverSnowStorm 6s linear infinite;
+}
+
+/* 🌬️ Rafales / poudrerie (voile qui traverse) */
+:root[data-theme="hiver"]::before{
+  opacity: .18;
+  mix-blend-mode: screen;
+  background:
+    repeating-linear-gradient(115deg,
+      rgba(255,255,255,.18) 0 2px,
+      transparent 2px 18px);
+  filter: blur(1.4px);
+  animation: hiverGusts 3.2s ease-in-out infinite;
+}
+
+/* ❄️ Chute + vrai vent (latéral) + variations */
+@keyframes hiverSnowStorm{
   0%{
     background-position:
-      0   -220px,
-      80px -140px,
-      40px -320px,
-      160px -240px;
-    transform: translateX(0);
+      0   -260px,
+      80px -180px,
+      40px -360px,
+      160px -280px;
+    transform: translateX(0) translateY(0);
   }
-  50%{
+  25%{
     background-position:
-      18px 220px,
-      60px  260px,
-      56px  120px,
-      140px 240px;
-    transform: translateX(6px);
+      40px  20px,
+      110px  80px,
+      80px -80px,
+      210px  60px;
+    transform: translateX(14px) translateY(0);
+  }
+  55%{
+    background-position:
+      -20px  360px,
+      140px  420px,
+      30px   240px,
+      260px  360px;
+    transform: translateX(-18px) translateY(0);
+  }
+  80%{
+    background-position:
+      35px  620px,
+      120px  680px,
+      70px   640px,
+      230px  680px;
+    transform: translateX(16px) translateY(0);
   }
   100%{
     background-position:
-      8px 560px,
-      78px  520px,
-      44px  560px,
-      168px 520px;
-    transform: translateX(0);
+      15px  900px,
+      110px  860px,
+      60px   900px,
+      220px  860px;
+    transform: translateX(0) translateY(0);
   }
 }
 
-@media (prefers-reduced-motion: reduce){
-  :root[data-theme="hiver"]::after{ animation:none; }
-}
-@keyframes hiverSnow{
-  from{ transform: translateY(-4%); }
-  to{ transform: translateY(4%); }
+/* 🌬️ Rafales : va-et-vient + un peu de rotation */
+@keyframes hiverGusts{
+  0%   { transform: translateX(-2%) translateY(-1%) rotate(-1deg); opacity: .10; }
+  35%  { transform: translateX( 3%) translateY( 0%) rotate( 1deg); opacity: .22; }
+  70%  { transform: translateX(-1%) translateY( 1%) rotate(-1deg); opacity: .16; }
+  100% { transform: translateX(-2%) translateY(-1%) rotate(-1deg); opacity: .10; }
 }
 
+@media (prefers-reduced-motion: reduce){
+  :root[data-theme="hiver"]::before,
+  :root[data-theme="hiver"]::after{
+    animation: none !important;
+  }
+}
 
 /* =========================================================
    THÈME : Vaporwave 🌴

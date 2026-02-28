@@ -2362,28 +2362,41 @@ html, body { min-height: 100%; }
 }
 
 /* =========================================================
-   Résumé (descInnerBox) = même fond que les tags en thèmes clairs
+   Résumé (descInnerBox) = même fond que tags (thumb-bg)
+   ✅ couvre html[data-theme] + :root[data-theme]
+   ✅ couvre aliases (été/ete, pâques/paques)
    ========================================================= */
 
-/* thèmes clairs forcés */
+html[data-theme="white"] .descInnerBox,
+html[data-theme="clair"] .descInnerBox,
+html[data-theme="printemps"] .descInnerBox,
+html[data-theme="ete"] .descInnerBox,
+html[data-theme="été"] .descInnerBox,
+html[data-theme="paques"] .descInnerBox,
+html[data-theme="pâques"] .descInnerBox,
+html[data-theme="desert"] .descInnerBox,
+html[data-theme="sakura"] .descInnerBox,
+html[data-theme="soleil"] .descInnerBox,
+
 :root[data-theme="white"] .descInnerBox,
 :root[data-theme="clair"] .descInnerBox,
 :root[data-theme="printemps"] .descInnerBox,
 :root[data-theme="ete"] .descInnerBox,
+:root[data-theme="été"] .descInnerBox,
 :root[data-theme="paques"] .descInnerBox,
+:root[data-theme="pâques"] .descInnerBox,
 :root[data-theme="desert"] .descInnerBox,
 :root[data-theme="sakura"] .descInnerBox,
 :root[data-theme="soleil"] .descInnerBox{
-  background: var(--thumb-bg) !important;   /* même couleur que tags */
+  background: var(--thumb-bg) !important;
   border-color: var(--border) !important;
-  box-shadow: none !important;              /* optionnel: évite l'effet sombre du viewer.css */
 }
 
-/* AUTO clair uniquement (pas de data-theme) */
+/* AUTO clair (sans data-theme) */
 @media (prefers-color-scheme: light){
+  html:not([data-theme]) .descInnerBox,
   :root:not([data-theme]) .descInnerBox{
     background: var(--thumb-bg) !important;
     border-color: var(--border) !important;
-    box-shadow: none !important;
   }
 }

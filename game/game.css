@@ -439,6 +439,31 @@ body.mode-game .topbar{
   line-height: 1.45;
 }
 
+
+
+/* ✅ FIX VISIBILITÉ "Informations" (thèmes clairs) 
+   - Le bloc peut paraître "délavé" si un parent applique une opacité/filtre
+   - On force une vraie lisibilité sans casser le layout
+*/
+#mainInfoBox{
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+#mainInfoBox, #mainInfoBox *{
+  opacity: 1 !important;
+  filter: none !important;
+  text-shadow: none !important;
+}
+#mainInfoBox .infoText{ color: var(--fg) !important; }
+#mainInfoBox .infoTextMuted{ color: var(--muted) !important; }
+
+/* Si le titre "Informations" est dans un badge/label */
+#mainInfoBox .infoTitle,
+#mainInfoBox h3{
+  color: var(--fg) !important;
+}
+
+
 /* =========================================================
    ✅ FIX LISIBILITÉ EN CLAIR (white/clair/light + AUTO système)
    - Ne change PAS le layout

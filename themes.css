@@ -829,8 +829,6 @@ html, body { min-height: 100%; }
   color-scheme: dark;
 
   background:
-    radial-gradient(circle at 18% 22%, rgba(255,122,24,.14) 0 2px, transparent 3px),
-    radial-gradient(circle at 72% 32%, rgba(255,209,102,.10) 0 2px, transparent 3px),
     radial-gradient(1200px 700px at 15% 0%, rgba(255,122,24,0.16), transparent 60%),
     radial-gradient(1100px 650px at 85% 10%, rgba(255,209,102,0.10), transparent 55%),
     linear-gradient(180deg, #070504 0%, #120b08 45%, #1a120c 100%);
@@ -842,10 +840,7 @@ html, body { min-height: 100%; }
   position:fixed; inset:0;
   pointer-events:none; z-index:-1;
   opacity:.10;
-  background:
-    radial-gradient(circle at 22% 28%, rgba(255,122,24,.55) 0 1px, transparent 2px),
-    radial-gradient(circle at 55% 45%, rgba(255,209,102,.50) 0 1px, transparent 2px),
-    radial-gradient(circle at 78% 68%, rgba(255,122,24,.50) 0 1px, transparent 2px);
+  background: none;
   animation: automneDrift 12s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce){
@@ -889,10 +884,6 @@ html, body { min-height: 100%; }
   color-scheme: dark;
 
   background:
-    radial-gradient(circle at 12% 18%, rgba(255,255,255,0.22) 0 1px, transparent 2px),
-    radial-gradient(circle at 28% 62%, rgba(255,255,255,0.18) 0 1px, transparent 2px),
-    radial-gradient(circle at 70% 35%, rgba(255,255,255,0.20) 0 1px, transparent 2px),
-    radial-gradient(circle at 85% 70%, rgba(255,255,255,0.16) 0 1px, transparent 2px),
     radial-gradient(1200px 700px at 15% 0%, rgba(90,162,255,0.16), transparent 60%),
     radial-gradient(1100px 650px at 85% 10%, rgba(155,231,255,0.10), transparent 55%),
     linear-gradient(180deg, #02060b 0%, #06111d 45%, #071019 100%);
@@ -901,16 +892,63 @@ html, body { min-height: 100%; }
 :root[data-theme="hiver"] body{ background: transparent !important; position:relative; isolation:isolate; }
 :root[data-theme="hiver"]::after{
   content:"";
-  position:fixed; inset:-20%;
-  pointer-events:none; z-index:-1;
-  opacity:.10;
-  background:
-    radial-gradient(circle at 10% 20%, rgba(255,255,255,.7) 0 1px, transparent 2px),
-    radial-gradient(circle at 30% 80%, rgba(255,255,255,.6) 0 1px, transparent 2px),
-    radial-gradient(circle at 70% 35%, rgba(255,255,255,.65) 0 1px, transparent 2px),
-    radial-gradient(circle at 85% 70%, rgba(255,255,255,.55) 0 1px, transparent 2px);
-  animation: hiverSnow 14s linear infinite;
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  opacity: .55;
+
+  /* ❄️ Neige dense (4 couches) */
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,.85) 0 1.2px, transparent 1.9px),
+    radial-gradient(circle, rgba(255,255,255,.55) 0 1.0px, transparent 1.7px),
+    radial-gradient(circle, rgba(255,255,255,.40) 0 0.8px, transparent 1.4px),
+    radial-gradient(circle, rgba(255,255,255,.28) 0 0.6px, transparent 1.2px);
+
+  background-size:
+    110px 140px,
+    180px 130px,
+    220px 240px,
+    320px 260px;
+
+  background-position:
+    0   -220px,
+    80px -140px,
+    40px -320px,
+    160px -240px;
+
+  filter: blur(.15px);
+  animation: hiverSnow 12s linear infinite;
 }
+
+/* ❄️ chute + léger vent */
+@keyframes hiverSnow{
+  0%{
+    background-position:
+      0   -220px,
+      80px -140px,
+      40px -320px,
+      160px -240px;
+    transform: translateX(0);
+  }
+  50%{
+    background-position:
+      18px 220px,
+      60px  260px,
+      56px  120px,
+      140px 240px;
+    transform: translateX(6px);
+  }
+  100%{
+    background-position:
+      8px 560px,
+      78px  520px,
+      44px  560px,
+      168px 520px;
+    transform: translateX(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce){
   :root[data-theme="hiver"]::after{ animation:none; }
 }

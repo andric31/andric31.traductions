@@ -2362,7 +2362,8 @@ html, body { min-height: 100%; }
 }
 
 /* =========================================================
-   Résumé = même fond que tags (tous thèmes clairs)
+   Résumé : forcer le fond EXACT (même que tags) sur thèmes clairs
+   - cible .game-summary + son contenu interne (au cas où un inner a un bg)
    ========================================================= */
 
 :root:not([data-theme]) .game-summary,
@@ -2374,6 +2375,19 @@ html, body { min-height: 100%; }
 :root[data-theme="desert"] .game-summary,
 :root[data-theme="sakura"] .game-summary,
 :root[data-theme="soleil"] .game-summary{
-  background: var(--thumb-bg) !important;
-  border: 1px solid var(--border);
+  background: var(--thumb-bg) !important; /* même fond que tags */
+  border-color: var(--border) !important;
+}
+
+/* Si le gris vient d’un “inner” (très fréquent), on le neutralise */
+:root:not([data-theme]) .game-summary > *,
+:root[data-theme="white"] .game-summary > *,
+:root[data-theme="clair"] .game-summary > *,
+:root[data-theme="printemps"] .game-summary > *,
+:root[data-theme="ete"] .game-summary > *,
+:root[data-theme="paques"] .game-summary > *,
+:root[data-theme="desert"] .game-summary > *,
+:root[data-theme="sakura"] .game-summary > *,
+:root[data-theme="soleil"] .game-summary > *{
+  background: transparent !important;
 }

@@ -933,7 +933,7 @@ html, body { min-height: 100%; }
     160px -280px;
 
   filter: blur(.12px);
-  animation: hiverSnowStorm 6s linear infinite;
+  animation: hiverSnowStorm 9s linear infinite;
 }
 
 /* 🌬️ Rafales / poudrerie (voile qui traverse) */
@@ -945,7 +945,7 @@ html, body { min-height: 100%; }
       rgba(255,255,255,.18) 0 2px,
       transparent 2px 18px);
   filter: blur(1.4px);
-  animation: hiverGusts 3.2s ease-in-out infinite;
+  animation: hiverGusts 5.5s ease-in-out infinite;
 }
 
 /* ❄️ Chute + vrai vent (latéral) + variations */

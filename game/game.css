@@ -60,7 +60,7 @@ body:not(.mode-game){
   height:34px;
   border-radius:10px;
   border:1px solid var(--border);
-  background: var(--soft-05);
+  background: rgba(255,255,255,0.05);
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -82,7 +82,7 @@ body:not(.mode-game){
   display:block;
   height:2px;
   border-radius:999px;
-  background: var(--fg);
+  background:#ffffff;
   opacity:0.92;
 }
 
@@ -110,8 +110,8 @@ body:not(.mode-game){
   font-weight:700;
 }
 .menu-item:hover{
-  background: var(--border-soft);
-  border-color: var(--border-soft);
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.06);
 }
 
 .modal-overlay{
@@ -141,19 +141,19 @@ body:not(.mode-game){
   align-items:center;
   justify-content:space-between;
   padding: 12px 14px;
-  border-bottom: 1px solid var(--border-soft);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
   background: rgba(255,255,255,0.02);
 }
 .modal-title{
   font-weight: 900;
-  color: var(--fg);
+  color:#fff;
 }
 .modal-close{
   width:32px;
   height:32px;
   border-radius:10px;
   border:1px solid var(--border);
-  background: var(--soft-05);
+  background: rgba(255,255,255,0.05);
   color: var(--fg);
   cursor:pointer;
 }
@@ -176,14 +176,14 @@ body:not(.mode-game){
   display:flex;
   justify-content:flex-end;
   gap:10px;
-  border-top: 1px solid var(--border-soft);
+  border-top: 1px solid rgba(255,255,255,0.06);
 }
 .modal-btn{
   padding: 10px 14px;
   border-radius: 12px;
   border: 1px solid var(--border);
-  background: var(--soft-05);
-  color: var(--fg);
+  background: rgba(255,255,255,0.05);
+  color:#fff;
   font-weight:800;
   cursor:pointer;
   user-select:none;
@@ -206,7 +206,7 @@ body:not(.mode-game){
   margin: 0 0 12px 0;
   font-size: 22px;
   line-height: 1.2;
-  color: var(--title);
+  color: #fff;
 }
 
 .cover{
@@ -214,14 +214,14 @@ body:not(.mode-game){
   height: 190px;
   border-radius: 14px;
   border: 1px solid var(--border);
-  background: var(--thumb-fallback-bg);
+  background: #0f121a;
   object-fit: cover;
   display:block;
 }
 .cover.is-placeholder{
   background:
-    radial-gradient(1200px 300px at 20% 0%, var(--border-soft), rgba(0,0,0,0)),
-    linear-gradient(180deg, var(--soft-04), rgba(0,0,0,0));
+    radial-gradient(1200px 300px at 20% 0%, rgba(255,255,255,0.06), rgba(0,0,0,0)),
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0));
 }
 
 .tagsRow{
@@ -233,8 +233,8 @@ body:not(.mode-game){
 
 .tagPill{
   border: 1px solid var(--border);
-  background: var(--soft-04);
-  color: var(--fg);
+  background: rgba(255,255,255,0.04);
+  color:#fff;
   border-radius: 999px;
   font-size: 12px;
   padding: 6px 10px;
@@ -263,8 +263,8 @@ body:not(.mode-game){
   padding: 10px 14px;
   border-radius: 12px;
   border: 1px solid var(--border);
-  background: var(--soft-05);
-  color: var(--fg);
+  background: rgba(255,255,255,0.05);
+  color:#fff;
   text-decoration:none;
   font-weight: 700;
   cursor:pointer;
@@ -275,7 +275,7 @@ body:not(.mode-game){
 #btnDiscord.btn-discord{
   background:#5865F2;
   border-color:#5865F2;
-  color: #ffffff;
+  color:#fff;
 }
 #btnDiscord.btn-discord:hover{
   background:#4752C4;
@@ -360,7 +360,7 @@ body:not(.mode-game){
 
 .ratingCancel{
   font-size: 16px;
-  color: var(--fg);
+  color: #fff;
   opacity: 0.75;
 }
 
@@ -422,10 +422,10 @@ body.mode-game .topbar{
 
 .infoBlock{
   margin-top: 12px;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255,255,255,.18);
   border-radius: 12px;
   padding: 10px 12px;
-  background: var(--panel, var(--soft-04));
+  background: rgba(0,0,0,.15);
 }
 .infoBlock h3{ margin: 0 0 6px 0; }
 .infoBlock .infoText{
@@ -438,31 +438,6 @@ body.mode-game .topbar{
   font-size: 13px;
   line-height: 1.45;
 }
-
-
-
-/* ✅ FIX VISIBILITÉ "Informations" (thèmes clairs) 
-   - Le bloc peut paraître "délavé" si un parent applique une opacité/filtre
-   - On force une vraie lisibilité sans casser le layout
-*/
-#mainInfoBox{
-  background: var(--card);
-  border: 1px solid var(--border);
-}
-#mainInfoBox, #mainInfoBox *{
-  opacity: 1 !important;
-  filter: none !important;
-  text-shadow: none !important;
-}
-#mainInfoBox .infoText{ color: var(--fg) !important; }
-#mainInfoBox .infoTextMuted{ color: var(--muted) !important; }
-
-/* Si le titre "Informations" est dans un badge/label */
-#mainInfoBox .infoTitle,
-#mainInfoBox h3{
-  color: var(--fg) !important;
-}
-
 
 /* =========================================================
    ✅ FIX LISIBILITÉ EN CLAIR (white/clair/light + AUTO système)
@@ -571,6 +546,16 @@ html[data-theme="light"] .ratingCancel,
 }
 
 /* Info block lisible */
+html[data-theme="white"] .infoBlock,
+html[data-theme="clair"] .infoBlock,
+html[data-theme="light"] .infoBlock,
+:root[data-theme="white"] .infoBlock,
+:root[data-theme="clair"] .infoBlock,
+:root[data-theme="light"] .infoBlock{
+  border-color: var(--border) !important;
+  background: var(--panel, rgba(0,0,0,0.04)) !important;
+}
+
 /* ===== AUTO système (pas de data-theme) ===== */
 @media (prefers-color-scheme: light){
   html:not([data-theme]) .title{ color: var(--title, var(--fg)) !important; }
@@ -606,15 +591,59 @@ html[data-theme="light"] .ratingCancel,
   }
 
   html:not([data-theme]) .ratingCancel{ color: var(--muted, var(--fg)) !important; }
+
+  html:not([data-theme]) .infoBlock{
+    border-color: var(--border) !important;
+    background: var(--panel, rgba(0,0,0,0.04)) !important;
+  }
 }
 
+/* ✅ Lisibilité bloc ℹ️ Informations (infoBlock) */
 
+/* 1) Thème clair explicite */
+html[data-theme="white"] .infoBlock,
+html[data-theme="clair"] .infoBlock,
+html[data-theme="light"] .infoBlock{
+  background:#f4f6f8 !important;
+  border-color:#d6dbe1 !important;
+}
 
+html[data-theme="white"] .infoBlock h3,
+html[data-theme="clair"] .infoBlock h3,
+html[data-theme="light"] .infoBlock h3{
+  color:#111 !important;
+  opacity:1 !important;
+}
+
+html[data-theme="white"] .infoBlock .infoText,
+html[data-theme="clair"] .infoBlock .infoText,
+html[data-theme="light"] .infoBlock .infoText{
+  color:#222 !important;
+  opacity:1 !important;
+}
+
+html[data-theme="white"] .infoBlock .infoTextMuted,
+html[data-theme="clair"] .infoBlock .infoTextMuted,
+html[data-theme="light"] .infoBlock .infoTextMuted{
+  color:#555 !important;
+  opacity:1 !important;
+}
+
+/* 2) Mode auto (pas de data-theme) + système en clair */
+@media (prefers-color-scheme: light){
+  html:not([data-theme]) .infoBlock{
+    background:#f4f6f8 !important;
+    border-color:#d6dbe1 !important;
+  }
+  html:not([data-theme]) .infoBlock h3{ color:#111 !important; opacity:1 !important; }
+  html:not([data-theme]) .infoBlock .infoText{ color:#222 !important; opacity:1 !important; }
+  html:not([data-theme]) .infoBlock .infoTextMuted{ color:#555 !important; opacity:1 !important; }
+}
 
 
 /* ✅ hover léger MAIS fixe (pas de surélévation) */
 #ratingBox:hover{
-  border-color: var(--border) !important;
+  border-color: #555 !important;
 }
 
 

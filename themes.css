@@ -2204,6 +2204,21 @@ html, body { min-height: 100%; }
   color: var(--fg) !important;
 }
 
+
+
+/* ✅ Tags (pills) : certains thèmes clairs "premium" ont un fond trop pâle
+   -> on garde AUTO/clair/white comme avant
+   -> on renforce uniquement printemps/ete/sakura/desert/paques/soleil */
+:root[data-theme="printemps"] .tagPill,
+:root[data-theme="ete"] .tagPill,
+:root[data-theme="sakura"] .tagPill,
+:root[data-theme="desert"] .tagPill,
+:root[data-theme="paques"] .tagPill,
+:root[data-theme="soleil"] .tagPill{
+  background: var(--thumb-bg, var(--thumb-fallback-bg, rgba(0,0,0,0.06))) !important;
+  border-color: var(--border-soft, rgba(0,0,0,0.12)) !important;
+}
+
 /* Boutons neutres uniquement (on laisse Discord/F95/MEGA comme avant) */
 :root[data-theme="clair"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord),
 :root[data-theme="white"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord),
@@ -2264,7 +2279,9 @@ html, body { min-height: 100%; }
 }
 
 /* =========================================================
-   ✅ Texte bloc "Informations" en noir pour thèmes clairs
+   ✅ Bloc ℹ️ Informations : texte lisible en thèmes clairs
+   - force le contenu (même sans classes .infoText / .infoTextMuted)
+   - ne touche PAS aux backgrounds / transparences
    ========================================================= */
 
 :root[data-theme="white"] .infoBlock,
@@ -2275,9 +2292,21 @@ html, body { min-height: 100%; }
 :root[data-theme="desert"] .infoBlock,
 :root[data-theme="sakura"] .infoBlock,
 :root[data-theme="soleil"] .infoBlock{
-  color: var(--fg) !important;
+  color: #555 !important; /* gris foncé doux */
 }
 
+:root[data-theme="white"] .infoBlock *,
+:root[data-theme="clair"] .infoBlock *,
+:root[data-theme="printemps"] .infoBlock *,
+:root[data-theme="ete"] .infoBlock *,
+:root[data-theme="paques"] .infoBlock *,
+:root[data-theme="desert"] .infoBlock *,
+:root[data-theme="sakura"] .infoBlock *,
+:root[data-theme="soleil"] .infoBlock *{
+  color: #555 !important;
+}
+
+/* Titre du bloc un peu plus foncé */
 :root[data-theme="white"] .infoBlock h3,
 :root[data-theme="clair"] .infoBlock h3,
 :root[data-theme="printemps"] .infoBlock h3,
@@ -2286,7 +2315,19 @@ html, body { min-height: 100%; }
 :root[data-theme="desert"] .infoBlock h3,
 :root[data-theme="sakura"] .infoBlock h3,
 :root[data-theme="soleil"] .infoBlock h3{
-  color: var(--title, var(--fg)) !important;
+  color: var(--title, #111) !important;
+}
+
+/* Liens éventuels */
+:root[data-theme="white"] .infoBlock a,
+:root[data-theme="clair"] .infoBlock a,
+:root[data-theme="printemps"] .infoBlock a,
+:root[data-theme="ete"] .infoBlock a,
+:root[data-theme="paques"] .infoBlock a,
+:root[data-theme="desert"] .infoBlock a,
+:root[data-theme="sakura"] .infoBlock a,
+:root[data-theme="soleil"] .infoBlock a{
+  color: var(--primary, #2d6cdf) !important;
 }
 
 /* =========================================================

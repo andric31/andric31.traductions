@@ -2177,7 +2177,6 @@ html, body { min-height: 100%; }
 :root[data-theme="sakura"],
 :root[data-theme="desert"],
 :root[data-theme="paques"],
-:root[data-theme="sakura"],
 :root[data-theme="soleil"]{ /* (si tu as/ajoutes ce thème) */
   /* rien ici */
 }
@@ -2190,7 +2189,6 @@ html, body { min-height: 100%; }
 :root[data-theme="sakura"] .title,
 :root[data-theme="desert"] .title,
 :root[data-theme="paques"] .title,
-:root[data-theme="sakura"] .title,
 :root[data-theme="soleil"] .title{
   color: var(--title, var(--fg)) !important;
 }
@@ -2202,7 +2200,6 @@ html, body { min-height: 100%; }
 :root[data-theme="sakura"] .tagPill,
 :root[data-theme="desert"] .tagPill,
 :root[data-theme="paques"] .tagPill,
-:root[data-theme="sakura"] .tagPill,
 :root[data-theme="soleil"] .tagPill{
   color: var(--fg) !important;
 }
@@ -2215,7 +2212,6 @@ html, body { min-height: 100%; }
 :root[data-theme="sakura"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord),
 :root[data-theme="desert"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord),
 :root[data-theme="paques"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord),
-:root[data-theme="sakura"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord),
 :root[data-theme="soleil"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord){
   color: var(--fg) !important;
 }
@@ -2228,7 +2224,6 @@ html, body { min-height: 100%; }
 :root[data-theme="sakura"] .ham-lines span,
 :root[data-theme="desert"] .ham-lines span,
 :root[data-theme="paques"] .ham-lines span,
-:root[data-theme="sakura"] .ham-lines span,
 :root[data-theme="soleil"] .ham-lines span{
   background: var(--fg) !important;
 }
@@ -2241,7 +2236,6 @@ html, body { min-height: 100%; }
 :root[data-theme="sakura"] .modal-title,
 :root[data-theme="desert"] .modal-title,
 :root[data-theme="paques"] .modal-title,
-:root[data-theme="sakura"] .modal-title,
 :root[data-theme="soleil"] .modal-title{
   color: var(--title, var(--fg)) !important;
 }
@@ -2253,7 +2247,6 @@ html, body { min-height: 100%; }
 :root[data-theme="sakura"] .modal-btn,
 :root[data-theme="desert"] .modal-btn,
 :root[data-theme="paques"] .modal-btn,
-:root[data-theme="sakura"] .modal-btn,
 :root[data-theme="soleil"] .modal-btn{
   color: var(--fg) !important;
 }
@@ -2266,7 +2259,6 @@ html, body { min-height: 100%; }
 :root[data-theme="sakura"] .ratingCancel,
 :root[data-theme="desert"] .ratingCancel,
 :root[data-theme="paques"] .ratingCancel,
-:root[data-theme="sakura"] .ratingCancel,
 :root[data-theme="soleil"] .ratingCancel{
   color: var(--fg) !important;
 }
@@ -2280,6 +2272,7 @@ html, body { min-height: 100%; }
 :root[data-theme="printemps"] .infoBlock,
 :root[data-theme="ete"] .infoBlock,
 :root[data-theme="paques"] .infoBlock,
+:root[data-theme="desert"] .infoBlock,
 :root[data-theme="sakura"] .infoBlock,
 :root[data-theme="soleil"] .infoBlock{
   color: var(--fg) !important;
@@ -2290,6 +2283,7 @@ html, body { min-height: 100%; }
 :root[data-theme="printemps"] .infoBlock h3,
 :root[data-theme="ete"] .infoBlock h3,
 :root[data-theme="paques"] .infoBlock h3,
+:root[data-theme="desert"] .infoBlock h3,
 :root[data-theme="sakura"] .infoBlock h3,
 :root[data-theme="soleil"] .infoBlock h3{
   color: var(--title, var(--fg)) !important;
@@ -2304,6 +2298,7 @@ html, body { min-height: 100%; }
 :root[data-theme="printemps"] .infoBlock .infoText,
 :root[data-theme="ete"] .infoBlock .infoText,
 :root[data-theme="paques"] .infoBlock .infoText,
+:root[data-theme="desert"] .infoBlock .infoText,
 :root[data-theme="sakura"] .infoBlock .infoText,
 :root[data-theme="soleil"] .infoBlock .infoText{
   color: #555 !important;   /* gris foncé doux */
@@ -2314,6 +2309,7 @@ html, body { min-height: 100%; }
 :root[data-theme="printemps"] .infoBlock .infoTextMuted,
 :root[data-theme="ete"] .infoBlock .infoTextMuted,
 :root[data-theme="paques"] .infoBlock .infoTextMuted,
+:root[data-theme="desert"] .infoBlock .infoTextMuted,
 :root[data-theme="sakura"] .infoBlock .infoTextMuted,
 :root[data-theme="soleil"] .infoBlock .infoTextMuted{
   color: #777 !important;   /* gris plus léger */

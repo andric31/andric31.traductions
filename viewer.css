@@ -751,7 +751,7 @@ a.card.card-link *{
   font-size: 18px;
   line-height: 1;
 
-  background: var(--soft-05);
+  background: var(--fg);
   border: 1px solid var(--border);
 
   display: inline-flex;

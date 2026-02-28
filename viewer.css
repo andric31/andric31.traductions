@@ -544,9 +544,9 @@ a.card.card-link *{
   justify-content:center;
   padding:6px 8px;              /* ⬅ moins haut */
   border-radius:8px;            /* ⬅ un peu plus fin */
-  background:#2e3652;
-  color:#ffffff;
-  border:1px solid #3c466a;
+  background: var(--btn);
+  color: var(--fg);
+  border:1px solid var(--border);
   text-decoration:none;
   font-size:13px;               /* ⬅ texte plus petit */
   font-weight:600;              /* ⬅ moins “bold” */
@@ -554,8 +554,8 @@ a.card.card-link *{
 }
 
 .btn:hover{
-  background:#3b4568;
-  border-color:#4d5a84;
+  background: var(--hover-bg);
+  border-color: var(--border);
   filter:brightness(1.05);      /* ⬅ hover plus doux */
 }
 
@@ -842,7 +842,7 @@ a.card.card-link *{
 }
 
 .viewer-annonce{
-  border: 1px solid rgba(255,255,255,.15);
+  border: 1px solid var(--border-soft);
   border-radius: 12px;
   overflow: hidden;
   background: var(--soft-04);
@@ -864,13 +864,13 @@ a.card.card-link *{
   cursor:pointer;
   padding:6px 10px; /* bouton */
   border-radius:10px;
-  border: 1px solid rgba(255,255,255,.18);
+  border: 1px solid var(--border-soft);
   background: var(--hover-bg);
   color: inherit;
 }
 
 .viewer-annonce__btn:hover{
-  background: rgba(255,255,255,.10);
+  background: var(--hover-bg);
 }
 
 .viewer-annonce__body{

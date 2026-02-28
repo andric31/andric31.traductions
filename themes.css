@@ -2362,58 +2362,52 @@ html, body { min-height: 100%; }
 }
 
 /* =========================================================
-   Résumé (descInnerBox) : même rendu que les tags en thèmes clairs
-   - Force background-color (pas transparent)
-   - Coupe le gradient/overlay (background-image + ::before/::after)
+   Résumé : même fond que .tagPill en thèmes clairs
+   (la pill = rgba(255,255,255,0.04) par défaut
+    et certains thèmes clairs forcent var(--btn, rgba(0,0,0,0.07)))
    ========================================================= */
 
-html[data-theme="white"]  #descInnerBox.descInnerBox,
-html[data-theme="clair"]  #descInnerBox.descInnerBox,
-html[data-theme="printemps"] #descInnerBox.descInnerBox,
-html[data-theme="ete"]    #descInnerBox.descInnerBox,
-html[data-theme="paques"] #descInnerBox.descInnerBox,
-html[data-theme="desert"] #descInnerBox.descInnerBox,
-html[data-theme="sakura"] #descInnerBox.descInnerBox,
-html[data-theme="soleil"] #descInnerBox.descInnerBox{
-  /* même formule que tes tags en clair */
-  background-color: var(--thumb-bg, rgba(20,24,36,0.06)) !important;
-  background-image: none !important;
-  border-color: var(--border) !important;
+:root[data-theme="white"]  #descInnerBox,
+:root[data-theme="clair"]  #descInnerBox,
+:root[data-theme="printemps"] #descInnerBox,
+:root[data-theme="ete"]    #descInnerBox,
+:root[data-theme="paques"] #descInnerBox,
+:root[data-theme="desert"] #descInnerBox,
+:root[data-theme="sakura"] #descInnerBox,
+:root[data-theme="soleil"] #descInnerBox{
+  /* même logique que .tagPill */
+  background: var(--btn, rgba(255,255,255,0.04)) !important;
+  border: 1px solid var(--border) !important;
+
+  /* tue le rendu “carte sombre” */
+  box-shadow: none !important;
 }
 
 @media (prefers-color-scheme: light){
-  html:not([data-theme]) #descInnerBox.descInnerBox{
-    background-color: var(--thumb-bg, rgba(20,24,36,0.06)) !important;
-    background-image: none !important;
-    border-color: var(--border) !important;
+  :root:not([data-theme]) #descInnerBox{
+    background: var(--btn, rgba(255,255,255,0.04)) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: none !important;
   }
 }
 
-/* kill overlays si le CSS fait un pseudo-element sombre */
-html[data-theme="white"]  #descInnerBox.descInnerBox::before,
-html[data-theme="clair"]  #descInnerBox.descInnerBox::before,
-html[data-theme="printemps"] #descInnerBox.descInnerBox::before,
-html[data-theme="ete"]    #descInnerBox.descInnerBox::before,
-html[data-theme="paques"] #descInnerBox.descInnerBox::before,
-html[data-theme="desert"] #descInnerBox.descInnerBox::before,
-html[data-theme="sakura"] #descInnerBox.descInnerBox::before,
-html[data-theme="soleil"] #descInnerBox.descInnerBox::before,
-html[data-theme="white"]  #descInnerBox.descInnerBox::after,
-html[data-theme="clair"]  #descInnerBox.descInnerBox::after,
-html[data-theme="printemps"] #descInnerBox.descInnerBox::after,
-html[data-theme="ete"]    #descInnerBox.descInnerBox::after,
-html[data-theme="paques"] #descInnerBox.descInnerBox::after,
-html[data-theme="desert"] #descInnerBox.descInnerBox::after,
-html[data-theme="sakura"] #descInnerBox.descInnerBox::after,
-html[data-theme="soleil"] #descInnerBox.descInnerBox::after{
+/* Si jamais un overlay/pseudo-element existe ailleurs */
+:root[data-theme="white"]  #descInnerBox::before,
+:root[data-theme="clair"]  #descInnerBox::before,
+:root[data-theme="printemps"] #descInnerBox::before,
+:root[data-theme="ete"]    #descInnerBox::before,
+:root[data-theme="paques"] #descInnerBox::before,
+:root[data-theme="desert"] #descInnerBox::before,
+:root[data-theme="sakura"] #descInnerBox::before,
+:root[data-theme="soleil"] #descInnerBox::before,
+:root[data-theme="white"]  #descInnerBox::after,
+:root[data-theme="clair"]  #descInnerBox::after,
+:root[data-theme="printemps"] #descInnerBox::after,
+:root[data-theme="ete"]    #descInnerBox::after,
+:root[data-theme="paques"] #descInnerBox::after,
+:root[data-theme="desert"] #descInnerBox::after,
+:root[data-theme="sakura"] #descInnerBox::after,
+:root[data-theme="soleil"] #descInnerBox::after{
   content: none !important;
   background: none !important;
-}
-
-@media (prefers-color-scheme: light){
-  html:not([data-theme]) #descInnerBox.descInnerBox::before,
-  html:not([data-theme]) #descInnerBox.descInnerBox::after{
-    content: none !important;
-    background: none !important;
-  }
 }

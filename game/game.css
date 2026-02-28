@@ -760,3 +760,25 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
 :root[data-theme="soleil"] .ratingCancel{
   color: var(--fg) !important;
 }
+
+/* =========================================================
+   ✅ Texte bloc "Informations" en noir pour thèmes clairs
+   ========================================================= */
+
+:root[data-theme="white"] .infoBlock,
+:root[data-theme="clair"] .infoBlock,
+:root[data-theme="printemps"] .infoBlock,
+:root[data-theme="ete"] .infoBlock,
+:root[data-theme="paques"] .infoBlock,
+:root[data-theme="soleil"] .infoBlock{
+  color: var(--fg) !important;
+}
+
+:root[data-theme="white"] .infoBlock h3,
+:root[data-theme="clair"] .infoBlock h3,
+:root[data-theme="printemps"] .infoBlock h3,
+:root[data-theme="ete"] .infoBlock h3,
+:root[data-theme="paques"] .infoBlock h3,
+:root[data-theme="soleil"] .infoBlock h3{
+  color: var(--title, var(--fg)) !important;
+}

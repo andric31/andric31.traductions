@@ -2215,8 +2215,9 @@ html, body { min-height: 100%; }
 :root[data-theme="desert"] .tagPill,
 :root[data-theme="paques"] .tagPill,
 :root[data-theme="soleil"] .tagPill{
-  background: var(--thumb-bg, var(--thumb-fallback-bg, rgba(0,0,0,0.06))) !important;
-  border-color: var(--border-soft, rgba(0,0,0,0.12)) !important;
+  background: var(--btn, rgba(0,0,0,0.07)) !important;
+  border-color: var(--border) !important;
+  color: var(--fg) !important;
 }
 
 /* Boutons neutres uniquement (on laisse Discord/F95/MEGA comme avant) */

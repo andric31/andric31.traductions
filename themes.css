@@ -2566,5 +2566,8 @@ html[data-theme="sakura"]{
   --body-gradient: var(--bg) !important;
 }
 
-.like-btn{ background: transparent; }
-.like-btn:hover{ background: var(--hover-bg); }
+:root:not([data-theme]),
+:root[data-theme="clair"],
+:root[data-theme="white"]{
+  --soft-05: rgba(255,255,255,0.05); /* ✅ comme sakura/été */
+}

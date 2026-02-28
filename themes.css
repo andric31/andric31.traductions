@@ -2411,3 +2411,26 @@ html, body { min-height: 100%; }
   content: none !important;
   background: none !important;
 }
+
+/* ✅ Désactive le gradient / overlay du background UNIQUEMENT sur certains thèmes */
+html[data-theme="printemps"] body,
+html[data-theme="ete"] body,
+html[data-theme="paques"] body,
+html[data-theme="desert"] body,
+html[data-theme="sakura"] body {
+  background-color: var(--bg) !important;
+  background-image: none !important;
+  background: var(--bg) !important;
+}
+
+/* ✅ Si ton thème utilise des variables de gradient, on les neutralise aussi */
+html[data-theme="printemps"],
+html[data-theme="ete"],
+html[data-theme="paques"],
+html[data-theme="desert"],
+html[data-theme="sakura"]{
+  --body-grad-1: var(--bg) !important;
+  --body-grad-2: var(--bg) !important;
+  --body-grad-3: var(--bg) !important;
+  --body-gradient: var(--bg) !important;
+}

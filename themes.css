@@ -1790,6 +1790,196 @@ html, body { min-height: 100%; }
 }
 :root[data-theme="steam"] body{ background: transparent !important; position:relative; isolation:isolate; }
 
+/* =========================================================
+   THÈME : Sakura 🌸
+   ========================================================= */
+:root[data-theme="sakura"]{
+  --bg:#fff5fb;
+  --bg2:#ffffff;
+  --fg:#1c1520;
+  --muted:#6a4b63;
+  --primary:#ff4da6;
+  --accent:#7a4dff;
+  --border:#f0d7e7;
+  --card:#ffffff;
+  --btn:#fff0f8;
+  --title:#140f17;
+  --topbar-bg:rgba(255,245,251,.92);
+  --body-grad-1:#fff5fb;
+  --body-grad-2:#fff7fd;
+  --body-grad-3:#ffffff;
+  --popover-bg:rgba(255,255,255,0.94);
+  --hover-bg:rgba(28,21,32,0.06);
+  --scrollbar-thumb:#e9bfd7;
+  --scrollbar-track:#fff0f8;
+  --scrollbar-thumb-webkit-hover:#dba2c7;
+  --card-hover-border:rgba(0,0,0,0.14);
+  --card-hover-glow:rgba(0,0,0,0.08);
+  --menu-divider-line:rgba(28,21,32,0.14);
+  --menu-divider-sweep:rgba(255,77,166,0.35);
+  color-scheme: light;
+}
+:root[data-theme="sakura"]::after{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:-1; opacity:.10;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(255,77,166,.55) 0 1px, transparent 2px),
+    radial-gradient(circle at 62% 35%, rgba(122,77,255,.45) 0 1px, transparent 2px),
+    radial-gradient(circle at 78% 70%, rgba(255,77,166,.45) 0 1px, transparent 2px);
+}
+
+/* =========================================================
+   THÈME : Désert 🏜️
+   ========================================================= */
+:root[data-theme="desert"]{
+  --bg:#fff7ec;
+  --bg2:#ffffff;
+  --fg:#23170d;
+  --muted:#6a4d35;
+  --primary:#ff8a2a;
+  --accent:#c77d2a;
+  --border:#efd7bb;
+  --card:#ffffff;
+  --btn:#fff0dd;
+  --title:#1a120a;
+  --topbar-bg:rgba(255,247,236,.92);
+  --body-grad-1:#fff3e1;
+  --body-grad-2:#fff7ec;
+  --body-grad-3:#ffffff;
+  --popover-bg:rgba(255,255,255,0.94);
+  --hover-bg:rgba(35,23,13,0.06);
+  --scrollbar-thumb:#e3c19b;
+  --scrollbar-track:#fff0dd;
+  --scrollbar-thumb-webkit-hover:#d4a875;
+  --card-hover-border:rgba(0,0,0,0.14);
+  --card-hover-glow:rgba(0,0,0,0.08);
+  --menu-divider-line:rgba(35,23,13,0.14);
+  --menu-divider-sweep:rgba(255,138,42,0.35);
+  color-scheme: light;
+}
+:root[data-theme="desert"]::after{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:-1; opacity:.10;
+  background:
+    radial-gradient(900px 520px at 18% 0%, rgba(255,138,42,0.14), transparent 60%),
+    radial-gradient(850px 480px at 92% 10%, rgba(199,125,42,0.10), transparent 55%);
+}
+
+/* =========================================================
+   THÈME : Néon 🌈
+   ========================================================= */
+:root[data-theme="neon"]{
+  --bg:#05030a;
+  --bg2:#0b0614;
+  --fg:#f6f7ff;
+  --muted:#c7c9ff;
+  --primary:#00f5ff;
+  --accent:#ff4da6;
+  --border:#2a2340;
+  --card:#0f0b18;
+  --btn:#161026;
+  --title:var(--fg);
+  --topbar-bg:linear-gradient(90deg, rgba(5,3,10,.92), rgba(0,245,255,.16), rgba(255,77,166,.12));
+  --body-grad-1:#020108;
+  --body-grad-2:#05030a;
+  --body-grad-3:#0b0614;
+  --popover-bg:rgba(15,11,24,.98);
+  --hover-bg:rgba(255,255,255,0.07);
+  --scrollbar-thumb:#3a2d6a;
+  --scrollbar-track:#020108;
+  --scrollbar-thumb-webkit-hover:#5740a8;
+  --card-hover-border:#00f5ff;
+  --card-hover-glow:rgba(0,245,255,.18);
+  --menu-divider-line:rgba(255,255,255,0.12);
+  --menu-divider-sweep:rgba(0,245,255,0.55);
+  color-scheme: dark;
+  background:
+    radial-gradient(1200px 700px at 15% 0%, rgba(0,245,255,0.16), transparent 60%),
+    radial-gradient(1100px 650px at 85% 10%, rgba(255,77,166,0.12), transparent 55%),
+    linear-gradient(180deg, #020108 0%, #04020b 45%, #05030a 100%);
+  background-attachment: fixed;
+}
+:root[data-theme="neon"] body{ background: transparent !important; }
+:root[data-theme="neon"]::after{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:-1; opacity:.12;
+  background:
+    repeating-linear-gradient(90deg, rgba(0,245,255,.10) 0 1px, transparent 1px 18px),
+    repeating-linear-gradient(0deg, rgba(255,77,166,.08) 0 1px, transparent 1px 24px);
+  mix-blend-mode: screen;
+}
+
+/* =========================================================
+   THÈME : Midnight 🌑
+   ========================================================= */
+:root[data-theme="midnight"]{
+  --bg:#050712;
+  --bg2:#0b1030;
+  --fg:#eef2ff;
+  --muted:#b8c3ff;
+  --primary:#5aa2ff;
+  --accent:#9c6bff;
+  --border:#1f2a5a;
+  --card:#0d1433;
+  --btn:#121c45;
+  --title:var(--fg);
+  --topbar-bg:linear-gradient(90deg, rgba(5,7,18,.92), rgba(90,162,255,.14), rgba(156,107,255,.12));
+  --popover-bg:rgba(13,20,51,.98);
+  --hover-bg:rgba(255,255,255,0.06);
+  --scrollbar-thumb:#2d3e85;
+  --scrollbar-track:#02040b;
+  --scrollbar-thumb-webkit-hover:#3b53b8;
+  --card-hover-border:rgba(156,107,255,.75);
+  --card-hover-glow:rgba(156,107,255,.18);
+  --menu-divider-line:rgba(255,255,255,0.12);
+  --menu-divider-sweep:rgba(156,107,255,0.55);
+  color-scheme: dark;
+  background:
+    radial-gradient(1200px 700px at 15% 0%, rgba(156,107,255,0.16), transparent 60%),
+    radial-gradient(1100px 650px at 85% 10%, rgba(90,162,255,0.12), transparent 55%),
+    linear-gradient(180deg, #02040b 0%, #04081a 45%, #050712 100%);
+  background-attachment: fixed;
+}
+:root[data-theme="midnight"] body{ background: transparent !important; }
+:root[data-theme="midnight"]::after{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:-1; opacity:.18;
+  background:
+    radial-gradient(circle, rgba(255,255,255,.70) 0 1px, transparent 2px),
+    radial-gradient(circle, rgba(255,255,255,.55) 0 1px, transparent 2px);
+  background-size: 280px 300px, 180px 220px;
+  background-position: 0 -140px, 120px -220px;
+}
+
+/* =========================================================
+   THÈME : Coffee ☕
+   ========================================================= */
+:root[data-theme="coffee"]{
+  --bg:#120c0a;
+  --bg2:#1a120f;
+  --fg:#fff3ea;
+  --muted:#e2c7b6;
+  --primary:#c77d2a;
+  --accent:#ffcc66;
+  --border:#3a241a;
+  --card:#1b120e;
+  --btn:#271a14;
+  --title:var(--fg);
+  --topbar-bg:linear-gradient(90deg, rgba(18,12,10,.92), rgba(199,125,42,.18));
+  --popover-bg:rgba(27,18,14,.98);
+  --hover-bg:rgba(255,255,255,0.08);
+  --scrollbar-thumb:#5a3b2c;
+  --scrollbar-track:#0b0706;
+  --scrollbar-thumb-webkit-hover:#775045;
+  --card-hover-border:#ffcc66;
+  --card-hover-glow:rgba(255,204,102,.18);
+  --menu-divider-line:rgba(255,255,255,0.12);
+  --menu-divider-sweep:rgba(255,204,102,0.55);
+  color-scheme: dark;
+  background:
+    radial-gradient(1200px 700px at 15% 0%, rgba(199,125,42,0.16), transparent 60%),
+    radial-gradient(1100px 650px at 85% 10%, rgba(255,204,102,0.10), transparent 55%),
+    linear-gradient(180deg, #070504 0%, #0f0a08 45%, #120c0a 100%);
+  background-attachment: fixed;
+}
+:root[data-theme="coffee"] body{ background: transparent !important; }
+
 /* =====================================================
    THEME HOVER ENGINE (1 seule fois)
    ===================================================== */

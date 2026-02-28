@@ -2434,3 +2434,28 @@ html[data-theme="sakura"]{
   --body-grad-3: var(--bg) !important;
   --body-gradient: var(--bg) !important;
 }
+
+/* ❌ Enlève le pattern de points (background) sur certains thèmes */
+html[data-theme="carnaval"] body,
+html[data-theme="halloween"] body,
+html[data-theme="nouvelan"] body,
+html[data-theme="automne"] body,
+html[data-theme="hiver"] body{
+  background-image: none !important;
+}
+
+/* ❌ Si les points viennent d’un overlay (::before/::after), on le coupe aussi */
+html[data-theme="carnaval"] body::before,
+html[data-theme="carnaval"] body::after,
+html[data-theme="halloween"] body::before,
+html[data-theme="halloween"] body::after,
+html[data-theme="nouvelan"] body::before,
+html[data-theme="nouvelan"] body::after,
+html[data-theme="automne"] body::before,
+html[data-theme="automne"] body::after,
+html[data-theme="hiver"] body::before,
+html[data-theme="hiver"] body::after{
+  content: none !important;
+  background: none !important;
+  display: none !important;
+}

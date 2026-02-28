@@ -2362,32 +2362,28 @@ html, body { min-height: 100%; }
 }
 
 /* =========================================================
-   Résumé : forcer le fond EXACT (même que tags) sur thèmes clairs
-   - cible .game-summary + son contenu interne (au cas où un inner a un bg)
+   Résumé (descInnerBox) = même fond que les tags en thèmes clairs
    ========================================================= */
 
-:root:not([data-theme]) .game-summary,
-:root[data-theme="white"] .game-summary,
-:root[data-theme="clair"] .game-summary,
-:root[data-theme="printemps"] .game-summary,
-:root[data-theme="ete"] .game-summary,
-:root[data-theme="paques"] .game-summary,
-:root[data-theme="desert"] .game-summary,
-:root[data-theme="sakura"] .game-summary,
-:root[data-theme="soleil"] .game-summary{
-  background: var(--thumb-bg) !important; /* même fond que tags */
+/* thèmes clairs forcés */
+:root[data-theme="white"] .descInnerBox,
+:root[data-theme="clair"] .descInnerBox,
+:root[data-theme="printemps"] .descInnerBox,
+:root[data-theme="ete"] .descInnerBox,
+:root[data-theme="paques"] .descInnerBox,
+:root[data-theme="desert"] .descInnerBox,
+:root[data-theme="sakura"] .descInnerBox,
+:root[data-theme="soleil"] .descInnerBox{
+  background: var(--thumb-bg) !important;   /* même couleur que tags */
   border-color: var(--border) !important;
+  box-shadow: none !important;              /* optionnel: évite l'effet sombre du viewer.css */
 }
 
-/* Si le gris vient d’un “inner” (très fréquent), on le neutralise */
-:root:not([data-theme]) .game-summary > *,
-:root[data-theme="white"] .game-summary > *,
-:root[data-theme="clair"] .game-summary > *,
-:root[data-theme="printemps"] .game-summary > *,
-:root[data-theme="ete"] .game-summary > *,
-:root[data-theme="paques"] .game-summary > *,
-:root[data-theme="desert"] .game-summary > *,
-:root[data-theme="sakura"] .game-summary > *,
-:root[data-theme="soleil"] .game-summary > *{
-  background: transparent !important;
+/* AUTO clair uniquement (pas de data-theme) */
+@media (prefers-color-scheme: light){
+  :root:not([data-theme]) .descInnerBox{
+    background: var(--thumb-bg) !important;
+    border-color: var(--border) !important;
+    box-shadow: none !important;
+  }
 }

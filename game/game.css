@@ -60,7 +60,7 @@ body:not(.mode-game){
   height:34px;
   border-radius:10px;
   border:1px solid var(--border);
-  background: rgba(255,255,255,0.05);
+  background: var(--soft-05);
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -82,7 +82,7 @@ body:not(.mode-game){
   display:block;
   height:2px;
   border-radius:999px;
-  background:#ffffff;
+  background: var(--fg);
   opacity:0.92;
 }
 
@@ -110,8 +110,8 @@ body:not(.mode-game){
   font-weight:700;
 }
 .menu-item:hover{
-  background: rgba(255,255,255,0.06);
-  border-color: rgba(255,255,255,0.06);
+  background: var(--border-soft);
+  border-color: var(--border-soft);
 }
 
 .modal-overlay{
@@ -141,19 +141,19 @@ body:not(.mode-game){
   align-items:center;
   justify-content:space-between;
   padding: 12px 14px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid var(--border-soft);
   background: rgba(255,255,255,0.02);
 }
 .modal-title{
   font-weight: 900;
-  color:#fff;
+  color: var(--fg);
 }
 .modal-close{
   width:32px;
   height:32px;
   border-radius:10px;
   border:1px solid var(--border);
-  background: rgba(255,255,255,0.05);
+  background: var(--soft-05);
   color: var(--fg);
   cursor:pointer;
 }
@@ -176,14 +176,14 @@ body:not(.mode-game){
   display:flex;
   justify-content:flex-end;
   gap:10px;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid var(--border-soft);
 }
 .modal-btn{
   padding: 10px 14px;
   border-radius: 12px;
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.05);
-  color:#fff;
+  background: var(--soft-05);
+  color: var(--fg);
   font-weight:800;
   cursor:pointer;
   user-select:none;
@@ -206,7 +206,7 @@ body:not(.mode-game){
   margin: 0 0 12px 0;
   font-size: 22px;
   line-height: 1.2;
-  color: #fff;
+  color: var(--title);
 }
 
 .cover{
@@ -214,14 +214,14 @@ body:not(.mode-game){
   height: 190px;
   border-radius: 14px;
   border: 1px solid var(--border);
-  background: #0f121a;
+  background: var(--thumb-fallback-bg);
   object-fit: cover;
   display:block;
 }
 .cover.is-placeholder{
   background:
-    radial-gradient(1200px 300px at 20% 0%, rgba(255,255,255,0.06), rgba(0,0,0,0)),
-    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0));
+    radial-gradient(1200px 300px at 20% 0%, var(--border-soft), rgba(0,0,0,0)),
+    linear-gradient(180deg, var(--soft-04), rgba(0,0,0,0));
 }
 
 .tagsRow{
@@ -233,8 +233,8 @@ body:not(.mode-game){
 
 .tagPill{
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.04);
-  color:#fff;
+  background: var(--soft-04);
+  color: var(--fg);
   border-radius: 999px;
   font-size: 12px;
   padding: 6px 10px;
@@ -263,8 +263,8 @@ body:not(.mode-game){
   padding: 10px 14px;
   border-radius: 12px;
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.05);
-  color:#fff;
+  background: var(--soft-05);
+  color: var(--fg);
   text-decoration:none;
   font-weight: 700;
   cursor:pointer;
@@ -275,7 +275,7 @@ body:not(.mode-game){
 #btnDiscord.btn-discord{
   background:#5865F2;
   border-color:#5865F2;
-  color:#fff;
+  color: #ffffff;
 }
 #btnDiscord.btn-discord:hover{
   background:#4752C4;
@@ -360,7 +360,7 @@ body:not(.mode-game){
 
 .ratingCancel{
   font-size: 16px;
-  color: #fff;
+  color: var(--fg);
   opacity: 0.75;
 }
 

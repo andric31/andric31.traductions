@@ -618,8 +618,6 @@ html, body { min-height: 100%; }
   color-scheme: dark;
 
   background:
-    radial-gradient(circle at 12% 18%, rgba(255,77,166,.18) 0 2px, transparent 3px),
-    radial-gradient(circle at 32% 62%, rgba(255,26,117,.14) 0 2px, transparent 3px),
     radial-gradient(1200px 700px at 15% 0%, rgba(255,77,166,0.16), transparent 60%),
     radial-gradient(1100px 650px at 85% 10%, rgba(255,26,117,0.12), transparent 55%),
     linear-gradient(180deg, #0b0008 0%, #12000f 45%, #180013 100%);
@@ -636,13 +634,9 @@ html, body { min-height: 100%; }
   inset:0;
   pointer-events:none;
   z-index:-1;
-  opacity:.10;
-  background:
-    radial-gradient(circle at 20% 25%, rgba(255,255,255,.7) 0 1px, transparent 2px),
-    radial-gradient(circle at 70% 35%, rgba(255,255,255,.6) 0 1px, transparent 2px),
-    radial-gradient(circle at 40% 75%, rgba(255,255,255,.55) 0 1px, transparent 2px);
-  filter: blur(.2px);
-  animation: valentineSparkle 6s ease-in-out infinite;
+  opacity:0;
+  background:none;
+  animation:none;
 }
 @media (prefers-reduced-motion: reduce){
   :root[data-theme="valentine"]::after{ animation:none; }

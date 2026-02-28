@@ -2064,7 +2064,7 @@ html, body { min-height: 100%; }
 }
 
 /* =========================================================
-   THÈME : Nouvel An 🎆
+   THÈME : Nouvel An 🎆  (FEU D’ARTIFICE RÉEL)
    ========================================================= */
 :root[data-theme="nouvelan"]{
   --bg:#050510;
@@ -2107,14 +2107,24 @@ html, body { min-height: 100%; }
   isolation: isolate;
 }
 
-/* 🎆 NOUVEL AN — vrai feu d’artifice (rayons + halo) */
+/* Base commune des couches FX */
+:root[data-theme="nouvelan"]::before,
 :root[data-theme="nouvelan"]::after{
   content:"";
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: -1;
-  opacity: 1;                 /* on gère l’opacité par couches */
+  background-repeat: no-repeat;
+  filter: blur(.15px);
+  mix-blend-mode: screen;
+  opacity: 0; /* animé */
+  transform: scale(.85);
+  will-change: transform, opacity;
+}
+
+/* 🎆 Couche 1 : 3 explosions */
+:root[data-theme="nouvelan"]::after{
   background:
     /* ==== Explosion #1 (or) ==== */
     radial-gradient(circle at 22% 62%,
@@ -2158,32 +2168,78 @@ html, body { min-height: 100%; }
       rgba(0,245,255,.55) 24deg 25deg,
       transparent 25deg 360deg);
 
-  /* taille des “explosions” (plus = plus grand) */
   background-size:
     300px 300px, 300px 300px,
     260px 260px, 260px 260px,
     280px 280px, 280px 280px;
 
-  background-repeat: no-repeat;
-  filter: blur(.15px);
-  mix-blend-mode: screen;
+  animation: fireworkBurst 3.8s ease-in-out infinite;
+}
 
-  animation: fireworkBurst 3.6s ease-in-out infinite;
+/* 🎆 Couche 2 : autres positions + décalage (effet continu) */
+:root[data-theme="nouvelan"]::before{
+  background:
+    /* ==== Explosion #4 (or) ==== */
+    radial-gradient(circle at 12% 32%,
+      rgba(255,215,0,.40) 0 12px,
+      rgba(255,215,0,.18) 12px 30px,
+      transparent 32px),
+    conic-gradient(from -10deg at 12% 32%,
+      transparent 0 6deg,
+      rgba(255,215,0,.85) 6deg 7.2deg,
+      transparent 7.2deg 16deg,
+      rgba(255,215,0,.55) 16deg 17deg,
+      transparent 17deg 360deg),
+
+    /* ==== Explosion #5 (rose) ==== */
+    radial-gradient(circle at 52% 72%,
+      rgba(255,77,166,.36) 0 12px,
+      rgba(255,77,166,.16) 12px 28px,
+      transparent 30px),
+    conic-gradient(from 35deg at 52% 72%,
+      transparent 0 5deg,
+      rgba(255,77,166,.90) 5deg 6.2deg,
+      transparent 6.2deg 14deg,
+      rgba(255,77,166,.55) 14deg 15deg,
+      transparent 15deg 360deg),
+
+    /* ==== Explosion #6 (cyan) ==== */
+    radial-gradient(circle at 88% 28%,
+      rgba(0,245,255,.34) 0 12px,
+      rgba(0,245,255,.14) 12px 28px,
+      transparent 30px),
+    conic-gradient(from -25deg at 88% 28%,
+      transparent 0 6deg,
+      rgba(0,245,255,.90) 6deg 7.2deg,
+      transparent 7.2deg 15deg,
+      rgba(0,245,255,.55) 15deg 16deg,
+      transparent 16deg 360deg);
+
+  background-size:
+    260px 260px, 260px 260px,
+    280px 280px, 280px 280px,
+    240px 240px, 240px 240px;
+
+  animation: fireworkBurst 3.8s ease-in-out infinite;
+  animation-delay: 1.9s; /* décalage = alternance */
 }
 
 /* L’anim fait “pouf” : apparait + grossit + disparait */
 @keyframes fireworkBurst{
-  0%   { transform: scale(.85); opacity: 0;   }
+  0%   { transform: scale(.82); opacity: 0; }
   12%  { opacity: 1; }
-  45%  { transform: scale(1.05); opacity: .95; }
+  45%  { transform: scale(1.06); opacity: .95; }
   75%  { transform: scale(1.12); opacity: .35; }
-  100% { transform: scale(.85); opacity: 0;   }
+  100% { transform: scale(.82); opacity: 0; }
 }
 
-@keyframes fireworkFloat{
-  0%{ transform: scale(1) translateY(0); opacity:.10; }
-  50%{ transform: scale(1.1) translateY(-8px); opacity:.18; }
-  100%{ transform: scale(1) translateY(0); opacity:.10; }
+@media (prefers-reduced-motion: reduce){
+  :root[data-theme="nouvelan"]::before,
+  :root[data-theme="nouvelan"]::after{
+    animation: none !important;
+    opacity: .25;
+    transform: none;
+  }
 }
 
 /* =====================================================

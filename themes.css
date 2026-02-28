@@ -685,9 +685,6 @@ html, body { min-height: 100%; }
   color-scheme: dark;
 
   background:
-    radial-gradient(circle at 20% 18%, rgba(255,204,0,.14) 0 3px, transparent 4px),
-    radial-gradient(circle at 45% 65%, rgba(0,204,102,.12) 0 3px, transparent 4px),
-    radial-gradient(circle at 78% 30%, rgba(106,0,255,.14) 0 3px, transparent 4px),
     radial-gradient(1200px 700px at 15% 0%, rgba(106,0,255,0.16), transparent 60%),
     radial-gradient(1100px 650px at 85% 10%, rgba(0,204,102,0.12), transparent 55%),
     radial-gradient(900px 600px at 60% 0%, rgba(255,204,0,0.10), transparent 60%),
@@ -2435,27 +2432,3 @@ html[data-theme="sakura"]{
   --body-gradient: var(--bg) !important;
 }
 
-/* ❌ Enlève le pattern de points (background) sur certains thèmes */
-html[data-theme="carnaval"] body,
-html[data-theme="halloween"] body,
-html[data-theme="nouvelan"] body,
-html[data-theme="automne"] body,
-html[data-theme="hiver"] body{
-  background-image: none !important;
-}
-
-/* ❌ Si les points viennent d’un overlay (::before/::after), on le coupe aussi */
-html[data-theme="carnaval"] body::before,
-html[data-theme="carnaval"] body::after,
-html[data-theme="halloween"] body::before,
-html[data-theme="halloween"] body::after,
-html[data-theme="nouvelan"] body::before,
-html[data-theme="nouvelan"] body::after,
-html[data-theme="automne"] body::before,
-html[data-theme="automne"] body::after,
-html[data-theme="hiver"] body::before,
-html[data-theme="hiver"] body::after{
-  content: none !important;
-  background: none !important;
-  display: none !important;
-}

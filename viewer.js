@@ -34,7 +34,7 @@
     filterCat: "all",
     filterEngine: "all",
     filterStatus: "all",
-    filterTags: [], // ✅ multi tags
+    filterTags: [],
     cols: "auto",
     pageSize: 50,
     visibleCount: 0,
@@ -74,9 +74,14 @@
   // =========================
 
   const GAME_STATS = {
-    views: new Map(), // key(uid:xxx) -> number
+    views: new Map(),
     mega: new Map(),
     likes: new Map(),
+    loaded: false,
+  };
+
+  const GAME_RATINGS = {
+    byKey: new Map(), // key(uid:xxx) -> {avg,count,sum}
     loaded: false,
   };
 
@@ -91,7 +96,24 @@
       if (!r.ok) return {};
       const j = await r.json();
       if (!j?.ok || !j.stats) return {};
-      return j.stats; // { key: {views, mega, likes}, ... }
+      return j.stats;
+    } catch {
+      return {};
+    }
+  }
+
+  async function fetchRatingsBulk(ids) {
+    try {
+      const r = await fetch("/api/ratings4s", {
+        method: "POST",
+        cache: "no-store",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ ids }),
+      });
+      if (!r.ok) return {};
+      const j = await r.json();
+      if (!j?.ok || !j.stats) return {};
+      return j.stats; // { key: {avg, count, sum}, ... }
     } catch {
       return {};
     }
@@ -100,7 +122,6 @@
   async function ensureGameStatsLoaded() {
     if (GAME_STATS.loaded) return;
 
-    // ✅ on envoie uid:<uid> (comme game.js)
     const keys = state.all.map((g) => counterKeyOfUid(g.uid)).filter(Boolean);
     const stats = await fetchGameStatsBulk(keys);
 
@@ -114,6 +135,24 @@
     GAME_STATS.loaded = true;
   }
 
+  async function ensureGameRatingsLoaded() {
+    if (GAME_RATINGS.loaded) return;
+
+    const keys = state.all.map((g) => counterKeyOfUid(g.uid)).filter(Boolean);
+    const stats = await fetchRatingsBulk(keys);
+
+    for (const k of keys) {
+      const s = stats[k] || {};
+      GAME_RATINGS.byKey.set(k, {
+        avg: Number(s.avg || 0),
+        count: Number(s.count || 0),
+        sum: Number(s.sum || 0),
+      });
+    }
+
+    GAME_RATINGS.loaded = true;
+  }
+
   async function forceReloadGameStats() {
     GAME_STATS.loaded = false;
     GAME_STATS.views.clear();
@@ -122,12 +161,17 @@
     await ensureGameStatsLoaded();
   }
 
+  async function forceReloadGameRatings() {
+    GAME_RATINGS.loaded = false;
+    GAME_RATINGS.byKey.clear();
+    await ensureGameRatingsLoaded();
+  }
+
   async function initMainPageCounter() {
     const el = document.getElementById("mainViews");
     if (!el) return;
 
     try {
-      // ✅ 1 seul "hit" par chargement de page
       const op = MAIN_VIEW_HIT_DONE ? "get" : "hit";
       const r = await fetch(
         `/api/counter?op=${op}&kind=view&id=${encodeURIComponent(MAIN_PAGE_ID)}`,
@@ -144,7 +188,79 @@
   }
 
   // =========================
-  // ☰ MENU (viewer.menu.js gère le contenu / items / modales)
+  // Helpers temps / notes
+  // =========================
+
+  function formatRelativeTranslationTime(ts) {
+    const t = Number(ts || 0);
+    if (!Number.isFinite(t) || t <= 0) return "—";
+
+    let delta = Date.now() - t;
+    if (!Number.isFinite(delta) || delta < 0) delta = 0;
+
+    const MIN = 60 * 1000;
+    const HOUR = 60 * MIN;
+    const DAY = 24 * HOUR;
+    const WEEK = 7 * DAY;
+    const MONTH = 30 * DAY;
+    const YEAR = 365 * DAY;
+
+    if (delta < MIN) return "à l’instant";
+
+    if (delta < HOUR) {
+      const n = Math.max(1, Math.floor(delta / MIN));
+      return `${n} min`;
+    }
+
+    if (delta < DAY) {
+      const n = Math.max(1, Math.floor(delta / HOUR));
+      return `${n} h`;
+    }
+
+    if (delta < WEEK) {
+      const n = Math.max(1, Math.floor(delta / DAY));
+      return `${n} j`;
+    }
+
+    if (delta < 5 * WEEK) {
+      const n = Math.max(1, Math.floor(delta / WEEK));
+      return `${n} sem`;
+    }
+
+    if (delta < YEAR) {
+      const n = Math.max(1, Math.floor(delta / MONTH));
+      return `${n} mois`;
+    }
+
+    const n = Math.max(1, Math.floor(delta / YEAR));
+    return `${n} an${n > 1 ? "s" : ""}`;
+  }
+
+  function formatAbsoluteDateTime(ts) {
+    const t = Number(ts || 0);
+    if (!Number.isFinite(t) || t <= 0) return "Date de traduction inconnue";
+    try {
+      return new Date(t).toLocaleString("fr-FR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return new Date(t).toISOString();
+    }
+  }
+
+  function formatRatingForCard(avg, count) {
+    const a = Number(avg || 0);
+    const c = Number(count || 0);
+    if (c <= 0 || a <= 0) return "—";
+    return `${a.toFixed(1)}/4`;
+  }
+
+  // =========================
+  // ☰ MENU
   // =========================
 
   function positionPopover(pop, anchorBtn) {
@@ -165,8 +281,9 @@
   }
 
   // =========================
-  // 🎨 Thème (Auto par défaut) — applique sur <html> ( :root )
+  // 🎨 Thème
   // =========================
+
   async function getViewerTheme() {
     try {
       return (localStorage.getItem("viewerTheme") || "auto").trim() || "auto";
@@ -174,183 +291,171 @@
       return "auto";
     }
   }
-  
+
   async function setViewerTheme(v) {
     try {
       localStorage.setItem("viewerTheme", String(v || "auto"));
     } catch {}
   }
-  
+
   function applyViewerTheme(t) {
     const v = (t || "auto").toString().trim() || "auto";
-    const root = document.documentElement; // ✅ <html> (=> :root)
-  
-    // ✅ reset propre
+    const root = document.documentElement;
+
     root.removeAttribute("data-theme");
-  
-    // ✅ auto = laisse prefers-color-scheme gérer (media query)
     if (v === "auto") return;
-  
-    // ✅ force un thème : :root[data-theme="..."]
     root.setAttribute("data-theme", v);
   }
 
-   // =========================
-   // Header tools
-   // =========================
-   let THEME_MQ_BOUND = false;
-   
-   function initHeaderMenuAndDisplayTools() {
-     const row = document.querySelector(".top-title-row");
-     if (!row) return;
-     if (document.getElementById("hamburgerBtn")) return;
-   
-     const h1 = row.querySelector("h1");
-     if (!h1) return;
-   
-     row.classList.add("top-title-flex");
-   
-     const btn = document.createElement("button");
-     btn.type = "button";
-     btn.id = "hamburgerBtn";
-     btn.className = "hamburger-btn";
-     btn.setAttribute("aria-label", "Ouvrir le menu");
-     btn.setAttribute("aria-haspopup", "menu");
-     btn.setAttribute("aria-expanded", "false");
-     btn.innerHTML = `
-       <span class="ham-lines" aria-hidden="true">
-         <span></span><span></span><span></span>
-       </span>
-     `;
-   
-     const tools = document.createElement("div");
-     tools.className = "top-title-tools";
-   
-     row.insertBefore(btn, h1);
-     row.appendChild(tools);
-   
-     const total = document.querySelector("#countTotal")?.closest(".total-inline");
-     const cols = document.getElementById("cols");
-     const pageSize = document.getElementById("pageSize");
-     const themeSel = document.getElementById("theme");
-   
-     if (total) tools.appendChild(total);
-     if (cols) tools.appendChild(cols);
-     if (pageSize) tools.appendChild(pageSize);
-     if (themeSel) tools.appendChild(themeSel);
-   
-     try {
-       window.ViewerMenu?.init?.();
-     } catch {}
-   
-     // ✅ helper : fermer menu proprement + aria
-     function closeTopMenu() {
-       const pop = document.getElementById("topMenuPopover");
-       if (pop) pop.classList.add("hidden");
-       btn.setAttribute("aria-expanded", "false");
-       try {
-         window.ViewerMenu?.closeMenu?.();
-       } catch {}
-     }
-   
-     // ✅ binder Windows theme watcher (une seule fois)
-     function bindAutoThemeWatcher() {
-       if (THEME_MQ_BOUND) return;
-       THEME_MQ_BOUND = true;
-   
-       const mq = window.matchMedia("(prefers-color-scheme: dark)");
-       mq.addEventListener("change", async () => {
-         try {
-           const t = await getViewerTheme();
-           if ((t || "auto") === "auto") {
-             // Auto = pas de data-theme, le CSS suit Windows
-             applyViewerTheme("auto");
-             if (themeSel) themeSel.value = "auto";
-           }
-         } catch {}
-       });
-     }
-   
-     // ✅ init thème + UI select
-     (async () => {
-       try {
-         const t = await getViewerTheme();
-         applyViewerTheme(t);
-         if (themeSel) themeSel.value = t;
-   
-         // ✅ watch Windows (seulement utile en auto)
-         bindAutoThemeWatcher();
-   
-         if (themeSel) {
-           themeSel.addEventListener("change", async (e) => {
-             const v = (e.target?.value || "auto").trim() || "auto";
-             await setViewerTheme(v);
-             applyViewerTheme(v);
-             // si l'utilisateur revient sur auto, on est bien sync Windows
-             if (v === "auto") bindAutoThemeWatcher();
-           });
-         }
-       } catch {}
-     })();
-   
-     btn.addEventListener("click", (e) => {
-       e.preventDefault();
-       e.stopPropagation();
-   
-       const pop = document.getElementById("topMenuPopover");
-       if (!pop) return;
-   
-       const isOpen = !pop.classList.contains("hidden");
-       if (isOpen) {
-         closeTopMenu();
-         return;
-       }
-   
-       pop.classList.remove("hidden");
-       btn.setAttribute("aria-expanded", "true");
-       positionPopover(pop, btn);
-     });
-   
-     document.addEventListener("click", (e) => {
-       // menu principal
-       const pop = document.getElementById("topMenuPopover");
-       const hb = document.getElementById("hamburgerBtn");
-       if (pop && hb) {
-         const t = e.target;
-         if (!pop.contains(t) && !hb.contains(t)) closeTopMenu();
-       }
-   
-       // tags popover
-       const tagsPop = document.getElementById("tagsPopover");
-       const tagsBtn = document.getElementById("tagsBtn");
-       if (tagsPop && tagsBtn) {
-         const t = e.target;
-         if (!tagsPop.contains(t) && !tagsBtn.contains(t)) closeTagsPopover();
-       }
-     });
-   
-     window.addEventListener("resize", () => {
-       const pop = document.getElementById("topMenuPopover");
-       const hb = document.getElementById("hamburgerBtn");
-       if (pop && hb && !pop.classList.contains("hidden")) positionPopover(pop, hb);
-   
-       const tp = document.getElementById("tagsPopover");
-       const tb = document.getElementById("tagsBtn");
-       if (tp && tb && !tp.classList.contains("hidden")) positionTagsPopover(tp, tb);
-     });
-   
-     document.addEventListener("keydown", (e) => {
-       if (e.key === "Escape") {
-         closeTopMenu();
-         try { window.ViewerMenuAbout?.close?.(); } catch {}
-         try { window.ViewerMenuExtension?.close?.(); } catch {}
-         closeTagsPopover();
-       }
-     });
-   }
+  // =========================
+  // Header tools
+  // =========================
+
+  let THEME_MQ_BOUND = false;
+
+  function initHeaderMenuAndDisplayTools() {
+    const row = document.querySelector(".top-title-row");
+    if (!row) return;
+    if (document.getElementById("hamburgerBtn")) return;
+
+    const h1 = row.querySelector("h1");
+    if (!h1) return;
+
+    row.classList.add("top-title-flex");
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.id = "hamburgerBtn";
+    btn.className = "hamburger-btn";
+    btn.setAttribute("aria-label", "Ouvrir le menu");
+    btn.setAttribute("aria-haspopup", "menu");
+    btn.setAttribute("aria-expanded", "false");
+    btn.innerHTML = `
+      <span class="ham-lines" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </span>
+    `;
+
+    const tools = document.createElement("div");
+    tools.className = "top-title-tools";
+
+    row.insertBefore(btn, h1);
+    row.appendChild(tools);
+
+    const total = document.querySelector("#countTotal")?.closest(".total-inline");
+    const cols = document.getElementById("cols");
+    const pageSize = document.getElementById("pageSize");
+    const themeSel = document.getElementById("theme");
+
+    if (total) tools.appendChild(total);
+    if (cols) tools.appendChild(cols);
+    if (pageSize) tools.appendChild(pageSize);
+    if (themeSel) tools.appendChild(themeSel);
+
+    try {
+      window.ViewerMenu?.init?.();
+    } catch {}
+
+    function closeTopMenu() {
+      const pop = document.getElementById("topMenuPopover");
+      if (pop) pop.classList.add("hidden");
+      btn.setAttribute("aria-expanded", "false");
+      try {
+        window.ViewerMenu?.closeMenu?.();
+      } catch {}
+    }
+
+    function bindAutoThemeWatcher() {
+      if (THEME_MQ_BOUND) return;
+      THEME_MQ_BOUND = true;
+
+      const mq = window.matchMedia("(prefers-color-scheme: dark)");
+      mq.addEventListener("change", async () => {
+        try {
+          const t = await getViewerTheme();
+          if ((t || "auto") === "auto") {
+            applyViewerTheme("auto");
+            if (themeSel) themeSel.value = "auto";
+          }
+        } catch {}
+      });
+    }
+
+    (async () => {
+      try {
+        const t = await getViewerTheme();
+        applyViewerTheme(t);
+        if (themeSel) themeSel.value = t;
+
+        bindAutoThemeWatcher();
+
+        if (themeSel) {
+          themeSel.addEventListener("change", async (e) => {
+            const v = (e.target?.value || "auto").trim() || "auto";
+            await setViewerTheme(v);
+            applyViewerTheme(v);
+            if (v === "auto") bindAutoThemeWatcher();
+          });
+        }
+      } catch {}
+    })();
+
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const pop = document.getElementById("topMenuPopover");
+      if (!pop) return;
+
+      const isOpen = !pop.classList.contains("hidden");
+      if (isOpen) {
+        closeTopMenu();
+        return;
+      }
+
+      pop.classList.remove("hidden");
+      btn.setAttribute("aria-expanded", "true");
+      positionPopover(pop, btn);
+    });
+
+    document.addEventListener("click", (e) => {
+      const pop = document.getElementById("topMenuPopover");
+      const hb = document.getElementById("hamburgerBtn");
+      if (pop && hb) {
+        const t = e.target;
+        if (!pop.contains(t) && !hb.contains(t)) closeTopMenu();
+      }
+
+      const tagsPop = document.getElementById("tagsPopover");
+      const tagsBtn = document.getElementById("tagsBtn");
+      if (tagsPop && tagsBtn) {
+        const t = e.target;
+        if (!tagsPop.contains(t) && !tagsBtn.contains(t)) closeTagsPopover();
+      }
+    });
+
+    window.addEventListener("resize", () => {
+      const pop = document.getElementById("topMenuPopover");
+      const hb = document.getElementById("hamburgerBtn");
+      if (pop && hb && !pop.classList.contains("hidden")) positionPopover(pop, hb);
+
+      const tp = document.getElementById("tagsPopover");
+      const tb = document.getElementById("tagsBtn");
+      if (tp && tb && !tp.classList.contains("hidden")) positionTagsPopover(tp, tb);
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closeTopMenu();
+        try { window.ViewerMenuAbout?.close?.(); } catch {}
+        try { window.ViewerMenuExtension?.close?.(); } catch {}
+        closeTagsPopover();
+      }
+    });
+  }
 
   // =========================
-  // ✅ TAGS MULTI (popover + save)
+  // ✅ TAGS MULTI
   // =========================
 
   const TAGS_STORE_KEY = "viewerSelectedTags";
@@ -765,13 +870,13 @@
 
     const updatedAtLocalTs = !Number.isNaN(updatedAtLocalParsed) ? updatedAtLocalParsed : 0;
     const createdAtLocalTs = !Number.isNaN(createdAtLocalParsed) ? createdAtLocalParsed : 0;
+    const lastTranslationTs = updatedAtLocalTs || createdAtLocalTs || updatedAtTs || 0;
 
-    // ✅ clé compteur UID ONLY
     const ckey = counterKeyOfUid(uid);
 
     return {
       uid,
-      ckey, // ✅ on garde la clé déjà calculée
+      ckey,
       collection: coll,
       id: String(game.id || ""),
       rawTitle: displayTitleRaw,
@@ -795,6 +900,7 @@
       updatedAtLocalTs,
       createdAtLocal: createdAtLocalRaw,
       createdAtLocalTs,
+      lastTranslationTs,
       __raw: game,
     };
   }
@@ -842,7 +948,6 @@
       return;
     }
 
-    // ✅ tri stats = UID key
     if (k === "views") {
       state.filtered.sort((a, b) => {
         const da = GAME_STATS.views.get(a.ckey) || 0;
@@ -976,7 +1081,13 @@
       const imgSrc = (g.image || "").trim() || "/favicon.png";
       const pageHref = buildGameUrl(g.__raw || g);
 
-      // ✅ Tuile entièrement cliquable
+      const views = GAME_STATS.views.get(g.ckey) || 0;
+      const likes = GAME_STATS.likes.get(g.ckey) || 0;
+      const rating = GAME_RATINGS.byKey.get(g.ckey) || { avg: 0, count: 0, sum: 0 };
+      const ratingText = formatRatingForCard(rating.avg, rating.count);
+      const translationText = formatRelativeTranslationTime(g.lastTranslationTs);
+      const translationTitle = formatAbsoluteDateTime(g.lastTranslationTs);
+
       card.href = pageHref;
       card.target = "_blank";
       card.rel = "noopener";
@@ -985,10 +1096,32 @@
       card.innerHTML = `
         <img src="${imgSrc}" class="thumb" alt=""
              referrerpolicy="no-referrer"
+             loading="lazy"
              onerror="this.onerror=null;this.src='/favicon.png';this.classList.add('is-fallback');">
         <div class="body">
           <h3 class="name clamp-2">${escapeHtml(getDisplayTitle(g.__raw || g))}</h3>
           <div class="badges-line one-line">${badgesLineHtml(g)}</div>
+
+          <div class="card-meta">
+            <div class="card-stats" aria-label="Statistiques de la vignette">
+              <span class="card-stat" title="${escapeHtml(translationTitle)}">
+                <span class="stat-icon stat-icon-time" aria-hidden="true"></span>
+                <span>${escapeHtml(translationText)}</span>
+              </span>
+              <span class="card-stat" title="Nombre de vues">
+                <span class="stat-icon stat-icon-views" aria-hidden="true"></span>
+                <span>${formatInt(views)}</span>
+              </span>
+              <span class="card-stat" title="Nombre de j'aime">
+                <span class="stat-icon stat-icon-likes" aria-hidden="true"></span>
+                <span>${formatInt(likes)}</span>
+              </span>
+              <span class="card-stat" title="Note étoile moyenne et nombre de votes">
+                <span class="stat-icon stat-icon-rating" aria-hidden="true"></span>
+                <span>${escapeHtml(ratingText)}</span>
+              </span>
+            </div>
+          </div>
         </div>
       `;
 
@@ -1045,17 +1178,19 @@
     state.filterCat = e.target.value || "all";
     applyFilters();
   });
+
   $("#filterEngine")?.addEventListener("change", (e) => {
     state.filterEngine = e.target.value || "all";
     applyFilters();
   });
+
   $("#filterStatus")?.addEventListener("change", (e) => {
     state.filterStatus = e.target.value || "all";
     applyFilters();
   });
 
   const pageSizeSel = $("#pageSize");
-  if (pageSizeSel)
+  if (pageSizeSel) {
     pageSizeSel.addEventListener("change", (e) => {
       const v = e.target.value;
       if (v === "all") state.pageSize = "all";
@@ -1066,6 +1201,7 @@
       state.visibleCount = 0;
       renderGrid();
     });
+  }
 
   $("#cols")?.addEventListener("change", async (e) => {
     state.cols = e.target.value || "auto";
@@ -1115,11 +1251,13 @@
     const ps = $("#pageSize");
     if (ps) ps.value = "50";
 
-    // ✅ reset cache stats
     GAME_STATS.loaded = false;
     GAME_STATS.views.clear();
     GAME_STATS.mega.clear();
     GAME_STATS.likes.clear();
+
+    GAME_RATINGS.loaded = false;
+    GAME_RATINGS.byKey.clear();
 
     init();
   });
@@ -1149,9 +1287,10 @@
 
       buildDynamicFilters();
 
-      if (state.sort.startsWith("views") || state.sort.startsWith("mega") || state.sort.startsWith("likes")) {
-        await ensureGameStatsLoaded();
-      }
+      await Promise.all([
+        ensureGameStatsLoaded(),
+        ensureGameRatingsLoaded(),
+      ]);
 
       applyFilters();
       initMainPageCounter();

@@ -1152,7 +1152,7 @@ body.age-gate-active footer {
 .card-stat{
   display:inline-flex;
   align-items:center;
-  gap:5px;
+  gap:3px;
   font-weight:600;
   line-height:1.2;
 }

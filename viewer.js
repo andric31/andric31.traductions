@@ -256,7 +256,11 @@
     const a = Number(avg || 0);
     const c = Number(count || 0);
     if (c <= 0 || a <= 0) return "—";
-    return `${a.toFixed(1)}/4`;
+  
+    const rounded = Math.round(a * 10) / 10;
+    const text = Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+  
+    return `${text}/4`;
   }
 
   // =========================

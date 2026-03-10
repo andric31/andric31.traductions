@@ -1082,6 +1082,7 @@
       const pageHref = buildGameUrl(g.__raw || g);
 
       const views = GAME_STATS.views.get(g.ckey) || 0;
+      const mega = GAME_STATS.mega.get(g.ckey) || 0;
       const likes = GAME_STATS.likes.get(g.ckey) || 0;
       const rating = GAME_RATINGS.byKey.get(g.ckey) || { avg: 0, count: 0, sum: 0 };
       const ratingText = formatRatingForCard(rating.avg, rating.count);
@@ -1111,6 +1112,10 @@
               <span class="card-stat" title="Nombre de vues">
                 <span class="stat-icon stat-icon-views" aria-hidden="true"></span>
                 <span>${formatInt(views)}</span>
+              </span>
+              <span class="card-stat" title="Nombre de téléchargements">
+                <span class="stat-icon stat-icon-downloads" aria-hidden="true"></span>
+                <span>${formatInt(mega)}</span>
               </span>
               <span class="card-stat" title="Nombre de j'aime">
                 <span class="stat-icon stat-icon-likes" aria-hidden="true"></span>

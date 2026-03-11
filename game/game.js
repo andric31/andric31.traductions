@@ -695,6 +695,93 @@ function showStatsBox() {
   if (stats) stats.style.display = "";
 }
 
+function formatRelativeTranslationTime(ts) {
+  const t = Number(ts || 0);
+  if (!Number.isFinite(t) || t <= 0) return "—";
+
+  let delta = Date.now() - t;
+  if (!Number.isFinite(delta) || delta < 0) delta = 0;
+
+  const MIN = 60 * 1000;
+  const HOUR = 60 * MIN;
+  const DAY = 24 * HOUR;
+  const WEEK = 7 * DAY;
+  const MONTH = 30 * DAY;
+  const YEAR = 365 * DAY;
+
+  if (delta < MIN) return "à l’instant";
+  if (delta < HOUR) return `${Math.max(1, Math.floor(delta / MIN))} min`;
+  if (delta < DAY) return `${Math.max(1, Math.floor(delta / HOUR))} h`;
+  if (delta < WEEK) return `${Math.max(1, Math.floor(delta / DAY))} j`;
+  if (delta < 5 * WEEK) return `${Math.max(1, Math.floor(delta / WEEK))} sem`;
+  if (delta < YEAR) return `${Math.max(1, Math.floor(delta / MONTH))} mois`;
+
+  const n = Math.max(1, Math.floor(delta / YEAR));
+  return `${n} an${n > 1 ? "s" : ""}`;
+}
+
+function formatAbsoluteDateTime(ts, fallback = "Date inconnue") {
+  const t = Number(ts || 0);
+  if (!Number.isFinite(t) || t <= 0) return fallback;
+  try {
+    return new Date(t).toLocaleString("fr-FR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return new Date(t).toISOString();
+  }
+}
+
+function formatAbsoluteDateOnly(ts, fallback = "Date inconnue") {
+  const t = Number(ts || 0);
+  if (!Number.isFinite(t) || t <= 0) return fallback;
+  try {
+    return new Date(t).toLocaleDateString("fr-FR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+  } catch {
+    return new Date(t).toISOString().slice(0, 10);
+  }
+}
+
+function setStatMeta(entry) {
+  const updatedAtLocalRaw = entry?.updatedAtLocal || "";
+  const createdAtLocalRaw = entry?.createdAtLocal || "";
+  const updatedAtRaw = entry?.updatedAt || "";
+
+  const updatedAtLocalTs = updatedAtLocalRaw ? Date.parse(updatedAtLocalRaw) : NaN;
+  const createdAtLocalTs = createdAtLocalRaw ? Date.parse(createdAtLocalRaw) : NaN;
+  const lastTranslationTs = !Number.isNaN(updatedAtLocalTs) ? updatedAtLocalTs : (!Number.isNaN(createdAtLocalTs) ? createdAtLocalTs : 0);
+
+  setText("statTranslationTime", formatRelativeTranslationTime(lastTranslationTs));
+
+  const translationWrap = $("statTranslationWrap");
+  if (translationWrap) {
+    translationWrap.title = formatAbsoluteDateTime(lastTranslationTs, updatedAtRaw || "Date de traduction inconnue");
+  }
+
+  setText("statAddedDate", formatAbsoluteDateOnly(!Number.isNaN(createdAtLocalTs) ? createdAtLocalTs : 0, "—"));
+  const addedWrap = $("statAddedWrap");
+  if (addedWrap) {
+    addedWrap.title = formatAbsoluteDateTime(!Number.isNaN(createdAtLocalTs) ? createdAtLocalTs : 0, "Date d’ajout inconnue");
+  }
+}
+
+function setStatRating(avg, count) {
+  const a = Number(avg || 0);
+  const c = Number(count || 0);
+  const text = c > 0 && a > 0 ? `${a.toFixed(1)}/4` : "—";
+  setText("statRating", text);
+  const wrap = $("statRatingWrap");
+  if (wrap) wrap.title = c > 0 && a > 0 ? `${a.toFixed(1)}/4 · ${c} vote${c > 1 ? "s" : ""}` : "Aucune note pour le moment";
+}
+
 async function counterGet(id) {
   const r = await fetch(`/api/counter?op=get&id=${encodeURIComponent(id)}`, { cache: "no-store" });
   if (!r.ok) throw new Error("counter get HTTP " + r.status);
@@ -931,6 +1018,7 @@ function renderRating4UI(gameId, data) {
 
   avgEl.textContent = avg > 0 ? avg.toFixed(1) + "/4" : "—";
   countEl.textContent = String(count);
+  setStatRating(avg, count);
 
   choices.innerHTML = "";
 
@@ -1323,6 +1411,8 @@ function renderVideoBlock({ id, videoUrl }) {
     // ✅ key unique uid-only
     const analyticsKey = counterKey;
 
+    setStatMeta(entry);
+
     // ✅ IMPORTANT : initCounters après création des extraLinkBtn → maintenant ça compte aussi
     await initCounters(counterKey, megaHref, archiveHref);
 
@@ -1334,6 +1424,7 @@ function renderVideoBlock({ id, videoUrl }) {
       });
     }
 
+    setStatRating(0, 0);
     try {
       const j = await rating4Get(analyticsKey);
       if (j?.ok) renderRating4UI(analyticsKey, j);

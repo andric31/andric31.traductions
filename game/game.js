@@ -710,11 +710,31 @@ function formatRelativeTranslationTime(ts) {
   const YEAR = 365 * DAY;
 
   if (delta < MIN) return "à l’instant";
-  if (delta < HOUR) return `${Math.max(1, Math.floor(delta / MIN))} min`;
-  if (delta < DAY) return `${Math.max(1, Math.floor(delta / HOUR))} h`;
-  if (delta < WEEK) return `${Math.max(1, Math.floor(delta / DAY))} j`;
-  if (delta < 5 * WEEK) return `${Math.max(1, Math.floor(delta / WEEK))} sem`;
-  if (delta < YEAR) return `${Math.max(1, Math.floor(delta / MONTH))} mois`;
+
+  if (delta < HOUR) {
+    const n = Math.max(1, Math.floor(delta / MIN));
+    return `${n} minute${n > 1 ? "s" : ""}`;
+  }
+
+  if (delta < DAY) {
+    const n = Math.max(1, Math.floor(delta / HOUR));
+    return `${n} heure${n > 1 ? "s" : ""}`;
+  }
+
+  if (delta < WEEK) {
+    const n = Math.max(1, Math.floor(delta / DAY));
+    return `${n} jour${n > 1 ? "s" : ""}`;
+  }
+
+  if (delta < 5 * WEEK) {
+    const n = Math.max(1, Math.floor(delta / WEEK));
+    return `${n} semaine${n > 1 ? "s" : ""}`;
+  }
+
+  if (delta < YEAR) {
+    const n = Math.max(1, Math.floor(delta / MONTH));
+    return `${n} mois`;
+  }
 
   const n = Math.max(1, Math.floor(delta / YEAR));
   return `${n} an${n > 1 ? "s" : ""}`;

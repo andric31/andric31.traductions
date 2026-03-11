@@ -252,6 +252,13 @@
     }
   }
 
+  function setViewerLoading(visible, text) {
+    const el = document.getElementById("viewerLoading");
+    if (!el) return;
+    if (text) el.textContent = text;
+    el.classList.toggle("is-visible", !!visible);
+  }
+
   function formatRatingForCard(avg, count) {
     const a = Number(avg || 0);
     const c = Number(count || 0);
@@ -1278,6 +1285,7 @@
   async function init() {
     $("#grid").innerHTML = "";
     $("#gridEmpty")?.classList.add("hidden");
+    setViewerLoading(true, "Chargement…");
 
     try {
       initHeaderMenuAndDisplayTools();
@@ -1303,6 +1311,7 @@
 
       applyFilters();
       initMainPageCounter();
+      setViewerLoading(false);
     } catch (e) {
       console.error("[viewer] load error:", e);
 
@@ -1316,6 +1325,7 @@
         ge.textContent = "Erreur de chargement";
         ge.classList.remove("hidden");
       }
+      setViewerLoading(false);
     }
   }
 

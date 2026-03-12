@@ -366,6 +366,48 @@ function getGalleryCount() {
   return Array.isArray(GameGallery.urls) ? GameGallery.urls.length : 0;
 }
 
+function getGalleryArrowSvg(dir) {
+  if (dir === "prev") {
+    return '<svg class="galarr" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M16 5 L8 12 L16 19" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  }
+  return '<svg class="galarr" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 5 L16 12 L8 19" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+function ensureGalleryButtonIcons() {
+  const prevBtn = $("coverPrevBtn");
+  const nextBtn = $("coverNextBtn");
+  const lightPrev = $("lightboxPrev");
+  const lightNext = $("lightboxNext");
+  const zoomBtn = $("coverZoomBtn");
+  if (prevBtn && !prevBtn.dataset.iconReady) { prevBtn.innerHTML = getGalleryArrowSvg("prev"); prevBtn.dataset.iconReady = "1"; }
+  if (nextBtn && !nextBtn.dataset.iconReady) { nextBtn.innerHTML = getGalleryArrowSvg("next"); nextBtn.dataset.iconReady = "1"; }
+  if (lightPrev && !lightPrev.dataset.iconReady) { lightPrev.innerHTML = getGalleryArrowSvg("prev"); lightPrev.dataset.iconReady = "1"; }
+  if (lightNext && !lightNext.dataset.iconReady) { lightNext.innerHTML = getGalleryArrowSvg("next"); lightNext.dataset.iconReady = "1"; }
+  if (zoomBtn && !zoomBtn.dataset.iconReady) { zoomBtn.textContent = "⛶"; zoomBtn.dataset.iconReady = "1"; }
+}
+
+function stopGalleryAuto() {
+  try {
+    if (GameGallery.autoTimer) {
+      clearInterval(GameGallery.autoTimer);
+      GameGallery.autoTimer = null;
+    }
+  } catch {}
+}
+
+function startGalleryAuto() {
+  stopGalleryAuto();
+  if (getGalleryCount() < 2) return;
+  GameGallery.autoTimer = setInterval(() => {
+    setGalleryIndex(GameGallery.index + 1, { fromAuto: true });
+  }, Math.max(1000, Number(GameGallery.autoDelayMs) || 3000));
+}
+
+function resetGalleryAuto() {
+  if (getGalleryCount() < 2) return;
+  startGalleryAuto();
+}
+
 function updateGalleryUI() {
   const img = $("cover");
   const zoomBtn = $("coverZoomBtn");
@@ -407,7 +449,7 @@ function updateGalleryUI() {
   }
 }
 
-function setGalleryIndex(nextIndex) {
+function setGalleryIndex(nextIndex, opts = {}) {
   const count = getGalleryCount();
   if (!count) return;
   let idx = Number(nextIndex);
@@ -415,6 +457,7 @@ function setGalleryIndex(nextIndex) {
   idx = ((idx % count) + count) % count;
   GameGallery.index = idx;
   updateGalleryUI();
+  if (!opts?.fromAuto) resetGalleryAuto();
 }
 
 function setGalleryUrls(urls) {
@@ -422,6 +465,8 @@ function setGalleryUrls(urls) {
   GameGallery.urls = clean;
   GameGallery.index = 0;
   updateGalleryUI();
+  if (clean.length > 1) startGalleryAuto();
+  else stopGalleryAuto();
 }
 
 function openLightbox() {
@@ -446,16 +491,30 @@ function closeLightbox() {
 }
 
 function initGalleryControls() {
+  ensureGalleryButtonIcons();
   $("coverZoomBtn")?.addEventListener("click", () => openLightbox());
   $("cover")?.addEventListener("click", () => { if (getGalleryCount()) openLightbox(); });
   $("coverPrevBtn")?.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); setGalleryIndex(GameGallery.index - 1); });
   $("coverNextBtn")?.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); setGalleryIndex(GameGallery.index + 1); });
-  $("lightboxPrev")?.addEventListener("click", (e) => { e.preventDefault(); setGalleryIndex(GameGallery.index - 1); });
-  $("lightboxNext")?.addEventListener("click", (e) => { e.preventDefault(); setGalleryIndex(GameGallery.index + 1); });
+  $("lightboxPrev")?.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); setGalleryIndex(GameGallery.index - 1); });
+  $("lightboxNext")?.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); setGalleryIndex(GameGallery.index + 1); });
   $("lightboxClose")?.addEventListener("click", () => closeLightbox());
   $("lightboxOverlay")?.addEventListener("click", (e) => {
     if (e.target?.id === "lightboxOverlay") closeLightbox();
   });
+
+  const hoverTargets = [$("coverWrap"), $("lightboxStage")].filter(Boolean);
+  hoverTargets.forEach((el) => {
+    el.addEventListener("mouseenter", () => stopGalleryAuto());
+    el.addEventListener("mouseleave", () => startGalleryAuto());
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stopGalleryAuto();
+    else startGalleryAuto();
+  });
+
+  window.addEventListener("beforeunload", () => stopGalleryAuto());
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {

@@ -44,8 +44,8 @@ export async function onRequest(context) {
     }
 
     const html = await resp.text();
-    const opHtml = extractOpHtml(html);
-    const gallery = dedupKeepOrder(extractGalleryUrls(opHtml));
+    const firstPostHtml = extractFirstPostHtml(html);
+    const gallery = dedupKeepOrder(extractGalleryUrls(firstPostHtml));
     const payload = JSON.stringify({ ok:true, gallery });
 
     await cache.put(cacheKey, new Response(payload, {
@@ -61,21 +61,25 @@ export async function onRequest(context) {
   }
 }
 
-function extractOpHtml(html) {
+function extractFirstPostHtml(html) {
   const s = String(html || "");
-  const m = s.match(/<article[^>]*class="[^"]*message--post[^"]*"[\s\S]*?<div[^>]*class="[^"]*bbWrapper[^"]*"[^>]*>([\s\S]*?)<\/div>[\s\S]*?<\/article>/i);
-  if (m && m[1]) return m[1];
-  const m2 = s.match(/<div[^>]*class="[^"]*bbWrapper[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
-  return m2 && m2[1] ? m2[1] : s;
+  const m = s.match(/<article[^>]*class="[^"]*message--post[^"]*"[\s\S]*?<\/article>/i);
+  if (m && m[0]) return m[0];
+  const m2 = s.match(/<div[^>]*class="[^"]*message--post[^"]*"[\s\S]*?<\/article>/i);
+  return m2 && m2[0] ? m2[0] : s;
 }
 
 function upgradeF95Url(url){
   try{
-    url = String(url||"").trim();
+    url = decodeHtml(String(url||"").trim());
     if(!url) return "";
+    if (url.startsWith('//')) url = 'https:' + url;
     url = url.replace(/^https:\/\/preview\.f95zone\.to\//i, "https://attachments.f95zone.to/");
     url = url.replace(/\/thumb\//i, "/");
-    url = url.replace(/_300x169\./i, "_800x450.").replace(/_460x259\./i, "_800x450.").replace(/_600x338\./i, "_800x450.");
+    url = url
+      .replace(/_300x169\./i, "_800x450.")
+      .replace(/_460x259\./i, "_800x450.")
+      .replace(/_600x338\./i, "_800x450.");
     return url;
   }catch{ return String(url||"").trim(); }
 }
@@ -90,23 +94,47 @@ function dedupKeepOrder(arr){
   });
 }
 
-function extractGalleryUrls(opHtml){
-  const s = String(opHtml || "");
+function isLikelyGalleryAsset(url){
+  try{
+    const u = new URL(url);
+    const h = String(u.hostname || '').toLowerCase();
+    if (!(h.endsWith('attachments.f95zone.to') || h.endsWith('preview.f95zone.to') || h.endsWith('f95zone.to'))) return false;
+    const path = String(u.pathname || '').toLowerCase();
+    if (path.includes('/smilies/')) return false;
+    if (path.includes('/avatars/')) return false;
+    if (path.includes('/icons/')) return false;
+    if (!/(\.jpg|\.jpeg|\.png|\.webp|\.gif)(?:$|\?)/i.test(path) && !path.includes('/attachments/')) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function extractGalleryUrls(firstPostHtml){
+  const s = String(firstPostHtml || '');
   const urls = [];
-  const reLinks = /<a[^>]*class="[^"]*js-lbImage[^"]*"[^>]*href="([^"]+)"[^>]*>/gi;
-  let m;
-  while ((m = reLinks.exec(s))) {
-    const href = String(m[1] || "").trim();
-    if (!href || /\/thumb\//i.test(href)) continue;
-    urls.push(upgradeF95Url(decodeHtml(href)));
+  const push = (raw) => {
+    const u = upgradeF95Url(raw);
+    if (!u || !isLikelyGalleryAsset(u)) return;
+    urls.push(u);
+  };
+
+  // 1) URLs full des liens lightbox de l'OP
+  for (const m of s.matchAll(/<a[^>]*class="[^"]*js-lbImage[^"]*"[^>]*href="([^"]+)"[^>]*>/gi)) {
+    push(m[1]);
   }
-  const reImgs = /<img[^>]+(?:data-src|src)="([^"]+)"[^>]*>/gi;
-  while ((m = reImgs.exec(s))) {
-    const u = String(m[1] || "").trim();
-    if (!u || /\/thumb\//i.test(u)) continue;
-    urls.push(upgradeF95Url(decodeHtml(u)));
+
+  // 2) Data-src / src des images de l'OP
+  for (const m of s.matchAll(/<img[^>]+(?:data-src|src)="([^"]+)"[^>]*>/gi)) {
+    push(m[1]);
   }
-  return urls;
+
+  // 3) Fallback large : toute URL attachments/preview présente dans l'OP
+  for (const m of s.matchAll(/https?:\/\/(?:attachments|preview)\.f95zone\.to\/[^"'\s<>]+/gi)) {
+    push(m[0]);
+  }
+
+  return dedupKeepOrder(urls);
 }
 
 function decodeHtml(s) {

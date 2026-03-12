@@ -253,10 +253,19 @@
   }
 
   function setViewerLoading(visible, text) {
-    const el = document.getElementById("viewerLoading");
-    if (!el) return;
-    if (text) el.textContent = text;
-    el.classList.toggle("is-visible", !!visible);
+    const loadingEl = document.getElementById("viewerLoading");
+    const emptyEl = document.getElementById("gridEmpty");
+  
+    if (loadingEl) loadingEl.classList.add("hidden");
+  
+    if (!emptyEl) return;
+  
+    if (visible) {
+      emptyEl.textContent = text || "Chargement…";
+      emptyEl.classList.remove("hidden");
+    } else {
+      emptyEl.classList.add("hidden");
+    }
   }
 
   function formatRatingForCard(avg, count) {

@@ -548,27 +548,229 @@ async function loadF95Gallery(entry, fallbackImageUrl) {
   }
 }
 
-function setCover(url) {
-  const img = $("cover");
-  if (!img) return;
+const coverGalleryState = {
+  urls: [],
+  idx: 0,
+  timer: null,
+  hover: false,
+  expanded: false,
+  activeLayer: "A",
+};
 
-  const u = (url || "").trim();
-  img.referrerPolicy = "no-referrer";
+function sanitizeUrl(url) {
+  return String(url || "").trim();
+}
 
+function dedupKeepOrder(arr) {
+  const seen = new Set();
+  return (arr || []).map(sanitizeUrl).filter((u) => {
+    if (!u || seen.has(u)) return false;
+    seen.add(u);
+    return true;
+  });
+}
+
+function getCoverElements() {
+  return {
+    stage: $("coverStage"),
+    blur: $("coverBlur"),
+    box: $("coverBox"),
+    a: $("coverA"),
+    b: $("coverB"),
+    prev: $("coverPrev"),
+    next: $("coverNext"),
+    count: $("coverCount"),
+    expand: $("coverExpand"),
+    lightbox: $("coverLightbox"),
+    lightboxBackdrop: $("coverLightboxBackdrop"),
+    lightboxPanel: $("coverLightboxPanel"),
+    lightboxImg: $("coverLightboxImg"),
+    lightboxClose: $("coverLightboxClose"),
+    lightboxPrev: $("coverLightboxPrev"),
+    lightboxNext: $("coverLightboxNext"),
+    lightboxCount: $("coverLightboxCount"),
+    lightboxBlur: $("coverLightboxBlur"),
+  };
+}
+
+function applyCoverImageToLayer(layer, url) {
+  if (!layer) return;
+  const u = sanitizeUrl(url);
+  layer.referrerPolicy = "no-referrer";
   if (!u) {
-    img.removeAttribute("src");
-    img.classList.add("is-placeholder");
+    layer.removeAttribute("src");
+    layer.classList.add("is-placeholder");
     return;
   }
-
-  img.classList.remove("is-placeholder");
-  img.src = u;
-
-  img.onerror = () => {
-    img.onerror = null;
-    img.removeAttribute("src");
-    img.classList.add("is-placeholder");
+  layer.classList.remove("is-placeholder");
+  layer.src = u;
+  layer.onerror = () => {
+    layer.onerror = null;
+    layer.removeAttribute("src");
+    layer.classList.add("is-placeholder");
   };
+}
+
+function updateCoverUi() {
+  const els = getCoverElements();
+  const total = coverGalleryState.urls.length;
+  const hasMany = total > 1;
+  const current = total ? coverGalleryState.urls[coverGalleryState.idx] : "";
+
+  if (els.stage) {
+    els.stage.classList.toggle("is-single", !hasMany);
+    els.stage.classList.toggle("is-expanded", !!coverGalleryState.expanded);
+    try {
+      els.stage.style.setProperty("--cover-img", current ? `url("${String(current).replace(/"/g, "%22")}")` : "none");
+    } catch {}
+  }
+  if (els.lightbox) els.lightbox.setAttribute("aria-hidden", coverGalleryState.expanded ? "false" : "true");
+  if (els.lightboxPanel) {
+    els.lightboxPanel.classList.toggle("is-expanded", true);
+    try {
+      els.lightboxPanel.style.setProperty("--cover-img", current ? `url("${String(current).replace(/"/g, "%22")}")` : "none");
+    } catch {}
+  }
+  if (els.prev) els.prev.style.display = hasMany ? "" : "none";
+  if (els.next) els.next.style.display = hasMany ? "" : "none";
+  if (els.count) {
+    els.count.style.display = hasMany ? "" : "none";
+    els.count.textContent = `${Math.min(total, total ? coverGalleryState.idx + 1 : 1)} / ${Math.max(total, 1)}`;
+  }
+  if (els.lightboxPrev) els.lightboxPrev.style.display = hasMany ? "" : "none";
+  if (els.lightboxNext) els.lightboxNext.style.display = hasMany ? "" : "none";
+  if (els.lightboxCount) els.lightboxCount.textContent = `${Math.min(total, total ? coverGalleryState.idx + 1 : 1)} / ${Math.max(total, 1)}`;
+  if (els.lightboxImg) applyCoverImageToLayer(els.lightboxImg, current);
+}
+
+function stopCoverAuto() {
+  if (coverGalleryState.timer) {
+    clearInterval(coverGalleryState.timer);
+    coverGalleryState.timer = null;
+  }
+}
+
+function startCoverAuto() {
+  stopCoverAuto();
+  if (coverGalleryState.urls.length <= 1) return;
+  if (coverGalleryState.hover) return;
+  coverGalleryState.timer = setInterval(() => {
+    setCoverIndex(coverGalleryState.idx + 1);
+  }, 3000);
+}
+
+function resetCoverAuto() {
+  stopCoverAuto();
+  startCoverAuto();
+}
+
+function setCoverIndex(nextIdx) {
+  const total = coverGalleryState.urls.length;
+  if (!total) return;
+  const idx = ((Number(nextIdx) || 0) % total + total) % total;
+  if (idx === coverGalleryState.idx && total > 0) {
+    updateCoverUi();
+    return;
+  }
+  coverGalleryState.idx = idx;
+
+  const els = getCoverElements();
+  const current = coverGalleryState.urls[idx] || "";
+  const nextLayer = coverGalleryState.activeLayer === "A" ? els.b : els.a;
+  const activeLayer = coverGalleryState.activeLayer === "A" ? els.a : els.b;
+  applyCoverImageToLayer(nextLayer, current);
+  requestAnimationFrame(() => {
+    if (activeLayer) activeLayer.classList.remove("is-active");
+    if (nextLayer) nextLayer.classList.add("is-active");
+    coverGalleryState.activeLayer = coverGalleryState.activeLayer === "A" ? "B" : "A";
+    updateCoverUi();
+  });
+}
+
+function openCoverLightbox() {
+  const els = getCoverElements();
+  if (!els.lightbox) return;
+  coverGalleryState.expanded = true;
+  els.lightbox.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+  updateCoverUi();
+}
+
+function closeCoverLightbox() {
+  const els = getCoverElements();
+  coverGalleryState.expanded = false;
+  if (els.lightbox) els.lightbox.classList.add("hidden");
+  document.body.style.overflow = "";
+  updateCoverUi();
+}
+
+function bindCoverGalleryEvents() {
+  if (window.__coverGalleryBound) return;
+  window.__coverGalleryBound = true;
+  const els = getCoverElements();
+  if (els.prev) els.prev.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); setCoverIndex(coverGalleryState.idx - 1); resetCoverAuto(); });
+  if (els.next) els.next.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); setCoverIndex(coverGalleryState.idx + 1); resetCoverAuto(); });
+  if (els.expand) els.expand.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); openCoverLightbox(); });
+  if (els.stage) {
+    els.stage.addEventListener("mouseenter", () => { coverGalleryState.hover = true; stopCoverAuto(); });
+    els.stage.addEventListener("mouseleave", () => { coverGalleryState.hover = false; startCoverAuto(); });
+  }
+  if (els.lightboxBackdrop) els.lightboxBackdrop.addEventListener("click", closeCoverLightbox);
+  if (els.lightboxClose) els.lightboxClose.addEventListener("click", closeCoverLightbox);
+  if (els.lightboxPrev) els.lightboxPrev.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); setCoverIndex(coverGalleryState.idx - 1); resetCoverAuto(); });
+  if (els.lightboxNext) els.lightboxNext.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); setCoverIndex(coverGalleryState.idx + 1); resetCoverAuto(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && coverGalleryState.expanded) {
+      closeCoverLightbox();
+      return;
+    }
+    if (e.key === "ArrowLeft" && coverGalleryState.urls.length > 1) {
+      setCoverIndex(coverGalleryState.idx - 1);
+      resetCoverAuto();
+    }
+    if (e.key === "ArrowRight" && coverGalleryState.urls.length > 1) {
+      setCoverIndex(coverGalleryState.idx + 1);
+      resetCoverAuto();
+    }
+  });
+}
+
+function setCover(urls) {
+  bindCoverGalleryEvents();
+  const list = dedupKeepOrder(Array.isArray(urls) ? urls : [urls]);
+  coverGalleryState.urls = list;
+  coverGalleryState.idx = 0;
+  coverGalleryState.activeLayer = "A";
+  const els = getCoverElements();
+  applyCoverImageToLayer(els.a, list[0] || "");
+  applyCoverImageToLayer(els.b, "");
+  if (els.a) els.a.classList.add("is-active");
+  if (els.b) els.b.classList.remove("is-active");
+  updateCoverUi();
+  startCoverAuto();
+}
+
+async function fetchF95Gallery(entry, display) {
+  const f95Url = sanitizeUrl((display && display.url) || (entry && entry.url) || "");
+  if (!f95Url) return [];
+  try {
+    const api = `/api/f95gallery?url=${encodeURIComponent(f95Url)}`;
+    const res = await fetchJson(api);
+    return Array.isArray(res?.gallery) ? res.gallery : [];
+  } catch {
+    return [];
+  }
+}
+
+async function setupCoverGallery(entry, display) {
+  const base = dedupKeepOrder([
+    sanitizeUrl((display && display.imageUrl) || ""),
+    sanitizeUrl((entry && entry.imageUrl) || ""),
+  ]);
+  setCover(base);
+  const remote = await fetchF95Gallery(entry, display);
+  const merged = dedupKeepOrder([...remote, ...base]);
+  if (merged.length) setCover(merged);
 }
 
 function renderTags(tags) {

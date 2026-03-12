@@ -210,152 +210,96 @@ body:not(.mode-game){
 }
 
 
-.coverWrap{
+.coverGallery{ margin-bottom: 0; }
+.coverStage{
   position:relative;
+  border-radius:14px;
+  overflow:hidden;
+  background:#0f121a;
+  border:1px solid var(--border);
 }
-
 .cover{
   width:100%;
   height: 190px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
+  border-radius: 0;
+  border: 0;
   background: #0f121a;
   object-fit: cover;
   display:block;
 }
-
-.coverZoomBtn,
- .coverNavBtn{
-  top:50%;
-  transform: translateY(-50%);
-  font-size:18px;
-}
-.coverZoomBtn:hover,
-.coverNavBtn:hover,
-.lightboxClose:hover,
-.lightboxNav:hover{ filter: brightness(1.08); }
-
-.coverZoomBtn{
-  top:12px;
-  right:12px;
-  font-size:18px;
-}
-
-.coverNavBtn{
-  top:50%;
-  transform: translateY(-50%);
+.coverCtrl{
+  position:absolute;
   width:42px;
   height:42px;
   border-radius:999px;
-  font-size:28px;
-  line-height:1;
+  border:1px solid rgba(255,255,255,.22);
+  background:rgba(0,0,0,.55);
+  color:#fff;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  z-index:5;
+  user-select:none;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
-.coverNavBtn.prev{ left:12px; }
-.coverNavBtn.next{ right:12px; }
-
-.coverCounter{
+.coverCtrl:hover{ background:rgba(0,0,0,.72); }
+.coverCtrl .galarr{ width:14px; height:14px; display:block; }
+.coverExpand{ top:12px; right:12px; }
+.coverPrev{ left:12px; top:50%; transform:translateY(-50%); }
+.coverNext{ right:12px; top:50%; transform:translateY(-50%); }
+.coverCount{
   position:absolute;
-  right:12px;
   bottom:12px;
-  z-index:2;
-  min-width:72px;
-  text-align:center;
+  right:12px;
   padding:6px 10px;
   border-radius:999px;
+  background:rgba(0,0,0,.55);
   border:1px solid rgba(255,255,255,.18);
-  background: rgba(0,0,0,.55);
-  color:#fff;
   font-size:12px;
-  font-weight:800;
+  color:#fff;
   line-height:1;
-  backdrop-filter: blur(4px);
+  user-select:none;
+  z-index:4;
 }
-
-.lightboxOverlay{
+.coverLightbox.hidden{ display:none !important; }
+.coverLightbox{
   position:fixed;
   inset:0;
-  z-index:5000;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:14px;
-  padding:20px;
-  background: rgba(0,0,0,.90);
+  z-index:4000;
 }
-.lightboxOverlay.hidden{ display:none !important; }
-
-.lightboxStage{
+.coverLightboxBackdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(6,10,18,.84);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.coverLightboxDialog{
   position:relative;
+  z-index:1;
+  width:min(94vw, 1400px);
+  height:min(90vh, 900px);
+  margin:5vh auto;
   display:flex;
   align-items:center;
   justify-content:center;
-  width:min(92vw, 1400px);
-  height:min(86vh, 980px);
 }
-
-.lightboxImage{
+.coverLightboxImg{
   max-width:100%;
   max-height:100%;
-  width:auto;
-  height:auto;
+  object-fit:contain;
   border-radius:16px;
-  border:1px solid rgba(255,255,255,.10);
-  object-fit: contain;
-  background:#0f121a;
+  box-shadow:0 18px 55px rgba(0,0,0,.55);
 }
+.coverLightboxClose{ top:12px; right:12px; }
+.coverLightboxPrev{ left:12px; }
+.coverLightboxNext{ right:12px; }
+.coverLightboxCount{ bottom:12px; right:12px; }
 
-.lightboxClose,
-.lightboxNav{
-  flex:0 0 auto;
-  width:42px;
-  height:42px;
-  border-radius:999px;
-  font-size:18px;
-  line-height:1;
-}
 
-.lightboxClose{
-  position:absolute;
-  top:12px;
-  right:12px;
-  z-index:60;
-  width:36px;
-  height:36px;
-  border-radius:999px;
-  font-size:18px;
-}
-
-.lightboxNav{
-  flex:0 0 auto;
-  width:54px;
-  height:54px;
-  border-radius:999px;
-  font-size:34px;
-  line-height:1;
-}
-
-.lightboxCounter{
-  position:absolute;
-  right:12px;
-  bottom:12px;
-  transform:none;
-  padding:6px 10px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.18);
-  background: rgba(0,0,0,.55);
-  color:#fff;
-  font-size:12px;
-  font-weight:800;
-  line-height:1;
-}
-
-@media (max-width: 700px){
-  .cover{ height: 180px; }
-  .coverNavBtn, .coverZoomBtn{ width:38px; height:38px; }
-  .lightboxOverlay{ padding:12px; gap:8px; }
-  .lightboxNav{ width:38px; height:38px; }
-  .lightboxClose{ top:10px; right:10px; width:36px; height:36px; font-size:18px; }
-}
 .cover.is-placeholder{
   background:
     radial-gradient(1200px 300px at 20% 0%, rgba(255,255,255,0.06), rgba(0,0,0,0)),
@@ -828,173 +772,3 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
   color: #ffb4b4;
 }
 
-
-.galarr{ width:14px; height:14px; display:block; }
-
-/* ===== Galerie cover style extension ===== */
-.coverStage{
-  position:relative;
-  width:100%;
-  height:260px;
-  border-radius:18px;
-  overflow:hidden;
-  display:block;
-  z-index:1;
-  border:1px solid rgba(255,255,255,.10);
-  box-shadow:0 6px 18px rgba(0,0,0,.25);
-  transition:box-shadow .15s ease,border-color .15s ease;
-  background:#0f121a;
-  isolation:isolate;
-}
-.coverStage:hover{
-  box-shadow:0 10px 26px rgba(0,0,0,.35);
-  border-color:rgba(255,255,255,.20);
-}
-.coverStage.is-expanded .coverBlur,
-.coverLightboxPanel.is-expanded .coverLightboxBlur{ display:block; }
-.coverBlur,
-.coverLightboxBlur{
-  content:"";
-  position:absolute;
-  inset:0;
-  background-image:var(--cover-img, none);
-  background-size:cover;
-  background-position:center;
-  filter:blur(34px);
-  -webkit-filter:blur(34px);
-  transform:scale(1.18);
-  opacity:.65;
-  display:none;
-  z-index:0;
-}
-.coverBox{
-  position:relative;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  z-index:1;
-  background:rgba(0,0,0,.15);
-}
-.coverLayer{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  display:block;
-  opacity:0;
-  transition:opacity .24s ease-in-out;
-  will-change:opacity;
-  background:#0f121a;
-}
-.coverStage.is-expanded .coverLayer{ object-fit:contain; }
-.coverLayer.is-active{ opacity:1; }
-.coverLayer.is-placeholder{
-  background:
-    radial-gradient(1200px 300px at 20% 0%, rgba(255,255,255,0.06), rgba(0,0,0,0)),
-    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0));
-}
-.coverGalBtn,
-.coverExpand,
-.coverLightboxClose,
-.coverLightboxNav{
-  position:absolute;
-  top:50%;
-  transform:translateY(-50%);
-  width:42px;
-  height:42px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.22);
-  background:rgba(0,0,0,.55);
-  color:#fff;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:18px;
-  line-height:1;
-  padding:0;
-  z-index:45;
-  user-select:none;
-  transition:background .12s ease,border-color .12s ease,opacity .12s ease;
-}
-.coverGalBtn:hover,
-.coverExpand:hover,
-.coverLightboxClose:hover,
-.coverLightboxNav:hover{ background:rgba(0,0,0,.75); border-color:rgba(255,255,255,.32); }
-.coverGalBtn .galarr,
-.coverLightboxNav .galarr{ width:14px; height:14px; display:block; }
-.coverGalBtn.prev{ left:12px; }
-.coverGalBtn.next{ right:12px; }
-.coverExpand{
-  top:12px;
-  right:12px;
-  transform:none;
-  width:36px;
-  height:36px;
-  z-index:60;
-}
-.coverCount,
-.coverLightboxCount{
-  position:absolute;
-  bottom:12px;
-  right:12px;
-  padding:6px 10px;
-  border-radius:999px;
-  background:rgba(0,0,0,.55);
-  border:1px solid rgba(255,255,255,.18);
-  font-size:12px;
-  z-index:55;
-  pointer-events:none;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  line-height:1;
-  color:#fff;
-}
-.coverLightbox{
-  position:fixed;
-  inset:0;
-  z-index:4000;
-}
-.coverLightbox.hidden{ display:none !important; }
-.coverLightboxBackdrop{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,.45);
-  backdrop-filter:blur(6px);
-  -webkit-backdrop-filter:blur(6px);
-}
-.coverLightboxPanel{
-  position:absolute;
-  inset:24px;
-  border-radius:18px;
-  overflow:hidden;
-  background:#171b29;
-  border:1px solid #23283b;
-  box-shadow:0 18px 48px rgba(0,0,0,.55);
-}
-.coverLightboxImg{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  display:block;
-  z-index:2;
-}
-.coverLightboxClose{
-  top:12px;
-  right:12px;
-  transform:none;
-  width:36px;
-  height:36px;
-  z-index:60;
-}
-.coverLightboxNav.prev{ left:12px; }
-.coverLightboxNav.next{ right:12px; }
-@media (max-width: 640px){
-  .coverStage{ height:220px; border-radius:16px; }
-  .coverLightboxPanel{ inset:10px; border-radius:16px; }
-  .coverGalBtn,.coverLightboxNav{ width:38px; height:38px; }
-}

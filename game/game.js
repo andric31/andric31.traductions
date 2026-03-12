@@ -60,6 +60,139 @@ function show(id, cond) {
   if (el) el.style.display = cond ? "" : "none";
 }
 
+const galleryState = {
+  urls: [],
+  index: 0,
+  timer: null,
+  hover: false,
+  loadedForUrl: "",
+};
+
+function dedupKeepOrder(list) {
+  const out = [];
+  const seen = new Set();
+  for (const raw of list || []) {
+    const u = String(raw || "").trim();
+    if (!u || seen.has(u)) continue;
+    seen.add(u);
+    out.push(u);
+  }
+  return out;
+}
+
+function getF95GalleryApiUrl(f95Url) {
+  const u = String(f95Url || "").trim();
+  if (!u) return "";
+  return `/api/f95gallery?url=${encodeURIComponent(u)}`;
+}
+
+function stopGalleryAuto() {
+  try { if (galleryState.timer) clearInterval(galleryState.timer); } catch {}
+  galleryState.timer = null;
+}
+
+function startGalleryAuto() {
+  stopGalleryAuto();
+  if (!galleryState.hover) return;
+  if (!Array.isArray(galleryState.urls) || galleryState.urls.length < 2) return;
+  galleryState.timer = setInterval(() => {
+    galleryGoTo(galleryState.index + 1);
+  }, 3000);
+}
+
+function updateGalleryControls() {
+  const many = Array.isArray(galleryState.urls) && galleryState.urls.length > 1;
+  const countText = many ? `${galleryState.index + 1} / ${galleryState.urls.length}` : "";
+  const ids = ["coverPrevBtn", "coverNextBtn", "coverLightboxPrev", "coverLightboxNext"];
+  ids.forEach((id) => show(id, many));
+  const count = $("coverCount");
+  const lcount = $("coverLightboxCount");
+  if (count) { count.textContent = countText; count.style.display = many ? "" : "none"; }
+  if (lcount) { lcount.textContent = countText; lcount.style.display = many ? "" : "none"; }
+}
+
+function galleryGoTo(index) {
+  if (!Array.isArray(galleryState.urls) || !galleryState.urls.length) return;
+  const len = galleryState.urls.length;
+  galleryState.index = ((index % len) + len) % len;
+  const u = galleryState.urls[galleryState.index] || "";
+  const img = $("cover");
+  const lb = $("coverLightboxImg");
+  if (img) {
+    img.classList.remove("is-placeholder");
+    img.src = u;
+    img.onerror = () => { img.onerror = null; };
+  }
+  if (lb) lb.src = u;
+  updateGalleryControls();
+}
+
+function setupGalleryEvents() {
+  const stage = $("coverStage");
+  const lightbox = $("coverLightbox");
+  if (!stage || stage.dataset.galleryBound === "1") return;
+  stage.dataset.galleryBound = "1";
+
+  $("coverPrevBtn")?.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); galleryGoTo(galleryState.index - 1); startGalleryAuto(); });
+  $("coverNextBtn")?.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); galleryGoTo(galleryState.index + 1); startGalleryAuto(); });
+  $("coverLightboxPrev")?.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); galleryGoTo(galleryState.index - 1); });
+  $("coverLightboxNext")?.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); galleryGoTo(galleryState.index + 1); });
+  $("coverExpandBtn")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    const lb = $("coverLightbox");
+    if (!lb) return;
+    lb.classList.remove("hidden");
+    lb.setAttribute("aria-hidden", "false");
+    const img = $("coverLightboxImg");
+    if (img) img.src = galleryState.urls[galleryState.index] || "";
+  });
+  const closeLb = () => {
+    const lb = $("coverLightbox");
+    if (!lb) return;
+    lb.classList.add("hidden");
+    lb.setAttribute("aria-hidden", "true");
+  };
+  $("coverLightboxClose")?.addEventListener("click", closeLb);
+  $("coverLightboxBackdrop")?.addEventListener("click", closeLb);
+  lightbox?.addEventListener("click", (e) => { if (e.target === lightbox) closeLb(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeLb();
+    if (e.key === "ArrowLeft") galleryGoTo(galleryState.index - 1);
+    if (e.key === "ArrowRight") galleryGoTo(galleryState.index + 1);
+  });
+  stage.addEventListener("mouseenter", () => { galleryState.hover = true; startGalleryAuto(); });
+  stage.addEventListener("mouseleave", () => { galleryState.hover = false; stopGalleryAuto(); });
+}
+
+async function loadF95Gallery(f95Url, fallbackUrl) {
+  setupGalleryEvents();
+  const fallback = String(fallbackUrl || "").trim();
+  const baseUrl = String(f95Url || "").trim();
+  if (!baseUrl) {
+    galleryState.urls = fallback ? [fallback] : [];
+    galleryState.index = 0;
+    galleryGoTo(0);
+    updateGalleryControls();
+    return;
+  }
+  if (galleryState.loadedForUrl === baseUrl) return;
+  galleryState.loadedForUrl = baseUrl;
+
+  let urls = fallback ? [fallback] : [];
+  try {
+    const resp = await fetch(getF95GalleryApiUrl(baseUrl));
+    const data = await resp.json();
+    if (data && data.ok && Array.isArray(data.gallery)) {
+      urls = dedupKeepOrder([...(data.cover ? [data.cover] : []), ...data.gallery, ...urls]);
+    }
+  } catch {}
+
+  galleryState.urls = dedupKeepOrder(urls);
+  galleryState.index = 0;
+  if (galleryState.urls.length) galleryGoTo(0);
+  else updateGalleryControls();
+}
+
 // =========================
 // ✅ Routing (id central) + Collections + Séries
 // =========================
@@ -335,442 +468,34 @@ function setHref(id, href) {
   }
 }
 
-
-const GameGallery = {
-  urls: [],
-  index: 0,
-  overlayOpen: false,
-};
-
-function normalizeGalleryUrl(url) {
-  let out = String(url || "").trim();
-  if (!out) return "";
-  out = out.replace(/^https:\/\/preview\.f95zone\.to\//i, "https://attachments.f95zone.to/");
-  out = out.replace(/^http:\/\/preview\.f95zone\.to\//i, "https://attachments.f95zone.to/");
-  return out;
-}
-
-function dedupKeepOrder(arr) {
-  const seen = new Set();
-  const out = [];
-  for (const raw of arr || []) {
-    const u = normalizeGalleryUrl(raw);
-    if (!u || seen.has(u)) continue;
-    seen.add(u);
-    out.push(u);
-  }
-  return out;
-}
-
-function getGalleryCount() {
-  return Array.isArray(GameGallery.urls) ? GameGallery.urls.length : 0;
-}
-
-function getGalleryArrowSvg(dir) {
-  if (dir === "prev") {
-    return '<svg class="galarr" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M16 5 L8 12 L16 19" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  }
-  return '<svg class="galarr" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 5 L16 12 L8 19" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-}
-
-function ensureGalleryButtonIcons() {
-  const prevBtn = $("coverPrevBtn");
-  const nextBtn = $("coverNextBtn");
-  const lightPrev = $("lightboxPrev");
-  const lightNext = $("lightboxNext");
-  const zoomBtn = $("coverZoomBtn");
-  if (prevBtn && !prevBtn.dataset.iconReady) { prevBtn.innerHTML = getGalleryArrowSvg("prev"); prevBtn.dataset.iconReady = "1"; }
-  if (nextBtn && !nextBtn.dataset.iconReady) { nextBtn.innerHTML = getGalleryArrowSvg("next"); nextBtn.dataset.iconReady = "1"; }
-  if (lightPrev && !lightPrev.dataset.iconReady) { lightPrev.innerHTML = getGalleryArrowSvg("prev"); lightPrev.dataset.iconReady = "1"; }
-  if (lightNext && !lightNext.dataset.iconReady) { lightNext.innerHTML = getGalleryArrowSvg("next"); lightNext.dataset.iconReady = "1"; }
-  if (zoomBtn && !zoomBtn.dataset.iconReady) { zoomBtn.textContent = "⛶"; zoomBtn.dataset.iconReady = "1"; }
-}
-
-function stopGalleryAuto() {
-  try {
-    if (GameGallery.autoTimer) {
-      clearInterval(GameGallery.autoTimer);
-      GameGallery.autoTimer = null;
-    }
-  } catch {}
-}
-
-function startGalleryAuto() {
-  stopGalleryAuto();
-  if (getGalleryCount() < 2) return;
-  GameGallery.autoTimer = setInterval(() => {
-    setGalleryIndex(GameGallery.index + 1, { fromAuto: true });
-  }, Math.max(1000, Number(GameGallery.autoDelayMs) || 3000));
-}
-
-function resetGalleryAuto() {
-  if (getGalleryCount() < 2) return;
-  startGalleryAuto();
-}
-
-function updateGalleryUI() {
+function setCover(url) {
   const img = $("cover");
-  const zoomBtn = $("coverZoomBtn");
-  const prevBtn = $("coverPrevBtn");
-  const nextBtn = $("coverNextBtn");
-  const counter = $("coverCounter");
-  const lightboxImage = $("lightboxImage");
-  const lightboxCounter = $("lightboxCounter");
+  if (!img) return;
 
-  const count = getGalleryCount();
-  const hasAny = count > 0;
-  const hasMultiple = count > 1;
-  const current = hasAny ? GameGallery.urls[Math.max(0, Math.min(GameGallery.index, count - 1))] : "";
+  const u = (url || "").trim();
+  img.referrerPolicy = "no-referrer";
 
-  if (img) {
-    if (current) {
-      img.classList.remove("is-placeholder");
-      if (img.src !== current) img.src = current;
-    } else {
-      img.removeAttribute("src");
-      img.classList.add("is-placeholder");
-    }
-  }
-
-  if (zoomBtn) zoomBtn.style.display = hasAny ? "" : "none";
-  if (prevBtn) prevBtn.style.display = hasMultiple ? "" : "none";
-  if (nextBtn) nextBtn.style.display = hasMultiple ? "" : "none";
-  if (counter) {
-    counter.style.display = hasMultiple ? "" : "none";
-    counter.textContent = hasAny ? `${GameGallery.index + 1} / ${count}` : "";
-  }
-
-  if (lightboxImage && GameGallery.overlayOpen && current) {
-    lightboxImage.src = current;
-  }
-  if (lightboxCounter) {
-    lightboxCounter.textContent = hasAny ? `${GameGallery.index + 1} / ${count}` : "";
-    lightboxCounter.style.display = hasMultiple ? "" : "none";
-  }
-}
-
-function setGalleryIndex(nextIndex, opts = {}) {
-  const count = getGalleryCount();
-  if (!count) return;
-  let idx = Number(nextIndex);
-  if (!Number.isFinite(idx)) idx = 0;
-  idx = ((idx % count) + count) % count;
-  GameGallery.index = idx;
-  updateGalleryUI();
-  if (!opts?.fromAuto) resetGalleryAuto();
-}
-
-function setGalleryUrls(urls) {
-  const clean = dedupKeepOrder(urls);
-  GameGallery.urls = clean;
-  GameGallery.index = 0;
-  updateGalleryUI();
-  if (clean.length > 1) startGalleryAuto();
-  else stopGalleryAuto();
-}
-
-function openLightbox() {
-  if (!getGalleryCount()) return;
-  const overlay = $("lightboxOverlay");
-  if (!overlay) return;
-  GameGallery.overlayOpen = true;
-  overlay.classList.remove("hidden");
-  overlay.setAttribute("aria-hidden", "false");
-  document.body.style.overflow = "hidden";
-  updateGalleryUI();
-}
-
-function closeLightbox() {
-  const overlay = $("lightboxOverlay");
-  GameGallery.overlayOpen = false;
-  if (overlay) {
-    overlay.classList.add("hidden");
-    overlay.setAttribute("aria-hidden", "true");
-  }
-  document.body.style.overflow = "";
-}
-
-function initGalleryControls() {
-  ensureGalleryButtonIcons();
-  $("coverZoomBtn")?.addEventListener("click", () => openLightbox());
-  $("cover")?.addEventListener("click", () => { if (getGalleryCount()) openLightbox(); });
-  $("coverPrevBtn")?.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); setGalleryIndex(GameGallery.index - 1); });
-  $("coverNextBtn")?.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); setGalleryIndex(GameGallery.index + 1); });
-  $("lightboxPrev")?.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); setGalleryIndex(GameGallery.index - 1); });
-  $("lightboxNext")?.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); setGalleryIndex(GameGallery.index + 1); });
-  $("lightboxClose")?.addEventListener("click", () => closeLightbox());
-  $("lightboxOverlay")?.addEventListener("click", (e) => {
-    if (e.target?.id === "lightboxOverlay") closeLightbox();
-  });
-
-  const hoverTargets = [$("coverWrap"), $("lightboxStage")].filter(Boolean);
-  hoverTargets.forEach((el) => {
-    el.addEventListener("mouseenter", () => stopGalleryAuto());
-    el.addEventListener("mouseleave", () => startGalleryAuto());
-  });
-
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) stopGalleryAuto();
-    else startGalleryAuto();
-  });
-
-  window.addEventListener("beforeunload", () => stopGalleryAuto());
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      closeLightbox();
-      return;
-    }
-    if (!getGalleryCount()) return;
-    if (e.key === "ArrowLeft") setGalleryIndex(GameGallery.index - 1);
-    if (e.key === "ArrowRight") setGalleryIndex(GameGallery.index + 1);
-  });
-}
-
-async function loadF95Gallery(entry, fallbackImageUrl) {
-  const primary = normalizeGalleryUrl(fallbackImageUrl || entry?.gameData?.imageUrl || entry?.imageUrl || "");
-  const threadUrl = String(entry?.url || "").trim();
-
-  if (!threadUrl) {
-    setGalleryUrls(primary ? [primary] : []);
-    return;
-  }
-
-  try {
-    const j = await fetchJson(`/api/f95gallery?url=${encodeURIComponent(threadUrl)}`);
-    const merged = dedupKeepOrder([
-      primary,
-      ...(Array.isArray(j?.gallery) ? j.gallery : []),
-    ]);
-    setGalleryUrls(merged.length ? merged : (primary ? [primary] : []));
-  } catch {
-    setGalleryUrls(primary ? [primary] : []);
-  }
-}
-
-const coverGalleryState = {
-  urls: [],
-  idx: 0,
-  timer: null,
-  hover: false,
-  expanded: false,
-  activeLayer: "A",
-};
-
-function sanitizeUrl(url) {
-  return String(url || "").trim();
-}
-
-function dedupKeepOrder(arr) {
-  const seen = new Set();
-  return (arr || []).map(sanitizeUrl).filter((u) => {
-    if (!u || seen.has(u)) return false;
-    seen.add(u);
-    return true;
-  });
-}
-
-function getCoverElements() {
-  return {
-    stage: $("coverStage"),
-    blur: $("coverBlur"),
-    box: $("coverBox"),
-    a: $("coverA"),
-    b: $("coverB"),
-    prev: $("coverPrev"),
-    next: $("coverNext"),
-    count: $("coverCount"),
-    expand: $("coverExpand"),
-    lightbox: $("coverLightbox"),
-    lightboxBackdrop: $("coverLightboxBackdrop"),
-    lightboxPanel: $("coverLightboxPanel"),
-    lightboxImg: $("coverLightboxImg"),
-    lightboxClose: $("coverLightboxClose"),
-    lightboxPrev: $("coverLightboxPrev"),
-    lightboxNext: $("coverLightboxNext"),
-    lightboxCount: $("coverLightboxCount"),
-    lightboxBlur: $("coverLightboxBlur"),
-  };
-}
-
-function applyCoverImageToLayer(layer, url) {
-  if (!layer) return;
-  const u = sanitizeUrl(url);
-  layer.referrerPolicy = "no-referrer";
   if (!u) {
-    layer.removeAttribute("src");
-    layer.classList.add("is-placeholder");
+    galleryState.urls = [];
+    img.removeAttribute("src");
+    img.classList.add("is-placeholder");
+    updateGalleryControls();
     return;
   }
-  layer.classList.remove("is-placeholder");
-  layer.src = u;
-  layer.onerror = () => {
-    layer.onerror = null;
-    layer.removeAttribute("src");
-    layer.classList.add("is-placeholder");
+
+  galleryState.urls = [u];
+  galleryState.index = 0;
+  img.classList.remove("is-placeholder");
+  img.src = u;
+  const lb = $("coverLightboxImg");
+  if (lb) lb.src = u;
+  updateGalleryControls();
+
+  img.onerror = () => {
+    img.onerror = null;
+    img.removeAttribute("src");
+    img.classList.add("is-placeholder");
   };
-}
-
-function updateCoverUi() {
-  const els = getCoverElements();
-  const total = coverGalleryState.urls.length;
-  const hasMany = total > 1;
-  const current = total ? coverGalleryState.urls[coverGalleryState.idx] : "";
-
-  if (els.stage) {
-    els.stage.classList.toggle("is-single", !hasMany);
-    els.stage.classList.toggle("is-expanded", !!coverGalleryState.expanded);
-    try {
-      els.stage.style.setProperty("--cover-img", current ? `url("${String(current).replace(/"/g, "%22")}")` : "none");
-    } catch {}
-  }
-  if (els.lightbox) els.lightbox.setAttribute("aria-hidden", coverGalleryState.expanded ? "false" : "true");
-  if (els.lightboxPanel) {
-    els.lightboxPanel.classList.toggle("is-expanded", true);
-    try {
-      els.lightboxPanel.style.setProperty("--cover-img", current ? `url("${String(current).replace(/"/g, "%22")}")` : "none");
-    } catch {}
-  }
-  if (els.prev) els.prev.style.display = hasMany ? "" : "none";
-  if (els.next) els.next.style.display = hasMany ? "" : "none";
-  if (els.count) {
-    els.count.style.display = hasMany ? "" : "none";
-    els.count.textContent = `${Math.min(total, total ? coverGalleryState.idx + 1 : 1)} / ${Math.max(total, 1)}`;
-  }
-  if (els.lightboxPrev) els.lightboxPrev.style.display = hasMany ? "" : "none";
-  if (els.lightboxNext) els.lightboxNext.style.display = hasMany ? "" : "none";
-  if (els.lightboxCount) els.lightboxCount.textContent = `${Math.min(total, total ? coverGalleryState.idx + 1 : 1)} / ${Math.max(total, 1)}`;
-  if (els.lightboxImg) applyCoverImageToLayer(els.lightboxImg, current);
-}
-
-function stopCoverAuto() {
-  if (coverGalleryState.timer) {
-    clearInterval(coverGalleryState.timer);
-    coverGalleryState.timer = null;
-  }
-}
-
-function startCoverAuto() {
-  stopCoverAuto();
-  if (coverGalleryState.urls.length <= 1) return;
-  if (coverGalleryState.hover) return;
-  coverGalleryState.timer = setInterval(() => {
-    setCoverIndex(coverGalleryState.idx + 1);
-  }, 3000);
-}
-
-function resetCoverAuto() {
-  stopCoverAuto();
-  startCoverAuto();
-}
-
-function setCoverIndex(nextIdx) {
-  const total = coverGalleryState.urls.length;
-  if (!total) return;
-  const idx = ((Number(nextIdx) || 0) % total + total) % total;
-  if (idx === coverGalleryState.idx && total > 0) {
-    updateCoverUi();
-    return;
-  }
-  coverGalleryState.idx = idx;
-
-  const els = getCoverElements();
-  const current = coverGalleryState.urls[idx] || "";
-  const nextLayer = coverGalleryState.activeLayer === "A" ? els.b : els.a;
-  const activeLayer = coverGalleryState.activeLayer === "A" ? els.a : els.b;
-  applyCoverImageToLayer(nextLayer, current);
-  requestAnimationFrame(() => {
-    if (activeLayer) activeLayer.classList.remove("is-active");
-    if (nextLayer) nextLayer.classList.add("is-active");
-    coverGalleryState.activeLayer = coverGalleryState.activeLayer === "A" ? "B" : "A";
-    updateCoverUi();
-  });
-}
-
-function openCoverLightbox() {
-  const els = getCoverElements();
-  if (!els.lightbox) return;
-  coverGalleryState.expanded = true;
-  els.lightbox.classList.remove("hidden");
-  document.body.style.overflow = "hidden";
-  updateCoverUi();
-}
-
-function closeCoverLightbox() {
-  const els = getCoverElements();
-  coverGalleryState.expanded = false;
-  if (els.lightbox) els.lightbox.classList.add("hidden");
-  document.body.style.overflow = "";
-  updateCoverUi();
-}
-
-function bindCoverGalleryEvents() {
-  if (window.__coverGalleryBound) return;
-  window.__coverGalleryBound = true;
-  const els = getCoverElements();
-  if (els.prev) els.prev.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); setCoverIndex(coverGalleryState.idx - 1); resetCoverAuto(); });
-  if (els.next) els.next.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); setCoverIndex(coverGalleryState.idx + 1); resetCoverAuto(); });
-  if (els.expand) els.expand.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); openCoverLightbox(); });
-  if (els.stage) {
-    els.stage.addEventListener("mouseenter", () => { coverGalleryState.hover = true; stopCoverAuto(); });
-    els.stage.addEventListener("mouseleave", () => { coverGalleryState.hover = false; startCoverAuto(); });
-  }
-  if (els.lightboxBackdrop) els.lightboxBackdrop.addEventListener("click", closeCoverLightbox);
-  if (els.lightboxClose) els.lightboxClose.addEventListener("click", closeCoverLightbox);
-  if (els.lightboxPrev) els.lightboxPrev.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); setCoverIndex(coverGalleryState.idx - 1); resetCoverAuto(); });
-  if (els.lightboxNext) els.lightboxNext.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); setCoverIndex(coverGalleryState.idx + 1); resetCoverAuto(); });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && coverGalleryState.expanded) {
-      closeCoverLightbox();
-      return;
-    }
-    if (e.key === "ArrowLeft" && coverGalleryState.urls.length > 1) {
-      setCoverIndex(coverGalleryState.idx - 1);
-      resetCoverAuto();
-    }
-    if (e.key === "ArrowRight" && coverGalleryState.urls.length > 1) {
-      setCoverIndex(coverGalleryState.idx + 1);
-      resetCoverAuto();
-    }
-  });
-}
-
-function setCover(urls) {
-  bindCoverGalleryEvents();
-  const list = dedupKeepOrder(Array.isArray(urls) ? urls : [urls]);
-  coverGalleryState.urls = list;
-  coverGalleryState.idx = 0;
-  coverGalleryState.activeLayer = "A";
-  const els = getCoverElements();
-  applyCoverImageToLayer(els.a, list[0] || "");
-  applyCoverImageToLayer(els.b, "");
-  if (els.a) els.a.classList.add("is-active");
-  if (els.b) els.b.classList.remove("is-active");
-  updateCoverUi();
-  startCoverAuto();
-}
-
-async function fetchF95Gallery(entry, display) {
-  const f95Url = sanitizeUrl((display && display.url) || (entry && entry.url) || "");
-  if (!f95Url) return [];
-  try {
-    const api = `/api/f95gallery?url=${encodeURIComponent(f95Url)}`;
-    const res = await fetchJson(api);
-    return Array.isArray(res?.gallery) ? res.gallery : [];
-  } catch {
-    return [];
-  }
-}
-
-async function setupCoverGallery(entry, display) {
-  const base = dedupKeepOrder([
-    sanitizeUrl((display && display.imageUrl) || ""),
-    sanitizeUrl((entry && entry.imageUrl) || ""),
-  ]);
-  setCover(base);
-  const remote = await fetchF95Gallery(entry, display);
-  const merged = dedupKeepOrder([...remote, ...base]);
-  if (merged.length) setCover(merged);
 }
 
 function renderTags(tags) {
@@ -1596,7 +1321,6 @@ function renderVideoBlock({ id, videoUrl }) {
 (async function main() {
   try {
     initHamburgerMenu();
-    initGalleryControls();
 
     const { id: idParam, uid: uidParam } = getParamsFromUrl();
 
@@ -1629,9 +1353,8 @@ function renderVideoBlock({ id, videoUrl }) {
     document.title = title;
 
     setText("title", title);
-    const primaryImageUrl = display.imageUrl || entry.imageUrl || "";
-    setCover(primaryImageUrl);
-    await loadF95Gallery(entry, primaryImageUrl);
+    setCover(display.imageUrl || entry.imageUrl || "");
+    loadF95Gallery(display.url || entry.url || "", display.imageUrl || entry.imageUrl || "");
     renderTags(display.tags || entry.tags || []);
 
     renderBadgesFromGame(display, entry, isCollectionChild);

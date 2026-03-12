@@ -43,52 +43,35 @@
 
         <h1 class="title" id="title">Chargement…</h1>
 
-        <div class="coverWrap" id="coverWrap">
-          <div id="coverStage" class="coverStage is-single">
-          <button type="button" id="coverPrev" class="coverGalBtn prev" aria-label="Image précédente" style="display:none;">
-            <svg class="galarr" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M16 5 L8 12 L16 19" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-          <button type="button" id="coverNext" class="coverGalBtn next" aria-label="Image suivante" style="display:none;">
-            <svg class="galarr" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 5 L16 12 L8 19" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-          <div id="coverCount" class="coverCount" style="display:none;">1 / 1</div>
-          <button type="button" id="coverExpand" class="coverExpand" aria-label="Agrandir l’image">⛶</button>
-          <div id="coverBlur" class="coverBlur" aria-hidden="true"></div>
-          <div id="coverBox" class="coverBox">
-            <img id="coverA" class="coverLayer is-active is-placeholder" alt="" referrerpolicy="no-referrer">
-            <img id="coverB" class="coverLayer is-placeholder" alt="" referrerpolicy="no-referrer">
-          </div>
-        </div>
-
-        <div id="coverLightbox" class="coverLightbox hidden" aria-hidden="true">
-          <div class="coverLightboxBackdrop" id="coverLightboxBackdrop"></div>
-          <div id="coverLightboxPanel" class="coverLightboxPanel">
-            <button type="button" id="coverLightboxClose" class="coverLightboxClose" aria-label="Fermer">✕</button>
-            <button type="button" id="coverLightboxPrev" class="coverLightboxNav prev" aria-label="Image précédente">
+        <div class="coverGallery" id="coverGallery">
+          <div class="coverStage" id="coverStage">
+            <img id="cover" class="cover is-placeholder" alt="" referrerpolicy="no-referrer">
+            <button type="button" class="coverCtrl coverExpand" id="coverExpandBtn" aria-label="Agrandir l’image" title="Agrandir l’image">
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M9 4H4v5M15 4h5v5M20 15v5h-5M4 15v5h5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button type="button" class="coverCtrl coverPrev" id="coverPrevBtn" aria-label="Image précédente" title="Image précédente" style="display:none;">
               <svg class="galarr" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M16 5 L8 12 L16 19" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
-            <button type="button" id="coverLightboxNext" class="coverLightboxNav next" aria-label="Image suivante">
+            <button type="button" class="coverCtrl coverNext" id="coverNextBtn" aria-label="Image suivante" title="Image suivante" style="display:none;">
               <svg class="galarr" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 5 L16 12 L8 19" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
-            <div id="coverLightboxCount" class="coverLightboxCount">1 / 1</div>
-            <div id="coverLightboxBlur" class="coverLightboxBlur" aria-hidden="true"></div>
-            <img id="coverLightboxImg" class="coverLightboxImg" alt="" referrerpolicy="no-referrer">
+            <div class="coverCount" id="coverCount" style="display:none;"></div>
           </div>
-        </div>
-          <button type="button" class="coverZoomBtn" id="coverZoomBtn" aria-label="Agrandir l’image" title="Agrandir l’image" style="display:none;">⛶</button>
-          <button type="button" class="coverNavBtn prev" id="coverPrevBtn" aria-label="Image précédente" title="Image précédente" style="display:none;"></button>
-          <button type="button" class="coverNavBtn next" id="coverNextBtn" aria-label="Image suivante" title="Image suivante" style="display:none;">›</button>
-          <div class="coverCounter" id="coverCounter" style="display:none;">1 / 1</div>
         </div>
 
-        <div class="lightboxOverlay hidden" id="lightboxOverlay" aria-hidden="true">
-          <button type="button" class="lightboxClose" id="lightboxClose" aria-label="Fermer">✕</button>
-          <button type="button" class="lightboxNav prev" id="lightboxPrev" aria-label="Image précédente"></button>
-          <div class="lightboxStage">
-            <img id="lightboxImage" class="lightboxImage" alt="Image en grand" referrerpolicy="no-referrer">
-            <div class="lightboxCounter" id="lightboxCounter">1 / 1</div>
+        <div class="coverLightbox hidden" id="coverLightbox" aria-hidden="true">
+          <div class="coverLightboxBackdrop" id="coverLightboxBackdrop"></div>
+          <div class="coverLightboxDialog" role="dialog" aria-modal="true" aria-label="Galerie d’images">
+            <button type="button" class="coverCtrl coverLightboxClose" id="coverLightboxClose" aria-label="Fermer" title="Fermer">✕</button>
+            <button type="button" class="coverCtrl coverPrev coverLightboxPrev" id="coverLightboxPrev" aria-label="Image précédente" title="Image précédente" style="display:none;">
+              <svg class="galarr" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M16 5 L8 12 L16 19" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button type="button" class="coverCtrl coverNext coverLightboxNext" id="coverLightboxNext" aria-label="Image suivante" title="Image suivante" style="display:none;">
+              <svg class="galarr" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 5 L16 12 L8 19" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <img id="coverLightboxImg" class="coverLightboxImg" alt="" referrerpolicy="no-referrer">
+            <div class="coverCount coverLightboxCount" id="coverLightboxCount" style="display:none;"></div>
           </div>
-          <button type="button" class="lightboxNav next" id="lightboxNext" aria-label="Image suivante">›</button>
         </div>
 
         <div id="videoBox" class="infoBlock" style="display:none;">

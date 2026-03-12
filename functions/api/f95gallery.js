@@ -13,14 +13,14 @@ export async function onRequest(context) {
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers });
 
     const f95Url = String(url.searchParams.get("url") || "").trim();
-    if (!f95Url) return new Response(JSON.stringify({ ok:false, error:"url invalide" }), { status:400, headers });
+    if (!f95Url) return json({ ok:false, error:"url invalide" }, 400, headers);
 
     let u;
     try { u = new URL(f95Url); } catch {
-      return new Response(JSON.stringify({ ok:false, error:"url invalide" }), { status:400, headers });
+      return json({ ok:false, error:"url invalide" }, 400, headers);
     }
     if (!String(u.hostname || "").toLowerCase().endsWith("f95zone.to")) {
-      return new Response(JSON.stringify({ ok:false, error:"host non autorisé" }), { status:400, headers });
+      return json({ ok:false, error:"host non autorisé" }, 400, headers);
     }
 
     const cache = caches.default;
@@ -31,40 +31,102 @@ export async function onRequest(context) {
     const resp = await fetch(f95Url, {
       headers: {
         "user-agent": "Mozilla/5.0 (compatible; andric31-trad/1.0)",
-        accept: "text/html,*/*",
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "accept-language": "en-US,en;q=0.9,fr;q=0.8",
+        "referer": "https://f95zone.to/",
       },
     });
-    if (!resp.ok) return new Response(JSON.stringify({ ok:false, error:"fetch F95 failed", status:resp.status }), { status:502, headers });
+    if (!resp.ok) return json({ ok:false, error:"fetch F95 failed", status:resp.status }, 502, headers);
 
     const html = await resp.text();
-    const op = extractFirstPost(html);
-    const gallery = dedupKeepOrder([
-      ...extractLightboxUrls(op),
-      ...extractImageUrls(op),
-      ...extractPreviewUrls(op),
-    ]).slice(0, 25);
+    const op = extractFirstPostWrapper(html);
+    const cleanOp = stripSpoilers(op);
 
-    const payload = JSON.stringify({ ok:true, cover: gallery[0] || "", gallery });
-    await cache.put(cacheKey, new Response(payload, { headers: { "content-type":"application/json; charset=utf-8", "cache-control":"public, max-age=1800" } }));
-    return new Response(payload, { headers });
+    const cover = getThreadMainImageUrlFromHtml(cleanOp);
+    const gallery = getThreadGalleryUrlsFromHtml(cleanOp);
+    const payload = {
+      ok: true,
+      cover: cover || gallery[0] || "",
+      gallery: dedupKeepOrder([...(cover ? [cover] : []), ...gallery]).slice(0, 60),
+    };
+
+    const body = JSON.stringify(payload);
+    await cache.put(cacheKey, new Response(body, { headers: { "content-type":"application/json; charset=utf-8", "cache-control":"public, max-age=1800" } }));
+    return new Response(body, { headers });
   } catch (err) {
-    return new Response(JSON.stringify({ ok:false, error:"Exception Worker", detail:String(err?.message || err) }), { status:500, headers });
+    return json({ ok:false, error:"Exception Worker", detail:String(err?.message || err) }, 500, headers);
   }
 }
 
-function extractFirstPost(html) {
+function json(obj, status, headers) {
+  return new Response(JSON.stringify(obj), { status, headers });
+}
+
+function extractFirstPostWrapper(html) {
   const s = String(html || "");
-  const m = s.match(/<article[^>]*class="[^"]*message--post[^"]*"[\s\S]*?<div[^>]*class="[^"]*bbWrapper[^"]*"[^>]*>([\s\S]*?)<\/div>[\s\S]*?<\/article>/i);
-  if (m && m[1]) return m[1];
-  const m2 = s.match(/<div[^>]*class="[^"]*bbWrapper[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
-  return m2 ? m2[1] : s;
+  const articleMatch = s.match(/<article[^>]*class="[^"]*message--post[^"]*"[\s\S]*?<div[^>]*class="[^"]*bbWrapper[^"]*"[^>]*>([\s\S]*?)<\/div>[\s\S]*?<\/article>/i);
+  if (articleMatch?.[1]) return articleMatch[1];
+  const wrapperMatch = s.match(/<div[^>]*class="[^"]*bbWrapper[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
+  return wrapperMatch?.[1] || s;
+}
+
+function stripSpoilers(html) {
+  let s = String(html || "");
+  // remove spoiler blocks to mirror extension logic as much as possible
+  s = s.replace(/<div[^>]*class="[^"]*bbCodeSpoiler[^"]*"[^>]*>[\s\S]*?<\/div>/gi, "");
+  s = s.replace(/<blockquote[^>]*class="[^"]*bbCodeSpoiler[^"]*"[^>]*>[\s\S]*?<\/blockquote>/gi, "");
+  return s;
+}
+
+function getThreadMainImageUrlFromHtml(op) {
+  try {
+    const u1 = pickFromContainer(op, /<div[^>]*class="[^"]*lbContainer-zoomer[^"]*"[^>]*>[\s\S]*?<\/div>/i);
+    if (u1) return u1;
+
+    const u2 = pickFromContainer(op, /<div[^>]*class="[^"]*lbContainer(?!-zoomer)[^"]*"[^>]*>[\s\S]*?<\/div>/i);
+    if (u2) return u2;
+
+    const lightboxLinks = extractLightboxUrls(op);
+    if (lightboxLinks.length) return lightboxLinks[0];
+
+    const imgs = extractStandaloneImageUrls(op);
+    return imgs[0] || "";
+  } catch {
+    return "";
+  }
+}
+
+function pickFromContainer(op, regex) {
+  const m = String(op || "").match(regex);
+  if (!m?.[0]) return "";
+  const block = m[0];
+
+  const a = block.match(/<a[^>]*class="[^"]*js-lbImage[^"]*"[^>]*href="([^"]+)"/i);
+  const href = upgradeF95Url(decodeHtml(a?.[1] || ""));
+  if (href && !/\/thumb\//i.test(href)) return href;
+
+  const img = block.match(/<img[^>]+(?:data-src|src)="([^"]+)"[^>]*>/i);
+  const u = upgradeF95Url(decodeHtml(img?.[1] || ""));
+  if (u && !/\/thumb\//i.test(u) && !/smilie|emoji/i.test(u)) return u;
+  return "";
+}
+
+function getThreadGalleryUrlsFromHtml(op) {
+  try {
+    const urls = [];
+    urls.push(...extractLightboxUrls(op));
+    urls.push(...extractStandaloneImageUrls(op));
+    return dedupKeepOrder(urls);
+  } catch {
+    return [];
+  }
 }
 
 function extractLightboxUrls(html) {
   const out = [];
   const re = /<a[^>]*class="[^"]*js-lbImage[^"]*"[^>]*href="([^"]+)"/gi;
   let m;
-  while ((m = re.exec(html))) {
+  while ((m = re.exec(String(html || "")))) {
     const u = upgradeF95Url(decodeHtml(m[1]));
     if (!u || /\/thumb\//i.test(u)) continue;
     out.push(u);
@@ -72,26 +134,20 @@ function extractLightboxUrls(html) {
   return out;
 }
 
-function extractImageUrls(html) {
+function extractStandaloneImageUrls(html) {
   const out = [];
-  const re = /<img[^>]+(?:data-src|src)="([^"]+)"[^>]*>/gi;
+  const s = String(html || "");
+  const re = /<img([^>]+)>/gi;
   let m;
-  while ((m = re.exec(html))) {
-    const u = upgradeF95Url(decodeHtml(m[1]));
+  while ((m = re.exec(s))) {
+    const tag = m[0];
+    const attrs = m[1] || "";
+    if (/smilie|emoji/i.test(tag)) continue;
+    // skip imgs already wrapped by a js-lbImage link nearby? hard to know with regex; keep as fallback, dedup later
+    const srcm = attrs.match(/(?:data-src|src)="([^"]+)"/i);
+    const u = upgradeF95Url(decodeHtml(srcm?.[1] || ""));
     if (!u || /\/thumb\//i.test(u)) continue;
-    if (/smilie|emoji/i.test(u)) continue;
     out.push(u);
-  }
-  return out;
-}
-
-function extractPreviewUrls(html) {
-  const out = [];
-  const re = /https?:\/\/attachments\.f95zone\.to\/[^"'\s<>]+/gi;
-  const m = html.match(re) || [];
-  for (const raw of m) {
-    const u = upgradeF95Url(raw);
-    if (u) out.push(u);
   }
   return out;
 }

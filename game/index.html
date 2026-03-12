@@ -43,7 +43,23 @@
 
         <h1 class="title" id="title">Chargement…</h1>
 
-        <img id="cover" class="cover is-placeholder" alt="" referrerpolicy="no-referrer">
+        <div class="coverWrap" id="coverWrap">
+          <img id="cover" class="cover is-placeholder" alt="" referrerpolicy="no-referrer">
+          <button type="button" class="coverZoomBtn" id="coverZoomBtn" aria-label="Agrandir l’image" title="Agrandir l’image" style="display:none;">🔍</button>
+          <button type="button" class="coverNavBtn prev" id="coverPrevBtn" aria-label="Image précédente" title="Image précédente" style="display:none;">‹</button>
+          <button type="button" class="coverNavBtn next" id="coverNextBtn" aria-label="Image suivante" title="Image suivante" style="display:none;">›</button>
+          <div class="coverCounter" id="coverCounter" style="display:none;">1 / 1</div>
+        </div>
+
+        <div class="lightboxOverlay hidden" id="lightboxOverlay" aria-hidden="true">
+          <button type="button" class="lightboxClose" id="lightboxClose" aria-label="Fermer">✕</button>
+          <button type="button" class="lightboxNav prev" id="lightboxPrev" aria-label="Image précédente">‹</button>
+          <div class="lightboxStage">
+            <img id="lightboxImage" class="lightboxImage" alt="Image en grand" referrerpolicy="no-referrer">
+            <div class="lightboxCounter" id="lightboxCounter">1 / 1</div>
+          </div>
+          <button type="button" class="lightboxNav next" id="lightboxNext" aria-label="Image suivante">›</button>
+        </div>
 
         <div id="videoBox" class="infoBlock" style="display:none;">
           <h3>📺 Vidéo</h3>

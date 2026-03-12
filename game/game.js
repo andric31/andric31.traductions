@@ -335,6 +335,160 @@ function setHref(id, href) {
   }
 }
 
+
+const GameGallery = {
+  urls: [],
+  index: 0,
+  overlayOpen: false,
+};
+
+function normalizeGalleryUrl(url) {
+  let out = String(url || "").trim();
+  if (!out) return "";
+  out = out.replace(/^https:\/\/preview\.f95zone\.to\//i, "https://attachments.f95zone.to/");
+  out = out.replace(/^http:\/\/preview\.f95zone\.to\//i, "https://attachments.f95zone.to/");
+  return out;
+}
+
+function dedupKeepOrder(arr) {
+  const seen = new Set();
+  const out = [];
+  for (const raw of arr || []) {
+    const u = normalizeGalleryUrl(raw);
+    if (!u || seen.has(u)) continue;
+    seen.add(u);
+    out.push(u);
+  }
+  return out;
+}
+
+function getGalleryCount() {
+  return Array.isArray(GameGallery.urls) ? GameGallery.urls.length : 0;
+}
+
+function updateGalleryUI() {
+  const img = $("cover");
+  const zoomBtn = $("coverZoomBtn");
+  const prevBtn = $("coverPrevBtn");
+  const nextBtn = $("coverNextBtn");
+  const counter = $("coverCounter");
+  const lightboxImage = $("lightboxImage");
+  const lightboxCounter = $("lightboxCounter");
+
+  const count = getGalleryCount();
+  const hasAny = count > 0;
+  const hasMultiple = count > 1;
+  const current = hasAny ? GameGallery.urls[Math.max(0, Math.min(GameGallery.index, count - 1))] : "";
+
+  if (img) {
+    if (current) {
+      img.classList.remove("is-placeholder");
+      if (img.src !== current) img.src = current;
+    } else {
+      img.removeAttribute("src");
+      img.classList.add("is-placeholder");
+    }
+  }
+
+  if (zoomBtn) zoomBtn.style.display = hasAny ? "" : "none";
+  if (prevBtn) prevBtn.style.display = hasMultiple ? "" : "none";
+  if (nextBtn) nextBtn.style.display = hasMultiple ? "" : "none";
+  if (counter) {
+    counter.style.display = hasMultiple ? "" : "none";
+    counter.textContent = hasAny ? `${GameGallery.index + 1} / ${count}` : "";
+  }
+
+  if (lightboxImage && GameGallery.overlayOpen && current) {
+    lightboxImage.src = current;
+  }
+  if (lightboxCounter) {
+    lightboxCounter.textContent = hasAny ? `${GameGallery.index + 1} / ${count}` : "";
+    lightboxCounter.style.display = hasMultiple ? "" : "none";
+  }
+}
+
+function setGalleryIndex(nextIndex) {
+  const count = getGalleryCount();
+  if (!count) return;
+  let idx = Number(nextIndex);
+  if (!Number.isFinite(idx)) idx = 0;
+  idx = ((idx % count) + count) % count;
+  GameGallery.index = idx;
+  updateGalleryUI();
+}
+
+function setGalleryUrls(urls) {
+  const clean = dedupKeepOrder(urls);
+  GameGallery.urls = clean;
+  GameGallery.index = 0;
+  updateGalleryUI();
+}
+
+function openLightbox() {
+  if (!getGalleryCount()) return;
+  const overlay = $("lightboxOverlay");
+  if (!overlay) return;
+  GameGallery.overlayOpen = true;
+  overlay.classList.remove("hidden");
+  overlay.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  updateGalleryUI();
+}
+
+function closeLightbox() {
+  const overlay = $("lightboxOverlay");
+  GameGallery.overlayOpen = false;
+  if (overlay) {
+    overlay.classList.add("hidden");
+    overlay.setAttribute("aria-hidden", "true");
+  }
+  document.body.style.overflow = "";
+}
+
+function initGalleryControls() {
+  $("coverZoomBtn")?.addEventListener("click", () => openLightbox());
+  $("cover")?.addEventListener("click", () => { if (getGalleryCount()) openLightbox(); });
+  $("coverPrevBtn")?.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); setGalleryIndex(GameGallery.index - 1); });
+  $("coverNextBtn")?.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); setGalleryIndex(GameGallery.index + 1); });
+  $("lightboxPrev")?.addEventListener("click", (e) => { e.preventDefault(); setGalleryIndex(GameGallery.index - 1); });
+  $("lightboxNext")?.addEventListener("click", (e) => { e.preventDefault(); setGalleryIndex(GameGallery.index + 1); });
+  $("lightboxClose")?.addEventListener("click", () => closeLightbox());
+  $("lightboxOverlay")?.addEventListener("click", (e) => {
+    if (e.target?.id === "lightboxOverlay") closeLightbox();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeLightbox();
+      return;
+    }
+    if (!getGalleryCount()) return;
+    if (e.key === "ArrowLeft") setGalleryIndex(GameGallery.index - 1);
+    if (e.key === "ArrowRight") setGalleryIndex(GameGallery.index + 1);
+  });
+}
+
+async function loadF95Gallery(entry, fallbackImageUrl) {
+  const primary = normalizeGalleryUrl(fallbackImageUrl || entry?.gameData?.imageUrl || entry?.imageUrl || "");
+  const threadUrl = String(entry?.url || "").trim();
+
+  if (!threadUrl) {
+    setGalleryUrls(primary ? [primary] : []);
+    return;
+  }
+
+  try {
+    const j = await fetchJson(`/api/f95gallery?url=${encodeURIComponent(threadUrl)}`);
+    const merged = dedupKeepOrder([
+      primary,
+      ...(Array.isArray(j?.gallery) ? j.gallery : []),
+    ]);
+    setGalleryUrls(merged.length ? merged : (primary ? [primary] : []));
+  } catch {
+    setGalleryUrls(primary ? [primary] : []);
+  }
+}
+
 function setCover(url) {
   const img = $("cover");
   if (!img) return;
@@ -1181,6 +1335,7 @@ function renderVideoBlock({ id, videoUrl }) {
 (async function main() {
   try {
     initHamburgerMenu();
+    initGalleryControls();
 
     const { id: idParam, uid: uidParam } = getParamsFromUrl();
 
@@ -1213,7 +1368,9 @@ function renderVideoBlock({ id, videoUrl }) {
     document.title = title;
 
     setText("title", title);
-    setCover(display.imageUrl || entry.imageUrl || "");
+    const primaryImageUrl = display.imageUrl || entry.imageUrl || "";
+    setCover(primaryImageUrl);
+    await loadF95Gallery(entry, primaryImageUrl);
     renderTags(display.tags || entry.tags || []);
 
     renderBadgesFromGame(display, entry, isCollectionChild);

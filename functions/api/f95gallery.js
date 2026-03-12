@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'gallery-v3';
+const CACHE_VERSION = 'gallery-v4';
 
 export async function onRequest(context) {
   const { request } = context;
@@ -179,7 +179,8 @@ function extractAttachmentPreviewUrls(html) {
   return matchAll(String(html || ''), /(https?:)?\/\/attachments\.f95zone\.to\/[^"]+/gi)
     .map(m => upgradeF95Url(decodeHtml(m[0] || '')))
     .filter(Boolean)
-    .map(u => u.replace(/["'>].*$/, ''));
+    .map(u => u.replace(/["'>].*$/, ''))
+    .filter(u => !/\/thumb\//i.test(u));
 }
 
 function dedupKeepOrder(list) {

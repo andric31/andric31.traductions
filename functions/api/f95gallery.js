@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'gallery-v4';
+const CACHE_VERSION = 'gallery-v5';
 
 export async function onRequest(context) {
   const { request } = context;
@@ -195,12 +195,24 @@ function dedupKeepOrder(list) {
   return out;
 }
 
+function isPollutingUrl(u) {
+  const s = String(u || '').trim().toLowerCase();
+  if (!s) return true;
+  if (/\/thumb\//i.test(s)) return true;
+  if (/\/data\/avatars\//i.test(s)) return true;
+  if (/smilie|emoji/i.test(s)) return true;
+  return false;
+}
+
 function upgradeF95Url(u) {
   const s = String(u || '').trim();
   if (!s) return '';
-  if (s.startsWith('//')) return 'https:' + s;
-  if (s.startsWith('/')) return 'https://f95zone.to' + s;
-  return s.replace(/&amp;/g, '&');
+  const out = s.startsWith('//')
+    ? 'https:' + s
+    : s.startsWith('/')
+      ? 'https://f95zone.to' + s
+      : s.replace(/&amp;/g, '&');
+  return isPollutingUrl(out) ? '' : out;
 }
 
 function decodeHtml(s) {

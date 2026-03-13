@@ -454,7 +454,9 @@ a.card.card-link *{
 .thumb{
   width:100%;
   height:var(--thumb-h);
+  display:block;
   object-fit:cover;
+  object-position:center;
   background: var(--thumb-bg);
 }
 

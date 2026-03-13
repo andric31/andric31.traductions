@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'gallery-v5';
+const CACHE_VERSION = 'gallery-v6';
 
 export async function onRequest(context) {
   const { request } = context;
@@ -51,7 +51,7 @@ export async function onRequest(context) {
     const payload = {
       ok: true,
       cover: cover || gallery[0] || '',
-      gallery: dedupKeepOrder([...(cover ? [cover] : []), ...gallery]).slice(0, 80),
+      gallery: prioritizeCoverFirst(cover, gallery).slice(0, 80),
     };
 
     const body = JSON.stringify(payload);
@@ -181,6 +181,22 @@ function extractAttachmentPreviewUrls(html) {
     .filter(Boolean)
     .map(u => u.replace(/["'>].*$/, ''))
     .filter(u => !/\/thumb\//i.test(u));
+}
+
+
+function prioritizeCoverFirst(cover, gallery) {
+  const first = String(cover || '').trim();
+  const ordered = dedupKeepOrder([...(Array.isArray(gallery) ? gallery : [])]);
+  if (!first) return ordered;
+
+  const isCover = (u) => /\/data\/covers\/thread\//i.test(String(u || ''));
+
+  const coverLike = ordered.filter(isCover);
+  const rest = ordered.filter(u => !isCover(u) && u !== first);
+
+  if (isCover(first)) return dedupKeepOrder([first, ...coverLike, ...rest]);
+  if (coverLike.length) return dedupKeepOrder([...coverLike, first, ...rest]);
+  return dedupKeepOrder([first, ...rest]);
 }
 
 function dedupKeepOrder(list) {

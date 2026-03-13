@@ -125,6 +125,13 @@ function updateGalleryControls() {
   if (lcount) { lcount.textContent = countText; lcount.style.display = many ? "" : "none"; }
 }
 
+function setLightboxBackground(url) {
+  const lb = $("coverLightbox");
+  if (!lb) return;
+  const u = String(url || "").trim();
+  lb.style.setProperty("--lb-bg", u ? `url("${u.replace(/"/g, '\"')}")` : "none");
+}
+
 function galleryGoTo(index) {
   if (!Array.isArray(galleryState.urls) || !galleryState.urls.length) return;
   const len = galleryState.urls.length;
@@ -138,6 +145,7 @@ function galleryGoTo(index) {
     img.onerror = () => { img.onerror = null; };
   }
   if (lb) lb.src = u;
+  setLightboxBackground(u);
   updateGalleryControls();
 }
 
@@ -155,10 +163,12 @@ function setupGalleryEvents() {
     e.preventDefault();
     const lb = $("coverLightbox");
     if (!lb) return;
+    const current = galleryState.urls[galleryState.index] || "";
+    setLightboxBackground(current);
     lb.classList.remove("hidden");
     lb.setAttribute("aria-hidden", "false");
     const img = $("coverLightboxImg");
-    if (img) img.src = galleryState.urls[galleryState.index] || "";
+    if (img) img.src = current;
   });
   const closeLb = () => {
     const lb = $("coverLightbox");

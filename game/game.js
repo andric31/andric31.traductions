@@ -125,6 +125,16 @@ function updateGalleryControls() {
   if (lcount) { lcount.textContent = countText; lcount.style.display = many ? "" : "none"; }
 }
 
+function updateLightboxBackdrop(url) {
+  const el = $("coverLightboxBackdrop");
+  if (!el) return;
+  const u = String(url || "").trim();
+  el.style.backgroundImage = u
+    ? `linear-gradient(180deg, rgba(6,10,18,.50), rgba(6,10,18,.82)), url("${u.replace(/(["\])/g, "\$1")}")`
+    : 'linear-gradient(180deg, rgba(6,10,18,.50), rgba(6,10,18,.82))';
+}
+
+
 function galleryGoTo(index) {
   if (!Array.isArray(galleryState.urls) || !galleryState.urls.length) return;
   const len = galleryState.urls.length;
@@ -138,6 +148,7 @@ function galleryGoTo(index) {
     img.onerror = () => { img.onerror = null; };
   }
   if (lb) lb.src = u;
+  updateLightboxBackdrop(u);
   updateGalleryControls();
 }
 
@@ -155,10 +166,12 @@ function setupGalleryEvents() {
     e.preventDefault();
     const lb = $("coverLightbox");
     if (!lb) return;
+    const currentUrl = galleryState.urls[galleryState.index] || "";
+    updateLightboxBackdrop(currentUrl);
     lb.classList.remove("hidden");
     lb.setAttribute("aria-hidden", "false");
     const img = $("coverLightboxImg");
-    if (img) img.src = galleryState.urls[galleryState.index] || "";
+    if (img) img.src = currentUrl;
   });
   const closeLb = () => {
     const lb = $("coverLightbox");

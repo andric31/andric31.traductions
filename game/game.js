@@ -68,13 +68,27 @@ const galleryState = {
   loadedForUrl: "",
 };
 
+function galleryUrlKey(raw) {
+  const u = String(raw || "").trim();
+  if (!u) return "";
+  try {
+    const x = new URL(u, location.origin);
+    const host = (x.hostname || "").toLowerCase();
+    const path = (x.pathname || "").replace(/\/+$/, "");
+    return `${host}${path}`;
+  } catch {
+    return u.replace(/[?#].*$/, "").replace(/\/+$/, "");
+  }
+}
+
 function dedupKeepOrder(list) {
   const out = [];
   const seen = new Set();
   for (const raw of list || []) {
     const u = String(raw || "").trim();
-    if (!u || seen.has(u)) continue;
-    seen.add(u);
+    const k = galleryUrlKey(u);
+    if (!u || !k || seen.has(k)) continue;
+    seen.add(k);
     out.push(u);
   }
   return out;
@@ -168,6 +182,8 @@ async function loadF95Gallery(f95Url, fallbackUrl) {
   setupGalleryEvents();
   const fallback = String(fallbackUrl || "").trim();
   const baseUrl = String(f95Url || "").trim();
+  const fallbackKey = galleryUrlKey(fallback);
+
   if (!baseUrl) {
     galleryState.urls = fallback ? [fallback] : [];
     galleryState.index = 0;
@@ -178,16 +194,22 @@ async function loadF95Gallery(f95Url, fallbackUrl) {
   if (galleryState.loadedForUrl === baseUrl) return;
   galleryState.loadedForUrl = baseUrl;
 
-  let urls = fallback ? [fallback] : [];
+  let merged = fallback ? [fallback] : [];
   try {
     const resp = await fetch(getF95GalleryApiUrl(baseUrl));
     const data = await resp.json();
-    if (data && data.ok && Array.isArray(data.gallery)) {
-      urls = dedupKeepOrder([...(data.cover ? [data.cover] : []), ...data.gallery, ...urls]);
+    if (data && data.ok) {
+      const remote = [];
+      if (data.cover) remote.push(data.cover);
+      if (Array.isArray(data.gallery)) remote.push(...data.gallery);
+      if (remote.length) {
+        const filteredRemote = remote.filter((u) => galleryUrlKey(u) !== fallbackKey);
+        merged = fallback ? [fallback, ...filteredRemote] : filteredRemote;
+      }
     }
   } catch {}
 
-  galleryState.urls = dedupKeepOrder(urls);
+  galleryState.urls = dedupKeepOrder(merged);
   galleryState.index = 0;
   if (galleryState.urls.length) galleryGoTo(0);
   else updateGalleryControls();

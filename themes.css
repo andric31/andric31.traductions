@@ -39,6 +39,15 @@ html, body { min-height: 100%; }
   --menu-divider-sweep: rgba(255,255,255,0.55);
 }
 
+/* =========================================================
+   ========================================================= */
+:root{
+  --lightbox-bg: var(--card);
+  --lightbox-border: var(--border);
+  --lightbox-btn-bg: var(--btn);
+  --lightbox-btn-hover: var(--hover-bg);
+  --lightbox-text: var(--fg);
+}
 
 /* =========================================================
    AUTO (par défaut) = TON THÈME CLAIR
@@ -2564,10 +2573,4 @@ html[data-theme="sakura"]{
   --body-grad-2: var(--bg) !important;
   --body-grad-3: var(--bg) !important;
   --body-gradient: var(--bg) !important;
-}
-
-:root:not([data-theme]),
-:root[data-theme="clair"],
-:root[data-theme="white"]{
-  --soft-05: rgba(255,255,255,0.05); /* ✅ comme sakura/été */
 }

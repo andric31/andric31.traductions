@@ -378,7 +378,108 @@ code{
 }
 
 
+/* ===== Shared tutorial images ===== */
+.image-wrap{
+  margin: 16px 0;
+  text-align: center;
+}
+.tutorial-img{
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: var(--wiki-shadow);
+}
 
+/* ===== Separators used in long pages ===== */
+.sep{
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+  margin: 30px 0;
+}
+
+/* ===== Lexicon helpers ===== */
+.lex-item{
+  margin-bottom: 12px;
+}
+.lex-item strong{
+  color: #6ec1ff;
+}
+
+/* ===== A–Z dictionary helpers (Petit Larousse) ===== */
+.az-search{
+  margin-top: 12px;
+}
+.az-search input{
+  width: 100%;
+  max-width: 520px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(0,0,0,0.25);
+  color: inherit;
+}
+.az-block{ display: none; }
+.az-block.active{ display: block; }
+
+.az-results{
+  margin-top: 18px;
+  display: none;
+}
+.az-results.active{ display: block; }
+
+.az-result{
+  padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.az-result:hover{
+  border-color: color-mix(in srgb, var(--accent, #4ea1ff) 55%, var(--wiki-border) 45%);
+  background: rgba(78,161,255,0.06);
+}
+
+.az-highlight{
+  background: rgba(110,193,255,0.15);
+  border-radius: 8px;
+  padding: 6px;
+}
+
+/* Small note line */
+.note{
+  margin-top: 10px;
+  opacity: .9;
+}
+
+.index-card {
+  text-align: center;
+}
+
+.index-list {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 0;
+}
+
+.index-list li {
+  margin: 10px 0;
+}
+
+.index-list a {
+  text-decoration: none;
+  color: #6ec1ff;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.index-list a:hover {
+  color: #ffffff;
+}
+
+/* =========================
+   PATCH : page "fr_relecture"
+   ========================= */
 
 /* Topbar: aligne proprement titre + sous-titre si wrapper présent */
 .topbar-inner{
@@ -481,51 +582,58 @@ body{
 .big-separator{width:min(1100px, calc(100% - 32px));height:1px;margin:18px auto;background:color-mix(in srgb, var(--wiki-border) 70%, transparent);}
 
 
-
-
-
-/* === Wiki accueil : tailles proches de Messages, tuiles plus lisibles === */
-.topbar.wiki-home-hero{
+/* === Hero accueil wiki aligné sur blog/messages === */
+.topbar.topbar-home{
   width: min(1100px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 14px 0 28px;
+  padding: 44px 0 30px;
   text-align: center;
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
 }
 
-.topbar.wiki-home-hero h1{
+.topbar.topbar-home .topbar-card{
+  display: contents;
+}
+
+.topbar.topbar-home .topbar-kicker{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--wiki-border) 82%, transparent);
+  background: color-mix(in srgb, var(--wiki-bg-soft) 94%, transparent);
+  color: var(--wiki-muted);
+  font-size: 13px;
+  margin-bottom: 18px;
+}
+
+.topbar.topbar-home h1{
   margin: 0;
-  font-size: clamp(30px, 5vw, 52px) !important;
+  font-size: clamp(40px, 6vw, 64px);
   line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--title, var(--wiki-text));
 }
 
-.topbar.wiki-home-hero p{
-  max-width: 900px;
-  margin: 14px auto 0;
-  font-size: clamp(15px, 2vw, 18px) !important;
-  line-height: 1.7;
-  opacity: .92;
+.topbar.topbar-home p{
+  max-width: 980px;
+  margin: 16px auto 0;
+  font-size: clamp(22px, 2.8vw, 34px);
+  line-height: 1.4;
+  color: var(--wiki-muted);
 }
 
-/* tuiles : texte intérieur plus gros */
-.tuto-card .title{
-  font-size: 20px !important;
-  line-height: 1.35 !important;
-  font-weight: 800 !important;
-  margin-bottom: 8px !important;
-}
+@media (max-width: 700px){
+  .topbar.topbar-home{
+    width: min(100%, calc(100% - 20px));
+    padding: 28px 0 18px;
+  }
 
-.tuto-card .desc{
-  font-size: 15px !important;
-  line-height: 1.65 !important;
-  opacity: .92 !important;
-}
+  .topbar.topbar-home h1{
+    font-size: clamp(34px, 9vw, 46px);
+  }
 
-/* icônes légèrement plus visibles */
-.tuto-card .icon{
-  font-size: 30px !important;
-  margin-bottom: 10px !important;
+  .topbar.topbar-home p{
+    font-size: clamp(18px, 5vw, 24px);
+  }
 }

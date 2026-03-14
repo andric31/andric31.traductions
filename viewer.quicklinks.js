@@ -20,9 +20,10 @@
 
   function iconWiki() {
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-      <path d="M3.75 5.75A2.75 2.75 0 0 1 6.5 3h10.25A2.25 2.25 0 0 1 19 5.25v13A1.75 1.75 0 0 1 17.25 20H7a3 3 0 0 1 0-6h12"/>
-      <path d="M7 14h9"/>
-      <path d="M7 9h7"/>
+      <path d="M4.75 5.75A2.75 2.75 0 0 1 7.5 3h3.75a2.75 2.75 0 0 1 2.75 2.75v14.5A2.75 2.75 0 0 0 11.25 17.5H7.5a2.75 2.75 0 0 0-2.75 2.75z"/>
+      <path d="M19.25 5.75A2.75 2.75 0 0 0 16.5 3h-3.75A2.75 2.75 0 0 0 10 5.75v14.5A2.75 2.75 0 0 1 12.75 17.5h3.75a2.75 2.75 0 0 1 2.75 2.75z"/>
+      <path d="M7.75 7.5h2.5"/>
+      <path d="M13.75 7.5h2.5"/>
     </svg>`;
   }
 
@@ -38,10 +39,9 @@
 
   function iconMessages() {
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-      <path d="M8.25 16.75H5.8A2.8 2.8 0 0 1 3 13.95V7.8A2.8 2.8 0 0 1 5.8 5h8.4A2.8 2.8 0 0 1 17 7.8v1.45"/>
-      <path d="M8.25 16.75 4.75 20v-3.25"/>
-      <path d="M10.35 19h6.85A2.8 2.8 0 0 0 20 16.2v-3.4A2.8 2.8 0 0 0 17.2 10h-6.85a2.8 2.8 0 0 0-2.8 2.8v3.4A2.8 2.8 0 0 0 10.35 19Z"/>
-      <path d="M15.25 19 18.75 22v-3"/>
+      <path d="M6.25 6.25h11.5A2.25 2.25 0 0 1 20 8.5v6a2.25 2.25 0 0 1-2.25 2.25H11l-4.75 3v-3H6.25A2.25 2.25 0 0 1 4 14.5v-6a2.25 2.25 0 0 1 2.25-2.25Z"/>
+      <path d="M8 10.5h8"/>
+      <path d="M8 13.5h5.5"/>
     </svg>`;
   }
 
@@ -310,10 +310,10 @@
     style.textContent = `
       .quick-notif-loading,.quick-notif-empty{padding:12px 14px;color:var(--muted);}
       .quick-notif-card{background:color-mix(in srgb,var(--card) 92%, transparent);border:1px solid var(--border);}
-      .quick-notif-card:hover{border-color:color-mix(in srgb,var(--link) 40%, var(--border));box-shadow:0 0 0 1px color-mix(in srgb,var(--link) 18%, transparent);}
-      .quick-notif-card-icon{background:color-mix(in srgb,var(--link) 14%, transparent);color:var(--link);}
-      .quick-notif-open{color:var(--link);}
-      .header-icon-dot{background:var(--link);box-shadow:0 0 0 2px var(--card);}
+      .quick-notif-card:hover{border-color:color-mix(in srgb,var(--primary) 40%, var(--border));box-shadow:0 0 0 1px color-mix(in srgb,var(--primary) 18%, transparent);}
+      .quick-notif-card-icon{background:color-mix(in srgb,var(--primary) 14%, transparent);color:var(--primary);}
+      .quick-notif-open{color:var(--primary);}
+      .header-icon-dot{background:var(--primary);box-shadow:0 0 0 2px var(--card);}
     `;
     document.head.appendChild(style);
   }

@@ -27,12 +27,12 @@ a {
 .blog-shell {
   width: min(var(--blog-max), calc(100% - 32px));
   margin: 0 auto;
-  padding: 40px 0 64px;
+  padding: 30px 0 64px;
 }
 
 .blog-hero {
   text-align: center;
-  padding: 28px 0 34px;
+  padding: 14px 0 28px;
 }
 
 .blog-kicker {
@@ -50,16 +50,16 @@ a {
 
 .blog-hero h1 {
   margin: 0;
-  font-size: clamp(32px, 5vw, 52px);
+  font-size: clamp(30px, 5vw, 52px);
   line-height: 1.05;
   color: var(--title, var(--fg, #fff));
 }
 
 .blog-hero p {
-  max-width: 760px;
-  margin: 16px auto 0;
-  font-size: clamp(16px, 2vw, 19px);
-  line-height: 1.65;
+  max-width: 900px;
+  margin: 14px auto 0;
+  font-size: clamp(15px, 2vw, 18px);
+  line-height: 1.7;
   color: var(--muted, #aab2c8);
 }
 

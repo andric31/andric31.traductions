@@ -21,16 +21,17 @@
 }
 
 html, body{
-  height: 100%;
+  margin: 0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--wiki-text);
+  background: var(--bg, #0f1117);
 }
 
 body {
   margin: 0;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   color: var(--wiki-text);
-  background:
-    radial-gradient(1200px 600px at 50% -10%, color-mix(in srgb, var(--accent, #6ce0b0) 6%, transparent), transparent 55%),
-    linear-gradient(180deg, color-mix(in srgb, var(--bg, #0f1117) 98%, #000 2%), var(--bg, #0f1117));
+  background: var(--bg, #0f1117);
 }
 
 a{
@@ -160,25 +161,26 @@ code{
 }
 
 .tuto-row{
-  /* ✅ Responsive : les cartes passent automatiquement à la ligne */
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 14px;
-  padding: 14px 8px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  padding: 8px 0;
   align-items: start;
 }
 
 .tuto-card{
   width: 100%;
   height: auto;
+  min-height: 0;
   background: var(--wiki-bg-soft);
-  border-radius: 18px;
-  padding: 16px 15px;
+  border-radius: 16px;
+  padding: 12px 12px;
   text-decoration: none;
-  color: white;
-  transition: 0.2s ease;
+  color: var(--wiki-text);
+  transition: .18s ease;
   border: 1px solid color-mix(in srgb, var(--wiki-border) 70%, transparent);
-  box-shadow: 0 12px 28px rgba(0,0,0,0.14);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.10);
+  align-self: start;
 }
 
 .tuto-card:hover {
@@ -186,19 +188,23 @@ code{
   transform: translateY(-4px);
 }
 
-.tuto-card .icon {
-  font-size: 32px;
-  margin-bottom: 10px;
+.tuto-card .icon{
+  font-size: 22px;
+  margin-bottom: 6px;
+  line-height: 1;
 }
 
-.tuto-card .title {
-  font-weight: bold;
-  margin-bottom: 5px;
+.tuto-card .title{
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  line-height: 1.35;
 }
 
-.tuto-card .desc {
-  font-size: 14px;
-  opacity: 0.7;
+.tuto-card .desc{
+  font-size: 12px;
+  opacity: .82;
+  line-height: 1.45;
 }
 
 .disabled {
@@ -569,8 +575,8 @@ body{
 .topbar-kicker{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;border:1px solid color-mix(in srgb, var(--wiki-border) 82%, transparent);background:color-mix(in srgb, var(--wiki-bg-soft) 95%, transparent);color:var(--wiki-muted);font-size:13px;margin-bottom:16px;}
 .topbar-home p{max-width:760px;margin:14px auto 0;color:var(--wiki-muted);font-size:clamp(16px,2vw,19px);line-height:1.65;}
 .topbar-home .topbar-card{box-shadow:0 18px 50px rgba(0,0,0,0.22);}
-.tuto-card{border-radius:18px;padding:16px 15px;box-shadow:0 12px 28px rgba(0,0,0,0.14);}
-.tuto-card .title{font-size:18px;margin-bottom:8px;}
-.tuto-card .desc{font-size:15px;opacity:.82;line-height:1.6;}
+.tuto-card{border-radius:16px;padding:12px 12px;box-shadow:0 8px 20px rgba(0,0,0,0.10);}
+.tuto-card .title{font-size:15px;margin-bottom:4px;}
+.tuto-card .desc{font-size:12px;opacity:.82;line-height:1.45;}
 .section-title{width:min(1100px, calc(100% - 32px));margin:24px auto 14px;color:var(--accent, #6ce0b0);text-transform:uppercase;letter-spacing:.05em;font-size:14px;}
 .big-separator{width:min(1100px, calc(100% - 32px));height:1px;margin:18px auto;background:color-mix(in srgb, var(--wiki-border) 70%, transparent);}

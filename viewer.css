@@ -1213,6 +1213,9 @@ body.age-gate-active footer {
   display:flex;
   align-items:center;
   justify-content:center;
+  width:18px;
+  height:18px;
+  margin:0 auto;
 }
 .header-icon-link svg{
   width:18px;

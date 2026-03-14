@@ -51,8 +51,14 @@
     els.list.classList.remove('hidden');
 
     for (const item of items) {
-      const article = document.createElement('article');
+      const article = document.createElement(item.url ? 'a' : 'article');
       article.className = `notif-item${item.id !== seenId ? ' new' : ''}`;
+      if (item.url) {
+        article.href = item.url;
+        article.target = '_blank';
+        article.rel = 'noopener noreferrer';
+        article.style.textDecoration = 'none';
+      }
       article.innerHTML = `
         <div class="notif-icon">${bellIcon()}</div>
         <div class="notif-body">

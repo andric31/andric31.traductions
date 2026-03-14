@@ -10,20 +10,23 @@
   const STORAGE = {
     seenMessageId: "andric31_seen_message_id",
     seenNotificationId: "andric31_seen_notification_id",
-    firstVisitShown: "andric31_first_visit_notification_shown",
   };
 
   const MESSAGES_API_URL = "/api/messages?limit=1";
-  const NOTIFICATIONS_JSON_URL = "/notifications/notifications.json";
   const NOTIFICATION_URL = "https://andric31-traductions.pages.dev/notifications/";
-
+  const NOTIFICATION_PREVIEW = {
+    id: "notif-member-grade-20260314",
+    title: "Promotion de grade !",
+    text: 'Félicitations ! Vous avez atteint le grade "Member".',
+    time: "Il y a 6 h",
+    url: NOTIFICATION_URL,
+  };
 
   function iconWiki() {
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-      <path d="M4.75 5.75A2.75 2.75 0 0 1 7.5 3h3.75a2.75 2.75 0 0 1 2.75 2.75v14.5A2.75 2.75 0 0 0 11.25 17.5H7.5a2.75 2.75 0 0 0-2.75 2.75z"/>
-      <path d="M19.25 5.75A2.75 2.75 0 0 0 16.5 3h-3.75A2.75 2.75 0 0 0 10 5.75v14.5A2.75 2.75 0 0 1 12.75 17.5h3.75a2.75 2.75 0 0 1 2.75 2.75z"/>
-      <path d="M7.75 7.5h2.5"/>
-      <path d="M13.75 7.5h2.5"/>
+      <path d="M3.75 5.75A2.75 2.75 0 0 1 6.5 3h10.25A2.25 2.25 0 0 1 19 5.25v13A1.75 1.75 0 0 1 17.25 20H7a3 3 0 0 1 0-6h12"/>
+      <path d="M7 14h9"/>
+      <path d="M7 9h7"/>
     </svg>`;
   }
 
@@ -39,9 +42,10 @@
 
   function iconMessages() {
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-      <path d="M6.25 6.25h11.5A2.25 2.25 0 0 1 20 8.5v6a2.25 2.25 0 0 1-2.25 2.25H11l-4.75 3v-3H6.25A2.25 2.25 0 0 1 4 14.5v-6a2.25 2.25 0 0 1 2.25-2.25Z"/>
-      <path d="M8 10.5h8"/>
-      <path d="M8 13.5h5.5"/>
+      <path d="M8.25 16.75H5.8A2.8 2.8 0 0 1 3 13.95V7.8A2.8 2.8 0 0 1 5.8 5h8.4A2.8 2.8 0 0 1 17 7.8v1.45"/>
+      <path d="M8.25 16.75 4.75 20v-3.25"/>
+      <path d="M10.35 19h6.85A2.8 2.8 0 0 0 20 16.2v-3.4A2.8 2.8 0 0 0 17.2 10h-6.85a2.8 2.8 0 0 0-2.8 2.8v3.4A2.8 2.8 0 0 0 10.35 19Z"/>
+      <path d="M15.25 19 18.75 22v-3"/>
     </svg>`;
   }
 
@@ -88,71 +92,6 @@
     dot.classList.toggle("hidden", !visible);
   }
 
-  function formatRelativeTime(iso) {
-    if (!iso) return "";
-    const date = new Date(iso);
-    if (Number.isNaN(date.getTime())) return "";
-    const diffMs = date.getTime() - Date.now();
-    try {
-      return new Intl.RelativeTimeFormat("fr", { numeric: "auto" }).format(Math.round(diffMs / 60000), "minute");
-    } catch {
-      return "";
-    }
-  }
-
-  function formatRelativeSmart(iso) {
-    if (!iso) return "";
-    const date = new Date(iso);
-    if (Number.isNaN(date.getTime())) return "";
-    const diffSec = Math.round((date.getTime() - Date.now()) / 1000);
-    const abs = Math.abs(diffSec);
-    const rtf = new Intl.RelativeTimeFormat("fr", { numeric: "auto" });
-    if (abs < 3600) return rtf.format(Math.round(diffSec / 60), "minute");
-    if (abs < 86400) return rtf.format(Math.round(diffSec / 3600), "hour");
-    if (abs < 2592000) return rtf.format(Math.round(diffSec / 86400), "day");
-    if (abs < 31536000) return rtf.format(Math.round(diffSec / 2592000), "month");
-    return rtf.format(Math.round(diffSec / 31536000), "year");
-  }
-
-  async function loadLatestNotification() {
-    try {
-      const res = await fetch(`${NOTIFICATIONS_JSON_URL}?v=${Date.now()}`, { cache: "no-store" });
-      const data = await res.json();
-      if (!res.ok || !Array.isArray(data) || !data.length) return null;
-      const items = data.slice().sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")));
-      const latest = items[0] || null;
-      if (!latest) return null;
-      return {
-        id: String(latest.id || ""),
-        title: String(latest.title || "Notification"),
-        text: String(latest.text || ""),
-        time: formatRelativeSmart(latest.created_at),
-        url: String(latest.url || NOTIFICATION_URL),
-      };
-    } catch {
-      return null;
-    }
-  }
-
-  function renderNotificationsPopover(pop, preview) {
-    if (!pop || !preview) return;
-    pop.innerHTML = `
-      <div class="quick-notif-head">Notifications</div>
-      <a class="quick-notif-card" href="${escapeHtml(preview.url)}" target="_blank" rel="noopener noreferrer">
-        <span class="quick-notif-card-icon">${iconNotifications()}</span>
-        <span class="quick-notif-card-body">
-          <strong>${escapeHtml(preview.title)}</strong>
-          <span>${escapeHtml(preview.text)}</span>
-          ${preview.time ? `<small>${escapeHtml(preview.time)}</small>` : ""}
-        </span>
-      </a>
-      <a class="quick-notif-open" href="${escapeHtml(preview.url)}" target="_blank" rel="noopener noreferrer">
-        Voir les notifications
-        <span aria-hidden="true">→</span>
-      </a>
-    `;
-  }
-
   function createNotificationsPopover(anchor) {
     let pop = document.getElementById(IDS.notificationsPopover);
     if (pop) return pop;
@@ -162,7 +101,21 @@
     pop.className = "quick-notif-popover hidden";
     pop.setAttribute("role", "dialog");
     pop.setAttribute("aria-label", "Dernière notification");
-    pop.innerHTML = `<div class="quick-notif-head">Notifications</div><div class="quick-notif-loading">Chargement…</div>`;
+    pop.innerHTML = `
+      <div class="quick-notif-head">Notifications</div>
+      <a class="quick-notif-card" href="${NOTIFICATION_PREVIEW.url}" target="_blank" rel="noopener noreferrer">
+        <span class="quick-notif-card-icon">${iconNotifications()}</span>
+        <span class="quick-notif-card-body">
+          <strong>${escapeHtml(NOTIFICATION_PREVIEW.title)}</strong>
+          <span>${escapeHtml(NOTIFICATION_PREVIEW.text)}</span>
+          <small>${escapeHtml(NOTIFICATION_PREVIEW.time)}</small>
+        </span>
+      </a>
+      <a class="quick-notif-open" href="${NOTIFICATION_PREVIEW.url}" target="_blank" rel="noopener noreferrer">
+        Voir les notifications
+        <span aria-hidden="true">→</span>
+      </a>
+    `;
     document.body.appendChild(pop);
 
     const reposition = () => placePopover(anchor, pop);
@@ -187,31 +140,19 @@
     if (pop) pop.classList.add("hidden");
   }
 
-  async function openNotificationsPopover(btn) {
+  function openNotificationsPopover(btn) {
     const pop = createNotificationsPopover(btn);
     pop.classList.remove("hidden");
     btn.setAttribute("aria-expanded", "true");
     placePopover(btn, pop);
-
-    const preview = await loadLatestNotification();
-    if (preview) {
-      renderNotificationsPopover(pop, preview);
-      localStorage.setItem(STORAGE.seenNotificationId, preview.id);
-      setDotVisible(btn, false);
-      placePopover(btn, pop);
-    } else {
-      pop.innerHTML = `
-        <div class="quick-notif-head">Notifications</div>
-        <div class="quick-notif-empty">Aucune notification pour le moment.</div>
-      `;
-      placePopover(btn, pop);
-    }
+    localStorage.setItem(STORAGE.seenNotificationId, NOTIFICATION_PREVIEW.id);
+    setDotVisible(btn, false);
   }
 
-  async function toggleNotificationsPopover(btn) {
+  function toggleNotificationsPopover(btn) {
     const pop = createNotificationsPopover(btn);
     const isHidden = pop.classList.contains("hidden");
-    if (isHidden) await openNotificationsPopover(btn);
+    if (isHidden) openNotificationsPopover(btn);
     else closeNotificationsPopover();
   }
 
@@ -266,26 +207,14 @@
   }
 
   async function initIndicators(messagesEl, notificationsEl) {
-    await initNotificationIndicator(notificationsEl);
+    initNotificationIndicator(notificationsEl);
     await initMessageIndicator(messagesEl);
   }
 
-  async function initNotificationIndicator(notificationsEl) {
-    const latest = await loadLatestNotification();
-    if (!latest) {
-      setDotVisible(notificationsEl, false);
-      return;
-    }
-    notificationsEl.dataset.latestNotificationId = latest.id;
+  function initNotificationIndicator(notificationsEl) {
     const seenNotificationId = localStorage.getItem(STORAGE.seenNotificationId) || "";
-    const hasNewNotification = seenNotificationId !== latest.id;
+    const hasNewNotification = seenNotificationId !== NOTIFICATION_PREVIEW.id;
     setDotVisible(notificationsEl, hasNewNotification);
-
-    const firstVisitShown = localStorage.getItem(STORAGE.firstVisitShown) === "1";
-    if (!firstVisitShown) {
-      localStorage.setItem(STORAGE.firstVisitShown, "1");
-      requestAnimationFrame(() => { openNotificationsPopover(notificationsEl); });
-    }
   }
 
   async function initMessageIndicator(messagesEl) {
@@ -301,21 +230,6 @@
     } catch {
       // silence: pas bloquant pour l'UI
     }
-  }
-
-  function injectPopoverStyles() {
-    if (document.getElementById("quickNotifThemePatch")) return;
-    const style = document.createElement("style");
-    style.id = "quickNotifThemePatch";
-    style.textContent = `
-      .quick-notif-loading,.quick-notif-empty{padding:12px 14px;color:var(--muted);}
-      .quick-notif-card{background:color-mix(in srgb,var(--card) 92%, transparent);border:1px solid var(--border);}
-      .quick-notif-card:hover{border-color:color-mix(in srgb,var(--primary) 40%, var(--border));box-shadow:0 0 0 1px color-mix(in srgb,var(--primary) 18%, transparent);}
-      .quick-notif-card-icon{background:color-mix(in srgb,var(--primary) 14%, transparent);color:var(--primary);}
-      .quick-notif-open{color:var(--primary);}
-      .header-icon-dot{background:var(--primary);box-shadow:0 0 0 2px var(--card);}
-    `;
-    document.head.appendChild(style);
   }
 
   function init() {
@@ -336,5 +250,5 @@
     obs.observe(document.documentElement, { childList: true, subtree: true });
   }
 
-  document.addEventListener("DOMContentLoaded", () => { injectPopoverStyles(); init(); });
+  document.addEventListener("DOMContentLoaded", init);
 })();

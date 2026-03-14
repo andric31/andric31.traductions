@@ -162,17 +162,17 @@ code{
 .tuto-row{
   /* ✅ Responsive : les cartes passent automatiquement à la ligne */
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 20px;
-  padding: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  padding: 12px 8px;
 }
 
 .tuto-card{
   width: 100%;
   height: 100%;
   background: var(--wiki-bg-soft);
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 18px;
+  padding: 16px 15px;
   text-decoration: none;
   color: white;
   transition: 0.2s ease;
@@ -185,18 +185,19 @@ code{
 }
 
 .tuto-card .icon {
-  font-size: 32px;
-  margin-bottom: 10px;
+  font-size: 26px;
+  margin-bottom: 8px;
 }
 
 .tuto-card .title {
   font-weight: bold;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
 
 .tuto-card .desc {
-  font-size: 14px;
-  opacity: 0.7;
+  font-size: 13px;
+  opacity: 0.78;
+  line-height: 1.5;
 }
 
 .disabled {
@@ -567,8 +568,8 @@ body{
 .topbar-kicker{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;border:1px solid color-mix(in srgb, var(--wiki-border) 82%, transparent);background:color-mix(in srgb, var(--wiki-bg-soft) 95%, transparent);color:var(--wiki-muted);font-size:13px;margin-bottom:16px;}
 .topbar-home p{max-width:760px;margin:14px auto 0;color:var(--wiki-muted);font-size:clamp(16px,2vw,19px);line-height:1.65;}
 .topbar-home .topbar-card{box-shadow:0 18px 50px rgba(0,0,0,0.22);}
-.tuto-card{border-radius:22px;padding:24px;box-shadow:0 18px 50px rgba(0,0,0,0.18);}
-.tuto-card .title{font-size:18px;margin-bottom:8px;}
-.tuto-card .desc{font-size:15px;opacity:.82;line-height:1.6;}
+.tuto-card{border-radius:18px;padding:16px 15px;box-shadow:0 14px 34px rgba(0,0,0,0.16);}
+.tuto-card .title{font-size:16px;margin-bottom:6px;}
+.tuto-card .desc{font-size:13px;opacity:.82;line-height:1.5;}
 .section-title{width:min(1100px, calc(100% - 32px));margin:24px auto 14px;color:var(--accent, #6ce0b0);text-transform:uppercase;letter-spacing:.05em;font-size:14px;}
 .big-separator{width:min(1100px, calc(100% - 32px));height:1px;margin:18px auto;background:color-mix(in srgb, var(--wiki-border) 70%, transparent);}

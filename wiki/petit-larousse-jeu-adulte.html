@@ -40,11 +40,7 @@
 <section class="card" id="dictionnaire">
   <h2>📚 Dictionnaire (A–Z)</h2>
 
-  <div class="az-search">
-    <input type="search" id="azSearch" placeholder="Rechercher un terme... (ex : NTR, BDSM, Ren'Py)">
-  </div>
-
-  <nav class="az-nav">
+  <nav class="az-nav" aria-label="Navigation alphabétique">
     <button data-letter="AZ-0-9">0-9</button>
     <button data-letter="AZ-A">A</button>
     <button data-letter="AZ-B">B</button>
@@ -74,7 +70,11 @@
     <button data-letter="AZ-Z">Z</button>
   </nav>
 
-  <div id="azResults" class="az-results"></div>
+  <div class="az-search">
+    <input type="search" id="azSearch" placeholder="Rechercher un terme... (ex : NTR, BDSM, Ren'Py)" autocomplete="off" spellcheck="false">
+  </div>
+
+  <div id="azResults" class="az-results" aria-live="polite"></div>
 </section>
 
 <section class="card">
@@ -1078,56 +1078,102 @@
   const results = document.getElementById('azResults');
   const nav = document.querySelector('.az-nav');
   const blocks = Array.from(document.querySelectorAll('.az-block'));
-  const items = blocks.flatMap(block => Array.from(block.querySelectorAll('.lex-item')).map(item => ({
-    block,
-    html: item.innerHTML,
-    text: item.textContent.toLowerCase()
-  })));
 
-  if (!input || !results) return;
+  if (!input || !results || !blocks.length) return;
 
-  function escapeRegExp(str){
-    return str.replace(/[.*+?^${}()|[\]\]/g, '\\$&');
+  function normalizeText(str){
+    return (str || '')
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/[’'`´]/g, ' ')
+      .replace(/[^\p{L}\p{N}]+/gu, ' ')
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 
-  function highlight(html, query){
-    if (!query) return html;
-    const pattern = new RegExp('(' + escapeRegExp(query) + ')', 'ig');
-    return html.replace(pattern, '<mark>$1</mark>');
+  function escapeHtml(str){
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
+
+  const items = blocks.flatMap(block => Array.from(block.querySelectorAll('.lex-item')).map(item => {
+    const strong = item.querySelector('strong');
+    const title = strong ? strong.textContent.trim() : item.textContent.trim().split(':')[0].trim();
+    const rawText = item.textContent.trim();
+    return {
+      block,
+      title,
+      rawText,
+      normalized: normalizeText(rawText),
+      normalizedTitle: normalizeText(title)
+    };
+  }));
 
   function resetView(){
     results.innerHTML = '';
     results.classList.remove('is-visible');
-    if (nav) nav.style.display = '';
     blocks.forEach(block => block.style.display = '');
+    document.querySelectorAll('.az-nav button').forEach(btn => btn.classList.remove('active'));
   }
 
-  input.addEventListener('input', () => {
-    const query = input.value.trim().toLowerCase();
-    if (!query) {
+  function renderResults(query){
+    const q = normalizeText(query);
+    if (!q) {
       resetView();
       return;
     }
 
-    const matches = items.filter(item => item.text.includes(query));
-    blocks.forEach(block => block.style.display = 'none');
-    if (nav) nav.style.display = 'none';
+    const terms = q.split(' ').filter(Boolean);
+    const scored = items.map(item => {
+      const inTitle = terms.every(term => item.normalizedTitle.includes(term));
+      const inText = terms.every(term => item.normalized.includes(term));
+      let score = 0;
+      if (inTitle) score += 6;
+      if (item.normalizedTitle.startsWith(q)) score += 5;
+      if (item.normalized.startsWith(q)) score += 3;
+      if (inText) score += 2;
+      if (!score) return null;
+      return { item, score };
+    }).filter(Boolean).sort((a, b) => b.score - a.score || a.item.title.localeCompare(b.item.title, 'fr'));
 
-    if (!matches.length) {
+    blocks.forEach(block => block.style.display = 'none');
+
+    if (!scored.length) {
       results.innerHTML = '<p class="az-empty">Aucun terme trouvé pour cette recherche.</p>';
       results.classList.add('is-visible');
       return;
     }
 
-    results.innerHTML = matches.map(item => `<div class="lex-item">${highlight(item.html, query)}</div>`).join('');
+    results.innerHTML = `
+      <div class="az-results-head">
+        <strong>${scored.length}</strong> résultat${scored.length > 1 ? 's' : ''} pour “${escapeHtml(query.trim())}”
+      </div>
+      <div class="az-results-list">
+        ${scored.map(({ item }) => `
+          <article class="lex-item search-hit">
+            <div class="search-hit-letter">${item.block.id.replace('AZ-', '')}</div>
+            <div class="search-hit-body">
+              ${item.rawText}
+            </div>
+          </article>
+        `).join('')}
+      </div>
+    `;
     results.classList.add('is-visible');
-  });
+  }
+
+  input.addEventListener('input', () => renderResults(input.value));
 
   document.querySelectorAll('.az-nav button').forEach(btn => {
     btn.addEventListener('click', () => {
       input.value = '';
       resetView();
+      btn.classList.add('active');
       const target = document.getElementById(btn.dataset.letter);
       if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });

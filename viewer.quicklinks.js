@@ -13,12 +13,13 @@
   };
 
   const MESSAGES_API_URL = "/api/messages?limit=1";
+  const NOTIFICATIONS_JSON_URL = "/notifications/notifications.json";
   const NOTIFICATION_URL = "https://andric31-traductions.pages.dev/notifications/";
-  const NOTIFICATION_PREVIEW = {
-    id: "notif-member-grade-20260314",
-    title: "Promotion de grade !",
-    text: 'Félicitations ! Vous avez atteint le grade "Member".',
-    time: "Il y a 6 h",
+  let latestNotification = {
+    id: "",
+    title: "Notifications",
+    text: "Aucune notification pour le moment.",
+    time: "",
     url: NOTIFICATION_URL,
   };
 
@@ -92,6 +93,31 @@
     dot.classList.toggle("hidden", !visible);
   }
 
+  function injectQuicklinksStyles() {
+    if (document.getElementById("quicklinksThemeStyles")) return;
+    const style = document.createElement("style");
+    style.id = "quicklinksThemeStyles";
+    style.textContent = `
+      .header-icon-link--quick{position:relative}
+      .header-icon-dot{position:absolute;top:4px;right:4px;width:10px;height:10px;border-radius:999px;background:var(--link, #4da3ff);box-shadow:0 0 0 2px var(--card, #111827)}
+      .header-icon-dot.hidden{display:none}
+      .quick-notif-popover{position:absolute;z-index:9999;width:min(360px,calc(100vw - 24px));padding:12px;border-radius:18px;border:1px solid var(--border, rgba(255,255,255,.12));background:color-mix(in srgb, var(--card, #111827) 94%, transparent);box-shadow:0 18px 42px rgba(0,0,0,.28);backdrop-filter:blur(12px)}
+      .quick-notif-popover.hidden{display:none}
+      .quick-notif-head{font-size:.95rem;font-weight:800;color:var(--title, var(--fg, #fff));margin:0 0 10px}
+      .quick-notif-card{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:start;padding:12px;border-radius:14px;border:1px solid var(--border, rgba(255,255,255,.12));background:color-mix(in srgb, var(--soft-04, rgba(255,255,255,.04)) 70%, transparent);color:var(--fg, #fff);text-decoration:none}
+      .quick-notif-card:hover{background:color-mix(in srgb, var(--btn, rgba(255,255,255,.08)) 70%, transparent)}
+      .quick-notif-card-icon{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:var(--btn, rgba(255,255,255,.08));color:var(--fg, #fff)}
+      .quick-notif-card-icon svg{width:20px;height:20px;display:block;stroke:currentColor;fill:none}
+      .quick-notif-card-body{display:flex;flex-direction:column;gap:4px;min-width:0}
+      .quick-notif-card-body strong{color:var(--title, var(--fg, #fff));line-height:1.3}
+      .quick-notif-card-body span{color:var(--fg, #fff);line-height:1.45}
+      .quick-notif-card-body small{color:var(--muted, rgba(255,255,255,.7))}
+      .quick-notif-open{margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:12px;border:1px solid var(--border, rgba(255,255,255,.12));background:color-mix(in srgb, var(--soft-04, rgba(255,255,255,.04)) 70%, transparent);color:var(--link, var(--fg, #fff));text-decoration:none;font-weight:700}
+      .quick-notif-open:hover{background:color-mix(in srgb, var(--btn, rgba(255,255,255,.08)) 70%, transparent)}
+    `;
+    document.head.appendChild(style);
+  }
+
   function createNotificationsPopover(anchor) {
     let pop = document.getElementById(IDS.notificationsPopover);
     if (pop) return pop;
@@ -103,15 +129,15 @@
     pop.setAttribute("aria-label", "Dernière notification");
     pop.innerHTML = `
       <div class="quick-notif-head">Notifications</div>
-      <a class="quick-notif-card" href="${NOTIFICATION_PREVIEW.url}" target="_blank" rel="noopener noreferrer">
+      <a class="quick-notif-card" href="${latestNotification.url}" target="_blank" rel="noopener noreferrer">
         <span class="quick-notif-card-icon">${iconNotifications()}</span>
         <span class="quick-notif-card-body">
-          <strong>${escapeHtml(NOTIFICATION_PREVIEW.title)}</strong>
-          <span>${escapeHtml(NOTIFICATION_PREVIEW.text)}</span>
-          <small>${escapeHtml(NOTIFICATION_PREVIEW.time)}</small>
+          <strong>${escapeHtml(latestNotification.title)}</strong>
+          <span>${escapeHtml(latestNotification.text)}</span>
+          <small>${escapeHtml(latestNotification.time)}</small>
         </span>
       </a>
-      <a class="quick-notif-open" href="${NOTIFICATION_PREVIEW.url}" target="_blank" rel="noopener noreferrer">
+      <a class="quick-notif-open" href="${latestNotification.url}" target="_blank" rel="noopener noreferrer">
         Voir les notifications
         <span aria-hidden="true">→</span>
       </a>
@@ -145,7 +171,9 @@
     pop.classList.remove("hidden");
     btn.setAttribute("aria-expanded", "true");
     placePopover(btn, pop);
-    localStorage.setItem(STORAGE.seenNotificationId, NOTIFICATION_PREVIEW.id);
+    if (latestNotification.id) {
+      localStorage.setItem(STORAGE.seenNotificationId, latestNotification.id);
+    }
     setDotVisible(btn, false);
   }
 
@@ -207,13 +235,60 @@
   }
 
   async function initIndicators(messagesEl, notificationsEl) {
-    initNotificationIndicator(notificationsEl);
+    await initNotificationIndicator(notificationsEl);
     await initMessageIndicator(messagesEl);
   }
 
-  function initNotificationIndicator(notificationsEl) {
+  function formatRelativeTime(iso) {
+    try {
+      if (!iso) return "";
+      const now = Date.now();
+      const then = new Date(iso).getTime();
+      if (!Number.isFinite(then)) return "";
+      const diffSec = Math.max(0, Math.round((now - then) / 1000));
+      const rtf = new Intl.RelativeTimeFormat("fr", { numeric: "auto" });
+      if (diffSec < 60) return rtf.format(-diffSec, "second");
+      const diffMin = Math.round(diffSec / 60);
+      if (diffMin < 60) return rtf.format(-diffMin, "minute");
+      const diffHour = Math.round(diffMin / 60);
+      if (diffHour < 24) return rtf.format(-diffHour, "hour");
+      const diffDay = Math.round(diffHour / 24);
+      if (diffDay < 7) return rtf.format(-diffDay, "day");
+      const diffWeek = Math.round(diffDay / 7);
+      if (diffWeek < 5) return rtf.format(-diffWeek, "week");
+      const diffMonth = Math.round(diffDay / 30);
+      if (diffMonth < 12) return rtf.format(-diffMonth, "month");
+      const diffYear = Math.round(diffDay / 365);
+      return rtf.format(-diffYear, "year");
+    } catch {
+      return "";
+    }
+  }
+
+  async function loadLatestNotification() {
+    try {
+      const res = await fetch(`${NOTIFICATIONS_JSON_URL}?v=${Date.now()}`, { cache: "no-store" });
+      const data = await res.json();
+      if (!res.ok || !Array.isArray(data) || !data.length) return latestNotification;
+      const sorted = data.slice().sort((a, b) => String(b?.created_at || "").localeCompare(String(a?.created_at || "")));
+      const item = sorted[0] || {};
+      latestNotification = {
+        id: String(item?.id || ""),
+        title: String(item?.title || "Notifications"),
+        text: String(item?.text || "Aucune notification pour le moment."),
+        time: formatRelativeTime(item?.created_at) || "",
+        url: String(item?.url || NOTIFICATION_URL),
+      };
+    } catch {
+      // silence: pas bloquant
+    }
+    return latestNotification;
+  }
+
+  async function initNotificationIndicator(notificationsEl) {
+    await loadLatestNotification();
     const seenNotificationId = localStorage.getItem(STORAGE.seenNotificationId) || "";
-    const hasNewNotification = seenNotificationId !== NOTIFICATION_PREVIEW.id;
+    const hasNewNotification = !!latestNotification.id && seenNotificationId !== latestNotification.id;
     setDotVisible(notificationsEl, hasNewNotification);
   }
 
@@ -233,6 +308,7 @@
   }
 
   function init() {
+    injectQuicklinksStyles();
     const helpBtn = document.getElementById("menuHelpBtn");
     if (helpBtn) return insertButtons(helpBtn);
 

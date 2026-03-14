@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Messages — andric31</title>
+  <link rel="icon" href="/favicon.png" />
+  <link rel="stylesheet" href="/themes.css" />
+  <link rel="stylesheet" href="messages.css" />
+</head>
+<body>
+  <main class="msg-shell">
+    <section class="msg-hero">
+      <div class="msg-kicker">💬 Mini chat global</div>
+      <h1>Messages</h1>
+      <p>Un espace simple pour discuter, laisser un avis ou poser une petite question. Les nouveaux messages apparaissent automatiquement dans le salon global.</p>
+    </section>
+
+    <section class="msg-layout">
+      <aside class="msg-panel msg-side">
+        <div class="msg-side-head">
+          <h2>Salon global</h2>
+          <span id="roomStatus" class="msg-status">Connexion…</span>
+        </div>
+
+        <div class="msg-side-block">
+          <div class="msg-side-title">Accès rapide</div>
+          <a class="msg-side-link" href="/">🏠 Accueil</a>
+          <a class="msg-side-link" href="/blog/">📰 Blog</a>
+          <button id="refreshBtn" class="msg-side-link msg-side-btn" type="button">🔄 Actualiser</button>
+        </div>
+
+        <div class="msg-side-block">
+          <div class="msg-side-title">Règles rapides</div>
+          <ul class="msg-rules">
+            <li>Reste poli et évite le spam.</li>
+            <li>Pas de flood ni de message vide.</li>
+            <li>Les messages trop longs sont refusés.</li>
+            <li>Un pseudo simple suffit.</li>
+          </ul>
+        </div>
+
+        <div class="msg-side-block msg-stats">
+          <div>
+            <span class="msg-stat-label">Messages chargés</span>
+            <strong id="msgCount">0</strong>
+          </div>
+          <div>
+            <span class="msg-stat-label">Actualisation</span>
+            <strong>7 sec</strong>
+          </div>
+        </div>
+      </aside>
+
+      <section class="msg-panel msg-main">
+        <header class="msg-main-head">
+          <div>
+            <div class="msg-main-kicker">Salon public</div>
+            <h2>Discussion générale</h2>
+          </div>
+          <button id="scrollBottomBtn" class="msg-ghost-btn" type="button">Bas de page</button>
+        </header>
+
+        <div id="messagesEmpty" class="msg-empty hidden">Aucun message pour le moment.</div>
+        <div id="messagesList" class="msg-list" aria-live="polite"></div>
+
+        <form id="chatForm" class="msg-compose">
+          <div class="msg-compose-top">
+            <label class="msg-field">
+              <span>Pseudo</span>
+              <input id="nickname" type="text" maxlength="40" placeholder="Ton pseudo" autocomplete="nickname" />
+            </label>
+          </div>
+
+          <label class="msg-field">
+            <span>Message</span>
+            <textarea id="messageInput" maxlength="500" rows="4" placeholder="Écris ton message ici…"></textarea>
+          </label>
+
+          <div class="msg-compose-bottom">
+            <div id="formInfo" class="msg-form-info">500 caractères max.</div>
+            <button id="sendBtn" class="msg-send-btn" type="submit">Envoyer</button>
+          </div>
+        </form>
+      </section>
+    </section>
+  </main>
+
+  <script src="messages.js"></script>
+</body>
+</html>

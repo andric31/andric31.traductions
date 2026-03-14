@@ -149,6 +149,17 @@ a:hover{ text-decoration: none; }
   background: var(--wiki-soft);
 }
 
+
+.az-block .lex-item{
+  margin: 0 0 12px;
+  line-height: 1.8;
+}
+
+.az-block .lex-item:last-child{
+  margin-bottom: 0;
+}
+
+
 .search-hit{
   display: grid;
   grid-template-columns: 54px 1fr;

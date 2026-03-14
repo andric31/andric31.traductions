@@ -11,6 +11,7 @@
     seenMessageId: "andric31_seen_message_id",
     seenNotificationId: "andric31_seen_notification_id",
     firstVisitShown: "andric31_first_visit_notification_shown",
+    hiddenNotificationId: "andric31_hidden_notification_id",
   };
 
   const MESSAGES_API_URL = "/api/messages?limit=1";
@@ -112,30 +113,42 @@
     return rtf.format(Math.round(diffSec / 31536000), "year");
   }
 
-  async function loadLatestNotification() {
+  async function loadNotificationsList() {
     try {
       const res = await fetch(`${NOTIFICATIONS_JSON_URL}?v=${Date.now()}`, { cache: "no-store" });
       const data = await res.json();
-      if (!res.ok || !Array.isArray(data) || !data.length) return null;
-      const items = data.slice().sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")));
-      const latest = items[0] || null;
-      if (!latest) return null;
-      return {
-        id: String(latest.id || ""),
-        title: String(latest.title || "Notification"),
-        text: String(latest.text || ""),
-        time: formatRelativeSmart(latest.created_at),
-        url: String(latest.url || NOTIFICATION_URL),
-      };
+      if (!res.ok || !Array.isArray(data) || !data.length) return [];
+      return data.slice().sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")));
     } catch {
-      return null;
+      return [];
     }
+  }
+
+  function toNotificationPreview(item) {
+    if (!item) return null;
+    return {
+      id: String(item.id || ""),
+      title: String(item.title || "Notification"),
+      text: String(item.text || ""),
+      time: formatRelativeSmart(item.created_at),
+      url: String(item.url || NOTIFICATION_URL),
+    };
+  }
+
+  async function loadLatestNotification() {
+    const items = await loadNotificationsList();
+    const hiddenId = localStorage.getItem(STORAGE.hiddenNotificationId) || "";
+    const latestVisible = items.find((item) => String(item?.id || "") !== hiddenId) || null;
+    return toNotificationPreview(latestVisible);
   }
 
   function renderNotificationsPopover(pop, preview) {
     if (!pop || !preview) return;
     pop.innerHTML = `
-      <div class="quick-notif-head">Notifications</div>
+      <div class="quick-notif-head quick-notif-head-row">
+        <span>Notifications</span>
+        <button type="button" class="quick-notif-close" data-action="dismiss-notification" aria-label="Masquer cette notification" title="Masquer cette notification">×</button>
+      </div>
       <a class="quick-notif-card" href="${escapeHtml(preview.url)}" target="_blank" rel="noopener noreferrer">
         <span class="quick-notif-card-icon">${iconNotifications()}</span>
         <span class="quick-notif-card-body">
@@ -162,6 +175,26 @@
     pop.setAttribute("aria-label", "Dernière notification");
     pop.innerHTML = `<div class="quick-notif-head">Notifications</div><div class="quick-notif-loading">Chargement…</div>`;
     document.body.appendChild(pop);
+
+    pop.addEventListener("click", (event) => {
+      const dismissBtn = event.target.closest("[data-action=\"dismiss-notification\"]");
+      if (!dismissBtn) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const btn = document.getElementById(IDS.notifications);
+      const latestId = btn?.dataset.latestNotificationId || "";
+      if (latestId) {
+        localStorage.setItem(STORAGE.hiddenNotificationId, latestId);
+        localStorage.setItem(STORAGE.seenNotificationId, latestId);
+      }
+      if (btn) setDotVisible(btn, false);
+      pop.innerHTML = `
+        <div class="quick-notif-head">Notifications</div>
+        <div class="quick-notif-empty">Notification masquée.</div>
+      `;
+      placePopover(btn || anchor, pop);
+      window.setTimeout(() => closeNotificationsPopover(), 650);
+    });
 
     const reposition = () => placePopover(anchor, pop);
     window.addEventListener("resize", reposition, { passive: true });
@@ -269,14 +302,17 @@
   }
 
   async function initNotificationIndicator(notificationsEl) {
-    const latest = await loadLatestNotification();
+    const items = await loadNotificationsList();
+    const latest = toNotificationPreview(items[0] || null);
     if (!latest) {
+      notificationsEl.dataset.latestNotificationId = "";
       setDotVisible(notificationsEl, false);
       return;
     }
     notificationsEl.dataset.latestNotificationId = latest.id;
     const seenNotificationId = localStorage.getItem(STORAGE.seenNotificationId) || "";
-    const hasNewNotification = seenNotificationId !== latest.id;
+    const hiddenNotificationId = localStorage.getItem(STORAGE.hiddenNotificationId) || "";
+    const hasNewNotification = latest.id !== seenNotificationId && latest.id !== hiddenNotificationId;
     setDotVisible(notificationsEl, hasNewNotification);
 
     const firstVisitShown = localStorage.getItem(STORAGE.firstVisitShown) === "1";
@@ -310,6 +346,8 @@
       .quick-notif-card:hover{border-color:color-mix(in srgb,var(--primary) 40%, var(--border));box-shadow:0 0 0 1px color-mix(in srgb,var(--primary) 18%, transparent);}
       .quick-notif-card-icon{background:color-mix(in srgb,var(--primary) 14%, transparent);color:var(--primary);}
       .quick-notif-open{color:var(--primary);}
+      .quick-notif-close{color:var(--muted);}
+      .quick-notif-close:hover{color:var(--title);background:color-mix(in srgb,var(--primary) 12%, transparent);}
       .header-icon-dot{background:var(--primary);box-shadow:0 0 0 2px var(--card);}
     `;
     document.head.appendChild(style);

@@ -244,3 +244,60 @@ code{
   .topbar, .page, .footer{ width: min(var(--wiki-page-max), calc(100% - 20px)); }
   .tuto-card, .card{ border-radius: 18px; padding: 18px; }
 }
+
+
+/* Espacement entre les cartes/tuiles de tutoriels */
+.page > .card + .card,
+.page > .image-wrap + .card,
+.page > .card + .image-wrap,
+.page > .image-wrap + .image-wrap{
+  margin-top: 16px;
+}
+
+/* Petit Larousse : recherche + navigation centrées */
+.az-search{
+  display: flex;
+  justify-content: center;
+  margin: 14px 0 18px;
+}
+
+.az-search input{
+  width: min(100%, 520px);
+  min-height: 46px;
+  padding: 0 16px;
+  border-radius: 14px;
+  border: 1px solid var(--wiki-border);
+  background: var(--wiki-soft);
+  color: var(--wiki-text);
+  font-size: 15px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+}
+
+.az-search input::placeholder{
+  color: var(--wiki-muted);
+}
+
+.az-search input:focus{
+  outline: none;
+  border-color: var(--wiki-border-strong);
+  background: color-mix(in srgb, var(--wiki-soft) 82%, var(--accent, #6ce0b0) 18%);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent, #6ce0b0) 14%, transparent);
+}
+
+#dictionnaire .az-nav{
+  max-width: 920px;
+  margin: 0 auto 10px;
+}
+
+@media (max-width: 680px){
+  .page > .card + .card,
+  .page > .image-wrap + .card,
+  .page > .card + .image-wrap,
+  .page > .image-wrap + .image-wrap{
+    margin-top: 14px;
+  }
+
+  .az-search input{
+    width: 100%;
+  }
+}

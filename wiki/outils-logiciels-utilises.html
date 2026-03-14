@@ -5,16 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Outils et logiciels utilisés — andric31</title>
 
-<script>
-(function(){
-  try{
-    const t = (localStorage.getItem("viewerTheme") || "auto").trim() || "auto";
-    const root = document.documentElement;
-    root.removeAttribute("data-theme");
-    if (t !== "auto") root.setAttribute("data-theme", t);
-  }catch{}
-})();
-</script>
+<script src="/theme-init.js"></script>
 <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=1">
 <link rel="stylesheet" href="/themes.css" />
 <link rel="stylesheet" href="wiki.css" />

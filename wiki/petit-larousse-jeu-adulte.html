@@ -5,16 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Le Petit Larousse du jeu pour adultes</title>
 
-<script>
-(function(){
-  try{
-    const t = (localStorage.getItem("viewerTheme") || "auto").trim() || "auto";
-    const root = document.documentElement;
-    root.removeAttribute("data-theme");
-    if (t !== "auto") root.setAttribute("data-theme", t);
-  }catch{}
-})();
-</script>
+<script src="/theme-init.js"></script>
 <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=1">
 <link rel="stylesheet" href="/themes.css" />
 <link rel="stylesheet" href="wiki.css" />
@@ -1080,77 +1071,6 @@
   <p>© andric31 — Tutos & Aide</p>
 </footer>
 
-<script>
-(function(){
-const searchInput = document.getElementById("azSearch");
-const resultsBox  = document.getElementById("azResults");
-const blocks      = document.querySelectorAll(".az-block");
-const navButtons  = document.querySelectorAll(".az-nav button");
-
-function normalize(str){
-  return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-}
-
-function showLetter(id){
-  blocks.forEach(b=>b.classList.remove("active"));
-  navButtons.forEach(b=>b.classList.remove("active"));
-  const block = document.getElementById(id);
-  if(block){
-    block.classList.add("active");
-    document.querySelector(`[data-letter="${id}"]`).classList.add("active");
-  }
-}
-
-navButtons.forEach(btn=>{
-  btn.addEventListener("click", ()=>{
-    searchInput.value="";
-    resultsBox.classList.remove("active");
-    showLetter(btn.dataset.letter);
-  });
-});
-
-const index=[];
-blocks.forEach(block=>{
-  const letter=block.id;
-  block.querySelectorAll(".lex-item").forEach(item=>{
-    index.push({
-      letter,
-      el:item,
-      text:normalize(item.textContent)
-    });
-  });
-});
-
-searchInput.addEventListener("input", e=>{
-  const q=normalize(e.target.value);
-  if(q.length<2){
-    resultsBox.classList.remove("active");
-    return;
-  }
-
-  const matches=index.filter(i=>i.text.includes(q));
-  resultsBox.classList.add("active");
-  blocks.forEach(b=>b.classList.remove("active"));
-  navButtons.forEach(b=>b.classList.remove("active"));
-
-  resultsBox.innerHTML = matches.map((m,i)=>`
-    <div class="az-result" data-i="${i}">
-      ${m.el.innerHTML}
-    </div>
-  `).join("");
-
-  resultsBox.querySelectorAll(".az-result").forEach((card,i)=>{
-    card.addEventListener("click",()=>{
-      showLetter(matches[i].letter);
-      matches[i].el.classList.add("az-highlight");
-      matches[i].el.scrollIntoView({behavior:"smooth",block:"center"});
-    });
-  });
-});
-
-showLetter("AZ-A");
-})();
-</script>
-
+<script src="/theme-init.js"></script>
 </body>
 </html>

@@ -282,7 +282,6 @@
     const firstVisitShown = localStorage.getItem(STORAGE.firstVisitShown) === "1";
     if (!firstVisitShown) {
       localStorage.setItem(STORAGE.firstVisitShown, "1");
-      requestAnimationFrame(() => { openNotificationsPopover(notificationsEl); });
     }
   }
 

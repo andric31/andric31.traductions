@@ -32,6 +32,8 @@
     const a = document.createElement("a");
     a.id = id;
     a.href = href;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
     a.className = `${refClass} header-icon-link`;
     a.setAttribute("aria-label", label);
     a.title = label;

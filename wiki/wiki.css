@@ -457,7 +457,8 @@ body{
 .topbar h1, h1, h2, h3{
   color: var(--title, var(--wiki-text));
 }
-.subtitle, .tuto-card .desc, .footer{
+.subtitle,
+.footer{
   width: min(1100px, calc(100% - 32px));
   margin: 18px auto 28px;
   padding: 18px 20px;
@@ -474,7 +475,7 @@ body{
 .topbar-kicker{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;border:1px solid color-mix(in srgb, var(--wiki-border) 82%, transparent);background:color-mix(in srgb, var(--wiki-bg-soft) 95%, transparent);color:var(--wiki-muted);font-size:13px;margin-bottom:16px;}
 .topbar-home p{max-width:760px;margin:14px auto 0;color:var(--wiki-muted);font-size:clamp(16px,2vw,19px);line-height:1.65;}
 .topbar-home .topbar-card{box-shadow:0 18px 50px rgba(0,0,0,0.22);}
-.tuto-card{border-radius:16px;padding:12px 12px;box-shadow:0 8px 20px rgba(0,0,0,0.10);}
+.tuto-card{border-radius:16px;padding:12px 12px 10px;box-shadow:0 8px 20px rgba(0,0,0,0.10);}
 .tuto-card .title{font-size:15px;margin-bottom:4px;}
 .tuto-card .desc{font-size:12px;opacity:.82;line-height:1.45;}
 .section-title{width:min(1100px, calc(100% - 32px));margin:24px auto 14px;color:var(--accent, #6ce0b0);text-transform:uppercase;letter-spacing:.05em;font-size:14px;}
@@ -486,9 +487,9 @@ body{
 
 /* === Wiki accueil : tailles proches de Messages, tuiles plus lisibles === */
 .topbar.wiki-home-hero{
-  width: min(1100px, calc(100% - 32px));
+  width: min(980px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 14px 0 28px;
+  padding: 44px 0 28px;
   text-align: center;
   background: transparent !important;
   border: 0 !important;
@@ -528,4 +529,32 @@ body{
 .tuto-card .icon{
   font-size: 30px !important;
   margin-bottom: 10px !important;
+}
+
+
+/* Alignement accueil wiki avec Messages / Blog */
+.section-title,
+.big-separator,
+.tuto-row{
+  width: min(980px, calc(100% - 32px));
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tuto-row{
+  padding: 6px 0;
+}
+
+.tuto-card{
+  background: linear-gradient(180deg, var(--wiki-bg-soft-2), var(--wiki-bg-soft));
+}
+
+.tuto-card .desc{
+  margin: 0;
+  padding: 0;
+  width: auto;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }

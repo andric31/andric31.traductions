@@ -580,3 +580,43 @@ body{
 .tuto-card .desc{font-size:12px;opacity:.82;line-height:1.45;}
 .section-title{width:min(1100px, calc(100% - 32px));margin:24px auto 14px;color:var(--accent, #6ce0b0);text-transform:uppercase;letter-spacing:.05em;font-size:14px;}
 .big-separator{width:min(1100px, calc(100% - 32px));height:1px;margin:18px auto;background:color-mix(in srgb, var(--wiki-border) 70%, transparent);}
+
+
+
+/* === Accueil wiki : sans encadré, plus gros === */
+.wiki-home-hero{
+  width: min(1100px, calc(100% - 32px));
+  margin: 26px auto 18px;
+  padding: 8px 0 4px;
+  text-align: center;
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.wiki-home-hero h1{
+  margin: 0;
+  font-size: clamp(48px, 7vw, 78px);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+}
+
+.wiki-home-hero p{
+  margin: 14px auto 0;
+  max-width: 900px;
+  font-size: clamp(21px, 2.3vw, 30px);
+  line-height: 1.45;
+  opacity: .92;
+}
+
+@media (max-width: 700px){
+  .wiki-home-hero{
+    width: min(100%, calc(100% - 20px));
+    margin: 20px auto 10px;
+  }
+  .wiki-home-hero p{
+    font-size: 18px;
+  }
+}

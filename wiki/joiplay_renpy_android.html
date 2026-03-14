@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lancer un jeu Ren’Py Windows (et sa traduction) avec JoiPlay sur Android</title>
+  <script>
+(function(){
+  try{
+    const t = (localStorage.getItem("viewerTheme") || "auto").trim() || "auto";
+    const root = document.documentElement;
+    root.removeAttribute("data-theme");
+    if (t !== "auto") root.setAttribute("data-theme", t);
+  }catch{}
+})();
+</script>
+<link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=1">
+  <link rel="stylesheet" href="/themes.css" />
+<link rel="stylesheet" href="wiki.css" />
+
+  <!-- (Optionnel) styles images si pas déjà dans tutos.css -->
+</head>
+<body>
+
+  <header class="topbar">
+    <a class="back" href="index.html">⬅ Retour</a>
+    <h1>📱 Lancer un jeu Ren’Py Windows (et sa traduction) avec JoiPlay sur Android</h1>
+    <p class="subtitle">
+      Ce guide explique comment jouer à un jeu <strong>Ren’Py (version Windows)</strong> sur Android avec <strong>JoiPlay</strong>,
+      et comment y intégrer ta traduction ✅
+    </p>
+  </header>
+
+  <main class="page">
+
+    <!-- IMAGE INTRO -->
+    <div class="image-wrap">
+      <img src="img/JoiPlay_Renpy/Ren'Py_Android_JoiPlay.png"
+           alt="Ren’Py sur Android avec JoiPlay"
+           class="tutorial-img">
+    </div>
+
+    <section class="card hero">
+      <div class="hero-head">
+        <div class="hero-icon">🧩</div>
+        <div>
+          <p class="eyebrow">Objectif</p>
+          <p class="hero-text">
+            Tu vas : <strong>télécharger le jeu + la traduction</strong>, <strong>copier la traduction</strong> dans le dossier du jeu,
+            puis <strong>ajouter le .exe</strong> dans JoiPlay pour lancer le jeu traduit 🎉
+          </p>
+        </div>
+      </div>
+
+      <div class="callout">
+        ✅ Important : prends toujours une traduction qui correspond à <strong>la même version</strong> que ton jeu.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>1️⃣ Télécharger le jeu Ren'Py et sa traduction correspondante</h2>
+      <p>
+        Commence par télécharger le jeu Ren'Py en <strong>version Windows</strong> et la <strong>traduction adaptée à sa version</strong>.
+        Une fois les deux fichiers téléchargés sur ton appareil Android, <strong>extrais-les</strong>.
+      </p>
+
+      <div class="callout tip">
+        💡 Tu obtiendras deux dossiers distincts : un pour le jeu, un pour la traduction.
+      </div>
+
+      <div class="image-wrap">
+        <img src="img/JoiPlay_Renpy/01.png"
+             alt="Téléchargement et extraction du jeu + traduction sur Android"
+             class="tutorial-img">
+      </div>
+
+      <div class="callout tip">
+        💡 Tu peux ensuite supprimer les archives <code>.zip</code> et <code>.rar</code> afin de gagner de l’espace sur Android.
+      </div>
+
+      <div class="callout warn">
+        ⚠️ Il est recommandé de placer tous tes jeux dans un <strong>dossier dédié</strong> que tu ne déplaceras pas,
+        même après l’installation dans JoiPlay.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>2️⃣ Copier les fichiers de la traduction</h2>
+      <p>
+        Ouvre le dossier de la traduction, sélectionne <strong>tous</strong> ses fichiers et dossiers,
+        puis <strong>copie-les dans le dossier du jeu</strong>.
+      </p>
+
+      <div class="callout">
+        ✅ Quand Android te demande si tu veux remplacer les fichiers existants, choisis <strong>Remplacer</strong>.
+      </div>
+
+      <div class="image-wrap">
+        <img src="img/JoiPlay_Renpy/02.jpg"
+             alt="Copier la traduction dans le dossier du jeu (remplacer les fichiers)"
+             class="tutorial-img">
+      </div>
+
+      <div class="callout tip">
+        🟦 Et voilà, le jeu et la traduction sont prêts ! Ajoute ensuite le jeu (avec la traduction) dans JoiPlay 🎉
+      </div>
+
+      <p>
+        Si tu n’utilises pas JoiPlay, tu peux t’arrêter ici ✅<br>
+        Sinon, passons à l’étape suivante : l’installation, l’ajout du jeu et son utilisation. 👇
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>3️⃣ Télécharger JoiPlay</h2>
+      <p>
+        Pour une meilleure expérience, il est recommandé de télécharger la dernière version de JoiPlay et les plugins
+        depuis le Patreon du créateur.
+      </p>
+
+      <ul class="list">
+        <li>
+          Patreon :
+          <a href="https://www.patreon.com/c/joiplay/home?vanity=joiplay" target="_blank" rel="noopener noreferrer">
+            JoiPlay (page officielle)
+          </a>
+        </li>
+        <li>
+          Version utilisée pour ce tutoriel (1.20.611) :
+          <a href="https://www.patreon.com/posts/joiplay-1-20-611-137694579" target="_blank" rel="noopener noreferrer">
+            Post Patreon 1.20.611
+          </a>
+        </li>
+        <li>Plugins mentionnés : <strong>Ren'Py 8.4.1 Plugin 1.00.10</strong> et <strong>Ren'Py 7.7.1 Plugin 1.00.60</strong></li>
+      </ul>
+
+      <div class="callout tip">
+        💡 JoiPlay permet d’exécuter des jeux Ren'Py Windows directement sur Android, sans avoir besoin d’un PC.
+      </div>
+
+      <div class="image-wrap">
+        <img src="img/JoiPlay_Renpy/pheader.png"
+             alt="JoiPlay et plugins (Patreon)"
+             class="tutorial-img">
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>4️⃣ Installation de JoiPlay</h2>
+
+      <div class="callout warn">
+        💡 Certains systèmes Android bloquent l’installation d’APK provenant de sources extérieures à Google Play.<br>
+        Comme nous utilisons des versions hors Play Store, tu dois autoriser l’installation d’applications inconnues dans :<br>
+        <strong>Paramètres → Sécurité et confidentialité → Autres paramètres de sécurité → Installation d’applis inconnues</strong>
+      </div>
+
+      <p>
+        Pour plus d’informations, consulte le manuel ou l’aide du système Android que tu utilises.
+      </p>
+
+      <p>
+        Ensuite, lance le fichier APK de JoiPlay et installe les plugins sur ton appareil Android.
+      </p>
+
+      <div class="image-wrap">
+        <img src="img/JoiPlay_Renpy/04.jpg"
+             alt="Installation de JoiPlay (APK)"
+             class="tutorial-img">
+      </div>
+
+      <div class="image-wrap">
+        <img src="img/JoiPlay_Renpy/04_2.jpg"
+             alt="Installation des plugins JoiPlay"
+             class="tutorial-img">
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>5️⃣ Lancement de JoiPlay</h2>
+      <p>
+        Une fois installé, ouvre JoiPlay depuis ton écran d’accueil Android.
+      </p>
+
+      <div class="callout">
+        💡 L’application te demande des autorisations (comme l’accès au stockage) : <strong>accepte-les</strong>,
+        sinon le jeu ne pourra pas se lancer !
+      </div>
+
+      <div class="image-wrap">
+        <img src="img/JoiPlay_Renpy/05.jpg"
+             alt="Permissions JoiPlay (stockage)"
+             class="tutorial-img">
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>6️⃣ Ajouter le jeu dans JoiPlay</h2>
+      <p>
+        Depuis l’écran d’accueil de JoiPlay, appuie sur le bouton <strong>➕</strong> puis sélectionne <strong>Add Game</strong>.
+        Ensuite, choisis le fichier <code>.exe</code> du jeu Ren'Py dans le dossier du jeu
+        (avec la traduction que tu as copiée, hein 😉).
+      </p>
+
+      <div class="image-wrap">
+        <img src="img/JoiPlay_Renpy/06.jpg"
+             alt="Ajouter un jeu dans JoiPlay (choisir le .exe)"
+             class="tutorial-img">
+      </div>
+
+      <h3>Pour finir l’ajout</h3>
+      <p>Une fenêtre s’ouvre et te demande de renseigner plusieurs champs :</p>
+      <ul class="list">
+        <li><strong>Game Name</strong> → le nom du jeu (tu peux mettre ce que tu veux)</li>
+        <li><strong>Version</strong> → la version du jeu (tu peux mettre ce que tu veux)</li>
+        <li><strong>Icon</strong> → ajoute une image si tu veux personnaliser ton jeu</li>
+      </ul>
+
+      <div class="callout tip">
+        💡 Conseil : mets le nom + la version dans “Game Name” (ex : <code>NomDuJeu v0.12.0</code>) pour t’y retrouver plus tard.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>7️⃣ Lancer le jeu traduit</h2>
+      <p>
+        Une fois ton jeu ajouté dans JoiPlay, il apparaîtra sur l’écran d’accueil de l’application.
+      </p>
+      <p>
+        Pour le lancer, appuie simplement sur son icône ✅<br>
+        Le jeu s’ouvrira alors directement avec la traduction en place !
+      </p>
+
+      <div class="callout tip">
+        💡 Avant que le jeu se lance, plusieurs autorisations vont t’être demandées. Pour jouer, il faut les accepter.
+      </div>
+
+      <div class="image-wrap">
+        <img src="img/JoiPlay_Renpy/07.jpg"
+             alt="Lancer le jeu Ren'Py dans JoiPlay (traduction active)"
+             class="tutorial-img">
+      </div>
+
+      <div class="callout">
+        🎮 Bon jeu !
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>🧰 Dépannage</h2>
+
+      <h3>❌ Le jeu ne démarre pas (écran noir / retour au menu JoiPlay)</h3>
+      <ul class="list">
+        <li>Vérifie que les <strong>plugins Ren’Py</strong> sont bien installés (Ren’Py 7/8 selon le jeu).</li>
+        <li>Vérifie que tu as bien choisi le <code>.exe</code> du jeu (pas un fichier au mauvais endroit).</li>
+        <li>Évite de déplacer le dossier du jeu après l’avoir ajouté dans JoiPlay.</li>
+      </ul>
+
+      <h3>❌ Le jeu n’est pas traduit</h3>
+      <ul class="list">
+        <li>Vérifie que les fichiers de traduction ont bien été copiés <strong>dans le bon dossier du jeu</strong>.</li>
+        <li>Vérifie la structure : <code>game/tl/fr_zenpy_DeepL_andric31/...</code></li>
+        <li>Vérifie que la traduction correspond à la <strong>même version</strong> que le jeu.</li>
+      </ul>
+
+      <div class="callout warn">
+        ⚠️ Si tu as un doute, supprime le dossier de traduction (<code>game/tl/fr_zenpy_DeepL_andric31</code>)
+        et recopie la traduction proprement.
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>© andric31 — Tutos & Aide</p>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>andric31 — Tutos & Aide</title>
+
+<script>
+(function(){
+  try{
+    const t = (localStorage.getItem("viewerTheme") || "auto").trim() || "auto";
+    const root = document.documentElement;
+    root.removeAttribute("data-theme");
+    if (t !== "auto") root.setAttribute("data-theme", t);
+  }catch{}
+})();
+</script>
+<link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=1">
+<link rel="stylesheet" href="/themes.css" />
+<link rel="stylesheet" href="wiki.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <h1>🛠️ Tutos & Aide</h1>
+  <p>🔍 Guides, outils, Informations...</p>
+</header>
+
+<!-- ===================== -->
+<!-- TUTOS -->
+<!-- ===================== -->
+<section class="tuto-row">
+
+  <a href="extraire-traduction-renpy.html" class="tuto-card">
+    <div class="icon">💻</div>
+    <div class="title">Utiliser une traduction Ren’Py</div>
+    <div class="desc">Guide Windows pas à pas</div>
+  </a>
+
+  <a href="joiplay_renpy_android.html" class="tuto-card">
+    <div class="icon">📱</div>
+    <div class="title">Ren’Py sur Android (JoiPlay)</div>
+    <div class="desc">Lancer sur Android un jeu Windows + traduction ✅</div>
+  </a>
+
+  <a href="renpy_android_traduction_pc.html" class="tuto-card">
+    <div class="icon">📱💻</div>
+    <div class="title">Ren’Py sur Android (avec un PC)</div>
+    <div class="desc">Mettre une traduction sur un APK Android ✅</div>
+  </a>
+
+</section>
+
+<!-- ===================== -->
+<!-- Autres -->
+<!-- ===================== -->
+
+<section class="tuto-row">
+
+  <a href="joiplay_rpgm_android.html" class="tuto-card">
+    <div class="icon">📱</div>
+    <div class="title">RPGM sur Android (JoiPlay)</div>
+    <div class="desc">Installer une traduction + lancer le jeu ✅</div>
+  </a>
+
+  <a href="traduction-others-asar.html" class="tuto-card">
+    <div class="icon">📦</div>
+    <div class="title">Traduction jeu Others (.asar)</div>
+    <div class="desc">Méthode automatique & manuelle</div>
+  </a>
+
+  <a href="traduction-godot-pck.html" class="tuto-card">
+    <div class="icon">🧊</div>
+    <div class="title">Traduction jeu Godot (.pck)</div>
+    <div class="desc">Méthode automatique & manuelle</div>
+  </a>
+
+  <a href="locale-emulator.html" class="tuto-card">
+    <div class="icon">🇯🇵</div>
+    <div class="title">Locale Emulator</div>
+    <div class="desc">Lancer un jeu en japonais (sans changer Windows)</div>
+  </a>
+
+</section>
+
+<!-- ===================== -->
+<!-- Mes outils -->
+<!-- ===================== -->
+
+<div class="big-separator"></div>
+<h2 class="section-title">🧰 Mes outils</h2>
+
+<section class="tuto-row">
+
+  <a href="outils-logiciels-utilises.html" class="tuto-card">
+    <div class="icon">🛠</div>
+    <div class="title">Outils & logiciels utilisés</div>
+    <div class="desc">Environnement et outils de traduction</div>
+  </a>
+
+  <a href="editeur-traduction-renpy-relecture.html" class="tuto-card">
+    <div class="icon">📝</div>
+    <div class="title">Éditeur Ren'Py Relecture</div>
+    <div class="desc">Corriger mes traductions en jeu</div>
+  </a>
+
+  <!-- FUTUR -->
+  <a href="#" class="tuto-card disabled" aria-disabled="true">
+    <div class="icon">🛠</div>
+    <div class="title">Outils Ren'Py</div>
+    <div class="desc">Bientôt disponible</div>
+  </a>
+
+</section>
+
+<!-- ===================== -->
+<!-- INFOS / REFERENCES -->
+<!-- ===================== -->
+
+<div class="big-separator"></div>
+<h2 class="section-title">🧠 Informations & Références</h2>
+
+<section class="tuto-row">
+
+  <a href="moteurs-jeux-traduits.html" class="tuto-card">
+    <div class="icon">🧠</div>
+    <div class="title">Moteurs de jeux</div>
+    <div class="desc">Les moteurs que je traduis</div>
+  </a>
+
+  <a href="petit-larousse-jeu-adulte.html" class="tuto-card">
+    <div class="icon">📖</div>
+    <div class="title">Le Petit Larousse du jeu pour adultes</div>
+    <div class="desc">Lexique complet A–Z des termes NSFW</div>
+  </a>
+
+  <a href="droits-traduction.html" class="tuto-card">
+    <div class="icon">📜</div>
+    <div class="title">Traductions & droits</div>
+    <div class="desc">Ce qu’il faut savoir ⚖️</div>
+  </a>
+
+</section>
+
+</body>
+</html>

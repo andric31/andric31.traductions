@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Appliquer une traduction Godot (.pck)</title>
+
+<script>
+(function(){
+  try{
+    const t = (localStorage.getItem("viewerTheme") || "auto").trim() || "auto";
+    const root = document.documentElement;
+    root.removeAttribute("data-theme");
+    if (t !== "auto") root.setAttribute("data-theme", t);
+  }catch{}
+})();
+</script>
+<link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=1">
+<link rel="stylesheet" href="/themes.css" />
+<link rel="stylesheet" href="wiki.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <a class="back" href="index.html">⬅ Retour</a>
+  <h1>🎮 Appliquer la traduction d'un jeu Godot (.pck)</h1>
+  <p class="subtitle">Méthode automatique et manuelle pour les jeux utilisant un fichier .pck</p>
+</header>
+
+<main class="page">
+
+<div class="image-wrap">
+  <img src="img/Others_Godot/IntroMod.webp" alt="Godot fichier pck" class="tutorial-img">
+</div>
+
+<section class="card">
+  <p>
+    Certains jeux <strong>Godot</strong> utilisent un fichier <code>.pck</code> pour regrouper leurs ressources
+    (scripts, images, sons, etc.) en un seul fichier.
+  </p>
+
+  <p>
+    Cela simplifie la distribution et le chargement.
+    Pour appliquer une traduction, il faut donc modifier ou remplacer ce fichier
+    afin d’y intégrer les textes traduits.
+  </p>
+
+  <p><strong>📦 Dans l’archive de traduction du jeu, deux méthodes sont proposées :</strong></p>
+</section>
+
+<div class="sep"></div>
+
+<section class="card">
+  <h2>🎯 Méthode Automatique (Plug & Play)</h2>
+
+  <p>
+    La plus simple : un exécutable applique directement la traduction sans rien installer de plus.
+    Tout est déjà inclus !
+  </p>
+
+  <ul>
+    <li>Placez puis décompressez l’archive de traduction dans le dossier principal du jeu (celui qui contient l’exécutable et le fichier .pck).</li>
+    <li>Double-cliquez sur <strong>xxx_fr_patch_traduction.exe</strong>.</li>
+    <li>Une fenêtre s’ouvrira.</li>
+  </ul>
+</section>
+
+<div class="image-wrap">
+  <img src="img/Others_Godot/01.webp" alt="Fenêtre patch Godot" class="tutorial-img">
+</div>
+
+<section class="card">
+
+  <p>Cliquez sur <strong>"Appliquer"</strong> pour lancer le processus.</p>
+
+  <ul>
+    <li><strong>Injection :</strong> les fichiers traduits sont intégrés dans le <code>.pck</code>.</li>
+    <li><strong>Finalisation :</strong> le nouveau <code>.pck</code> patché remplace l’original.</li>
+  </ul>
+
+  <p>
+    Une fois le message <strong>"Patch appliqué avec succès."</strong> affiché, cliquez sur OK.
+  </p>
+
+  <p>
+    Vous pouvez ensuite supprimer l'exécutable et l'archive.
+  </p>
+
+</section>
+
+<div class="image-wrap">
+  <img src="img/Others_Godot/02.webp" alt="Patch appliqué succès" class="tutorial-img">
+</div>
+
+<section class="card">
+  <p>
+    Lancez le jeu normalement et profitez de la traduction !
+  </p>
+</section>
+
+<div class="sep"></div>
+
+<section class="card">
+  <h2>🔧 Méthode Manuelle (Avancé)</h2>
+
+  <p>
+    Si vous préférez gérer vous-même la traduction, j’ai inclus les fichiers traduits
+    dans l’arborescence correcte pour une intégration manuelle.
+  </p>
+
+  <p>
+    ⚠️ Cette méthode nécessite de manipuler le fichier <code>.pck</code> avec des outils adaptés
+    et demande quelques connaissances techniques.
+  </p>
+</section>
+
+<div class="sep"></div>
+
+<section class="card">
+  <h2>✅ Liste de jeux traduits utilisant un fichier .pck</h2>
+
+  <ul class="asar-list">
+    <li>Zero One - Remastered - 
+      <a href="https://discord.com/channels/1278373830624149524/1409288392541208706/1409288445175791808" target="_blank">
+        Traduction
+      </a>
+    </li>
+
+    <li>My Girlfriend's Streaming Career - 
+      <a href="https://discord.com/channels/1278373830624149524/1410727855079297045/1410727901338533898" target="_blank">
+        Traduction
+      </a>
+    </li>
+  </ul>
+
+</section>
+
+</main>
+
+<footer class="footer">
+  <p>© andric31 — Tutos & Aide</p>
+</footer>
+
+</body>
+</html>

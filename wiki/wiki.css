@@ -59,7 +59,7 @@ a:hover{
 
 .topbar.topbar-home .topbar-card{
   text-align: center;
-  padding: 28px 22px;
+  padding: 22px 22px;
 }
 
 .topbar-card{
@@ -72,7 +72,7 @@ a:hover{
 
 .topbar.topbar-home .topbar-card{
   text-align: center;
-  padding: 28px 22px;
+  padding: 22px 22px;
 }
 
 .topbar h1{
@@ -484,7 +484,7 @@ body{
 
 
 
-/* === Wiki accueil : tailles proches de Messages, tuiles plus lisibles === */
+/* === Wiki accueil : entête harmonisé avec Blog / Messages === */
 .topbar.wiki-home-hero{
   width: min(1100px, calc(100% - 32px));
   margin: 0 auto;
@@ -494,6 +494,19 @@ body{
   border: 0 !important;
   box-shadow: none !important;
   border-radius: 0 !important;
+}
+
+.topbar-kicker{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 14px;
+  border-radius:999px;
+  border:1px solid color-mix(in srgb, var(--wiki-border) 82%, transparent);
+  background:color-mix(in srgb, var(--wiki-bg-soft) 95%, transparent);
+  color:var(--wiki-muted);
+  font-size:13px;
+  margin-bottom:18px;
 }
 
 .topbar.wiki-home-hero h1{
@@ -507,25 +520,6 @@ body{
   margin: 14px auto 0;
   font-size: clamp(15px, 2vw, 18px) !important;
   line-height: 1.7;
+  color: var(--wiki-muted);
   opacity: .92;
-}
-
-/* tuiles : texte intérieur plus gros */
-.tuto-card .title{
-  font-size: 20px !important;
-  line-height: 1.35 !important;
-  font-weight: 800 !important;
-  margin-bottom: 8px !important;
-}
-
-.tuto-card .desc{
-  font-size: 15px !important;
-  line-height: 1.65 !important;
-  opacity: .92 !important;
-}
-
-/* icônes légèrement plus visibles */
-.tuto-card .icon{
-  font-size: 30px !important;
-  margin-bottom: 10px !important;
 }

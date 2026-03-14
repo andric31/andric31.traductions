@@ -102,11 +102,11 @@ a:hover{ text-decoration: none; }
 .az-search{
   display: flex;
   justify-content: center;
-  margin: 10px 0 14px;
+  margin: 16px 0 8px;
 }
 
 .az-search input{
-  width: min(100%, 640px);
+  width: min(100%, 720px);
   padding: 12px 16px;
   border-radius: 12px;
   border: 1px solid var(--wiki-border);
@@ -123,28 +123,60 @@ a:hover{ text-decoration: none; }
 
 .az-results{
   display: none;
-  margin-top: 16px;
+  margin-top: 18px;
 }
 
 .az-results.is-visible{
   display: block;
 }
 
+.az-results-head{
+  text-align: center;
+  color: var(--wiki-muted);
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+
+.az-results-list{
+  display: grid;
+  gap: 12px;
+}
+
 .az-results .lex-item{
-  padding: 12px 14px;
+  padding: 14px 16px;
   border: 1px solid var(--wiki-border);
-  border-radius: 14px;
+  border-radius: 16px;
   background: var(--wiki-soft);
 }
 
-.az-results .lex-item + .lex-item{
-  margin-top: 10px;
+.search-hit{
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.search-hit-letter{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--wiki-border-strong);
+  background: var(--wiki-accent-soft);
+  font-weight: 800;
+  color: var(--wiki-text);
+}
+
+.search-hit-body{
+  line-height: 1.8;
 }
 
 .az-empty{
   text-align: center;
   color: var(--wiki-muted);
-  padding: 10px 0 2px;
+  padding: 12px 0 4px;
 }
 
 .wiki-home-section{ margin-top: 8px; }
@@ -169,15 +201,19 @@ pre,
 code{ overflow-wrap: anywhere; word-break: break-word; }
 
 .az-nav{
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(42px, 1fr));
-  gap: 8px;
-  width: 100%;
-  margin: 12px 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px 10px;
+  width: min(100%, 860px);
+  margin: 14px auto 0;
 }
 
 .az-nav button{
-  width: 100%;
+  flex: 0 0 42px;
+  width: 42px;
+  min-width: 42px;
   padding: 8px 0;
   border: 1px solid var(--wiki-border);
   border-radius: 10px;
@@ -294,4 +330,21 @@ code{
   .wiki-shell{ width: min(var(--wiki-max), calc(100% - 20px)); padding: 24px 0 46px; }
   .topbar, .page, .footer{ width: min(var(--wiki-page-max), calc(100% - 20px)); }
   .tuto-card, .card{ border-radius: 18px; padding: 18px; }
+}
+
+
+@media (max-width: 700px){
+  .az-nav{
+    width: min(100%, 420px);
+    gap: 8px;
+  }
+  .az-search input{
+    width: 100%;
+  }
+  .search-hit{
+    grid-template-columns: 1fr;
+  }
+  .search-hit-letter{
+    width: fit-content;
+  }
 }

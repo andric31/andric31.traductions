@@ -1071,6 +1071,69 @@
   <p>© andric31 — Tutos & Aide</p>
 </footer>
 
+
+<script>
+(function(){
+  const input = document.getElementById('azSearch');
+  const results = document.getElementById('azResults');
+  const nav = document.querySelector('.az-nav');
+  const blocks = Array.from(document.querySelectorAll('.az-block'));
+  const items = blocks.flatMap(block => Array.from(block.querySelectorAll('.lex-item')).map(item => ({
+    block,
+    html: item.innerHTML,
+    text: item.textContent.toLowerCase()
+  })));
+
+  if (!input || !results) return;
+
+  function escapeRegExp(str){
+    return str.replace(/[.*+?^${}()|[\]\]/g, '\\$&');
+  }
+
+  function highlight(html, query){
+    if (!query) return html;
+    const pattern = new RegExp('(' + escapeRegExp(query) + ')', 'ig');
+    return html.replace(pattern, '<mark>$1</mark>');
+  }
+
+  function resetView(){
+    results.innerHTML = '';
+    results.classList.remove('is-visible');
+    if (nav) nav.style.display = '';
+    blocks.forEach(block => block.style.display = '');
+  }
+
+  input.addEventListener('input', () => {
+    const query = input.value.trim().toLowerCase();
+    if (!query) {
+      resetView();
+      return;
+    }
+
+    const matches = items.filter(item => item.text.includes(query));
+    blocks.forEach(block => block.style.display = 'none');
+    if (nav) nav.style.display = 'none';
+
+    if (!matches.length) {
+      results.innerHTML = '<p class="az-empty">Aucun terme trouvé pour cette recherche.</p>';
+      results.classList.add('is-visible');
+      return;
+    }
+
+    results.innerHTML = matches.map(item => `<div class="lex-item">${highlight(item.html, query)}</div>`).join('');
+    results.classList.add('is-visible');
+  });
+
+  document.querySelectorAll('.az-nav button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      input.value = '';
+      resetView();
+      const target = document.getElementById(btn.dataset.letter);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+})();
+</script>
 <script src="/theme-init.js"></script>
 </body>
 </html>

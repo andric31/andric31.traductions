@@ -2,175 +2,102 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>f95list_andric31_viewer</title>
-
+  <title>Messages — andric31</title>
   <link rel="icon" href="/favicon.png" />
-  <link rel="stylesheet" href="/viewer.css" />
+  <script src="/theme-init.js"></script>
   <link rel="stylesheet" href="/themes.css" />
-  <link rel="stylesheet" href="viewer.menu.help.css">
+  <link rel="stylesheet" href="messages.css" />
 </head>
 <body>
-
-  <!-- 🔞 AGE GATE -->
-  <div id="age-gate" style="display:none;">
-    <div class="age-box">
-      <h2>🔞 Contenu réservé aux adultes</h2>
-      <p>
-        Ce site contient des images et contenus destinés à un public majeur.<br>
-        En continuant, vous confirmez avoir <strong>18 ans ou plus</strong>.
-      </p>
-
-      <button id="age-yes">J’ai 18 ans</button>
-      <button id="age-no">Quitter</button>
-    </div>
-  </div>
-
-  <header class="topbar" role="banner">
-    <div class="top-title-row">
-      <h1>f95list_andric31_viewer</h1>
-    </div>
-
-    <div class="top-actions">
-      <div class="search-wrap">
-        <input id="search" type="search" placeholder="Rechercher un jeu." autocomplete="off" />
-        <span class="stat-in-bar total-inline">Total : <strong id="countTotal">0</strong></span>
-      </div>
-
-      <select id="sort" title="Trier">
-        <option value="updatedAtLocal-desc">Date de la traduction</option>
-        <option value="mega-desc">📥 Téléchargements</option>
-        <option value="views-desc">👁️ Vues</option>
-        <option value="likes-desc">❤️ J'aime</option>
-        <option value="title-asc">Titre A→Z</option>
-        <option value="title-desc">Titre Z→A</option>
-        <option value="updatedAt-desc">Date Thread F95 (Maj)</option>
-      </select>
-
-      <select id="filterCat" title="Catégorie">
-        <option value="all">Catégorie : Toutes</option>
-        <option value="VN">VN</option>
-        <option value="Collection">Collection</option>
-      </select>
-
-      <select id="filterEngine" title="Moteur">
-        <option value="all">Moteur : Tous</option>
-        <option value="Ren'Py">Ren'Py</option>
-        <option value="RPGM">RPGM</option>
-        <option value="Unity">Unity</option>
-        <option value="Others">Others</option>
-        <option value="Wolf RPG">Wolf RPG</option>
-      </select>
-
-      <select id="filterStatus" title="Statut">
-        <option value="all">Statut : Tous</option>
-        <option value="Completed">Completed</option>
-        <option value="Abandoned">Abandoned</option>
-        <option value="Onhold">Onhold</option>
-        <option value="En cours">En cours</option>
-      </select>
-
-      <button id="tagsBtn" type="button" class="tags-btn" aria-haspopup="menu" aria-expanded="false">
-        🏷️ Tags <span id="tagsCount" class="tags-count hidden">0</span>
-      </button>
-
-      <select id="cols" title="Vignettes par ligne">
-        <option value="auto">Vignettes/ligne : Auto</option>
-        <option value="1">1 par ligne</option>
-        <option value="2">2 par ligne</option>
-        <option value="3">3 par ligne</option>
-        <option value="4">4 par ligne</option>
-        <option value="5">5 par ligne</option>
-        <option value="6">6 par ligne</option>
-        <option value="7">7 par ligne</option>
-        <option value="8">8 par ligne</option>
-        <option value="9">9 par ligne</option>
-        <option value="10">10 par ligne</option>
-      </select>
-
-      <select id="pageSize" title="Affichage progressif">
-        <option value="50">Afficher par 50</option>
-        <option value="100">Afficher par 100</option>
-        <option value="all">Tout afficher</option>
-      </select>
-
-      <select id="theme" title="Thème">
-        <option value="auto">Thème : Auto (Windows)</option>
-        <option value="dark">Thème : Sombre</option>
-        <option value="white">Thème : Clair</option>
-
-        <option value="valentine">Thème : Saint-Valentin 💘</option>
-        <option value="carnaval">Thème : Carnaval 🎭</option>
-        <option value="paques">Thème : Pâques 🐣</option>
-        <option value="halloween">Thème : Halloween 🎃</option>
-        <option value="noel">Thème : Noël 🎄</option>
-        <option value="nouvelan">Thème : Nouvel An 🎆</option>
-        
-        <option value="printemps">Thème : Printemps 🌸</option>
-        <option value="ete">Thème : Été 🌞</option>
-        <option value="automne">Thème : Automne 🍂</option>
-        <option value="hiver">Thème : Hiver ❄️</option>
-        
-        <option value="sakura">Thème : Sakura 🌸</option>
-        <option value="desert">Thème : Désert 🏜️</option>
-        <option value="ocean">Thème : Océan 🌊</option>
-        <option value="forest">Thème : Forêt 🌲</option>
-        
-        <option value="vaporwave">Thème : Vaporwave 🌴</option>
-        <option value="cyberpunk">Thème : Cyberpunk ⚡</option>
-        <option value="neon">Thème : Néon 🌈</option>
-        <option value="midnight">Thème : Midnight 🌑</option>
-        
-        <option value="galaxy">Thème : Galaxy 🌌</option>
-        <option value="gothic">Thème : Gothic 🧛</option>
-        <option value="coffee">Thème : Coffee ☕</option>
-        
-        <option value="lava">Thème : Lava 🔥</option>
-        <option value="ice">Thème : Ice 🧊</option>
-        <option value="matrix">Thème : Matrix 🌫</option>
-        <option value="sunset">Thème : Sunset 🌇</option>
-        <option value="retro">Thème : Retro 🎮</option>
-        <option value="tropical">Thème : Tropical 🏖️</option>
-        <option value="crimson">Thème : Crimson 🩸</option>
-        <option value="steam">Thème : Steam ⚙️</option>
-      </select>
-
-      <button id="refresh" type="button">Rafraîchir</button>
-    </div>
-  </header>
-
-  <main role="main">
-    <section id="gridMode" class="grid-wrap" aria-label="Vignettes des jeux">
-
-      <!-- ✅ BANDEAU ANNONCE ICI (au-dessus des tuiles) -->
-      <div id="viewerAnnonceHost"></div>
-
-      <div id="grid" class="grid"></div>
-      <div id="gridEmpty" class="empty hidden">Aucun résultat.</div>
+  <main class="msg-shell">
+    <section class="msg-hero">
+      <div class="msg-kicker">💬 Mini chat global</div>
+      <h1>Messages</h1>
+      <p>Un espace simple pour discuter, laisser un avis ou poser une petite question. Les nouveaux messages apparaissent automatiquement dans le salon global.</p>
     </section>
 
-    <!-- ✅ Footer stats -->
-    <footer class="viewer-footer">
-      👁️ Vues de la page : <strong id="mainViews">—</strong>
-    </footer>
+    <section class="msg-layout">
+      <aside class="msg-panel msg-side">
+        <div class="msg-side-head">
+          <h2>Salons</h2>
+          <span id="roomStatus" class="msg-status">Connexion…</span>
+        </div>
+
+        <div class="msg-side-block">
+          <div class="msg-side-title">Accès rapide</div>
+          <a class="msg-side-link" href="/">🏠 f95list_andric31_viewer</a>
+          <button id="refreshBtn" class="msg-side-link msg-side-btn" type="button">🔄 Actualiser</button>
+        </div>
+
+        <div class="msg-side-block">
+          <div class="msg-side-title">Règles rapides</div>
+          <ul class="msg-rules">
+            <li>Reste poli et évite le spam.</li>
+            <li>Pas de flood ni de message vide.</li>
+            <li>Les messages trop longs sont refusés.</li>
+            <li>Le pseudo invité est retenu sur ce navigateur.</li>
+          </ul>
+        </div>
+
+        <div class="msg-side-block msg-stats">
+          <div>
+            <span class="msg-stat-label">Messages</span>
+            <strong id="msgCount">0</strong>
+          </div>
+          <div>
+            <span class="msg-stat-label">Actualisation</span>
+            <strong>7 sec</strong>
+          </div>
+        </div>
+      </aside>
+
+      <section class="msg-panel msg-main">
+        <header class="msg-main-head">
+          <div>
+            <div class="msg-main-kicker">Salon public</div>
+            <h2>Discussion générale</h2>
+          </div>
+          <button id="scrollBottomBtn" class="msg-ghost-btn" type="button">Bas de page</button>
+        </header>
+
+        <div id="messagesEmpty" class="msg-empty hidden">Aucun message pour le moment.</div>
+        <div id="messagesList" class="msg-list" aria-live="polite"></div>
+
+        <form id="chatForm" class="msg-compose">
+          <div class="msg-compose-top">
+            <label class="msg-field">
+              <span>Pseudo</span>
+              <input id="nickname" type="text" maxlength="40" placeholder="Ton pseudo" autocomplete="nickname" />
+            </label>
+
+            <label class="msg-field">
+              <span>Salon</span>
+              <div class="msg-select-wrap">
+                <select id="roomSelect">
+                  <option value="global">Public — Global</option>
+                </select>
+              </div>
+            </label>
+          </div>
+
+          <div id="authChatInfo" class="msg-form-info">Non connecté : pseudo mémorisé dans ce navigateur et accès limité au salon public.</div>
+
+          <label class="msg-field">
+            <span>Message</span>
+            <textarea id="messageInput" maxlength="500" rows="4" placeholder="Écris ton message ici…"></textarea>
+          </label>
+
+          <div class="msg-compose-bottom">
+            <div id="formInfo" class="msg-form-info">500 caractères max.</div>
+            <button id="sendBtn" class="msg-send-btn" type="submit">Envoyer</button>
+          </div>
+        </form>
+      </section>
+    </section>
   </main>
 
-  <script src="/viewer.menu.js"></script>
-  <script src="/viewer.menu.about.js"></script>
-  <script src="/viewer.menu.extension.js"></script>
-
-  <!-- ✅ charge le bandeau (indépendant de f95list.json) -->
-  <script src="/viewer.annonce.js"></script>
-
-  <script src="/viewer.js"></script>
-
-  <!-- 🔞 Age gate -->
-  <script src="/viewer.agegate.js"></script>
-
-  <script src="viewer.menu.help.js"></script>
-  <script src="/viewer.quicklinks.js"></script>
   <script src="/auth/auth.client.js"></script>
+  <script src="messages.js"></script>
 </body>
 </html>
-

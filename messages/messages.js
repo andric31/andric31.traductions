@@ -141,18 +141,21 @@
             <span class="msg-avatar">${escapeHtml(avatarLetter(item.nickname))}</span>
             <span>${escapeHtml(item.nickname)}</span>
           </div>
-          <div class="msg-date">${escapeHtml(formatDate(item.created_at))}</div>
+          <div class="msg-item-meta">
+            <div class="msg-date">${escapeHtml(formatDate(item.created_at))}</div>
+          </div>
         </div>
         <div class="msg-text">${escapeHtml(item.message)}</div>
       `;
 
       if (isAdmin) {
+        const meta = article.querySelector('.msg-item-meta');
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'msg-delete-btn';
         btn.textContent = 'Supprimer';
         btn.addEventListener('click', () => deleteMessage(item.id));
-        article.appendChild(btn);
+        meta?.appendChild(btn);
       }
 
       els.list.appendChild(article);

@@ -15,7 +15,7 @@
     hiddenNotificationId: "andric31_hidden_notification_id",
   };
 
-  const MESSAGES_API_URL = "/api/messages?limit=1";
+  const MESSAGES_API_URL = "/api/messages?limit=1&scope=allowed";
   const BLOG_INDEX_URL = "/blog/";
   const NOTIFICATIONS_JSON_URL = "/notifications/notifications.json";
   const NOTIFICATION_URL = "https://andric31-traductions.pages.dev/notifications/";
@@ -372,10 +372,13 @@
 
   async function initMessageIndicator(messagesEl) {
     try {
-      const res = await fetch(MESSAGES_API_URL, { cache: "no-store" });
+      if (window.SiteAuth?.fetchMe && !window.SiteAuth.loaded) {
+        try { await window.SiteAuth.fetchMe(); } catch {}
+      }
+      const res = await fetch(MESSAGES_API_URL, { cache: "no-store", credentials: "same-origin" });
       const data = await res.json();
-      if (!res.ok || !data?.ok || !Array.isArray(data.messages) || !data.messages.length) return;
-      const latest = data.messages[data.messages.length - 1];
+      if (!res.ok || !data?.ok || !Array.isArray(data.messages)) return;
+      const latest = data.messages[data.messages.length - 1] || null;
       const latestId = Number(latest?.id || 0);
       messagesEl.dataset.latestMessageId = String(latestId || 0);
       const seenMessageId = Number(localStorage.getItem(STORAGE.seenMessageId) || 0);

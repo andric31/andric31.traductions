@@ -12,25 +12,31 @@
   <style>
     html:not(.auth-ready) body { visibility: hidden; }
 
+    html.auth-denied body { visibility: visible; }
+
     .blog-admin-shell {
-      width: min(1360px, calc(100% - 16px));
-      margin: 18px auto 18px;
-      display: grid;
-      gap: 12px;
+      display:grid;
+      gap:10px;
+      width:min(1180px, calc(100% - 18px));
+      margin:12px auto 18px !important;
+      padding-top:0 !important;
     }
+
+    body .auth-shell.blog-admin-shell { margin-top:12px !important; }
+    body .auth-card { scroll-margin-top: 8px; }
 
     .blog-admin-top.auth-card,
     .blog-admin-main.auth-card,
     .blog-admin-out.auth-card {
-      padding: 14px;
+      padding: 16px;
     }
 
     .blog-admin-top .auth-title {
-      margin-bottom: 6px;
+      margin: 0 0 6px;
     }
 
     .blog-admin-top .auth-subtitle {
-      margin-bottom: 10px;
+      margin: 0 0 10px;
     }
 
     .blog-admin-top .auth-actions {
@@ -39,7 +45,7 @@
 
     .blog-admin-grid {
       display: grid;
-      grid-template-columns: minmax(360px, 520px) minmax(340px, 1fr);
+      grid-template-columns: minmax(320px, 440px) 1fr;
       gap: 12px;
       align-items: start;
     }

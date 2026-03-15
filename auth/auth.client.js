@@ -153,6 +153,8 @@
           else window.ViewerMenu.addItem(it.label, it.onClick);
         }
         window.ViewerMenu.addDivider();
+        const divItems = window.ViewerMenu.__getItems?.();
+        if (divItems?.[divItems.length - 1]) divItems[divItems.length - 1].__authManaged = true;
         if (me) {
           const label = `👤 Mon compte — ${me.display_name || me.username}`;
           const logoutLabel = '🔓 Se déconnecter';

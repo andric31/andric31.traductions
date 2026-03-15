@@ -278,8 +278,8 @@
       if (event.key === "Escape") closeNotificationsPopover();
     });
 
-    afterEl.insertAdjacentElement("afterend", messages);
     afterEl.insertAdjacentElement("afterend", notifications);
+    afterEl.insertAdjacentElement("afterend", messages);
     afterEl.insertAdjacentElement("afterend", blog);
     afterEl.insertAdjacentElement("afterend", wiki);
 

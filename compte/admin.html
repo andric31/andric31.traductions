@@ -11,13 +11,14 @@
   <script src="/theme-init.js"></script>
   
 <style>
-  .admin-layout { display:grid; gap:16px; }
+  .admin-layout { display:grid; gap:14px; width:min(1180px, calc(100% - 18px)); margin:12px auto 28px; }
   .admin-split { display:grid; grid-template-columns: minmax(320px, 440px) 1fr; gap:16px; align-items:start; }
   .admin-note { color:var(--muted); font-size:14px; line-height:1.55; }
-  .admin-toolbar { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
+  .admin-toolbar { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:10px; }
+  .admin-summary { margin:4px 0 0; color:var(--muted); font-size:13px; }
   .admin-tools {
     display:grid;
-    grid-template-columns: minmax(240px, 1.4fr) minmax(180px, .9fr) auto;
+    grid-template-columns: minmax(260px, 1.6fr) repeat(3, minmax(160px, .75fr)) auto;
     gap:10px;
     margin:10px 0 12px;
     align-items:end;
@@ -29,6 +30,23 @@
     margin:0 0 12px;
   }
   .admin-stats .admin-pill { background:rgba(80,160,255,.10); }
+  .admin-quickfilters {
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:0 0 12px;
+  }
+  .admin-chip {
+    appearance:none;
+    border:1px solid var(--border, var(--auth-border));
+    background:rgba(255,255,255,.05);
+    color:var(--text,#fff);
+    border-radius:999px;
+    padding:8px 12px;
+    cursor:pointer;
+    font:inherit;
+  }
+  .admin-chip.active { background:rgba(80, 160, 255, .18); }
   .admin-users { display:grid; gap:14px; }
   .member-card {
     border:1px solid var(--border, var(--auth-border));
@@ -52,6 +70,8 @@
     background:rgba(255,255,255,.08); border:1px solid var(--border, var(--auth-border)); font-size:13px;
   }
   .admin-pill.me { background:rgba(80, 160, 255, .14); }
+  .admin-pill.ok { background:rgba(74, 222, 128, .14); }
+  .admin-pill.off { background:rgba(255, 99, 132, .12); }
   .member-grid {
     display:grid;
     grid-template-columns: repeat(2, minmax(220px, 1fr));
@@ -73,6 +93,7 @@
   .meta-box strong { display:block; color:var(--text,#fff); font-size:12px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px; }
   .member-actions { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:14px; }
   .row-msg { flex:1 1 240px; min-height:20px; }
+  .auth-card[data-auth-only][data-role-min="admin"] > .auth-actions { margin-top:12px; }
   @media (max-width: 980px) {
     .admin-split { grid-template-columns:1fr; }
     .member-grid { grid-template-columns:1fr; }
@@ -145,7 +166,8 @@
   <div class="admin-toolbar">
     <div>
       <h2 style="margin:0;">👥 Membres</h2>
-      <div class="admin-note">Retrouve rapidement un membre avec la recherche et les filtres par rôle.</div>
+      <div class="admin-note">Retrouve rapidement un membre avec la recherche, les filtres et le tri.</div>
+      <div class="admin-summary" id="usersSummary">—</div>
     </div>
     <button class="auth-btn" id="refreshUsersBtn" type="button">Actualiser</button>
   </div>
@@ -153,11 +175,11 @@
   <div class="admin-tools">
     <label class="auth-label" style="margin:0;">
       <span>Recherche</span>
-      <input class="auth-input" id="searchUsersInput" type="text" placeholder="Pseudo ou nom affiché..." />
+      <input class="auth-input" id="searchUsersInput" type="text" placeholder="ID, pseudo, nom affiché ou rôle..." />
     </label>
 
     <label class="auth-label" style="margin:0;">
-      <span>Filtre rôle</span>
+      <span>Rôle</span>
       <select class="auth-select" id="roleFilterSelect">
         <option value="">Tous</option>
         <option value="admin">admin</option>
@@ -166,9 +188,35 @@
       </select>
     </label>
 
+    <label class="auth-label" style="margin:0;">
+      <span>Statut</span>
+      <select class="auth-select" id="statusFilterSelect">
+        <option value="">Tous</option>
+        <option value="active">Actifs</option>
+        <option value="inactive">Désactivés</option>
+      </select>
+    </label>
+
+    <label class="auth-label" style="margin:0;">
+      <span>Trier par</span>
+      <select class="auth-select" id="sortUsersSelect">
+        <option value="username_asc">Pseudo A → Z</option>
+        <option value="created_desc">Création récente</option>
+        <option value="login_desc">Dernier login</option>
+        <option value="role_asc">Rôle</option>
+      </select>
+    </label>
+
     <div class="auth-actions" style="margin:0;">
       <button class="auth-btn" id="resetUsersFiltersBtn" type="button">Réinitialiser</button>
     </div>
+  </div>
+
+  <div class="admin-quickfilters" id="quickRoleFilters">
+    <button class="admin-chip active" type="button" data-quick-role="">Tous</button>
+    <button class="admin-chip" type="button" data-quick-role="admin">Admins</button>
+    <button class="admin-chip" type="button" data-quick-role="translator">Traducteurs</button>
+    <button class="admin-chip" type="button" data-quick-role="member">Membres</button>
   </div>
 
   <div class="admin-stats" id="usersStats">
@@ -201,6 +249,10 @@
     const roleFilterSelect = document.getElementById('roleFilterSelect');
     const resetUsersFiltersBtn = document.getElementById('resetUsersFiltersBtn');
     const usersStats = document.getElementById('usersStats');
+    const usersSummary = document.getElementById('usersSummary');
+    const statusFilterSelect = document.getElementById('statusFilterSelect');
+    const sortUsersSelect = document.getElementById('sortUsersSelect');
+    const quickRoleFilters = document.getElementById('quickRoleFilters');
     let allUsers = [];
 
     function setMsg(el, text, ok) {
@@ -223,14 +275,18 @@
     }
 
     function updateStats(list) {
-      const stats = { total: list.length, admin: 0, translator: 0, member: 0 };
+      const stats = { total: list.length, active: 0, inactive: 0, admin: 0, translator: 0, member: 0 };
       for (const u of list) {
         const role = String(u?.role || '').toLowerCase();
         if (role in stats) stats[role] += 1;
+        if (u?.is_active) stats.active += 1;
+        else stats.inactive += 1;
       }
       if (usersStats) {
         usersStats.innerHTML = `
           <span class="admin-pill">Total : ${stats.total}</span>
+          <span class="admin-pill ok">Actifs : ${stats.active}</span>
+          <span class="admin-pill off">Désactivés : ${stats.inactive}</span>
           <span class="admin-pill">admin : ${stats.admin}</span>
           <span class="admin-pill">translator : ${stats.translator}</span>
           <span class="admin-pill">member : ${stats.member}</span>
@@ -238,17 +294,66 @@
       }
     }
 
+    function updateSummary(filtered) {
+      if (!usersSummary) return;
+      const total = allUsers.length;
+      const shown = filtered.length;
+      const q = String(searchUsersInput?.value || '').trim();
+      const role = String(roleFilterSelect?.value || '').trim();
+      const status = String(statusFilterSelect?.value || '').trim();
+      const parts = [`${shown} affiché(s) sur ${total}`];
+      if (q) parts.push(`recherche : “${q}”`);
+      if (role) parts.push(`rôle : ${role}`);
+      if (status === 'active') parts.push('statut : actifs');
+      if (status === 'inactive') parts.push('statut : désactivés');
+      usersSummary.textContent = parts.join(' • ');
+    }
+
+    function sortUsers(list) {
+      const mode = String(sortUsersSelect?.value || 'username_asc');
+      const arr = [...list];
+      arr.sort((a, b) => {
+        const au = String(a?.username || '').toLowerCase();
+        const bu = String(b?.username || '').toLowerCase();
+        const ar = String(a?.role || '').toLowerCase();
+        const br = String(b?.role || '').toLowerCase();
+        const ac = new Date(a?.created_at || 0).getTime() || 0;
+        const bc = new Date(b?.created_at || 0).getTime() || 0;
+        const al = new Date(a?.last_login_at || 0).getTime() || 0;
+        const bl = new Date(b?.last_login_at || 0).getTime() || 0;
+        if (mode === 'created_desc') return bc - ac || au.localeCompare(bu, 'fr');
+        if (mode === 'login_desc') return bl - al || au.localeCompare(bu, 'fr');
+        if (mode === 'role_asc') return ar.localeCompare(br, 'fr') || au.localeCompare(bu, 'fr');
+        return au.localeCompare(bu, 'fr');
+      });
+      return arr;
+    }
+
+    function syncQuickRoleButtons() {
+      if (!quickRoleFilters) return;
+      const current = String(roleFilterSelect?.value || '');
+      quickRoleFilters.querySelectorAll('[data-quick-role]').forEach((btn) => {
+        btn.classList.toggle('active', String(btn.dataset.quickRole || '') === current);
+      });
+    }
+
     function getFilteredUsers() {
       const q = String(searchUsersInput?.value || '').trim().toLowerCase();
       const roleFilter = String(roleFilterSelect?.value || '').trim().toLowerCase();
-      return allUsers.filter((u) => {
+      const statusFilter = String(statusFilterSelect?.value || '').trim().toLowerCase();
+      const filtered = allUsers.filter((u) => {
         const username = String(u?.username || '').toLowerCase();
         const displayName = String(u?.display_name || '').toLowerCase();
         const role = String(u?.role || '').toLowerCase();
-        const matchText = !q || username.includes(q) || displayName.includes(q);
+        const id = String(u?.id || '').toLowerCase();
+        const activeLabel = u?.is_active ? 'active actif' : 'inactive désactivé';
+        const haystack = [id, username, displayName, role, activeLabel].join(' ');
+        const matchText = !q || haystack.includes(q);
         const matchRole = !roleFilter || role === roleFilter;
-        return matchText && matchRole;
+        const matchStatus = !statusFilter || (statusFilter === 'active' ? !!u?.is_active : !u?.is_active);
+        return matchText && matchRole && matchStatus;
       });
+      return sortUsers(filtered);
     }
 
     function renderUsers(list) {
@@ -262,7 +367,8 @@
                   <h3 class="member-title">${esc(u.display_name || u.username)}</h3>
                   <div class="member-sub">
                     <span class="admin-pill">ID ${u.id}</span>
-                    <span class="admin-pill">Rôle actuel : ${esc(u.role)}</span>
+                    <span class="admin-pill">Rôle : ${esc(u.role)}</span>
+                    <span class="admin-pill ${u.is_active ? 'ok' : 'off'}">${u.is_active ? 'Actif' : 'Désactivé'}</span>
                     ${isSelf ? '<span class="admin-pill me">Ton compte</span>' : ''}
                   </div>
                 </div>
@@ -311,7 +417,9 @@
 
       usersTbody.innerHTML = rows || '<div class="member-card">Aucun membre ne correspond à la recherche.</div>';
       updateStats(allUsers);
+      updateSummary(list);
       setMsg(usersMsg, `${list.length} membre(s) affiché(s) sur ${allUsers.length}.`, true);
+      syncQuickRoleButtons();
     }
 
     function applyUserFilters() {
@@ -356,9 +464,19 @@
     refreshUsersBtn?.addEventListener('click', () => loadUsers());
     searchUsersInput?.addEventListener('input', () => applyUserFilters());
     roleFilterSelect?.addEventListener('change', () => applyUserFilters());
+    statusFilterSelect?.addEventListener('change', () => applyUserFilters());
+    sortUsersSelect?.addEventListener('change', () => applyUserFilters());
+    quickRoleFilters?.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-quick-role]');
+      if (!btn) return;
+      if (roleFilterSelect) roleFilterSelect.value = btn.dataset.quickRole || '';
+      applyUserFilters();
+    });
     resetUsersFiltersBtn?.addEventListener('click', () => {
       if (searchUsersInput) searchUsersInput.value = '';
       if (roleFilterSelect) roleFilterSelect.value = '';
+      if (statusFilterSelect) statusFilterSelect.value = '';
+      if (sortUsersSelect) sortUsersSelect.value = 'username_asc';
       applyUserFilters();
     });
 

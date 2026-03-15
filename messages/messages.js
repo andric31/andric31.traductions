@@ -136,16 +136,16 @@
       const article = document.createElement('article');
       article.className = 'msg-item';
       article.innerHTML = `
-        <div class="msg-item-head">
+        <div class="msg-item-main">
           <div class="msg-author">
             <span class="msg-avatar">${escapeHtml(avatarLetter(item.nickname))}</span>
             <span>${escapeHtml(item.nickname)}</span>
           </div>
-          <div class="msg-head-actions">
-            <div class="msg-date">${escapeHtml(formatDate(item.created_at))}</div>
-          </div>
+          <div class="msg-text">${escapeHtml(item.message)}</div>
         </div>
-        <div class="msg-text">${escapeHtml(item.message)}</div>
+        <div class="msg-head-actions">
+          <div class="msg-date">${escapeHtml(formatDate(item.created_at))}</div>
+        </div>
       `;
 
       if (isAdmin) {

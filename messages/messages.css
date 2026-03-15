@@ -211,18 +211,20 @@ button, input, textarea { font: inherit; }
 
 .msg-item {
   display: grid;
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px 16px;
   padding: 16px;
   border-radius: 18px;
   border: 1px solid var(--msg-border);
   background: linear-gradient(180deg, var(--msg-card-strong), var(--msg-card));
 }
 
-.msg-item-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
+.msg-item-main {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 8px;
 }
 
 .msg-author {
@@ -257,6 +259,7 @@ button, input, textarea { font: inherit; }
   justify-content: flex-start;
   gap: 8px;
   flex: 0 0 auto;
+  align-self: start;
 }
 
 .msg-text {
@@ -264,6 +267,7 @@ button, input, textarea { font: inherit; }
   word-break: break-word;
   line-height: 1.75;
   color: color-mix(in srgb, var(--fg, #e8eaf0) 90%, var(--muted, #aab2c8) 10%);
+  margin-top: -2px;
 }
 
 .msg-compose {

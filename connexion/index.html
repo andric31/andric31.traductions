@@ -1,1 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Connexion</title>
+  <link rel="icon" href="/favicon.png" />
+  <link rel="stylesheet" href="/viewer.css" />
+  <link rel="stylesheet" href="/themes.css" />
+  <link rel="stylesheet" href="/auth/auth.css" />
+  <script src="/theme-init.js"></script>
+</head>
+<body>
+  <main class="auth-shell">
+    <section class="auth-card">
+      <h1 class="auth-title">🔐 Connexion</h1>
+      <p class="auth-subtitle">Accès membre sécurisé pour afficher des options réservées aux personnes connectées.</p>
 
+      <div class="auth-grid">
+        <div>
+          <form id="loginForm" class="auth-form" autocomplete="on">
+            <label class="auth-label">
+              <span>Nom d’utilisateur</span>
+              <input class="auth-input" id="username" name="username" type="text" autocomplete="username" required />
+            </label>
+            <label class="auth-label">
+              <span>Mot de passe</span>
+              <input class="auth-input" id="password" name="password" type="password" autocomplete="current-password" required />
+            </label>
+            <div class="auth-actions">
+              <button class="auth-btn primary" type="submit">Se connecter</button>
+              <a class="auth-btn" href="/">Retour au site</a>
+              <a class="auth-btn" href="/compte/">Mon compte</a>
+            </div>
+            <div id="loginMsg" class="auth-msg"></div>
+          </form>
+        </div>
+
+        <div class="auth-box">
+          <div id="guestBox" data-guest-only>
+            <h3>👋 Bienvenue</h3>
+            <p>Connecte-toi pour accéder à ton espace membre et aux options réservées.</p>
+            <ul class="auth-list">
+              <li>accès à l’espace membre</li>
+              <li>contenus et options réservés</li>
+              <li>fonctionnalités supplémentaires</li>
+            </ul>
+          </div>
+
+          <div id="userBox" data-auth-only class="auth-hidden">
+            <h3>✅ Connecté</h3>
+            <p class="auth-userline">👤 <strong data-auth-name></strong> · <span data-auth-role></span></p>
+            <p>Ton accès est actif. Tu peux aller dans l’espace membre ou te déconnecter.</p>
+            <div class="auth-actions">
+              <a class="auth-btn primary" href="/compte/">Ouvrir mon compte</a>
+              <button class="auth-btn warn" id="logoutBtn" type="button">Se déconnecter</button>
+            </div>
+            <div id="logoutMsg" class="auth-msg"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="auth-card" style="margin-top:16px;" data-auth-only data-role-min="admin">
+      <h2 style="margin-top:0;">🛠️ Admin rapide</h2>
+      <p>Créer un compte depuis le navigateur avec le token admin.</p>
+      <div class="auth-actions">
+        <a class="auth-btn" href="/compte/admin.html">Ouvrir l’outil admin</a>
+      </div>
+    </section>
+  </main>
+
+  <script src="/auth/auth.client.js"></script>
+  <script>
+    const loginForm = document.getElementById('loginForm');
+    const loginMsg = document.getElementById('loginMsg');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const logoutMsg = document.getElementById('logoutMsg');
+
+    function setMsg(el, text, ok) {
+      if (!el) return;
+      el.textContent = text || '';
+      el.className = 'auth-msg ' + (text ? (ok ? 'ok' : 'err') : '');
+    }
+
+    loginForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      setMsg(loginMsg, 'Connexion…', true);
+      const username = document.getElementById('username')?.value || '';
+      const password = document.getElementById('password')?.value || '';
+      try {
+        await window.SiteAuth.login(username, password);
+        setMsg(loginMsg, 'Connexion réussie.', true);
+        setTimeout(() => { location.href = '/compte/'; }, 350);
+      } catch (err) {
+        setMsg(loginMsg, err?.message || 'Erreur de connexion.', false);
+      }
+    });
+
+    logoutBtn?.addEventListener('click', async () => {
+      setMsg(logoutMsg, 'Déconnexion…', true);
+      try {
+        await window.SiteAuth.logout();
+        setMsg(logoutMsg, 'Déconnecté.', true);
+      } catch (err) {
+        setMsg(logoutMsg, err?.message || 'Erreur de déconnexion.', false);
+      }
+    });
+  </script>
+</body>
+</html>

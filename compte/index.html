@@ -9,59 +9,43 @@
   <link rel="stylesheet" href="/themes.css" />
   <link rel="stylesheet" href="/auth/auth.css" />
   <script src="/theme-init.js"></script>
+  <style>
+    html:not(.auth-ready) body { visibility: hidden; }
+  </style>
 </head>
 <body>
   <main class="auth-shell">
-    <section class="auth-card">
-      <h1 class="auth-title">👤 Compte</h1>
-      <p class="auth-subtitle">Consulte et gère les informations de ton compte.</p>
+    <section class="auth-card auth-hidden" id="guestCard">
+      <h1 class="auth-title">🔒 Accès au compte</h1>
+      <p class="auth-subtitle">Tu dois être connecté pour accéder à cette page.</p>
 
-      <div class="auth-grid">
-        <div>
-          <form id="loginForm" class="auth-form" autocomplete="on">
-            <label class="auth-label">
-              <span>Nom d’utilisateur</span>
-              <input class="auth-input" id="username" name="username" type="text" autocomplete="username" required />
-            </label>
-            <label class="auth-label">
-              <span>Mot de passe</span>
-              <input class="auth-input" id="password" name="password" type="password" autocomplete="current-password" required />
-            </label>
-            <div class="auth-actions">
-              <a class="auth-btn primary" href="/connexion/">Se connecter</a>
-              <a class="auth-btn" href="/">Retour au site</a>
-              <a class="auth-btn" href="/compte/">Mon compte</a>
-            </div>
-            <div id="loginMsg" class="auth-msg"></div>
-          </form>
-        </div>
-
-        <div class="auth-box">
-          <div id="guestBox" data-guest-only>
-            <h3>👋 Bienvenue</h3>
-            <p>Cette page regroupe les informations et options liées à ton compte.</p>
-            <ul class="auth-list">
-              <li>accès à ton compte</li>
-              <li>contenus et options réservés</li>
-              <li>fonctionnalités supplémentaires</li>
-            </ul>
-          </div>
-
-          <div id="userBox" data-auth-only class="auth-hidden">
-            <h3>✅ Connecté</h3>
-            <p class="auth-userline">👤 <strong data-auth-name></strong> · <span data-auth-role></span></p>
-            <p>Ton accès est actif. Tu peux gérer ton compte depuis cette page ou te déconnecter.</p>
-            <div class="auth-actions">
-              <a class="auth-btn primary" href="/compte/">Ouvrir mon compte</a>
-              <button class="auth-btn warn" id="logoutBtn" type="button">Se déconnecter</button>
-            </div>
-            <div id="logoutMsg" class="auth-msg"></div>
-          </div>
+      <div class="auth-box">
+        <h3>Connexion requise</h3>
+        <p>Pour des raisons de sécurité, la page compte est réservée aux membres connectés.</p>
+        <div class="auth-actions">
+          <a class="auth-btn primary" href="/connexion/">Se connecter</a>
+          <a class="auth-btn" href="/">Retour au site</a>
         </div>
       </div>
     </section>
 
-    <section class="auth-card" style="margin-top:16px;" data-auth-only data-role-min="admin">
+    <section class="auth-card auth-hidden" id="accountCard">
+      <h1 class="auth-title">👤 Compte</h1>
+      <p class="auth-subtitle">Consulte et gère les informations de ton compte.</p>
+
+      <div class="auth-box">
+        <h3>✅ Connecté</h3>
+        <p class="auth-userline">👤 <strong data-auth-name></strong> · <span data-auth-role></span></p>
+        <p>Ton accès est actif. Tu peux gérer ton compte depuis cette page ou te déconnecter.</p>
+        <div class="auth-actions">
+          <a class="auth-btn" href="/">Retour au site</a>
+          <button class="auth-btn warn" id="logoutBtn" type="button">Se déconnecter</button>
+        </div>
+        <div id="logoutMsg" class="auth-msg"></div>
+      </div>
+    </section>
+
+    <section class="auth-card auth-hidden" style="margin-top:16px;" id="adminQuickCard" data-role-min="admin">
       <h2 style="margin-top:0;">🛠️ Admin rapide</h2>
       <p>Créer un compte depuis le navigateur avec le token admin.</p>
       <div class="auth-actions">
@@ -72,10 +56,10 @@
 
   <script src="/auth/auth.client.js"></script>
   <script>
-    const loginForm = document.getElementById('loginForm');
-    const loginMsg = document.getElementById('loginMsg');
     const logoutBtn = document.getElementById('logoutBtn');
     const logoutMsg = document.getElementById('logoutMsg');
+    const guestCard = document.getElementById('guestCard');
+    const accountCard = document.getElementById('accountCard');
 
     function setMsg(el, text, ok) {
       if (!el) return;
@@ -83,25 +67,25 @@
       el.className = 'auth-msg ' + (text ? (ok ? 'ok' : 'err') : '');
     }
 
-    loginForm?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      setMsg(loginMsg, 'Connexion…', true);
-      const username = document.getElementById('username')?.value || '';
-      const password = document.getElementById('password')?.value || '';
-      try {
-        await window.SiteAuth.login(username, password);
-        setMsg(loginMsg, 'Connexion réussie.', true);
-        setTimeout(() => { location.href = '/compte/'; }, 350);
-      } catch (err) {
-        setMsg(loginMsg, err?.message || 'Erreur de connexion.', false);
+    function guardAccount(me) {
+      if (!window.SiteAuth?.loaded) return;
+      if (!me) {
+        guestCard?.classList.remove('auth-hidden');
+        accountCard?.classList.add('auth-hidden');
+        return;
       }
-    });
+      guestCard?.classList.add('auth-hidden');
+      accountCard?.classList.remove('auth-hidden');
+    }
+
+    window.SiteAuth.onChange(guardAccount);
+    if (window.SiteAuth.loaded) guardAccount(window.SiteAuth.me);
 
     logoutBtn?.addEventListener('click', async () => {
       setMsg(logoutMsg, 'Déconnexion…', true);
       try {
         await window.SiteAuth.logout();
-        setMsg(logoutMsg, 'Déconnecté.', true);
+        location.replace('/connexion/');
       } catch (err) {
         setMsg(logoutMsg, err?.message || 'Erreur de déconnexion.', false);
       }

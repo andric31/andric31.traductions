@@ -27,6 +27,7 @@
     }
     state.loaded = true;
     applyAuthDom();
+    document.documentElement.classList.add('auth-ready');
     notify();
     return state.me;
   }
@@ -73,6 +74,7 @@
     state.me = data.user || null;
     state.loaded = true;
     applyAuthDom();
+    document.documentElement.classList.add('auth-ready');
     notify();
     return data;
   }
@@ -85,6 +87,7 @@
     state.me = null;
     state.loaded = true;
     applyAuthDom();
+    document.documentElement.classList.add('auth-ready');
     notify();
     return data;
   }

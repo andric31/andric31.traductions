@@ -101,6 +101,12 @@
 .auth-list { margin: 0; padding-left: 18px; }
 .auth-hidden { display: none !important; }
 
+html:not(.auth-ready) [data-auth-only],
+html:not(.auth-ready) [data-guest-only],
+html:not(.auth-ready) [data-role-min] {
+  display: none !important;
+}
+
 .auth-userline {
   display: inline-flex;
   align-items: center;

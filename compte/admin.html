@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin comptes</title>
+  <link rel="icon" href="/favicon.png" />
+  <link rel="stylesheet" href="/viewer.css" />
+  <link rel="stylesheet" href="/themes.css" />
+  <link rel="stylesheet" href="/auth/auth.css" />
+  <script src="/theme-init.js"></script>
+</head>
+<body>
+  <main class="auth-shell">
+    <section class="auth-card">
+      <h1 class="auth-title">🛠️ Création de compte</h1>
+      <p class="auth-subtitle">Cette page envoie le token admin seulement à ton propre serveur. Le token n’est pas stocké automatiquement.</p>
+      <form id="adminForm" class="auth-form" autocomplete="off">
+        <label class="auth-label"><span>Token admin</span><input class="auth-input" id="adminToken" type="password" /></label>
+        <label class="auth-label"><span>Nom d’utilisateur</span><input class="auth-input" id="newUsername" type="text" /></label>
+        <label class="auth-label"><span>Nom affiché</span><input class="auth-input" id="newDisplay" type="text" /></label>
+        <label class="auth-label"><span>Mot de passe</span><input class="auth-input" id="newPassword" type="password" /></label>
+        <label class="auth-label"><span>Rôle</span>
+          <select class="auth-select" id="newRole">
+            <option value="member">member</option>
+            <option value="translator">translator</option>
+            <option value="admin">admin</option>
+          </select>
+        </label>
+        <div class="auth-actions">
+          <button class="auth-btn primary" type="submit">Créer le compte</button>
+          <a class="auth-btn" href="/compte/">Retour</a>
+        </div>
+        <div id="adminMsg" class="auth-msg"></div>
+      </form>
+    </section>
+  </main>
+
+  <script src="/auth/auth.client.js"></script>
+  <script>
+    const form = document.getElementById('adminForm');
+    const msg = document.getElementById('adminMsg');
+    function setMsg(text, ok) {
+      msg.textContent = text || '';
+      msg.className = 'auth-msg ' + (text ? (ok ? 'ok' : 'err') : '');
+    }
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      setMsg('Création…', true);
+      try {
+        const payload = {
+          username: document.getElementById('newUsername')?.value || '',
+          display_name: document.getElementById('newDisplay')?.value || '',
+          password: document.getElementById('newPassword')?.value || '',
+          role: document.getElementById('newRole')?.value || 'member',
+        };
+        const token = document.getElementById('adminToken')?.value || '';
+        const res = await window.SiteAuth.createUserAdmin(payload, token);
+        setMsg(`Compte créé : ${res?.created?.username || ''}`, true);
+        form.reset();
+      } catch (err) {
+        setMsg(err?.message || 'Erreur.', false);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -15,6 +15,20 @@
   .admin-split { display:grid; grid-template-columns: minmax(320px, 440px) 1fr; gap:16px; align-items:start; }
   .admin-note { color:var(--muted); font-size:14px; line-height:1.55; }
   .admin-toolbar { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
+  .admin-tools {
+    display:grid;
+    grid-template-columns: minmax(220px, 1.3fr) minmax(180px, .8fr) auto;
+    gap:10px;
+    margin:14px 0 12px;
+    align-items:end;
+  }
+  .admin-stats {
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:0 0 12px;
+  }
+  .admin-stats .admin-pill { background:rgba(80, 160, 255, .10); }
   .admin-users { display:grid; gap:14px; }
   .member-card {
     border:1px solid var(--border, var(--auth-border));
@@ -65,6 +79,7 @@
     .member-meta { grid-template-columns:1fr; }
     .member-head { flex-direction:column; }
     .admin-toolbar { flex-direction:column; align-items:stretch; }
+    .admin-tools { grid-template-columns:1fr; }
   }
 </style>
 </head>
@@ -130,10 +145,39 @@
   <div class="admin-toolbar">
     <div>
       <h2 style="margin:0;">👥 Membres</h2>
-      <div class="admin-note">Chaque membre est affiché dans un bloc plus lisible, avec ses infos, son rôle et ses actions au même endroit.</div>
+      <div class="admin-note">Retrouve rapidement un membre avec la recherche et les filtres par rôle.</div>
     </div>
     <button class="auth-btn" id="refreshUsersBtn" type="button">Actualiser</button>
   </div>
+
+  <div class="admin-tools">
+    <label class="auth-label" style="margin:0;">
+      <span>Recherche</span>
+      <input class="auth-input" id="searchUsersInput" type="text" placeholder="Pseudo ou nom affiché..." />
+    </label>
+
+    <label class="auth-label" style="margin:0;">
+      <span>Filtre rôle</span>
+      <select class="auth-select" id="roleFilterSelect">
+        <option value="">Tous</option>
+        <option value="admin">admin</option>
+        <option value="translator">translator</option>
+        <option value="member">member</option>
+      </select>
+    </label>
+
+    <div class="auth-actions" style="margin:0;">
+      <button class="auth-btn" id="resetUsersFiltersBtn" type="button">Réinitialiser</button>
+    </div>
+  </div>
+
+  <div class="admin-stats" id="usersStats">
+    <span class="admin-pill">Total : 0</span>
+    <span class="admin-pill">admin : 0</span>
+    <span class="admin-pill">translator : 0</span>
+    <span class="admin-pill">member : 0</span>
+  </div>
+
   <div id="usersMsg" class="auth-msg"></div>
   <div id="usersTbody" class="admin-users">
     <div class="member-card">Chargement…</div>
@@ -153,6 +197,11 @@
     const usersMsg = document.getElementById('usersMsg');
     const usersTbody = document.getElementById('usersTbody');
     const refreshUsersBtn = document.getElementById('refreshUsersBtn');
+    const searchUsersInput = document.getElementById('searchUsersInput');
+    const roleFilterSelect = document.getElementById('roleFilterSelect');
+    const resetUsersFiltersBtn = document.getElementById('resetUsersFiltersBtn');
+    const usersStats = document.getElementById('usersStats');
+    let allUsers = [];
 
     function setMsg(el, text, ok) {
       if (!el) return;
@@ -173,15 +222,41 @@
       }
     }
 
-    async function loadUsers() {
-      if (!window.SiteAuth?.me || window.SiteAuth.me.role !== 'admin') return;
-      setMsg(usersMsg, 'Chargement des membres…', true);
-      try {
-        const data = await window.SiteAuth.adminListUsers();
-        const meId = Number(window.SiteAuth.me.id || 0);
-        const rows = (data.users || []).map((u) => {
-          const isSelf = Number(u.id) === meId;
-          return `
+
+    function updateStats(list) {
+      const stats = { total: list.length, admin: 0, translator: 0, member: 0 };
+      for (const u of list) {
+        const role = String(u?.role || '').toLowerCase();
+        if (role in stats) stats[role] += 1;
+      }
+      if (usersStats) {
+        usersStats.innerHTML = `
+          <span class="admin-pill">Total : ${stats.total}</span>
+          <span class="admin-pill">admin : ${stats.admin}</span>
+          <span class="admin-pill">translator : ${stats.translator}</span>
+          <span class="admin-pill">member : ${stats.member}</span>
+        `;
+      }
+    }
+
+    function getFilteredUsers() {
+      const q = String(searchUsersInput?.value || '').trim().toLowerCase();
+      const roleFilter = String(roleFilterSelect?.value || '').trim().toLowerCase();
+      return allUsers.filter((u) => {
+        const username = String(u?.username || '').toLowerCase();
+        const displayName = String(u?.display_name || '').toLowerCase();
+        const role = String(u?.role || '').toLowerCase();
+        const matchText = !q || username.includes(q) || displayName.includes(q);
+        const matchRole = !roleFilter || role === roleFilter;
+        return matchText && matchRole;
+      });
+    }
+
+    function renderUsers(list) {
+      const meId = Number(window.SiteAuth?.me?.id || 0);
+      const rows = (list || []).map((u) => {
+        const isSelf = Number(u.id) === meId;
+        return `
             <article class="member-card" data-user-id="${u.id}">
               <div class="member-head">
                 <div>
@@ -233,7 +308,31 @@
                 <div class="auth-msg row-msg" data-row-msg></div>
               </div>
             </article>`;
-        }).join('');
+      }).join('');
+
+      usersTbody.innerHTML = rows || '<div class="member-card">Aucun membre ne correspond à la recherche.</div>';
+      updateStats(allUsers);
+      setMsg(usersMsg, `${list.length} membre(s) affiché(s) sur ${allUsers.length}.`, true);
+    }
+
+    function applyUserFilters() {
+      renderUsers(getFilteredUsers());
+    }
+
+    async function loadUsers() {
+      if (!window.SiteAuth?.me || window.SiteAuth.me.role !== 'admin') return;
+      setMsg(usersMsg, 'Chargement des membres…', true);
+      try {
+        const data = await window.SiteAuth.adminListUsers();
+        allUsers = Array.isArray(data.users) ? data.users : [];
+        applyUserFilters();
+      } catch (err) {
+        allUsers = [];
+        updateStats([]);
+        usersTbody.innerHTML = '<div class="member-card">Erreur de chargement.</div>';
+        setMsg(usersMsg, err?.message || 'Erreur.', false);
+      }
+    }).join('');
         usersTbody.innerHTML = rows || '<div class="member-card">Aucun membre.</div>';
         setMsg(usersMsg, `${(data.users || []).length} membre(s) chargé(s).`, true);
       } catch (err) {
@@ -263,11 +362,18 @@
     });
 
     refreshUsersBtn?.addEventListener('click', () => loadUsers());
+    searchUsersInput?.addEventListener('input', () => applyUserFilters());
+    roleFilterSelect?.addEventListener('change', () => applyUserFilters());
+    resetUsersFiltersBtn?.addEventListener('click', () => {
+      if (searchUsersInput) searchUsersInput.value = '';
+      if (roleFilterSelect) roleFilterSelect.value = '';
+      applyUserFilters();
+    });
 
     usersTbody?.addEventListener('click', async (e) => {
       const btn = e.target.closest('button[data-action]');
       if (!btn) return;
-      const tr = btn.closest('tr[data-user-id]');
+      const tr = btn.closest('article[data-user-id]');
       if (!tr) return;
       const id = Number(tr.getAttribute('data-user-id') || 0);
       const rowMsg = tr.querySelector('[data-row-msg]');

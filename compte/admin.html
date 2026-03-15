@@ -119,7 +119,7 @@
 
     <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
       <h1 class="auth-title">🛠️ Gestion des membres</h1>
-      <p class="auth-subtitle">Tu peux créer, modifier, désactiver, réinitialiser le mot de passe ou supprimer un compte. Les mots de passe ne sont jamais visibles : ils sont stockés hachés côté serveur.</p>
+      <p class="auth-subtitle">Tu peux créer, modifier, désactiver, réinitialiser le mot de passe ou supprimer un compte.</p>
       <div class="auth-actions">
         <a class="auth-btn" href="/connexion/">Retour au compte</a>
         <a class="auth-btn" href="/">Retour au site</a>
@@ -150,8 +150,8 @@
         </div>
 
         <div class="auth-box">
-          <h3 style="margin-top:0;">ℹ️ Rappel sécurité</h3>
-          <p class="admin-note">Tu m’as demandé de voir le mot de passe des membres, mais ce n’est pas possible proprement ni de façon sécurisée : les mots de passe sont hachés et non lisibles. À la place, cette page permet de les remplacer par un nouveau mot de passe.</p>
+          <h3 style="margin-top:0;">ℹ️ Rappel</h3>
+          <p class="admin-note">Les mots de passe ne sont jamais visibles, par sécurité, ils sont stockés hachés côté serveur.</p>
           <ul class="auth-list">
             <li>liste de tous les comptes</li>
             <li>modification pseudo / nom affiché / rôle</li>
@@ -168,7 +168,6 @@
   <div class="admin-toolbar">
     <div>
       <h2 style="margin:0;">👥 Membres</h2>
-      <div class="admin-note">Retrouve rapidement un membre avec la recherche, les filtres et le tri.</div>
       <div class="admin-summary" id="usersSummary">—</div>
     </div>
     <button class="auth-btn" id="refreshUsersBtn" type="button">Actualiser</button>

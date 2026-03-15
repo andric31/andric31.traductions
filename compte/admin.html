@@ -11,7 +11,9 @@
   <script src="/theme-init.js"></script>
   
 <style>
-  .admin-layout { display:grid; gap:12px; width:min(1180px, calc(100% - 18px)); margin:2px auto 22px; }
+  .admin-layout { display:grid; gap:10px; width:min(1180px, calc(100% - 18px)); margin:0 auto 18px !important; padding-top:0 !important; }
+  body .auth-shell.admin-layout { margin-top:0 !important; }
+  body .auth-card { scroll-margin-top: 8px; }
   .admin-split { display:grid; grid-template-columns: minmax(320px, 440px) 1fr; gap:16px; align-items:start; }
   .admin-note { color:var(--muted); font-size:14px; line-height:1.55; }
   .admin-toolbar { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:10px; }
@@ -173,10 +175,12 @@
   </div>
 
   <div class="admin-tools">
-    <label class="auth-label" style="margin:0;">
-      <span>Filtrer les membres</span>
-      <input class="auth-input" id="searchUsersInput" name="member_filter_search" type="search" placeholder="ID, pseudo, nom affiché ou rôle..." autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-form-type="other" />
-    </label>
+    <div class="auth-label" style="margin:0;">
+      <span>Filtre rapide des membres</span>
+      <input type="text" tabindex="-1" aria-hidden="true" autocomplete="username" style="position:absolute;left:-9999px;opacity:0;width:1px;height:1px;pointer-events:none;" />
+      <input type="password" tabindex="-1" aria-hidden="true" autocomplete="current-password" style="position:absolute;left:-9999px;opacity:0;width:1px;height:1px;pointer-events:none;" />
+      <input class="auth-input" id="searchUsersInput" name="admin_member_filter_q_91x" type="text" inputmode="search" readonly placeholder="Filtrer par ID, pseudo, nom affiché, rôle ou statut..." autocomplete="new-password" autocapitalize="none" autocorrect="off" spellcheck="false" />
+    </div>
 
     <label class="auth-label" style="margin:0;">
       <span>Rôle</span>
@@ -463,8 +467,14 @@
 
     refreshUsersBtn?.addEventListener('click', () => loadUsers());
     if (searchUsersInput) {
-      searchUsersInput.setAttribute('autocomplete', 'off');
+      searchUsersInput.setAttribute('autocomplete', 'new-password');
+      searchUsersInput.setAttribute('name', 'admin_member_filter_q_91x');
       searchUsersInput.value = '';
+      requestAnimationFrame(() => { searchUsersInput.value = ''; });
+      window.addEventListener('pageshow', () => { searchUsersInput.value = ''; });
+      searchUsersInput.addEventListener('focus', () => {
+        searchUsersInput.removeAttribute('readonly');
+      }, { once:true });
     }
     searchUsersInput?.addEventListener('input', () => applyUserFilters());
     roleFilterSelect?.addEventListener('change', () => applyUserFilters());

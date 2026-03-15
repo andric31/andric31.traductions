@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin blog</title>
+  <link rel="icon" href="/favicon.png" />
+  <link rel="stylesheet" href="/viewer.css" />
+  <link rel="stylesheet" href="/themes.css" />
+  <link rel="stylesheet" href="/auth/auth.css" />
+  <script src="/theme-init.js"></script>
+  <style>
+    html:not(.auth-ready) body { visibility: hidden; }
+    .blog-admin-shell { width:min(1320px, calc(100% - 18px)); margin:12px auto 24px; display:grid; gap:16px; }
+    .blog-admin-grid { display:grid; grid-template-columns:minmax(340px, 520px) minmax(320px, 1fr); gap:16px; align-items:start; }
+    .blog-admin-card { border:1px solid var(--border, var(--auth-border)); border-radius:18px; background:rgba(255,255,255,.03); padding:16px; }
+    .blog-admin-title { margin:0 0 10px; }
+    .blog-admin-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .blog-admin-row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+    .blog-admin-preview iframe { width:100%; min-height:560px; border:1px solid rgba(255,255,255,.08); border-radius:14px; background:#fff; }
+    .blog-admin-toolbar, .blog-admin-actions { display:flex; flex-wrap:wrap; gap:10px; }
+    .blog-admin-actions { margin-top:12px; }
+    .blog-admin-help { color:var(--muted); line-height:1.6; font-size:14px; }
+    .blog-admin-code { width:100%; min-height:180px; resize:vertical; font:13px/1.5 Consolas, monospace; }
+    .blog-admin-code.big { min-height:300px; }
+    .blog-admin-pill { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; border:1px solid var(--border, var(--auth-border)); background:rgba(80,160,255,.10); font-size:13px; }
+    .blog-admin-split { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .blog-admin-mini { font-size:12px; color:var(--muted); }
+    @media (max-width: 980px) {
+      .blog-admin-grid, .blog-admin-row, .blog-admin-row-3, .blog-admin-split { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="blog-admin-shell">
+    <section class="auth-card" data-guest-only>
+      <h1 class="auth-title">📝 Éditeur blog</h1>
+      <p class="auth-subtitle">Tu dois être connecté avec un compte admin pour utiliser cet outil.</p>
+      <div class="auth-actions">
+        <a class="auth-btn primary" href="/connexion/">Se connecter</a>
+        <a class="auth-btn" href="/blog/">Retour au blog</a>
+      </div>
+    </section>
+
+    <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
+      <h1 class="auth-title">📝 Éditeur blog admin</h1>
+      <p class="auth-subtitle">Base prête pour créer un article, générer le fichier HTML, le bloc carte pour <code>blog/index.html</code> et l’entrée JSON pour une future API.</p>
+      <div class="auth-actions">
+        <a class="auth-btn" href="/compte/">Compte</a>
+        <a class="auth-btn" href="/compte/admin.html">Gestion membres</a>
+        <a class="auth-btn" href="/blog/">Voir le blog</a>
+      </div>
+    </section>
+
+    <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
+      <div class="blog-admin-grid">
+        <div class="blog-admin-card">
+          <h2 class="blog-admin-title">Création d’article</h2>
+          <div class="blog-admin-row">
+            <label class="auth-label"><span>Titre</span><input class="auth-input" id="title" type="text" placeholder="Ex. Capsule #2 — Nouvelles du projet" /></label>
+            <label class="auth-label"><span>Slug</span><input class="auth-input" id="slug" type="text" placeholder="capsule-02-nouvelles-du-projet" /></label>
+          </div>
+          <div class="blog-admin-row-3">
+            <label class="auth-label"><span>Date affichée</span><input class="auth-input" id="displayDate" type="text" value="15 mars 2026" /></label>
+            <label class="auth-label"><span>Date ISO</span><input class="auth-input" id="isoDate" type="date" value="2026-03-15" /></label>
+            <label class="auth-label"><span>Catégorie</span><input class="auth-input" id="category" type="text" value="Actualité" /></label>
+          </div>
+          <div class="blog-admin-row">
+            <label class="auth-label"><span>Auteur</span><input class="auth-input" id="author" type="text" value="andric31" /></label>
+            <label class="auth-label"><span>Avatar lettre</span><input class="auth-input" id="avatar" type="text" value="A" maxlength="2" /></label>
+          </div>
+          <div class="blog-admin-row">
+            <label class="auth-label"><span>Type de carte</span>
+              <select class="auth-select" id="cardType">
+                <option value="regular">Article normal</option>
+                <option value="pinned">Article épinglé</option>
+              </select>
+            </label>
+            <label class="auth-label"><span>Résumé court</span><input class="auth-input" id="excerpt" type="text" placeholder="Petit récap de l’article..." /></label>
+          </div>
+          <label class="auth-label"><span>Chapô / intro</span><textarea class="auth-textarea" id="intro" rows="4" placeholder="Introduction affichée dans l’article."></textarea></label>
+          <label class="auth-label"><span>Contenu HTML de l’article</span><textarea class="auth-textarea" id="content" rows="16" placeholder="<h2>Section</h2>&#10;<p>Ton texte...</p>"></textarea></label>
+
+          <div class="blog-admin-actions">
+            <button class="auth-btn primary" type="button" id="generateBtn">Générer</button>
+            <button class="auth-btn" type="button" id="previewBtn">Aperçu</button>
+            <button class="auth-btn" type="button" id="fillDemoBtn">Exemple</button>
+            <button class="auth-btn" type="button" id="resetBtn">Vider</button>
+          </div>
+          <div id="editorMsg" class="auth-msg"></div>
+        </div>
+
+        <div class="blog-admin-card blog-admin-preview">
+          <div class="blog-admin-toolbar">
+            <h2 class="blog-admin-title" style="margin:0;">Aperçu</h2>
+            <span class="blog-admin-pill" id="currentFileLabel">Fichier : —</span>
+          </div>
+          <iframe id="previewFrame" title="Aperçu article blog"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
+      <div class="blog-admin-split">
+        <div class="blog-admin-card">
+          <h3 class="blog-admin-title">Fichier article HTML</h3>
+          <p class="blog-admin-help">Télécharge directement le fichier à mettre dans <code>/blog/</code>.</p>
+          <div class="blog-admin-actions">
+            <button class="auth-btn primary" type="button" id="downloadArticleBtn">Télécharger l’article</button>
+            <button class="auth-btn" type="button" id="copyArticleBtn">Copier</button>
+          </div>
+          <textarea id="articleHtmlOut" class="blog-admin-code big" spellcheck="false"></textarea>
+        </div>
+        <div class="blog-admin-card">
+          <h3 class="blog-admin-title">Bloc carte pour blog/index.html</h3>
+          <p class="blog-admin-help">À coller dans la section “⭐ Article épinglé” ou “📚 Tous les articles”.</p>
+          <div class="blog-admin-actions">
+            <button class="auth-btn" type="button" id="copyCardBtn">Copier le bloc</button>
+          </div>
+          <textarea id="cardHtmlOut" class="blog-admin-code" spellcheck="false"></textarea>
+
+          <h3 class="blog-admin-title" style="margin-top:18px;">Entrée JSON future API</h3>
+          <p class="blog-admin-help">Prévu pour plus tard si tu passes sur une vraie gestion via <code>articles.json</code> ou API admin.</p>
+          <div class="blog-admin-actions">
+            <button class="auth-btn" type="button" id="copyJsonBtn">Copier le JSON</button>
+          </div>
+          <textarea id="jsonOut" class="blog-admin-code" spellcheck="false"></textarea>
+        </div>
+      </div>
+      <div class="blog-admin-mini" style="margin-top:10px;">Note : dans cette version il n’y a pas encore d’API d’écriture blog dans le zip, donc l’outil prépare les fichiers proprement mais n’enregistre pas encore directement sur le serveur.</div>
+    </section>
+  </main>
+
+  <script src="/auth/auth.client.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const el = {
+      title: $('title'), slug: $('slug'), displayDate: $('displayDate'), isoDate: $('isoDate'), category: $('category'),
+      author: $('author'), avatar: $('avatar'), cardType: $('cardType'), excerpt: $('excerpt'), intro: $('intro'), content: $('content'),
+      generateBtn: $('generateBtn'), previewBtn: $('previewBtn'), fillDemoBtn: $('fillDemoBtn'), resetBtn: $('resetBtn'), editorMsg: $('editorMsg'),
+      articleHtmlOut: $('articleHtmlOut'), cardHtmlOut: $('cardHtmlOut'), jsonOut: $('jsonOut'), previewFrame: $('previewFrame'),
+      currentFileLabel: $('currentFileLabel'), downloadArticleBtn: $('downloadArticleBtn'), copyArticleBtn: $('copyArticleBtn'),
+      copyCardBtn: $('copyCardBtn'), copyJsonBtn: $('copyJsonBtn')
+    };
+
+    function setMsg(text, ok) {
+      el.editorMsg.textContent = text || '';
+      el.editorMsg.className = 'auth-msg ' + (text ? (ok ? 'ok' : 'err') : '');
+    }
+
+    function esc(v) {
+      return String(v ?? '').replace(/[&<>"']/g, (m) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+    }
+
+    function slugify(input) {
+      return String(input || '')
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .replace(/-{2,}/g, '-');
+    }
+
+    function buildData() {
+      const title = el.title.value.trim();
+      const slug = slugify(el.slug.value.trim() || title);
+      const data = {
+        title,
+        slug,
+        href: `${slug}.html`,
+        display_date: el.displayDate.value.trim(),
+        iso_date: el.isoDate.value.trim(),
+        category: el.category.value.trim() || 'Actualité',
+        author: el.author.value.trim() || 'andric31',
+        avatar: (el.avatar.value.trim() || 'A').slice(0, 2),
+        excerpt: el.excerpt.value.trim(),
+        intro: el.intro.value.trim(),
+        content_html: el.content.value.trim(),
+        pinned: el.cardType.value === 'pinned',
+      };
+      if (!data.title) throw new Error('Le titre est obligatoire.');
+      if (!data.slug) throw new Error('Le slug est vide.');
+      if (!data.excerpt) throw new Error('Le résumé court est obligatoire.');
+      if (!data.content_html) throw new Error('Le contenu HTML est obligatoire.');
+      return data;
+    }
+
+    function buildArticleHtml(data) {
+      return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${esc(data.title)} — Blog andric31</title>
+  <link rel="icon" href="/favicon.png" />
+  <script src="/theme-init.js"></script>
+  <link rel="stylesheet" href="/themes.css" />
+  <link rel="stylesheet" href="blog.css" />
+</head>
+<body>
+  <main class="blog-shell blog-article">
+    <a class="blog-back" href="/blog/">← Retour au blog</a>
+
+    <article class="blog-article-box">
+      <header class="blog-article-head">
+        <div class="blog-meta">
+          <span>${esc(data.display_date)}</span>
+          <span>•</span>
+          <span>${esc(data.category)}</span>
+        </div>
+        <h1>${esc(data.title)}</h1>
+        <p>${esc(data.intro || data.excerpt)}</p>
+      </header>
+
+      <div class="blog-article-content">
+${data.content_html}
+      </div>
+    </article>
+  </main>
+</body>
+</html>`;
+    }
+
+    function buildCardHtml(data) {
+      const meta = data.pinned
+        ? `<span class="blog-chip">📌 Épinglé</span>\n            <span>${esc(data.display_date)}</span>`
+        : `<span>${esc(data.display_date)}</span>\n            <span>•</span>\n            <span>${esc(data.category)}</span>`;
+      const linkText = data.pinned ? 'Lire →' : 'Lire l’article →';
+      return `<a class="blog-card" href="${esc(data.href)}">
+  <div class="blog-card-main">
+    <div class="blog-meta">
+      ${meta}
+    </div>
+    <h2>${esc(data.title)}</h2>
+    <p>${esc(data.excerpt)}</p>
+  </div>
+  <div class="blog-card-side">
+    <div class="blog-author"><span class="blog-avatar">${esc(data.avatar)}</span> ${esc(data.author)}</div>
+    <span class="blog-link">${linkText}</span>
+  </div>
+</a>`;
+    }
+
+    function buildJson(data) {
+      return JSON.stringify({
+        title: data.title,
+        slug: data.slug,
+        href: `/blog/${data.href}`,
+        display_date: data.display_date,
+        iso_date: data.iso_date,
+        category: data.category,
+        author: data.author,
+        avatar: data.avatar,
+        excerpt: data.excerpt,
+        pinned: data.pinned,
+      }, null, 2);
+    }
+
+    function renderPreview(html) {
+      const doc = el.previewFrame.contentWindow?.document;
+      if (!doc) return;
+      doc.open();
+      doc.write(html);
+      doc.close();
+    }
+
+    function generateAll(showMsg = true) {
+      const data = buildData();
+      el.slug.value = data.slug;
+      const articleHtml = buildArticleHtml(data);
+      const cardHtml = buildCardHtml(data);
+      const json = buildJson(data);
+      el.articleHtmlOut.value = articleHtml;
+      el.cardHtmlOut.value = cardHtml;
+      el.jsonOut.value = json;
+      el.currentFileLabel.textContent = `Fichier : ${data.href}`;
+      renderPreview(articleHtml);
+      if (showMsg) setMsg('Article généré.', true);
+      return { data, articleHtml, cardHtml, json };
+    }
+
+    function download(name, text, type = 'text/plain;charset=utf-8') {
+      const blob = new Blob([text], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+    }
+
+    async function copyText(text) {
+      await navigator.clipboard.writeText(text || '');
+    }
+
+    function fillDemo() {
+      el.title.value = 'Capsule #2 — Nouvelles du projet';
+      el.slug.value = '';
+      el.displayDate.value = '15 mars 2026';
+      el.isoDate.value = '2026-03-15';
+      el.category.value = 'Actualité';
+      el.author.value = 'andric31';
+      el.avatar.value = 'A';
+      el.cardType.value = 'regular';
+      el.excerpt.value = 'Petit point rapide sur les nouveautés du site, les prochaines améliorations et les tests en cours.';
+      el.intro.value = 'Voici un nouveau point rapide sur le site, les outils et la suite des améliorations prévues.';
+      el.content.value = `<h2>Ce qui avance</h2>\n        <p>Le site continue d’évoluer avec de nouvelles améliorations sur les notifications, le blog et les outils de gestion.</p>\n\n        <h2>La suite</h2>\n        <p>La prochaine étape consiste à rendre la création d’articles plus simple depuis un espace admin connecté, sans devoir tout éditer à la main.</p>`;
+      generateAll(true);
+    }
+
+    function resetForm() {
+      ['title','slug','excerpt','intro','content'].forEach((k) => el[k].value = '');
+      el.cardType.value = 'regular';
+      el.currentFileLabel.textContent = 'Fichier : —';
+      el.articleHtmlOut.value = '';
+      el.cardHtmlOut.value = '';
+      el.jsonOut.value = '';
+      renderPreview('<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;padding:24px;">Aperçu vide.</body></html>');
+      setMsg('', true);
+    }
+
+    el.title.addEventListener('input', () => {
+      if (!el.slug.dataset.manual || !el.slug.value.trim()) el.slug.value = slugify(el.title.value);
+    });
+    el.slug.addEventListener('input', () => { el.slug.dataset.manual = '1'; });
+
+    el.generateBtn.addEventListener('click', () => { try { generateAll(true); } catch (e) { setMsg(e.message || 'Erreur.', false); } });
+    el.previewBtn.addEventListener('click', () => { try { generateAll(false); setMsg('Aperçu mis à jour.', true); } catch (e) { setMsg(e.message || 'Erreur.', false); } });
+    el.fillDemoBtn.addEventListener('click', fillDemo);
+    el.resetBtn.addEventListener('click', resetForm);
+
+    el.downloadArticleBtn.addEventListener('click', () => {
+      try {
+        const { data, articleHtml } = generateAll(false);
+        download(data.href, articleHtml, 'text/html;charset=utf-8');
+        setMsg(`Article téléchargé : ${data.href}`, true);
+      } catch (e) { setMsg(e.message || 'Erreur.', false); }
+    });
+
+    el.copyArticleBtn.addEventListener('click', async () => {
+      try { await copyText(el.articleHtmlOut.value); setMsg('HTML de l’article copié.', true); } catch { setMsg('Copie impossible.', false); }
+    });
+    el.copyCardBtn.addEventListener('click', async () => {
+      try { await copyText(el.cardHtmlOut.value); setMsg('Bloc carte copié.', true); } catch { setMsg('Copie impossible.', false); }
+    });
+    el.copyJsonBtn.addEventListener('click', async () => {
+      try { await copyText(el.jsonOut.value); setMsg('JSON copié.', true); } catch { setMsg('Copie impossible.', false); }
+    });
+
+    window.SiteAuth.onChange((me) => {
+      if (!window.SiteAuth.loaded) return;
+      if (!me) return;
+      if (!['admin'].includes(String(me.role || '').toLowerCase())) {
+        document.body.innerHTML = '<main class="auth-shell"><section class="auth-card"><h1 class="auth-title">⛔ Accès refusé</h1><p class="auth-subtitle">Cette page est réservée aux admins.</p><div class="auth-actions"><a class="auth-btn" href="/compte/">Retour au compte</a><a class="auth-btn" href="/blog/">Retour au blog</a></div></section></main>';
+      }
+    });
+
+    resetForm();
+  </script>
+</body>
+</html>

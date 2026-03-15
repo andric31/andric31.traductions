@@ -17,9 +17,9 @@
   .admin-toolbar { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
   .admin-tools {
     display:grid;
-    grid-template-columns: minmax(220px, 1.3fr) minmax(180px, .8fr) auto;
+    grid-template-columns: minmax(240px, 1.4fr) minmax(180px, .9fr) auto;
     gap:10px;
-    margin:14px 0 12px;
+    margin:10px 0 12px;
     align-items:end;
   }
   .admin-stats {
@@ -28,7 +28,7 @@
     gap:8px;
     margin:0 0 12px;
   }
-  .admin-stats .admin-pill { background:rgba(80, 160, 255, .10); }
+  .admin-stats .admin-pill { background:rgba(80,160,255,.10); }
   .admin-users { display:grid; gap:14px; }
   .member-card {
     border:1px solid var(--border, var(--auth-border));
@@ -222,7 +222,6 @@
       }
     }
 
-
     function updateStats(list) {
       const stats = { total: list.length, admin: 0, translator: 0, member: 0 };
       for (const u of list) {
@@ -332,6 +331,7 @@
         usersTbody.innerHTML = '<div class="member-card">Erreur de chargement.</div>';
         setMsg(usersMsg, err?.message || 'Erreur.', false);
       }
+    }
 
     createForm?.addEventListener('submit', async (e) => {
       e.preventDefault();

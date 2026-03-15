@@ -145,18 +145,18 @@
   function renderNotificationsPopover(pop, preview) {
     if (!pop || !preview) return;
     pop.innerHTML = `
-      <div class="quick-notif-head quick-notif-head-row">
-        <span>Notifications</span>
+      <div class="quick-notif-head">Notifications</div>
+      <div class="quick-notif-card-wrap">
+        <a class="quick-notif-card" href="${escapeHtml(preview.url)}" target="_blank" rel="noopener noreferrer">
+          <span class="quick-notif-card-icon">${iconNotifications()}</span>
+          <span class="quick-notif-card-body">
+            <strong>${escapeHtml(preview.title)}</strong>
+            <span>${escapeHtml(preview.text)}</span>
+            ${preview.time ? `<small>${escapeHtml(preview.time)}</small>` : ""}
+          </span>
+        </a>
         <button type="button" class="quick-notif-close" data-action="dismiss-notification" aria-label="Masquer cette notification" title="Masquer cette notification">×</button>
       </div>
-      <a class="quick-notif-card" href="${escapeHtml(preview.url)}" target="_blank" rel="noopener noreferrer">
-        <span class="quick-notif-card-icon">${iconNotifications()}</span>
-        <span class="quick-notif-card-body">
-          <strong>${escapeHtml(preview.title)}</strong>
-          <span>${escapeHtml(preview.text)}</span>
-          ${preview.time ? `<small>${escapeHtml(preview.time)}</small>` : ""}
-        </span>
-      </a>
       <a class="quick-notif-open" href="${escapeHtml(preview.url)}" target="_blank" rel="noopener noreferrer">
         Voir les notifications
         <span aria-hidden="true">→</span>

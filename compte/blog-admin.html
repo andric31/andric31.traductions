@@ -12,9 +12,17 @@
   <style>
     html:not(.auth-ready) body { visibility: hidden; }
 
+    body {
+      margin: 0;
+    }
+
+    .blog-admin-shell {
+      padding-top: 0;
+    }
+
     .blog-admin-shell {
       width: min(1360px, calc(100% - 16px));
-      margin: 4px auto 18px;
+      margin: 0 auto 18px;
       display: grid;
       gap: 12px;
     }
@@ -23,6 +31,7 @@
     .blog-admin-main.auth-card,
     .blog-admin-out.auth-card {
       padding: 14px;
+      margin-top: 0;
     }
 
     .blog-admin-top .auth-title {

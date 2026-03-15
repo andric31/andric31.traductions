@@ -20,13 +20,14 @@
     <section class="msg-layout">
       <aside class="msg-panel msg-side">
         <div class="msg-side-head">
-          <h2>Salon global</h2>
+          <h2>Salons</h2>
           <span id="roomStatus" class="msg-status">Connexion…</span>
         </div>
 
         <div class="msg-side-block">
           <div class="msg-side-title">Accès rapide</div>
           <a class="msg-side-link" href="/">🏠 f95list_andric31_viewer</a>
+          <a class="msg-side-link" href="/connexion/">🔐 Connexion</a>
           <button id="refreshBtn" class="msg-side-link msg-side-btn" type="button">🔄 Actualiser</button>
         </div>
 
@@ -36,7 +37,7 @@
             <li>Reste poli et évite le spam.</li>
             <li>Pas de flood ni de message vide.</li>
             <li>Les messages trop longs sont refusés.</li>
-            <li>Un pseudo simple suffit.</li>
+            <li>Le pseudo invité est retenu sur ce navigateur.</li>
           </ul>
         </div>
 
@@ -70,7 +71,16 @@
               <span>Pseudo</span>
               <input id="nickname" type="text" maxlength="40" placeholder="Ton pseudo" autocomplete="nickname" />
             </label>
+
+            <label class="msg-field">
+              <span>Salon</span>
+              <select id="roomSelect">
+                <option value="global">Global public</option>
+              </select>
+            </label>
           </div>
+
+          <div id="authChatInfo" class="msg-form-info">Non connecté : pseudo mémorisé dans ce navigateur et accès limité au salon public.</div>
 
           <label class="msg-field">
             <span>Message</span>
@@ -86,6 +96,7 @@
     </section>
   </main>
 
+  <script src="/auth/auth.client.js"></script>
   <script src="messages.js"></script>
 </body>
 </html>

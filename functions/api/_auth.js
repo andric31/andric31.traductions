@@ -140,7 +140,7 @@ export async function verifyPassword(password, encoded) {
   try {
     const parts = String(encoded || '').split('$');
     if (parts.length !== 4 || parts[0] !== 'pbkdf2_sha256') return false;
-    const iterations = Math.max(100000, Number(parts[1]) || PBKDF2_ITERATIONS);
+    const iterations = Number(parts[1]) || PBKDF2_ITERATIONS;
     const salt = base64ToBytes(parts[2]);
     const expected = parts[3];
     const got = await pbkdf2Hash(password, salt, iterations);

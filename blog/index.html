@@ -8,6 +8,10 @@
   <script src="/theme-init.js"></script>
   <link rel="stylesheet" href="/themes.css" />
   <link rel="stylesheet" href="blog.css" />
+  <style>
+    html:not(.auth-ready) [data-auth-only],
+    .auth-hidden { display:none !important; }
+  </style>
 </head>
 <body>
   <main class="blog-shell">
@@ -55,7 +59,7 @@
         </div>
       </a>
     </section>
-    <div class="blog-shell" style="padding-top:0; margin-top:-14px;" data-auth-only data-role-min="admin">
+    <div class="blog-shell auth-hidden" style="padding-top:0; margin-top:-14px;" data-auth-only data-role-min="admin">
     <div class="blog-kicker" style="margin-bottom:0;">
       <a href="/compte/blog-admin.html" style="text-decoration:none; color:inherit; font-weight:700;">🛠️ Ouvrir l'éditeur blog</a>
     </div>

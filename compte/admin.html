@@ -3,50 +3,194 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin comptes</title>
+  <title>Admin membres</title>
   <link rel="icon" href="/favicon.png" />
   <link rel="stylesheet" href="/viewer.css" />
   <link rel="stylesheet" href="/themes.css" />
   <link rel="stylesheet" href="/auth/auth.css" />
   <script src="/theme-init.js"></script>
+  <style>
+    .admin-layout { display:grid; gap:16px; }
+    .admin-table-wrap { overflow:auto; border:1px solid var(--border, var(--auth-border)); border-radius:14px; }
+    .admin-table { width:100%; border-collapse:collapse; min-width:980px; }
+    .admin-table th, .admin-table td { padding:10px 12px; border-bottom:1px solid rgba(255,255,255,.08); text-align:left; vertical-align:top; }
+    .admin-table th { background:rgba(255,255,255,.05); font-size:14px; }
+    .admin-table tr:hover td { background:rgba(255,255,255,.03); }
+    .admin-mini { font-size:12px; color:var(--muted); }
+    .auth-badge { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; background:rgba(255,255,255,.08); border:1px solid var(--border, var(--auth-border)); font-size:13px; }
+    .admin-split { display:grid; grid-template-columns: 1.2fr .8fr; gap:16px; }
+    .admin-note { color:var(--muted); font-size:14px; }
+    @media (max-width: 980px) { .admin-split { grid-template-columns:1fr; } }
+  </style>
 </head>
 <body>
-  <main class="auth-shell">
-    <section class="auth-card">
-      <h1 class="auth-title">🛠️ Création de compte</h1>
-      <p class="auth-subtitle">Cette page envoie le token admin seulement à ton propre serveur. Le token n’est pas stocké automatiquement.</p>
-      <form id="adminForm" class="auth-form" autocomplete="off">
-        <label class="auth-label"><span>Token admin</span><input class="auth-input" id="adminToken" type="password" /></label>
-        <label class="auth-label"><span>Nom d’utilisateur</span><input class="auth-input" id="newUsername" type="text" /></label>
-        <label class="auth-label"><span>Nom affiché</span><input class="auth-input" id="newDisplay" type="text" /></label>
-        <label class="auth-label"><span>Mot de passe</span><input class="auth-input" id="newPassword" type="password" /></label>
-        <label class="auth-label"><span>Rôle</span>
-          <select class="auth-select" id="newRole">
-            <option value="member">member</option>
-            <option value="translator">translator</option>
-            <option value="admin">admin</option>
-          </select>
-        </label>
-        <div class="auth-actions">
-          <button class="auth-btn primary" type="submit">Créer le compte</button>
-          <a class="auth-btn" href="/compte/">Retour</a>
+  <main class="auth-shell admin-layout">
+    <section class="auth-card" data-guest-only>
+      <h1 class="auth-title">🛡️ Gestion des membres</h1>
+      <p class="auth-subtitle">Tu dois être connecté en administrateur pour gérer les comptes.</p>
+      <div class="auth-actions">
+        <a class="auth-btn primary" href="/compte/">Se connecter</a>
+        <a class="auth-btn" href="/">Retour au site</a>
+      </div>
+    </section>
+
+    <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
+      <h1 class="auth-title">🛠️ Gestion des membres</h1>
+      <p class="auth-subtitle">Tu peux créer, modifier, désactiver, réinitialiser le mot de passe ou supprimer un compte. Les mots de passe ne sont jamais visibles : ils sont stockés hachés côté serveur.</p>
+      <div class="auth-actions">
+        <a class="auth-btn" href="/membre/">Retour espace membre</a>
+        <a class="auth-btn" href="/">Retour au site</a>
+      </div>
+    </section>
+
+    <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
+      <div class="admin-split">
+        <div class="auth-box">
+          <h3 style="margin-top:0;">➕ Créer un membre</h3>
+          <form id="createForm" class="auth-form" autocomplete="off">
+            <label class="auth-label"><span>Token admin</span><input class="auth-input" id="adminToken" type="password" /></label>
+            <label class="auth-label"><span>Nom d’utilisateur</span><input class="auth-input" id="newUsername" type="text" /></label>
+            <label class="auth-label"><span>Nom affiché</span><input class="auth-input" id="newDisplay" type="text" /></label>
+            <label class="auth-label"><span>Mot de passe</span><input class="auth-input" id="newPassword" type="password" /></label>
+            <label class="auth-label"><span>Rôle</span>
+              <select class="auth-select" id="newRole">
+                <option value="member">member</option>
+                <option value="translator">translator</option>
+                <option value="admin">admin</option>
+              </select>
+            </label>
+            <div class="auth-actions">
+              <button class="auth-btn primary" type="submit">Créer le compte</button>
+            </div>
+            <div id="createMsg" class="auth-msg"></div>
+          </form>
         </div>
-        <div id="adminMsg" class="auth-msg"></div>
-      </form>
+
+        <div class="auth-box">
+          <h3 style="margin-top:0;">ℹ️ Rappel sécurité</h3>
+          <p class="admin-note">Tu m’as demandé de voir le mot de passe des membres, mais ce n’est pas possible proprement ni de façon sécurisée : les mots de passe sont hachés et non lisibles. À la place, cette page permet de les remplacer par un nouveau mot de passe.</p>
+          <ul class="auth-list">
+            <li>liste de tous les comptes</li>
+            <li>modification pseudo / nom affiché / rôle</li>
+            <li>activation ou désactivation</li>
+            <li>réinitialisation de mot de passe</li>
+            <li>suppression de compte</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
+      <div class="auth-actions" style="justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h2 style="margin:0;">👥 Membres</h2>
+        <button class="auth-btn" id="refreshUsersBtn" type="button">Actualiser</button>
+      </div>
+      <div id="usersMsg" class="auth-msg"></div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Utilisateur</th>
+              <th>Nom affiché</th>
+              <th>Rôle</th>
+              <th>Actif</th>
+              <th>Dates</th>
+              <th>Réinit mot de passe</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="usersTbody">
+            <tr><td colspan="8">Chargement…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="auth-card auth-hidden" data-auth-only>
+      <p class="admin-note">Astuce : après réinitialisation d’un mot de passe ou désactivation, les sessions du membre sont fermées automatiquement.</p>
     </section>
   </main>
 
   <script src="/auth/auth.client.js"></script>
   <script>
-    const form = document.getElementById('adminForm');
-    const msg = document.getElementById('adminMsg');
-    function setMsg(text, ok) {
-      msg.textContent = text || '';
-      msg.className = 'auth-msg ' + (text ? (ok ? 'ok' : 'err') : '');
+    const createForm = document.getElementById('createForm');
+    const createMsg = document.getElementById('createMsg');
+    const usersMsg = document.getElementById('usersMsg');
+    const usersTbody = document.getElementById('usersTbody');
+    const refreshUsersBtn = document.getElementById('refreshUsersBtn');
+
+    function setMsg(el, text, ok) {
+      if (!el) return;
+      el.textContent = text || '';
+      el.className = 'auth-msg ' + (text ? (ok ? 'ok' : 'err') : '');
     }
-    form?.addEventListener('submit', async (e) => {
+
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    function fmtDate(v) {
+      if (!v) return '—';
+      try {
+        return new Date(v).toLocaleString('fr-FR');
+      } catch {
+        return v;
+      }
+    }
+
+    async function loadUsers() {
+      if (!window.SiteAuth?.me || window.SiteAuth.me.role !== 'admin') return;
+      setMsg(usersMsg, 'Chargement des membres…', true);
+      try {
+        const data = await window.SiteAuth.adminListUsers();
+        const meId = Number(window.SiteAuth.me.id || 0);
+        const rows = (data.users || []).map((u) => {
+          const isSelf = Number(u.id) === meId;
+          return `
+            <tr data-user-id="${u.id}">
+              <td>${u.id}</td>
+              <td>
+                <input class="auth-input" data-field="username" value="${esc(u.username)}" />
+                <div class="admin-mini">${isSelf ? 'Ton compte' : ''}</div>
+              </td>
+              <td><input class="auth-input" data-field="display_name" value="${esc(u.display_name)}" /></td>
+              <td>
+                <select class="auth-select" data-field="role">
+                  <option value="member" ${u.role === 'member' ? 'selected' : ''}>member</option>
+                  <option value="translator" ${u.role === 'translator' ? 'selected' : ''}>translator</option>
+                  <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>admin</option>
+                </select>
+              </td>
+              <td>
+                <label class="auth-badge"><input type="checkbox" data-field="is_active" ${u.is_active ? 'checked' : ''} /> ${u.is_active ? 'oui' : 'non'}</label>
+              </td>
+              <td>
+                <div class="admin-mini">créé : ${esc(fmtDate(u.created_at))}</div>
+                <div class="admin-mini">maj : ${esc(fmtDate(u.updated_at))}</div>
+                <div class="admin-mini">login : ${esc(fmtDate(u.last_login_at))}</div>
+              </td>
+              <td><input class="auth-input" data-field="password" type="password" placeholder="laisser vide pour ne pas changer" /></td>
+              <td>
+                <div class="auth-actions">
+                  <button class="auth-btn primary" type="button" data-action="save">Enregistrer</button>
+                  <button class="auth-btn warn" type="button" data-action="delete" ${isSelf ? 'disabled' : ''}>Supprimer</button>
+                </div>
+                <div class="auth-msg" data-row-msg></div>
+              </td>
+            </tr>`;
+        }).join('');
+        usersTbody.innerHTML = rows || '<tr><td colspan="8">Aucun membre.</td></tr>';
+        setMsg(usersMsg, `${(data.users || []).length} membre(s) chargé(s).`, true);
+      } catch (err) {
+        usersTbody.innerHTML = '<tr><td colspan="8">Erreur de chargement.</td></tr>';
+        setMsg(usersMsg, err?.message || 'Erreur.', false);
+      }
+    }
+
+    createForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      setMsg('Création…', true);
+      setMsg(createMsg, 'Création…', true);
       try {
         const payload = {
           username: document.getElementById('newUsername')?.value || '',
@@ -56,12 +200,57 @@
         };
         const token = document.getElementById('adminToken')?.value || '';
         const res = await window.SiteAuth.createUserAdmin(payload, token);
-        setMsg(`Compte créé : ${res?.created?.username || ''}`, true);
-        form.reset();
+        setMsg(createMsg, `Compte créé : ${res?.created?.username || ''}`, true);
+        createForm.reset();
+        loadUsers();
       } catch (err) {
-        setMsg(err?.message || 'Erreur.', false);
+        setMsg(createMsg, err?.message || 'Erreur.', false);
       }
     });
+
+    refreshUsersBtn?.addEventListener('click', () => loadUsers());
+
+    usersTbody?.addEventListener('click', async (e) => {
+      const btn = e.target.closest('button[data-action]');
+      if (!btn) return;
+      const tr = btn.closest('tr[data-user-id]');
+      if (!tr) return;
+      const id = Number(tr.getAttribute('data-user-id') || 0);
+      const rowMsg = tr.querySelector('[data-row-msg]');
+      const username = tr.querySelector('[data-field="username"]')?.value || '';
+      const display_name = tr.querySelector('[data-field="display_name"]')?.value || '';
+      const role = tr.querySelector('[data-field="role"]')?.value || 'member';
+      const is_active = !!tr.querySelector('[data-field="is_active"]')?.checked;
+      const password = tr.querySelector('[data-field="password"]')?.value || '';
+
+      if (btn.dataset.action === 'save') {
+        setMsg(rowMsg, 'Enregistrement…', true);
+        try {
+          const res = await window.SiteAuth.adminUpdateUser({ id, username, display_name, role, is_active, password });
+          const pwField = tr.querySelector('[data-field="password"]');
+          if (pwField) pwField.value = '';
+          setMsg(rowMsg, res.password_reset ? 'Compte mis à jour + mot de passe remplacé.' : 'Compte mis à jour.', true);
+          loadUsers();
+        } catch (err) {
+          setMsg(rowMsg, err?.message || 'Erreur.', false);
+        }
+      }
+
+      if (btn.dataset.action === 'delete') {
+        if (!confirm('Supprimer ce compte définitivement ?')) return;
+        setMsg(rowMsg, 'Suppression…', true);
+        try {
+          await window.SiteAuth.adminDeleteUser(id);
+          setMsg(rowMsg, 'Compte supprimé.', true);
+          loadUsers();
+        } catch (err) {
+          setMsg(rowMsg, err?.message || 'Erreur.', false);
+        }
+      }
+    });
+
+    window.SiteAuth?.onChange(() => loadUsers());
+    document.addEventListener('DOMContentLoaded', () => setTimeout(loadUsers, 250));
   </script>
 </body>
 </html>

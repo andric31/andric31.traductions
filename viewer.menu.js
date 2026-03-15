@@ -92,6 +92,7 @@ function addItem(label, onClick) {
     addItem,
     addDivider,
     clearItems,
-    closeMenu
+    closeMenu,
+    __getItems: () => ITEMS
   };
 })();

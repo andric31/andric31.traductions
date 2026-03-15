@@ -82,6 +82,15 @@ function roleLevel(role) {
   return ({ member: 1, translator: 2, admin: 3 }[String(role || 'member')] || 0);
 }
 
+function getAllowedRooms(user) {
+  const rooms = ['global'];
+  if (!user) return rooms;
+  if (roleLevel(user.role) >= roleLevel('member')) rooms.push('private:members');
+  if (roleLevel(user.role) >= roleLevel('translator')) rooms.push('private:translators');
+  if (roleLevel(user.role) >= roleLevel('admin')) rooms.push('private:admins');
+  return rooms;
+}
+
 function parseRoom(rawRoom, user) {
   const room = String(rawRoom || 'global').trim();
   if (!room || room === 'global') {
@@ -132,6 +141,23 @@ export async function onRequest(context) {
   if (request.method === 'GET') {
     const limitRaw = Number(url.searchParams.get('limit') || 80);
     const limit = Math.min(Math.max(limitRaw || 80, 1), 100);
+    const scope = String(url.searchParams.get('scope') || '').trim();
+
+    if (scope === 'allowed') {
+      const allowedRooms = getAllowedRooms(sessionUser);
+      const placeholders = allowedRooms.map((_, idx) => `?${idx + 1}`).join(', ');
+      const rows = await env.DB.prepare(`
+        SELECT id, nickname, message, created_at, room_key
+        FROM messages_global
+        WHERE room_key IN (${placeholders})
+        ORDER BY id DESC
+        LIMIT ?${allowedRooms.length + 1}
+      `).bind(...allowedRooms, limit).all();
+
+      const messages = (rows?.results || []).slice().reverse();
+      return json({ ok: true, messages, rooms: allowedRooms, scope: 'allowed' });
+    }
+
     const roomInfo = parseRoom(url.searchParams.get('room') || 'global', sessionUser);
     if (!roomInfo.ok) return json({ ok: false, error: roomInfo.error }, roomInfo.status || 400);
     const rows = await env.DB.prepare(`

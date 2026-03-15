@@ -89,6 +89,34 @@
     return data;
   }
 
+
+  async function adminListUsers() {
+    const resp = await api('/api/auth-admin-users');
+    const data = await resp.json();
+    if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Chargement impossible.');
+    return data;
+  }
+
+  async function adminUpdateUser(payload) {
+    const resp = await api('/api/auth-admin-update-user', {
+      method: 'POST',
+      body: JSON.stringify(payload || {}),
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Modification impossible.');
+    return data;
+  }
+
+  async function adminDeleteUser(id) {
+    const resp = await api('/api/auth-admin-delete-user', {
+      method: 'POST',
+      body: JSON.stringify({ id }),
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Suppression impossible.');
+    return data;
+  }
+
   async function createUserAdmin(payload, token) {
     const resp = await api('/api/auth-admin-create-user', {
       method: 'POST',
@@ -163,6 +191,9 @@
     onChange,
     applyAuthDom,
     createUserAdmin,
+    adminListUsers,
+    adminUpdateUser,
+    adminDeleteUser,
     bindMenuIntegration,
   };
 

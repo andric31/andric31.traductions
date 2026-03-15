@@ -332,14 +332,6 @@
         usersTbody.innerHTML = '<div class="member-card">Erreur de chargement.</div>';
         setMsg(usersMsg, err?.message || 'Erreur.', false);
       }
-    }).join('');
-        usersTbody.innerHTML = rows || '<div class="member-card">Aucun membre.</div>';
-        setMsg(usersMsg, `${(data.users || []).length} membre(s) chargé(s).`, true);
-      } catch (err) {
-        usersTbody.innerHTML = '<div class="member-card">Erreur de chargement.</div>'; 
-        setMsg(usersMsg, err?.message || 'Erreur.', false);
-      }
-    }
 
     createForm?.addEventListener('submit', async (e) => {
       e.preventDefault();

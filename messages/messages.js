@@ -96,7 +96,7 @@
     if (!els.roomSelect) return;
     const me = getAuthUser();
     const wanted = localStorage.getItem(ROOM_KEY) || 'global';
-    const options = [{ value: 'global', label: 'Public - Global' }];
+    const options = [{ value: 'global', label: 'Public — Global' }];
 
     if (me?.id) {
       options.push({ value: 'private:members', label: 'Privé — Membres connectés' });

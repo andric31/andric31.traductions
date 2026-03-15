@@ -6,7 +6,7 @@ function buildHeaders() {
     'cache-control': 'no-store',
     'access-control-allow-origin': '*',
     'access-control-allow-methods': 'GET,POST,DELETE,OPTIONS',
-    'access-control-allow-headers': 'content-type,x-admin-token',
+    'access-control-allow-headers': 'content-type',
   };
 }
 
@@ -185,15 +185,13 @@ export async function onRequest(context) {
   }
 
   if (request.method === 'DELETE') {
-    const expectedToken = String(env?.CHAT_ADMIN_TOKEN || '').trim();
-    const gotToken = String(request.headers.get('x-admin-token') || '').trim();
     const id = Number(url.searchParams.get('id') || 0);
 
-    if (!expectedToken) {
-      return json({ ok: false, error: 'Token admin non configuré.' }, 403);
+    if (!sessionUser) {
+      return json({ ok: false, error: 'Connexion requise.' }, 401);
     }
-    if (!gotToken || gotToken !== expectedToken) {
-      return json({ ok: false, error: 'Token admin invalide.' }, 403);
+    if (roleLevel(sessionUser.role) < roleLevel('admin')) {
+      return json({ ok: false, error: 'Accès admin requis.' }, 403);
     }
     if (!Number.isInteger(id) || id <= 0) {
       return json({ ok: false, error: 'ID invalide.' }, 400);

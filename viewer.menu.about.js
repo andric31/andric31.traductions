@@ -78,10 +78,11 @@ Profil https://f95zone.to/members/andric31.247797/
     return true;
   }
 
-  // wait for ViewerMenu
-  let tries = 0;
-  const t = setInterval(() => {
-    tries++;
-    if (register() || tries > 80) clearInterval(t);
-  }, 50);
+  if (!register()) {
+    let tries = 0;
+    const t = setInterval(() => {
+      tries++;
+      if (register() || tries > 80) clearInterval(t);
+    }, 50);
+  }
 })();

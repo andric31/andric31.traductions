@@ -254,6 +254,9 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
     window.ViewerMenuExtension = { open, close };
     return true;
   }
-
-  const t = setInterval(() => register() && clearInterval(t), 50);
+  if (!register()) {
+    const t = setInterval(() => {
+      if (register()) clearInterval(t);
+    }, 50);
+  }
 })();

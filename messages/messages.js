@@ -3,7 +3,6 @@
   const REFRESH_MS = 7000;
   const NICK_KEY = 'andric31_messages_nickname';
   const ROOM_KEY = 'andric31_messages_room';
-  const ADMIN_TOKEN_KEY = 'andric31_messages_admin_token';
 
   const els = {
     list: document.getElementById('messagesList'),
@@ -60,12 +59,6 @@
     const cleaned = String(name || '?').trim();
     return (cleaned[0] || '?').toUpperCase();
   }
-
-  function getAdminToken() {
-    return localStorage.getItem(ADMIN_TOKEN_KEY) || '';
-  }
-
-
 
   function getAuthUser() {
     return window.SiteAuth?.me || null;
@@ -136,7 +129,8 @@
     els.count.textContent = String(messages.length);
     els.empty.classList.toggle('hidden', messages.length > 0);
 
-    const adminToken = getAdminToken();
+    const me = getAuthUser();
+    const isAdmin = roleLevel(me?.role) >= roleLevel('admin');
 
     for (const item of messages) {
       const article = document.createElement('article');
@@ -152,7 +146,7 @@
         <div class="msg-text">${escapeHtml(item.message)}</div>
       `;
 
-      if (adminToken) {
+      if (isAdmin) {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'msg-delete-btn';
@@ -236,14 +230,14 @@
   }
 
   async function deleteMessage(id) {
-    const token = getAdminToken();
-    if (!token) return;
+    const me = getAuthUser();
+    if (roleLevel(me?.role) < roleLevel('admin')) return;
     if (!confirm('Supprimer ce message ?')) return;
 
     try {
       const res = await fetch(`${API_URL}?id=${encodeURIComponent(id)}`, {
         method: 'DELETE',
-        headers: { 'x-admin-token': token },
+        credentials: 'same-origin',
       });
       const data = await res.json();
       if (!res.ok || !data?.ok) throw new Error(data?.error || 'Suppression impossible');
@@ -263,22 +257,6 @@
     refreshTimer = setInterval(() => fetchMessages({ silent: true }), REFRESH_MS);
   }
 
-  function initAdminShortcut() {
-    window.addEventListener('keydown', (evt) => {
-      if (!evt.ctrlKey || !evt.shiftKey || evt.key.toLowerCase() !== 'm') return;
-      const current = getAdminToken();
-      const token = prompt('Token admin pour la modération :', current);
-      if (token === null) return;
-      if (!token.trim()) {
-        localStorage.removeItem(ADMIN_TOKEN_KEY);
-        setInfo('Mode admin retiré.');
-      } else {
-        localStorage.setItem(ADMIN_TOKEN_KEY, token.trim());
-        setInfo('Mode admin activé.', 'success');
-      }
-      render();
-    });
-  }
 
   function init() {
     fillNicknameFromAuth();
@@ -294,7 +272,6 @@
       const left = 500 - els.message.value.length;
       setInfo(`${left} caractère${left > 1 ? 's' : ''} restant${left > 1 ? 's' : ''}.`);
     });
-    initAdminShortcut();
     if (window.SiteAuth?.onChange) {
       window.SiteAuth.onChange(() => {
         fillNicknameFromAuth();

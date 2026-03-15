@@ -45,7 +45,7 @@
 
     .blog-admin-grid {
       display: grid;
-      grid-template-columns: minmax(320px, 440px) 1fr;
+      grid-template-columns: 1fr;
       gap: 12px;
       align-items: start;
     }
@@ -97,6 +97,16 @@
     .blog-admin-form .auth-label > span {
       font-size: 13px;
       opacity: .95;
+      font-weight: 700;
+    }
+
+    .blog-admin-label-help {
+      display:block;
+      margin-top:4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      font-weight: 400;
     }
 
     .blog-admin-form .auth-input,
@@ -107,6 +117,32 @@
 
     .blog-admin-form .auth-textarea {
       resize: vertical;
+      line-height: 1.55;
+    }
+
+    #content.blog-admin-editor-full {
+      min-height: 58vh;
+      font: 15px/1.6 Consolas, monospace;
+    }
+
+    .blog-admin-guide {
+      margin: 0 0 14px;
+      padding: 12px 14px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px;
+      background: rgba(80,160,255,.08);
+    }
+
+    .blog-admin-guide-title {
+      margin: 0 0 6px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .blog-admin-guide p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
       line-height: 1.55;
     }
 
@@ -218,7 +254,7 @@
 
     <section class="auth-card auth-hidden blog-admin-top" data-auth-only data-role-min="admin">
       <h1 class="auth-title">📝 Éditeur blog admin</h1>
-      <p class="auth-subtitle">Version simplifiée : à gauche tu remplis l’article, à droite tu vois l’aperçu, puis en bas tu récupères le HTML, la carte blog et le JSON.</p>
+      <p class="auth-subtitle">Version plus claire : l’éditeur prend toute la largeur, chaque champ explique son rôle, puis tu récupères le HTML, la carte blog et le JSON plus bas.</p>
       <div class="auth-actions">
         <a class="auth-btn" href="/compte/">Retour au compte</a>
         <a class="auth-btn" href="/">Retour au site</a>
@@ -230,55 +266,60 @@
       <div class="blog-admin-grid">
         <div class="blog-admin-card blog-admin-form">
           <h2 class="blog-admin-section-title">Création d’article</h2>
-          <p class="blog-admin-subtitle">Commence par le titre, le résumé et le contenu. Le slug peut se remplir automatiquement.</p>
+          <p class="blog-admin-subtitle">L’éditeur prend maintenant toute la largeur. Remplis les champs de haut en bas, puis regarde l’aperçu plus bas.</p>
+
+          <div class="blog-admin-guide">
+            <div class="blog-admin-guide-title">Repère rapide</div>
+            <p><strong>Titre</strong> = nom de l’article visible sur le blog. <strong>Slug</strong> = nom du fichier et du lien web. <strong>Date affichée</strong> = texte vu par les visiteurs. <strong>Date ISO</strong> = format technique pour trier proprement. <strong>Catégorie</strong> = petit label visible sur la carte et dans l’article.</p>
+          </div>
 
           <div class="blog-admin-row">
             <label class="auth-label">
-              <span>Titre</span>
+              <span>Titre<span class="blog-admin-label-help">Nom affiché sur la carte blog et en haut de l’article.</span></span>
               <input class="auth-input" id="title" type="text" placeholder="Ex. Capsule #2 — Nouvelles du projet" />
             </label>
             <label class="auth-label">
-              <span>Slug</span>
+              <span>Slug<span class="blog-admin-label-help">Nom du fichier HTML et morceau du lien. Exemple : mon-article.html</span></span>
               <input class="auth-input" id="slug" type="text" placeholder="capsule-02-nouvelles-du-projet" />
             </label>
           </div>
 
           <div class="blog-admin-row-3">
             <label class="auth-label">
-              <span>Date affichée</span>
+              <span>Date affichée<span class="blog-admin-label-help">Texte visible pour les visiteurs. Exemple : 15 mars 2026</span></span>
               <input class="auth-input" id="displayDate" type="text" value="15 mars 2026" />
             </label>
             <label class="auth-label">
-              <span>Date ISO</span>
+              <span>Date ISO<span class="blog-admin-label-help">Date technique au format AAAA-MM-JJ pour garder un ordre propre.</span></span>
               <input class="auth-input" id="isoDate" type="date" value="2026-03-15" />
             </label>
             <label class="auth-label">
-              <span>Catégorie</span>
+              <span>Catégorie<span class="blog-admin-label-help">Label court affiché sur l’article. Exemple : Actualité, Devlog, Correction</span></span>
               <input class="auth-input" id="category" type="text" value="Actualité" />
             </label>
           </div>
 
           <div class="blog-admin-row">
             <label class="auth-label">
-              <span>Auteur</span>
+              <span>Auteur<span class="blog-admin-label-help">Nom affiché sur la carte à droite.</span></span>
               <input class="auth-input" id="author" type="text" value="andric31" />
             </label>
             <label class="auth-label">
-              <span>Avatar lettre</span>
+              <span>Avatar lettre<span class="blog-admin-label-help">Une ou deux lettres affichées dans le rond avatar.</span></span>
               <input class="auth-input" id="avatar" type="text" value="A" maxlength="2" />
             </label>
           </div>
 
           <div class="blog-admin-row">
             <label class="auth-label">
-              <span>Type de carte</span>
+              <span>Type de carte<span class="blog-admin-label-help">Article normal ou article mis en avant avec le badge épinglé.</span></span>
               <select class="auth-select" id="cardType">
                 <option value="regular">Article normal</option>
                 <option value="pinned">Article épinglé</option>
               </select>
             </label>
             <label class="auth-label">
-              <span>Résumé court</span>
+              <span>Résumé court<span class="blog-admin-label-help">Petit texte affiché sur la carte blog. Il doit donner envie de cliquer.</span></span>
               <input class="auth-input" id="excerpt" type="text" placeholder="Petit récap de l’article..." />
             </label>
           </div>
@@ -286,13 +327,13 @@
           <div class="blog-admin-divider"></div>
 
           <label class="auth-label">
-            <span>Chapô / intro</span>
+            <span>Chapô / intro<span class="blog-admin-label-help">Texte visible sous le grand titre dans l’article. Tu peux reprendre le résumé ou le développer un peu.</span></span>
             <textarea class="auth-textarea" id="intro" rows="4" placeholder="Introduction affichée dans l’article."></textarea>
           </label>
 
           <label class="auth-label">
-            <span>Contenu HTML de l’article</span>
-            <textarea class="auth-textarea" id="content" rows="15" placeholder="<h2>Section</h2>&#10;<p>Ton texte...</p>"></textarea>
+            <span>Contenu HTML de l’article<span class="blog-admin-label-help">Corps complet de l’article. Utilise par exemple &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt; et &lt;strong&gt;.</span></span>
+            <textarea class="auth-textarea blog-admin-editor-full" id="content" rows="22" placeholder="<h2>Section</h2>&#10;<p>Ton texte...</p>"></textarea>
           </label>
 
           <div class="blog-admin-actions">
@@ -310,7 +351,7 @@
               <h2 class="blog-admin-section-title" style="margin:0;">Aperçu</h2>
               <span class="blog-admin-pill" id="currentFileLabel">Fichier : —</span>
             </div>
-            <p class="blog-admin-preview-note">L’aperçu utilise un fond blanc avec un texte sombre forcé pour rester lisible pendant l’édition.</p>
+            <p class="blog-admin-preview-note">L’aperçu est en dessous de l’éditeur pour laisser plus de place à l’écriture. Le fond blanc est forcé pour rester lisible pendant l’édition.</p>
             <iframe id="previewFrame" title="Aperçu article blog"></iframe>
           </div>
         </div>

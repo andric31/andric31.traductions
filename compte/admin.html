@@ -11,6 +11,9 @@
   <script src="/theme-init.js"></script>
   
 <style>
+  html:not(.auth-ready) body { visibility: hidden; }
+  html.auth-denied body { visibility: visible; }
+
   .admin-layout { display:grid; gap:10px; width:min(1180px, calc(100% - 18px)); margin:12px auto 18px !important; padding-top:0 !important; }
   body .auth-shell.admin-layout { margin-top:12px !important; }
   body .auth-card { scroll-margin-top: 8px; }
@@ -108,7 +111,7 @@
 </head>
 <body>
   <main class="auth-shell admin-layout">
-    <section class="auth-card" data-guest-only>
+    <section class="auth-card auth-hidden" data-guest-only>
       <h1 class="auth-title">🛡️ Gestion des membres</h1>
       <p class="auth-subtitle">Tu dois être connecté en administrateur pour gérer les comptes.</p>
       <div class="auth-actions">
@@ -121,7 +124,7 @@
       <h1 class="auth-title">🛠️ Gestion des membres</h1>
       <p class="auth-subtitle">Tu peux créer, modifier, désactiver, réinitialiser le mot de passe ou supprimer un compte.</p>
       <div class="auth-actions">
-        <a class="auth-btn" href="/connexion/">Retour au compte</a>
+        <a class="auth-btn" href="/compte/">Retour au compte</a>
         <a class="auth-btn" href="/">Retour au site</a>
       </div>
     </section>
@@ -236,12 +239,58 @@
 </section>
 
 
-    <section class="auth-card auth-hidden" data-auth-only>
+    <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
       <p class="admin-note">Astuce : après réinitialisation d’un mot de passe ou désactivation, les sessions du membre sont fermées automatiquement.</p>
     </section>
   </main>
 
   <script src="/auth/auth.client.js"></script>
+  <script>
+    (function(){
+      function showDenied(){
+        document.documentElement.classList.add('auth-ready','auth-denied');
+        document.querySelectorAll('[data-auth-only]').forEach((el)=>el.remove());
+        const guest = document.querySelector('[data-guest-only]');
+        if (guest) {
+          guest.classList.remove('auth-hidden');
+          const title = guest.querySelector('.auth-title');
+          const subtitle = guest.querySelector('.auth-subtitle');
+          if (title) title.textContent = '⛔ Accès refusé';
+          if (subtitle) subtitle.textContent = 'Cette page est réservée aux administrateurs.';
+        }
+      }
+      function check(){
+        if (!window.SiteAuth?.loaded) return false;
+        const me = window.SiteAuth.me;
+        const ok = !!(me && String(me.role || '').toLowerCase() === 'admin');
+        if (ok) {
+          document.documentElement.classList.add('auth-ready');
+          return true;
+        }
+        showDenied();
+        return false;
+      }
+      window.__adminPageAllowed = false;
+      window.__ensureAdminPage = function(){
+        const ok = check();
+        window.__adminPageAllowed = ok;
+        return ok;
+      };
+      document.addEventListener('DOMContentLoaded', function(){ setTimeout(window.__ensureAdminPage, 0); });
+      if (window.SiteAuth?.onChange) {
+        window.SiteAuth.onChange(function(me){
+          const ok = !!(window.SiteAuth?.loaded && me && String(me.role || '').toLowerCase() === 'admin');
+          if (ok) {
+            window.__adminPageAllowed = true;
+            document.documentElement.classList.add('auth-ready');
+            return;
+          }
+          window.__adminPageAllowed = false;
+          showDenied();
+        });
+      }
+    })();
+  </script>
   <script>
     const createForm = document.getElementById('createForm');
     const createMsg = document.getElementById('createMsg');
@@ -430,6 +479,7 @@
     }
 
     async function loadUsers() {
+      if (!window.__ensureAdminPage || !window.__ensureAdminPage()) return;
       if (!window.SiteAuth?.me || window.SiteAuth.me.role !== 'admin') return;
       setMsg(usersMsg, 'Chargement des membres…', true);
       try {
@@ -532,8 +582,8 @@
       }
     });
 
-    window.SiteAuth?.onChange(() => loadUsers());
-    document.addEventListener('DOMContentLoaded', () => setTimeout(loadUsers, 250));
+    window.SiteAuth?.onChange(() => { if (window.__adminPageAllowed) loadUsers(); });
+    document.addEventListener('DOMContentLoaded', () => { if (window.__ensureAdminPage && window.__ensureAdminPage()) setTimeout(loadUsers, 250); });
   </script>
 </body>
 </html>

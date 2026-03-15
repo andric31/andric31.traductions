@@ -21,7 +21,6 @@
       <div class="auth-actions">
         <a class="auth-btn primary" href="/connexion/">Se connecter</a>
         <a class="auth-btn" href="/">Retour au site</a>
-        </div>
       </div>
     </section>
 
@@ -41,14 +40,7 @@
       </div>
     </section>
 
-    <section class="auth-card auth-hidden" style="margin-top:16px;" id="adminQuickCard" data-role-min="admin">
-      <h2 style="margin-top:0;">🛠️ Admin</h2>
-      <p>Outils de gestion réservés aux administrateurs.</p>
-      <div class="auth-actions">
-        <a class="auth-btn" href="/compte/admin.html">Gestion des comptes</a>
-        <a class="auth-btn" href="/compte/blog-admin.html">Éditeur de blog</a>
-      </div>
-    </section>
+    <div id="adminQuickMount"></div>
   </main>
 
   <script src="/auth/auth.client.js"></script>
@@ -57,6 +49,7 @@
     const logoutMsg = document.getElementById('logoutMsg');
     const guestCard = document.getElementById('guestCard');
     const accountCard = document.getElementById('accountCard');
+    const adminQuickMount = document.getElementById('adminQuickMount');
 
     function setMsg(el, text, ok) {
       if (!el) return;
@@ -64,15 +57,35 @@
       el.className = 'auth-msg ' + (text ? (ok ? 'ok' : 'err') : '');
     }
 
+    function renderAdminCard(me) {
+      if (!adminQuickMount) return;
+      const role = String(me?.role || '').toLowerCase();
+      if (role !== 'admin') {
+        adminQuickMount.innerHTML = '';
+        return;
+      }
+      adminQuickMount.innerHTML = `
+        <section class="auth-card" style="margin-top:16px;">
+          <h2 style="margin-top:0;">🛠️ Admin</h2>
+          <p>Outils de gestion réservés aux administrateurs.</p>
+          <div class="auth-actions">
+            <a class="auth-btn" href="/compte/admin.html">Gestion des comptes</a>
+            <a class="auth-btn" href="/compte/blog-admin.html">Éditeur de blog</a>
+          </div>
+        </section>`;
+    }
+
     function guardAccount(me) {
       if (!window.SiteAuth?.loaded) return;
       if (!me) {
         guestCard?.classList.remove('auth-hidden');
         accountCard?.classList.add('auth-hidden');
+        adminQuickMount.innerHTML = '';
         return;
       }
       guestCard?.classList.add('auth-hidden');
       accountCard?.classList.remove('auth-hidden');
+      renderAdminCard(me);
     }
 
     window.SiteAuth.onChange(guardAccount);

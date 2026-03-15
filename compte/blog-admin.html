@@ -11,29 +11,197 @@
   <script src="/theme-init.js"></script>
   <style>
     html:not(.auth-ready) body { visibility: hidden; }
-    .blog-admin-shell { width:min(1320px, calc(100% - 18px)); margin:12px auto 24px; display:grid; gap:16px; }
-    .blog-admin-grid { display:grid; grid-template-columns:minmax(340px, 520px) minmax(320px, 1fr); gap:16px; align-items:start; }
-    .blog-admin-card { border:1px solid var(--border, var(--auth-border)); border-radius:18px; background:rgba(255,255,255,.03); padding:16px; }
-    .blog-admin-title { margin:0 0 10px; }
-    .blog-admin-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    .blog-admin-row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
-    .blog-admin-preview iframe { width:100%; min-height:560px; border:1px solid rgba(255,255,255,.08); border-radius:14px; background:#fff; }
-    .blog-admin-toolbar, .blog-admin-actions { display:flex; flex-wrap:wrap; gap:10px; }
-    .blog-admin-actions { margin-top:12px; }
-    .blog-admin-help { color:var(--muted); line-height:1.6; font-size:14px; }
-    .blog-admin-code { width:100%; min-height:180px; resize:vertical; font:13px/1.5 Consolas, monospace; }
-    .blog-admin-code.big { min-height:300px; }
-    .blog-admin-pill { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; border:1px solid var(--border, var(--auth-border)); background:rgba(80,160,255,.10); font-size:13px; }
-    .blog-admin-split { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-    .blog-admin-mini { font-size:12px; color:var(--muted); }
-    @media (max-width: 980px) {
-      .blog-admin-grid, .blog-admin-row, .blog-admin-row-3, .blog-admin-split { grid-template-columns:1fr; }
+
+    .blog-admin-shell {
+      width: min(1360px, calc(100% - 16px));
+      margin: 4px auto 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .blog-admin-top.auth-card,
+    .blog-admin-main.auth-card,
+    .blog-admin-out.auth-card {
+      padding: 14px;
+    }
+
+    .blog-admin-top .auth-title {
+      margin-bottom: 6px;
+    }
+
+    .blog-admin-top .auth-subtitle {
+      margin-bottom: 10px;
+    }
+
+    .blog-admin-top .auth-actions {
+      gap: 8px;
+    }
+
+    .blog-admin-grid {
+      display: grid;
+      grid-template-columns: minmax(360px, 520px) minmax(340px, 1fr);
+      gap: 12px;
+      align-items: start;
+    }
+
+    .blog-admin-card {
+      border: 1px solid var(--border, var(--auth-border));
+      border-radius: 18px;
+      background: rgba(255,255,255,.03);
+      padding: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.18);
+    }
+
+    .blog-admin-title {
+      margin: 0 0 8px;
+      font-size: clamp(22px, 2.2vw, 34px);
+    }
+
+    .blog-admin-section-title {
+      margin: 0 0 10px;
+      font-size: 20px;
+    }
+
+    .blog-admin-subtitle {
+      margin: 0 0 12px;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 14px;
+    }
+
+    .blog-admin-divider {
+      height: 1px;
+      background: rgba(255,255,255,.07);
+      margin: 12px 0;
+    }
+
+    .blog-admin-row,
+    .blog-admin-row-3 {
+      display: grid;
+      gap: 10px;
+    }
+
+    .blog-admin-row { grid-template-columns: 1fr 1fr; }
+    .blog-admin-row-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    .blog-admin-form .auth-label {
+      gap: 6px;
+    }
+
+    .blog-admin-form .auth-label > span {
+      font-size: 13px;
+      opacity: .95;
+    }
+
+    .blog-admin-form .auth-input,
+    .blog-admin-form .auth-select,
+    .blog-admin-form .auth-textarea {
+      min-height: 46px;
+    }
+
+    .blog-admin-form .auth-textarea {
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    .blog-admin-actions,
+    .blog-admin-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .blog-admin-actions {
+      margin-top: 12px;
+    }
+
+    .blog-admin-preview-wrap {
+      display: grid;
+      gap: 10px;
+    }
+
+    .blog-admin-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      border: 1px solid var(--border, var(--auth-border));
+      background: rgba(80,160,255,.10);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .blog-admin-preview-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .blog-admin-preview iframe {
+      width: 100%;
+      min-height: 760px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px;
+      background: #ffffff;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.03);
+    }
+
+    .blog-admin-out-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .blog-admin-help {
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 13px;
+      margin: 0 0 10px;
+    }
+
+    .blog-admin-code {
+      width: 100%;
+      min-height: 220px;
+      resize: vertical;
+      font: 13px/1.55 Consolas, monospace;
+      border-radius: 14px;
+    }
+
+    .blog-admin-code.big {
+      min-height: 520px;
+    }
+
+    .blog-admin-mini {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 1120px) {
+      .blog-admin-grid,
+      .blog-admin-out-grid,
+      .blog-admin-row,
+      .blog-admin-row-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .blog-admin-preview iframe {
+        min-height: 560px;
+      }
+
+      .blog-admin-code.big {
+        min-height: 320px;
+      }
     }
   </style>
 </head>
 <body>
   <main class="blog-admin-shell">
-    <section class="auth-card" data-guest-only>
+    <section class="auth-card auth-hidden" data-guest-only>
       <h1 class="auth-title">📝 Éditeur blog</h1>
       <p class="auth-subtitle">Tu dois être connecté avec un compte admin pour utiliser cet outil.</p>
       <div class="auth-actions">
@@ -42,9 +210,9 @@
       </div>
     </section>
 
-    <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
+    <section class="auth-card auth-hidden blog-admin-top" data-auth-only data-role-min="admin">
       <h1 class="auth-title">📝 Éditeur blog admin</h1>
-      <p class="auth-subtitle">Base prête pour créer un article, générer le fichier HTML, le bloc carte pour <code>blog/index.html</code> et l’entrée JSON pour une future API.</p>
+      <p class="auth-subtitle">Version simplifiée : à gauche tu remplis l’article, à droite tu vois l’aperçu, puis en bas tu récupères le HTML, la carte blog et le JSON.</p>
       <div class="auth-actions">
         <a class="auth-btn" href="/compte/">Compte</a>
         <a class="auth-btn" href="/compte/admin.html">Gestion membres</a>
@@ -52,34 +220,74 @@
       </div>
     </section>
 
-    <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
+    <section class="auth-card auth-hidden blog-admin-main" data-auth-only data-role-min="admin">
       <div class="blog-admin-grid">
-        <div class="blog-admin-card">
-          <h2 class="blog-admin-title">Création d’article</h2>
+        <div class="blog-admin-card blog-admin-form">
+          <h2 class="blog-admin-section-title">Création d’article</h2>
+          <p class="blog-admin-subtitle">Commence par le titre, le résumé et le contenu. Le slug peut se remplir automatiquement.</p>
+
           <div class="blog-admin-row">
-            <label class="auth-label"><span>Titre</span><input class="auth-input" id="title" type="text" placeholder="Ex. Capsule #2 — Nouvelles du projet" /></label>
-            <label class="auth-label"><span>Slug</span><input class="auth-input" id="slug" type="text" placeholder="capsule-02-nouvelles-du-projet" /></label>
+            <label class="auth-label">
+              <span>Titre</span>
+              <input class="auth-input" id="title" type="text" placeholder="Ex. Capsule #2 — Nouvelles du projet" />
+            </label>
+            <label class="auth-label">
+              <span>Slug</span>
+              <input class="auth-input" id="slug" type="text" placeholder="capsule-02-nouvelles-du-projet" />
+            </label>
           </div>
+
           <div class="blog-admin-row-3">
-            <label class="auth-label"><span>Date affichée</span><input class="auth-input" id="displayDate" type="text" value="15 mars 2026" /></label>
-            <label class="auth-label"><span>Date ISO</span><input class="auth-input" id="isoDate" type="date" value="2026-03-15" /></label>
-            <label class="auth-label"><span>Catégorie</span><input class="auth-input" id="category" type="text" value="Actualité" /></label>
+            <label class="auth-label">
+              <span>Date affichée</span>
+              <input class="auth-input" id="displayDate" type="text" value="15 mars 2026" />
+            </label>
+            <label class="auth-label">
+              <span>Date ISO</span>
+              <input class="auth-input" id="isoDate" type="date" value="2026-03-15" />
+            </label>
+            <label class="auth-label">
+              <span>Catégorie</span>
+              <input class="auth-input" id="category" type="text" value="Actualité" />
+            </label>
           </div>
+
           <div class="blog-admin-row">
-            <label class="auth-label"><span>Auteur</span><input class="auth-input" id="author" type="text" value="andric31" /></label>
-            <label class="auth-label"><span>Avatar lettre</span><input class="auth-input" id="avatar" type="text" value="A" maxlength="2" /></label>
+            <label class="auth-label">
+              <span>Auteur</span>
+              <input class="auth-input" id="author" type="text" value="andric31" />
+            </label>
+            <label class="auth-label">
+              <span>Avatar lettre</span>
+              <input class="auth-input" id="avatar" type="text" value="A" maxlength="2" />
+            </label>
           </div>
+
           <div class="blog-admin-row">
-            <label class="auth-label"><span>Type de carte</span>
+            <label class="auth-label">
+              <span>Type de carte</span>
               <select class="auth-select" id="cardType">
                 <option value="regular">Article normal</option>
                 <option value="pinned">Article épinglé</option>
               </select>
             </label>
-            <label class="auth-label"><span>Résumé court</span><input class="auth-input" id="excerpt" type="text" placeholder="Petit récap de l’article..." /></label>
+            <label class="auth-label">
+              <span>Résumé court</span>
+              <input class="auth-input" id="excerpt" type="text" placeholder="Petit récap de l’article..." />
+            </label>
           </div>
-          <label class="auth-label"><span>Chapô / intro</span><textarea class="auth-textarea" id="intro" rows="4" placeholder="Introduction affichée dans l’article."></textarea></label>
-          <label class="auth-label"><span>Contenu HTML de l’article</span><textarea class="auth-textarea" id="content" rows="16" placeholder="<h2>Section</h2>&#10;<p>Ton texte...</p>"></textarea></label>
+
+          <div class="blog-admin-divider"></div>
+
+          <label class="auth-label">
+            <span>Chapô / intro</span>
+            <textarea class="auth-textarea" id="intro" rows="4" placeholder="Introduction affichée dans l’article."></textarea>
+          </label>
+
+          <label class="auth-label">
+            <span>Contenu HTML de l’article</span>
+            <textarea class="auth-textarea" id="content" rows="15" placeholder="<h2>Section</h2>&#10;<p>Ton texte...</p>"></textarea>
+          </label>
 
           <div class="blog-admin-actions">
             <button class="auth-btn primary" type="button" id="generateBtn">Générer</button>
@@ -91,19 +299,22 @@
         </div>
 
         <div class="blog-admin-card blog-admin-preview">
-          <div class="blog-admin-toolbar">
-            <h2 class="blog-admin-title" style="margin:0;">Aperçu</h2>
-            <span class="blog-admin-pill" id="currentFileLabel">Fichier : —</span>
+          <div class="blog-admin-preview-wrap">
+            <div class="blog-admin-toolbar">
+              <h2 class="blog-admin-section-title" style="margin:0;">Aperçu</h2>
+              <span class="blog-admin-pill" id="currentFileLabel">Fichier : —</span>
+            </div>
+            <p class="blog-admin-preview-note">L’aperçu utilise un fond blanc avec un texte sombre forcé pour rester lisible pendant l’édition.</p>
+            <iframe id="previewFrame" title="Aperçu article blog"></iframe>
           </div>
-          <iframe id="previewFrame" title="Aperçu article blog"></iframe>
         </div>
       </div>
     </section>
 
-    <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
-      <div class="blog-admin-split">
+    <section class="auth-card auth-hidden blog-admin-out" data-auth-only data-role-min="admin">
+      <div class="blog-admin-out-grid">
         <div class="blog-admin-card">
-          <h3 class="blog-admin-title">Fichier article HTML</h3>
+          <h3 class="blog-admin-section-title">Fichier article HTML</h3>
           <p class="blog-admin-help">Télécharge directement le fichier à mettre dans <code>/blog/</code>.</p>
           <div class="blog-admin-actions">
             <button class="auth-btn primary" type="button" id="downloadArticleBtn">Télécharger l’article</button>
@@ -111,27 +322,77 @@
           </div>
           <textarea id="articleHtmlOut" class="blog-admin-code big" spellcheck="false"></textarea>
         </div>
+
         <div class="blog-admin-card">
-          <h3 class="blog-admin-title">Bloc carte pour blog/index.html</h3>
-          <p class="blog-admin-help">À coller dans la section “⭐ Article épinglé” ou “📚 Tous les articles”.</p>
+          <h3 class="blog-admin-section-title">Bloc carte</h3>
+          <p class="blog-admin-help">À coller dans la section épinglée ou dans la liste des articles.</p>
           <div class="blog-admin-actions">
             <button class="auth-btn" type="button" id="copyCardBtn">Copier le bloc</button>
           </div>
           <textarea id="cardHtmlOut" class="blog-admin-code" spellcheck="false"></textarea>
+        </div>
 
-          <h3 class="blog-admin-title" style="margin-top:18px;">Entrée JSON future API</h3>
-          <p class="blog-admin-help">Prévu pour plus tard si tu passes sur une vraie gestion via <code>articles.json</code> ou API admin.</p>
+        <div class="blog-admin-card">
+          <h3 class="blog-admin-section-title">Entrée JSON</h3>
+          <p class="blog-admin-help">Prévu pour plus tard si tu passes sur une vraie API ou un <code>articles.json</code>.</p>
           <div class="blog-admin-actions">
             <button class="auth-btn" type="button" id="copyJsonBtn">Copier le JSON</button>
           </div>
           <textarea id="jsonOut" class="blog-admin-code" spellcheck="false"></textarea>
         </div>
       </div>
-      <div class="blog-admin-mini" style="margin-top:10px;">Note : dans cette version il n’y a pas encore d’API d’écriture blog dans le zip, donc l’outil prépare les fichiers proprement mais n’enregistre pas encore directement sur le serveur.</div>
+
+      <div class="blog-admin-mini">Note : dans cette version il n’y a pas encore d’API d’écriture blog dans le zip, donc l’outil prépare les fichiers proprement mais n’enregistre pas encore directement sur le serveur.</div>
     </section>
   </main>
 
   <script src="/auth/auth.client.js"></script>
+  <script>
+    (function(){
+      function showDenied(){
+        document.documentElement.classList.add('auth-ready','auth-denied');
+        document.querySelectorAll('[data-auth-only]').forEach((el)=>el.remove());
+        const guest = document.querySelector('[data-guest-only]');
+        if (guest) {
+          guest.classList.remove('auth-hidden');
+          const title = guest.querySelector('.auth-title');
+          const subtitle = guest.querySelector('.auth-subtitle');
+          if (title) title.textContent = '⛔ Accès refusé';
+          if (subtitle) subtitle.textContent = 'Cette page est réservée aux administrateurs.';
+        }
+      }
+      function check(){
+        if (!window.SiteAuth?.loaded) return false;
+        const me = window.SiteAuth.me;
+        const ok = !!(me && String(me.role || '').toLowerCase() === 'admin');
+        if (ok) {
+          document.documentElement.classList.add('auth-ready');
+          return true;
+        }
+        showDenied();
+        return false;
+      }
+      window.__blogAdminAllowed = false;
+      window.__ensureBlogAdminPage = function(){
+        const ok = check();
+        window.__blogAdminAllowed = ok;
+        return ok;
+      };
+      document.addEventListener('DOMContentLoaded', function(){ setTimeout(window.__ensureBlogAdminPage, 0); });
+      if (window.SiteAuth?.onChange) {
+        window.SiteAuth.onChange(function(me){
+          const ok = !!(window.SiteAuth?.loaded && me && String(me.role || '').toLowerCase() === 'admin');
+          if (ok) {
+            window.__blogAdminAllowed = true;
+            document.documentElement.classList.add('auth-ready');
+            return;
+          }
+          window.__blogAdminAllowed = false;
+          showDenied();
+        });
+      }
+    })();
+  </script>
   <script>
     const $ = (id) => document.getElementById(id);
     const el = {
@@ -260,7 +521,12 @@ ${data.content_html}
       const doc = el.previewFrame.contentWindow?.document;
       if (!doc) return;
       doc.open();
-      doc.write(html);
+      doc.write(`<!DOCTYPE html><html><head><style>
+        html,body{margin:0;padding:0;background:#ffffff;color:#111827;font-family:Arial,Helvetica,sans-serif}
+        body{padding:0}
+        h1,h2,h3,h4,h5,h6,p,span,div,li,a,strong,em,small{color:inherit}
+        a{color:#1d4ed8}
+      </style></head><body>${html}</body></html>`);
       doc.close();
     }
 
@@ -306,7 +572,7 @@ ${data.content_html}
       el.cardType.value = 'regular';
       el.excerpt.value = 'Petit point rapide sur les nouveautés du site, les prochaines améliorations et les tests en cours.';
       el.intro.value = 'Voici un nouveau point rapide sur le site, les outils et la suite des améliorations prévues.';
-      el.content.value = `<h2>Ce qui avance</h2>\n        <p>Le site continue d’évoluer avec de nouvelles améliorations sur les notifications, le blog et les outils de gestion.</p>\n\n        <h2>La suite</h2>\n        <p>La prochaine étape consiste à rendre la création d’articles plus simple depuis un espace admin connecté, sans devoir tout éditer à la main.</p>`;
+      el.content.value = `<h2>Ce qui avance</h2>\n<p>Le site continue d’évoluer avec de nouvelles améliorations sur les notifications, le blog et les outils de gestion.</p>\n\n<h2>La suite</h2>\n<p>La prochaine étape consiste à rendre la création d’articles plus simple depuis un espace admin connecté, sans devoir tout éditer à la main.</p>`;
       generateAll(true);
     }
 
@@ -317,7 +583,7 @@ ${data.content_html}
       el.articleHtmlOut.value = '';
       el.cardHtmlOut.value = '';
       el.jsonOut.value = '';
-      renderPreview('<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;padding:24px;">Aperçu vide.</body></html>');
+      renderPreview('<div style="padding:24px;"><h2 style="margin-top:0;">Aperçu vide</h2><p>Remplis les champs puis clique sur Générer ou Aperçu.</p></div>');
       setMsg('', true);
     }
 
@@ -350,14 +616,14 @@ ${data.content_html}
     });
 
     window.SiteAuth.onChange((me) => {
-      if (!window.SiteAuth.loaded) return;
-      if (!me) return;
-      if (!['admin'].includes(String(me.role || '').toLowerCase())) {
-        document.body.innerHTML = '<main class="auth-shell"><section class="auth-card"><h1 class="auth-title">⛔ Accès refusé</h1><p class="auth-subtitle">Cette page est réservée aux admins.</p><div class="auth-actions"><a class="auth-btn" href="/compte/">Retour au compte</a><a class="auth-btn" href="/blog/">Retour au blog</a></div></section></main>';
-      }
+      if (!window.SiteAuth?.loaded) return;
+      if (!me || String(me.role || '').toLowerCase() !== 'admin') return;
+      document.documentElement.classList.add('auth-ready');
     });
 
-    resetForm();
+    if (window.__ensureBlogAdminPage && window.__ensureBlogAdminPage()) {
+      resetForm();
+    }
   </script>
 </body>
 </html>

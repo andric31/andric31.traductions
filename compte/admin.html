@@ -9,19 +9,64 @@
   <link rel="stylesheet" href="/themes.css" />
   <link rel="stylesheet" href="/auth/auth.css" />
   <script src="/theme-init.js"></script>
-  <style>
-    .admin-layout { display:grid; gap:16px; }
-    .admin-table-wrap { overflow:auto; border:1px solid var(--border, var(--auth-border)); border-radius:14px; }
-    .admin-table { width:100%; border-collapse:collapse; min-width:980px; }
-    .admin-table th, .admin-table td { padding:10px 12px; border-bottom:1px solid rgba(255,255,255,.08); text-align:left; vertical-align:top; }
-    .admin-table th { background:rgba(255,255,255,.05); font-size:14px; }
-    .admin-table tr:hover td { background:rgba(255,255,255,.03); }
-    .admin-mini { font-size:12px; color:var(--muted); }
-    .auth-badge { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; background:rgba(255,255,255,.08); border:1px solid var(--border, var(--auth-border)); font-size:13px; }
-    .admin-split { display:grid; grid-template-columns: 1.2fr .8fr; gap:16px; }
-    .admin-note { color:var(--muted); font-size:14px; }
-    @media (max-width: 980px) { .admin-split { grid-template-columns:1fr; } }
-  </style>
+  
+<style>
+  .admin-layout { display:grid; gap:16px; }
+  .admin-split { display:grid; grid-template-columns: minmax(320px, 440px) 1fr; gap:16px; align-items:start; }
+  .admin-note { color:var(--muted); font-size:14px; line-height:1.55; }
+  .admin-toolbar { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
+  .admin-users { display:grid; gap:14px; }
+  .member-card {
+    border:1px solid var(--border, var(--auth-border));
+    border-radius:16px;
+    background:rgba(255,255,255,.03);
+    padding:16px;
+  }
+  .member-head {
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+    margin-bottom:14px;
+    padding-bottom:12px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .member-title { margin:0; font-size:20px; }
+  .member-sub { margin-top:6px; display:flex; flex-wrap:wrap; gap:8px; }
+  .admin-pill, .auth-badge {
+    display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border-radius:999px;
+    background:rgba(255,255,255,.08); border:1px solid var(--border, var(--auth-border)); font-size:13px;
+  }
+  .admin-pill.me { background:rgba(80, 160, 255, .14); }
+  .member-grid {
+    display:grid;
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+    gap:14px 16px;
+    margin-bottom:14px;
+  }
+  .member-grid .full { grid-column: 1 / -1; }
+  .member-meta {
+    display:grid;
+    grid-template-columns: repeat(3, minmax(140px, 1fr));
+    gap:10px;
+    margin-top:10px;
+    padding:12px;
+    border-radius:14px;
+    background:rgba(0,0,0,.14);
+    border:1px solid rgba(255,255,255,.06);
+  }
+  .meta-box { font-size:13px; color:var(--muted); line-height:1.45; }
+  .meta-box strong { display:block; color:var(--text,#fff); font-size:12px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px; }
+  .member-actions { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:14px; }
+  .row-msg { flex:1 1 240px; min-height:20px; }
+  @media (max-width: 980px) {
+    .admin-split { grid-template-columns:1fr; }
+    .member-grid { grid-template-columns:1fr; }
+    .member-meta { grid-template-columns:1fr; }
+    .member-head { flex-direction:column; }
+    .admin-toolbar { flex-direction:column; align-items:stretch; }
+  }
+</style>
 </head>
 <body>
   <main class="auth-shell admin-layout">
@@ -80,32 +125,21 @@
       </div>
     </section>
 
-    <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
-      <div class="auth-actions" style="justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <h2 style="margin:0;">👥 Membres</h2>
-        <button class="auth-btn" id="refreshUsersBtn" type="button">Actualiser</button>
-      </div>
-      <div id="usersMsg" class="auth-msg"></div>
-      <div class="admin-table-wrap">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Utilisateur</th>
-              <th>Nom affiché</th>
-              <th>Rôle</th>
-              <th>Actif</th>
-              <th>Dates</th>
-              <th>Réinit mot de passe</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="usersTbody">
-            <tr><td colspan="8">Chargement…</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
+    
+<section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
+  <div class="admin-toolbar">
+    <div>
+      <h2 style="margin:0;">👥 Membres</h2>
+      <div class="admin-note">Chaque membre est affiché dans un bloc plus lisible, avec ses infos, son rôle et ses actions au même endroit.</div>
+    </div>
+    <button class="auth-btn" id="refreshUsersBtn" type="button">Actualiser</button>
+  </div>
+  <div id="usersMsg" class="auth-msg"></div>
+  <div id="usersTbody" class="admin-users">
+    <div class="member-card">Chargement…</div>
+  </div>
+</section>
+
 
     <section class="auth-card auth-hidden" data-auth-only>
       <p class="admin-note">Astuce : après réinitialisation d’un mot de passe ou désactivation, les sessions du membre sont fermées automatiquement.</p>
@@ -148,42 +182,62 @@
         const rows = (data.users || []).map((u) => {
           const isSelf = Number(u.id) === meId;
           return `
-            <tr data-user-id="${u.id}">
-              <td>${u.id}</td>
-              <td>
-                <input class="auth-input" data-field="username" value="${esc(u.username)}" />
-                <div class="admin-mini">${isSelf ? 'Ton compte' : ''}</div>
-              </td>
-              <td><input class="auth-input" data-field="display_name" value="${esc(u.display_name)}" /></td>
-              <td>
-                <select class="auth-select" data-field="role">
-                  <option value="member" ${u.role === 'member' ? 'selected' : ''}>member</option>
-                  <option value="translator" ${u.role === 'translator' ? 'selected' : ''}>translator</option>
-                  <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>admin</option>
-                </select>
-              </td>
-              <td>
-                <label class="auth-badge"><input type="checkbox" data-field="is_active" ${u.is_active ? 'checked' : ''} /> ${u.is_active ? 'oui' : 'non'}</label>
-              </td>
-              <td>
-                <div class="admin-mini">créé : ${esc(fmtDate(u.created_at))}</div>
-                <div class="admin-mini">maj : ${esc(fmtDate(u.updated_at))}</div>
-                <div class="admin-mini">login : ${esc(fmtDate(u.last_login_at))}</div>
-              </td>
-              <td><input class="auth-input" data-field="password" type="password" placeholder="laisser vide pour ne pas changer" /></td>
-              <td>
-                <div class="auth-actions">
-                  <button class="auth-btn primary" type="button" data-action="save">Enregistrer</button>
-                  <button class="auth-btn warn" type="button" data-action="delete" ${isSelf ? 'disabled' : ''}>Supprimer</button>
+            <article class="member-card" data-user-id="${u.id}">
+              <div class="member-head">
+                <div>
+                  <h3 class="member-title">${esc(u.display_name || u.username)}</h3>
+                  <div class="member-sub">
+                    <span class="admin-pill">ID ${u.id}</span>
+                    <span class="admin-pill">Rôle actuel : ${esc(u.role)}</span>
+                    ${isSelf ? '<span class="admin-pill me">Ton compte</span>' : ''}
+                  </div>
                 </div>
-                <div class="auth-msg" data-row-msg></div>
-              </td>
-            </tr>`;
+                <label class="auth-badge"><input type="checkbox" data-field="is_active" ${u.is_active ? 'checked' : ''} /> Compte actif</label>
+              </div>
+
+              <div class="member-grid">
+                <label class="auth-label">
+                  <span>Pseudo</span>
+                  <input class="auth-input" data-field="username" value="${esc(u.username)}" />
+                </label>
+
+                <label class="auth-label">
+                  <span>Nom affiché</span>
+                  <input class="auth-input" data-field="display_name" value="${esc(u.display_name)}" />
+                </label>
+
+                <label class="auth-label">
+                  <span>Rôle</span>
+                  <select class="auth-select" data-field="role">
+                    <option value="member" ${u.role === 'member' ? 'selected' : ''}>member</option>
+                    <option value="translator" ${u.role === 'translator' ? 'selected' : ''}>translator</option>
+                    <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>admin</option>
+                  </select>
+                </label>
+
+                <label class="auth-label">
+                  <span>Nouveau mot de passe</span>
+                  <input class="auth-input" data-field="password" type="password" placeholder="laisser vide pour ne pas changer" />
+                </label>
+              </div>
+
+              <div class="member-meta">
+                <div class="meta-box"><strong>Créé</strong>${esc(fmtDate(u.created_at))}</div>
+                <div class="meta-box"><strong>Mis à jour</strong>${esc(fmtDate(u.updated_at))}</div>
+                <div class="meta-box"><strong>Dernier login</strong>${esc(fmtDate(u.last_login_at))}</div>
+              </div>
+
+              <div class="member-actions">
+                <button class="auth-btn primary" type="button" data-action="save">Enregistrer</button>
+                <button class="auth-btn warn" type="button" data-action="delete" ${isSelf ? 'disabled' : ''}>Supprimer</button>
+                <div class="auth-msg row-msg" data-row-msg></div>
+              </div>
+            </article>`;
         }).join('');
-        usersTbody.innerHTML = rows || '<tr><td colspan="8">Aucun membre.</td></tr>';
+        usersTbody.innerHTML = rows || '<div class="member-card">Aucun membre.</div>';
         setMsg(usersMsg, `${(data.users || []).length} membre(s) chargé(s).`, true);
       } catch (err) {
-        usersTbody.innerHTML = '<tr><td colspan="8">Erreur de chargement.</td></tr>';
+        usersTbody.innerHTML = '<div class="member-card">Erreur de chargement.</div>'; 
         setMsg(usersMsg, err?.message || 'Erreur.', false);
       }
     }

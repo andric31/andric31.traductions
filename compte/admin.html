@@ -17,12 +17,12 @@
   .admin-split { display:grid; grid-template-columns: minmax(320px, 440px) 1fr; gap:16px; align-items:start; }
   .admin-note { color:var(--muted); font-size:14px; line-height:1.55; }
   .admin-toolbar { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:10px; }
-  .admin-summary { margin:4px 0 0; color:var(--muted); font-size:13px; }
+  .admin-summary { margin:6px 0 0; color:#7ee0a1; font-size:13px; font-weight:600; }
   .admin-tools {
     display:grid;
     grid-template-columns: minmax(260px, 1.6fr) repeat(3, minmax(160px, .75fr)) auto;
     gap:10px;
-    margin:10px 0 12px;
+    margin:8px 0 10px;
     align-items:end;
   }
   .admin-stats {
@@ -305,7 +305,7 @@
       const q = String(searchUsersInput?.value || '').trim();
       const role = String(roleFilterSelect?.value || '').trim();
       const status = String(statusFilterSelect?.value || '').trim();
-      const parts = [`${shown} affiché(s) sur ${total}`];
+      const parts = [`${shown} membre(s) affiché(s) sur ${total}`];
       if (q) parts.push(`recherche : “${q}”`);
       if (role) parts.push(`rôle : ${role}`);
       if (status === 'active') parts.push('statut : actifs');
@@ -422,7 +422,7 @@
       usersTbody.innerHTML = rows || '<div class="member-card">Aucun membre ne correspond à la recherche.</div>';
       updateStats(allUsers);
       updateSummary(list);
-      setMsg(usersMsg, `${list.length} membre(s) affiché(s) sur ${allUsers.length}.`, true);
+      setMsg(usersMsg, '', true);
       syncQuickRoleButtons();
     }
 

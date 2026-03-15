@@ -1,1 +1,116 @@
+:root {
+  --auth-bg: rgba(255,255,255,.04);
+  --auth-border: rgba(255,255,255,.12);
+  --auth-shadow: 0 14px 34px rgba(0,0,0,.25);
+}
 
+.auth-shell {
+  width: min(920px, calc(100% - 24px));
+  margin: 28px auto;
+}
+
+.auth-card {
+  background: var(--auth-bg);
+  border: 1px solid var(--auth-border);
+  border-radius: 18px;
+  box-shadow: var(--auth-shadow);
+  padding: 20px;
+  backdrop-filter: blur(8px);
+}
+
+.auth-title {
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+
+.auth-subtitle {
+  margin: 0 0 18px;
+  color: var(--muted);
+}
+
+.auth-grid {
+  display: grid;
+  grid-template-columns: 1.05fr .95fr;
+  gap: 16px;
+}
+
+.auth-form {
+  display: grid;
+  gap: 12px;
+}
+
+.auth-label {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.auth-label span {
+  font-size: 14px;
+}
+
+.auth-input,
+.auth-select,
+.auth-textarea {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--border, var(--auth-border));
+  background: rgba(0,0,0,.18);
+  color: var(--text, #fff);
+  padding: 12px 14px;
+  box-sizing: border-box;
+  font: inherit;
+}
+
+.auth-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.auth-btn {
+  appearance: none;
+  border: 1px solid var(--border, var(--auth-border));
+  background: rgba(255,255,255,.08);
+  color: var(--text, #fff);
+  border-radius: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.auth-btn:hover { filter: brightness(1.08); }
+.auth-btn.primary { background: rgba(80, 160, 255, .18); }
+.auth-btn.warn { background: rgba(255, 180, 80, .18); }
+
+.auth-msg {
+  min-height: 20px;
+  font-size: 14px;
+}
+.auth-msg.ok { color: #7ff0a0; }
+.auth-msg.err { color: #ff9b9b; }
+
+.auth-box {
+  border: 1px solid var(--border, var(--auth-border));
+  border-radius: 14px;
+  padding: 14px;
+  background: rgba(255,255,255,.03);
+}
+
+.auth-box h3 { margin-top: 0; }
+.auth-list { margin: 0; padding-left: 18px; }
+.auth-hidden { display: none !important; }
+
+.auth-userline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border, var(--auth-border));
+  background: rgba(255,255,255,.06);
+}
+
+@media (max-width: 820px) {
+  .auth-grid { grid-template-columns: 1fr; }
+}

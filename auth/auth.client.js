@@ -168,7 +168,7 @@
           const items2 = window.ViewerMenu.__getItems?.();
           if (items2?.[items2.length - 1]) items2[items2.length - 1].__authManaged = true;
         } else {
-          window.ViewerMenu.addItem('🔐 Se connecter', () => { location.href = '/compte/'; });
+          window.ViewerMenu.addItem('🔐 Se connecter', () => { location.href = '/connexion/'; });
           const items1 = window.ViewerMenu.__getItems?.();
           if (items1?.[items1.length - 1]) items1[items1.length - 1].__authManaged = true;
         }

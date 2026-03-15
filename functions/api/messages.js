@@ -1,3 +1,5 @@
+import { ensureAuthTables, getSessionUser } from './_auth.js';
+
 function buildHeaders() {
   return {
     'content-type': 'application/json; charset=utf-8',
@@ -28,13 +30,27 @@ async function ensureTable(db) {
       message TEXT NOT NULL,
       created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
       ip_hash TEXT,
-      user_agent TEXT
+      user_agent TEXT,
+      room_type TEXT NOT NULL DEFAULT 'global',
+      room_key TEXT NOT NULL DEFAULT 'global',
+      owner_user_id INTEGER
     )
   `).run();
+
+  const columns = await db.prepare(`PRAGMA table_info(messages_global)`).all();
+  const names = new Set((columns?.results || []).map((x) => x.name));
+  if (!names.has('room_type')) await db.prepare(`ALTER TABLE messages_global ADD COLUMN room_type TEXT NOT NULL DEFAULT 'global'`).run();
+  if (!names.has('room_key')) await db.prepare(`ALTER TABLE messages_global ADD COLUMN room_key TEXT NOT NULL DEFAULT 'global'`).run();
+  if (!names.has('owner_user_id')) await db.prepare(`ALTER TABLE messages_global ADD COLUMN owner_user_id INTEGER`).run();
 
   await db.prepare(`
     CREATE INDEX IF NOT EXISTS idx_messages_global_created_at
     ON messages_global(created_at DESC)
+  `).run();
+
+  await db.prepare(`
+    CREATE INDEX IF NOT EXISTS idx_messages_global_room_created
+    ON messages_global(room_key, created_at DESC)
   `).run();
 }
 
@@ -61,6 +77,35 @@ async function checkRateLimit(db, ipHash) {
   return { ok: true };
 }
 
+
+function roleLevel(role) {
+  return ({ member: 1, translator: 2, admin: 3 }[String(role || 'member')] || 0);
+}
+
+function parseRoom(rawRoom, user) {
+  const room = String(rawRoom || 'global').trim();
+  if (!room || room === 'global') {
+    return { ok: true, roomType: 'global', roomKey: 'global', ownerUserId: null };
+  }
+
+  const sharedRooms = {
+    'private:members': { minRole: 'member' },
+    'private:translators': { minRole: 'translator' },
+    'private:admins': { minRole: 'admin' },
+  };
+
+  const shared = sharedRooms[room];
+  if (shared) {
+    if (!user) return { ok: false, error: 'Connexion requise pour ce salon privé.', status: 401 };
+    if (roleLevel(user.role) < roleLevel(shared.minRole)) {
+      return { ok: false, error: 'Accès refusé à ce salon privé.', status: 403 };
+    }
+    return { ok: true, roomType: 'private', roomKey: room, ownerUserId: null };
+  }
+
+  return { ok: false, error: 'Salon inconnu.', status: 400 };
+}
+
 async function sha256Hex(input) {
   const data = new TextEncoder().encode(input);
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
@@ -81,16 +126,21 @@ export async function onRequest(context) {
   }
 
   await ensureTable(env.DB);
+  await ensureAuthTables(env.DB);
+  const sessionUser = await getSessionUser(env.DB, env, request);
 
   if (request.method === 'GET') {
     const limitRaw = Number(url.searchParams.get('limit') || 80);
     const limit = Math.min(Math.max(limitRaw || 80, 1), 100);
+    const roomInfo = parseRoom(url.searchParams.get('room') || 'global', sessionUser);
+    if (!roomInfo.ok) return json({ ok: false, error: roomInfo.error }, roomInfo.status || 400);
     const rows = await env.DB.prepare(`
       SELECT id, nickname, message, created_at
       FROM messages_global
+      WHERE room_key = ?1
       ORDER BY id DESC
-      LIMIT ?1
-    `).bind(limit).all();
+      LIMIT ?2
+    `).bind(roomInfo.roomKey, limit).all();
 
     const messages = (rows?.results || []).slice().reverse();
     return json({ ok: true, messages });
@@ -106,6 +156,8 @@ export async function onRequest(context) {
 
     const nickname = cleanString(body?.nickname);
     const message = clampMessage(body?.message);
+    const roomInfo = parseRoom(body?.room || 'global', sessionUser);
+    if (!roomInfo.ok) return json({ ok: false, error: roomInfo.error }, roomInfo.status || 400);
 
     if (!nickname || nickname.length < 2 || nickname.length > 40) {
       return json({ ok: false, error: 'Pseudo invalide.' }, 400);
@@ -122,10 +174,12 @@ export async function onRequest(context) {
       return json({ ok: false, error: `Attends ${rateLimit.wait}s avant de renvoyer un message.` }, 429);
     }
 
+    const finalNickname = sessionUser ? cleanString(sessionUser.display_name || sessionUser.username) : nickname;
+
     await env.DB.prepare(`
-      INSERT INTO messages_global (nickname, message, created_at, ip_hash, user_agent)
-      VALUES (?1, ?2, strftime('%Y-%m-%dT%H:%M:%fZ','now'), ?3, ?4)
-    `).bind(nickname, message, ipHash, userAgent).run();
+      INSERT INTO messages_global (nickname, message, created_at, ip_hash, user_agent, room_type, room_key, owner_user_id)
+      VALUES (?1, ?2, strftime('%Y-%m-%dT%H:%M:%fZ','now'), ?3, ?4, ?5, ?6, ?7)
+    `).bind(finalNickname, message, ipHash, userAgent, roomInfo.roomType, roomInfo.roomKey, roomInfo.ownerUserId).run();
 
     return json({ ok: true });
   }

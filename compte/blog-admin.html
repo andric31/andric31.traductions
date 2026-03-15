@@ -254,7 +254,7 @@
 
     <section class="auth-card auth-hidden blog-admin-top" data-auth-only data-role-min="admin">
       <h1 class="auth-title">📝 Éditeur blog admin</h1>
-      <p class="auth-subtitle">Version plus claire : l’éditeur prend toute la largeur, chaque champ explique son rôle, puis tu récupères le HTML, la carte blog et le JSON plus bas.</p>
+      <p class="auth-subtitle">Version plus claire : l’éditeur prend toute la largeur, chaque champ explique son rôle, puis le HTML, la carte blog et le JSON sont générés plus bas.</p>
       <div class="auth-actions">
         <a class="auth-btn" href="/compte/">Retour au compte</a>
         <a class="auth-btn" href="/">Retour au site</a>
@@ -266,7 +266,7 @@
       <div class="blog-admin-grid">
         <div class="blog-admin-card blog-admin-form">
           <h2 class="blog-admin-section-title">Création d’article</h2>
-          <p class="blog-admin-subtitle">L’éditeur prend maintenant toute la largeur. Remplis les champs de haut en bas, puis regarde l’aperçu plus bas.</p>
+          <p class="blog-admin-subtitle">L’éditeur prend maintenant toute la largeur. Remplir les champs de haut en bas, puis vérifier l’aperçu plus bas.</p>
 
           <div class="blog-admin-guide">
             <div class="blog-admin-guide-title">Repère rapide</div>
@@ -327,12 +327,12 @@
           <div class="blog-admin-divider"></div>
 
           <label class="auth-label">
-            <span>Chapô / intro<span class="blog-admin-label-help">Texte visible sous le grand titre dans l’article. Tu peux reprendre le résumé ou le développer un peu.</span></span>
+            <span>Chapô / intro<span class="blog-admin-label-help">Texte visible sous le grand titre dans l’article. Peut reprendre le résumé ou le développer un peu.</span></span>
             <textarea class="auth-textarea" id="intro" rows="4" placeholder="Introduction affichée dans l’article."></textarea>
           </label>
 
           <label class="auth-label">
-            <span>Contenu HTML de l’article<span class="blog-admin-label-help">Corps complet de l’article. Utilise par exemple &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt; et &lt;strong&gt;.</span></span>
+            <span>Contenu HTML de l’article<span class="blog-admin-label-help">Corps complet de l’article. Utiliser par exemple &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt; et &lt;strong&gt;.</span></span>
             <textarea class="auth-textarea blog-admin-editor-full" id="content" rows="22" placeholder="<h2>Section</h2>&#10;<p>Ton texte...</p>"></textarea>
           </label>
 
@@ -351,7 +351,7 @@
               <h2 class="blog-admin-section-title" style="margin:0;">Aperçu</h2>
               <span class="blog-admin-pill" id="currentFileLabel">Fichier : —</span>
             </div>
-            <p class="blog-admin-preview-note">L’aperçu est en dessous de l’éditeur pour laisser plus de place à l’écriture. Le fond blanc est forcé pour rester lisible pendant l’édition.</p>
+            <p class="blog-admin-preview-note">L’aperçu est placé sous l’éditeur pour laisser plus de place à l’écriture. Le fond blanc est forcé pour rester lisible pendant l’édition.</p>
             <iframe id="previewFrame" title="Aperçu article blog"></iframe>
           </div>
         </div>
@@ -362,7 +362,7 @@
       <div class="blog-admin-out-grid">
         <div class="blog-admin-card">
           <h3 class="blog-admin-section-title">Fichier article HTML</h3>
-          <p class="blog-admin-help">Télécharge directement le fichier à mettre dans <code>/blog/</code>.</p>
+          <p class="blog-admin-help">Permet de récupérer directement le fichier à placer dans <code>/blog/</code>.</p>
           <div class="blog-admin-actions">
             <button class="auth-btn primary" type="button" id="downloadArticleBtn">Télécharger l’article</button>
             <button class="auth-btn" type="button" id="copyArticleBtn">Copier</button>
@@ -372,7 +372,7 @@
 
         <div class="blog-admin-card">
           <h3 class="blog-admin-section-title">Bloc carte</h3>
-          <p class="blog-admin-help">À coller dans la section épinglée ou dans la liste des articles.</p>
+          <p class="blog-admin-help">Bloc à coller dans la section épinglée ou dans la liste des articles.</p>
           <div class="blog-admin-actions">
             <button class="auth-btn" type="button" id="copyCardBtn">Copier le bloc</button>
           </div>
@@ -381,7 +381,7 @@
 
         <div class="blog-admin-card">
           <h3 class="blog-admin-section-title">Entrée JSON</h3>
-          <p class="blog-admin-help">Prévu pour plus tard si tu passes sur une vraie API ou un <code>articles.json</code>.</p>
+          <p class="blog-admin-help">Prévu pour plus tard en cas de passage vers une vraie API ou un <code>articles.json</code>.</p>
           <div class="blog-admin-actions">
             <button class="auth-btn" type="button" id="copyJsonBtn">Copier le JSON</button>
           </div>
@@ -389,7 +389,7 @@
         </div>
       </div>
 
-      <div class="blog-admin-mini">Note : dans cette version il n’y a pas encore d’API d’écriture blog dans le zip, donc l’outil prépare les fichiers proprement mais n’enregistre pas encore directement sur le serveur.</div>
+      <div class="blog-admin-mini">Note : dans cette version, il n’y a pas encore d’API d’écriture blog dans le zip. L’outil prépare les fichiers proprement, mais n’enregistre pas encore directement sur le serveur.</div>
     </section>
   </main>
 
@@ -630,7 +630,7 @@ ${data.content_html}
       el.articleHtmlOut.value = '';
       el.cardHtmlOut.value = '';
       el.jsonOut.value = '';
-      renderPreview('<div style="padding:24px;"><h2 style="margin-top:0;">Aperçu vide</h2><p>Remplis les champs puis clique sur Générer ou Aperçu.</p></div>');
+      renderPreview('<div style="padding:24px;"><h2 style="margin-top:0;">Aperçu vide</h2><p>Remplir les champs puis cliquer sur Générer ou Aperçu.</p></div>');
       setMsg('', true);
     }
 

@@ -9,12 +9,14 @@
 
   const STORAGE = {
     seenMessageId: "andric31_seen_message_id",
+    seenBlogSignature: "andric31_seen_blog_signature",
     seenNotificationId: "andric31_seen_notification_id",
     firstVisitShown: "andric31_first_visit_notification_shown",
     hiddenNotificationId: "andric31_hidden_notification_id",
   };
 
   const MESSAGES_API_URL = "/api/messages?limit=1";
+  const BLOG_INDEX_URL = "/blog/";
   const NOTIFICATIONS_JSON_URL = "/notifications/notifications.json";
   const NOTIFICATION_URL = "https://andric31-traductions.pages.dev/notifications/";
 
@@ -262,6 +264,11 @@
       toggleNotificationsPopover(notifications);
     });
 
+    blog.addEventListener("click", () => {
+      localStorage.setItem(STORAGE.seenBlogSignature, String(blog.dataset.latestBlogSignature || ""));
+      setDotVisible(blog, false);
+    });
+
     messages.addEventListener("click", () => {
       localStorage.setItem(STORAGE.seenMessageId, String(messages.dataset.latestMessageId || "0"));
       setDotVisible(messages, false);
@@ -283,7 +290,7 @@
     afterEl.insertAdjacentElement("afterend", blog);
     afterEl.insertAdjacentElement("afterend", wiki);
 
-    initIndicators(messages, notifications);
+    initIndicators(blog, messages, notifications);
   }
 
   function escapeHtml(value) {
@@ -296,9 +303,43 @@
     }[char]));
   }
 
-  async function initIndicators(messagesEl, notificationsEl) {
+  async function initIndicators(blogEl, messagesEl, notificationsEl) {
+    await initBlogIndicator(blogEl);
     await initNotificationIndicator(notificationsEl);
     await initMessageIndicator(messagesEl);
+    startIndicatorRefresh(blogEl, messagesEl, notificationsEl);
+  }
+
+  async function loadLatestBlogSignature() {
+    try {
+      const res = await fetch(`${BLOG_INDEX_URL}?v=${Date.now()}`, { cache: "no-store" });
+      const html = await res.text();
+      if (!res.ok || !html) return "";
+
+      const allArticlesMatch = html.match(/<div class="blog-section-title">[\s\S]*?Tous les articles[\s\S]*?<section class="blog-list">([\s\S]*?)<\/section>/i);
+      const scope = allArticlesMatch ? allArticlesMatch[1] : html;
+      const cardMatch = scope.match(/<a[^>]+class="blog-card"[^>]+href="([^"]+)"[\s\S]*?<time[^>]*datetime="([^"]+)"[^>]*>[\s\S]*?<h2>(.*?)<\/h2>/i);
+      if (!cardMatch) return "";
+
+      const href = String(cardMatch[1] || "").trim();
+      const datetime = String(cardMatch[2] || "").trim();
+      const title = String(cardMatch[3] || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+      return `${href}||${datetime}||${title}`;
+    } catch {
+      return "";
+    }
+  }
+
+  async function initBlogIndicator(blogEl) {
+    if (!blogEl) return;
+    const latestSignature = await loadLatestBlogSignature();
+    blogEl.dataset.latestBlogSignature = latestSignature;
+    if (!latestSignature) {
+      setDotVisible(blogEl, false);
+      return;
+    }
+    const seenBlogSignature = localStorage.getItem(STORAGE.seenBlogSignature) || "";
+    setDotVisible(blogEl, latestSignature !== seenBlogSignature);
   }
 
   async function initNotificationIndicator(notificationsEl) {
@@ -319,6 +360,14 @@
     if (!firstVisitShown) {
       localStorage.setItem(STORAGE.firstVisitShown, "1");
     }
+  }
+
+  function startIndicatorRefresh(blogEl, messagesEl, notificationsEl) {
+    window.setInterval(() => {
+      if (blogEl) initBlogIndicator(blogEl);
+      if (messagesEl) initMessageIndicator(messagesEl);
+      if (notificationsEl) initNotificationIndicator(notificationsEl);
+    }, 10000);
   }
 
   async function initMessageIndicator(messagesEl) {

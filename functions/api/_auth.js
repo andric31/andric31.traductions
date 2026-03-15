@@ -1,6 +1,6 @@
 const AUTH_COOKIE = 'andric31_session';
 const SESSION_DAYS = 14;
-const PBKDF2_ITERATIONS = 210000;
+const PBKDF2_ITERATIONS = 60000;
 const MIN_PASSWORD_LENGTH = 8;
 
 function authHeaders(extra = {}) {

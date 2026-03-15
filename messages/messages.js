@@ -3,7 +3,6 @@
   const REFRESH_MS = 7000;
   const NICK_KEY = 'andric31_messages_nickname';
   const ROOM_KEY = 'andric31_messages_room';
-  const ADMIN_TOKEN_KEY = 'andric31_messages_admin_token';
 
   const els = {
     list: document.getElementById('messagesList'),
@@ -61,12 +60,6 @@
     return (cleaned[0] || '?').toUpperCase();
   }
 
-  function getAdminToken() {
-    return localStorage.getItem(ADMIN_TOKEN_KEY) || '';
-  }
-
-
-
   function getAuthUser() {
     return window.SiteAuth?.me || null;
   }
@@ -86,7 +79,7 @@
       els.nickname.readOnly = true;
       els.nickname.setAttribute('aria-readonly', 'true');
       els.nickname.title = 'Pseudo lié au compte connecté';
-      if (els.authInfo) els.authInfo.textContent = `Connecté en tant que ${me.display_name || me.username}. Le pseudo est rempli automatiquement.`;
+      if (els.authInfo) els.authInfo.textContent = '';
       return true;
     }
     els.nickname.readOnly = false;
@@ -95,7 +88,7 @@
     if (!els.nickname.value) {
       els.nickname.value = localStorage.getItem(NICK_KEY) || '';
     }
-    if (els.authInfo) els.authInfo.textContent = 'Non connecté : pseudo mémorisé dans ce navigateur et accès limité au salon public.';
+    if (els.authInfo) els.authInfo.textContent = '';
     return false;
   }
 
@@ -136,7 +129,8 @@
     els.count.textContent = String(messages.length);
     els.empty.classList.toggle('hidden', messages.length > 0);
 
-    const adminToken = getAdminToken();
+    const me = getAuthUser();
+    const isAdmin = roleLevel(me?.role) >= roleLevel('admin');
 
     for (const item of messages) {
       const article = document.createElement('article');
@@ -147,17 +141,21 @@
             <span class="msg-avatar">${escapeHtml(avatarLetter(item.nickname))}</span>
             <span>${escapeHtml(item.nickname)}</span>
           </div>
-          <div class="msg-item-side">
+          <div class="msg-head-actions">
             <div class="msg-date">${escapeHtml(formatDate(item.created_at))}</div>
-            ${adminToken ? '<button type="button" class="msg-delete-btn">Supprimer</button>' : ''}
           </div>
         </div>
         <div class="msg-text">${escapeHtml(item.message)}</div>
       `;
 
-      if (adminToken) {
-        const btn = article.querySelector('.msg-delete-btn');
-        btn?.addEventListener('click', () => deleteMessage(item.id));
+      if (isAdmin) {
+        const actions = article.querySelector('.msg-head-actions');
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'msg-delete-btn';
+        btn.textContent = 'Supprimer';
+        btn.addEventListener('click', () => deleteMessage(item.id));
+        actions.appendChild(btn);
       }
 
       els.list.appendChild(article);
@@ -235,14 +233,14 @@
   }
 
   async function deleteMessage(id) {
-    const token = getAdminToken();
-    if (!token) return;
+    const me = getAuthUser();
+    if (roleLevel(me?.role) < roleLevel('admin')) return;
     if (!confirm('Supprimer ce message ?')) return;
 
     try {
       const res = await fetch(`${API_URL}?id=${encodeURIComponent(id)}`, {
         method: 'DELETE',
-        headers: { 'x-admin-token': token },
+        credentials: 'same-origin',
       });
       const data = await res.json();
       if (!res.ok || !data?.ok) throw new Error(data?.error || 'Suppression impossible');
@@ -262,22 +260,6 @@
     refreshTimer = setInterval(() => fetchMessages({ silent: true }), REFRESH_MS);
   }
 
-  function initAdminShortcut() {
-    window.addEventListener('keydown', (evt) => {
-      if (!evt.ctrlKey || !evt.shiftKey || evt.key.toLowerCase() !== 'm') return;
-      const current = getAdminToken();
-      const token = prompt('Token admin pour la modération :', current);
-      if (token === null) return;
-      if (!token.trim()) {
-        localStorage.removeItem(ADMIN_TOKEN_KEY);
-        setInfo('Mode admin retiré.');
-      } else {
-        localStorage.setItem(ADMIN_TOKEN_KEY, token.trim());
-        setInfo('Mode admin activé.', 'success');
-      }
-      render();
-    });
-  }
 
   function init() {
     fillNicknameFromAuth();
@@ -293,7 +275,6 @@
       const left = 500 - els.message.value.length;
       setInfo(`${left} caractère${left > 1 ? 's' : ''} restant${left > 1 ? 's' : ''}.`);
     });
-    initAdminShortcut();
     if (window.SiteAuth?.onChange) {
       window.SiteAuth.onChange(() => {
         fillNicknameFromAuth();

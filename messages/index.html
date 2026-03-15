@@ -27,7 +27,6 @@
         <div class="msg-side-block">
           <div class="msg-side-title">Accès rapide</div>
           <a class="msg-side-link" href="/">🏠 f95list_andric31_viewer</a>
-          <a class="msg-side-link" href="/connexion/">🔐 Connexion</a>
           <button id="refreshBtn" class="msg-side-link msg-side-btn" type="button">🔄 Actualiser</button>
         </div>
 
@@ -43,7 +42,7 @@
 
         <div class="msg-side-block msg-stats">
           <div>
-            <span class="msg-stat-label">Messages chargés</span>
+            <span class="msg-stat-label">Messages</span>
             <strong id="msgCount">0</strong>
           </div>
           <div>
@@ -74,9 +73,11 @@
 
             <label class="msg-field">
               <span>Salon</span>
-              <select id="roomSelect">
-                <option value="global">Global public</option>
-              </select>
+              <div class="msg-select-wrap">
+                <select id="roomSelect">
+                  <option value="global">Global public</option>
+                </select>
+              </div>
             </label>
           </div>
 

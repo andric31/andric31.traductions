@@ -220,17 +220,9 @@ button, input, textarea { font: inherit; }
 
 .msg-item-head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
-}
-
-.msg-item-side {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
-  flex-shrink: 0;
 }
 
 .msg-author {
@@ -255,6 +247,13 @@ button, input, textarea { font: inherit; }
 .msg-date {
   font-size: 13px;
   color: var(--muted, #aab2c8);
+}
+
+.msg-head-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
 }
 
 .msg-text {
@@ -340,7 +339,6 @@ button, input, textarea { font: inherit; }
 }
 
 .msg-delete-btn {
-  justify-self: end;
   align-self: flex-end;
   color: var(--msg-danger);
 }
@@ -367,4 +365,76 @@ button, input, textarea { font: inherit; }
     align-items: flex-start;
     flex-direction: column;
   }
+}
+
+.msg-field input,
+.msg-field textarea,
+.msg-field select {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid var(--msg-border);
+  background: var(--msg-input-bg);
+  color: var(--fg, #e8eaf0);
+  padding: 14px 15px;
+  outline: none;
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease, transform .18s ease;
+}
+
+.msg-field input::placeholder,
+.msg-field textarea::placeholder {
+  color: color-mix(in srgb, var(--muted, #aab2c8) 88%, transparent);
+}
+
+.msg-field input:focus,
+.msg-field textarea:focus,
+.msg-field select:focus {
+  border-color: var(--msg-border-strong);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent, #6ce0b0) 14%, transparent);
+  background: color-mix(in srgb, var(--msg-input-bg) 82%, var(--accent, #6ce0b0) 18%);
+}
+
+.msg-select-wrap {
+  position: relative;
+}
+
+.msg-select-wrap::after {
+  content: "▾";
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-52%);
+  pointer-events: none;
+  color: var(--accent, #6ce0b0);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+#roomSelect {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  padding-right: 42px;
+  background-image: linear-gradient(180deg, color-mix(in srgb, var(--msg-input-bg) 88%, transparent), color-mix(in srgb, var(--msg-soft) 70%, transparent));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+}
+
+#roomSelect:hover {
+  border-color: var(--msg-border-strong);
+  background-image: linear-gradient(180deg, color-mix(in srgb, var(--msg-input-bg) 78%, var(--accent, #6ce0b0) 22%), color-mix(in srgb, var(--msg-soft) 64%, transparent));
+}
+
+#roomSelect {
+  color-scheme: light dark;
+}
+
+#roomSelect option,
+#roomSelect optgroup {
+  color: var(--fg, #e8eaf0);
+  background: var(--card, #141826);
+}
+
+#roomSelect option:checked {
+  color: var(--fg, #e8eaf0);
+  background: color-mix(in srgb, var(--accent, #6ce0b0) 22%, var(--card, #141826) 78%);
 }

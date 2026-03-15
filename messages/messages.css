@@ -417,7 +417,17 @@ button, input, textarea { font: inherit; }
   background-image: linear-gradient(180deg, color-mix(in srgb, var(--msg-input-bg) 78%, var(--accent, #6ce0b0) 22%), color-mix(in srgb, var(--msg-soft) 64%, transparent));
 }
 
-#roomSelect option {
-  color: #e8eaf0;
-  background: #141826;
+#roomSelect {
+  color-scheme: light dark;
+}
+
+#roomSelect option,
+#roomSelect optgroup {
+  color: var(--fg, #e8eaf0);
+  background: var(--card, #141826);
+}
+
+#roomSelect option:checked {
+  color: var(--fg, #e8eaf0);
+  background: color-mix(in srgb, var(--accent, #6ce0b0) 22%, var(--card, #141826) 78%);
 }

@@ -11,7 +11,7 @@
   <script src="/theme-init.js"></script>
   
 <style>
-  .admin-layout { display:grid; gap:14px; width:min(1180px, calc(100% - 18px)); margin:12px auto 28px; }
+  .admin-layout { display:grid; gap:12px; width:min(1180px, calc(100% - 18px)); margin:2px auto 22px; }
   .admin-split { display:grid; grid-template-columns: minmax(320px, 440px) 1fr; gap:16px; align-items:start; }
   .admin-note { color:var(--muted); font-size:14px; line-height:1.55; }
   .admin-toolbar { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:10px; }
@@ -174,8 +174,8 @@
 
   <div class="admin-tools">
     <label class="auth-label" style="margin:0;">
-      <span>Recherche</span>
-      <input class="auth-input" id="searchUsersInput" type="text" placeholder="ID, pseudo, nom affiché ou rôle..." />
+      <span>Filtrer les membres</span>
+      <input class="auth-input" id="searchUsersInput" name="member_filter_search" type="search" placeholder="ID, pseudo, nom affiché ou rôle..." autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-form-type="other" />
     </label>
 
     <label class="auth-label" style="margin:0;">
@@ -462,6 +462,10 @@
     });
 
     refreshUsersBtn?.addEventListener('click', () => loadUsers());
+    if (searchUsersInput) {
+      searchUsersInput.setAttribute('autocomplete', 'off');
+      searchUsersInput.value = '';
+    }
     searchUsersInput?.addEventListener('input', () => applyUserFilters());
     roleFilterSelect?.addEventListener('change', () => applyUserFilters());
     statusFilterSelect?.addEventListener('change', () => applyUserFilters());

@@ -86,7 +86,7 @@
       els.nickname.readOnly = true;
       els.nickname.setAttribute('aria-readonly', 'true');
       els.nickname.title = 'Pseudo lié au compte connecté';
-      if (els.authInfo) els.authInfo.textContent = `Connecté en tant que ${me.display_name || me.username}. Le pseudo est rempli automatiquement.`;
+      if (els.authInfo) els.authInfo.textContent = '';
       return true;
     }
     els.nickname.readOnly = false;
@@ -95,7 +95,7 @@
     if (!els.nickname.value) {
       els.nickname.value = localStorage.getItem(NICK_KEY) || '';
     }
-    if (els.authInfo) els.authInfo.textContent = 'Non connecté : pseudo mémorisé dans ce navigateur et accès limité au salon public.';
+    if (els.authInfo) els.authInfo.textContent = '';
     return false;
   }
 

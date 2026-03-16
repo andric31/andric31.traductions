@@ -759,6 +759,20 @@
     return Number.isNaN(ts) ? null : ts;
   }
 
+  function parseIsoDateTime(str) {
+    if (!str) return 0;
+    const raw = String(str).trim();
+    if (!raw) return 0;
+
+    let normalized = raw;
+    if (/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[+-][0-9]{4}$/.test(raw)) {
+      normalized = raw.replace(/([+-][0-9]{2})([0-9]{2})$/, "$1:$2");
+    }
+
+    const ts = Date.parse(normalized);
+    return Number.isNaN(ts) ? 0 : ts;
+  }
+
   function cleanTitle(raw) {
     let t = String(raw || "").trim();
     let categories = [];
@@ -882,14 +896,15 @@
 
     const updatedAtTs = parseFrenchDate(game.updatedAt);
     const releaseDateTs = parseFrenchDate(game.releaseDate);
+    const createdAtDateTimeRaw = game.createdAtDateTime || "";
+    const updatedAtDateTimeRaw = game.updatedAtDateTime || "";
+    const createdAtDateTimeTs = parseIsoDateTime(createdAtDateTimeRaw);
+    const updatedAtDateTimeTs = parseIsoDateTime(updatedAtDateTimeRaw);
 
     const updatedAtLocalRaw = game.updatedAtLocal || "";
     const createdAtLocalRaw = game.createdAtLocal || "";
-    const updatedAtLocalParsed = updatedAtLocalRaw ? Date.parse(updatedAtLocalRaw) : NaN;
-    const createdAtLocalParsed = createdAtLocalRaw ? Date.parse(createdAtLocalRaw) : NaN;
-
-    const updatedAtLocalTs = !Number.isNaN(updatedAtLocalParsed) ? updatedAtLocalParsed : 0;
-    const createdAtLocalTs = !Number.isNaN(createdAtLocalParsed) ? createdAtLocalParsed : 0;
+    const updatedAtLocalTs = parseIsoDateTime(updatedAtLocalRaw);
+    const createdAtLocalTs = parseIsoDateTime(createdAtLocalRaw);
     const lastTranslationTs = updatedAtLocalTs || createdAtLocalTs || updatedAtTs || 0;
 
     const ckey = counterKeyOfUid(uid);
@@ -920,6 +935,10 @@
       updatedAtLocalTs,
       createdAtLocal: createdAtLocalRaw,
       createdAtLocalTs,
+      createdAtDateTime: createdAtDateTimeRaw,
+      createdAtDateTimeTs,
+      updatedAtDateTime: updatedAtDateTimeRaw,
+      updatedAtDateTimeTs,
       lastTranslationTs,
       __raw: game,
     };
@@ -962,7 +981,7 @@
       return;
     }
 
-    if (["releaseDate", "updatedAt", "updatedAtLocal"].includes(k)) {
+    if (["releaseDate", "updatedAt", "updatedAtLocal", "createdAtDateTime", "updatedAtDateTime"].includes(k)) {
       const key = k + "Ts";
       state.filtered.sort((a, b) => ((a[key] || 0) - (b[key] || 0)) * mul);
       return;

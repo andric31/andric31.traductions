@@ -1100,6 +1100,6 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
   stroke-linejoin:round;
 }
 .sideLikeBtn .likeIconSvg--liked path{
-  fill:#ff5c8a;
-  stroke:#ff5c8a;
+  fill:#ffd54a;
+  stroke:#ffd54a;
 }

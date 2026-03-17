@@ -476,6 +476,65 @@ body:not(.mode-game){
   transform: none;
 }
 
+
+/* ✅ Boutons de liens figés sur la page jeu (indépendants du thème)
+   - Garde l'effet F95 blanc/rouge
+   - Garde Discord / MEGA / autres hosts fixes
+   - Ne touche pas à Archives de la traduction
+*/
+.btnLike .f95-white,
+#btnF95 .f95-white{
+  color:#ffffff !important;
+  font-weight:800;
+}
+.btnLike .f95-red,
+#btnF95 .f95-red{
+  color:#8b2d2d !important;
+  font-weight:800;
+}
+
+.btnLike.btn-f95,
+#btnF95.btn-f95,
+.btnLike.btn-discord,
+#btnDiscord.btn-discord,
+.btnLike.btnMega,
+#btnMega,
+.btnLike.btn-host-drive,
+.btnLike.btn-host-gofile,
+.btnLike.btn-host-default{
+  color:#ffffff !important;
+}
+
+.btnLike.btn-host-drive{
+  background: linear-gradient(180deg,#1a73e8 0%,#1558b0 100%) !important;
+  border: 1px solid rgba(255,255,255,.04) !important;
+  color:#ffffff !important;
+}
+.btnLike.btn-host-drive:hover{
+  background: linear-gradient(180deg,#2a7ff0 0%,#1b63c2 100%) !important;
+  border-color: rgba(255,255,255,.04) !important;
+}
+
+.btnLike.btn-host-gofile{
+  background: linear-gradient(180deg,#2e7d32 0%,#1b5e20 100%) !important;
+  border: 1px solid rgba(255,255,255,.04) !important;
+  color:#ffffff !important;
+}
+.btnLike.btn-host-gofile:hover{
+  background: linear-gradient(180deg,#388e3c 0%,#236f28 100%) !important;
+  border-color: rgba(255,255,255,.04) !important;
+}
+
+.btnLike.btn-host-default{
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,.16) !important;
+  color:#ffffff !important;
+}
+.btnLike.btn-host-default:hover{
+  background: rgba(255,255,255,0.09) !important;
+  border-color: rgba(255,255,255,.18) !important;
+}
+
 .ratingStar,
 .ratingCancel{
   display:inline-flex;
@@ -632,12 +691,12 @@ html[data-theme="light"] .tagPill,
 }
 
 /* Boutons neutres (laisser F95/MEGA/Discord) */
-html[data-theme="white"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord),
-html[data-theme="clair"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord),
-html[data-theme="light"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord),
-:root[data-theme="white"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord),
-:root[data-theme="clair"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord),
-:root[data-theme="light"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord){
+html[data-theme="white"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord):not(.btn-host-drive):not(.btn-host-gofile):not(.btn-host-default),
+html[data-theme="clair"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord):not(.btn-host-drive):not(.btn-host-gofile):not(.btn-host-default),
+html[data-theme="light"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord):not(.btn-host-drive):not(.btn-host-gofile):not(.btn-host-default),
+:root[data-theme="white"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord):not(.btn-host-drive):not(.btn-host-gofile):not(.btn-host-default),
+:root[data-theme="clair"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord):not(.btn-host-drive):not(.btn-host-gofile):not(.btn-host-default),
+:root[data-theme="light"] .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord):not(.btn-host-drive):not(.btn-host-gofile):not(.btn-host-default){
   color: var(--fg) !important;
   background: var(--btn, rgba(0,0,0,0.06)) !important;
   border-color: var(--border) !important;
@@ -726,7 +785,7 @@ html[data-theme="light"] .infoBlock,
     border-color: var(--border) !important;
   }
 
-  html:not([data-theme]) .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord){
+  html:not([data-theme]) .btnLike:not(.btn-f95):not(.btnMega):not(.btn-discord):not(.btn-host-drive):not(.btn-host-gofile):not(.btn-host-default){
     color: var(--fg) !important;
     background: var(--btn, rgba(0,0,0,0.06)) !important;
     border-color: var(--border) !important;
@@ -824,17 +883,18 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
 }
 
 .badge.status-updated{
-  background: rgba(34, 197, 94, 0.18);
-  border: 1px solid rgba(34, 197, 94, 0.45);
-  color: #b8f7c9;
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.32);
+  color: #1faa59;
+  font-weight: 600;
 }
 
 .badge.status-outdated{
-  background: rgba(239, 68, 68, 0.18);
-  border: 1px solid rgba(239, 68, 68, 0.45);
-  color: #ffb4b4;
+  background: rgba(248, 113, 113, 0.14);
+  border: 1px solid rgba(239, 68, 68, 0.32);
+  color: #ff8080;
+  font-weight: 600;
 }
-
 
 
 /* ===== Layout v6.1 : colonne traduction à droite, recommandations en bas ===== */

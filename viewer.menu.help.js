@@ -152,11 +152,21 @@
                     <div class="mh-subpanel">
                       <div class="mh-subitem">ℹ️ <strong>À propos</strong> — Informations de contact.</div>
                       <div class="mh-subitem">🧩 <strong>Extension</strong> — Description de l’extension.</div>
+                      <div class="mh-subitem" style="height:1px; margin:8px 0; background:rgba(255,255,255,0.08);"></div>
+                      <div class="mh-subitem">🔐 <strong>Se connecter</strong> — Accès au compte utilisateur.</div>
                     </div>
                   </dd>
                 </div>
 
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="8"/></svg></span><span>Aide</span></dt><dd>Affiche cette fenêtre d’aide.</dd></div>
+
+                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span><span>Wiki</span></dt><dd>Ouvre le wiki et les guides disponibles.</dd></div>
+
+                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 6.25A2.25 2.25 0 0 1 6.25 4h11.5A2.25 2.25 0 0 1 20 6.25v11.5A2.25 2.25 0 0 1 17.75 20H6.25A2.25 2.25 0 0 1 4 17.75z"/><path d="M7.5 8h9"/><path d="M7.5 12h9"/><path d="M7.5 16h5"/><circle cx="16.75" cy="16.25" r=".9" fill="currentColor" stroke="none"/></svg></span><span>Blog</span></dt><dd>Accède aux dernières nouvelles et articles publiés.</dd></div>
+
+                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.25 6.25h11.5A2.25 2.25 0 0 1 20 8.5v6a2.25 2.25 0 0 1-2.25 2.25H11l-4.75 3v-3H6.25A2.25 2.25 0 0 1 4 14.5v-6a2.25 2.25 0 0 1 2.25-2.25Z"/><path d="M8 10.5h8"/><path d="M8 13.5h5.5"/></svg></span><span>Messages</span></dt><dd>Ouvre la page des messages.</dd></div>
+
+                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 18H5.75A1.75 1.75 0 0 1 4 16.25c0-.55.27-1.07.72-1.39l.73-.53a2.5 2.5 0 0 0 1.05-2.03V10a5.5 5.5 0 1 1 11 0v2.3a2.5 2.5 0 0 0 1.05 2.03l.73.53c.45.32.72.84.72 1.39A1.75 1.75 0 0 1 18.25 18H17"/><path d="M9.5 18a2.5 2.5 0 0 0 5 0"/></svg></span><span>Notifications</span></dt><dd>Affiche les dernières notifications.</dd></div>
 
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span>Profil</span></dt><dd>Nom de la liste.</dd></div>
 

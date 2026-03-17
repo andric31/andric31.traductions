@@ -1008,12 +1008,19 @@ function setMyLike(gameId, v) {
     localStorage.setItem(`like_${gameId}`, v ? "1" : "0");
   } catch {}
 }
+function getLikeIconSvg(liked) {
+  const path = `<path d="M14 10V4.8c0-.9-.8-1.6-1.7-1.4-.4.1-.7.4-.9.8L8.3 10H5.8C4.8 10 4 10.8 4 11.8V18c0 1.1.9 2 2 2h8.2c.8 0 1.5-.5 1.8-1.2l2-5.3c.1-.2.1-.4.1-.6V12c0-1.1-.9-2-2-2h-2.1zM8 10v10"/>`;
+  return liked
+    ? `<svg class="likeIconSvg likeIconSvg--liked" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${path}</svg>`
+    : `<svg class="likeIconSvg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${path}</svg>`;
+}
+
 function updateLikeBtn(gameId) {
   const b = $("btnLike");
   if (!b) return;
 
   const liked = getMyLike(gameId);
-  b.textContent = liked ? "❤️" : "🤍";
+  b.innerHTML = getLikeIconSvg(liked);
   b.setAttribute("aria-label", liked ? "Je n’aime plus" : "J’aime");
 }
 
@@ -1622,6 +1629,22 @@ function renderVideoBlock({ id, videoUrl }) {
       const j = await rating4Get(analyticsKey);
       if (j?.ok) renderRating4UI(analyticsKey, j);
     } catch {}
+
+    try {
+      if (window.GameRelated && typeof window.GameRelated.render === "function") {
+        await window.GameRelated.render({
+          list,
+          page,
+          entry,
+          display,
+          currentTitle: title,
+          buildGameUrl,
+          getDisplayTitle
+        });
+      }
+    } catch (e) {
+      console.warn("GameRelated.render failed", e);
+    }
 
   } catch (e) {
     showError(`Erreur: ${e?.message || e}`);

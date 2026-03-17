@@ -22,124 +22,153 @@
   <link rel="stylesheet" href="../viewer.css" />
   <link rel="stylesheet" href="../themes.css" />
   <link rel="stylesheet" href="./game.css" />
+  <link rel="stylesheet" href="./game.related.css" />
 </head>
 
 <body class="mode-game">
   <div class="wrap">
-    <div class="cardPreview" id="card" aria-live="polite">
-      <div class="cardInner">
+    <div class="gameTopLayout">
+      <div class="gameMainColumn">
+        <div class="cardPreview" id="card" aria-live="polite">
+          <div class="cardInner">
 
-        <div class="headRow">
-          <button type="button" class="hamburger-btn" id="hamburgerBtn" aria-label="Ouvrir le menu" aria-haspopup="menu" aria-expanded="false">
-            <span class="ham-lines" aria-hidden="true"><span></span><span></span><span></span></span>
-          </button>
+            <div class="headRow">
+              <button type="button" class="hamburger-btn" id="hamburgerBtn" aria-label="Ouvrir le menu" aria-haspopup="menu" aria-expanded="false">
+                <span class="ham-lines" aria-hidden="true"><span></span><span></span><span></span></span>
+              </button>
 
-          <button class="btnLike like-btn" id="btnLike" type="button" aria-label="J’aime">🤍</button>
+              <div class="badgesRow" id="badges"></div>
+            </div>
 
-          <div class="badgesRow" id="badges"></div>
-        </div>
+            <div class="majState" id="majState" style="display:none;"></div>
 
-        <div class="majState" id="majState" style="display:none;"></div>
+            <h1 class="title" id="title">Chargement…</h1>
 
-        <h1 class="title" id="title">Chargement…</h1>
+            <div class="coverGallery" id="coverGallery">
+              <div class="coverStage" id="coverStage">
+                <img id="cover" class="cover is-placeholder" alt="" referrerpolicy="no-referrer">
+                <button type="button" class="coverCtrl coverExpand" id="coverExpandBtn" aria-label="Agrandir l’image" title="Agrandir l’image">
+                  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M9 4H4v5M15 4h5v5M20 15v5h-5M4 15v5h5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <button type="button" class="coverCtrl coverPrev" id="coverPrevBtn" aria-label="Image précédente" title="Image précédente" style="display:none;">
+                  <svg class="galarr" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M16 5 L8 12 L16 19" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <button type="button" class="coverCtrl coverNext" id="coverNextBtn" aria-label="Image suivante" title="Image suivante" style="display:none;">
+                  <svg class="galarr" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 5 L16 12 L8 19" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="coverCount" id="coverCount" style="display:none;"></div>
+              </div>
+            </div>
 
-        <div class="coverGallery" id="coverGallery">
-          <div class="coverStage" id="coverStage">
-            <img id="cover" class="cover is-placeholder" alt="" referrerpolicy="no-referrer">
-            <button type="button" class="coverCtrl coverExpand" id="coverExpandBtn" aria-label="Agrandir l’image" title="Agrandir l’image">
-              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M9 4H4v5M15 4h5v5M20 15v5h-5M4 15v5h5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-            <button type="button" class="coverCtrl coverPrev" id="coverPrevBtn" aria-label="Image précédente" title="Image précédente" style="display:none;">
-              <svg class="galarr" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M16 5 L8 12 L16 19" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-            <button type="button" class="coverCtrl coverNext" id="coverNextBtn" aria-label="Image suivante" title="Image suivante" style="display:none;">
-              <svg class="galarr" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 5 L16 12 L8 19" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-            <div class="coverCount" id="coverCount" style="display:none;"></div>
+            <div class="coverLightbox hidden" id="coverLightbox" aria-hidden="true">
+              <div class="coverLightboxBackdrop" id="coverLightboxBackdrop"></div>
+              <div class="coverLightboxDialog" role="dialog" aria-modal="true" aria-label="Galerie d’images">
+                <button type="button" class="coverCtrl coverLightboxClose" id="coverLightboxClose" aria-label="Fermer" title="Fermer">✕</button>
+                <button type="button" class="coverCtrl coverPrev coverLightboxPrev" id="coverLightboxPrev" aria-label="Image précédente" title="Image précédente" style="display:none;">
+                  <svg class="galarr" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M16 5 L8 12 L16 19" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <button type="button" class="coverCtrl coverNext coverLightboxNext" id="coverLightboxNext" aria-label="Image suivante" title="Image suivante" style="display:none;">
+                  <svg class="galarr" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 5 L16 12 L8 19" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <img id="coverLightboxImg" class="coverLightboxImg" alt="" referrerpolicy="no-referrer">
+                <div class="coverCount coverLightboxCount" id="coverLightboxCount" style="display:none;"></div>
+              </div>
+            </div>
+
+            <div id="videoBox" class="infoBlock" style="display:none;">
+              <h3>📺 Vidéo</h3>
+              <iframe id="videoFrame"
+                style="width:100%; aspect-ratio:16/9; border-radius:12px; border:1px solid var(--border);"
+                loading="lazy"
+                allowfullscreen>
+              </iframe>
+            </div>
+
+            <div id="mainInfoBox" class="infoBlock" style="display:none;">
+              <div class="tagsRow" id="tags"></div>
+
+              <div id="descInnerBox" class="descInnerBox" style="display:none;">
+                <div id="descriptionText" class="infoText"></div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="coverLightbox hidden" id="coverLightbox" aria-hidden="true">
-          <div class="coverLightboxBackdrop" id="coverLightboxBackdrop"></div>
-          <div class="coverLightboxDialog" role="dialog" aria-modal="true" aria-label="Galerie d’images">
-            <button type="button" class="coverCtrl coverLightboxClose" id="coverLightboxClose" aria-label="Fermer" title="Fermer">✕</button>
-            <button type="button" class="coverCtrl coverPrev coverLightboxPrev" id="coverLightboxPrev" aria-label="Image précédente" title="Image précédente" style="display:none;">
-              <svg class="galarr" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M16 5 L8 12 L16 19" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-            <button type="button" class="coverCtrl coverNext coverLightboxNext" id="coverLightboxNext" aria-label="Image suivante" title="Image suivante" style="display:none;">
-              <svg class="galarr" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 5 L16 12 L8 19" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-            <img id="coverLightboxImg" class="coverLightboxImg" alt="" referrerpolicy="no-referrer">
-            <div class="coverCount coverLightboxCount" id="coverLightboxCount" style="display:none;"></div>
+        <div class="infoBlock statsOut statsUnderMain" id="statsOut" style="display:none;">
+          <h3>📊 Statistiques</h3>
+          <div class="statsLine">
+            <span class="statsItem" id="statTranslationWrap" title="Date de traduction inconnue">⏱️ Mise à jour : <strong id="statTranslationTime">—</strong></span>
+            <span class="statsItem">👁️ Vues : <strong id="statViews">0</strong></span>
+            <span class="statsItem">📥 Téléchargements : <strong id="statMegaClicks">0</strong></span>
+            <span class="statsItem">❤️ J’aime : <strong id="statLikes">0</strong></span>
+            <span class="statsItem" id="statRatingWrap" title="Note moyenne de la traduction">⭐ Note : <strong id="statRating">—</strong></span>
+            <span class="statsItem" id="statAddedWrap" title="Date d’ajout inconnue">📅 Ajouté le <strong id="statAddedDate">—</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="gameSidePanel">
+        <div class="infoBlock gameActionsCard">
+          <div class="sideAccent"></div>
+          <h3>🔗 Téléchargements & liens</h3>
+          <div class="sideIntro">Retrouve ici les liens et informations utiles pour cette traduction.</div>
+
+          <div class="btnRow btnRowSide">
+            <a class="btnLike" id="btnDiscord" target="_blank" rel="noopener" style="display:none;">💬 Discord</a>
+            <a class="btnLike" id="btnF95" target="_blank" rel="noopener" style="display:none;">F95Zone</a>
+          </div>
+
+          <div class="btnMainRow btnMainRowSide">
+            <a class="btnLike btnMega" id="btnMega" target="_blank" rel="noopener" style="display:none;">📥 Télécharger la traduction · MEGA</a>
+            <!-- translationsExtra injecté ici -->
+          </div>
+
+          <div id="notesBox" class="translationAboutInline" style="display:none;">
+            <h3>📝 À propos de cette traduction</h3>
+            <div id="notesText" class="infoTextMuted"></div>
+          </div>
+
+          <div id="archiveBox" style="display:none; justify-content:center;">
+            <a id="archiveLink" class="btnLike" target="_blank" rel="noopener" style="justify-content:center;">
+              📦 Archives de la traduction
+            </a>
           </div>
         </div>
 
-        <div id="videoBox" class="infoBlock" style="display:none;">
-          <h3>📺 Vidéo</h3>
-          <iframe id="videoFrame"
-            style="width:100%; aspect-ratio:16/9; border-radius:12px; border:1px solid var(--border);"
-            loading="lazy"
-            allowfullscreen>
-          </iframe>
-        </div>
-
-        <div id="mainInfoBox" class="infoBlock" style="display:none;">
-          <div class="tagsRow" id="tags"></div>
-
-          <div id="descInnerBox" class="descInnerBox" style="display:none;">
-            <div id="descriptionText" class="infoText"></div>
-          </div>
-        </div>
-
-        <!-- ✅ BOUTONS : juste AU-DESSUS des étoiles -->
-        <div class="btnRow">
-          <a class="btnLike" id="btnDiscord" target="_blank" rel="noopener" style="display:none;">💬 Discord</a>
-          <a class="btnLike" id="btnF95" target="_blank" rel="noopener" style="display:none;">F95Zone</a>
-        </div>
-
-        <div class="btnMainRow">
-          <a class="btnLike btnMega" id="btnMega" target="_blank" rel="noopener" style="display:none;">📥 Télécharger la traduction · MEGA</a>
-          <!-- translationsExtra injecté ici -->
-        </div>
-
-        <div id="archiveBox" style="display:none; margin-top:12px; justify-content:center;">
-          <a id="archiveLink" class="btnLike" target="_blank" rel="noopener" style="justify-content:center;">
-            📦 Archives de la traduction
-          </a>
-        </div>
-
-        <!-- ✅ ℹ️ Informations AU-DESSUS des étoiles -->
-        <div id="notesBox" class="infoBlock" style="display:none;">
-          <h3>ℹ️ Informations</h3>
-          <div id="notesText" class="infoTextMuted"></div>
-        </div>
-
-        <!-- ⭐ Notation -->
-        <div id="ratingBox" class="infoBlock" style="text-align:center;">
-          <div style="color:var(--muted); font-size:12px; margin-bottom:6px;">
-            Note de la traduction :
+        <div id="ratingBox" class="infoBlock translationRatingCard translationSideCard" style="text-align:center;">
+          <h3>⭐ Donne ton avis !</h3>
+          <div class="ratingSummary">
+            <span class="ratingSummaryLabel">Moyenne</span>
             <strong id="ratingAvg">—</strong>
-            (<span id="ratingCount">0</span> votes)
+            <span class="ratingVotes">(<span id="ratingCount">0</span> votes)</span>
           </div>
 
           <div id="ratingChoices" style="display:flex; justify-content:center; gap:8px;"></div>
           <div id="ratingMsg" style="margin-top:6px; color:var(--muted); font-size:12px;"></div>
         </div>
 
-      </div>
+        <div id="likeBox" class="infoBlock translationLikeCard translationSideCard" style="text-align:center;">
+          <h3>👍 Si tu aimes ce jeu</h3>
+          <div class="likeIntro">Laisse un like pour soutenir cette fiche et cette traduction.</div>
+          <button class="btnLike like-btn sideLikeBtn" id="btnLike" type="button" aria-label="J’aime"><svg class="likeIconSvg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 10V4.8c0-.9-.8-1.6-1.7-1.4-.4.1-.7.4-.9.8L8.3 10H5.8C4.8 10 4 10.8 4 11.8V18c0 1.1.9 2 2 2h8.2c.8 0 1.5-.5 1.8-1.2l2-5.3c.1-.2.1-.4.1-.6V12c0-1.1-.9-2-2-2h-2.1zM8 10v10"/></svg></button>
+        </div>
+      </aside>
     </div>
 
-    <div class="statsOut infoBlock" id="statsOut" style="display:none;">
-      <div class="statsLine">
-        <span class="statsItem" id="statTranslationWrap" title="Date de traduction inconnue">⏱️ Mise à jour : <strong id="statTranslationTime">—</strong></span>
-        <span class="statsItem">👁️ Vues : <strong id="statViews">0</strong></span>
-        <span class="statsItem">📥 Téléchargements : <strong id="statMegaClicks">0</strong></span>
-        <span class="statsItem">❤️ J’aime : <strong id="statLikes">0</strong></span>
-        <span class="statsItem" id="statRatingWrap" title="Note moyenne de la traduction">⭐ Note : <strong id="statRating">—</strong></span>
+    <div class="infoBlock similarGamesBlock sameAuthorBlock" id="sameAuthorBlock" style="display:none;">
+      <div class="similarHead">
+        <h3>Du même auteur</h3>
+        <div class="similarSub" id="sameAuthorSub"></div>
       </div>
-      <div class="statsLine statsLineSub">
-        <span class="statsItem" id="statAddedWrap" title="Date d’ajout inconnue">📅 Ajouté le <strong id="statAddedDate">—</strong></span>
+      <div class="similarGrid sameAuthorGrid" id="sameAuthorGrid"></div>
+    </div>
+
+    <div class="infoBlock similarGamesBlock" id="similarGamesBlock" style="display:none;">
+      <div class="similarHead">
+        <h3>Jeux similaires</h3>
+        <div class="similarSub" id="similarGamesSub">Basé sur les tags les plus proches</div>
       </div>
+      <div class="similarGrid" id="similarGamesGrid"></div>
     </div>
 
     <div class="err" id="errBox"></div>
@@ -180,6 +209,7 @@
   <script src="../viewer.menu.about.js"></script>
   <script src="../viewer.menu.extension.js"></script>
   <script src="./game.js"></script>
+  <script src="./game.related.js"></script>
 
 </body>
 </html>

@@ -1160,10 +1160,10 @@ body.age-gate-active footer {
 }
 
 .stat-icon{
-  width:14px;
-  height:14px;
+  width:13px;
+  height:13px;
   display:inline-block;
-  flex:0 0 14px;
+  flex:0 0 13px;
   background-color:currentColor;
   opacity:.8;
   vertical-align:middle;

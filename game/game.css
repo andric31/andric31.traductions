@@ -1049,7 +1049,7 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
 
 .ratingSummary strong{
   color:var(--fg);
-  font-size:28px;
+  font-size:20px;
   line-height:1;
 }
 

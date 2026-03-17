@@ -1141,9 +1141,15 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
 
 .sideLikeBtn{
   min-width: 210px;
-  padding: 10px 16px;
+  padding: 6px 16px;
   font-size: 16px;
   font-weight: 800;
+  color:#555;
+}
+
+.sideLikeBtn:hover,
+.sideLikeBtn:focus-visible{
+  color:#ffd54a;
 }
 
 .sideLikeBtn .likeIconSvg{
@@ -1154,7 +1160,7 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
 }
 .sideLikeBtn .likeIconSvg path{
   fill:none;
-  stroke:#ffffff;
+  stroke:currentColor;
   stroke-width:2;
   stroke-linecap:round;
   stroke-linejoin:round;

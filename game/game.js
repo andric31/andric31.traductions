@@ -1009,7 +1009,7 @@ function setMyLike(gameId, v) {
   } catch {}
 }
 function getLikeIconSvg(liked) {
-  const path = `<path d="M14 10V4.8c0-.9-.8-1.6-1.7-1.4-.4.1-.7.4-.9.8L8.3 10H5.8C4.8 10 4 10.8 4 11.8V18c0 1.1.9 2 2 2h8.2c.8 0 1.5-.5 1.8-1.2l2-5.3c.1-.2.1-.4.1-.6V12c0-1.1-.9-2-2-2h-2.1zM8 10v10"/>`;
+  const path = `<path d="M8 21H5.5A1.5 1.5 0 0 1 4 19.5v-7A1.5 1.5 0 0 1 5.5 11H8m0 10V11m0 10h8.2c.8 0 1.4-.5 1.6-1.3l1.1-5.2c.2-.9-.5-1.8-1.5-1.8H13V7.8c0-1-.8-1.8-1.8-1.8h-.1L8 11"/>`;
   return liked
     ? `<svg class="likeIconSvg likeIconSvg--liked" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${path}</svg>`
     : `<svg class="likeIconSvg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${path}</svg>`;

@@ -414,6 +414,7 @@ body:not(.mode-game){
   font-weight: 700;
   cursor:pointer;
   user-select:none;
+  text-align:center;
 }
 .btnLike:hover{ filter: brightness(1.08); }
 
@@ -1168,4 +1169,65 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
 .sideLikeBtn .likeIconSvg--liked path{
   fill:#ffd54a;
   stroke:#ffd54a;
+}
+
+.btnQuickAuto{
+  position:relative;
+  padding:10px 12px !important;
+  background: linear-gradient(180deg,#b71c1c 0%,#8e0e0e 100%) !important;
+  border:1px solid rgba(255, 208, 90, 0.68) !important;
+  box-shadow: 0 10px 22px rgba(0,0,0,.35), 0 0 0 1px rgba(255, 219, 120, 0.12) inset, 0 0 18px rgba(255, 196, 94, 0.08) !important;
+}
+.btnQuickAuto:hover{
+  background: linear-gradient(180deg,#c62828 0%,#9f1b1b 100%) !important;
+  border-color: rgba(255, 216, 120, 0.72) !important;
+}
+.btnQuickAuto .quickAutoOuter{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  width:100%;
+}
+.btnQuickAuto .quickAutoBadge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:3px 10px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.03em;
+  color:#ffe8a3;
+  background:rgba(255, 210, 90, 0.12);
+  border:1px solid rgba(255, 210, 90, 0.42);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+.btnQuickAuto .quickAutoInner{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  width:100%;
+  padding:11px 14px;
+  border-radius:12px;
+  background:linear-gradient(180deg, rgba(255, 221, 138, .10), rgba(255,255,255,.025));
+  border:1px solid rgba(255, 214, 112, .18);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+}
+.btnQuickAuto .quickAutoTitle{
+  display:block;
+  font-size:15px;
+  font-weight:800;
+  line-height:1.25;
+  color:#ffffff;
+}
+.btnQuickAuto .quickAutoSub{
+  display:block;
+  font-size:12px;
+  font-weight:600;
+  line-height:1.35;
+  color:rgba(255,255,255,.84);
 }

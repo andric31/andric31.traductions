@@ -1501,8 +1501,15 @@ function renderVideoBlock({ id, videoUrl }) {
       })
       .filter(Boolean);
 
+    const hasQuickAutoExtra = extraValid.some(x => String(x.name || "").trim().toLowerCase() === "traduction auto rapide");
+
     const megaRow = document.querySelector(".btnMainRow");
     const megaBtn = document.getElementById("btnMega");
+
+    if (hasQuickAutoExtra && megaBtn) {
+      megaBtn.removeAttribute("href");
+      megaBtn.style.display = "none";
+    }
 
     const megaHrefNow = (megaBtn && megaBtn.getAttribute("href")) ? megaBtn.getAttribute("href").trim() : "";
     const hasMega  = !!megaHrefNow;
@@ -1559,9 +1566,10 @@ function renderVideoBlock({ id, videoUrl }) {
             const name = String(x.name || "Lien").trim();
             const link = String(x.link || "").trim();
             const hostCls = getHostClass(link);
+            const isQuickAuto = name.toLowerCase() === "traduction auto rapide";
 
             const a = document.createElement("a");
-            a.className = `btnLike ${hostCls} extraLinkBtn`; // ✅ important: extraLinkBtn
+            a.className = `btnLike ${hostCls} extraLinkBtn${isQuickAuto ? " btnQuickAuto" : ""}`; // ✅ important: extraLinkBtn
             a.target = "_blank";
             a.rel = "noopener";
             a.href = link;
@@ -1570,7 +1578,16 @@ function renderVideoBlock({ id, videoUrl }) {
             a.style.margin = "0 auto";
             a.style.justifyContent = "center";
 
-            if (name.toLowerCase() === "patch") {
+            if (isQuickAuto) {
+              a.innerHTML = `
+                <span class="quickAutoOuter">
+                  <span class="quickAutoBadge">⚡ Version express</span>
+                  <span class="quickAutoInner">
+                    <span class="quickAutoTitle">📥 Traduction auto rapide</span>
+                    <span class="quickAutoSub">Version pour essayer vite fait&nbsp;!</span>
+                  </span>
+                </span>`;
+            } else if (name.toLowerCase() === "patch") {
               a.textContent = "📥 Télécharger · Patch";
             } else {
               if (hostCls === "btn-f95" && /f95\s*zone/i.test(name)) {

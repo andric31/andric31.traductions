@@ -270,9 +270,9 @@ button, input, textarea { font: inherit; }
   margin-top: -2px;
 }
 
-.msg-compose {
+ .msg-compose {
   display: grid;
-  gap: 14px;
+  gap: 10px;
   border: 1px solid var(--msg-border);
   border-radius: 20px;
   background: var(--msg-soft);
@@ -348,6 +348,30 @@ button, input, textarea { font: inherit; }
 .msg-delete-btn {
   align-self: flex-end;
   color: var(--msg-danger);
+}
+
+
+.msg-compose-top {
+  align-items: end;
+}
+
+#authChatInfo {
+  margin-top: -2px;
+  margin-bottom: -2px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.msg-field textarea {
+  min-height: 92px;
+}
+
+.msg-compose-bottom {
+  margin-top: -4px;
+}
+
+.msg-compose-bottom .msg-form-info {
+  line-height: 1.2;
 }
 
 @media (max-width: 980px) {

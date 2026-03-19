@@ -1473,7 +1473,32 @@ function renderVideoBlock({ id, videoUrl }) {
     const megaHref = (entry.translation || "").trim();
     const archiveHref = (entry.translationsArchive || "").trim();
     const translationType = String(entry.translationType || "").trim().toLowerCase();
-    const isMainQuickAuto = translationType === "auto rapide";
+
+    function getTranslationTypeMeta(typeValue) {
+      const t = String(typeValue || "").trim().toLowerCase();
+      if (t === "auto rapide") {
+        return { title: "⚡ Traduction auto rapide", note: "Version pour essayer vite fait !" };
+      }
+      if (t === "auto avec correction") {
+        return { title: "🛠️ Traduction automatique avec correction", note: "Version corrigée en automatique." };
+      }
+      if (t === "auto avec relecture") {
+        return { title: "✅ Traduction automatique avec relecture", note: "Version relue manuellement." };
+      }
+      if (t === "manuel - humaine") {
+        return { title: "✍️ Traduction manuelle", note: "Version humaine." };
+      }
+      if (t === "vo française") {
+        return { title: "🇫🇷 Version française", note: "Français inclus de base." };
+      }
+      if (t === "a tester") {
+        return { title: "🧪 Version à tester", note: "À vérifier" };
+      }
+      return null;
+    }
+
+    const mainTranslationTypeMeta = getTranslationTypeMeta(translationType);
+    const isMainQuickAuto = !!mainTranslationTypeMeta;
 
     setHref("btnMega", megaHref);
     if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction · MEGA";
@@ -1501,9 +1526,14 @@ function renderVideoBlock({ id, videoUrl }) {
       const tile = document.createElement("div");
       tile.className = `${extraClassName} quickAutoTile`;
 
+      const tileMeta = getTranslationTypeMeta(fallbackName) || getTranslationTypeMeta("auto rapide") || {
+        title: "⚡ Traduction auto rapide",
+        note: "Version pour essayer vite fait !"
+      };
+
       const title = document.createElement("div");
       title.className = "quickAutoTitleRow";
-      title.textContent = "⚡ Traduction auto rapide";
+      title.textContent = tileMeta.title;
 
       const a = document.createElement("a");
       a.className = `btnLike ${hostCls} extraLinkBtn`;
@@ -1527,7 +1557,7 @@ function renderVideoBlock({ id, videoUrl }) {
 
       const note = document.createElement("div");
       note.className = "quickAutoSub";
-      note.textContent = "Version pour essayer vite fait !";
+      note.textContent = tileMeta.note;
 
       tile.appendChild(title);
       tile.appendChild(a);
@@ -1608,11 +1638,11 @@ function renderVideoBlock({ id, videoUrl }) {
 
             const title = document.createElement("div");
             title.className = "quickAutoTitleRow";
-            title.textContent = "⚡ Traduction auto rapide";
+            title.textContent = mainTranslationTypeMeta.title;
 
             const note = document.createElement("div");
             note.className = "quickAutoSub";
-            note.textContent = "Version pour essayer vite fait !";
+            note.textContent = mainTranslationTypeMeta.note;
 
             mainTile.appendChild(title);
             mainTile.appendChild(megaBtn);

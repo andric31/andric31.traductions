@@ -252,7 +252,12 @@
   }
 
   function scrollToBottom() {
-    els.list.scrollTop = els.list.scrollHeight;
+    if (!els.list) return;
+    els.list.scrollTo({ top: els.list.scrollHeight, behavior: 'smooth' });
+    requestAnimationFrame(() => {
+      els.list.scrollTop = els.list.scrollHeight;
+      els.list.lastElementChild?.scrollIntoView({ block: 'end', behavior: 'smooth' });
+    });
   }
 
   function startAutoRefresh() {

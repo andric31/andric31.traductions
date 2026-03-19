@@ -183,7 +183,7 @@ button, input, textarea { font: inherit; }
 
 .msg-main {
   display: grid;
-  grid-template-rows: auto auto minmax(280px, 1fr) auto;
+  grid-template-rows: auto auto minmax(220px, 1fr) auto;
   gap: 14px;
   padding: 18px;
 }
@@ -204,7 +204,7 @@ button, input, textarea { font: inherit; }
   gap: 12px;
   align-content: start;
   min-height: 0;
-  max-height: 760px;
+  max-height: clamp(320px, 46vh, 520px);
   overflow: auto;
   padding-right: 4px;
 }
@@ -468,4 +468,19 @@ button, input, textarea { font: inherit; }
 #roomSelect option:checked {
   color: var(--fg, #e8eaf0);
   background: color-mix(in srgb, var(--accent, #6ce0b0) 22%, var(--card, #141826) 78%);
+}
+
+
+.msg-list::-webkit-scrollbar { width: 10px; }
+.msg-list::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--accent, #6ce0b0) 24%, transparent);
+  border-radius: 999px;
+}
+.msg-list::-webkit-scrollbar-track { background: transparent; }
+
+.msg-compose {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  backdrop-filter: blur(10px);
 }

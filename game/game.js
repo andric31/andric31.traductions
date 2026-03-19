@@ -794,7 +794,7 @@ function initHamburgerMenu() {
   try {
     if (!window.__homeMenuAdded && window.ViewerMenu?.addItem) {
       window.__homeMenuAdded = true;
-      window.ViewerMenu.addItem("📚 Retour à la liste des traductions", () => { window.location.href = "../"; });
+      window.ViewerMenu.addItem("📚 Retour à la liste des traductions", () => { window.location.href = "../"; }, { prepend: true });
     }
   } catch {}
 

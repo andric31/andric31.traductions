@@ -1012,7 +1012,6 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
   margin-top:0;
 }
 .translationAboutInline{
-  margin-top:4px;
   padding:12px 14px;
   border-top:0;
   border:1px solid rgba(255,255,255,.08);
@@ -1171,63 +1170,106 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
   stroke:#ffd54a;
 }
 
-.btnQuickAuto{
-  position:relative;
-  padding:10px 12px !important;
-  background: linear-gradient(180deg,#b71c1c 0%,#8e0e0e 100%) !important;
-  border:1px solid rgba(255, 208, 90, 0.68) !important;
-  box-shadow: 0 10px 22px rgba(0,0,0,.35), 0 0 0 1px rgba(255, 219, 120, 0.12) inset, 0 0 18px rgba(255, 196, 94, 0.08) !important;
-}
-.btnQuickAuto:hover{
-  background: linear-gradient(180deg,#c62828 0%,#9f1b1b 100%) !important;
-  border-color: rgba(255, 216, 120, 0.72) !important;
-}
-.btnQuickAuto .quickAutoOuter{
+.quickAutoTile{
   display:flex;
   flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:6px;
+  align-items:stretch;
+  gap:8px;
   width:100%;
+  padding:12px;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.018));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
+  box-sizing:border-box;
 }
-.btnQuickAuto .quickAutoBadge{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding:3px 10px;
-  border-radius:999px;
-  font-size:11px;
-  font-weight:800;
-  letter-spacing:.03em;
-  color:#ffe8a3;
-  background:rgba(255, 210, 90, 0.12);
-  border:1px solid rgba(255, 210, 90, 0.42);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
-}
-.btnQuickAuto .quickAutoInner{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:4px;
+.quickAutoTile .quickAutoTitleRow{
+  display:block;
   width:100%;
-  padding:11px 14px;
-  border-radius:12px;
-  background:linear-gradient(180deg, rgba(255, 221, 138, .10), rgba(255,255,255,.025));
-  border:1px solid rgba(255, 214, 112, .18);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
-}
-.btnQuickAuto .quickAutoTitle{
-  display:block;
-  font-size:15px;
+  text-align:center;
+  font-size:13px;
   font-weight:800;
-  line-height:1.25;
-  color:#ffffff;
+  letter-spacing:.01em;
+  text-transform:none;
+  color:var(--fg);
 }
-.btnQuickAuto .quickAutoSub{
+.quickAutoTile .btnLike{
+  width:100%;
+  max-width:none;
+  margin:0 !important;
+  box-sizing:border-box;
+  justify-content:center;
+}
+
+/* ✅ Dans la tuile spéciale, le bouton garde exactement le comportement visuel
+   d'un bouton d'hébergeur standard, quel que soit le thème */
+.quickAutoTile .btnLike,
+.quickAutoTile .btnLike:link,
+.quickAutoTile .btnLike:visited,
+.quickAutoTile .btnLike:hover,
+.quickAutoTile .btnLike:active,
+.quickAutoTile .btnLike:focus-visible,
+.quickAutoTile .btnLike span{
+  color: inherit;
+}
+
+.quickAutoTile .btnLike.btnMega,
+.quickAutoTile .btnLike.btnMega:link,
+.quickAutoTile .btnLike.btnMega:visited,
+.quickAutoTile .btnLike.btnMega:hover,
+.quickAutoTile .btnLike.btnMega:active,
+.quickAutoTile .btnLike.btnMega:focus-visible,
+.quickAutoTile .btnLike.btnMega span,
+.quickAutoTile #btnMega,
+.quickAutoTile #btnMega:link,
+.quickAutoTile #btnMega:visited,
+.quickAutoTile #btnMega:hover,
+.quickAutoTile #btnMega:active,
+.quickAutoTile #btnMega:focus-visible,
+.quickAutoTile #btnMega span{
+  color:#ffffff !important;
+}
+
+.quickAutoTile .btnLike.btn-f95,
+.quickAutoTile .btnLike.btn-f95:link,
+.quickAutoTile .btnLike.btn-f95:visited,
+.quickAutoTile .btnLike.btn-f95:hover,
+.quickAutoTile .btnLike.btn-f95:active,
+.quickAutoTile .btnLike.btn-f95:focus-visible,
+.quickAutoTile .btnLike.btn-f95 span{
+  color:#ffffff !important;
+}
+
+.quickAutoTile .btnLike.btn-host-drive,
+.quickAutoTile .btnLike.btn-host-drive:link,
+.quickAutoTile .btnLike.btn-host-drive:visited,
+.quickAutoTile .btnLike.btn-host-drive:hover,
+.quickAutoTile .btnLike.btn-host-drive:active,
+.quickAutoTile .btnLike.btn-host-drive:focus-visible,
+.quickAutoTile .btnLike.btn-host-drive span,
+.quickAutoTile .btnLike.btn-host-gofile,
+.quickAutoTile .btnLike.btn-host-gofile:link,
+.quickAutoTile .btnLike.btn-host-gofile:visited,
+.quickAutoTile .btnLike.btn-host-gofile:hover,
+.quickAutoTile .btnLike.btn-host-gofile:active,
+.quickAutoTile .btnLike.btn-host-gofile:focus-visible,
+.quickAutoTile .btnLike.btn-host-gofile span,
+.quickAutoTile .btnLike.btn-host-default,
+.quickAutoTile .btnLike.btn-host-default:link,
+.quickAutoTile .btnLike.btn-host-default:visited,
+.quickAutoTile .btnLike.btn-host-default:hover,
+.quickAutoTile .btnLike.btn-host-default:active,
+.quickAutoTile .btnLike.btn-host-default:focus-visible,
+.quickAutoTile .btnLike.btn-host-default span{
+  color:#ffffff !important;
+}
+.quickAutoTile .quickAutoSub{
   display:block;
+  width:100%;
+  text-align:center;
   font-size:12px;
   font-weight:600;
   line-height:1.35;
-  color:rgba(255,255,255,.84);
+  color:var(--muted);
 }
+

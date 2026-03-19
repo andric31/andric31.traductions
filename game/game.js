@@ -1485,6 +1485,15 @@ function renderVideoBlock({ id, videoUrl }) {
       return "btn-host-default";
     }
 
+    function getHostLabel(url, fallbackName = "Lien"){
+      const hostCls = getHostClass(url);
+      if (hostCls === "btnMega") return "MEGA";
+      if (hostCls === "btn-host-gofile") return "Gofile";
+      if (hostCls === "btn-host-drive") return "Google Drive";
+      if (hostCls === "btn-f95") return "F95Zone";
+      return String(fallbackName || "Lien").trim() || "Lien";
+    }
+
     const extraRaw = entry.translationsExtra;
     const extraList = Array.isArray(extraRaw) ? extraRaw : (extraRaw ? [extraRaw] : []);
     const extraValid = extraList
@@ -1568,8 +1577,44 @@ function renderVideoBlock({ id, videoUrl }) {
             const hostCls = getHostClass(link);
             const isQuickAuto = name.toLowerCase() === "traduction auto rapide";
 
+            if (isQuickAuto) {
+              const tile = document.createElement("div");
+              tile.className = "extraLinkBtn quickAutoTile";
+
+              const title = document.createElement("div");
+              title.className = "quickAutoTitleRow";
+              title.textContent = "⚡ Traduction auto rapide";
+
+              const a = document.createElement("a");
+              a.className = `btnLike ${hostCls} extraLinkBtn`;
+              a.target = "_blank";
+              a.rel = "noopener";
+              a.href = link;
+              a.addEventListener("contextmenu", (e) => {
+                e.preventDefault();
+                return false;
+              });
+
+              const quickHostLabel = getHostLabel(link, name);
+              if (hostCls === "btn-f95") {
+                a.innerHTML = `📥 Télécharger la traduction · <span class="f95-logo"><span class="f95-white">F95</span><span class="f95-red">Zone</span></span>`;
+              } else {
+                a.textContent = `📥 Télécharger la traduction · ${quickHostLabel}`;
+              }
+
+              const note = document.createElement("div");
+              note.className = "quickAutoSub";
+              note.textContent = "Version pour essayer vite fait !";
+
+              tile.appendChild(title);
+              tile.appendChild(a);
+              tile.appendChild(note);
+              wrap.appendChild(tile);
+              return;
+            }
+
             const a = document.createElement("a");
-            a.className = `btnLike ${hostCls} extraLinkBtn${isQuickAuto ? " btnQuickAuto" : ""}`; // ✅ important: extraLinkBtn
+            a.className = `btnLike ${hostCls} extraLinkBtn`; // ✅ important: extraLinkBtn
             a.target = "_blank";
             a.rel = "noopener";
             a.href = link;
@@ -1578,16 +1623,7 @@ function renderVideoBlock({ id, videoUrl }) {
             a.style.margin = "0 auto";
             a.style.justifyContent = "center";
 
-            if (isQuickAuto) {
-              a.innerHTML = `
-                <span class="quickAutoOuter">
-                  <span class="quickAutoBadge">⚡ Version express</span>
-                  <span class="quickAutoInner">
-                    <span class="quickAutoTitle">📥 Traduction auto rapide</span>
-                    <span class="quickAutoSub">Version pour essayer vite fait&nbsp;!</span>
-                  </span>
-                </span>`;
-            } else if (name.toLowerCase() === "patch") {
+            if (name.toLowerCase() === "patch") {
               a.textContent = "📥 Télécharger · Patch";
             } else {
               if (hostCls === "btn-f95" && /f95\s*zone/i.test(name)) {

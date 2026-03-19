@@ -414,7 +414,6 @@ body:not(.mode-game){
   font-weight: 700;
   cursor:pointer;
   user-select:none;
-  text-align:center;
 }
 .btnLike:hover{ filter: brightness(1.08); }
 
@@ -1012,6 +1011,7 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
   margin-top:0;
 }
 .translationAboutInline{
+  margin-top:0;
   padding:12px 14px;
   border-top:0;
   border:1px solid rgba(255,255,255,.08);
@@ -1169,13 +1169,13 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
   fill:#ffd54a;
   stroke:#ffd54a;
 }
-
 .quickAutoTile{
   display:flex;
   flex-direction:column;
   align-items:stretch;
   gap:8px;
   width:100%;
+  max-width:100%;
   padding:12px;
   border:1px solid var(--border);
   border-radius:14px;
@@ -1200,69 +1200,6 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
   box-sizing:border-box;
   justify-content:center;
 }
-
-/* ✅ Dans la tuile spéciale, le bouton garde exactement le comportement visuel
-   d'un bouton d'hébergeur standard, quel que soit le thème */
-.quickAutoTile .btnLike,
-.quickAutoTile .btnLike:link,
-.quickAutoTile .btnLike:visited,
-.quickAutoTile .btnLike:hover,
-.quickAutoTile .btnLike:active,
-.quickAutoTile .btnLike:focus-visible,
-.quickAutoTile .btnLike span{
-  color: inherit;
-}
-
-.quickAutoTile .btnLike.btnMega,
-.quickAutoTile .btnLike.btnMega:link,
-.quickAutoTile .btnLike.btnMega:visited,
-.quickAutoTile .btnLike.btnMega:hover,
-.quickAutoTile .btnLike.btnMega:active,
-.quickAutoTile .btnLike.btnMega:focus-visible,
-.quickAutoTile .btnLike.btnMega span,
-.quickAutoTile #btnMega,
-.quickAutoTile #btnMega:link,
-.quickAutoTile #btnMega:visited,
-.quickAutoTile #btnMega:hover,
-.quickAutoTile #btnMega:active,
-.quickAutoTile #btnMega:focus-visible,
-.quickAutoTile #btnMega span{
-  color:#ffffff !important;
-}
-
-.quickAutoTile .btnLike.btn-f95,
-.quickAutoTile .btnLike.btn-f95:link,
-.quickAutoTile .btnLike.btn-f95:visited,
-.quickAutoTile .btnLike.btn-f95:hover,
-.quickAutoTile .btnLike.btn-f95:active,
-.quickAutoTile .btnLike.btn-f95:focus-visible,
-.quickAutoTile .btnLike.btn-f95 span{
-  color:#ffffff !important;
-}
-
-.quickAutoTile .btnLike.btn-host-drive,
-.quickAutoTile .btnLike.btn-host-drive:link,
-.quickAutoTile .btnLike.btn-host-drive:visited,
-.quickAutoTile .btnLike.btn-host-drive:hover,
-.quickAutoTile .btnLike.btn-host-drive:active,
-.quickAutoTile .btnLike.btn-host-drive:focus-visible,
-.quickAutoTile .btnLike.btn-host-drive span,
-.quickAutoTile .btnLike.btn-host-gofile,
-.quickAutoTile .btnLike.btn-host-gofile:link,
-.quickAutoTile .btnLike.btn-host-gofile:visited,
-.quickAutoTile .btnLike.btn-host-gofile:hover,
-.quickAutoTile .btnLike.btn-host-gofile:active,
-.quickAutoTile .btnLike.btn-host-gofile:focus-visible,
-.quickAutoTile .btnLike.btn-host-gofile span,
-.quickAutoTile .btnLike.btn-host-default,
-.quickAutoTile .btnLike.btn-host-default:link,
-.quickAutoTile .btnLike.btn-host-default:visited,
-.quickAutoTile .btnLike.btn-host-default:hover,
-.quickAutoTile .btnLike.btn-host-default:active,
-.quickAutoTile .btnLike.btn-host-default:focus-visible,
-.quickAutoTile .btnLike.btn-host-default span{
-  color:#ffffff !important;
-}
 .quickAutoTile .quickAutoSub{
   display:block;
   width:100%;
@@ -1272,4 +1209,3 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
   line-height:1.35;
   color:var(--muted);
 }
-

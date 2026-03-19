@@ -31,6 +31,7 @@
     filtered: [],
     q: "",
     sort: "updatedAtLocal-desc",
+    filterTranslationType: "all",
     filterCat: "all",
     filterEngine: "all",
     filterStatus: "all",
@@ -922,6 +923,7 @@
       engines,
       engine: engines[0] || null,
       status: STATUS_ALLOWED.includes(c.status) || c.status === "En cours" ? c.status : "En cours",
+      translationType: String(game.translationType || "").trim(),
       discord: String(game.discordlink || ""),
       translation: String(game.translation || ""),
       image: displayImageRaw,
@@ -965,9 +967,57 @@
 
   function buildDynamicFilters() {
     const tags = new Set();
+    const translationTypes = new Set();
+
     for (const g of state.all) {
       if (Array.isArray(g.tags)) g.tags.forEach((t) => t && tags.add(t));
+      const tt = String(g.translationType || "").trim();
+      if (tt) translationTypes.add(tt);
     }
+
+    const preferredOrder = [
+      "automatique",
+      "auto rapide",
+      "auto avec correction",
+      "auto avec relecture",
+      "manuel - humaine",
+      "VO française",
+      "A tester",
+    ];
+
+    const preferredIndex = new Map(preferredOrder.map((v, i) => [v.toLowerCase(), i]));
+    const allTranslationTypes = Array.from(translationTypes).sort((a, b) => {
+      const ak = a.toLowerCase();
+      const bk = b.toLowerCase();
+      const ai = preferredIndex.has(ak) ? preferredIndex.get(ak) : 999;
+      const bi = preferredIndex.has(bk) ? preferredIndex.get(bk) : 999;
+      if (ai !== bi) return ai - bi;
+      return a.localeCompare(b, "fr", { sensitivity: "base" });
+    });
+
+    const ttSel = $("#filterTranslationType");
+    if (ttSel) {
+      const previous = state.filterTranslationType || "all";
+      const translationTypeLabels = {
+        "automatique": "Automatique 🎲",
+        "auto rapide": "Automatique ⚡ rapide",
+        "auto avec correction": "Automatique 🤖 correction",
+        "auto avec relecture": "Automatique 👀 relecture",
+        "manuel - humaine": "Manuelle",
+        "VO française": "Version française",
+        "A tester": "À tester",
+      };
+      ttSel.innerHTML = '<option value="all">Type de traduction : Tout</option>';
+      for (const tt of allTranslationTypes) {
+        const opt = document.createElement("option");
+        opt.value = tt;
+        opt.textContent = translationTypeLabels[tt] || tt;
+        ttSel.appendChild(opt);
+      }
+      ttSel.value = allTranslationTypes.includes(previous) ? previous : "all";
+      state.filterTranslationType = ttSel.value || "all";
+    }
+
     const allTags = Array.from(tags).sort((a, b) => a.localeCompare(b));
     initTagsUI(allTags);
   }
@@ -1035,6 +1085,7 @@
 
   function applyFilters() {
     const q = state.q.toLowerCase();
+    const ftt = state.filterTranslationType;
     const fc = state.filterCat;
     const fe = state.filterEngine;
     const fs = state.filterStatus;
@@ -1042,6 +1093,8 @@
 
     state.filtered = state.all.filter((g) => {
       const mq = !q || g.title.toLowerCase().includes(q) || String(g.id || "").includes(q) || String(g.uid || "").includes(q);
+
+      const mtt = ftt === "all" || String(g.translationType || "") === ftt;
 
       const mc =
         fc === "all" || (Array.isArray(g.categories) ? g.categories.includes(fc) : g.category === fc);
@@ -1057,7 +1110,7 @@
         mt = ft.every((t) => tags.includes(t));
       }
 
-      return mq && mc && me && ms && mt;
+      return mq && mtt && mc && me && ms && mt;
     });
 
     sortNow();
@@ -1428,6 +1481,11 @@
     renderGrid();
   });
 
+  $("#filterTranslationType")?.addEventListener("change", (e) => {
+    state.filterTranslationType = e.target.value || "all";
+    applyFilters();
+  });
+
   $("#filterCat")?.addEventListener("change", (e) => {
     state.filterCat = e.target.value || "all";
     applyFilters();
@@ -1466,6 +1524,7 @@
   $("#refresh")?.addEventListener("click", () => {
     state.q = "";
     state.sort = "updatedAtLocal-desc";
+    state.filterTranslationType = "all";
     state.filterCat = "all";
     state.filterEngine = "all";
     state.filterStatus = "all";
@@ -1477,6 +1536,9 @@
 
     const sort = $("#sort");
     if (sort) sort.value = state.sort;
+
+    const tt = $("#filterTranslationType");
+    if (tt) tt.value = "all";
 
     const cat = $("#filterCat");
     if (cat) cat.value = "all";

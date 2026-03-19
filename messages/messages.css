@@ -183,11 +183,11 @@ button, input, textarea { font: inherit; }
 
 .msg-main {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  gap: 14px;
+  grid-template-rows: auto minmax(360px, 1fr) auto;
+  gap: 12px;
   padding: 18px;
   min-height: 0;
-  height: clamp(560px, 68vh, 760px);
+  height: clamp(620px, 74vh, 860px);
   overflow: hidden;
 }
 
@@ -206,7 +206,7 @@ button, input, textarea { font: inherit; }
   display: grid;
   gap: 12px;
   align-content: start;
-  min-height: 220px;
+  min-height: 360px;
   max-height: none;
   overflow: auto;
   padding-right: 6px;
@@ -276,11 +276,11 @@ button, input, textarea { font: inherit; }
 
 .msg-compose {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   border: 1px solid var(--msg-border);
   border-radius: 20px;
   background: color-mix(in srgb, var(--msg-card-strong) 88%, var(--bg, #0d1018) 12%);
-  padding: 14px 16px 16px;
+  padding: 12px 14px 14px;
   box-shadow: 0 -10px 28px rgba(0,0,0,0.16);
 }
 
@@ -368,7 +368,7 @@ button, input, textarea { font: inherit; }
 }
 
 .msg-field textarea {
-  min-height: 92px;
+  min-height: 74px;
 }
 
 .msg-compose-bottom {
@@ -383,7 +383,7 @@ button, input, textarea { font: inherit; }
   .msg-layout { grid-template-columns: 1fr; }
   .msg-panel { min-height: auto; }
   .msg-main { height: auto; overflow: visible; }
-  .msg-list { max-height: 420px; }
+  .msg-list { min-height: 0; max-height: 420px; }
 }
 
 @media (max-width: 640px) {
@@ -413,7 +413,7 @@ button, input, textarea { font: inherit; }
   border: 1px solid var(--msg-border);
   background: var(--msg-input-bg);
   color: var(--fg, #e8eaf0);
-  padding: 14px 15px;
+  padding: 12px 14px;
   outline: none;
   transition: border-color .18s ease, box-shadow .18s ease, background .18s ease, transform .18s ease;
 }
@@ -507,8 +507,8 @@ button, input, textarea { font: inherit; }
 
 .msg-field textarea {
   resize: none;
-  min-height: 96px;
-  max-height: 180px;
+  min-height: 74px;
+  max-height: 140px;
 }
 
 .msg-compose-bottom {

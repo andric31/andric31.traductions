@@ -1477,13 +1477,13 @@ function renderVideoBlock({ id, videoUrl }) {
     function getTranslationTypeMeta(typeValue) {
       const t = String(typeValue || "").trim().toLowerCase();
       if (t === "auto rapide") {
-        return { title: "⚡ Traduction auto rapide", note: "Version pour essayer vite fait !" };
+        return { title: "⚡ Traduction auto", note: "Version pour essayer vite fait !" };
       }
       if (t === "auto avec correction") {
-        return { title: "🛠️ Traduction automatique avec correction", note: "Version corrigée en automatique." };
+        return { title: "🤖 Traduction automatique avec correction", note: "Version pré-corrigée en automatique." };
       }
       if (t === "auto avec relecture") {
-        return { title: "✅ Traduction automatique avec relecture", note: "Version relue manuellement." };
+        return { title: "👀 Traduction automatique avec relecture", note: "Version pré-relue manuellement." };
       }
       if (t === "manuel - humaine") {
         return { title: "✍️ Traduction manuelle", note: "Version humaine." };
@@ -1527,7 +1527,7 @@ function renderVideoBlock({ id, videoUrl }) {
       tile.className = `${extraClassName} quickAutoTile`;
 
       const tileMeta = getTranslationTypeMeta(fallbackName) || getTranslationTypeMeta("auto rapide") || {
-        title: "⚡ Traduction auto rapide",
+        title: "⚡ Traduction auto",
         note: "Version pour essayer vite fait !"
       };
 

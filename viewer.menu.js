@@ -53,8 +53,10 @@
     });
   }
 
-function addItem(label, onClick) {
-    ITEMS.push({ label: String(label || ""), onClick });
+function addItem(label, onClick, options) {
+    const item = { label: String(label || ""), onClick };
+    if (options && options.prepend) ITEMS.unshift(item);
+    else ITEMS.push(item);
     renderMenuItems();
   }
 

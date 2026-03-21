@@ -882,7 +882,13 @@
       : [];
 
     const c = cleanTitle(displayTitleRaw);
-    const categories = Array.isArray(c.categories) ? c.categories : game.category ? [game.category] : [];
+    
+    let finalStatus = "";
+    if (game.gameData?.status) finalStatus = String(game.gameData.status).trim();
+    else if (game.status) finalStatus = String(game.status).trim();
+    else if (game.version && ["Completed", "Abandoned", "Onhold"].includes(String(game.version).trim())) finalStatus = String(game.version).trim();
+    else finalStatus = c.status;
+const categories = Array.isArray(c.categories) ? c.categories : game.category ? [game.category] : [];
 
     let engines = Array.isArray(c.engines) ? c.engines : game.engine ? [game.engine] : [];
     if (game.gameData?.engine) {
@@ -922,7 +928,7 @@
       category: categories[0] || null,
       engines,
       engine: engines[0] || null,
-      status: STATUS_ALLOWED.includes(c.status) || c.status === "En cours" ? c.status : "En cours",
+      status: STATUS_ALLOWED.includes(finalStatus) || finalStatus === "En cours" ? finalStatus : "En cours",
       translationType: String(game.translationType || "").trim(),
       discord: String(game.discordlink || ""),
       translation: String(game.translation || ""),

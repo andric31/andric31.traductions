@@ -164,6 +164,11 @@
           window.ViewerMenu.addItem(label, () => { location.href = '/compte/'; });
           const items1 = window.ViewerMenu.__getItems?.();
           if (items1?.[items1.length - 1]) items1[items1.length - 1].__authManaged = true;
+          window.ViewerMenu.addItem('🛡️ Confidentialité', () => {
+            try { window.ViewerMenuConfidentialite?.open?.(); } catch {}
+          });
+          const itemsPrivacy = window.ViewerMenu.__getItems?.();
+          if (itemsPrivacy?.[itemsPrivacy.length - 1]) itemsPrivacy[itemsPrivacy.length - 1].__authManaged = true;
           window.ViewerMenu.addItem(logoutLabel, async () => {
             try { await logout(); } catch (e) { alert(e.message || 'Erreur.'); }
           });

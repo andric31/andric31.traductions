@@ -528,6 +528,15 @@
       else document.querySelector(".top-actions")?.appendChild(btn);
     }
 
+    let activeBox = document.getElementById("activeTagsBar");
+    if (!activeBox) {
+      activeBox = document.createElement("div");
+      activeBox.id = "activeTagsBar";
+      activeBox.className = "active-tags-bar hidden";
+      const actions = document.querySelector(".top-actions");
+      actions?.insertAdjacentElement("afterend", activeBox);
+    }
+
     let pop = document.getElementById("tagsPopover");
     if (!pop) {
       pop = document.createElement("div");
@@ -538,12 +547,15 @@
           <div class="tag-title">Tags</div>
           <button type="button" class="tag-clear" id="tagsClearBtn">Tout enlever</button>
         </div>
+        <div class="tag-search-wrap">
+          <input id="tagsSearch" class="tag-search-input" type="search" placeholder="Rechercher un tag..." autocomplete="off" />
+        </div>
         <div class="tag-list" id="tagsList"></div>
       `;
       document.body.appendChild(pop);
     }
 
-    return { btn, pop };
+    return { btn, pop, activeBox };
   }
 
   function positionTagsPopover(pop, anchorBtn) {
@@ -587,15 +599,64 @@
   let TAGS_UI_BOUND = false;
 
   function initTagsUI(allTags) {
-    const { btn, pop } = ensureTagsDom();
+    const { btn, pop, activeBox } = ensureTagsDom();
     const list = document.getElementById("tagsList");
+    const searchInput = document.getElementById("tagsSearch");
+
+    const tagCounts = new Map();
+    for (const g of state.all || []) {
+      const tags = Array.isArray(g.tags) ? g.tags : [];
+      for (const t of tags) {
+        if (!t) continue;
+        tagCounts.set(t, (tagCounts.get(t) || 0) + 1);
+      }
+    }
+
+    const renderActiveTags = () => {
+      if (!activeBox) return;
+      const activeTags = Array.from(state.filterTags || []);
+      activeBox.innerHTML = "";
+      activeBox.classList.toggle("hidden", activeTags.length <= 0);
+      if (!activeTags.length) return;
+
+      const label = document.createElement("div");
+      label.className = "active-tags-label";
+      label.textContent = "Tags actifs :";
+      activeBox.appendChild(label);
+
+      for (const t of activeTags) {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "active-tag-chip";
+        chip.innerHTML = `<span class="active-tag-chip-name">${escapeHtml(t)}</span><span class="active-tag-chip-x">✕</span>`;
+        chip.addEventListener("click", () => {
+          state.filterTags = (state.filterTags || []).filter((x) => x !== t);
+          setSavedTags(state.filterTags);
+          updateTagsCountBadge();
+          renderActiveTags();
+          renderTagList();
+          applyFilters();
+        });
+        activeBox.appendChild(chip);
+      }
+    };
 
     const renderTagList = () => {
       if (!list) return;
       const active = new Set(state.filterTags || []);
+      const q = String(searchInput?.value || "").trim().toLowerCase();
       list.innerHTML = "";
 
-      for (const t of allTags) {
+      const visibleTags = allTags
+        .filter((t) => !q || t.toLowerCase().includes(q))
+        .sort((a, b) => {
+          const aa = active.has(a) ? 0 : 1;
+          const bb = active.has(b) ? 0 : 1;
+          if (aa !== bb) return aa - bb;
+          return a.localeCompare(b);
+        });
+
+      for (const t of visibleTags) {
         const item = document.createElement("button");
         item.type = "button";
         item.className = "tag-item" + (active.has(t) ? " active" : "");
@@ -604,6 +665,7 @@
             <span class="tag-check">✓</span>
             <span class="tag-name">${escapeHtml(t)}</span>
           </span>
+          <span class="tag-hit-count">${tagCounts.get(t) || 0}</span>
         `;
         item.addEventListener("click", () => {
           const cur = new Set(state.filterTags || []);
@@ -613,11 +675,19 @@
           state.filterTags = Array.from(cur);
           setSavedTags(state.filterTags);
           updateTagsCountBadge();
+          renderActiveTags();
           renderTagList();
           applyFilters();
         });
 
         list.appendChild(item);
+      }
+
+      if (!visibleTags.length) {
+        const empty = document.createElement("div");
+        empty.className = "tag-empty";
+        empty.textContent = "Aucun tag trouvé.";
+        list.appendChild(empty);
       }
     };
 
@@ -638,18 +708,25 @@
         btn.setAttribute("aria-expanded", "true");
         renderTagList();
         positionTagsPopover(pop, btn);
+        try { searchInput?.focus({ preventScroll: true }); } catch {}
       });
 
       document.getElementById("tagsClearBtn")?.addEventListener("click", () => {
         state.filterTags = [];
         clearSavedTags();
         updateTagsCountBadge();
+        renderActiveTags();
         renderTagList();
         applyFilters();
+      });
+
+      searchInput?.addEventListener("input", () => {
+        renderTagList();
       });
     }
 
     updateTagsCountBadge();
+    renderActiveTags();
     renderTagList();
   }
 

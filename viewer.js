@@ -463,6 +463,8 @@
       const tp = document.getElementById("tagsPopover");
       const tb = document.getElementById("tagsBtn");
       if (tp && tb && !tp.classList.contains("hidden")) positionTagsPopover(tp, tb);
+
+      syncTopbarHeight();
     });
 
     document.addEventListener("keydown", (e) => {
@@ -504,6 +506,18 @@
   function setSavedTags(tags) {
     try {
       localStorage.setItem(TAGS_STORE_KEY, JSON.stringify(tags || []));
+    } catch {}
+  }
+
+
+  function syncTopbarHeight() {
+    try {
+      const topbar = document.querySelector(".topbar");
+      if (!topbar) return;
+      const h = Math.ceil(topbar.offsetHeight || 0);
+      if (h > 0) {
+        document.documentElement.style.setProperty("--topbar-h", h + "px");
+      }
     } catch {}
   }
 
@@ -617,7 +631,10 @@
       const activeTags = Array.from(state.filterTags || []);
       activeBox.innerHTML = "";
       activeBox.classList.toggle("hidden", activeTags.length <= 0);
-      if (!activeTags.length) return;
+      if (!activeTags.length) {
+        requestAnimationFrame(syncTopbarHeight);
+        return;
+      }
 
       const label = document.createElement("div");
       label.className = "active-tags-label";
@@ -639,6 +656,8 @@
         });
         activeBox.appendChild(chip);
       }
+
+      requestAnimationFrame(syncTopbarHeight);
     };
 
     const renderTagList = () => {
@@ -1672,6 +1691,7 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
 
     try {
       initHeaderMenuAndDisplayTools();
+      syncTopbarHeight();
 
       state.cols = await getViewerCols();
       const colsSel = $("#cols");

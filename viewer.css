@@ -14,7 +14,7 @@
   --name-lines: 2;
   --badges-h: 28px;
 
-  --topbar-h: 78px;
+  --topbar-h: 78px; /* mis à jour dynamiquement en JS selon la hauteur réelle */
 
   --topbar-bg: rgba(16,20,37,.9);
 
@@ -384,7 +384,7 @@ a.card.card-link:focus-visible{
 
 /* ----- MAIN ----- */
 main{
-  padding: calc(var(--topbar-h) + 36px) 12px 16px;
+  padding: calc(var(--topbar-h) + 4px) 12px 16px;
 }
 
 /* ----- GRID ----- */

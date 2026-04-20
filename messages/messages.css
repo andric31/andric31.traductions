@@ -658,8 +658,13 @@ button { border: 0; }
   .msg-compose-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto auto;
-    align-items: stretch;
+    align-items: start;
     column-gap: 8px;
+  }
+
+  .msg-compose-row > .msg-compose-actions,
+  .msg-compose-row > .msg-send-btn {
+    margin-top: 18px;
   }
 
   .msg-room-list,

@@ -1245,20 +1245,20 @@ button { border: 0; }
 /* v25: actions farther right, tighter cards, composer buttons truly inside textarea */
 @media (min-width: 1081px) {
   .msg-list { gap: 8px; }
-  .msg-bubble { padding-bottom: 24px; }
+  .msg-bubble { padding-bottom: 16px; }
   .msg-text:last-child { margin-bottom: 0; }
   .msg-actions {
     left: auto;
-    right: 12px;
-    bottom: 6px;
+    right: 8px;
+    bottom: 2px;
     width: auto;
-    max-width: calc(100% - 24px);
+    max-width: calc(100% - 16px);
     justify-content: flex-end;
-    gap: 8px;
+    gap: 6px;
   }
   .msg-tools-left,
   .msg-tools-right { transform: none; margin: 0; padding: 0; }
-  .msg-react-toolbar { justify-content: flex-end; max-width: none; }
+  .msg-react-toolbar { justify-content: flex-end; max-width: none; gap: 4px; }
 
   .msg-compose-row {
     position: relative;
@@ -1269,17 +1269,19 @@ button { border: 0; }
     min-height: 52px;
     height: 52px;
     max-height: 52px;
-    padding-right: 150px;
+    padding-right: 148px;
   }
   .msg-compose-row > .msg-compose-actions,
   .msg-compose-row > .msg-send-btn {
     position: absolute;
-    bottom: 8px;
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
     margin: 0 !important;
     align-self: auto;
     z-index: 4;
   }
-  .msg-compose-row > .msg-compose-actions { right: 86px; }
+  .msg-compose-row > .msg-compose-actions { right: 84px; }
   .msg-compose-row > .msg-send-btn { right: 8px; }
   .msg-emoji-trigger {
     width: 34px;
@@ -1302,15 +1304,15 @@ button { border: 0; }
 }
 
 @media (max-width: 1080px) {
-  .msg-bubble { padding-bottom: 24px; }
+  .msg-bubble { padding-bottom: 16px; }
   .msg-actions {
     left: auto;
-    right: 10px;
-    bottom: 6px;
+    right: 8px;
+    bottom: 2px;
     width: auto;
-    max-width: calc(100% - 20px);
+    max-width: calc(100% - 16px);
     justify-content: flex-end;
-    gap: 7px;
+    gap: 6px;
   }
-  .msg-react-toolbar { justify-content: flex-end; max-width: none; }
+  .msg-react-toolbar { justify-content: flex-end; max-width: none; gap: 4px; }
 }

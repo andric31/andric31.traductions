@@ -423,6 +423,10 @@ button { border: 0; }
   flex: 1 1 0;
 }
 
+.msg-field-nick {
+  min-width: 260px;
+}
+
 .msg-field span {
   font-size: 11px;
   font-weight: 700;
@@ -508,10 +512,12 @@ button { border: 0; }
 }
 
 .msg-send-btn {
-  padding: 0 12px;
-  min-height: 30px;
+  padding: 0 16px;
+  min-height: 38px;
   font-weight: 800;
   flex: 0 0 auto;
+  align-self: center;
+  white-space: nowrap;
 }
 
 .msg-form-info {
@@ -519,6 +525,22 @@ button { border: 0; }
 }
 .msg-form-info.error { color: var(--msg-danger); }
 .msg-form-info.success { color: var(--msg-success); }
+
+.msg-field-nick span {
+  display: none;
+}
+
+.msg-field-nick input {
+  min-height: 40px;
+}
+
+.msg-side-notes strong {
+  color: var(--fg, #e8eaf0);
+}
+
+.msg-side-notes ul {
+  line-height: 1.6;
+}
 
 @media (max-width: 1080px) {
   body {
@@ -619,8 +641,9 @@ button { border: 0; }
 
   .msg-compose-head {
     display: grid;
-    grid-template-columns: minmax(210px, 260px) 1fr;
-    align-items: end;
+    grid-template-columns: minmax(290px, 360px) 1fr;
+    align-items: center;
+    column-gap: 8px;
   }
 
   .msg-compose-head .msg-form-info {
@@ -633,8 +656,9 @@ button { border: 0; }
 
   .msg-compose-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto auto;
     align-items: end;
+    column-gap: 8px;
   }
 
   .msg-room-list,
@@ -838,6 +862,7 @@ button { border: 0; }
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
+  align-self: center;
 }
 
 .msg-emoji-trigger {

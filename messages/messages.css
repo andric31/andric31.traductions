@@ -1241,3 +1241,76 @@ button { border: 0; }
     border-bottom-left-radius: 0;
   }
 }
+
+/* v25: actions farther right, tighter cards, composer buttons truly inside textarea */
+@media (min-width: 1081px) {
+  .msg-list { gap: 8px; }
+  .msg-bubble { padding-bottom: 24px; }
+  .msg-text:last-child { margin-bottom: 0; }
+  .msg-actions {
+    left: auto;
+    right: 12px;
+    bottom: 6px;
+    width: auto;
+    max-width: calc(100% - 24px);
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  .msg-tools-left,
+  .msg-tools-right { transform: none; margin: 0; padding: 0; }
+  .msg-react-toolbar { justify-content: flex-end; max-width: none; }
+
+  .msg-compose-row {
+    position: relative;
+    align-items: stretch;
+    gap: 0;
+  }
+  .msg-compose-row > .msg-field-grow textarea {
+    min-height: 52px;
+    height: 52px;
+    max-height: 52px;
+    padding-right: 150px;
+  }
+  .msg-compose-row > .msg-compose-actions,
+  .msg-compose-row > .msg-send-btn {
+    position: absolute;
+    bottom: 8px;
+    margin: 0 !important;
+    align-self: auto;
+    z-index: 4;
+  }
+  .msg-compose-row > .msg-compose-actions { right: 86px; }
+  .msg-compose-row > .msg-send-btn { right: 8px; }
+  .msg-emoji-trigger {
+    width: 34px;
+    min-height: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+  }
+  .msg-send-btn {
+    min-width: 74px;
+    min-height: 34px;
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 1080px) {
+  .msg-bubble { padding-bottom: 24px; }
+  .msg-actions {
+    left: auto;
+    right: 10px;
+    bottom: 6px;
+    width: auto;
+    max-width: calc(100% - 20px);
+    justify-content: flex-end;
+    gap: 7px;
+  }
+  .msg-react-toolbar { justify-content: flex-end; max-width: none; }
+}

@@ -1513,3 +1513,108 @@ button { border: 0; }
 .msg-compose-row .msg-field-grow span {
   margin-bottom: 7px !important;
 }
+
+
+/* v32 final cleanup: stable actions, message label higher, clean compose buttons */
+@media (min-width: 1081px) {
+  .msg-compose-row {
+    position: relative !important;
+    align-items: stretch !important;
+  }
+  .msg-compose-row > .msg-field-grow {
+    position: relative !important;
+    min-width: 0;
+  }
+  .msg-compose-row > .msg-field-grow > span,
+  .msg-compose-row > .msg-field-grow label > span,
+  .msg-compose-row .msg-field-grow span {
+    display: block !important;
+    margin-bottom: 12px !important;
+    transform: translateY(-4px);
+  }
+  .msg-compose-row > .msg-field-grow textarea {
+    min-height: 46px !important;
+    height: 46px !important;
+    padding-right: 138px !important;
+  }
+  .msg-compose-row > .msg-compose-actions,
+  .msg-compose-row > .msg-send-btn {
+    position: absolute !important;
+    top: auto !important;
+    margin: 0 !important;
+    align-self: auto !important;
+    z-index: 3;
+  }
+  .msg-compose-row > .msg-compose-actions {
+    right: 88px !important;
+    bottom: 7px !important;
+  }
+  .msg-compose-row > .msg-send-btn {
+    right: 8px !important;
+    bottom: 7px !important;
+    min-width: 74px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 14px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .msg-emoji-trigger {
+    width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    border-radius: 10px !important;
+    display: grid !important;
+    place-items: center !important;
+  }
+
+  .msg-item {
+    gap: 8px !important;
+  }
+  .msg-bubble {
+    position: relative !important;
+    padding: 8px 10px 34px !important;
+  }
+  .msg-text {
+    margin-bottom: 0 !important;
+  }
+  .msg-actions {
+    position: absolute !important;
+    right: 10px !important;
+    bottom: 6px !important;
+    left: auto !important;
+    width: max-content !important;
+    max-width: calc(100% - 20px) !important;
+    margin: 0 !important;
+    gap: 6px !important;
+    max-height: none !important;
+    overflow: visible !important;
+    transform: none !important;
+  }
+  .msg-bubble:hover .msg-actions,
+  .msg-item.is-open .msg-actions {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+  .msg-actions:not(:has(*)) {
+    display:none !important;
+  }
+  .msg-tools-left,
+  .msg-tools-right {
+    transform: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+  .msg-tools-left {
+    margin-right: 6px !important;
+  }
+  .msg-react-toolbar {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    flex-wrap: nowrap !important;
+  }
+}

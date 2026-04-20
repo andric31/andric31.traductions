@@ -1488,3 +1488,21 @@ button { border: 0; }
     place-items: center;
   }
 }
+
+/* v30: move Message label a bit higher + emoji a bit more left */
+@media (min-width: 1081px) {
+  .msg-compose-row > .msg-field-grow {
+    gap: 6px;
+  }
+  .msg-compose-row > .msg-field-grow > span,
+  .msg-compose-row > .msg-field-grow label > span,
+  .msg-compose-row .msg-field-grow span {
+    margin-bottom: 2px;
+  }
+  .msg-compose-row > .msg-compose-actions {
+    right: 104px;
+  }
+  .msg-compose-row > .msg-field-grow textarea {
+    padding-right: 144px;
+  }
+}

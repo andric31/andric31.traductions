@@ -14,7 +14,6 @@
     <aside class="msg-sidebar">
       <div class="msg-brand">
         <div>
-          <div class="msg-brand-kicker">Mini chat</div>
           <h1>Messages</h1>
         </div>
         <span id="roomStatus" class="msg-status">Connexion…</span>
@@ -42,23 +41,15 @@
 
       <section class="msg-card msg-section">
         <div class="msg-section-label">Salons</div>
-        <div class="msg-channel-list">
-          <button class="msg-channel is-active" type="button">
-            <span class="msg-channel-main">
-              <strong>Discussion générale</strong>
-              <small>Salon public</small>
-            </span>
-            <span id="msgCount" class="msg-channel-badge">0</span>
-          </button>
-        </div>
+        <div id="sidebarRoomList" class="msg-channel-list"></div>
       </section>
 
       <section class="msg-card msg-section msg-side-notes">
         <div class="msg-section-label">Repères rapides</div>
         <ul>
           <li>Reste poli et évite le flood.</li>
-          <li>Les messages trop longs sont refusés.</li>
-          <li>Le pseudo invité est mémorisé localement.</li>
+          <li>Tu peux répondre à un message avec ↩.</li>
+          <li>Le bouton 😀 ouvre un mini sélecteur d’emojis.</li>
           <li>Le bouton “Bas de page” recentre vite la discussion.</li>
         </ul>
       </section>
@@ -84,21 +75,25 @@
         <div id="messagesList" class="msg-list" aria-live="polite"></div>
 
         <form id="chatForm" class="msg-compose">
+          <div id="replyPreview" class="msg-reply-preview hidden">
+            <div class="msg-reply-preview-copy">
+              <strong id="replyAuthor">Réponse</strong>
+              <small id="replyExcerpt">Extrait du message sélectionné</small>
+            </div>
+            <button id="cancelReplyBtn" class="msg-inline-btn" type="button">Annuler</button>
+          </div>
+
           <div class="msg-compose-head">
             <label class="msg-field msg-field-small">
               <span>Pseudo</span>
               <input id="nickname" type="text" maxlength="40" placeholder="Ton pseudo" autocomplete="nickname" />
             </label>
+            <div id="authChatInfo" class="msg-form-info msg-form-info-inline">Non connecté : pseudo mémorisé dans ce navigateur et accès limité au salon public.</div>
+          </div>
 
-            <label class="msg-field msg-field-small">
-              <span>Salon</span>
-              <div class="msg-select-wrap">
-                <select id="roomSelect">
-                  <option value="global">Public — Global</option>
-                </select>
-              </div>
-            </label>
-            <div id="authChatInfo" class="msg-form-info">Non connecté : pseudo mémorisé dans ce navigateur et accès limité au salon public.</div>
+          <div class="msg-compose-row msg-compose-row-tools">
+            <button id="emojiToggleBtn" class="msg-inline-btn" type="button" aria-expanded="false">😀 Emoji</button>
+            <div id="emojiPicker" class="msg-emoji-picker hidden" aria-hidden="true"></div>
           </div>
 
           <div class="msg-compose-row">

@@ -1814,3 +1814,50 @@ button { border: 0; }
     line-height: 1.4 !important;
   }
 }
+
+/* v23: theme-aware reply + emoji controls */
+.msg-inline-btn,
+.msg-react-btn,
+.msg-emoji-trigger,
+.msg-emoji-item,
+.msg-reaction-chip {
+  color: var(--fg, #e8eaf0) !important;
+  border-color: var(--msg-border) !important;
+}
+
+.msg-inline-btn,
+.msg-react-btn {
+  background: color-mix(in srgb, var(--msg-card-strong, #171b29) 82%, var(--msg-soft, rgba(255,255,255,0.06)) 18%) !important;
+}
+
+.msg-inline-btn:hover,
+.msg-react-btn:hover,
+.msg-react-btn.is-active,
+.msg-reaction-chip:hover,
+.msg-reaction-chip.is-active {
+  border-color: var(--msg-border-strong) !important;
+  background: color-mix(in srgb, var(--accent, #6ce0b0) 14%, var(--msg-card-strong, #171b29) 86%) !important;
+  color: var(--fg, #e8eaf0) !important;
+}
+
+.msg-emoji-trigger {
+  background: color-mix(in srgb, var(--msg-card-strong, #171b29) 74%, transparent) !important;
+  color: var(--muted, #aab2c8) !important;
+}
+
+.msg-emoji-trigger:hover,
+.msg-emoji-trigger[aria-expanded="true"] {
+  background: color-mix(in srgb, var(--accent, #6ce0b0) 14%, var(--msg-card-strong, #171b29) 86%) !important;
+  color: var(--fg, #e8eaf0) !important;
+  border-color: var(--msg-border-strong) !important;
+}
+
+.msg-emoji-picker {
+  background: color-mix(in srgb, var(--msg-card-strong, #171b29) 96%, var(--bg2, #141826) 4%) !important;
+  border-color: var(--msg-border) !important;
+}
+
+.msg-emoji-item,
+.msg-reaction-chip {
+  background: color-mix(in srgb, var(--msg-soft, rgba(255,255,255,0.06)) 88%, var(--msg-card-strong, #171b29) 12%) !important;
+}

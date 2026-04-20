@@ -1792,3 +1792,25 @@ button { border: 0; }
     overflow: visible !important;
   }
 }
+
+
+/* v39: bannière public masquée en privé + rendu plus propre */
+.msg-banner-list {
+  align-content: start;
+}
+
+.msg-banner.hidden + .msg-banner {
+  margin-top: 0 !important;
+}
+
+@media (min-width: 1081px) {
+  .msg-banner-list {
+    gap: 6px !important;
+  }
+
+  .msg-banner {
+    padding: 8px 12px !important;
+    border-radius: 14px !important;
+    line-height: 1.4 !important;
+  }
+}

@@ -22,6 +22,8 @@
     roomKicker: document.getElementById('roomKicker'),
     roomTitle: document.getElementById('roomTitle'),
     roomSubtitle: document.getElementById('roomSubtitle'),
+    publicPrivacyBanner: document.getElementById('publicPrivacyBanner'),
+    globalNoticeBanner: document.getElementById('globalNoticeBanner'),
     authInfo: document.getElementById('authChatInfo'),
     sidebarRoomList: document.getElementById('sidebarRoomList'),
     emojiToggle: document.getElementById('emojiToggleBtn'),
@@ -164,6 +166,14 @@
       'private:translators': 'Salon privé traducteurs',
       'private:admins': 'Salon privé admins',
     }[String(roomValue || 'global')] || 'Salon');
+  }
+
+  function syncRoomBanners(roomValue) {
+    const isPublic = String(roomValue || 'global') === 'global';
+    if (els.publicPrivacyBanner) els.publicPrivacyBanner.classList.toggle('hidden', !isPublic);
+    if (els.globalNoticeBanner) els.globalNoticeBanner.textContent = isPublic
+      ? 'Merci de ne pas flooder ni interférer dans les aides en cours.'
+      : 'Salon privé : garde les échanges utiles et évite de partager des informations sensibles inutiles.';
   }
 
   function roomTitle(roomValue) {
@@ -405,6 +415,7 @@
       if (els.roomSubtitle) els.roomSubtitle.textContent = room === 'global'
         ? 'Salon visible par tous, pratique pour discuter rapidement ou demander de l’aide.'
         : 'Salon réservé selon ton niveau d’accès.';
+      syncRoomBanners(room);
     } catch (err) {
       setStatus('Hors ligne', 'error');
       if (!silent) setInfo(err.message || 'Impossible de charger les messages.', 'error');

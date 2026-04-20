@@ -34,8 +34,8 @@ button { border: 0; }
   height: calc(100dvh - 24px);
   margin: 12px auto;
   display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
-  gap: 10px;
+  grid-template-columns: 282px minmax(0, 1fr);
+  gap: 6px;
   overflow: hidden;
 }
 
@@ -83,7 +83,7 @@ button { border: 0; }
 }
 
 .msg-status {
-  padding: 8px 12px;
+  padding: 7px 10px;
   border-radius: 999px;
   border: 1px solid var(--msg-border);
   background: var(--msg-soft);
@@ -101,7 +101,7 @@ button { border: 0; }
 }
 
 .msg-section {
-  padding: 10px 12px;
+  padding: 8px 10px;
 }
 
 .msg-room-list,
@@ -159,7 +159,7 @@ button { border: 0; }
 
 .msg-room-copy strong,
 .msg-channel-main strong {
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .msg-room-copy small,
@@ -210,7 +210,7 @@ button { border: 0; }
   align-items: flex-start;
   justify-content: space-between;
   gap: 18px;
-  padding: 16px 18px;
+  padding: 14px 16px;
 }
 
 .msg-topbar p {
@@ -237,10 +237,10 @@ button { border: 0; }
 .msg-thread {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  gap: 10px;
+  gap: 8px;
   min-height: 0;
   height: 100%;
-  padding: 12px;
+  padding: 10px;
   overflow: hidden;
 }
 
@@ -322,12 +322,12 @@ button { border: 0; }
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .msg-author {
   font-weight: 800;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .msg-date {
@@ -358,23 +358,23 @@ button { border: 0; }
   border: 1px solid var(--msg-border);
   border-radius: 18px;
   background: color-mix(in srgb, var(--msg-card-strong) 90%, var(--bg, #0d1018) 10%);
-  padding: 10px 12px;
-  box-shadow: 0 -10px 26px rgba(0,0,0,0.14);
+  padding: 8px 10px;
+  box-shadow: 0 -8px 20px rgba(0,0,0,0.12);
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .msg-compose-head,
 .msg-compose-row,
 .msg-compose-footer {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: end;
 }
 
 .msg-field {
   display: grid;
-  gap: 5px;
+  gap: 4px;
   min-width: 0;
 }
 
@@ -400,15 +400,15 @@ button { border: 0; }
   border-radius: 14px;
   background: var(--msg-input-bg);
   color: var(--fg, #e8eaf0);
-  padding: 10px 12px;
+  padding: 8px 10px;
   outline: none;
   transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
 }
 
 .msg-field textarea {
   resize: none;
-  min-height: 64px;
-  max-height: 120px;
+  min-height: 46px;
+  max-height: 88px;
 }
 
 .msg-field input::placeholder,
@@ -446,14 +446,14 @@ button { border: 0; }
 }
 
 .msg-send-btn {
-  padding: 0 18px;
-  min-height: 64px;
+  padding: 0 16px;
+  min-height: 46px;
   font-weight: 800;
   flex: 0 0 auto;
 }
 
 .msg-form-info {
-  font-size: 13px;
+  font-size: 12px;
 }
 .msg-form-info.error { color: var(--msg-danger); }
 .msg-form-info.success { color: var(--msg-success); }
@@ -518,10 +518,50 @@ button { border: 0; }
 
 /* optimisation espace bureau */
 @media (min-width: 1081px) {
+  .msg-app {
+    width: min(var(--msg-max), calc(100% - 16px));
+    height: calc(100dvh - 16px);
+    margin: 8px auto;
+    align-items: stretch;
+  }
+
+  .msg-sidebar,
+  .msg-main-shell {
+    min-width: 0;
+  }
+
+  .msg-main-shell {
+    gap: 6px;
+  }
+
+  .msg-topbar h2 {
+    font-size: 20px;
+  }
+
+  .msg-topbar p {
+    margin-top: 6px;
+    line-height: 1.45;
+  }
+
+  .msg-banner {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .msg-item {
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 8px;
+  }
+
   .msg-compose-head {
     display: grid;
-    grid-template-columns: minmax(180px, 260px) minmax(200px, 280px);
-    justify-content: start;
+    grid-template-columns: minmax(150px, 220px) minmax(160px, 220px) 1fr;
+    align-items: end;
+  }
+
+  .msg-compose-head .msg-form-info {
+    align-self: center;
+    margin-left: 4px;
   }
 
   .msg-compose-row {
@@ -530,7 +570,15 @@ button { border: 0; }
     align-items: end;
   }
 
-  .msg-send-btn {
-    align-self: stretch;
+  .msg-compose-footer {
+    justify-content: space-between;
+    min-height: 16px;
+  }
+
+  .msg-field span,
+  .msg-date,
+  .msg-form-info,
+  #formInfo {
+    font-size: 11px;
   }
 }

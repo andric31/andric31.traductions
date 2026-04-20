@@ -950,10 +950,10 @@ button { border: 0; }
   padding: 6px 8px;
   border: 1px solid color-mix(in srgb, var(--msg-border) 85%, transparent);
   border-radius: 12px;
-  background: color-mix(in srgb, var(--msg-card-strong) 90%, rgba(10,12,20,0.88));
-  box-shadow: 0 8px 20px rgba(0,0,0,.28);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: color-mix(in srgb, var(--msg-card-strong) 68%, rgba(10,12,20,0.52));
+  box-shadow: 0 8px 20px rgba(0,0,0,.18);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
   justify-content: space-between;
   align-items: center;
   opacity: 0;

@@ -5,8 +5,8 @@
   const ROOM_KEY = 'andric31_messages_room';
   const REPLY_PREFIX = '[[reply:';
   const REACT_KEY = 'andric31_messages_reactions';
-  const EMOJIS = ['😀','😁','😂','🤣','😊','😍','🥰','😘','😎','🤔','😅','😢','😭','😡','👍','👎','👏','🙏','🔥','✅','❌','🎉','💬','❤️'];
-  const QUICK_REACTIONS = ['👍','❤️','😂','🔥','👏','🎉','😮','🤔','😢','😡'];
+  const EMOJIS = ['😀','😁','😂','🤣','😊','🙂','😉','😍','🥰','😘','😎','🤔','😅','😮','😯','😢','😭','😡','🙌','👍','👎','👏','🙏','🔥','✅','❌','🎉','✨','💯','💬','❤️','🫶','😴','🤯','😆','🥳','😇','🤩','😬'];
+  const QUICK_REACTIONS = ['👍','❤️','😂','🔥','👏','🎉','😮','🤔','😢','😡','🙏','✅','👎','🤣'];
 
   const els = {
     list: document.getElementById('messagesList'),
@@ -326,16 +326,15 @@
               ${parsed.reply ? `<div class="msg-quote"><span class="msg-quote-author">${escapeHtml(parsed.reply.author)}</span><span class="msg-quote-text">${escapeHtml(parsed.reply.excerpt)}</span></div>` : ''}
               <div class="msg-text">${escapeHtml(parsed.body)}</div>
               ${reactionHtml ? `<div class="msg-reactions">${reactionHtml}</div>` : ''}
-              <div class="msg-actions">
-                <div class="msg-tools-left">
-                  <button class="msg-inline-btn msg-reply-btn" type="button" data-reply-id="${escapeHtml(String(item.id))}">↩ Répondre</button>
-                </div>
-                <div class="msg-tools-right">
-                  <div class="msg-react-toolbar">
-                    ${QUICK_REACTIONS.map((emoji) => `<button class="msg-react-btn${hasUserReaction(item.id, emoji) ? ' is-active' : ''}" type="button" data-react-id="${escapeHtml(String(item.id))}" data-emoji="${emoji}" aria-label="Réagir avec ${emoji}">${emoji}</button>`).join('')}
-                  </div>
-                </div>
+            </div>
+            <div class="msg-side-actions">
+              <button class="msg-inline-btn msg-reply-btn" type="button" data-reply-id="${escapeHtml(String(item.id))}">↩ Répondre</button>
+              <div class="msg-react-toolbar">
+                ${QUICK_REACTIONS.map((emoji) => `<button class="msg-react-btn${hasUserReaction(item.id, emoji) ? ' is-active' : ''}" type="button" data-react-id="${escapeHtml(String(item.id))}" data-emoji="${emoji}" aria-label="Réagir avec ${emoji}">${emoji}</button>`).join('')}
               </div>
+              <div class="msg-admin-slot"></div>
+            </div>
+            <div class="msg-actions">
             </div>
           </div>
         </div>
@@ -368,7 +367,7 @@
       });
 
       if (isAdmin) {
-        const actions = article.querySelector('.msg-tools-left');
+        const actions = article.querySelector('.msg-admin-slot');
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'msg-delete-btn';

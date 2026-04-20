@@ -303,7 +303,7 @@ button { border: 0; }
   padding-right: 4px;
   display: grid;
   align-content: start;
-  gap: 10px;
+  gap: 14px;
   overscroll-behavior: contain;
   scroll-behavior: smooth;
 }
@@ -336,7 +336,7 @@ button { border: 0; }
   border: 1px solid var(--msg-border);
   border-radius: 18px;
   background: linear-gradient(180deg, color-mix(in srgb, var(--msg-card-strong) 96%, transparent), color-mix(in srgb, var(--msg-card) 94%, transparent));
-  padding: 8px 10px;
+  padding: 9px 10px;
 }
 
 .msg-meta {
@@ -1071,4 +1071,19 @@ button { border: 0; }
   .msg-compose-row { align-items: center; }
   .msg-compose-actions { margin-right: 8px; }
   .msg-send-btn { margin-left: 0 !important; }
+}
+
+
+.msg-compose-row {
+  align-items: flex-end;
+}
+
+.msg-compose-actions {
+  align-self: flex-end;
+  transform: translateY(5px);
+}
+
+.msg-send-btn {
+  align-self: flex-end;
+  transform: translateY(5px);
 }

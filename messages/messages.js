@@ -173,7 +173,7 @@
     if (els.publicPrivacyBanner) els.publicPrivacyBanner.classList.toggle('hidden', !isPublic);
     if (els.globalNoticeBanner) els.globalNoticeBanner.textContent = isPublic
       ? 'Merci de ne pas flooder ni interférer dans les aides en cours.'
-      : 'Salon privé : garde les échanges utiles et évite de partager des informations sensibles inutiles.';
+      : 'Merci de ne pas flooder ni interférer dans les aides en cours.';
   }
 
   function roomTitle(roomValue) {

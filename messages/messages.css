@@ -1506,3 +1506,10 @@ button { border: 0; }
     padding-right: 144px;
   }
 }
+
+/* v31: remonte le label Message */
+.msg-compose-row > .msg-field-grow > span,
+.msg-compose-row > .msg-field-grow label > span,
+.msg-compose-row .msg-field-grow span {
+  margin-bottom: 7px !important;
+}

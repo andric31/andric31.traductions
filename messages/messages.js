@@ -106,7 +106,7 @@
     els.nickname.removeAttribute('aria-readonly');
     els.nickname.title = '';
     if (!els.nickname.value) els.nickname.value = localStorage.getItem(NICK_KEY) || '';
-    if (els.authInfo) els.authInfo.textContent = 'Non connecté : pseudo mémorisé ici, accès au salon public.';
+    if (els.authInfo) els.authInfo.textContent = 'Non connecté : pseudo mémorisé dans ce navigateur, accès au salon public.';
     return false;
   }
 

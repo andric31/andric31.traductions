@@ -1654,37 +1654,37 @@ button { border: 0; }
   }
 }
 
-/* v36: tighten composer bottom spacing and move emoji a bit left */
+
+/* v37: no label, emoji more left, tighter footer */
 @media (min-width: 1081px) {
   .msg-compose {
     gap: 4px !important;
-    padding-top: 5px !important;
+    padding-top: 6px !important;
     padding-bottom: 4px !important;
   }
   .msg-compose-row {
     min-height: 58px !important;
   }
   .msg-compose-row > .msg-field-grow textarea {
-    min-height: 40px !important;
-    height: 40px !important;
-    max-height: 40px !important;
-    padding-top: 7px !important;
-    padding-bottom: 7px !important;
+    min-height: 42px !important;
+    height: 42px !important;
+    max-height: 42px !important;
     padding-right: 146px !important;
+    padding-bottom: 9px !important;
   }
   .msg-compose-row > .msg-compose-actions,
   .msg-compose-row > .msg-send-btn {
-    top: 24px !important;
+    top: 26px !important;
   }
   .msg-compose-row > .msg-compose-actions {
-    right: 94px !important;
+    right: 102px !important;
   }
   .msg-compose-row > .msg-send-btn {
     right: 8px !important;
   }
   .msg-compose-footer {
-    min-height: 12px !important;
-    margin-top: -2px !important;
+    margin-top: -4px !important;
+    min-height: 10px !important;
   }
   #formInfo {
     line-height: 1 !important;

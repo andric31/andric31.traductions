@@ -1871,3 +1871,71 @@ button { border: 0; }
   border: 0 !important;
   padding: 0 !important;
 }
+
+/* v40 mobile fix: reduce empty space in nickname + text composer on phone */
+@media (max-width: 720px) {
+  .msg-compose {
+    padding: 6px !important;
+    gap: 6px !important;
+  }
+
+  .msg-compose-head,
+  .msg-compose-row,
+  .msg-compose-footer {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 6px !important;
+  }
+
+  .msg-field-small,
+  .msg-field-grow,
+  .msg-field-nick,
+  .msg-form-info-inline,
+  .msg-form-info,
+  .msg-compose-actions,
+  .msg-send-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    flex: 0 0 auto !important;
+  }
+
+  .msg-field-nick {
+    min-width: 0 !important;
+  }
+
+  .msg-field,
+  .msg-field label,
+  .msg-field input,
+  .msg-field textarea {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .msg-field textarea,
+  .msg-compose-row > .msg-field-grow textarea {
+    min-height: 88px !important;
+    max-height: 140px !important;
+  }
+
+  .msg-compose-actions {
+    display: flex !important;
+    justify-content: flex-start !important;
+    margin: 0 !important;
+    right: auto !important;
+  }
+
+  .msg-send-btn {
+    min-height: 46px !important;
+    height: 46px !important;
+    margin: 0 !important;
+    right: auto !important;
+  }
+
+  .msg-form-info-inline,
+  .msg-form-info {
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+  }
+}

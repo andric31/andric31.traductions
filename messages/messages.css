@@ -1052,3 +1052,23 @@ button { border: 0; }
   .msg-actions { bottom: -8px; }
   .msg-tools-right, .msg-tools-left { width: max-content; max-width: 100%; }
 }
+
+
+/* v20: actions lower + composer alignment */
+@media (min-width: 1081px) {
+  .msg-actions { bottom: -22px; }
+}
+.msg-tools-left { transform: translateY(2px); }
+.msg-tools-right { transform: translateY(2px); }
+.msg-compose-row { align-items: center; }
+.msg-compose-row > .msg-compose-actions,
+.msg-compose-row > .msg-send-btn { margin-top: 0; align-self: center; }
+.msg-compose-row > .msg-field-grow { margin-right: 8px; }
+.msg-compose-actions { margin-right: 8px; }
+.msg-send-btn { margin-left: 0 !important; align-self: center; }
+.msg-send-btn, .msg-emoji-trigger { position: relative; top: 0; }
+@media (max-width: 1080px) {
+  .msg-compose-row { align-items: center; }
+  .msg-compose-actions { margin-right: 8px; }
+  .msg-send-btn { margin-left: 0 !important; }
+}

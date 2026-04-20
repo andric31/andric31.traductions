@@ -361,8 +361,8 @@ button { border: 0; }
 .msg-text {
   white-space: pre-wrap;
   word-break: break-word;
-  line-height: 1.5;
-  font-size: 14px;
+  line-height: 1.52;
+  font-size: 15px;
 }
 
 .msg-actions {
@@ -437,15 +437,15 @@ button { border: 0; }
   border-radius: 14px;
   background: var(--msg-input-bg);
   color: var(--fg, #e8eaf0);
-  padding: 7px 8px;
+  padding: 7px 10px;
   outline: none;
   transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
 }
 
 .msg-field textarea {
   resize: none;
-  min-height: 28px;
-  max-height: 52px;
+  min-height: 42px;
+  max-height: 66px;
 }
 
 .msg-field input::placeholder,
@@ -619,13 +619,16 @@ button { border: 0; }
 
   .msg-compose-head {
     display: grid;
-    grid-template-columns: minmax(130px, 180px) minmax(140px, 180px) 1fr;
+    grid-template-columns: minmax(210px, 260px) 1fr;
     align-items: end;
   }
 
   .msg-compose-head .msg-form-info {
     align-self: center;
     margin-left: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .msg-compose-row {
@@ -829,14 +832,47 @@ button { border: 0; }
   white-space: nowrap;
 }
 
-.msg-compose-row-tools {
+.msg-compose-actions {
+  position: relative;
+  display: flex;
   align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.msg-emoji-trigger {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid var(--msg-border);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--muted, #aab2c8);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+.msg-emoji-trigger:hover,
+.msg-emoji-trigger[aria-expanded="true"] {
+  border-color: var(--msg-border-strong);
+  color: var(--fg, #e8eaf0);
+  background: var(--msg-soft);
 }
 
 .msg-emoji-picker {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  z-index: 20;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  width: 248px;
+  padding: 8px;
+  border: 1px solid var(--msg-border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--msg-card-strong) 98%, transparent);
+  box-shadow: 0 14px 30px rgba(0,0,0,.24);
 }
 
 .msg-emoji-item {
@@ -852,4 +888,16 @@ button { border: 0; }
 .msg-emoji-item:hover {
   border-color: var(--msg-border-strong);
   background: var(--msg-soft-2);
+}
+
+@media (max-width: 720px) {
+  .msg-compose-head {
+    grid-template-columns: 1fr;
+  }
+  .msg-compose-head .msg-form-info {
+    white-space: normal;
+  }
+  .msg-compose-row {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
 }

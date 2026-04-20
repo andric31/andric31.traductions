@@ -6,7 +6,7 @@
   const REPLY_PREFIX = '[[reply:';
   const REACT_KEY = 'andric31_messages_reactions';
   const EMOJIS = ['😀','😁','😂','🤣','😊','😍','🥰','😘','😎','🤔','😅','😢','😭','😡','👍','👎','👏','🙏','🔥','✅','❌','🎉','💬','❤️'];
-  const QUICK_REACTIONS = ['👍','❤️','😂','😮','😢','😡'];
+  const QUICK_REACTIONS = ['👍','❤️','😂','🔥','👏','🎉','😮','🤔','😢','😡'];
 
   const els = {
     list: document.getElementById('messagesList'),
@@ -99,14 +99,14 @@
       els.nickname.readOnly = true;
       els.nickname.setAttribute('aria-readonly', 'true');
       els.nickname.title = 'Pseudo lié au compte connecté';
-      if (els.authInfo) els.authInfo.textContent = 'Connecté : ton pseudo est repris automatiquement depuis ton compte.';
+      if (els.authInfo) els.authInfo.textContent = 'Connecté : pseudo repris automatiquement depuis ton compte.';
       return true;
     }
     els.nickname.readOnly = false;
     els.nickname.removeAttribute('aria-readonly');
     els.nickname.title = '';
     if (!els.nickname.value) els.nickname.value = localStorage.getItem(NICK_KEY) || '';
-    if (els.authInfo) els.authInfo.textContent = 'Non connecté : pseudo mémorisé dans ce navigateur et accès limité au salon public.';
+    if (els.authInfo) els.authInfo.textContent = 'Non connecté : pseudo mémorisé ici, accès au salon public.';
     return false;
   }
 

@@ -88,12 +88,7 @@
               <span>Pseudo</span>
               <input id="nickname" type="text" maxlength="40" placeholder="Ton pseudo" autocomplete="nickname" />
             </label>
-            <div id="authChatInfo" class="msg-form-info msg-form-info-inline">Non connecté : pseudo mémorisé dans ce navigateur et accès limité au salon public.</div>
-          </div>
-
-          <div class="msg-compose-row msg-compose-row-tools">
-            <button id="emojiToggleBtn" class="msg-inline-btn" type="button" aria-expanded="false">😀 Emoji</button>
-            <div id="emojiPicker" class="msg-emoji-picker hidden" aria-hidden="true"></div>
+            <div id="authChatInfo" class="msg-form-info msg-form-info-inline">Non connecté : pseudo mémorisé ici, accès au salon public.</div>
           </div>
 
           <div class="msg-compose-row">
@@ -101,6 +96,10 @@
               <span>Message</span>
               <textarea id="messageInput" maxlength="500" rows="2" placeholder="Écris ton message ici…"></textarea>
             </label>
+            <div class="msg-compose-actions">
+              <button id="emojiToggleBtn" class="msg-emoji-trigger" type="button" aria-expanded="false" aria-label="Ouvrir le sélecteur d’emojis">☺</button>
+              <div id="emojiPicker" class="msg-emoji-picker hidden" aria-hidden="true"></div>
+            </div>
             <button id="sendBtn" class="msg-send-btn" type="submit">Envoyer</button>
           </div>
 

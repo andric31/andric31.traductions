@@ -55,11 +55,11 @@ button { border: 0; }
 }
 
 .msg-brand {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
   padding: 18px 8px 4px;
+  min-width: 0;
 }
 
 .msg-brand-kicker,
@@ -88,8 +88,13 @@ button { border: 0; }
   border: 1px solid var(--msg-border);
   background: var(--msg-soft);
   color: var(--muted, #aab2c8);
-  font-size: 12px;
+  font-size: 11px;
+  line-height: 1.2;
   white-space: nowrap;
+  justify-self: start;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .msg-status.ok {
   color: var(--msg-success);

@@ -35,7 +35,7 @@ button { border: 0; }
   margin: 12px auto;
   display: grid;
   grid-template-columns: 300px minmax(0, 1fr);
-  gap: 18px;
+  gap: 10px;
   overflow: hidden;
 }
 
@@ -49,7 +49,7 @@ button { border: 0; }
 .msg-sidebar {
   display: grid;
   grid-template-rows: auto auto auto 1fr;
-  gap: 16px;
+  gap: 10px;
   min-height: 0;
   overflow: hidden;
 }
@@ -101,7 +101,7 @@ button { border: 0; }
 }
 
 .msg-section {
-  padding: 14px;
+  padding: 10px 12px;
 }
 
 .msg-room-list,
@@ -200,7 +200,7 @@ button { border: 0; }
 .msg-main-shell {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  gap: 16px;
+  gap: 10px;
   min-height: 0;
   overflow: hidden;
 }
@@ -210,7 +210,7 @@ button { border: 0; }
   align-items: flex-start;
   justify-content: space-between;
   gap: 18px;
-  padding: 18px 20px;
+  padding: 16px 18px;
 }
 
 .msg-topbar p {
@@ -237,21 +237,21 @@ button { border: 0; }
 .msg-thread {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  gap: 14px;
+  gap: 10px;
   min-height: 0;
   height: 100%;
-  padding: 14px;
+  padding: 12px;
   overflow: hidden;
 }
 
 .msg-banner-list {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .msg-banner {
-  border-radius: 16px;
-  padding: 11px 14px;
+  border-radius: 14px;
+  padding: 9px 12px;
   border: 1px solid var(--msg-border);
   font-size: 14px;
   line-height: 1.45;
@@ -281,15 +281,15 @@ button { border: 0; }
   padding-right: 6px;
   display: grid;
   align-content: start;
-  gap: 14px;
+  gap: 10px;
   overscroll-behavior: contain;
   scroll-behavior: smooth;
 }
 
 .msg-item {
   display: grid;
-  grid-template-columns: 46px minmax(0, 1fr);
-  gap: 12px;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 10px;
   align-items: start;
 }
 
@@ -299,9 +299,9 @@ button { border: 0; }
 }
 
 .msg-avatar {
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
   display: grid;
   place-items: center;
   font-weight: 800;
@@ -314,7 +314,7 @@ button { border: 0; }
   border: 1px solid var(--msg-border);
   border-radius: 18px;
   background: linear-gradient(180deg, color-mix(in srgb, var(--msg-card-strong) 96%, transparent), color-mix(in srgb, var(--msg-card) 94%, transparent));
-  padding: 13px 15px;
+  padding: 10px 12px;
 }
 
 .msg-meta {
@@ -322,11 +322,12 @@ button { border: 0; }
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .msg-author {
   font-weight: 800;
+  font-size: 14px;
 }
 
 .msg-date {
@@ -338,11 +339,12 @@ button { border: 0; }
 .msg-text {
   white-space: pre-wrap;
   word-break: break-word;
-  line-height: 1.72;
+  line-height: 1.5;
+  font-size: 14px;
 }
 
 .msg-actions {
-  margin-top: 10px;
+  margin-top: 8px;
   display: flex;
   justify-content: flex-end;
 }
@@ -354,25 +356,25 @@ button { border: 0; }
 
 .msg-compose {
   border: 1px solid var(--msg-border);
-  border-radius: 22px;
+  border-radius: 18px;
   background: color-mix(in srgb, var(--msg-card-strong) 90%, var(--bg, #0d1018) 10%);
-  padding: 14px;
+  padding: 10px 12px;
   box-shadow: 0 -10px 26px rgba(0,0,0,0.14);
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .msg-compose-head,
 .msg-compose-row,
 .msg-compose-footer {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: end;
 }
 
 .msg-field {
   display: grid;
-  gap: 7px;
+  gap: 5px;
   min-width: 0;
 }
 
@@ -385,7 +387,7 @@ button { border: 0; }
 }
 
 .msg-field span {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--muted, #aab2c8);
 }
@@ -398,15 +400,15 @@ button { border: 0; }
   border-radius: 14px;
   background: var(--msg-input-bg);
   color: var(--fg, #e8eaf0);
-  padding: 12px 14px;
+  padding: 10px 12px;
   outline: none;
   transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
 }
 
 .msg-field textarea {
   resize: none;
-  min-height: 88px;
-  max-height: 160px;
+  min-height: 64px;
+  max-height: 120px;
 }
 
 .msg-field input::placeholder,
@@ -444,8 +446,8 @@ button { border: 0; }
 }
 
 .msg-send-btn {
-  padding: 0 20px;
-  min-height: 88px;
+  padding: 0 18px;
+  min-height: 64px;
   font-weight: 800;
   flex: 0 0 auto;
 }
@@ -510,5 +512,25 @@ button { border: 0; }
 
   .msg-avatar {
     display: none;
+  }
+}
+
+
+/* optimisation espace bureau */
+@media (min-width: 1081px) {
+  .msg-compose-head {
+    display: grid;
+    grid-template-columns: minmax(180px, 260px) minmax(200px, 280px);
+    justify-content: start;
+  }
+
+  .msg-compose-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+  }
+
+  .msg-send-btn {
+    align-self: stretch;
   }
 }

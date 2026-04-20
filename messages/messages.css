@@ -1618,3 +1618,38 @@ button { border: 0; }
     flex-wrap: nowrap !important;
   }
 }
+
+/* v33: fix message label and composer button alignment */
+@media (min-width: 1081px) {
+  .msg-compose-row {
+    position: relative !important;
+    min-height: 72px !important;
+  }
+  .msg-compose-row > .msg-field-grow > span,
+  .msg-compose-row > .msg-field-grow label > span,
+  .msg-compose-row .msg-field-grow span {
+    margin-bottom: 4px !important;
+    transform: none !important;
+  }
+  .msg-compose-row > .msg-field-grow textarea {
+    min-height: 46px !important;
+    height: 46px !important;
+    max-height: 46px !important;
+    padding-right: 138px !important;
+  }
+  .msg-compose-row > .msg-compose-actions,
+  .msg-compose-row > .msg-send-btn {
+    top: 30px !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+  .msg-compose-row > .msg-compose-actions {
+    right: 88px !important;
+  }
+  .msg-compose-row > .msg-send-btn {
+    right: 8px !important;
+    min-width: 74px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+  }
+}

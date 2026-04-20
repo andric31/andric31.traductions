@@ -3,8 +3,6 @@
   const REFRESH_MS = 7000;
   const NICK_KEY = 'andric31_messages_nickname';
   const ROOM_KEY = 'andric31_messages_room';
-  const REPLY_PREFIX = '[[reply:';
-  const EMOJIS = ['😀','😁','😂','🤣','😊','😍','🥰','😘','😎','🤔','😅','😢','😭','😡','👍','👎','👏','🙏','🔥','✅','❌','🎉','💬','❤️'];
 
   const els = {
     list: document.getElementById('messagesList'),
@@ -13,35 +11,29 @@
     nickname: document.getElementById('nickname'),
     message: document.getElementById('messageInput'),
     info: document.getElementById('formInfo'),
-    status: document.getElementById('roomStatus'),
-    refresh: document.getElementById('refreshBtn'),
+    authInfo: document.getElementById('authChatInfo'),
+    roomSelect: document.getElementById('roomSelect'),
     send: document.getElementById('sendBtn'),
+    refresh: document.getElementById('refreshBtn'),
     scrollBottom: document.getElementById('scrollBottomBtn'),
+    count: document.getElementById('msgCount'),
+    status: document.getElementById('roomStatus'),
     roomKicker: document.getElementById('roomKicker'),
     roomTitle: document.getElementById('roomTitle'),
     roomSubtitle: document.getElementById('roomSubtitle'),
-    authInfo: document.getElementById('authChatInfo'),
-    sidebarRoomList: document.getElementById('sidebarRoomList'),
-    emojiToggle: document.getElementById('emojiToggleBtn'),
-    emojiPicker: document.getElementById('emojiPicker'),
-    replyPreview: document.getElementById('replyPreview'),
-    replyAuthor: document.getElementById('replyAuthor'),
-    replyExcerpt: document.getElementById('replyExcerpt'),
-    cancelReply: document.getElementById('cancelReplyBtn'),
   };
 
   let messages = [];
   let refreshTimer = null;
   let lastRenderedMessageId = null;
-  let replyState = null;
 
   function escapeHtml(value) {
     return String(value ?? '')
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#039;');
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 
   function setInfo(text, type = '') {
@@ -58,7 +50,10 @@
 
   function formatDate(iso) {
     try {
-      return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(iso));
+      return new Intl.DateTimeFormat('fr-FR', {
+        dateStyle: 'short',
+        timeStyle: 'short',
+      }).format(new Date(iso));
     } catch {
       return iso || '';
     }
@@ -74,7 +69,7 @@
   }
 
   function getSelectedRoom() {
-    return localStorage.getItem(ROOM_KEY) || 'global';
+    return els.roomSelect?.value || localStorage.getItem(ROOM_KEY) || 'global';
   }
 
   function roleLevel(role) {
@@ -102,7 +97,9 @@
     els.nickname.readOnly = false;
     els.nickname.removeAttribute('aria-readonly');
     els.nickname.title = '';
-    if (!els.nickname.value) els.nickname.value = localStorage.getItem(NICK_KEY) || '';
+    if (!els.nickname.value) {
+      els.nickname.value = localStorage.getItem(NICK_KEY) || '';
+    }
     if (els.authInfo) els.authInfo.textContent = 'Non connecté : pseudo mémorisé dans ce navigateur et accès limité au salon public.';
     return false;
   }
@@ -110,11 +107,17 @@
   function getAvailableRooms() {
     const me = getAuthUser();
     const rooms = [{ value: 'global', label: 'Discussion générale', subtitle: 'Salon public', access: 'public' }];
+
     if (me?.id) {
       rooms.push({ value: 'private:members', label: 'Salon membres', subtitle: 'Réservé aux comptes connectés', access: 'members' });
-      if (roleLevel(me.role) >= roleLevel('translator')) rooms.push({ value: 'private:translators', label: 'Salon traducteurs', subtitle: 'Réservé aux traducteurs', access: 'translators' });
-      if (roleLevel(me.role) >= roleLevel('admin')) rooms.push({ value: 'private:admins', label: 'Salon admins', subtitle: 'Réservé aux admins', access: 'admins' });
+      if (roleLevel(me.role) >= roleLevel('translator')) {
+        rooms.push({ value: 'private:translators', label: 'Salon traducteurs', subtitle: 'Réservé aux traducteurs', access: 'translators' });
+      }
+      if (roleLevel(me.role) >= roleLevel('admin')) {
+        rooms.push({ value: 'private:admins', label: 'Salon admins', subtitle: 'Réservé aux admins', access: 'admins' });
+      }
     }
+
     return rooms;
   }
 
@@ -155,95 +158,23 @@
   }
 
   function roomLabel(roomValue) {
-    return ({
+    const labels = {
       global: 'Salon public',
       'private:members': 'Salon privé membres',
       'private:translators': 'Salon privé traducteurs',
       'private:admins': 'Salon privé admins',
-    }[String(roomValue || 'global')] || 'Salon');
+    };
+    return labels[String(roomValue || 'global')] || 'Salon';
   }
 
   function roomTitle(roomValue) {
-    return ({
+    const labels = {
       global: 'Discussion générale',
       'private:members': 'Discussion membres',
       'private:translators': 'Discussion traducteurs',
       'private:admins': 'Discussion admins',
-    }[String(roomValue || 'global')] || 'Discussion');
-  }
-
-  function excerptText(value, max = 90) {
-    const clean = String(value || '').replace(/\s+/g, ' ').trim();
-    if (clean.length <= max) return clean;
-    return clean.slice(0, max - 1) + '…';
-  }
-
-  function parseMessage(raw) {
-    const text = String(raw || '');
-    if (!text.startsWith(REPLY_PREFIX)) return { reply: null, body: text };
-    const end = text.indexOf(']]');
-    if (end === -1) return { reply: null, body: text };
-    const payload = text.slice(REPLY_PREFIX.length, end);
-    const sep = payload.indexOf('|');
-    if (sep === -1) return { reply: null, body: text };
-    const author = payload.slice(0, sep).trim();
-    const excerpt = payload.slice(sep + 1).trim();
-    const body = text.slice(end + 2).replace(/^\n+/, '');
-    return { reply: { author, excerpt }, body };
-  }
-
-  function buildStoredMessage(message) {
-    if (!replyState) return message;
-    return `${REPLY_PREFIX}${replyState.author}|${replyState.excerpt}]]\n${message}`;
-  }
-
-  function updateReplyPreview() {
-    const hasReply = Boolean(replyState);
-    els.replyPreview.classList.toggle('hidden', !hasReply);
-    if (!hasReply) return;
-    els.replyAuthor.textContent = `Réponse à ${replyState.author}`;
-    els.replyExcerpt.textContent = replyState.excerpt;
-  }
-
-  function setReplyFromItem(item) {
-    const parsed = parseMessage(item?.message);
-    replyState = {
-      author: String(item?.nickname || 'Message').trim() || 'Message',
-      excerpt: excerptText(parsed.body || item?.message || ''),
     };
-    updateReplyPreview();
-    els.message.focus();
-  }
-
-  function clearReply() {
-    replyState = null;
-    updateReplyPreview();
-  }
-
-  function insertAtCursor(input, text) {
-    const start = input.selectionStart ?? input.value.length;
-    const end = input.selectionEnd ?? input.value.length;
-    const before = input.value.slice(0, start);
-    const after = input.value.slice(end);
-    input.value = before + text + after;
-    const next = start + text.length;
-    input.setSelectionRange(next, next);
-    input.focus();
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-  }
-
-  function toggleEmojiPicker(force) {
-    const shouldOpen = typeof force === 'boolean' ? force : els.emojiPicker.classList.contains('hidden');
-    els.emojiPicker.classList.toggle('hidden', !shouldOpen);
-    els.emojiPicker.setAttribute('aria-hidden', String(!shouldOpen));
-    els.emojiToggle.setAttribute('aria-expanded', String(shouldOpen));
-  }
-
-  function renderEmojiPicker() {
-    els.emojiPicker.innerHTML = EMOJIS.map((emoji) => `<button class="msg-emoji-item" type="button" data-emoji="${emoji}" aria-label="Ajouter ${emoji}">${emoji}</button>`).join('');
-    els.emojiPicker.querySelectorAll('[data-emoji]').forEach((btn) => {
-      btn.addEventListener('click', () => insertAtCursor(els.message, `${btn.getAttribute('data-emoji')} `));
-    });
+    return labels[String(roomValue || 'global')] || 'Discussion';
   }
 
   function render() {
@@ -251,13 +182,13 @@
     const nextLastId = messages.length ? String(messages[messages.length - 1].id ?? '') : null;
 
     els.list.innerHTML = '';
+    els.count && (els.count.textContent = String(messages.length));
     els.empty.classList.toggle('hidden', messages.length > 0);
 
     const me = getAuthUser();
     const isAdmin = roleLevel(me?.role) >= roleLevel('admin');
 
     for (const item of messages) {
-      const parsed = parseMessage(item.message);
       const article = document.createElement('article');
       article.className = `msg-item${isSelfMessage(item) ? ' is-self' : ''}`;
       article.innerHTML = `
@@ -267,21 +198,13 @@
             <span class="msg-author">${escapeHtml(item.nickname)}</span>
             <span class="msg-date">${escapeHtml(formatDate(item.created_at))}</span>
           </div>
-          ${parsed.reply ? `<div class="msg-quote"><span class="msg-quote-author">${escapeHtml(parsed.reply.author)}</span><span class="msg-quote-text">${escapeHtml(parsed.reply.excerpt)}</span></div>` : ''}
-          <div class="msg-text">${escapeHtml(parsed.body)}</div>
+          <div class="msg-text">${escapeHtml(item.message)}</div>
           <div class="msg-actions"></div>
         </div>
       `;
 
-      const actions = article.querySelector('.msg-actions');
-      const replyBtn = document.createElement('button');
-      replyBtn.type = 'button';
-      replyBtn.className = 'msg-inline-btn msg-reply-btn';
-      replyBtn.textContent = '↩ Répondre';
-      replyBtn.addEventListener('click', () => setReplyFromItem(item));
-      actions.appendChild(replyBtn);
-
       if (isAdmin) {
+        const actions = article.querySelector('.msg-actions');
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'msg-delete-btn';
@@ -312,9 +235,11 @@
       if (els.roomKicker) els.roomKicker.textContent = roomLabel(room);
       renderSidebarRooms();
       if (els.roomTitle) els.roomTitle.textContent = roomTitle(room);
-      if (els.roomSubtitle) els.roomSubtitle.textContent = room === 'global'
-        ? 'Salon visible par tous, pratique pour discuter rapidement ou demander de l’aide.'
-        : 'Salon réservé selon ton niveau d’accès.';
+      if (els.roomSubtitle) {
+        els.roomSubtitle.textContent = room === 'global'
+          ? 'Salon visible par tous, pratique pour discuter rapidement ou demander de l’aide.'
+          : 'Salon réservé selon ton niveau d’accès.';
+      }
     } catch (err) {
       setStatus('Hors ligne', 'error');
       if (!silent) setInfo(err.message || 'Impossible de charger les messages.', 'error');
@@ -323,14 +248,27 @@
 
   async function postMessage(evt) {
     evt.preventDefault();
+
     fillNicknameFromAuth();
     const nickname = els.nickname.value.trim();
     const message = els.message.value.trim();
     const room = getSelectedRoom();
 
-    if (!nickname) return setInfo('Le pseudo est obligatoire.', 'error'), els.nickname.focus();
-    if (nickname.length < 2) return setInfo('Le pseudo est trop court.', 'error'), els.nickname.focus();
-    if (!message) return setInfo('Le message est vide.', 'error'), els.message.focus();
+    if (!nickname) {
+      setInfo('Le pseudo est obligatoire.', 'error');
+      els.nickname.focus();
+      return;
+    }
+    if (nickname.length < 2) {
+      setInfo('Le pseudo est trop court.', 'error');
+      els.nickname.focus();
+      return;
+    }
+    if (!message) {
+      setInfo('Le message est vide.', 'error');
+      els.message.focus();
+      return;
+    }
 
     els.send.disabled = true;
     setInfo('Envoi du message…');
@@ -340,7 +278,7 @@
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ nickname, message: buildStoredMessage(message), room }),
+        body: JSON.stringify({ nickname, message, room }),
       });
       const data = await res.json();
       if (!res.ok || !data?.ok) throw new Error(data?.error || 'Envoi impossible');
@@ -348,8 +286,6 @@
       if (!getAuthUser()) localStorage.setItem(NICK_KEY, nickname);
       localStorage.setItem(ROOM_KEY, room);
       els.message.value = '';
-      clearReply();
-      toggleEmojiPicker(false);
       setInfo('Message envoyé.', 'success');
       await fetchMessages({ silent: true });
       scrollToBottom({ force: true });
@@ -364,8 +300,12 @@
     const me = getAuthUser();
     if (roleLevel(me?.role) < roleLevel('admin')) return;
     if (!confirm('Supprimer ce message ?')) return;
+
     try {
-      const res = await fetch(`${API_URL}?id=${encodeURIComponent(id)}`, { method: 'DELETE', credentials: 'same-origin' });
+      const res = await fetch(`${API_URL}?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        credentials: 'same-origin',
+      });
       const data = await res.json();
       if (!res.ok || !data?.ok) throw new Error(data?.error || 'Suppression impossible');
       setInfo('Message supprimé.', 'success');
@@ -393,17 +333,9 @@
     fillNicknameFromAuth();
     syncRoomOptions();
     renderSidebarRooms();
-    renderEmojiPicker();
-    updateReplyPreview();
-
     els.form.addEventListener('submit', postMessage);
     els.refresh.addEventListener('click', () => fetchMessages());
     els.scrollBottom.addEventListener('click', () => scrollToBottom({ force: true }));
-    els.cancelReply.addEventListener('click', clearReply);
-    els.emojiToggle.addEventListener('click', () => toggleEmojiPicker());
-    document.addEventListener('click', (evt) => {
-      if (!els.emojiPicker.contains(evt.target) && evt.target !== els.emojiToggle) toggleEmojiPicker(false);
-    });
     els.message.addEventListener('input', () => {
       const left = 500 - els.message.value.length;
       setInfo(`${left} caractère${left > 1 ? 's' : ''} restant${left > 1 ? 's' : ''}.`);

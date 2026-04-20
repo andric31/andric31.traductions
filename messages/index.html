@@ -48,8 +48,8 @@
         <div class="msg-section-label">Repères rapides</div>
         <ul>
           <li>Reste poli et évite le flood.</li>
-          <li>Tu peux répondre à un message avec ↩.</li>
-          <li>Le bouton 😀 ouvre un mini sélecteur d’emojis.</li>
+          <li>Les messages trop longs sont refusés.</li>
+          <li>Le pseudo invité est mémorisé localement.</li>
           <li>Le bouton “Bas de page” recentre vite la discussion.</li>
         </ul>
       </section>
@@ -75,25 +75,12 @@
         <div id="messagesList" class="msg-list" aria-live="polite"></div>
 
         <form id="chatForm" class="msg-compose">
-          <div id="replyPreview" class="msg-reply-preview hidden">
-            <div class="msg-reply-preview-copy">
-              <strong id="replyAuthor">Réponse</strong>
-              <small id="replyExcerpt">Extrait du message sélectionné</small>
-            </div>
-            <button id="cancelReplyBtn" class="msg-inline-btn" type="button">Annuler</button>
-          </div>
-
           <div class="msg-compose-head">
             <label class="msg-field msg-field-small">
               <span>Pseudo</span>
               <input id="nickname" type="text" maxlength="40" placeholder="Ton pseudo" autocomplete="nickname" />
             </label>
             <div id="authChatInfo" class="msg-form-info msg-form-info-inline">Non connecté : pseudo mémorisé dans ce navigateur et accès limité au salon public.</div>
-          </div>
-
-          <div class="msg-compose-row msg-compose-row-tools">
-            <button id="emojiToggleBtn" class="msg-inline-btn" type="button" aria-expanded="false">😀 Emoji</button>
-            <div id="emojiPicker" class="msg-emoji-picker hidden" aria-hidden="true"></div>
           </div>
 
           <div class="msg-compose-row">

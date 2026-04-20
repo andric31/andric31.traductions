@@ -1859,5 +1859,5 @@ button { border: 0; }
 
 .msg-emoji-item,
 .msg-reaction-chip {
-  background: color-mix(in srgb, var(--msg-soft, rgba(255,255,255,0.06)) 88%, var(--msg-card-strong, #171b29) 12%) !important;
+  background: transparent !important;
 }

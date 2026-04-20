@@ -10,68 +10,87 @@
   <link rel="stylesheet" href="messages.css" />
 </head>
 <body>
-  <main class="msg-shell">
-    <section class="msg-hero">
-      <div class="msg-kicker">💬 Mini chat global</div>
-      <h1>Messages</h1>
-      <p>Un espace simple pour discuter, laisser un avis ou poser une petite question. Les nouveaux messages apparaissent automatiquement dans le salon global.</p>
-    </section>
-
-    <section class="msg-layout">
-      <aside class="msg-panel msg-side">
-        <div class="msg-side-head">
-          <h2>Salons</h2>
-          <span id="roomStatus" class="msg-status">Connexion…</span>
+  <main class="msg-app">
+    <aside class="msg-sidebar">
+      <div class="msg-brand">
+        <div>
+          <div class="msg-brand-kicker">Mini chat</div>
+          <h1>Messages</h1>
         </div>
+        <span id="roomStatus" class="msg-status">Connexion…</span>
+      </div>
 
-        <div class="msg-side-block">
-          <div class="msg-side-title">Accès rapide</div>
-          <a class="msg-side-link" href="/">🏠 f95list_andric31_viewer</a>
-          <button id="refreshBtn" class="msg-side-link msg-side-btn" type="button">🔄 Actualiser</button>
+      <section class="msg-card msg-section">
+        <div class="msg-section-label">Accès rapide</div>
+        <nav class="msg-room-list">
+          <a class="msg-room-link" href="/">
+            <span class="msg-room-icon">🏠</span>
+            <span class="msg-room-copy">
+              <strong>Retour au viewer</strong>
+              <small>f95list_andric31_viewer</small>
+            </span>
+          </a>
+          <button id="refreshBtn" class="msg-room-link msg-room-button" type="button">
+            <span class="msg-room-icon">↻</span>
+            <span class="msg-room-copy">
+              <strong>Actualiser</strong>
+              <small>Recharge les messages</small>
+            </span>
+          </button>
+        </nav>
+      </section>
+
+      <section class="msg-card msg-section">
+        <div class="msg-section-label">Salons</div>
+        <div class="msg-channel-list">
+          <button class="msg-channel is-active" type="button">
+            <span class="msg-channel-main">
+              <strong>Discussion générale</strong>
+              <small>Salon public</small>
+            </span>
+            <span id="msgCount" class="msg-channel-badge">0</span>
+          </button>
         </div>
+      </section>
 
-        <div class="msg-side-block">
-          <div class="msg-side-title">Règles rapides</div>
-          <ul class="msg-rules">
-            <li>Reste poli et évite le spam.</li>
-            <li>Pas de flood ni de message vide.</li>
-            <li>Les messages trop longs sont refusés.</li>
-            <li>Le pseudo invité est retenu sur ce navigateur.</li>
-          </ul>
+      <section class="msg-card msg-section msg-side-notes">
+        <div class="msg-section-label">Repères rapides</div>
+        <ul>
+          <li>Reste poli et évite le flood.</li>
+          <li>Les messages trop longs sont refusés.</li>
+          <li>Le pseudo invité est mémorisé localement.</li>
+          <li>Le bouton “Bas de page” recentre vite la discussion.</li>
+        </ul>
+      </section>
+    </aside>
+
+    <section class="msg-main-shell">
+      <header class="msg-topbar msg-card">
+        <div>
+          <div id="roomKicker" class="msg-topbar-kicker">Salon public</div>
+          <h2 id="roomTitle">Discussion générale</h2>
+          <p id="roomSubtitle">Un affichage plus pratique, inspiré d’un vrai centre de messages.</p>
         </div>
+        <button id="scrollBottomBtn" class="msg-topbar-btn" type="button">Bas de page</button>
+      </header>
 
-        <div class="msg-side-block msg-stats">
-          <div>
-            <span class="msg-stat-label">Messages</span>
-            <strong id="msgCount">0</strong>
-          </div>
-          <div>
-            <span class="msg-stat-label">Actualisation</span>
-            <strong>7 sec</strong>
-          </div>
+      <section class="msg-thread msg-card">
+        <div class="msg-banner-list">
+          <div class="msg-banner msg-banner-danger">Merci de ne pas flooder ni interférer dans les aides en cours.</div>
+          <div class="msg-banner msg-banner-warn">Salon public : visible par tous. Évite les infos privées.</div>
         </div>
-      </aside>
-
-      <section class="msg-panel msg-main">
-        <header class="msg-main-head">
-          <div>
-            <div class="msg-main-kicker">Salon public</div>
-            <h2>Discussion générale</h2>
-          </div>
-          <button id="scrollBottomBtn" class="msg-ghost-btn" type="button">Bas de page</button>
-        </header>
 
         <div id="messagesEmpty" class="msg-empty hidden">Aucun message pour le moment.</div>
         <div id="messagesList" class="msg-list" aria-live="polite"></div>
 
         <form id="chatForm" class="msg-compose">
-          <div class="msg-compose-top">
-            <label class="msg-field">
+          <div class="msg-compose-head">
+            <label class="msg-field msg-field-small">
               <span>Pseudo</span>
               <input id="nickname" type="text" maxlength="40" placeholder="Ton pseudo" autocomplete="nickname" />
             </label>
 
-            <label class="msg-field">
+            <label class="msg-field msg-field-small">
               <span>Salon</span>
               <div class="msg-select-wrap">
                 <select id="roomSelect">
@@ -83,14 +102,16 @@
 
           <div id="authChatInfo" class="msg-form-info">Non connecté : pseudo mémorisé dans ce navigateur et accès limité au salon public.</div>
 
-          <label class="msg-field">
-            <span>Message</span>
-            <textarea id="messageInput" maxlength="500" rows="4" placeholder="Écris ton message ici…"></textarea>
-          </label>
-
-          <div class="msg-compose-bottom">
-            <div id="formInfo" class="msg-form-info">500 caractères max.</div>
+          <div class="msg-compose-row">
+            <label class="msg-field msg-field-grow">
+              <span>Message</span>
+              <textarea id="messageInput" maxlength="500" rows="3" placeholder="Écris ton message ici…"></textarea>
+            </label>
             <button id="sendBtn" class="msg-send-btn" type="submit">Envoyer</button>
+          </div>
+
+          <div class="msg-compose-footer">
+            <div id="formInfo" class="msg-form-info">500 caractères max.</div>
           </div>
         </form>
       </section>

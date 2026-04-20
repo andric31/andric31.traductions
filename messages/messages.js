@@ -18,6 +18,9 @@
     scrollBottom: document.getElementById('scrollBottomBtn'),
     count: document.getElementById('msgCount'),
     status: document.getElementById('roomStatus'),
+    roomKicker: document.getElementById('roomKicker'),
+    roomTitle: document.getElementById('roomTitle'),
+    roomSubtitle: document.getElementById('roomSubtitle'),
   };
 
   let messages = [];
@@ -72,6 +75,14 @@
     return ({ member: 1, translator: 2, admin: 3 }[String(role || 'member')] || 0);
   }
 
+  function isSelfMessage(item) {
+    const me = getAuthUser();
+    const authName = (me?.display_name || me?.username || '').trim().toLowerCase();
+    const currentNick = (els.nickname?.value || '').trim().toLowerCase();
+    const itemNick = String(item?.nickname || '').trim().toLowerCase();
+    return Boolean(itemNick && (itemNick === authName || itemNick === currentNick));
+  }
+
   function fillNicknameFromAuth() {
     const me = getAuthUser();
     if (me?.display_name || me?.username) {
@@ -79,7 +90,7 @@
       els.nickname.readOnly = true;
       els.nickname.setAttribute('aria-readonly', 'true');
       els.nickname.title = 'Pseudo lié au compte connecté';
-      if (els.authInfo) els.authInfo.textContent = '';
+      if (els.authInfo) els.authInfo.textContent = 'Connecté : ton pseudo est repris automatiquement depuis ton compte.';
       return true;
     }
     els.nickname.readOnly = false;
@@ -88,7 +99,7 @@
     if (!els.nickname.value) {
       els.nickname.value = localStorage.getItem(NICK_KEY) || '';
     }
-    if (els.authInfo) els.authInfo.textContent = '';
+    if (els.authInfo) els.authInfo.textContent = 'Non connecté : pseudo mémorisé dans ce navigateur et accès limité au salon public.';
     return false;
   }
 
@@ -124,6 +135,16 @@
     return labels[String(roomValue || 'global')] || 'Salon';
   }
 
+  function roomTitle(roomValue) {
+    const labels = {
+      global: 'Discussion générale',
+      'private:members': 'Discussion membres',
+      'private:translators': 'Discussion traducteurs',
+      'private:admins': 'Discussion admins',
+    };
+    return labels[String(roomValue || 'global')] || 'Discussion';
+  }
+
   function render() {
     els.list.innerHTML = '';
     els.count.textContent = String(messages.length);
@@ -134,22 +155,21 @@
 
     for (const item of messages) {
       const article = document.createElement('article');
-      article.className = 'msg-item';
+      article.className = `msg-item${isSelfMessage(item) ? ' is-self' : ''}`;
       article.innerHTML = `
-        <div class="msg-item-main">
-          <div class="msg-author">
-            <span class="msg-avatar">${escapeHtml(avatarLetter(item.nickname))}</span>
-            <span>${escapeHtml(item.nickname)}</span>
+        <div class="msg-avatar">${escapeHtml(avatarLetter(item.nickname))}</div>
+        <div class="msg-bubble">
+          <div class="msg-meta">
+            <span class="msg-author">${escapeHtml(item.nickname)}</span>
+            <span class="msg-date">${escapeHtml(formatDate(item.created_at))}</span>
           </div>
           <div class="msg-text">${escapeHtml(item.message)}</div>
-        </div>
-        <div class="msg-head-actions">
-          <div class="msg-date">${escapeHtml(formatDate(item.created_at))}</div>
+          <div class="msg-actions"></div>
         </div>
       `;
 
       if (isAdmin) {
-        const actions = article.querySelector('.msg-head-actions');
+        const actions = article.querySelector('.msg-actions');
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'msg-delete-btn';
@@ -172,10 +192,13 @@
       messages = Array.isArray(data.messages) ? data.messages : [];
       render();
       setStatus(`${roomLabel(room)} · actif`, 'ok');
-      const headKicker = document.querySelector('.msg-main-kicker');
-      const headTitle = document.querySelector('.msg-main-head h2');
-      if (headKicker) headKicker.textContent = roomLabel(room);
-      if (headTitle) headTitle.textContent = room === 'global' ? 'Discussion générale' : roomLabel(room);
+      if (els.roomKicker) els.roomKicker.textContent = roomLabel(room);
+      if (els.roomTitle) els.roomTitle.textContent = roomTitle(room);
+      if (els.roomSubtitle) {
+        els.roomSubtitle.textContent = room === 'global'
+          ? 'Salon visible par tous, pratique pour discuter rapidement ou demander de l’aide.'
+          : 'Salon réservé selon ton niveau d’accès.';
+      }
     } catch (err) {
       setStatus('Hors ligne', 'error');
       if (!silent) setInfo(err.message || 'Impossible de charger les messages.', 'error');
@@ -260,7 +283,6 @@
     refreshTimer = setInterval(() => fetchMessages({ silent: true }), REFRESH_MS);
   }
 
-
   function init() {
     fillNicknameFromAuth();
     syncRoomOptions();
@@ -275,6 +297,7 @@
       const left = 500 - els.message.value.length;
       setInfo(`${left} caractère${left > 1 ? 's' : ''} restant${left > 1 ? 's' : ''}.`);
     });
+
     if (window.SiteAuth?.onChange) {
       window.SiteAuth.onChange(() => {
         fillNicknameFromAuth();
@@ -295,6 +318,7 @@
     } else {
       fetchMessages();
     }
+
     startAutoRefresh();
   }
 

@@ -1690,3 +1690,69 @@ button { border: 0; }
     line-height: 1 !important;
   }
 }
+
+/* v38 final compose tightening */
+.msg-compose {
+  gap: 4px !important;
+  padding: 5px 8px 4px !important;
+}
+
+.msg-compose-row {
+  align-items: stretch !important;
+  gap: 8px !important;
+}
+
+.msg-compose-row > .msg-field-grow {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+.msg-compose-row > .msg-field-grow textarea {
+  min-height: 40px !important;
+  height: 40px !important;
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
+
+.msg-compose-row > .msg-compose-actions,
+.msg-compose-row > .msg-send-btn {
+  align-self: stretch !important;
+  margin: 0 !important;
+}
+
+.msg-compose-actions {
+  display: flex !important;
+  align-items: stretch !important;
+  justify-content: center !important;
+  margin-right: 12px !important;
+}
+
+.msg-emoji-trigger {
+  width: 32px !important;
+  min-width: 32px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.msg-send-btn {
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 16px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.msg-compose-footer {
+  margin-top: -2px !important;
+  min-height: 14px !important;
+  gap: 0 !important;
+}
+
+.msg-form-info {
+  font-size: 11px !important;
+  line-height: 1.1 !important;
+}

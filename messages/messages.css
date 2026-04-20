@@ -754,7 +754,7 @@ button { border: 0; }
 
 .msg-react-btn {
   min-width: 0;
-  padding: 5px 8px;
+  padding: 5px 7px;
   border-radius: 999px;
   border: 1px solid var(--msg-border);
   background: var(--msg-soft);
@@ -949,12 +949,12 @@ button { border: 0; }
   position: absolute;
   left: 10px;
   right: 10px;
-  bottom: 8px;
+  bottom: -10px;
   margin-top: 0;
-  padding: 4px 0;
+  padding: 0;
   border: 0;
   border-radius: 12px;
-  background: rgba(0,0,0,0.001);
+  background: transparent;
   box-shadow: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -965,7 +965,7 @@ button { border: 0; }
   max-height: none;
   overflow: visible;
   pointer-events: none;
-  z-index: 4;
+  z-index: 6;
 }
 
 .msg-bubble:hover .msg-actions,
@@ -985,8 +985,8 @@ button { border: 0; }
   flex-wrap: nowrap;
   overflow-x: auto;
   scrollbar-width: none;
-  max-width: min(56vw, 520px);
-  gap: 5px;
+  max-width: min(54vw, 500px);
+  gap: 4px;
 }
 .msg-react-toolbar::-webkit-scrollbar {
   display: none;
@@ -1016,12 +1016,39 @@ button { border: 0; }
 
 /* v18 tweaks: truly transparent actions + send button close to emoji */
 .msg-actions::before { content: none; }
-.msg-tools-left, .msg-tools-right { position: relative; z-index: 1; }
+.msg-tools-left, .msg-tools-right { position: relative; z-index: 1; display: flex; align-items: center; }
 .msg-inline-btn,
 .msg-react-btn {
-  box-shadow: 0 4px 12px rgba(0,0,0,.16);
+  box-shadow: 0 6px 18px rgba(0,0,0,.24);
+}
+
+.msg-tools-left {
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(11, 17, 34, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.msg-tools-right {
+  padding: 4px 6px;
+  border-radius: 999px;
+  background: rgba(11, 17, 34, 0.60);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 @media (min-width: 1081px) {
   .msg-compose-actions { margin-right: 0; }
   .msg-send-btn { margin-left: -1px; }
+}
+
+
+/* v19 overlay optimization */
+.msg-inline-btn { background: rgba(26, 34, 58, 0.88); }
+.msg-react-btn { background: rgba(18, 26, 46, 0.88); }
+.msg-bubble:hover .msg-actions,
+.msg-item.is-open .msg-actions { transform: translateY(0); }
+@media (max-width: 1080px) {
+  .msg-actions { bottom: -8px; }
+  .msg-tools-right, .msg-tools-left { width: max-content; max-width: 100%; }
 }

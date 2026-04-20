@@ -1184,3 +1184,60 @@ button { border: 0; }
   .msg-compose-row > .msg-send-btn { align-self: end; margin-top: 20px; margin-bottom: 2px; }
   .msg-send-btn, .msg-emoji-trigger { min-height: 48px; height: 48px; }
 }
+
+/* v24: composer buttons inside input zone + tighter message cards */
+@media (min-width: 1081px) {
+  .msg-list { gap: 8px; }
+  .msg-bubble { padding-bottom: 30px; }
+  .msg-actions {
+    left: 12px;
+    right: 12px;
+    bottom: 4px;
+    gap: 6px;
+  }
+  .msg-react-toolbar { max-width: calc(100% - 92px); }
+
+  .msg-compose-row {
+    position: relative;
+    align-items: stretch;
+    gap: 0;
+  }
+  .msg-compose-row > .msg-field-grow {
+    margin-right: 0;
+    min-width: 0;
+  }
+  .msg-compose-row > .msg-field-grow textarea {
+    min-height: 50px;
+    height: 50px;
+    max-height: 50px;
+    padding-right: 150px;
+  }
+  .msg-compose-row > .msg-compose-actions,
+  .msg-compose-row > .msg-send-btn {
+    position: absolute;
+    bottom: 0;
+    margin: 0 !important;
+    align-self: auto;
+    z-index: 3;
+  }
+  .msg-compose-row > .msg-compose-actions {
+    right: 88px;
+  }
+  .msg-compose-row > .msg-send-btn {
+    right: 0;
+    min-height: 50px;
+    height: 50px;
+  }
+  .msg-emoji-trigger {
+    width: 36px;
+    min-height: 50px;
+    height: 50px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  .msg-send-btn {
+    min-width: 88px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+}

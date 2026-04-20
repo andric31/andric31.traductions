@@ -1753,3 +1753,42 @@ button { border: 0; }
     right: 0 !important;
   }
 }
+
+/* v21: admin delete matches reply + sidebar remains readable with many rooms */
+.msg-actions .msg-delete-btn {
+  padding: 5px 9px !important;
+  min-height: 30px !important;
+  height: 30px !important;
+  border-radius: 12px !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.msg-sidebar {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding-right: 4px;
+}
+
+.msg-side-notes {
+  min-height: fit-content;
+}
+
+.msg-side-notes ul {
+  margin-top: 8px;
+  line-height: 1.48;
+}
+
+@media (min-width: 1081px) {
+  .msg-sidebar {
+    grid-template-rows: auto auto auto auto !important;
+    align-content: start;
+  }
+
+  .msg-side-notes {
+    overflow: visible !important;
+  }
+}

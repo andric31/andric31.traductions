@@ -25,6 +25,7 @@
 
   let messages = [];
   let refreshTimer = null;
+  let lastRenderedMessageId = null;
 
   function escapeHtml(value) {
     return String(value ?? '')
@@ -146,6 +147,9 @@
   }
 
   function render() {
+    const previousLastId = lastRenderedMessageId;
+    const nextLastId = messages.length ? String(messages[messages.length - 1].id ?? '') : null;
+
     els.list.innerHTML = '';
     els.count.textContent = String(messages.length);
     els.empty.classList.toggle('hidden', messages.length > 0);
@@ -180,6 +184,10 @@
 
       els.list.appendChild(article);
     }
+
+    lastRenderedMessageId = nextLastId;
+    const hasNewTail = previousLastId !== nextLastId;
+    requestAnimationFrame(() => scrollToBottom({ force: hasNewTail || !previousLastId }));
   }
 
   async function fetchMessages({ silent = false } = {}) {
@@ -247,7 +255,7 @@
       els.message.value = '';
       setInfo('Message envoyé.', 'success');
       await fetchMessages({ silent: true });
-      scrollToBottom();
+      scrollToBottom({ force: true });
     } catch (err) {
       setInfo(err.message || 'Erreur pendant l’envoi.', 'error');
     } finally {
@@ -274,7 +282,12 @@
     }
   }
 
-  function scrollToBottom() {
+  function isNearBottom() {
+    return (els.list.scrollHeight - els.list.scrollTop - els.list.clientHeight) < 60;
+  }
+
+  function scrollToBottom({ force = false } = {}) {
+    if (!force && !isNearBottom()) return;
     els.list.scrollTop = els.list.scrollHeight;
   }
 
@@ -292,7 +305,7 @@
       localStorage.setItem(ROOM_KEY, getSelectedRoom());
       fetchMessages();
     });
-    els.scrollBottom.addEventListener('click', scrollToBottom);
+    els.scrollBottom.addEventListener('click', () => scrollToBottom({ force: true }));
     els.message.addEventListener('input', () => {
       const left = 500 - els.message.value.length;
       setInfo(`${left} caractère${left > 1 ? 's' : ''} restant${left > 1 ? 's' : ''}.`);

@@ -104,57 +104,26 @@
     return false;
   }
 
-  function getAvailableRooms() {
+  function syncRoomOptions() {
+    if (!els.roomSelect) return;
     const me = getAuthUser();
-    const rooms = [{ value: 'global', label: 'Discussion générale', subtitle: 'Salon public', access: 'public' }];
+    const wanted = localStorage.getItem(ROOM_KEY) || 'global';
+    const options = [{ value: 'global', label: 'Public — Global' }];
 
     if (me?.id) {
-      rooms.push({ value: 'private:members', label: 'Salon membres', subtitle: 'Réservé aux comptes connectés', access: 'members' });
+      options.push({ value: 'private:members', label: 'Privé — Membres connectés' });
       if (roleLevel(me.role) >= roleLevel('translator')) {
-        rooms.push({ value: 'private:translators', label: 'Salon traducteurs', subtitle: 'Réservé aux traducteurs', access: 'translators' });
+        options.push({ value: 'private:translators', label: 'Privé — Traducteurs' });
       }
       if (roleLevel(me.role) >= roleLevel('admin')) {
-        rooms.push({ value: 'private:admins', label: 'Salon admins', subtitle: 'Réservé aux admins', access: 'admins' });
+        options.push({ value: 'private:admins', label: 'Privé — Admins' });
       }
     }
 
-    return rooms;
-  }
-
-  function syncRoomOptions() {
-    const rooms = getAvailableRooms();
-    const wanted = localStorage.getItem(ROOM_KEY) || 'global';
-    const allowed = new Set(rooms.map((x) => x.value));
-    const selected = allowed.has(wanted) ? wanted : 'global';
-    localStorage.setItem(ROOM_KEY, selected);
-  }
-
-  function renderSidebarRooms() {
-    if (!els.sidebarRoomList) return;
-    const current = getSelectedRoom();
-    const rooms = getAvailableRooms();
-    els.sidebarRoomList.innerHTML = rooms.map((room) => {
-      const active = room.value === current ? ' is-active' : '';
-      const lock = room.access === 'public' ? '' : '<span class="msg-channel-lock">🔒</span>';
-      return `
-        <button class="msg-channel${active}" type="button" data-room="${escapeHtml(room.value)}">
-          <span class="msg-channel-main">
-            <strong>${escapeHtml(room.label)}</strong>
-            <small>${lock}${escapeHtml(room.subtitle)}</small>
-          </span>
-          <span class="msg-channel-badge">${room.value === current ? escapeHtml(String(messages.length)) : '•'}</span>
-        </button>
-      `;
-    }).join('');
-
-    els.sidebarRoomList.querySelectorAll('[data-room]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const value = btn.getAttribute('data-room') || 'global';
-        if (value === getSelectedRoom()) return;
-        localStorage.setItem(ROOM_KEY, value);
-        fetchMessages();
-      });
-    });
+    els.roomSelect.innerHTML = options.map((opt) => `<option value="${escapeHtml(opt.value)}">${escapeHtml(opt.label)}</option>`).join('');
+    const allowed = new Set(options.map((x) => x.value));
+    els.roomSelect.value = allowed.has(wanted) ? wanted : 'global';
+    localStorage.setItem(ROOM_KEY, els.roomSelect.value);
   }
 
   function roomLabel(roomValue) {
@@ -182,7 +151,7 @@
     const nextLastId = messages.length ? String(messages[messages.length - 1].id ?? '') : null;
 
     els.list.innerHTML = '';
-    els.count && (els.count.textContent = String(messages.length));
+    els.count.textContent = String(messages.length);
     els.empty.classList.toggle('hidden', messages.length > 0);
 
     const me = getAuthUser();
@@ -224,7 +193,6 @@
   async function fetchMessages({ silent = false } = {}) {
     if (!silent) setStatus('Chargement…');
     const room = getSelectedRoom();
-    renderSidebarRooms();
     try {
       const res = await fetch(`${API_URL}?limit=80&room=${encodeURIComponent(room)}`, { cache: 'no-store', credentials: 'same-origin' });
       const data = await res.json();
@@ -233,7 +201,6 @@
       render();
       setStatus(`${roomLabel(room)} · actif`, 'ok');
       if (els.roomKicker) els.roomKicker.textContent = roomLabel(room);
-      renderSidebarRooms();
       if (els.roomTitle) els.roomTitle.textContent = roomTitle(room);
       if (els.roomSubtitle) {
         els.roomSubtitle.textContent = room === 'global'
@@ -332,9 +299,12 @@
   function init() {
     fillNicknameFromAuth();
     syncRoomOptions();
-    renderSidebarRooms();
     els.form.addEventListener('submit', postMessage);
     els.refresh.addEventListener('click', () => fetchMessages());
+    els.roomSelect?.addEventListener('change', () => {
+      localStorage.setItem(ROOM_KEY, getSelectedRoom());
+      fetchMessages();
+    });
     els.scrollBottom.addEventListener('click', () => scrollToBottom({ force: true }));
     els.message.addEventListener('input', () => {
       const left = 500 - els.message.value.length;
@@ -345,7 +315,6 @@
       window.SiteAuth.onChange(() => {
         fillNicknameFromAuth();
         syncRoomOptions();
-        renderSidebarRooms();
         fetchMessages({ silent: true });
       });
       if (!window.SiteAuth.loaded && window.SiteAuth.fetchMe) {

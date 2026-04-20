@@ -14,6 +14,7 @@
     <aside class="msg-sidebar">
       <div class="msg-brand">
         <div>
+          <div class="msg-brand-kicker">Mini chat</div>
           <h1>Messages</h1>
         </div>
         <span id="roomStatus" class="msg-status">Connexion…</span>
@@ -41,7 +42,15 @@
 
       <section class="msg-card msg-section">
         <div class="msg-section-label">Salons</div>
-        <div id="sidebarRoomList" class="msg-channel-list"></div>
+        <div class="msg-channel-list">
+          <button class="msg-channel is-active" type="button">
+            <span class="msg-channel-main">
+              <strong>Discussion générale</strong>
+              <small>Salon public</small>
+            </span>
+            <span id="msgCount" class="msg-channel-badge">0</span>
+          </button>
+        </div>
       </section>
 
       <section class="msg-card msg-section msg-side-notes">
@@ -80,7 +89,16 @@
               <span>Pseudo</span>
               <input id="nickname" type="text" maxlength="40" placeholder="Ton pseudo" autocomplete="nickname" />
             </label>
-            <div id="authChatInfo" class="msg-form-info msg-form-info-inline">Non connecté : pseudo mémorisé dans ce navigateur et accès limité au salon public.</div>
+
+            <label class="msg-field msg-field-small">
+              <span>Salon</span>
+              <div class="msg-select-wrap">
+                <select id="roomSelect">
+                  <option value="global">Public — Global</option>
+                </select>
+              </div>
+            </label>
+            <div id="authChatInfo" class="msg-form-info">Non connecté : pseudo mémorisé dans ce navigateur et accès limité au salon public.</div>
           </div>
 
           <div class="msg-compose-row">

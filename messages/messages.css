@@ -1408,3 +1408,83 @@ button { border: 0; }
   }
   .msg-react-toolbar { justify-content: flex-end; max-width: none; gap: 4px; }
 }
+
+/* v28: clean final alignment overrides */
+@media (min-width: 1081px) {
+  .msg-list { gap: 8px; }
+  .msg-bubble {
+    padding: 8px 10px 8px;
+  }
+  .msg-meta { margin-bottom: 2px; }
+  .msg-text { margin-bottom: 0; }
+  .msg-actions {
+    margin-top: 4px;
+    justify-content: flex-end;
+    gap: 6px;
+    max-height: 40px;
+  }
+  .msg-bubble:hover .msg-actions,
+  .msg-item.is-open .msg-actions {
+    max-height: 40px;
+  }
+  .msg-tools-left,
+  .msg-tools-right,
+  .msg-react-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+  }
+
+  .msg-compose-row {
+    position: relative;
+    display: block;
+    min-height: 76px;
+  }
+  .msg-compose-row > .msg-field-grow {
+    display: block;
+    width: 100%;
+  }
+  .msg-compose-row > .msg-field-grow textarea {
+    min-height: 50px;
+    height: 50px;
+    max-height: 50px;
+    padding-right: 132px;
+  }
+  .msg-compose-row > .msg-compose-actions,
+  .msg-compose-row > .msg-send-btn {
+    position: absolute;
+    top: 28px;
+    bottom: auto;
+    transform: none !important;
+    margin: 0 !important;
+    z-index: 5;
+  }
+  .msg-compose-row > .msg-compose-actions {
+    right: 92px;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .msg-compose-row > .msg-send-btn {
+    right: 8px;
+    min-width: 78px;
+    height: 34px;
+    min-height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 14px;
+    border-radius: 10px;
+  }
+  .msg-emoji-trigger {
+    width: 34px;
+    height: 34px;
+    min-height: 34px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+  }
+}

@@ -241,6 +241,44 @@ button { border: 0; }
   line-height: 1.6;
 }
 
+.msg-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.msg-inline-setting {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--msg-border);
+  border-radius: 14px;
+  background: var(--msg-soft);
+}
+
+.msg-inline-setting span {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted, #aab2c8);
+}
+
+.msg-inline-setting select {
+  border: 1px solid var(--msg-border);
+  border-radius: 10px;
+  background: var(--msg-input-bg);
+  color: var(--fg, #e8eaf0);
+  padding: 6px 28px 6px 10px;
+  outline: none;
+}
+
+.msg-inline-setting select:focus {
+  border-color: var(--msg-border-strong);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent, #6ce0b0) 14%, transparent);
+}
+
 .msg-topbar-btn,
 .msg-send-btn,
 .msg-delete-btn {
@@ -578,6 +616,7 @@ button { border: 0; }
   }
 
   .msg-topbar,
+  .msg-topbar-actions,
   .msg-compose-head,
   .msg-compose-row,
   .msg-meta,
@@ -1937,5 +1976,27 @@ button { border: 0; }
   .msg-form-info {
     font-size: 12px !important;
     line-height: 1.35 !important;
+  }
+}
+
+
+@media (max-width: 720px) {
+  .msg-topbar-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .msg-inline-setting {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .msg-inline-setting select,
+  .msg-topbar-btn {
+    width: 100%;
+  }
+
+  .msg-list {
+    padding-bottom: 8px;
   }
 }

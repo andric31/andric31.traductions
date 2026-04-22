@@ -1,8 +1,9 @@
 (() => {
   const API_URL = '/api/messages';
-  const REFRESH_MS = 7000;
+  const DEFAULT_REFRESH_MS = 7000;
   const NICK_KEY = 'andric31_messages_nickname';
   const ROOM_KEY = 'andric31_messages_room';
+  const REFRESH_KEY = 'andric31_messages_refresh_ms';
   const REPLY_PREFIX = '[[reply:';
   const REACT_KEY = 'andric31_messages_reactions';
   const EMOJIS = ['😀','😁','😂','🤣','😊','😍','🥰','😘','😎','🤔','😅','😢','😭','😡','👍','👎','👏','🙏','🔥','✅','❌','🎉','💬','❤️'];
@@ -31,6 +32,7 @@
     replyPreview: document.getElementById('replyPreview'),
     replyAuthor: document.getElementById('replyAuthor'),
     replyExcerpt: document.getElementById('replyExcerpt'),
+    refreshDelay: document.getElementById('refreshDelaySelect'),
     cancelReply: document.getElementById('cancelReplyBtn'),
   };
 
@@ -39,6 +41,7 @@
   let lastRenderedMessageId = null;
   let replyState = null;
   let openMessageId = null;
+  let keepPinnedToBottom = true;
 
   function escapeHtml(value) {
     return String(value ?? '')
@@ -218,6 +221,42 @@
     els.replyExcerpt.textContent = replyState.excerpt;
   }
 
+
+  function getRefreshDelay() {
+    const raw = Number(localStorage.getItem(REFRESH_KEY) || DEFAULT_REFRESH_MS);
+    const allowed = new Set([3000, 5000, 7000, 10000, 15000, 30000]);
+    return allowed.has(raw) ? raw : DEFAULT_REFRESH_MS;
+  }
+
+  function syncRefreshDelayControl() {
+    if (!els.refreshDelay) return;
+    els.refreshDelay.value = String(getRefreshDelay());
+  }
+
+  function isMobileViewport() {
+    return window.matchMedia('(max-width: 1080px)').matches;
+  }
+
+  function getLastMessageElement() {
+    return els.list?.lastElementChild || null;
+  }
+
+  function keepLastMessageVisible({ force = false } = {}) {
+    const last = getLastMessageElement();
+    if (!last) return;
+    if (!force && !keepPinnedToBottom && !isNearBottom()) return;
+    const run = () => {
+      last.scrollIntoView({ block: 'end', inline: 'nearest', behavior: force ? 'smooth' : 'auto' });
+      els.list.scrollTop = els.list.scrollHeight;
+    };
+    run();
+    if (isMobileViewport()) {
+      requestAnimationFrame(run);
+      setTimeout(run, 120);
+      setTimeout(run, 260);
+    }
+  }
+
   function setReplyFromItem(item) {
     const parsed = parseMessage(item?.message);
     replyState = {
@@ -307,6 +346,7 @@
 
   function render() {
     const previousLastId = lastRenderedMessageId;
+    const shouldStickToBottom = keepPinnedToBottom || isNearBottom();
     const nextLastId = messages.length ? String(messages[messages.length - 1].id ?? '') : null;
 
     els.list.innerHTML = '';
@@ -395,7 +435,7 @@
 
     lastRenderedMessageId = nextLastId;
     const hasNewTail = previousLastId !== nextLastId;
-    requestAnimationFrame(() => scrollToBottom({ force: hasNewTail || !previousLastId }));
+    requestAnimationFrame(() => keepLastMessageVisible({ force: hasNewTail || !previousLastId || shouldStickToBottom }));
   }
 
   async function fetchMessages({ silent = false } = {}) {
@@ -453,7 +493,7 @@
       toggleEmojiPicker(false);
       setInfo('Message envoyé.', 'success');
       await fetchMessages({ silent: true });
-      scrollToBottom({ force: true });
+      keepLastMessageVisible({ force: true });
     } catch (err) {
       setInfo(err.message || 'Erreur pendant l’envoi.', 'error');
     } finally {
@@ -481,13 +521,14 @@
   }
 
   function scrollToBottom({ force = false } = {}) {
+    keepPinnedToBottom = true;
     if (!force && !isNearBottom()) return;
-    els.list.scrollTop = els.list.scrollHeight;
+    keepLastMessageVisible({ force: true });
   }
 
   function startAutoRefresh() {
     if (refreshTimer) clearInterval(refreshTimer);
-    refreshTimer = setInterval(() => fetchMessages({ silent: true }), REFRESH_MS);
+    refreshTimer = setInterval(() => fetchMessages({ silent: true }), getRefreshDelay());
   }
 
   function init() {
@@ -496,14 +537,33 @@
     renderSidebarRooms();
     renderEmojiPicker();
     updateReplyPreview();
+    syncRefreshDelayControl();
 
     els.form.addEventListener('submit', postMessage);
     els.refresh.addEventListener('click', () => fetchMessages());
+    els.refreshDelay?.addEventListener('change', () => {
+      localStorage.setItem(REFRESH_KEY, String(Number(els.refreshDelay.value) || DEFAULT_REFRESH_MS));
+      startAutoRefresh();
+      setInfo(`Actualisation auto : ${Math.round(getRefreshDelay() / 1000)} s.`, 'success');
+    });
     els.scrollBottom.addEventListener('click', () => scrollToBottom({ force: true }));
     els.cancelReply.addEventListener('click', clearReply);
     els.emojiToggle.addEventListener('click', () => toggleEmojiPicker());
     document.addEventListener('click', (evt) => {
       if (!els.emojiPicker.contains(evt.target) && evt.target !== els.emojiToggle) toggleEmojiPicker(false);
+    });
+    els.list.addEventListener('scroll', () => {
+      keepPinnedToBottom = isNearBottom();
+    }, { passive: true });
+    window.addEventListener('resize', () => {
+      if (keepPinnedToBottom) keepLastMessageVisible({ force: true });
+    }, { passive: true });
+    window.visualViewport?.addEventListener('resize', () => {
+      if (keepPinnedToBottom) keepLastMessageVisible({ force: true });
+    }, { passive: true });
+    els.message.addEventListener('focus', () => {
+      keepPinnedToBottom = true;
+      keepLastMessageVisible({ force: true });
     });
     els.message.addEventListener('input', () => {
       const left = 500 - els.message.value.length;

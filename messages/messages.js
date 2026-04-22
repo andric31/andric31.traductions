@@ -567,6 +567,7 @@
 
     els.form.addEventListener('submit', postMessage);
     els.refresh.addEventListener('click', () => fetchMessages());
+    els.refreshDelay?.addEventListener('click', (evt) => evt.stopPropagation());
     els.refreshDelay?.addEventListener('change', () => {
       localStorage.setItem(REFRESH_KEY, String(Number(els.refreshDelay.value) || DEFAULT_REFRESH_MS));
       startAutoRefresh();

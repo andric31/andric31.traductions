@@ -147,6 +147,55 @@ button { border: 0; }
 
 .msg-room-button { cursor: pointer; }
 
+.msg-room-refresh-wrap {
+  display: grid;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.msg-room-refresh-btn {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.msg-room-refresh-btn .msg-room-icon,
+.msg-room-refresh-btn .msg-room-copy {
+  pointer-events: none;
+}
+
+.msg-refresh-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--msg-border);
+  background: color-mix(in srgb, var(--msg-soft) 72%, transparent);
+  color: var(--muted, #aab2c8);
+}
+
+.msg-refresh-inline span {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+.msg-refresh-inline select {
+  min-width: 84px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--msg-border);
+  background: var(--msg-input-bg);
+  color: var(--fg, #e8eaf0);
+}
+
 .msg-room-icon {
   width: 34px;
   height: 34px;

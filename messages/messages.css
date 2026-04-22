@@ -343,7 +343,8 @@ button { border: 0; }
   align-content: start;
   gap: 10px;
   overscroll-behavior: contain;
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
+  overflow-anchor: none;
 }
 
 .msg-item {

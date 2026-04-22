@@ -42,6 +42,7 @@
   let replyState = null;
   let openMessageId = null;
   let keepPinnedToBottom = true;
+  let lastMessagesSignature = '';
 
   function escapeHtml(value) {
     return String(value ?? '')
@@ -347,6 +348,20 @@
     });
   }
 
+
+  function buildMessagesSignature(list) {
+    try {
+      return (Array.isArray(list) ? list : []).map((item) => [
+        item?.id ?? '',
+        item?.created_at ?? '',
+        item?.nickname ?? '',
+        item?.message ?? '',
+      ].join('¦')).join('||');
+    } catch {
+      return String(Date.now());
+    }
+  }
+
   function render() {
     const previousLastId = lastRenderedMessageId;
     const shouldStickToBottom = keepPinnedToBottom || isNearBottom();
@@ -449,8 +464,16 @@
       const res = await fetch(`${API_URL}?limit=80&room=${encodeURIComponent(room)}`, { cache: 'no-store', credentials: 'same-origin' });
       const data = await res.json();
       if (!res.ok || !data?.ok) throw new Error(data?.error || 'Erreur de chargement');
-      messages = Array.isArray(data.messages) ? data.messages : [];
-      render();
+      const nextMessages = Array.isArray(data.messages) ? data.messages : [];
+      const nextSignature = buildMessagesSignature(nextMessages);
+      const roomChanged = room !== (localStorage.getItem('__andric31_last_room_rendered') || '');
+      const shouldRerender = roomChanged || nextSignature !== lastMessagesSignature;
+      messages = nextMessages;
+      if (shouldRerender) {
+        lastMessagesSignature = nextSignature;
+        localStorage.setItem('__andric31_last_room_rendered', room);
+        render();
+      }
       setStatus(`${roomLabel(room)} · actif`, 'ok');
       if (els.roomKicker) els.roomKicker.textContent = roomLabel(room);
       renderSidebarRooms();
@@ -526,7 +549,7 @@
   function scrollToBottom({ force = false } = {}) {
     keepPinnedToBottom = true;
     if (!force && !isNearBottom()) return;
-    keepLastMessageVisible({ force: true, smooth: Boolean(force) });
+    keepLastMessageVisible({ force: true, smooth: false });
   }
 
   function startAutoRefresh() {

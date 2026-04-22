@@ -241,12 +241,15 @@
     return els.list?.lastElementChild || null;
   }
 
-  function keepLastMessageVisible({ force = false } = {}) {
+  function keepLastMessageVisible({ force = false, smooth = false } = {}) {
     const last = getLastMessageElement();
     if (!last) return;
     if (!force && !keepPinnedToBottom && !isNearBottom()) return;
     const run = () => {
-      last.scrollIntoView({ block: 'end', inline: 'nearest', behavior: force ? 'smooth' : 'auto' });
+      els.list.scrollTop = els.list.scrollHeight;
+      if (smooth) {
+        last.scrollIntoView({ block: 'end', inline: 'nearest', behavior: 'smooth' });
+      }
       els.list.scrollTop = els.list.scrollHeight;
     };
     run();
@@ -435,7 +438,7 @@
 
     lastRenderedMessageId = nextLastId;
     const hasNewTail = previousLastId !== nextLastId;
-    requestAnimationFrame(() => keepLastMessageVisible({ force: hasNewTail || !previousLastId || shouldStickToBottom }));
+    requestAnimationFrame(() => keepLastMessageVisible({ force: hasNewTail || !previousLastId || shouldStickToBottom, smooth: false }));
   }
 
   async function fetchMessages({ silent = false } = {}) {
@@ -493,7 +496,7 @@
       toggleEmojiPicker(false);
       setInfo('Message envoyé.', 'success');
       await fetchMessages({ silent: true });
-      keepLastMessageVisible({ force: true });
+      keepLastMessageVisible({ force: true, smooth: false });
     } catch (err) {
       setInfo(err.message || 'Erreur pendant l’envoi.', 'error');
     } finally {
@@ -523,7 +526,7 @@
   function scrollToBottom({ force = false } = {}) {
     keepPinnedToBottom = true;
     if (!force && !isNearBottom()) return;
-    keepLastMessageVisible({ force: true });
+    keepLastMessageVisible({ force: true, smooth: Boolean(force) });
   }
 
   function startAutoRefresh() {
@@ -556,14 +559,14 @@
       keepPinnedToBottom = isNearBottom();
     }, { passive: true });
     window.addEventListener('resize', () => {
-      if (keepPinnedToBottom) keepLastMessageVisible({ force: true });
+      if (keepPinnedToBottom) keepLastMessageVisible({ force: true, smooth: false });
     }, { passive: true });
     window.visualViewport?.addEventListener('resize', () => {
-      if (keepPinnedToBottom) keepLastMessageVisible({ force: true });
+      if (keepPinnedToBottom) keepLastMessageVisible({ force: true, smooth: false });
     }, { passive: true });
     els.message.addEventListener('focus', () => {
       keepPinnedToBottom = true;
-      keepLastMessageVisible({ force: true });
+      keepLastMessageVisible({ force: true, smooth: true });
     });
     els.message.addEventListener('input', () => {
       const left = 500 - els.message.value.length;

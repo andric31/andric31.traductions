@@ -148,16 +148,19 @@ button { border: 0; }
 .msg-room-button { cursor: pointer; }
 
 .msg-room-refresh-wrap {
-  display: grid;
-  gap: 8px;
-  align-items: stretch;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
 }
 
 .msg-room-refresh-btn {
   display: flex;
   width: 100%;
+  min-width: 0;
+  flex: 1 1 auto;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   padding: 0;
   background: transparent;
   color: inherit;
@@ -169,27 +172,32 @@ button { border: 0; }
   pointer-events: none;
 }
 
+.msg-room-refresh-btn .msg-room-copy small {
+  font-size: 11px;
+}
+
 .msg-refresh-inline {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 14px;
+  gap: 8px;
+  flex: 0 0 auto;
+  padding: 6px 8px;
+  border-radius: 12px;
   border: 1px solid var(--msg-border);
-  background: color-mix(in srgb, var(--msg-soft) 72%, transparent);
+  background: color-mix(in srgb, var(--msg-soft) 58%, transparent);
   color: var(--muted, #aab2c8);
 }
 
 .msg-refresh-inline span {
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 800;
   letter-spacing: .02em;
+  white-space: nowrap;
 }
 
 .msg-refresh-inline select {
-  min-width: 84px;
-  padding: 7px 10px;
+  min-width: 72px;
+  padding: 5px 8px;
   border-radius: 10px;
   border: 1px solid var(--msg-border);
   background: var(--msg-input-bg);
@@ -2048,5 +2056,17 @@ button { border: 0; }
 
   .msg-list {
     padding-bottom: 8px;
+  }
+}
+
+
+@media (max-width: 1200px) {
+  .msg-room-refresh-wrap {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .msg-refresh-inline {
+    align-self: flex-start;
   }
 }

@@ -1001,6 +1001,18 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
   margin:0 !important;
 }
 
+/* Centre proprement les retours à la ligne dans translationsExtra */
+.btnMainRowSide .extraLinkBtn{
+  text-align:center;
+  white-space:pre-line;
+  line-height:1.35;
+}
+
+.quickAutoTile .quickAutoTitleRow,
+.quickAutoTile .quickAutoSub{
+  white-space:pre-line;
+}
+
 
 #archiveBox{
   margin-top:0 !important;

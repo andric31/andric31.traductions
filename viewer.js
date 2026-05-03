@@ -1313,8 +1313,10 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
     const gridBottom = gridEl ? gridEl.getBoundingClientRect().bottom : Infinity;
 
     // Deux sécurités : bas réel de la page OU bas de la grille visible.
-    const nearPageBottom = scrollTop + viewportH >= scrollH - 900;
-    const nearGridBottom = gridBottom <= viewportH + 900;
+    const AUTO_SCROLL_TRIGGER_PX = 250;
+    
+    const nearPageBottom = scrollTop + viewportH >= scrollH - AUTO_SCROLL_TRIGGER_PX;
+    const nearGridBottom = gridBottom <= viewportH + AUTO_SCROLL_TRIGGER_PX;
     if (!nearPageBottom && !nearGridBottom) return;
 
     state.infiniteLoading = true;

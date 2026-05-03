@@ -37,8 +37,9 @@
     filterStatus: "all",
     filterTags: [],
     cols: "auto",
-    pageSize: 50,
+    pageSize: "auto",
     visibleCount: 0,
+    infiniteLoading: false,
   };
 
   // =========================
@@ -1245,6 +1246,95 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
 
 
   // =========================
+  // Affichage auto + scroll infini
+  // =========================
+
+  const AUTO_PAGE_STEP = 50;
+
+  function getCurrentColsCount() {
+    const gridEl = $("#grid");
+    if (!gridEl) return 1;
+
+    if (state.cols !== "auto") {
+      return Math.max(1, Math.min(10, parseInt(state.cols, 10) || 1));
+    }
+
+    try {
+      const tpl = getComputedStyle(gridEl).gridTemplateColumns || "";
+      const count = tpl.split(" ").filter(Boolean).length;
+      return Math.max(1, count || 1);
+    } catch {
+      return 1;
+    }
+  }
+
+  function alignVisibleCount(count, total) {
+    const cols = getCurrentColsCount();
+    let n = Math.max(0, Math.ceil(Number(count || 0) / cols) * cols);
+    if (n >= total) return total;
+    return Math.min(total, n);
+  }
+
+  function getPageStep() {
+    if (state.pageSize === "all") return Infinity;
+    if (state.pageSize === "auto") return AUTO_PAGE_STEP;
+    const n = parseInt(state.pageSize, 10);
+    return !isNaN(n) && n > 0 ? n : AUTO_PAGE_STEP;
+  }
+
+  function growVisibleCount() {
+    const total = state.filtered.length;
+    if (!total || state.pageSize === "all") return false;
+
+    const current = state.visibleCount || 0;
+    const next = alignVisibleCount(current + getPageStep(), total);
+    if (next <= current) return false;
+
+    state.visibleCount = next;
+    renderGrid();
+    return true;
+  }
+
+  function maybeAutoLoadMore() {
+    // Scroll infini uniquement en mode "Afficher par : Auto".
+    if (state.infiniteLoading || state.pageSize !== "auto") return;
+    if (!state.filtered.length || state.visibleCount >= state.filtered.length) return;
+
+    const doc = document.scrollingElement || document.documentElement || document.body;
+    const scrollTop = window.scrollY || window.pageYOffset || doc.scrollTop || 0;
+    const viewportH = window.innerHeight || doc.clientHeight || 0;
+    const scrollH = Math.max(
+      doc.scrollHeight || 0,
+      document.documentElement?.scrollHeight || 0,
+      document.body?.scrollHeight || 0
+    );
+
+    const gridEl = $("#grid");
+    const gridBottom = gridEl ? gridEl.getBoundingClientRect().bottom : Infinity;
+
+    // Deux sécurités : bas réel de la page OU bas de la grille visible.
+    const nearPageBottom = scrollTop + viewportH >= scrollH - 900;
+    const nearGridBottom = gridBottom <= viewportH + 900;
+    if (!nearPageBottom && !nearGridBottom) return;
+
+    state.infiniteLoading = true;
+    requestAnimationFrame(() => {
+      growVisibleCount();
+      state.infiniteLoading = false;
+      // Si le navigateur est encore proche du bas après ajout, on continue.
+      requestAnimationFrame(maybeAutoLoadMore);
+    });
+  }
+
+  function bindInfiniteScroll() {
+    window.addEventListener("scroll", maybeAutoLoadMore, { passive: true });
+    window.addEventListener("wheel", maybeAutoLoadMore, { passive: true });
+    window.addEventListener("touchmove", maybeAutoLoadMore, { passive: true });
+    window.addEventListener("resize", maybeAutoLoadMore, { passive: true });
+  }
+
+
+  // =========================
   // Hover gallery (miniatures F95 sur les tuiles)
   // =========================
   const HOVER_GALLERY = {
@@ -1469,9 +1559,10 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
     const total = state.filtered.length;
 
     if (!state.visibleCount || state.visibleCount < 0) {
-      state.visibleCount = state.pageSize === "all" ? total : Math.min(total, state.pageSize);
+      state.visibleCount = state.pageSize === "all" ? total : alignVisibleCount(getPageStep(), total);
     }
 
+    state.visibleCount = state.pageSize === "all" ? total : alignVisibleCount(state.visibleCount, total);
     const limit = state.pageSize === "all" ? total : Math.min(total, state.visibleCount);
 
     const frag = document.createDocumentFragment();
@@ -1541,8 +1632,8 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
 
     if (limit < total && state.pageSize !== "all") {
       const rest = total - limit;
-      const step = typeof state.pageSize === "number" ? state.pageSize : 50;
-      const more = Math.min(step, rest);
+      const nextLimit = alignVisibleCount(limit + getPageStep(), total);
+      const more = Math.min(nextLimit - limit, rest);
 
       const wrap = document.createElement("div");
       wrap.className = "load-more-wrap";
@@ -1551,7 +1642,7 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
       btn.className = "load-more-btn";
       btn.textContent = `Afficher +${more} (${rest} restants)`;
       btn.addEventListener("click", () => {
-        state.visibleCount = Math.min(total, limit + step);
+        state.visibleCount = nextLimit;
         renderGrid();
       });
 
@@ -1560,6 +1651,7 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
     }
 
     updateStats();
+    requestAnimationFrame(maybeAutoLoadMore);
   }
 
   // =========================
@@ -1608,9 +1700,10 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
     pageSizeSel.addEventListener("change", (e) => {
       const v = e.target.value;
       if (v === "all") state.pageSize = "all";
+      else if (v === "auto") state.pageSize = "auto";
       else {
         const n = parseInt(v, 10);
-        state.pageSize = !isNaN(n) && n > 0 ? n : 50;
+        state.pageSize = !isNaN(n) && n > 0 ? n : AUTO_PAGE_STEP;
       }
       state.visibleCount = 0;
       renderGrid();
@@ -1620,6 +1713,10 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
   $("#cols")?.addEventListener("change", async (e) => {
     state.cols = e.target.value || "auto";
     applyGridCols();
+    if (state.pageSize !== "all") {
+      state.visibleCount = alignVisibleCount(state.visibleCount || getPageStep(), state.filtered.length);
+      renderGrid();
+    }
     await setViewerCols(state.cols);
   });
 
@@ -1665,9 +1762,9 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
       window.ViewerMenuExtension?.close?.();
     } catch {}
 
-    state.pageSize = 50;
+    state.pageSize = "auto";
     const ps = $("#pageSize");
-    if (ps) ps.value = "50";
+    if (ps) ps.value = "auto";
 
     GAME_STATS.loaded = false;
     GAME_STATS.views.clear();
@@ -1679,6 +1776,8 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
 
     init();
   });
+
+  bindInfiniteScroll();
 
   // =========================
   // Init
@@ -1696,6 +1795,9 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
       state.cols = await getViewerCols();
       const colsSel = $("#cols");
       if (colsSel) colsSel.value = state.cols;
+
+      const pageSizeSelInit = $("#pageSize");
+      if (pageSizeSelInit) pageSizeSelInit.value = state.pageSize;
 
       const raw = await loadList();
       state.all = Array.isArray(raw) ? raw.map(normalizeGame) : [];

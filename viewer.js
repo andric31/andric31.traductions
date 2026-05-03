@@ -1312,8 +1312,8 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
     const gridEl = $("#grid");
     const gridBottom = gridEl ? gridEl.getBoundingClientRect().bottom : Infinity;
 
-    // Deux sécurités : bas réel de la page OU bas de la grille visible.
-    const AUTO_SCROLL_TRIGGER_PX = 250;
+    // Bas de page auto.
+    const AUTO_SCROLL_TRIGGER_PX = 120;
     
     const nearPageBottom = scrollTop + viewportH >= scrollH - AUTO_SCROLL_TRIGGER_PX;
     const nearGridBottom = gridBottom <= viewportH + AUTO_SCROLL_TRIGGER_PX;

@@ -269,14 +269,14 @@
   <main class="page">
 
     <div class="checker-panel">
-      <h2>🎮 Choisir le fichier .exe du jeu</h2>
+      <h2>📁 Choisir le dossier contenant le .exe du jeu</h2>
       <p>
-        Glisse-dépose le dossier principal du jeu, ou clique sur le bouton pour choisir directement le fichier <code>.exe</code> du jeu.
+        Choisis le dossier principal du jeu, celui où se trouve le fichier <code>.exe</code>.
         L’outil vérifie uniquement la structure utile, sans afficher la liste des fichiers.
       </p>
 
       <div class="step-flow" aria-label="Étapes de vérification">
-        <div id="step1" class="step-pill active"><span class="num">1</span> Dossier ou .exe</div>
+        <div id="step1" class="step-pill active"><span class="num">1</span> Dossier du jeu</div>
         <div id="step2" class="step-pill"><span class="num">2</span> Recherche game/tl</div>
         <div id="step3" class="step-pill"><span class="num">3</span> Résultat</div>
       </div>
@@ -284,19 +284,18 @@
       <div id="dropZone" class="drop-zone">
         <div class="drop-icon">📂</div>
         <strong>Glisse-dépose le dossier du jeu ici</strong>
-        <span>Ou choisis directement le fichier .exe du jeu avec le bouton.</span>
+        <span>Le bon dossier est celui où se trouve le fichier .exe du jeu.</span>
 
         <div class="button-row">
-          <label class="primary-btn" for="exeInput">🎮 Choisir le fichier .exe du jeu</label>
+          <label class="primary-btn" for="folderInput">📁 Choisir le dossier contenant le .exe</label>
           <button id="resetBtn" class="secondary-btn" type="button" disabled>Réinitialiser</button>
         </div>
 
         <input id="folderInput" class="file-input" type="file" webkitdirectory directory multiple />
-        <input id="exeInput" class="file-input" type="file" accept=".exe" />
       </div>
 
       <div class="callout tip">
-        ✅ <strong>Conseil :</strong> choisis le fichier <code>.exe</code> pour confirmer le bon jeu. Pour la vérification complète, glisse-dépose ensuite le dossier qui contient ce <code>.exe</code>.
+        ✅ <strong>Conseil :</strong> sélectionne le dossier qui contient le fichier <code>.exe</code> du jeu. Si aucun <code>.exe</code> n’est détecté, c’est probablement que le mauvais dossier a été choisi.
       </div>
 
       <div id="resultAnchor"></div>
@@ -329,7 +328,6 @@
 
   <script>
     const folderInput = document.getElementById("folderInput");
-    const exeInput = document.getElementById("exeInput");
     const dropZone = document.getElementById("dropZone");
     const report = document.getElementById("report");
     const resultAnchor = document.getElementById("resultAnchor");
@@ -355,30 +353,10 @@
       analyzeFiles(files, "selection", false);
     });
 
-    exeInput.addEventListener("change", async function() {
-      const exeFile = Array.from(exeInput.files || [])[0];
-
-      if (!exeFile) return;
-
-      if (!exeFile.name.toLowerCase().endsWith(".exe")) {
-        setSteps(3);
-        showMessage(
-          "warn",
-          "⚠️ Mauvais fichier choisi",
-          "Choisis le fichier .exe du jeu. Exemple : NomDuJeu.exe"
-        );
-        scrollToReport();
-        return;
-      }
-
-      await analyzeFromExe(exeFile);
-    });
-
     resetBtn.addEventListener("click", function(event) {
       event.preventDefault();
       event.stopPropagation();
       folderInput.value = "";
-      exeInput.value = "";
       report.innerHTML = "";
       report.classList.remove("show");
       resetBtn.disabled = true;
@@ -438,7 +416,7 @@
         showMessage(
           "warn",
           "⚠️ Dépôt non lisible",
-          "Le navigateur n’a pas donné accès au dossier déposé. Utilise le bouton « Choisir le fichier .exe du jeu » ou réessaie le dépôt du dossier."
+          "Le navigateur n’a pas donné accès au dossier déposé. Utilise le bouton « Choisir le dossier contenant le .exe » ou réessaie le dépôt du dossier."
         );
         scrollToReport();
         return;
@@ -581,91 +559,6 @@
       return entries;
     }
 
-    async function analyzeFromExe(exeFile) {
-      resetBtn.disabled = false;
-      report.classList.add("show");
-      setSteps(3);
-
-      const exePath = normalizePath(exeFile.webkitRelativePath || exeFile.name);
-      exeFile._relativePath = exePath;
-
-      const result = {
-        level: "warn",
-        title: "✅ .exe détecté",
-        message: "Le fichier .exe du jeu est bien reconnu. La page ne peut pas lire automatiquement les fichiers autour de ce .exe, donc la vérification game/tl reste limitée.",
-        anyExe: true,
-        hasGameTl: false,
-        preferredLanguageDir: "",
-        rpyCount: 0,
-        jsonCount: 0,
-        emptyRpyCount: 0,
-        problems: [],
-        warnings: [
-          "Vérification limitée : le navigateur ne donne accès qu’au fichier .exe sélectionné, pas au dossier complet du jeu.",
-          "Pour lancer la vérification complète, glisse-dépose le dossier du jeu dans la grande zone bleue."
-        ],
-        advice: [
-          "Le bon dossier à déposer est celui qui contient ce fichier .exe.",
-          "Après le dépôt du dossier, l’outil pourra vérifier game/tl et les fichiers .rpy."
-        ],
-        summary: [
-          "✅ .exe détecté",
-          "",
-          "Fichier choisi : " + exeFile.name,
-          "Fichier .exe détecté : oui",
-          "Chemin game/tl détecté : non vérifié avec le choix .exe seul",
-          "Dossier de traduction : non vérifié avec le choix .exe seul",
-          "Fichiers .rpy détectés : non vérifié avec le choix .exe seul",
-          "",
-          "Avertissements :",
-          "- Le navigateur donne accès au fichier .exe choisi, mais pas automatiquement au dossier complet du jeu.",
-          "- Pour une vérification complète, glisse-dépose le dossier qui contient ce .exe.",
-          "",
-          "Conseil :",
-          "- Le bon dossier à déposer est celui où se trouve le fichier .exe du jeu."
-        ].join("\n")
-      };
-
-      report.innerHTML = renderReport(result);
-      bindCopyButton();
-      scrollToReport();
-    }
-
-    async function collectDirectoryHandle(directoryHandle, pathPrefix, output) {
-      if (!directoryHandle || output.length >= MAX_FILES_TO_SCAN) return;
-
-      for await (const [name, handle] of directoryHandle.entries()) {
-        if (output.length >= MAX_FILES_TO_SCAN) return;
-
-        if (handle.kind === "directory") {
-          await collectDirectoryHandle(handle, pathPrefix + name + "/", output);
-          continue;
-        }
-
-        await addUsefulHandleFile(handle, pathPrefix, output);
-      }
-    }
-
-    async function addUsefulHandleFile(handle, pathPrefix, output) {
-      const lower = handle.name.toLowerCase();
-
-      const useful =
-        lower.endsWith(".rpy") ||
-        lower.endsWith(".json") ||
-        lower.endsWith(".txt") ||
-        lower.endsWith(".exe");
-
-      if (!useful) return;
-
-      try {
-        const file = await handle.getFile();
-        file._relativePath = normalizePath(pathPrefix + handle.name);
-        output.push(file);
-      } catch (error) {
-        console.warn("Fichier ignoré, lecture impossible :", handle.name, error);
-      }
-    }
-
     function analyzeFiles(files, source, stopped) {
       resetBtn.disabled = false;
       report.classList.add("show");
@@ -749,7 +642,7 @@
       }
 
       if (!anyExe) {
-        warnings.push("Aucun fichier .exe détecté. Vérifie que tu as choisi le bon fichier .exe ou le dossier principal du jeu.");
+        warnings.push("Aucun fichier .exe détecté. Tu n’as probablement pas choisi le dossier principal du jeu. Choisis le dossier où se trouve le fichier .exe.");
       }
 
       if (!hasGameTl && !hasTlRoot && !preferredLanguageDir) {
@@ -792,7 +685,7 @@
       const summaryLines = [
         title,
         "",
-        "Élément choisi : " + (rootName || "sélection"),
+        "Dossier choisi : " + (rootName || "dossier sélectionné"),
         "Fichier .exe détecté : " + (anyExe ? "oui" : "non"),
         "Chemin game/tl détecté : " + (hasGameTl ? "oui" : "non"),
         "Dossier de traduction : " + (preferredLanguageDir || "non détecté clairement"),

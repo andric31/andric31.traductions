@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vérifier une traduction Ren'Py</title>
+  <script src="/theme-init.js"></script>
+  <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=1">
+  <link rel="stylesheet" href="/themes.css" />
+  <link rel="stylesheet" href="wiki.css" />
+
+  <style>
+    .checker-panel {
+      margin: 24px 0;
+      padding: 22px;
+      border-radius: 22px;
+      border: 1px solid var(--wiki-border);
+      background: linear-gradient(180deg, var(--wiki-card-strong), var(--wiki-card));
+      box-shadow: var(--wiki-shadow);
+    }
+
+    .step-flow {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 18px 0 22px;
+    }
+
+    .step-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--wiki-border);
+      background: var(--wiki-soft);
+      color: var(--wiki-muted);
+      font-weight: 800;
+    }
+
+    .step-pill .num {
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: var(--wiki-soft-strong);
+      border: 1px solid var(--wiki-border);
+      color: var(--wiki-text);
+      flex: 0 0 auto;
+    }
+
+    .step-pill.active {
+      color: var(--wiki-text);
+      border-color: var(--wiki-border-strong);
+      background: var(--wiki-accent-soft);
+    }
+
+    .step-pill.done {
+      color: var(--wiki-text);
+      border-color: color-mix(in srgb, #7bd389 45%, var(--wiki-border) 55%);
+      background: rgba(123,211,137,0.10);
+    }
+
+    .drop-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      min-height: 230px;
+      padding: 30px;
+      margin-top: 18px;
+      border: 2px dashed color-mix(in srgb, var(--accent, #6ce0b0) 55%, #7aa7ff 45%);
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at top left, rgba(122,167,255,0.24), transparent 42%),
+        radial-gradient(circle at bottom right, color-mix(in srgb, var(--accent, #6ce0b0) 24%, transparent), transparent 46%),
+        linear-gradient(180deg, rgba(122,167,255,0.12), var(--wiki-soft));
+      text-align: center;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+      transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+
+    .drop-zone.dragover {
+      transform: translateY(-2px);
+      border-color: var(--wiki-link);
+      background:
+        radial-gradient(circle at top left, rgba(122,167,255,0.34), transparent 44%),
+        radial-gradient(circle at bottom right, color-mix(in srgb, var(--accent, #6ce0b0) 34%, transparent), transparent 48%),
+        linear-gradient(180deg, rgba(122,167,255,0.18), var(--wiki-accent-soft));
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent, #6ce0b0) 14%, transparent), inset 0 0 0 1px rgba(255,255,255,0.06);
+    }
+
+    .drop-icon {
+      width: 72px;
+      height: 72px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 22px;
+      border: 1px solid var(--wiki-border-strong);
+      background: var(--wiki-accent-soft);
+      font-size: 38px;
+      line-height: 1;
+    }
+
+    .file-input { display: none; }
+
+    .button-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .primary-btn,
+    .secondary-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-weight: 800;
+      font-size: 14px;
+      transition: transform .15s ease, opacity .15s ease;
+    }
+
+    .primary-btn {
+      color: #fff;
+      background: linear-gradient(135deg, #3157ff, #7a5cff);
+      border: 1px solid rgba(255,255,255,0.14);
+    }
+
+    .secondary-btn {
+      color: var(--wiki-muted);
+      background: var(--wiki-soft);
+      border: 1px solid var(--wiki-border);
+    }
+
+    .primary-btn:hover,
+    .secondary-btn:hover { transform: translateY(-1px); }
+
+    .primary-btn:disabled,
+    .secondary-btn:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .report {
+      display: none;
+      margin-top: 22px;
+    }
+
+    .report.show { display: block; }
+
+    .status-card {
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid var(--wiki-border);
+      background: var(--wiki-soft);
+      margin-bottom: 16px;
+    }
+
+    .status-card.ok {
+      border-left: 4px solid #7bd389;
+      background: rgba(123,211,137,0.10);
+    }
+
+    .status-card.warn {
+      border-left: 4px solid #f0c36d;
+      background: rgba(240,195,109,0.12);
+    }
+
+    .status-card.err {
+      border-left: 4px solid #ff6b6b;
+      background: rgba(255,107,107,0.10);
+    }
+
+    .status-title {
+      margin: 0 0 8px;
+      font-size: 1.3rem;
+      line-height: 1.25;
+    }
+
+    .status-text {
+      margin: 0;
+      color: var(--wiki-muted);
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .result-item {
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px solid var(--wiki-border);
+      background: color-mix(in srgb, var(--wiki-soft) 72%, transparent);
+    }
+
+    .result-item strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .result-item small {
+      color: var(--wiki-muted);
+      word-break: break-word;
+      line-height: 1.55;
+    }
+
+    .details-list {
+      margin: 10px 0 0;
+      padding-left: 20px;
+    }
+
+    .details-list li { margin: 7px 0; }
+
+    .copy-box {
+      width: 100%;
+      min-height: 140px;
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid var(--wiki-border);
+      background: var(--wiki-card);
+      color: var(--wiki-text);
+      resize: vertical;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .chapter-separator {
+      border: 0;
+      border-top: 2px solid var(--wiki-border);
+      margin: 38px 0 30px;
+    }
+
+    @media (max-width: 760px) {
+      .step-flow { grid-template-columns: 1fr; }
+      .drop-zone {
+        min-height: 210px;
+        padding: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <a class="back" href="index.html">⬅ Retour</a>
+    <h1>🧪 Vérifier une traduction Ren'Py</h1>
+    <p class="subtitle">
+      Cet outil vérifie si une traduction Ren'Py est bien placée dans le dossier du jeu.<br>
+      Les fichiers sont lus uniquement par ton navigateur : rien n’est envoyé sur Internet.
+    </p>
+  </header>
+
+  <main class="page">
+
+    <div class="checker-panel">
+      <h2>📁 Choisir le dossier du jeu</h2>
+      <p>
+        Glisse-dépose le dossier principal du jeu, celui où se trouve le fichier <code>.exe</code>.
+        L’outil vérifie uniquement la structure utile, sans afficher la liste des fichiers.
+      </p>
+
+      <div class="step-flow" aria-label="Étapes de vérification">
+        <div id="step1" class="step-pill active"><span class="num">1</span> Dossier du jeu</div>
+        <div id="step2" class="step-pill"><span class="num">2</span> Recherche game/tl</div>
+        <div id="step3" class="step-pill"><span class="num">3</span> Résultat</div>
+      </div>
+
+      <div id="dropZone" class="drop-zone">
+        <div class="drop-icon">📂</div>
+        <strong>Glisse-dépose le dossier du jeu ici</strong>
+        <span>La page n’affiche pas les fichiers du dossier.</span>
+
+        <div class="button-row">
+          <label class="primary-btn" for="folderInput">📁 Choisir le dossier du jeu</label>
+          <button id="resetBtn" class="secondary-btn" type="button" disabled>Réinitialiser</button>
+        </div>
+
+        <input id="folderInput" class="file-input" type="file" webkitdirectory directory multiple />
+      </div>
+
+      <div class="callout tip">
+        ✅ <strong>Conseil :</strong> prends simplement le dossier racine du jeu, celui où se trouve le fichier <code>.exe</code>.
+        L’outil affiche uniquement un diagnostic. Si le dépôt bloque, utilise le bouton.
+      </div>
+
+      <div id="resultAnchor"></div>
+      <div id="report" class="report"></div>
+    </div>
+
+    <hr class="chapter-separator" />
+
+    <h2>ℹ️ Ce que l’outil vérifie</h2>
+    <ul>
+      <li>Présence d’un fichier <code>.exe</code>.</li>
+      <li>Présence du dossier <code>game/tl</code>.</li>
+      <li>Présence d’un dossier de traduction dans <code>game/tl</code>.</li>
+      <li>Présence de fichiers <code>.rpy</code>.</li>
+      <li>Détection de fichiers <code>.rpy</code> vides.</li>
+      <li>Détection des fichiers <code>.json</code> présents.</li>
+      <li>Détection possible d’un mauvais emplacement.</li>
+    </ul>
+
+    <div class="callout">
+      💡 <strong>Important :</strong> cet outil ne modifie aucun fichier. Il sert uniquement à aider à comprendre
+      si la traduction est installée au bon endroit.
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <p>© andric31 — Tutos & Aide</p>
+  </footer>
+
+  <script>
+    const folderInput = document.getElementById("folderInput");
+    const dropZone = document.getElementById("dropZone");
+    const report = document.getElementById("report");
+    const resultAnchor = document.getElementById("resultAnchor");
+    const resetBtn = document.getElementById("resetBtn");
+
+    const step1 = document.getElementById("step1");
+    const step2 = document.getElementById("step2");
+    const step3 = document.getElementById("step3");
+
+    const MAX_FILES_TO_SCAN = 6000;
+    const LANGUAGE_HINTS = ["french", "fr", "francais", "français", "fr_zenpy_deepl_andric31"];
+
+    window.addEventListener("dragover", function(event) {
+      event.preventDefault();
+    });
+
+    window.addEventListener("drop", function(event) {
+      event.preventDefault();
+    });
+
+    folderInput.addEventListener("change", function() {
+      const files = Array.from(folderInput.files || []);
+      analyzeFiles(files, "selection", false);
+    });
+
+    resetBtn.addEventListener("click", function(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      folderInput.value = "";
+      report.innerHTML = "";
+      report.classList.remove("show");
+      resetBtn.disabled = true;
+      setSteps(1);
+    });
+
+    dropZone.addEventListener("dragover", function(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      dropZone.classList.add("dragover");
+    });
+
+    dropZone.addEventListener("dragleave", function() {
+      dropZone.classList.remove("dragover");
+    });
+
+    dropZone.addEventListener("drop", async function(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      dropZone.classList.remove("dragover");
+
+      setSteps(2);
+      report.classList.add("show");
+      report.innerHTML = renderLoading();
+
+      const items = Array.from(event.dataTransfer.items || []);
+      const entries = items
+        .map(function(item) {
+          return item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
+        })
+        .filter(Boolean);
+
+      if (!entries.length) {
+        const droppedFiles = Array.from(event.dataTransfer.files || []);
+        analyzeFiles(droppedFiles, "drop", false);
+        return;
+      }
+
+      const files = [];
+      let stopped = false;
+
+      for (const entry of entries) {
+        try {
+          await collectUsefulEntry(entry, "", files);
+        } catch (error) {
+          console.warn("Entrée ignorée pendant le dépôt :", entry && entry.name ? entry.name : entry, error);
+        }
+
+        if (files.length >= MAX_FILES_TO_SCAN) {
+          stopped = true;
+          break;
+        }
+      }
+
+      if (!files.length) {
+        setSteps(3);
+        showMessage(
+          "warn",
+          "⚠️ Dépôt non lisible",
+          "Le navigateur n’a pas donné accès au dossier déposé. Utilise le bouton « Choisir le dossier du jeu », il est plus fiable."
+        );
+        scrollToReport();
+        return;
+      }
+
+      analyzeFiles(files, "drop", stopped);
+    });
+
+    async function collectUsefulEntry(entry, pathPrefix, output) {
+      if (!entry || output.length >= MAX_FILES_TO_SCAN) return;
+
+      if (entry.isFile) {
+        await addUsefulFile(entry, pathPrefix, output, true);
+        return;
+      }
+
+      if (!entry.isDirectory) return;
+
+      const rootPath = pathPrefix + entry.name + "/";
+      const children = await readDirectoryEntries(entry);
+      const names = children.map(function(child) {
+        return child.name.toLowerCase();
+      });
+
+      if (names.includes("game")) {
+        for (const child of children) {
+          if (output.length >= MAX_FILES_TO_SCAN) return;
+
+          if (child.isFile && child.name.toLowerCase().endsWith(".exe")) {
+            await addUsefulFile(child, rootPath, output, true);
+          }
+        }
+
+        const gameEntry = children.find(function(child) {
+          return child.isDirectory && child.name.toLowerCase() === "game";
+        });
+
+        if (!gameEntry) return;
+
+        const gameChildren = await readDirectoryEntries(gameEntry);
+        const tlEntry = gameChildren.find(function(child) {
+          return child.isDirectory && child.name.toLowerCase() === "tl";
+        });
+
+        if (tlEntry) {
+          await collectTranslationTree(tlEntry, rootPath + "game/tl/", output);
+        }
+
+        return;
+      }
+
+      if (names.includes("tl")) {
+        const tlEntry = children.find(function(child) {
+          return child.isDirectory && child.name.toLowerCase() === "tl";
+        });
+
+        if (tlEntry) {
+          await collectTranslationTree(tlEntry, rootPath + "tl/", output);
+        }
+
+        return;
+      }
+
+      await collectTranslationTree(entry, rootPath, output);
+    }
+
+    async function collectTranslationTree(entry, pathPrefix, output) {
+      if (!entry || output.length >= MAX_FILES_TO_SCAN) return;
+
+      if (entry.isFile) {
+        await addUsefulFile(entry, pathPrefix, output, false);
+        return;
+      }
+
+      if (!entry.isDirectory) return;
+
+      let children = [];
+
+      try {
+        children = await readDirectoryEntries(entry);
+      } catch (error) {
+        console.warn("Dossier ignoré, lecture impossible :", entry.name, error);
+        return;
+      }
+
+      for (const child of children) {
+        if (output.length >= MAX_FILES_TO_SCAN) return;
+
+        if (child.isDirectory) {
+          await collectTranslationTree(child, pathPrefix + child.name + "/", output);
+        } else {
+          await collectTranslationTree(child, pathPrefix, output);
+        }
+      }
+    }
+
+    async function addUsefulFile(entry, pathPrefix, output, allowExe) {
+      const lower = entry.name.toLowerCase();
+
+      const useful =
+        lower.endsWith(".rpy") ||
+        lower.endsWith(".json") ||
+        lower.endsWith(".txt") ||
+        (allowExe && lower.endsWith(".exe"));
+
+      if (!useful) return;
+
+      try {
+        const file = await new Promise(function(resolve, reject) {
+          entry.file(resolve, reject);
+        });
+
+        file._relativePath = normalizePath(pathPrefix + entry.name);
+        output.push(file);
+      } catch (error) {
+        console.warn("Fichier ignoré, lecture impossible :", entry.name, error);
+      }
+    }
+
+    async function readDirectoryEntries(entry) {
+      const reader = entry.createReader();
+      const entries = [];
+
+      while (true) {
+        let batch = [];
+
+        try {
+          batch = await new Promise(function(resolve, reject) {
+            reader.readEntries(resolve, reject);
+          });
+        } catch (error) {
+          console.warn("Lecture du dossier impossible :", entry && entry.name ? entry.name : entry, error);
+          break;
+        }
+
+        if (!batch.length) break;
+        entries.push(...batch);
+      }
+
+      return entries;
+    }
+
+    function analyzeFiles(files, source, stopped) {
+      resetBtn.disabled = false;
+      report.classList.add("show");
+      setSteps(2);
+      report.innerHTML = renderLoading();
+
+      setTimeout(function() {
+        try {
+          const normalizedFiles = files.map(function(file) {
+            return {
+              path: normalizePath(file._relativePath || file.webkitRelativePath || file.name),
+              name: file.name,
+              size: file.size
+            };
+          });
+
+          const result = buildReport(normalizedFiles, source || "selection", Boolean(stopped));
+          setSteps(3);
+          report.innerHTML = renderReport(result);
+          bindCopyButton();
+          scrollToReport();
+        } catch (error) {
+          console.error(error);
+          setSteps(3);
+          showMessage("err", "❌ Erreur pendant la vérification", "L’outil n’a pas réussi à analyser ce dossier.");
+          scrollToReport();
+        }
+      }, 40);
+    }
+
+    function buildReport(files, source, stopped) {
+      const paths = files.map(function(item) {
+        return item.path;
+      });
+
+      const rootName = guessRootName(paths);
+      const relativePaths = paths.map(function(path) {
+        return stripRoot(path, rootName);
+      });
+
+      const anyExe = files.some(function(item) {
+        return item.name.toLowerCase().endsWith(".exe");
+      });
+
+      const hasGameTl = relativePaths.some(function(path) {
+        return path.toLowerCase().startsWith("game/tl/");
+      });
+
+      const hasTlRoot = relativePaths.some(function(path) {
+        return path.toLowerCase().startsWith("tl/");
+      });
+
+      const languageDirs = findLanguageDirs(relativePaths);
+      const directLanguageDirs = languageDirs.length ? languageDirs : findDirectLanguageDirs(relativePaths);
+      const preferredLanguageDir = chooseBestLanguageDir(directLanguageDirs, relativePaths);
+
+      const rpyFiles = files.filter(function(item) {
+        return item.name.toLowerCase().endsWith(".rpy");
+      });
+
+      const rpyInTranslation = preferredLanguageDir
+        ? rpyFiles.filter(function(item) {
+            return stripRoot(item.path, rootName).startsWith(preferredLanguageDir + "/");
+          })
+        : rpyFiles;
+
+      const jsonFiles = files.filter(function(item) {
+        return item.name.toLowerCase().endsWith(".json");
+      });
+
+      const emptyRpy = rpyInTranslation.filter(function(item) {
+        return item.size === 0;
+      });
+
+      const problems = [];
+      const warnings = [];
+      const advice = [];
+
+      if (!files.length) {
+        problems.push("Aucun fichier utile détecté.");
+      }
+
+      if (!anyExe && source !== "drop") {
+        warnings.push("Aucun fichier .exe détecté. Vérifie que tu as choisi le dossier principal du jeu.");
+      }
+
+      if (!hasGameTl && !hasTlRoot && !preferredLanguageDir) {
+        warnings.push("Le chemin game/tl n’a pas été détecté. La traduction est peut-être placée ailleurs.");
+      }
+
+      if (!rpyInTranslation.length) {
+        problems.push("Aucun fichier .rpy de traduction détecté.");
+      }
+
+      if (emptyRpy.length) {
+        warnings.push(emptyRpy.length + " fichier(s) .rpy vide(s) détecté(s).");
+      }
+
+      if (stopped) {
+        warnings.push("Analyse limitée automatiquement, car beaucoup de fichiers ont été détectés.");
+      }
+
+      if (!problems.length) {
+        advice.push("La traduction semble présente. Le chemin attendu dans le jeu est : game/tl/nom_de_la_langue/.");
+      } else {
+        advice.push("Réinstalle la traduction à la racine du jeu, là où se trouve le fichier .exe.");
+        advice.push("Après installation, le dossier de traduction doit se trouver dans game/tl/.");
+      }
+
+      let level = "ok";
+      let title = "✅ Traduction détectée";
+      let message = "Les fichiers de traduction semblent présents.";
+
+      if (problems.length) {
+        level = "err";
+        title = "❌ Traduction introuvable";
+        message = "L’outil n’a pas trouvé les fichiers attendus.";
+      } else if (warnings.length) {
+        level = "warn";
+        title = "⚠️ Traduction à vérifier";
+        message = "La traduction semble présente, mais certains points méritent une vérification.";
+      }
+
+      const summaryLines = [
+        title,
+        "",
+        "Dossier choisi : " + (rootName || "dossier sélectionné"),
+        "Fichier .exe détecté : " + (anyExe ? "oui" : "non"),
+        "Chemin game/tl détecté : " + (hasGameTl ? "oui" : "non"),
+        "Dossier de traduction : " + (preferredLanguageDir || "non détecté clairement"),
+        "Fichiers .rpy détectés : " + rpyInTranslation.length,
+        "Fichiers JSON détectés : " + jsonFiles.length
+      ];
+
+      if (problems.length) {
+        summaryLines.push("", "Problèmes :");
+        problems.forEach(function(problem) {
+          summaryLines.push("- " + problem);
+        });
+      }
+
+      if (warnings.length) {
+        summaryLines.push("", "Avertissements :");
+        warnings.forEach(function(warning) {
+          summaryLines.push("- " + warning);
+        });
+      }
+
+      summaryLines.push("", "Conseil :");
+      advice.forEach(function(line) {
+        summaryLines.push("- " + line);
+      });
+
+      return {
+        level: level,
+        title: title,
+        message: message,
+        anyExe: anyExe,
+        hasGameTl: hasGameTl,
+        preferredLanguageDir: preferredLanguageDir,
+        rpyCount: rpyInTranslation.length,
+        jsonCount: jsonFiles.length,
+        emptyRpyCount: emptyRpy.length,
+        problems: problems,
+        warnings: warnings,
+        advice: advice,
+        summary: summaryLines.join("\n")
+      };
+    }
+
+    function renderLoading() {
+      return '<div class="status-card"><h3 class="status-title">🔎 Vérification en cours...</h3><p class="status-text">Étape 2/3 — Recherche du dossier <code>game/tl</code>. Le résultat s’affichera juste en dessous.</p></div>';
+    }
+
+    function showMessage(level, title, text) {
+      report.classList.add("show");
+      report.innerHTML = renderMainStatus(level, title, text);
+    }
+
+    function renderMainStatus(level, title, text) {
+      return '<div class="status-card ' + escapeHtml(level) + '"><h3 class="status-title">' + escapeHtml(title) + '</h3><p class="status-text">' + escapeHtml(text) + '</p></div>';
+    }
+
+    function renderReport(result) {
+      return ""
+        + '<div class="status-card ok"><h3 class="status-title">✅ Analyse terminée</h3><p class="status-text">Le dossier a été vérifié. Résultat ci-dessous.</p></div>'
+        + renderMainStatus(result.level, result.title, result.message)
+        + '<div class="result-grid">'
+        + renderCheck("🎮 Fichier .exe", result.anyExe ? "✅ Détecté" : "⚠️ Non détecté", "Aide à confirmer que c’est bien le dossier racine du jeu.")
+        + renderCheck("🌍 Chemin game/tl", result.hasGameTl ? "✅ Détecté" : "⚠️ Non détecté", "Chemin attendu : game/tl/")
+        + renderCheck("🇫🇷 Dossier de traduction", result.preferredLanguageDir ? "✅ Détecté" : "⚠️ Non détecté clairement", result.preferredLanguageDir || "Exemple : game/tl/french/")
+        + renderCheck("📜 Fichiers .rpy", result.rpyCount ? "✅ " + result.rpyCount + " fichier(s)" : "❌ Aucun fichier", "Les traductions Ren\'Py utilisent généralement des fichiers .rpy.")
+        + renderCheck("🧾 Fichiers JSON", result.jsonCount ? "✅ " + result.jsonCount + " fichier(s)" : "Aucun JSON", "Simple détection, sans affichage des fichiers.")
+        + renderCheck("🙈 Liste des fichiers", "Masquée", "L’outil n’affiche pas les fichiers du jeu.")
+        + "</div>"
+        + renderListSection("❌ Problèmes détectés", result.problems, "Aucun problème bloquant détecté.")
+        + renderListSection("⚠️ Points à vérifier", result.warnings, "Aucun avertissement particulier.")
+        + renderListSection("🛠️ Solution conseillée", result.advice, "")
+        + (result.emptyRpyCount ? renderListSection("📄 Fichiers .rpy vides", ["Un ou plusieurs fichiers .rpy sont vides."], "") : "")
+        + '<div class="status-card"><h3 class="status-title">📋 Rapport à copier</h3><p class="status-text">Tu peux copier ce rapport et l’envoyer sur Discord si besoin.</p><textarea id="copyBox" class="copy-box" readonly>' + escapeHtml(result.summary) + '</textarea><div class="button-row"><button id="copyReportBtn" class="primary-btn" type="button">📋 Copier le rapport</button></div></div>';
+    }
+
+    function renderCheck(title, value, hint) {
+      return '<div class="result-item"><strong>' + escapeHtml(title) + '</strong><small>' + escapeHtml(value) + '</small><br><small>' + escapeHtml(hint) + '</small></div>';
+    }
+
+    function renderListSection(title, items, emptyText) {
+      if (!items.length && !emptyText) return "";
+
+      if (!items.length) {
+        return '<div class="status-card"><h3 class="status-title">' + escapeHtml(title) + '</h3><p class="status-text">' + escapeHtml(emptyText) + '</p></div>';
+      }
+
+      return '<div class="status-card"><h3 class="status-title">' + escapeHtml(title) + '</h3><ul class="details-list">' + items.map(function(item) {
+        return '<li>' + escapeHtml(item) + '</li>';
+      }).join("") + "</ul></div>";
+    }
+
+    function bindCopyButton() {
+      const copyBtn = document.getElementById("copyReportBtn");
+      const copyBox = document.getElementById("copyBox");
+
+      if (!copyBtn || !copyBox) return;
+
+      copyBtn.addEventListener("click", async function() {
+        try {
+          await navigator.clipboard.writeText(copyBox.value);
+          copyBtn.textContent = "✅ Rapport copié";
+          setTimeout(function() {
+            copyBtn.textContent = "📋 Copier le rapport";
+          }, 1800);
+        } catch (error) {
+          copyBox.select();
+          document.execCommand("copy");
+        }
+      });
+    }
+
+    function setSteps(current) {
+      step1.classList.toggle("active", current === 1);
+      step2.classList.toggle("active", current === 2);
+      step3.classList.toggle("active", current === 3);
+
+      step1.classList.toggle("done", current > 1);
+      step2.classList.toggle("done", current > 2);
+    }
+
+    function scrollToReport() {
+      if (!resultAnchor) return;
+
+      setTimeout(function() {
+        resultAnchor.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }, 80);
+    }
+
+    function normalizePath(path) {
+      return String(path || "").replaceAll("\\", "/").replaceAll("\\", "/").replace(/^\/+/, "").replace(/\/+/g, "/");
+    }
+
+    function guessRootName(paths) {
+      const firstParts = paths.map(function(path) {
+        return normalizePath(path).split("/")[0];
+      }).filter(Boolean);
+
+      if (!firstParts.length) return "";
+
+      const first = firstParts[0];
+      return firstParts.every(function(part) {
+        return part === first;
+      }) ? first : "";
+    }
+
+    function stripRoot(path, rootName) {
+      const normalized = normalizePath(path);
+
+      if (rootName && normalized.startsWith(rootName + "/")) {
+        return normalized.slice(rootName.length + 1);
+      }
+
+      return normalized;
+    }
+
+    function findLanguageDirs(relativePaths) {
+      const dirs = new Set();
+
+      relativePaths.forEach(function(path) {
+        const parts = normalizePath(path).split("/");
+
+        if (parts.length >= 3 && parts[0].toLowerCase() === "game" && parts[1].toLowerCase() === "tl") {
+          dirs.add(parts.slice(0, 3).join("/"));
+        }
+      });
+
+      return Array.from(dirs).sort();
+    }
+
+    function findDirectLanguageDirs(relativePaths) {
+      const dirs = new Set();
+
+      relativePaths.forEach(function(path) {
+        const parts = normalizePath(path).split("/");
+
+        if (parts.length >= 2) {
+          dirs.add(parts[0]);
+        }
+      });
+
+      return Array.from(dirs).sort();
+    }
+
+    function chooseBestLanguageDir(languageDirs, relativePaths) {
+      if (!languageDirs.length) return "";
+
+      const scored = languageDirs.map(function(dir) {
+        const name = dir.split("/").pop().toLowerCase();
+
+        const filesInside = relativePaths.filter(function(path) {
+          return path.startsWith(dir + "/");
+        });
+
+        const rpyCount = filesInside.filter(function(path) {
+          return path.toLowerCase().endsWith(".rpy");
+        }).length;
+
+        const hintScore = LANGUAGE_HINTS.some(function(hint) {
+          return name.includes(hint);
+        }) ? 1000 : 0;
+
+        return { dir: dir, score: hintScore + rpyCount };
+      });
+
+      scored.sort(function(a, b) {
+        return b.score - a.score || a.dir.localeCompare(b.dir);
+      });
+
+      return scored[0].dir;
+    }
+
+    function escapeHtml(value) {
+      return String(value === undefined || value === null ? "" : value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+  </script>
+
+</body>
+</html>

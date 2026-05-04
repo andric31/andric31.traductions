@@ -8,6 +8,13 @@
 <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=1">
   <link rel="stylesheet" href="/themes.css" />
 <link rel="stylesheet" href="wiki.css" />
+  <style>
+    .chapter-separator {
+      border: 0;
+      border-top: 2px solid rgba(255,255,255,0.12);
+      margin: 38px 0 30px;
+    }
+  </style>
 </head>
 <body>
 
@@ -37,6 +44,8 @@
 
     <pre><code>nom_du_jeu_fr_zenpy_DeepL_andric31.rar</code></pre>
 
+    <hr class="chapter-separator" />
+
     <h2>🗂 2) Extraire l’archive au bon endroit</h2>
 
     <p>Sous Windows :</p>
@@ -61,6 +70,8 @@
            class="tutorial-img">
     </div>
 
+    <hr class="chapter-separator" />
+
     <h2>📁 3) Vérifier l’emplacement final</h2>
 
     <p>Une fois l’extraction terminée, le fichier doit se trouver ici :</p>
@@ -82,6 +93,8 @@
       <code>game\tl\</code>, alors l’installation est correcte ✅
     </p>
 
+    <hr class="chapter-separator" />
+
     <h2>▶️ 4) Lancer le jeu</h2>
 
     <p>Lance simplement :</p>
@@ -96,6 +109,8 @@
     </ul>
 
     <!-- ERREURS A EVITER -->
+    <hr class="chapter-separator" />
+
     <h2>⚠️ Erreurs à éviter</h2>
     <p><strong>🛠️ Ce qu’il ne faut pas faire (et quoi faire à la place)</strong></p>
 
@@ -111,6 +126,8 @@
     </div>
 
     <!-- PROBLEMES FREQUENTS -->
+    <hr class="chapter-separator" />
+
     <h2>❗ Problèmes fréquents</h2>
 
     <h3>❌ La traduction ne s’affiche pas</h3>
@@ -127,6 +144,8 @@
 
     <p>Supprime l’ancienne version de la traduction puis réinstalle proprement.</p>
 
+    <hr class="chapter-separator" />
+
     <h2>💡 Astuce</h2>
 
     <p>Si tu avais déjà une ancienne version :</p>
@@ -142,6 +161,62 @@
     </ol>
 
     <p>Ça évite les conflits de fichiers ✅</p>
+
+
+    <hr class="chapter-separator" />
+
+    <h2>🧠 Mode expert — Réinitialiser les données Ren'Py</h2>
+    
+    <div class="callout warn">
+      ⚠️ <strong>Attention :</strong> cette manipulation est à faire seulement si l’installation propre ne suffit pas.
+      Elle peut supprimer les préférences du jeu et les sauvegardes locales.
+    </div>
+    
+    <p>
+      Certains jeux <strong>Ren'Py</strong> enregistrent des fichiers de configuration et de sauvegarde dans le dossier
+      <code>AppData</code> de Windows. Si le jeu garde une ancienne langue, une ancienne traduction,
+      ou continue à planter même après une réinstallation propre, tu peux essayer de réinitialiser ce dossier.
+    </p>
+    
+    <ol>
+      <li>Ferme complètement le jeu.</li>
+      <li>Fais une copie de tes sauvegardes si tu veux les conserver.</li>
+      <li>Appuie sur <strong>Windows + R</strong>.</li>
+      <li>Colle ce chemin :</li>
+    </ol>
+    
+    <pre><code>%APPDATA%\RenPy</code></pre>
+    
+    <p>Ensuite, cherche le dossier du jeu concerné. Exemple :</p>
+    
+    <pre><code>%APPDATA%\RenPy\ChroniclesofKartoba</code></pre>
+    
+    <div class="callout">
+      🔎 <strong>Astuce de recherche :</strong> le dossier Ren'Py n'a pas toujours exactement le même nom que le jeu.
+      Dans l’explorateur Windows, tu peux trier les dossiers par <strong>Modifié le</strong> pour retrouver plus facilement
+      le dossier utilisé récemment, surtout si tu viens de lancer le jeu.
+    </div>
+    
+    <ol start="5">
+      <li>
+        Si tu es sûr d’avoir trouvé le bon dossier, tu peux le supprimer.
+      </li>
+      <li>
+        Si tu n’es pas sûr, renomme-le plutôt en ajoutant <code>_backup</code> à la fin.
+        Cela permet de revenir en arrière facilement si besoin.
+      </li>
+    </ol>
+    
+    <pre><code>ChroniclesofKartoba_backup</code></pre>
+    
+    <ol start="7">
+      <li>Relance le jeu.</li>
+    </ol>
+    
+    <p>
+      Au prochain lancement, le jeu recréera automatiquement un nouveau dossier propre.
+      Si le problème est réglé, tu pourras garder ou supprimer l’ancien dossier plus tard.
+    </p>
 
   </main>
 

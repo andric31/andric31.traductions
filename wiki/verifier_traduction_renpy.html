@@ -296,8 +296,7 @@
       </div>
 
       <div class="callout tip">
-        ✅ <strong>Conseil :</strong> le plus fiable est de choisir directement le fichier <code>.exe</code> du jeu.
-        Le glisser-déposer du dossier reste disponible si tu préfères.
+        ✅ <strong>Conseil :</strong> choisis le fichier <code>.exe</code> pour confirmer le bon jeu. Pour la vérification complète, glisse-dépose ensuite le dossier qui contient ce <code>.exe</code>.
       </div>
 
       <div id="resultAnchor"></div>
@@ -585,55 +584,51 @@
     async function analyzeFromExe(exeFile) {
       resetBtn.disabled = false;
       report.classList.add("show");
-      setSteps(2);
-      report.innerHTML = renderLoading();
+      setSteps(3);
 
       const exePath = normalizePath(exeFile.webkitRelativePath || exeFile.name);
       exeFile._relativePath = exePath;
 
-      if (!window.showDirectoryPicker) {
-        setSteps(3);
-        showMessage(
-          "warn",
-          "⚠️ Accès au dossier nécessaire",
-          "Le navigateur ne permet pas de lire automatiquement le dossier autour du .exe. Glisse-dépose le dossier du jeu dans la zone prévue."
-        );
-        scrollToReport();
-        return;
-      }
+      const result = {
+        level: "warn",
+        title: "✅ .exe détecté",
+        message: "Le fichier .exe du jeu est bien reconnu. La page ne peut pas lire automatiquement les fichiers autour de ce .exe, donc la vérification game/tl reste limitée.",
+        anyExe: true,
+        hasGameTl: false,
+        preferredLanguageDir: "",
+        rpyCount: 0,
+        jsonCount: 0,
+        emptyRpyCount: 0,
+        problems: [],
+        warnings: [
+          "Vérification limitée : le navigateur ne donne accès qu’au fichier .exe sélectionné, pas au dossier complet du jeu.",
+          "Pour lancer la vérification complète, glisse-dépose le dossier du jeu dans la grande zone bleue."
+        ],
+        advice: [
+          "Le bon dossier à déposer est celui qui contient ce fichier .exe.",
+          "Après le dépôt du dossier, l’outil pourra vérifier game/tl et les fichiers .rpy."
+        ],
+        summary: [
+          "✅ .exe détecté",
+          "",
+          "Fichier choisi : " + exeFile.name,
+          "Fichier .exe détecté : oui",
+          "Chemin game/tl détecté : non vérifié avec le choix .exe seul",
+          "Dossier de traduction : non vérifié avec le choix .exe seul",
+          "Fichiers .rpy détectés : non vérifié avec le choix .exe seul",
+          "",
+          "Avertissements :",
+          "- Le navigateur donne accès au fichier .exe choisi, mais pas automatiquement au dossier complet du jeu.",
+          "- Pour une vérification complète, glisse-dépose le dossier qui contient ce .exe.",
+          "",
+          "Conseil :",
+          "- Le bon dossier à déposer est celui où se trouve le fichier .exe du jeu."
+        ].join("\n")
+      };
 
-      try {
-        showMessage(
-          "warn",
-          "🎮 .exe choisi",
-          "Pour vérifier game/tl, le navigateur doit maintenant recevoir l’autorisation de lire le dossier qui contient ce .exe."
-        );
-
-        const directoryHandle = await window.showDirectoryPicker({
-          mode: "read",
-          startIn: "downloads"
-        });
-
-        const files = [exeFile];
-        let stopped = false;
-
-        await collectDirectoryHandle(directoryHandle, directoryHandle.name + "/", files);
-
-        if (files.length >= MAX_FILES_TO_SCAN) {
-          stopped = true;
-        }
-
-        analyzeFiles(files, "exe", stopped);
-      } catch (error) {
-        console.warn("Sélection du dossier annulée ou impossible :", error);
-        setSteps(3);
-        showMessage(
-          "warn",
-          "⚠️ Dossier non ouvert",
-          "Le .exe est bien choisi, mais le navigateur doit aussi avoir accès au dossier du jeu pour vérifier game/tl. Glisse-dépose le dossier du jeu ou accepte l’ouverture du dossier demandé."
-        );
-        scrollToReport();
-      }
+      report.innerHTML = renderReport(result);
+      bindCopyButton();
+      scrollToReport();
     }
 
     async function collectDirectoryHandle(directoryHandle, pathPrefix, output) {

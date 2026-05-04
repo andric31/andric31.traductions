@@ -295,7 +295,8 @@
       </div>
 
       <div class="callout tip">
-        ✅ <strong>Conseil :</strong> sélectionne le dossier qui contient le fichier <code>.exe</code> du jeu. Si aucun <code>.exe</code> n’est détecté, c’est probablement que le mauvais dossier a été choisi.
+        ✅ <strong>Conseil :</strong> dans la fenêtre Windows de sélection du dossier, les fichiers comme <code>.exe</code> ne sont pas affichés, c’est normal.
+        Sélectionne le dossier qui contient <code>game</code>, <code>lib</code> et <code>renpy</code>, puis clique sur <strong>Importer</strong> : le nom du <code>.exe</code> détecté s’affichera dans le résultat.
       </div>
 
       <div id="resultAnchor"></div>
@@ -758,6 +759,9 @@
       return ""
         + '<div class="status-card ok"><h3 class="status-title">✅ Analyse terminée</h3><p class="status-text">Le dossier a été vérifié. Résultat ci-dessous.</p></div>'
         + renderMainStatus(result.level, result.title, result.message)
+        + (result.anyExe
+          ? '<div class="status-card ok"><h3 class="status-title">🎮 .exe trouvé : ' + escapeHtml(result.exeDisplay) + '</h3><p class="status-text">Si ce nom correspond au jeu, tu as bien sélectionné le dossier principal.</p></div>'
+          : '<div class="status-card warn"><h3 class="status-title">⚠️ Aucun .exe visible après import</h3><p class="status-text">Tu n’es probablement pas dans le dossier principal du jeu. Remonte ou descends d’un niveau, puis réessaie.</p></div>')
         + '<div class="result-grid">'
         + renderCheck("🎮 Fichier .exe", result.anyExe ? "✅ " + result.exeDisplay : "⚠️ Non détecté", result.anyExe ? "Si ce nom correspond au jeu, tu es probablement dans le bon dossier." : "Aucun .exe trouvé : tu n’es probablement pas dans le dossier racine du jeu.")
         + renderCheck("🌍 Chemin game/tl", result.hasGameTl ? "✅ Détecté" : "⚠️ Non détecté", "Chemin attendu : game/tl/")

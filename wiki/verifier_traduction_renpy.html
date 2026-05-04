@@ -306,7 +306,7 @@
 
     <h2>ℹ️ Ce que l’outil vérifie</h2>
     <ul>
-      <li>Présence d’un fichier <code>.exe</code>.</li>
+      <li>Présence d’un fichier <code>.exe</code> et affichage de son nom pour confirmer le bon dossier.</li>
       <li>Présence du dossier <code>game/tl</code>.</li>
       <li>Présence d’un dossier de traduction dans <code>game/tl</code>.</li>
       <li>Présence de fichiers <code>.rpy</code>.</li>
@@ -599,9 +599,19 @@
         return stripRoot(path, rootName);
       });
 
-      const anyExe = files.some(function(item) {
+      const exeFiles = files.filter(function(item) {
         return item.name.toLowerCase().endsWith(".exe");
       });
+
+      const anyExe = exeFiles.length > 0;
+
+      const exeNames = exeFiles.map(function(item) {
+        return item.name;
+      }).filter(Boolean).sort();
+
+      const exeDisplay = exeNames.length
+        ? exeNames.slice(0, 4).join(", ") + (exeNames.length > 4 ? " + " + (exeNames.length - 4) + " autre(s)" : "")
+        : "Aucun .exe détecté";
 
       const hasGameTl = relativePaths.some(function(path) {
         return path.toLowerCase().startsWith("game/tl/");
@@ -687,6 +697,7 @@
         "",
         "Dossier choisi : " + (rootName || "dossier sélectionné"),
         "Fichier .exe détecté : " + (anyExe ? "oui" : "non"),
+        "Nom du .exe : " + exeDisplay,
         "Chemin game/tl détecté : " + (hasGameTl ? "oui" : "non"),
         "Dossier de traduction : " + (preferredLanguageDir || "non détecté clairement"),
         "Fichiers .rpy détectés : " + rpyInTranslation.length,
@@ -717,6 +728,7 @@
         title: title,
         message: message,
         anyExe: anyExe,
+        exeDisplay: exeDisplay,
         hasGameTl: hasGameTl,
         preferredLanguageDir: preferredLanguageDir,
         rpyCount: rpyInTranslation.length,
@@ -747,12 +759,12 @@
         + '<div class="status-card ok"><h3 class="status-title">✅ Analyse terminée</h3><p class="status-text">Le dossier a été vérifié. Résultat ci-dessous.</p></div>'
         + renderMainStatus(result.level, result.title, result.message)
         + '<div class="result-grid">'
-        + renderCheck("🎮 Fichier .exe", result.anyExe ? "✅ Détecté" : "⚠️ Non détecté", "Aide à confirmer que c’est bien le dossier racine du jeu.")
+        + renderCheck("🎮 Fichier .exe", result.anyExe ? "✅ " + result.exeDisplay : "⚠️ Non détecté", result.anyExe ? "Si ce nom correspond au jeu, tu es probablement dans le bon dossier." : "Aucun .exe trouvé : tu n’es probablement pas dans le dossier racine du jeu.")
         + renderCheck("🌍 Chemin game/tl", result.hasGameTl ? "✅ Détecté" : "⚠️ Non détecté", "Chemin attendu : game/tl/")
         + renderCheck("🇫🇷 Dossier de traduction", result.preferredLanguageDir ? "✅ Détecté" : "⚠️ Non détecté clairement", result.preferredLanguageDir || "Exemple : game/tl/french/")
         + renderCheck("📜 Fichiers .rpy", result.rpyCount ? "✅ " + result.rpyCount + " fichier(s)" : "❌ Aucun fichier", "Les traductions Ren\'Py utilisent généralement des fichiers .rpy.")
         + renderCheck("🧾 Fichiers JSON", result.jsonCount ? "✅ " + result.jsonCount + " fichier(s)" : "Aucun JSON", "Simple détection, sans affichage des fichiers.")
-        + renderCheck("🙈 Liste des fichiers", "Masquée", "L’outil n’affiche pas les fichiers du jeu.")
+        + renderCheck("🙈 Liste des fichiers", "Masquée", "Seul le nom du .exe est affiché pour confirmer le bon dossier.")
         + "</div>"
         + renderListSection("❌ Problèmes détectés", result.problems, "Aucun problème bloquant détecté.")
         + renderListSection("⚠️ Points à vérifier", result.warnings, "Aucun avertissement particulier.")

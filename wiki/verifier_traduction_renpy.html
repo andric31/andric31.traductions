@@ -945,7 +945,6 @@
       return ""
         + '<div class="status-card ok"><h3 class="status-title">✅ Analyse terminée</h3><p class="status-text">Le dossier a été vérifié. Résultat ci-dessous.</p></div>'
         + renderMainStatus(result.level, result.title, result.message)
-        + renderAndricCheck(result.andricCheck)
         + (result.anyExe
           ? '<div class="status-card ok"><h3 class="status-title">🎮 .exe trouvé : ' + escapeHtml(result.exeDisplay) + '</h3><p class="status-text">Si ce nom correspond au jeu, tu as bien sélectionné le dossier principal.</p></div>'
           : '<div class="status-card warn"><h3 class="status-title">⚠️ Aucun .exe visible après import</h3><p class="status-text">Tu n’es probablement pas dans le dossier principal du jeu. Remonte ou descends d’un niveau, puis réessaie.</p></div>')
@@ -963,6 +962,7 @@
         + renderListSection("⚠️ Points à vérifier", result.warnings, "Aucun avertissement particulier.")
         + renderListSection("🛠️ Solution conseillée", result.advice, "")
         + (result.emptyRpyCount ? renderListSection("📄 Fichiers .rpy vides", ["Un ou plusieurs fichiers .rpy sont vides."], "") : "")
+        + renderAndricCheck(result.andricCheck)
         + '<div class="status-card"><h3 class="status-title">📋 Rapport à copier</h3><p class="status-text">Tu peux copier ce rapport et l’envoyer sur Discord si besoin.</p><textarea id="copyBox" class="copy-box" readonly>' + escapeHtml(result.summary) + '</textarea><div class="button-row"><button id="copyReportBtn" class="primary-btn" type="button">📋 Copier le rapport</button></div></div>';
     }
 

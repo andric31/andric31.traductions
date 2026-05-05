@@ -702,7 +702,6 @@
         return isTopLevelFile(relativePath);
       });
 
-      const ignoredNestedExeCount = Math.max(0, allExeFiles.length - exeFiles.length);
       const anyExe = exeFiles.length > 0;
 
       const exeNames = exeFiles.map(function(item) {
@@ -768,9 +767,6 @@
         warnings.push("Aucun fichier .exe détecté à la racine du dossier choisi. Tu n’as probablement pas choisi le dossier principal du jeu. Choisis le dossier où se trouve le fichier .exe.");
       }
 
-      if (ignoredNestedExeCount) {
-        warnings.push(ignoredNestedExeCount + " fichier(s) .exe trouvé(s) dans des sous-dossiers ont été ignorés pour éviter les faux positifs.");
-      }
 
       if (!hasGameTl && !hasTlRoot && !preferredLanguageDir) {
         warnings.push("Le chemin game/tl n’a pas été détecté. La traduction est peut-être placée ailleurs.");

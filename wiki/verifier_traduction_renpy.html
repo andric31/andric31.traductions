@@ -838,6 +838,7 @@
       });
 
       return {
+        rootName: rootName || "dossier sélectionné",
         level: level,
         title: title,
         message: message,
@@ -878,6 +879,7 @@
           ? '<div class="status-card ok"><h3 class="status-title">🎮 .exe trouvé : ' + escapeHtml(result.exeDisplay) + '</h3><p class="status-text">Si ce nom correspond au jeu, tu as bien sélectionné le dossier principal.</p></div>'
           : '<div class="status-card warn"><h3 class="status-title">⚠️ Aucun .exe visible après import</h3><p class="status-text">Tu n’es probablement pas dans le dossier principal du jeu. Remonte ou descends d’un niveau, puis réessaie.</p></div>')
         + '<div class="result-grid">'
+        + renderCheck("📁 Dossier sélectionné", result.rootName || "dossier sélectionné", "Nom du dossier importé dans le navigateur.")
         + renderCheck("🎮 Fichier .exe", result.anyExe ? "✅ " + result.exeDisplay : "⚠️ Non détecté", result.anyExe ? "Seulement les .exe à la racine du dossier choisi sont pris en compte." : "Aucun .exe trouvé à la racine : tu n’es probablement pas dans le dossier principal du jeu.")
         + renderCheck("🐍 Version Ren'Py", result.renpyVersion ? "✅ " + result.renpyVersion : "Non détectée", result.renpyVersionPath || "Fichier attendu : game/script_version.txt")
         + renderCheck("🌍 Chemin game/tl", result.hasGameTl ? "✅ Détecté" : "⚠️ Non détecté", "Chemin attendu : game/tl/")

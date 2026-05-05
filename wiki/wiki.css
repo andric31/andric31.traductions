@@ -374,3 +374,86 @@ code{
     width: fit-content;
   }
 }
+
+/* Pavé vers l'outil de vérification Ren'Py */
+.verify-cta{
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin-top: 18px;
+  padding: 22px;
+  border-radius: 20px;
+  border: 1px solid var(--wiki-border);
+  background: linear-gradient(180deg, var(--wiki-card-strong), var(--wiki-card));
+  box-shadow: var(--wiki-shadow);
+  color: var(--wiki-text);
+  text-decoration: none;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.verify-cta:hover{
+  transform: translateY(-3px);
+  border-color: var(--wiki-border-strong);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--wiki-card-strong) 92%, white 8%),
+    color-mix(in srgb, var(--wiki-card) 96%, white 4%)
+  );
+}
+
+.verify-cta-icon{
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  font-size: 24px;
+  background: color-mix(in srgb, var(--accent, #6ce0b0) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent, #6ce0b0) 28%, transparent);
+}
+
+.verify-cta-content{
+  flex: 1;
+  min-width: 0;
+}
+
+.verify-cta-label{
+  margin: 0 0 6px;
+  font-size: 12px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  opacity: .75;
+}
+
+.verify-cta h2{
+  margin: 0 0 8px;
+}
+
+.verify-cta-text{
+  margin: 0 0 14px;
+  line-height: 1.6;
+  opacity: .92;
+}
+
+.verify-cta-button{
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--wiki-border);
+  background: var(--wiki-soft);
+  font-weight: 600;
+}
+
+@media (max-width: 720px){
+  .verify-cta{
+    flex-direction: column;
+  }
+
+  .verify-cta-icon{
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
+  }
+}

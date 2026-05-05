@@ -1,1 +1,1516 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vérifier une traduction Ren'Py</title>
+  <script src="/theme-init.js"></script>
+  <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=1">
+  <link rel="stylesheet" href="/themes.css" />
+  <link rel="stylesheet" href="wiki.css" />
 
+  <style>
+    .checker-panel {
+      margin: 24px 0;
+      padding: 22px;
+      border-radius: 22px;
+      border: 1px solid var(--wiki-border);
+      background: linear-gradient(180deg, var(--wiki-card-strong), var(--wiki-card));
+      box-shadow: var(--wiki-shadow);
+    }
+
+    .step-flow {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 18px 0 22px;
+    }
+
+    .step-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--wiki-border);
+      background: var(--wiki-soft);
+      color: var(--wiki-muted);
+      font-weight: 800;
+    }
+
+    .step-pill .num {
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: var(--wiki-soft-strong);
+      border: 1px solid var(--wiki-border);
+      color: var(--wiki-text);
+      flex: 0 0 auto;
+    }
+
+    .step-pill.active {
+      color: var(--wiki-text);
+      border-color: var(--wiki-border-strong);
+      background: var(--wiki-accent-soft);
+    }
+
+    .step-pill.done {
+      color: var(--wiki-text);
+      border-color: color-mix(in srgb, #7bd389 45%, var(--wiki-border) 55%);
+      background: rgba(123,211,137,0.10);
+    }
+
+    .drop-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      min-height: 230px;
+      padding: 30px;
+      margin-top: 18px;
+      border: 2px dashed color-mix(in srgb, var(--accent, #6ce0b0) 55%, #7aa7ff 45%);
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at top left, rgba(122,167,255,0.24), transparent 42%),
+        radial-gradient(circle at bottom right, color-mix(in srgb, var(--accent, #6ce0b0) 24%, transparent), transparent 46%),
+        linear-gradient(180deg, rgba(122,167,255,0.12), var(--wiki-soft));
+      text-align: center;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+      transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+
+    .drop-zone.dragover {
+      transform: translateY(-2px);
+      border-color: var(--wiki-link);
+      background:
+        radial-gradient(circle at top left, rgba(122,167,255,0.34), transparent 44%),
+        radial-gradient(circle at bottom right, color-mix(in srgb, var(--accent, #6ce0b0) 34%, transparent), transparent 48%),
+        linear-gradient(180deg, rgba(122,167,255,0.18), var(--wiki-accent-soft));
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent, #6ce0b0) 14%, transparent), inset 0 0 0 1px rgba(255,255,255,0.06);
+    }
+
+    .drop-icon {
+      width: 72px;
+      height: 72px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 22px;
+      border: 1px solid var(--wiki-border-strong);
+      background: var(--wiki-accent-soft);
+      font-size: 38px;
+      line-height: 1;
+    }
+
+    .file-input { display: none; }
+
+
+    .folder-help {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      margin-left: 6px;
+      border-radius: 999px;
+      border: 1px solid var(--wiki-border-strong);
+      background: var(--wiki-accent-soft);
+      color: var(--wiki-text);
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1;
+      cursor: help;
+      vertical-align: middle;
+      z-index: 20;
+    }
+
+    .folder-help-preview {
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 12px);
+      transform: translateX(-50%) translateY(6px);
+      width: min(560px, 82vw);
+      padding: 10px;
+      border-radius: 18px;
+      border: 1px solid var(--wiki-border-strong);
+      background: var(--wiki-card-strong);
+      box-shadow: var(--wiki-shadow);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity .16s ease, transform .16s ease, visibility .16s ease;
+    }
+
+    .folder-help-preview::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -8px;
+      width: 14px;
+      height: 14px;
+      transform: translateX(-50%) rotate(45deg);
+      border-right: 1px solid var(--wiki-border-strong);
+      border-bottom: 1px solid var(--wiki-border-strong);
+      background: var(--wiki-card-strong);
+    }
+
+    .folder-help-preview img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      border: 1px solid var(--wiki-border);
+    }
+
+    .folder-help:hover .folder-help-preview,
+    .folder-help:focus .folder-help-preview,
+    .folder-help:focus-within .folder-help-preview {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .button-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+
+    .folder-picker-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .primary-btn,
+    .secondary-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-weight: 800;
+      font-size: 14px;
+      transition: transform .15s ease, opacity .15s ease;
+    }
+
+    .primary-btn {
+      color: #fff;
+      background: linear-gradient(135deg, #3157ff, #7a5cff);
+      border: 1px solid rgba(255,255,255,0.14);
+    }
+
+    .secondary-btn {
+      color: var(--wiki-muted);
+      background: var(--wiki-soft);
+      border: 1px solid var(--wiki-border);
+    }
+
+    .primary-btn:hover,
+    .secondary-btn:hover { transform: translateY(-1px); }
+
+    .primary-btn:disabled,
+    .secondary-btn:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .report {
+      display: none;
+      margin-top: 22px;
+    }
+
+    .report.show { display: block; }
+
+    .status-card {
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid var(--wiki-border);
+      background: var(--wiki-soft);
+      margin-bottom: 16px;
+    }
+
+    .status-card.ok {
+      border-left: 4px solid #7bd389;
+      background: rgba(123,211,137,0.10);
+    }
+
+    .status-card.warn {
+      border-left: 4px solid #f0c36d;
+      background: rgba(240,195,109,0.12);
+    }
+
+    .status-card.err {
+      border-left: 4px solid #ff6b6b;
+      background: rgba(255,107,107,0.10);
+    }
+
+    .status-title {
+      margin: 0 0 8px;
+      font-size: 1.3rem;
+      line-height: 1.25;
+    }
+
+    .status-text {
+      margin: 0;
+      color: var(--wiki-muted);
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .result-item {
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px solid var(--wiki-border);
+      background: color-mix(in srgb, var(--wiki-soft) 72%, transparent);
+    }
+
+    .result-item strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .result-item small {
+      color: var(--wiki-muted);
+      word-break: break-word;
+      line-height: 1.55;
+    }
+
+    .details-list {
+      margin: 10px 0 0;
+      padding-left: 20px;
+    }
+
+    .details-list li { margin: 7px 0; }
+
+    .copy-box {
+      width: 100%;
+      min-height: 140px;
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid var(--wiki-border);
+      background: var(--wiki-card);
+      color: var(--wiki-text);
+      resize: vertical;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .chapter-separator {
+      border: 0;
+      border-top: 2px solid var(--wiki-border);
+      margin: 38px 0 30px;
+    }
+
+
+    .mini-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin: 3px 6px 3px 0;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--wiki-border);
+      background: var(--wiki-soft);
+      color: var(--wiki-muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .mini-badge.ok {
+      border-color: color-mix(in srgb, #7bd389 45%, var(--wiki-border) 55%);
+      background: rgba(123,211,137,0.10);
+      color: var(--wiki-text);
+    }
+
+    .mini-badge.warn {
+      border-color: color-mix(in srgb, #f0c36d 55%, var(--wiki-border) 45%);
+      background: rgba(240,195,109,0.12);
+      color: var(--wiki-text);
+    }
+
+    .mini-badge.err {
+      border-color: color-mix(in srgb, #ff6b6b 55%, var(--wiki-border) 45%);
+      background: rgba(255,107,107,0.10);
+      color: var(--wiki-text);
+    }
+
+    @media (max-width: 760px) {
+      .step-flow { grid-template-columns: 1fr; }
+      .drop-zone {
+        min-height: 210px;
+        padding: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <a class="back" href="index.html">⬅ Retour</a>
+    <h1>🧪 Vérifier une traduction Ren'Py</h1>
+    <p class="subtitle">
+      Cet outil vérifie si une traduction Ren'Py est bien placée dans le dossier du jeu.<br>
+      Les fichiers sont lus uniquement par ton navigateur : rien n’est envoyé sur Internet.
+    </p>
+  </header>
+
+  <main class="page">
+
+    <div class="checker-panel">
+      <h2>📁 Choisir le dossier contenant le .exe du jeu</h2>
+      <p>
+        Choisis le dossier principal du jeu, celui où se trouve le fichier <code>.exe</code>.
+        L’outil vérifie uniquement la structure utile, sans afficher la liste des fichiers.
+      </p>
+
+      <div class="step-flow" aria-label="Étapes de vérification">
+        <div id="step1" class="step-pill active"><span class="num">1</span> Dossier du jeu</div>
+        <div id="step2" class="step-pill"><span class="num">2</span> Recherche game/tl</div>
+        <div id="step3" class="step-pill"><span class="num">3</span> Résultat</div>
+      </div>
+
+      <div id="dropZone" class="drop-zone">
+        <div class="drop-icon">📂</div>
+        <strong>Glisse-dépose le dossier du jeu ici</strong>
+        <span>Le bon dossier est celui où se trouve le fichier .exe du jeu.</span>
+
+        <div class="button-row">
+          <div class="folder-picker-wrap">
+            <label class="primary-btn" for="folderInput">📁 Choisir le dossier contenant le .exe</label>
+            <span class="folder-help" tabindex="0" aria-label="Aide visuelle pour choisir le bon dossier">
+              i
+              <span class="folder-help-preview" role="tooltip">
+                <img src="img/verifier_traduction_renpy_folder.png" alt="Exemple du dossier du jeu à sélectionner, celui qui contient le fichier .exe" loading="lazy">
+              </span>
+            </span>
+          </div>
+          <button id="resetBtn" class="secondary-btn" type="button" disabled>Réinitialiser</button>
+        </div>
+
+        <input id="folderInput" class="file-input" type="file" webkitdirectory directory multiple />
+      </div>
+
+      <div class="callout tip">
+        ✅ <strong>Conseil :</strong> dans la fenêtre Windows de sélection du dossier, les fichiers comme <code>.exe</code> ne sont pas affichés, c’est normal.
+        Sélectionne le dossier qui contient <code>game</code>, <code>lib</code> et <code>renpy</code>, puis clique sur <strong>Importer</strong> : le nom du <code>.exe</code> détecté s’affichera dans le résultat.
+      </div>
+
+      <div id="resultAnchor"></div>
+      <div id="report" class="report"></div>
+    </div>
+
+    <hr class="chapter-separator" />
+
+    <h2>ℹ️ Ce que l’outil vérifie</h2>
+    <ul>
+      <li>Présence d’un fichier <code>.exe</code> et affichage de son nom pour confirmer le bon dossier.</li>
+      <li>Présence du dossier <code>game/tl</code>.</li>
+      <li>Présence d’un dossier de traduction dans <code>game/tl</code>.</li>
+      <li>Présence de fichiers <code>.rpy</code>.</li>
+      <li>Détection de fichiers <code>.rpy</code> vides.</li>
+      <li>Détection des fichiers <code>.json</code> présents.</li>
+      <li>Détection possible d’un mauvais emplacement.</li>
+      <li>Détection spéciale des traductions <code>fr_zenpy_DeepL_andric31</code> avec lecture de <code>fr_credits.txt</code>.</li>
+    </ul>
+
+    <div class="callout">
+      💡 <strong>Important :</strong> cet outil ne modifie aucun fichier. Il sert uniquement à aider à comprendre
+      si la traduction est installée au bon endroit.
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <p>© andric31 — Tutos & Aide</p>
+  </footer>
+
+  <script>
+    const folderInput = document.getElementById("folderInput");
+    const dropZone = document.getElementById("dropZone");
+    const report = document.getElementById("report");
+    const resultAnchor = document.getElementById("resultAnchor");
+    const resetBtn = document.getElementById("resetBtn");
+
+    const step1 = document.getElementById("step1");
+    const step2 = document.getElementById("step2");
+    const step3 = document.getElementById("step3");
+
+    const MAX_FILES_TO_SCAN = 6000;
+    const LANGUAGE_HINTS = ["french", "fr", "francais", "français", "fr_zenpy_deepl_andric31"];
+    const ANDRIC_LANGUAGE_DIR = "fr_zenpy_DeepL_andric31";
+    const FR_CREDITS_FILE = "fr_credits.txt";
+
+    // ✅ Même source que ton site andric31-traductions.pages.dev
+    // viewer.js et game/game.js utilisent cette base GitHub par défaut.
+    const DEFAULT_F95LIST_URL = "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json";
+
+    const DATABASE_URLS = [
+      DEFAULT_F95LIST_URL,
+      "/f95list.json",
+      "/data/f95list.json",
+      "/games.json",
+      "/data/games.json",
+      "f95list.json",
+      "../f95list.json"
+    ];
+
+    window.addEventListener("dragover", function(event) {
+      event.preventDefault();
+    });
+
+    window.addEventListener("drop", function(event) {
+      event.preventDefault();
+    });
+
+    folderInput.addEventListener("change", function() {
+      const files = Array.from(folderInput.files || []);
+      analyzeFiles(files, "selection", false);
+    });
+
+    resetBtn.addEventListener("click", function(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      folderInput.value = "";
+      report.innerHTML = "";
+      report.classList.remove("show");
+      resetBtn.disabled = true;
+      setSteps(1);
+    });
+
+    dropZone.addEventListener("dragover", function(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      dropZone.classList.add("dragover");
+    });
+
+    dropZone.addEventListener("dragleave", function() {
+      dropZone.classList.remove("dragover");
+    });
+
+    dropZone.addEventListener("drop", async function(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      dropZone.classList.remove("dragover");
+
+      setSteps(2);
+      report.classList.add("show");
+      report.innerHTML = renderLoading();
+
+      const items = Array.from(event.dataTransfer.items || []);
+      const entries = items
+        .map(function(item) {
+          return item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
+        })
+        .filter(Boolean);
+
+      if (!entries.length) {
+        const droppedFiles = Array.from(event.dataTransfer.files || []);
+        analyzeFiles(droppedFiles, "drop", false);
+        return;
+      }
+
+      const files = [];
+      let stopped = false;
+
+      for (const entry of entries) {
+        try {
+          await collectUsefulEntry(entry, "", files);
+        } catch (error) {
+          console.warn("Entrée ignorée pendant le dépôt :", entry && entry.name ? entry.name : entry, error);
+        }
+
+        if (files.length >= MAX_FILES_TO_SCAN) {
+          stopped = true;
+          break;
+        }
+      }
+
+      if (!files.length) {
+        setSteps(3);
+        showMessage(
+          "warn",
+          "⚠️ Dépôt non lisible",
+          "Le navigateur n’a pas donné accès au dossier déposé. Utilise le bouton « Choisir le dossier contenant le .exe » ou réessaie le dépôt du dossier."
+        );
+        scrollToReport();
+        return;
+      }
+
+      analyzeFiles(files, "drop", stopped);
+    });
+
+    async function collectUsefulEntry(entry, pathPrefix, output) {
+      if (!entry || output.length >= MAX_FILES_TO_SCAN) return;
+
+      if (entry.isFile) {
+        await addUsefulFile(entry, pathPrefix, output, true);
+        return;
+      }
+
+      if (!entry.isDirectory) return;
+
+      const rootPath = pathPrefix + entry.name + "/";
+      const children = await readDirectoryEntries(entry);
+      const names = children.map(function(child) {
+        return child.name.toLowerCase();
+      });
+
+      if (names.includes("game")) {
+        for (const child of children) {
+          if (output.length >= MAX_FILES_TO_SCAN) return;
+
+          if (child.isFile) {
+            const lowerChildName = child.name.toLowerCase();
+            if (lowerChildName.endsWith(".exe") || lowerChildName === "f95list.json" || lowerChildName.endsWith(".json")) {
+              await addUsefulFile(child, rootPath, output, true);
+            }
+          }
+        }
+
+        const gameEntry = children.find(function(child) {
+          return child.isDirectory && child.name.toLowerCase() === "game";
+        });
+
+        if (!gameEntry) return;
+
+        const gameChildren = await readDirectoryEntries(gameEntry);
+        const tlEntry = gameChildren.find(function(child) {
+          return child.isDirectory && child.name.toLowerCase() === "tl";
+        });
+
+        if (tlEntry) {
+          await collectTranslationTree(tlEntry, rootPath + "game/tl/", output);
+        }
+
+        return;
+      }
+
+      if (names.includes("tl")) {
+        const tlEntry = children.find(function(child) {
+          return child.isDirectory && child.name.toLowerCase() === "tl";
+        });
+
+        if (tlEntry) {
+          await collectTranslationTree(tlEntry, rootPath + "tl/", output);
+        }
+
+        return;
+      }
+
+      await collectTranslationTree(entry, rootPath, output);
+    }
+
+    async function collectTranslationTree(entry, pathPrefix, output) {
+      if (!entry || output.length >= MAX_FILES_TO_SCAN) return;
+
+      if (entry.isFile) {
+        await addUsefulFile(entry, pathPrefix, output, false);
+        return;
+      }
+
+      if (!entry.isDirectory) return;
+
+      let children = [];
+
+      try {
+        children = await readDirectoryEntries(entry);
+      } catch (error) {
+        console.warn("Dossier ignoré, lecture impossible :", entry.name, error);
+        return;
+      }
+
+      for (const child of children) {
+        if (output.length >= MAX_FILES_TO_SCAN) return;
+
+        if (child.isDirectory) {
+          await collectTranslationTree(child, pathPrefix + child.name + "/", output);
+        } else {
+          await collectTranslationTree(child, pathPrefix, output);
+        }
+      }
+    }
+
+    async function addUsefulFile(entry, pathPrefix, output, allowExe) {
+      const lower = entry.name.toLowerCase();
+
+      const useful =
+        lower.endsWith(".rpy") ||
+        lower.endsWith(".json") ||
+        lower.endsWith(".txt") ||
+        (allowExe && lower.endsWith(".exe"));
+
+      if (!useful) return;
+
+      try {
+        const file = await new Promise(function(resolve, reject) {
+          entry.file(resolve, reject);
+        });
+
+        file._relativePath = normalizePath(pathPrefix + entry.name);
+        output.push(file);
+      } catch (error) {
+        console.warn("Fichier ignoré, lecture impossible :", entry.name, error);
+      }
+    }
+
+    async function readDirectoryEntries(entry) {
+      const reader = entry.createReader();
+      const entries = [];
+
+      while (true) {
+        let batch = [];
+
+        try {
+          batch = await new Promise(function(resolve, reject) {
+            reader.readEntries(resolve, reject);
+          });
+        } catch (error) {
+          console.warn("Lecture du dossier impossible :", entry && entry.name ? entry.name : entry, error);
+          break;
+        }
+
+        if (!batch.length) break;
+        entries.push(...batch);
+      }
+
+      return entries;
+    }
+
+    function analyzeFiles(files, source, stopped) {
+      resetBtn.disabled = false;
+      report.classList.add("show");
+      setSteps(2);
+      report.innerHTML = renderLoading();
+
+      setTimeout(async function() {
+        try {
+          const normalizedFiles = await Promise.all(files.map(async function(file) {
+            const normalized = {
+              path: normalizePath(file._relativePath || file.webkitRelativePath || file.name),
+              name: file.name,
+              size: file.size,
+              text: ""
+            };
+
+            const lowerName = file.name.toLowerCase();
+
+            if ((lowerName === "script_version.txt" || lowerName === FR_CREDITS_FILE || lowerName.endsWith(".json")) && file.size <= 2 * 1024 * 1024 && typeof file.text === "function") {
+              try {
+                normalized.text = await file.text();
+              } catch (error) {
+                console.warn("Impossible de lire le fichier :", file.name, error);
+              }
+            }
+
+            return normalized;
+          }));
+
+          const result = await buildReport(normalizedFiles, source || "selection", Boolean(stopped));
+          setSteps(3);
+          report.innerHTML = renderReport(result);
+          bindCopyButton();
+          scrollToReport();
+        } catch (error) {
+          console.error(error);
+          setSteps(3);
+          showMessage("err", "❌ Erreur pendant la vérification", "L’outil n’a pas réussi à analyser ce dossier.");
+          scrollToReport();
+        }
+      }, 40);
+    }
+
+    async function buildReport(files, source, stopped) {
+      const paths = files.map(function(item) {
+        return item.path;
+      });
+
+      const rootName = guessRootName(paths);
+      const relativePaths = paths.map(function(path) {
+        return stripRoot(path, rootName);
+      });
+
+      const allExeFiles = files.filter(function(item) {
+        return item.name.toLowerCase().endsWith(".exe");
+      });
+
+      const exeFiles = allExeFiles.filter(function(item) {
+        const relativePath = stripRoot(item.path, rootName);
+        return isTopLevelFile(relativePath);
+      });
+
+      const anyExe = exeFiles.length > 0;
+
+      const exeNames = exeFiles.map(function(item) {
+        return item.name;
+      }).filter(Boolean).sort();
+
+      const exeDisplay = exeNames.length
+        ? exeNames.slice(0, 4).join(", ") + (exeNames.length > 4 ? " + " + (exeNames.length - 4) + " autre(s)" : "")
+        : "Aucun .exe détecté";
+
+      const hasGameTl = relativePaths.some(function(path) {
+        return path.toLowerCase().startsWith("game/tl/");
+      });
+
+      const hasTlRoot = relativePaths.some(function(path) {
+        return path.toLowerCase().startsWith("tl/");
+      });
+
+      const languageDirs = findLanguageDirs(relativePaths);
+      const directLanguageDirs = languageDirs.length ? languageDirs : findDirectLanguageDirs(relativePaths);
+      const preferredLanguageDir = chooseBestLanguageDir(directLanguageDirs, relativePaths);
+
+      const rpyFiles = files.filter(function(item) {
+        return item.name.toLowerCase().endsWith(".rpy");
+      });
+
+      const rpyInTranslation = preferredLanguageDir
+        ? rpyFiles.filter(function(item) {
+            return stripRoot(item.path, rootName).startsWith(preferredLanguageDir + "/");
+          })
+        : rpyFiles;
+
+      const jsonFiles = files.filter(function(item) {
+        return item.name.toLowerCase().endsWith(".json");
+      });
+
+      const jsonInTranslation = jsonFiles.filter(function(item) {
+        const relativePath = stripRoot(item.path, rootName);
+
+        if (preferredLanguageDir) {
+          return relativePath.startsWith(preferredLanguageDir + "/");
+        }
+
+        const lowerPath = relativePath.toLowerCase();
+        return lowerPath.startsWith("game/tl/") || lowerPath.startsWith("tl/");
+      });
+
+      const renpyVersionInfo = findRenpyVersionInfo(files, rootName);
+
+      const emptyRpy = rpyInTranslation.filter(function(item) {
+        return item.size === 0;
+      });
+
+      const andricCheck = await buildAndricTranslationCheck(files, rootName, relativePaths, directLanguageDirs, preferredLanguageDir, exeNames);
+
+      const problems = [];
+      const warnings = [];
+      const advice = [];
+
+      if (!files.length) {
+        problems.push("Aucun fichier utile détecté.");
+      }
+
+      if (!anyExe) {
+        warnings.push("Aucun fichier .exe détecté à la racine du dossier choisi. Tu n’as probablement pas choisi le dossier principal du jeu. Choisis le dossier où se trouve le fichier .exe.");
+      }
+
+
+      if (!hasGameTl && !hasTlRoot && !preferredLanguageDir) {
+        warnings.push("Le chemin game/tl n’a pas été détecté. La traduction est peut-être placée ailleurs.");
+      }
+
+      if (!rpyInTranslation.length) {
+        problems.push("Aucun fichier .rpy de traduction détecté.");
+      }
+
+      if (emptyRpy.length) {
+        warnings.push(emptyRpy.length + " fichier(s) .rpy vide(s) détecté(s).");
+      }
+
+      if (stopped) {
+        warnings.push("Analyse limitée automatiquement, car beaucoup de fichiers ont été détectés.");
+      }
+
+      if (andricCheck.detected && !andricCheck.folderNameMatched) {
+        warnings.push("La traduction andric31 est détectée, mais le dossier choisi ne correspond pas à la section NOM DU FICHIER TRADUIT du fr_credits.txt.");
+      }
+
+      if (andricCheck.detected && andricCheck.databaseStatus === "missing") {
+        warnings.push("La traduction andric31 est détectée, mais aucune entrée correspondante n’a été retrouvée dans la base JSON accessible.");
+      }
+
+      if (!problems.length) {
+        advice.push("La traduction semble présente. Le chemin attendu dans le jeu est : game/tl/nom_de_la_langue/.");
+      } else {
+        advice.push("Réinstalle la traduction à la racine du jeu, là où se trouve le fichier .exe.");
+        advice.push("Après installation, le dossier de traduction doit se trouver dans game/tl/.");
+      }
+
+      let level = "ok";
+      let title = "✅ Traduction détectée";
+      let message = "Les fichiers de traduction semblent présents.";
+
+      if (problems.length) {
+        level = "err";
+        title = "❌ Traduction introuvable";
+        message = "L’outil n’a pas trouvé les fichiers attendus.";
+      } else if (warnings.length) {
+        level = "warn";
+        title = "⚠️ Traduction à vérifier";
+        message = "La traduction semble présente, mais certains points méritent une vérification.";
+      }
+
+      const summaryLines = [
+        title,
+        "",
+        "Dossier choisi : " + (rootName || "dossier sélectionné"),
+        "Fichier .exe détecté : " + (anyExe ? "oui" : "non"),
+        "Nom du .exe : " + exeDisplay,
+        "Version Ren'Py : " + (renpyVersionInfo.version || "non détectée"),
+        "Chemin game/tl détecté : " + (hasGameTl ? "oui" : "non"),
+        "Dossier de traduction : " + (preferredLanguageDir || "non détecté clairement"),
+        "Fichiers .rpy détectés : " + rpyInTranslation.length,
+        "Fichiers JSON détectés dans la traduction : " + jsonInTranslation.length,
+        "Traduction andric31 : " + (andricCheck.detected ? "oui" : "non"),
+        "fr_credits.txt : " + (andricCheck.creditsFound ? "oui" : "non"),
+        "Dossier listé dans NOM DU FICHIER TRADUIT : " + (andricCheck.folderNameMatched ? "oui" : (andricCheck.detected ? "non" : "non concerné")),
+        "Base JSON : " + andricCheck.databaseLabel
+      ];
+
+      if (problems.length) {
+        summaryLines.push("", "Problèmes :");
+        problems.forEach(function(problem) {
+          summaryLines.push("- " + problem);
+        });
+      }
+
+      if (warnings.length) {
+        summaryLines.push("", "Avertissements :");
+        warnings.forEach(function(warning) {
+          summaryLines.push("- " + warning);
+        });
+      }
+
+      summaryLines.push("", "Conseil :");
+      advice.forEach(function(line) {
+        summaryLines.push("- " + line);
+      });
+
+      return {
+        rootName: rootName || "dossier sélectionné",
+        level: level,
+        title: title,
+        message: message,
+        anyExe: anyExe,
+        exeDisplay: exeDisplay,
+        hasGameTl: hasGameTl,
+        preferredLanguageDir: preferredLanguageDir,
+        renpyVersion: renpyVersionInfo.version,
+        renpyVersionPath: renpyVersionInfo.path,
+        rpyCount: rpyInTranslation.length,
+        jsonCount: jsonInTranslation.length,
+        emptyRpyCount: emptyRpy.length,
+        andricCheck: andricCheck,
+        problems: problems,
+        warnings: warnings,
+        advice: advice,
+        summary: summaryLines.join("\n")
+      };
+    }
+
+    function renderLoading() {
+      return '<div class="status-card"><h3 class="status-title">🔎 Vérification en cours...</h3><p class="status-text">Étape 2/3 — Recherche du dossier <code>game/tl</code>. Le résultat s’affichera juste en dessous.</p></div>';
+    }
+
+    function showMessage(level, title, text) {
+      report.classList.add("show");
+      report.innerHTML = renderMainStatus(level, title, text);
+    }
+
+    function renderMainStatus(level, title, text) {
+      return '<div class="status-card ' + escapeHtml(level) + '"><h3 class="status-title">' + escapeHtml(title) + '</h3><p class="status-text">' + escapeHtml(text) + '</p></div>';
+    }
+
+    function renderReport(result) {
+      return ""
+        + '<div class="status-card ok"><h3 class="status-title">✅ Analyse terminée</h3><p class="status-text">Le dossier a été vérifié. Résultat ci-dessous.</p></div>'
+        + renderMainStatus(result.level, result.title, result.message)
+        + (result.anyExe
+          ? '<div class="status-card ok"><h3 class="status-title">🎮 .exe trouvé : ' + escapeHtml(result.exeDisplay) + '</h3><p class="status-text">Si ce nom correspond au jeu, tu as bien sélectionné le dossier principal.</p></div>'
+          : '<div class="status-card warn"><h3 class="status-title">⚠️ Aucun .exe visible après import</h3><p class="status-text">Tu n’es probablement pas dans le dossier principal du jeu. Remonte ou descends d’un niveau, puis réessaie.</p></div>')
+        + '<div class="result-grid">'
+        + renderCheck("📁 Dossier sélectionné", result.rootName || "dossier sélectionné", "Nom du dossier importé dans le navigateur.")
+        + renderCheck("🎮 Fichier .exe", result.anyExe ? "✅ " + result.exeDisplay : "⚠️ Non détecté", result.anyExe ? "Seulement les .exe à la racine du dossier choisi sont pris en compte." : "Aucun .exe trouvé à la racine : tu n’es probablement pas dans le dossier principal du jeu.")
+        + renderCheck("🐍 Version Ren'Py", result.renpyVersion ? "✅ " + result.renpyVersion : "Non détectée", result.renpyVersionPath || "Fichier attendu : game/script_version.txt")
+        + renderCheck("🌍 Chemin game/tl", result.hasGameTl ? "✅ Détecté" : "⚠️ Non détecté", "Chemin attendu : game/tl/")
+        + renderCheck("🇫🇷 Dossier de traduction", result.preferredLanguageDir ? "✅ Détecté" : "⚠️ Non détecté clairement", result.preferredLanguageDir || "Exemple : game/tl/french/")
+        + renderCheck("📜 Fichiers .rpy", result.rpyCount ? "✅ " + result.rpyCount + " fichier(s)" : "❌ Aucun fichier", "Les traductions Ren\'Py utilisent généralement des fichiers .rpy.")
+        + renderCheck("🧾 Fichiers JSON", result.jsonCount ? "✅ " + result.jsonCount + " fichier(s)" : "Aucun JSON", "Comptage limité au dossier de traduction détecté.")
+        + renderCheck("🙈 Liste des fichiers", "Masquée", "Seul le nom du .exe est affiché pour confirmer le bon dossier.")
+        + "</div>"
+        + renderListSection("❌ Problèmes détectés", result.problems, "Aucun problème bloquant détecté.")
+        + renderListSection("⚠️ Points à vérifier", result.warnings, "Aucun avertissement particulier.")
+        + renderListSection("🛠️ Solution conseillée", result.advice, "")
+        + (result.emptyRpyCount ? renderListSection("📄 Fichiers .rpy vides", ["Un ou plusieurs fichiers .rpy sont vides."], "") : "")
+        + renderAndricCheck(result.andricCheck)
+        + '<div class="status-card"><h3 class="status-title">📋 Rapport à copier</h3><p class="status-text">Tu peux copier ce rapport et l’envoyer sur Discord si besoin.</p><textarea id="copyBox" class="copy-box" readonly>' + escapeHtml(result.summary) + '</textarea><div class="button-row"><button id="copyReportBtn" class="primary-btn" type="button">📋 Copier le rapport</button></div></div>';
+    }
+
+    function renderAndricCheck(check) {
+      if (!check || !check.detected) {
+        return '<div class="status-card"><h3 class="status-title">🧩 Traduction andric31</h3><p class="status-text">Aucune traduction <code>' + escapeHtml(ANDRIC_LANGUAGE_DIR) + '</code> détectée dans ce dossier.</p></div>';
+      }
+
+      const level = check.folderNameMatched && check.databaseStatus === "matched" ? "ok" : (check.creditsFound ? "warn" : "err");
+      const title = check.folderNameMatched
+        ? "✅ Traduction andric31 reconnue"
+        : "⚠️ Traduction andric31 à vérifier";
+
+      const badges = [];
+      badges.push('<span class="mini-badge ok">📁 ' + escapeHtml(check.languageDir || ANDRIC_LANGUAGE_DIR) + '</span>');
+      badges.push('<span class="mini-badge ' + (check.creditsFound ? "ok" : "err") + '">🧾 fr_credits.txt ' + (check.creditsFound ? "trouvé" : "introuvable") + '</span>');
+      badges.push('<span class="mini-badge ' + (check.folderNameMatched ? "ok" : "warn") + '">📦 Dossier ' + (check.folderNameMatched ? "validé" : "non listé") + '</span>');
+      badges.push('<span class="mini-badge ' + (check.databaseStatus === "matched" ? "ok" : "warn") + '">🗄️ Base JSON : ' + escapeHtml(check.databaseLabel) + '</span>');
+
+      return ''
+        + '<div class="status-card ' + escapeHtml(level) + '">'
+        + '<h3 class="status-title">' + escapeHtml(title) + '</h3>'
+        + '<p class="status-text">' + badges.join(" ") + '</p>'
+        + '<div class="result-grid">'
+        + renderCheck("🧾 Fichier crédits", check.creditsPath || "Non trouvé", "Chemin du fichier fr_credits.txt détecté.")
+        + renderCheck("🎮 Titre crédits", check.creditTitle || "Non détecté", "Titre lu dans la première section du fr_credits.txt.")
+        + renderCheck("📦 Dossier choisi", check.selectedFolderLabel || "Non détecté", "Comparé avec la section NOM DU FICHIER TRADUIT.")
+        + renderCheck("📋 Noms autorisés", check.translatedFileNames.length ? check.translatedFileNames.join(", ") : "Aucun nom détecté", "Section #NOM DU FICHIER TRADUIT du fr_credits.txt.")
+        + renderCheck("🔗 ID F95", check.f95Id || "Non détecté", "Pris depuis la section INFORMATION ou depuis l’URL de la base.")
+        + renderCheck("🗄️ Entrée base", check.databaseTitle || check.databaseLabel, check.databaseHint)
+        + '</div>'
+        + renderListSection("⚠️ Vérification andric31", check.messages, "Aucun point particulier.")
+        + '</div>';
+    }
+
+    function renderCheck(title, value, hint) {
+      return '<div class="result-item"><strong>' + escapeHtml(title) + '</strong><small>' + escapeHtml(value) + '</small><br><small>' + escapeHtml(hint) + '</small></div>';
+    }
+
+    function renderListSection(title, items, emptyText) {
+      if (!items.length && !emptyText) return "";
+
+      if (!items.length) {
+        return '<div class="status-card"><h3 class="status-title">' + escapeHtml(title) + '</h3><p class="status-text">' + escapeHtml(emptyText) + '</p></div>';
+      }
+
+      return '<div class="status-card"><h3 class="status-title">' + escapeHtml(title) + '</h3><ul class="details-list">' + items.map(function(item) {
+        return '<li>' + escapeHtml(item) + '</li>';
+      }).join("") + "</ul></div>";
+    }
+
+    function bindCopyButton() {
+      const copyBtn = document.getElementById("copyReportBtn");
+      const copyBox = document.getElementById("copyBox");
+
+      if (!copyBtn || !copyBox) return;
+
+      copyBtn.addEventListener("click", async function() {
+        try {
+          await navigator.clipboard.writeText(copyBox.value);
+          copyBtn.textContent = "✅ Rapport copié";
+          setTimeout(function() {
+            copyBtn.textContent = "📋 Copier le rapport";
+          }, 1800);
+        } catch (error) {
+          copyBox.select();
+          document.execCommand("copy");
+        }
+      });
+    }
+
+    function setSteps(current) {
+      step1.classList.toggle("active", current === 1);
+      step2.classList.toggle("active", current === 2);
+      step3.classList.toggle("active", current === 3);
+
+      step1.classList.toggle("done", current > 1);
+      step2.classList.toggle("done", current > 2);
+    }
+
+    function scrollToReport() {
+      if (!resultAnchor) return;
+
+      setTimeout(function() {
+        resultAnchor.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }, 80);
+    }
+
+    function normalizePath(path) {
+      return String(path || "").replaceAll("\\", "/").replaceAll("\\", "/").replace(/^\/+/, "").replace(/\/+/g, "/");
+    }
+
+    function guessRootName(paths) {
+      const firstParts = paths.map(function(path) {
+        return normalizePath(path).split("/")[0];
+      }).filter(Boolean);
+
+      if (!firstParts.length) return "";
+
+      const first = firstParts[0];
+      return firstParts.every(function(part) {
+        return part === first;
+      }) ? first : "";
+    }
+
+    function stripRoot(path, rootName) {
+      const normalized = normalizePath(path);
+
+      if (rootName && normalized.startsWith(rootName + "/")) {
+        return normalized.slice(rootName.length + 1);
+      }
+
+      return normalized;
+    }
+
+    function isTopLevelFile(path) {
+      const normalized = normalizePath(path);
+      return normalized && !normalized.includes("/");
+    }
+
+    async function buildAndricTranslationCheck(files, rootName, relativePaths, languageDirs, preferredLanguageDir, exeNames) {
+      const normalizedAndric = normalizeLoose(ANDRIC_LANGUAGE_DIR);
+      const andricLanguageDir = languageDirs.find(function(dir) {
+        return normalizeLoose(dir.split("/").pop()) === normalizedAndric;
+      }) || (preferredLanguageDir && normalizeLoose(preferredLanguageDir.split("/").pop()) === normalizedAndric ? preferredLanguageDir : "");
+
+      const frCreditsCandidates = files.filter(function(item) {
+        return item.name.toLowerCase() === FR_CREDITS_FILE;
+      }).map(function(item) {
+        const relativePath = stripRoot(item.path, rootName);
+        const lowerPath = relativePath.toLowerCase();
+        let score = 0;
+
+        if (andricLanguageDir && relativePath.startsWith(andricLanguageDir + "/")) score += 1000;
+        if (lowerPath.includes("game/tl/" + ANDRIC_LANGUAGE_DIR.toLowerCase() + "/")) score += 900;
+        if (lowerPath.includes(ANDRIC_LANGUAGE_DIR.toLowerCase())) score += 500;
+        if (lowerPath.endsWith("/" + FR_CREDITS_FILE)) score += 20;
+
+        return { item: item, relativePath: relativePath, score: score };
+      }).sort(function(a, b) {
+        return b.score - a.score || a.relativePath.localeCompare(b.relativePath);
+      });
+
+      const credits = frCreditsCandidates.length ? frCreditsCandidates[0] : null;
+      const parsedCredits = credits ? parseFrCredits(credits.item.text || "") : emptyFrCredits();
+      const selectedNames = buildSelectedGameNames(rootName, exeNames);
+      const folderNameMatched = Boolean(parsedCredits.translatedFileNames.length && selectedNames.some(function(selected) {
+        return parsedCredits.translatedFileNames.some(function(name) {
+          return namesMatch(selected, name);
+        });
+      }));
+
+      const databaseInfo = await findDatabaseEntry(parsedCredits, credits, files, rootName);
+      const detected = Boolean(andricLanguageDir || credits);
+      const messages = [];
+
+      if (!andricLanguageDir) {
+        messages.push("Le dossier " + ANDRIC_LANGUAGE_DIR + " n’a pas été trouvé dans game/tl.");
+      }
+
+      if (!credits) {
+        messages.push("Aucun fr_credits.txt n’a été trouvé dans le dossier de traduction.");
+      }
+
+      if (credits && !parsedCredits.translatedFileNames.length) {
+        messages.push("Le fr_credits.txt est présent, mais la section NOM DU FICHIER TRADUIT est vide ou non reconnue.");
+      }
+
+      if (credits && parsedCredits.translatedFileNames.length && !folderNameMatched) {
+        messages.push("Le dossier choisi ne correspond pas aux noms listés dans NOM DU FICHIER TRADUIT.");
+      }
+
+      if (credits && !parsedCredits.f95Id) {
+        messages.push("Aucun identifiant F95Zone n’a été trouvé dans la section INFORMATION.");
+      }
+
+      if (databaseInfo.status === "missing") {
+        messages.push("Aucune entrée correspondante n’a été retrouvée dans la base JSON accessible.");
+      } else if (databaseInfo.status === "unavailable") {
+        messages.push("La base JSON n’est pas accessible depuis cette page. La vérification locale via fr_credits.txt reste utilisable.");
+      }
+
+      return {
+        detected: detected,
+        languageDir: andricLanguageDir,
+        creditsFound: Boolean(credits),
+        creditsPath: credits ? credits.relativePath : "",
+        creditTitle: parsedCredits.title,
+        translatedFileNames: parsedCredits.translatedFileNames,
+        selectedFolderLabel: selectedNames.join(" / "),
+        folderNameMatched: folderNameMatched,
+        f95Id: parsedCredits.f95Id || databaseInfo.id || "",
+        databaseStatus: databaseInfo.status,
+        databaseLabel: databaseInfo.label,
+        databaseTitle: databaseInfo.entry ? (databaseInfo.entry.cleanTitle || databaseInfo.entry.title || "") : "",
+        databaseHint: databaseInfo.hint,
+        messages: messages
+      };
+    }
+
+    function emptyFrCredits() {
+      return {
+        title: "",
+        translatedFileNames: [],
+        infoLines: [],
+        f95Id: ""
+      };
+    }
+
+    function parseFrCredits(text) {
+      const result = emptyFrCredits();
+      const lines = String(text || "").replace(/^\uFEFF/, "").split(/\r?\n/);
+      const sections = {};
+      let current = "intro";
+      sections[current] = [];
+
+      lines.forEach(function(rawLine) {
+        const line = rawLine.trim();
+        const headerMatch = line.match(/^#\s*([^#]+?)\s*#{3,}\s*$/);
+
+        if (headerMatch) {
+          current = normalizeSectionName(headerMatch[1]);
+          if (!sections[current]) sections[current] = [];
+          return;
+        }
+
+        if (!sections[current]) sections[current] = [];
+        sections[current].push(rawLine);
+      });
+
+      result.title = cleanSectionLines(sections["titre_du_jeu"] || sections.intro || [])[0] || "";
+      result.translatedFileNames = cleanSectionLines(sections["nom_du_fichier_traduit"] || []);
+      result.infoLines = cleanSectionLines(sections["information"] || []);
+      result.f95Id = findF95Id(result.infoLines.join("\n") + "\n" + text);
+      return result;
+    }
+
+    function normalizeSectionName(value) {
+      return normalizeLoose(value).replace(/\s+/g, "_");
+    }
+
+    function cleanSectionLines(lines) {
+      return (lines || []).map(function(line) {
+        return String(line || "").trim();
+      }).filter(function(line) {
+        return line && !line.startsWith("#");
+      });
+    }
+
+    function findF95Id(text) {
+      const match = String(text || "").match(/f95zone\.to\/threads\/(?:[^\s\/]*?\.)?(\d+)\/?/i);
+      return match ? match[1] : "";
+    }
+
+    function buildSelectedGameNames(rootName, exeNames) {
+      const names = [];
+      if (rootName) names.push(rootName);
+      (exeNames || []).forEach(function(name) {
+        names.push(name);
+        names.push(name.replace(/\.exe$/i, ""));
+      });
+      return Array.from(new Set(names.filter(Boolean)));
+    }
+
+    function namesMatch(a, b) {
+      const na = normalizeFolderName(a);
+      const nb = normalizeFolderName(b);
+      if (!na || !nb) return false;
+      return na === nb || na.includes(nb) || nb.includes(na);
+    }
+
+    function normalizeFolderName(value) {
+      return normalizeLoose(value)
+        .replace(/\.exe$/i, "")
+        .replace(/[^a-z0-9]+/g, "")
+        .trim();
+    }
+
+    function normalizeLoose(value) {
+      return String(value || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[_-]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    async function findDatabaseEntry(parsedCredits, credits, files, rootName) {
+      const localDb = findLocalDatabase(files, rootName);
+      const remoteDb = localDb || await loadRemoteDatabase();
+
+      if (!remoteDb.items.length) {
+        return {
+          status: "unavailable",
+          label: localDb ? "vide" : "non accessible",
+          hint: localDb ? "Un fichier JSON a été lu, mais aucune entrée exploitable n’a été trouvée." : "La base du site sera cherchée via localStorage.f95listUrl puis via la base GitHub officielle du site.",
+          id: "",
+          entry: null
+        };
+      }
+
+      const targetId = parsedCredits.f95Id || "";
+      const targetTitle = parsedCredits.title || "";
+      let entry = null;
+
+      if (targetId) {
+        entry = remoteDb.items.find(function(item) {
+          return String(item.id || "") === String(targetId) || findF95Id(item.url || "") === String(targetId);
+        }) || null;
+      }
+
+      if (!entry && targetTitle) {
+        const normalizedTitle = normalizeTitleForSearch(targetTitle);
+        entry = remoteDb.items.find(function(item) {
+          const itemTitle = normalizeTitleForSearch(item.cleanTitle || item.title || "");
+          return itemTitle === normalizedTitle || itemTitle.includes(normalizedTitle) || normalizedTitle.includes(itemTitle);
+        }) || null;
+      }
+
+      if (!entry && parsedCredits.translatedFileNames.length) {
+        const normalizedNames = parsedCredits.translatedFileNames.map(normalizeTitleForSearch).filter(Boolean);
+        entry = remoteDb.items.find(function(item) {
+          const itemTitle = normalizeTitleForSearch(item.cleanTitle || item.title || "");
+          return normalizedNames.some(function(name) {
+            return itemTitle === name || itemTitle.includes(name) || name.includes(itemTitle);
+          });
+        }) || null;
+      }
+
+      if (!entry) {
+        return {
+          status: "missing",
+          label: "entrée introuvable",
+          hint: "Base lue : " + remoteDb.source + ". Recherche faite par ID F95 puis par titre/création.",
+          id: targetId,
+          entry: null
+        };
+      }
+
+      return {
+        status: "matched",
+        label: "entrée trouvée",
+        hint: "Base lue : " + remoteDb.source + ". Correspondance par " + (targetId ? "ID F95" : "titre") + ".",
+        id: String(entry.id || findF95Id(entry.url || "") || targetId || ""),
+        entry: entry
+      };
+    }
+
+    function findLocalDatabase(files, rootName) {
+      const candidates = files.filter(function(item) {
+        const name = item.name.toLowerCase();
+        return name.endsWith(".json") && item.text && (name.includes("f95") || name.includes("list") || name.includes("games"));
+      }).map(function(item) {
+        const relativePath = stripRoot(item.path, rootName);
+        let score = 0;
+        if (item.name.toLowerCase() === "f95list.json") score += 1000;
+        if (relativePath.split("/").length <= 2) score += 100;
+        return { item: item, relativePath: relativePath, score: score };
+      }).sort(function(a, b) {
+        return b.score - a.score || a.relativePath.localeCompare(b.relativePath);
+      });
+
+      for (const candidate of candidates) {
+        const items = parseDatabaseJson(candidate.item.text);
+        if (items.length) {
+          return { source: candidate.relativePath, items: items };
+        }
+      }
+
+      return null;
+    }
+
+    async function loadRemoteDatabase() {
+      if (Array.isArray(window.ANDRIC31_TRANSLATIONS_DB)) {
+        return { source: "window.ANDRIC31_TRANSLATIONS_DB", items: window.ANDRIC31_TRANSLATIONS_DB };
+      }
+
+      const urls = buildDatabaseUrls();
+
+      for (const url of urls) {
+        try {
+          const response = await fetch(url, { cache: "no-store" });
+          if (!response.ok) continue;
+          const data = await response.json();
+          const items = normalizeDatabaseItems(data);
+          if (items.length) {
+            return { source: url, items: items };
+          }
+        } catch (error) {
+          console.warn("Base JSON non lisible :", url, error);
+        }
+      }
+
+      return { source: "", items: [] };
+    }
+
+    function buildDatabaseUrls() {
+      const urls = [];
+
+      try {
+        const customUrl = (localStorage.getItem("f95listUrl") || "").trim();
+        if (customUrl) urls.push(customUrl);
+      } catch (error) {}
+
+      DATABASE_URLS.forEach(function(url) {
+        if (url) urls.push(url);
+      });
+
+      return Array.from(new Set(urls));
+    }
+
+    function parseDatabaseJson(text) {
+      try {
+        return normalizeDatabaseItems(JSON.parse(text));
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function normalizeDatabaseItems(data) {
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data && data.games)) return data.games;
+      if (Array.isArray(data && data.items)) return data.items;
+      if (data && typeof data === "object") return Object.values(data).filter(function(item) {
+        return item && typeof item === "object";
+      });
+      return [];
+    }
+
+    function normalizeTitleForSearch(value) {
+      return normalizeLoose(value)
+        .replace(/\[[^\]]*\]/g, "")
+        .replace(/\bvn\b|\bren py\b|\brenpy\b/g, "")
+        .replace(/[^a-z0-9]+/g, "")
+        .trim();
+    }
+
+    function findRenpyVersionInfo(files, rootName) {
+      const candidates = files.filter(function(item) {
+        return item.name.toLowerCase() === "script_version.txt";
+      }).map(function(item) {
+        const relativePath = stripRoot(item.path, rootName);
+        const lowerPath = relativePath.toLowerCase();
+        let score = 0;
+
+        if (lowerPath === "game/script_version.txt") score += 100;
+        if (lowerPath.endsWith("/game/script_version.txt")) score += 70;
+        if (lowerPath === "script_version.txt") score += 30;
+
+        return { item: item, relativePath: relativePath, score: score };
+      }).sort(function(a, b) {
+        return b.score - a.score || a.relativePath.localeCompare(b.relativePath);
+      });
+
+      if (!candidates.length) {
+        return { version: "", path: "" };
+      }
+
+      const best = candidates[0];
+      const content = String(best.item.text || "").trim();
+      const versionMatch = content.match(/\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)/);
+
+      if (versionMatch) {
+        return {
+          version: versionMatch[0].replace(/\s+/g, ""),
+          path: best.relativePath
+        };
+      }
+
+      const firstLine = content.split(/\r?\n/).map(function(line) {
+        return line.trim();
+      }).filter(Boolean)[0] || "";
+
+      return {
+        version: firstLine.slice(0, 60),
+        path: best.relativePath
+      };
+    }
+
+    function findLanguageDirs(relativePaths) {
+      const dirs = new Set();
+
+      relativePaths.forEach(function(path) {
+        const parts = normalizePath(path).split("/");
+
+        if (parts.length >= 3 && parts[0].toLowerCase() === "game" && parts[1].toLowerCase() === "tl") {
+          dirs.add(parts.slice(0, 3).join("/"));
+        }
+      });
+
+      return Array.from(dirs).sort();
+    }
+
+    function findDirectLanguageDirs(relativePaths) {
+      const dirs = new Set();
+
+      relativePaths.forEach(function(path) {
+        const parts = normalizePath(path).split("/");
+
+        if (parts.length >= 2) {
+          dirs.add(parts[0]);
+        }
+      });
+
+      return Array.from(dirs).sort();
+    }
+
+    function chooseBestLanguageDir(languageDirs, relativePaths) {
+      if (!languageDirs.length) return "";
+
+      const scored = languageDirs.map(function(dir) {
+        const name = dir.split("/").pop().toLowerCase();
+
+        const filesInside = relativePaths.filter(function(path) {
+          return path.startsWith(dir + "/");
+        });
+
+        const rpyCount = filesInside.filter(function(path) {
+          return path.toLowerCase().endsWith(".rpy");
+        }).length;
+
+        const hintScore = LANGUAGE_HINTS.some(function(hint) {
+          return name.includes(hint);
+        }) ? 1000 : 0;
+
+        return { dir: dir, score: hintScore + rpyCount };
+      });
+
+      scored.sort(function(a, b) {
+        return b.score - a.score || a.dir.localeCompare(b.dir);
+      });
+
+      return scored[0].dir;
+    }
+
+    function escapeHtml(value) {
+      return String(value === undefined || value === null ? "" : value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+  </script>
+
+</body>
+</html>

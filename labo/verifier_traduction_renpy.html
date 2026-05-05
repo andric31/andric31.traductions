@@ -292,6 +292,18 @@
       line-height: 1.55;
     }
 
+    .result-item a,
+    .status-card a {
+      color: var(--wiki-link);
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .result-item a:hover,
+    .status-card a:hover {
+      text-decoration: underline;
+    }
+
     .details-list {
       margin: 10px 0 0;
       padding-left: 20px;
@@ -869,19 +881,23 @@
       const summaryLines = [
         title,
         "",
-        "Dossier choisi : " + (rootName || "dossier sélectionné"),
-        "Fichier .exe détecté : " + (anyExe ? "oui" : "non"),
-        "Nom du .exe : " + exeDisplay,
-        "Version Ren'Py : " + (renpyVersionInfo.version || "non détectée"),
-        "Chemin game/tl détecté : " + (hasGameTl ? "oui" : "non"),
-        "Dossier de traduction : " + (preferredLanguageDir || "non détecté clairement"),
-        "Fichiers .rpy détectés : " + rpyInTranslation.length,
-        "Fichiers JSON détectés dans la traduction : " + jsonInTranslation.length,
-        "Traduction andric31 : " + (andricCheck.detected ? "oui" : "non"),
-        "fr_credits.txt : " + (andricCheck.creditsFound ? "oui" : "non"),
-        "Dossier listé dans NOM DU FICHIER TRADUIT : " + (andricCheck.folderNameMatched ? "oui" : (andricCheck.detected ? "non" : "non concerné")),
-        "Base JSON : " + andricCheck.databaseLabel
+        "Vérifications faites :",
+        "- Dossier choisi : " + (rootName || "dossier sélectionné"),
+        "- .exe à la racine : " + (anyExe ? "oui (" + exeDisplay + ")" : "non"),
+        "- Version Ren'Py : " + (renpyVersionInfo.version || "non détectée"),
+        "- Chemin game/tl : " + (hasGameTl ? "oui" : "non"),
+        "- Dossier de traduction : " + (preferredLanguageDir || "non détecté clairement"),
+        "- Fichiers .rpy de traduction : " + rpyInTranslation.length,
+        "- Fichiers JSON dans la traduction : " + jsonInTranslation.length,
+        "- Traduction andric31 : " + (andricCheck.detected ? "oui" : "non")
       ];
+
+      if (andricCheck.detected) {
+        summaryLines.push("- fr_credits.txt : " + (andricCheck.creditsFound ? "oui" : "non"));
+        summaryLines.push("- Dossier NOM DU FICHIER TRADUIT : " + (andricCheck.folderNameMatched ? "validé" : "à vérifier"));
+        summaryLines.push("- ID F95 : " + (andricCheck.f95Id || "non détecté"));
+        summaryLines.push("- Page traduction andric31 : " + (andricCheck.translationPageUrl ? andricCheck.translationPageUrl : "non trouvée"));
+      }
 
       if (problems.length) {
         summaryLines.push("", "Problèmes :");
@@ -952,7 +968,6 @@
         + renderCheck("🇫🇷 Dossier de traduction", result.preferredLanguageDir ? "✅ Détecté" : "⚠️ Non détecté clairement", result.preferredLanguageDir || "Exemple : game/tl/french/")
         + renderCheck("📜 Fichiers .rpy", result.rpyCount ? "✅ " + result.rpyCount + " fichier(s)" : "❌ Aucun fichier", "Les traductions Ren\'Py utilisent généralement des fichiers .rpy.")
         + renderCheck("🧾 Fichiers JSON", result.jsonCount ? "✅ " + result.jsonCount + " fichier(s)" : "Aucun JSON", "Comptage limité au dossier de traduction détecté.")
-        + renderCheck("🙈 Liste des fichiers", "Masquée", "Seul le nom du .exe est affiché pour confirmer le bon dossier.")
         + "</div>"
         + renderListSection("❌ Problèmes détectés", result.problems, "Aucun problème bloquant détecté.")
         + renderListSection("⚠️ Points à vérifier", result.warnings, "Aucun avertissement particulier.")
@@ -976,7 +991,7 @@
       badges.push('<span class="mini-badge ok">📁 ' + escapeHtml(check.languageDir || ANDRIC_LANGUAGE_DIR) + '</span>');
       badges.push('<span class="mini-badge ' + (check.creditsFound ? "ok" : "err") + '">🧾 fr_credits.txt ' + (check.creditsFound ? "trouvé" : "introuvable") + '</span>');
       badges.push('<span class="mini-badge ' + (check.folderNameMatched ? "ok" : "warn") + '">📦 Dossier ' + (check.folderNameMatched ? "validé" : "non listé") + '</span>');
-      badges.push('<span class="mini-badge ' + (check.databaseStatus === "matched" ? "ok" : "warn") + '">🗄️ Base JSON : ' + escapeHtml(check.databaseLabel) + '</span>');
+      badges.push('<span class="mini-badge ' + (check.databaseStatus === "matched" ? "ok" : "warn") + '">🔗 Page traduction : ' + escapeHtml(check.databaseLabel) + '</span>');
 
       return ''
         + '<div class="status-card ' + escapeHtml(level) + '">'
@@ -987,8 +1002,8 @@
         + renderCheck("🎮 Titre crédits", check.creditTitle || "Non détecté", "Titre lu dans la première section du fr_credits.txt.")
         + renderCheck("📦 Dossier choisi", check.selectedFolderLabel || "Non détecté", "Comparé avec la section NOM DU FICHIER TRADUIT.")
         + renderCheck("📋 Noms autorisés", check.translatedFileNames.length ? check.translatedFileNames.join(", ") : "Aucun nom détecté", "Section #NOM DU FICHIER TRADUIT du fr_credits.txt.")
-        + renderCheck("🔗 ID F95", check.f95Id || "Non détecté", "Pris depuis la section INFORMATION ou depuis l’URL de la base.")
-        + renderCheck("🗄️ Entrée base", check.databaseTitle || check.databaseLabel, check.databaseHint)
+        + renderCheckHtml("🔗 ID F95", buildLinkHtml(check.f95Url, check.f95Id || "Non détecté"), "Lien vers le thread F95Zone quand l’ID est disponible.")
+        + renderCheckHtml("🗄️ Page traduction", buildLinkHtml(check.translationPageUrl, check.databaseTitle || check.databaseLabel), check.databaseHint)
         + '</div>'
         + renderListSection("⚠️ Vérification andric31", check.messages, "Aucun point particulier.")
         + '</div>';
@@ -996,6 +1011,16 @@
 
     function renderCheck(title, value, hint) {
       return '<div class="result-item"><strong>' + escapeHtml(title) + '</strong><small>' + escapeHtml(value) + '</small><br><small>' + escapeHtml(hint) + '</small></div>';
+    }
+
+    function renderCheckHtml(title, valueHtml, hint) {
+      return '<div class="result-item"><strong>' + escapeHtml(title) + '</strong><small>' + valueHtml + '</small><br><small>' + escapeHtml(hint) + '</small></div>';
+    }
+
+    function buildLinkHtml(url, label) {
+      const safeLabel = escapeHtml(label || "Ouvrir");
+      if (!url) return safeLabel;
+      return '<a href="' + escapeAttribute(url) + '" target="_blank" rel="noopener noreferrer">' + safeLabel + '</a>';
     }
 
     function renderListSection(title, items, emptyText) {
@@ -1154,6 +1179,8 @@
         selectedFolderLabel: selectedNames.join(" / "),
         folderNameMatched: folderNameMatched,
         f95Id: parsedCredits.f95Id || databaseInfo.id || "",
+        f95Url: databaseInfo.f95Url || buildF95ThreadUrl(databaseInfo.entry, parsedCredits.f95Id || databaseInfo.id || ""),
+        translationPageUrl: databaseInfo.translationPageUrl || "",
         databaseStatus: databaseInfo.status,
         databaseLabel: databaseInfo.label,
         databaseTitle: databaseInfo.entry ? (databaseInfo.entry.cleanTitle || databaseInfo.entry.title || "") : "",
@@ -1216,6 +1243,26 @@
       return match ? match[1] : "";
     }
 
+    function buildTranslationPageUrl(entry) {
+      if (!entry) return "";
+
+      const coll = (entry.collection || "").toString().trim();
+      const id = (entry.id || "").toString().trim();
+      const uid = (entry.uid ?? "").toString().trim();
+
+      if (coll) return "/game/?id=" + encodeURIComponent(coll) + "&uid=" + encodeURIComponent(uid);
+      if (id) return "/game/?id=" + encodeURIComponent(id);
+      if (uid) return "/game/?uid=" + encodeURIComponent(uid);
+      return "";
+    }
+
+    function buildF95ThreadUrl(entry, fallbackId) {
+      const url = entry && entry.url ? String(entry.url).trim() : "";
+      if (url) return url;
+      const id = String(fallbackId || "").trim();
+      return id ? "https://f95zone.to/threads/" + encodeURIComponent(id) + "/" : "";
+    }
+
     function buildSelectedGameNames(rootName, exeNames) {
       const names = [];
       if (rootName) names.push(rootName);
@@ -1258,9 +1305,11 @@
         return {
           status: "unavailable",
           label: localDb ? "vide" : "non accessible",
-          hint: localDb ? "Un fichier JSON a été lu, mais aucune entrée exploitable n’a été trouvée." : "La base du site sera cherchée via localStorage.f95listUrl puis via la base GitHub officielle du site.",
+          hint: localDb ? "Un fichier JSON local a été lu, mais aucune entrée exploitable n’a été trouvée." : "La base des traductions n’est pas disponible pour afficher la page andric31.",
           id: "",
-          entry: null
+          entry: null,
+          translationPageUrl: "",
+          f95Url: ""
         };
       }
 
@@ -1296,18 +1345,22 @@
         return {
           status: "missing",
           label: "entrée introuvable",
-          hint: "Base lue : " + remoteDb.source + ". Recherche faite par ID F95 puis par titre/création.",
+          hint: "Recherche faite par ID F95 puis par titre/crédits.",
           id: targetId,
-          entry: null
+          entry: null,
+          translationPageUrl: "",
+          f95Url: targetId ? "https://f95zone.to/threads/" + encodeURIComponent(targetId) + "/" : ""
         };
       }
 
       return {
         status: "matched",
-        label: "entrée trouvée",
-        hint: "Base lue : " + remoteDb.source + ". Correspondance par " + (targetId ? "ID F95" : "titre") + ".",
+        label: "trouvée",
+        hint: "Lien vers ta page de traduction andric31. Correspondance par " + (targetId ? "ID F95" : "titre") + ".",
         id: String(entry.id || findF95Id(entry.url || "") || targetId || ""),
-        entry: entry
+        entry: entry,
+        translationPageUrl: buildTranslationPageUrl(entry),
+        f95Url: buildF95ThreadUrl(entry, targetId)
       };
     }
 
@@ -1505,6 +1558,10 @@
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value).replaceAll("`", "&#096;");
     }
   </script>
 

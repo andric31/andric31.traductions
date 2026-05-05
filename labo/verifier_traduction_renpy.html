@@ -850,7 +850,7 @@
       }
 
       if (andricCheck.detected && !andricCheck.folderNameMatched) {
-        warnings.push("La traduction andric31 est détectée, mais le dossier choisi ne correspond pas à la section NOM DU FICHIER TRADUIT du fr_credits.txt.");
+        warnings.push("La traduction andric31 est détectée, mais le dossier sélectionné ne correspond pas à la section NOM DU FICHIER TRADUIT du fr_credits.txt.");
       }
 
       if (andricCheck.detected && andricCheck.databaseStatus === "missing") {
@@ -1153,7 +1153,7 @@
       }
 
       if (credits && parsedCredits.translatedFileNames.length && !folderNameMatched) {
-        messages.push("Le dossier choisi ne correspond pas aux noms listés dans NOM DU FICHIER TRADUIT.");
+        messages.push("Le dossier sélectionné ne correspond pas aux noms listés dans NOM DU FICHIER TRADUIT.");
       }
 
       if (credits && !parsedCredits.f95Id) {
@@ -1303,7 +1303,7 @@
       }
 
       if (match && match.matched) {
-        return "Le dossier/fichier sélectionné correspond à « " + match.allowedName + " » dans NOM DU FICHIER TRADUIT.";
+        return "Le dossier sélectionné correspond à « " + match.allowedName + " » dans NOM DU FICHIER TRADUIT.";
       }
 
       const selected = (selectedNames || []).filter(Boolean)[0] || "dossier sélectionné";
@@ -1312,11 +1312,11 @@
 
     function buildSelectedGameNames(rootName, exeNames) {
       const names = [];
+
+      // Le fr_credits.txt contient le nom du dossier du jeu.
+      // On valide donc uniquement le dossier sélectionné, pas le nom du .exe.
       if (rootName) names.push(rootName);
-      (exeNames || []).forEach(function(name) {
-        names.push(name);
-        names.push(name.replace(/\.exe$/i, ""));
-      });
+
       return Array.from(new Set(names.filter(Boolean)));
     }
 

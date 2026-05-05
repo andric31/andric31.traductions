@@ -1000,10 +1000,10 @@
         + '<div class="result-grid">'
         + renderCheck("🧾 Fichier crédits", check.creditsPath || "Non trouvé", "Chemin du fichier fr_credits.txt détecté.")
         + renderCheck("🎮 Titre crédits", check.creditTitle || "Non détecté", "Titre lu dans la première section du fr_credits.txt.")
-        + renderCheck("📦 Dossier choisi", check.selectedFolderLabel || "Non détecté", "Comparé avec la section NOM DU FICHIER TRADUIT.")
-        + renderCheck("📋 Noms autorisés", check.translatedFileNames.length ? check.translatedFileNames.join(", ") : "Aucun nom détecté", "Section #NOM DU FICHIER TRADUIT du fr_credits.txt.")
-        + renderCheckHtml("🔗 ID F95", buildLinkHtml(check.f95Url, check.f95Id || "Non détecté"), "Lien vers le thread F95Zone quand l’ID est disponible.")
-        + renderCheckHtml("🗄️ Page traduction", buildLinkHtml(check.translationPageUrl, check.databaseTitle || check.databaseLabel), check.databaseHint)
+        + renderCheck("📦 Correspondance dossier", check.folderMatchLabel || "Non vérifiable", check.folderMatchHint || "Validation avec la section NOM DU FICHIER TRADUIT.")
+        + renderCheck("📋 Nom(s) dans fr_credits.txt", check.translatedFileNames.length ? check.translatedFileNames.join(", ") : "Aucun nom détecté", "Section #NOM DU FICHIER TRADUIT du fr_credits.txt.")
+        + renderCheckHtml("🔗 Thread F95", buildLinkHtml(check.f95Url, check.f95Id || "Non détecté"), "Lien vers le thread F95Zone.")
+        + renderCheckHtml("🔗 Page traduction", buildLinkHtml(check.translationPageUrl, check.databaseTitle || check.databaseLabel), check.databaseHint)
         + '</div>'
         + renderListSection("⚠️ Vérification andric31", check.messages, "Aucun point particulier.")
         + '</div>';
@@ -1133,11 +1133,8 @@
       const credits = frCreditsCandidates.length ? frCreditsCandidates[0] : null;
       const parsedCredits = credits ? parseFrCredits(credits.item.text || "") : emptyFrCredits();
       const selectedNames = buildSelectedGameNames(rootName, exeNames);
-      const folderNameMatched = Boolean(parsedCredits.translatedFileNames.length && selectedNames.some(function(selected) {
-        return parsedCredits.translatedFileNames.some(function(name) {
-          return namesMatch(selected, name);
-        });
-      }));
+      const folderMatch = findFolderNameMatch(selectedNames, parsedCredits.translatedFileNames);
+      const folderNameMatched = folderMatch.matched;
 
       const databaseInfo = await findDatabaseEntry(parsedCredits, credits, files, rootName);
       const detected = Boolean(andricLanguageDir || credits);
@@ -1178,6 +1175,8 @@
         translatedFileNames: parsedCredits.translatedFileNames,
         selectedFolderLabel: selectedNames.join(" / "),
         folderNameMatched: folderNameMatched,
+        folderMatchLabel: buildFolderMatchLabel(folderMatch, parsedCredits.translatedFileNames),
+        folderMatchHint: buildFolderMatchHint(folderMatch, selectedNames, parsedCredits.translatedFileNames),
         f95Id: parsedCredits.f95Id || databaseInfo.id || "",
         f95Url: databaseInfo.f95Url || buildF95ThreadUrl(databaseInfo.entry, parsedCredits.f95Id || databaseInfo.id || ""),
         translationPageUrl: databaseInfo.translationPageUrl || "",
@@ -1261,6 +1260,54 @@
       if (url) return url;
       const id = String(fallbackId || "").trim();
       return id ? "https://f95zone.to/threads/" + encodeURIComponent(id) + "/" : "";
+    }
+
+    function findFolderNameMatch(selectedNames, translatedFileNames) {
+      const selected = (selectedNames || []).filter(Boolean);
+      const allowed = (translatedFileNames || []).filter(Boolean);
+
+      for (const selectedName of selected) {
+        for (const allowedName of allowed) {
+          if (namesMatch(selectedName, allowedName)) {
+            return {
+              matched: true,
+              selectedName: selectedName,
+              allowedName: allowedName
+            };
+          }
+        }
+      }
+
+      return {
+        matched: false,
+        selectedName: selected[0] || "",
+        allowedName: allowed[0] || ""
+      };
+    }
+
+    function buildFolderMatchLabel(match, translatedFileNames) {
+      if (!translatedFileNames || !translatedFileNames.length) {
+        return "Non vérifiable";
+      }
+
+      if (match && match.matched) {
+        return "✅ Validée";
+      }
+
+      return "⚠️ À vérifier";
+    }
+
+    function buildFolderMatchHint(match, selectedNames, translatedFileNames) {
+      if (!translatedFileNames || !translatedFileNames.length) {
+        return "Aucun nom n’a été trouvé dans la section NOM DU FICHIER TRADUIT.";
+      }
+
+      if (match && match.matched) {
+        return "Le dossier/fichier sélectionné correspond à « " + match.allowedName + " » dans NOM DU FICHIER TRADUIT.";
+      }
+
+      const selected = (selectedNames || []).filter(Boolean)[0] || "dossier sélectionné";
+      return "Aucun nom de la section NOM DU FICHIER TRADUIT ne correspond à « " + selected + " ».";
     }
 
     function buildSelectedGameNames(rootName, exeNames) {
@@ -1356,7 +1403,7 @@
       return {
         status: "matched",
         label: "trouvée",
-        hint: "Lien vers ta page de traduction andric31. Correspondance par " + (targetId ? "ID F95" : "titre") + ".",
+        hint: "Lien vers la page de traduction andric31. Correspondance par " + (targetId ? "ID F95" : "titre") + ".",
         id: String(entry.id || findF95Id(entry.url || "") || targetId || ""),
         entry: entry,
         translationPageUrl: buildTranslationPageUrl(entry),

@@ -811,9 +811,9 @@
         "Dossier choisi : " + (rootName || "dossier sélectionné"),
         "Fichier .exe détecté : " + (anyExe ? "oui" : "non"),
         "Nom du .exe : " + exeDisplay,
+        "Version Ren'Py : " + (renpyVersionInfo.version || "non détectée"),
         "Chemin game/tl détecté : " + (hasGameTl ? "oui" : "non"),
         "Dossier de traduction : " + (preferredLanguageDir || "non détecté clairement"),
-        "Version Ren'Py : " + (renpyVersionInfo.version || "non détectée"),
         "Fichiers .rpy détectés : " + rpyInTranslation.length,
         "Fichiers JSON détectés dans la traduction : " + jsonInTranslation.length
       ];
@@ -879,9 +879,9 @@
           : '<div class="status-card warn"><h3 class="status-title">⚠️ Aucun .exe visible après import</h3><p class="status-text">Tu n’es probablement pas dans le dossier principal du jeu. Remonte ou descends d’un niveau, puis réessaie.</p></div>')
         + '<div class="result-grid">'
         + renderCheck("🎮 Fichier .exe", result.anyExe ? "✅ " + result.exeDisplay : "⚠️ Non détecté", result.anyExe ? "Seulement les .exe à la racine du dossier choisi sont pris en compte." : "Aucun .exe trouvé à la racine : tu n’es probablement pas dans le dossier principal du jeu.")
+        + renderCheck("🐍 Version Ren'Py", result.renpyVersion ? "✅ " + result.renpyVersion : "Non détectée", result.renpyVersionPath || "Fichier attendu : game/script_version.txt")
         + renderCheck("🌍 Chemin game/tl", result.hasGameTl ? "✅ Détecté" : "⚠️ Non détecté", "Chemin attendu : game/tl/")
         + renderCheck("🇫🇷 Dossier de traduction", result.preferredLanguageDir ? "✅ Détecté" : "⚠️ Non détecté clairement", result.preferredLanguageDir || "Exemple : game/tl/french/")
-        + renderCheck("🐍 Version Ren'Py", result.renpyVersion ? "✅ " + result.renpyVersion : "Non détectée", result.renpyVersionPath || "Fichier attendu : game/script_version.txt")
         + renderCheck("📜 Fichiers .rpy", result.rpyCount ? "✅ " + result.rpyCount + " fichier(s)" : "❌ Aucun fichier", "Les traductions Ren\'Py utilisent généralement des fichiers .rpy.")
         + renderCheck("🧾 Fichiers JSON", result.jsonCount ? "✅ " + result.jsonCount + " fichier(s)" : "Aucun JSON", "Comptage limité au dossier de traduction détecté.")
         + renderCheck("🙈 Liste des fichiers", "Masquée", "Seul le nom du .exe est affiché pour confirmer le bon dossier.")

@@ -108,12 +108,86 @@
 
     .file-input { display: none; }
 
+
+    .folder-help {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      margin-left: 6px;
+      border-radius: 999px;
+      border: 1px solid var(--wiki-border-strong);
+      background: var(--wiki-accent-soft);
+      color: var(--wiki-text);
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1;
+      cursor: help;
+      vertical-align: middle;
+      z-index: 20;
+    }
+
+    .folder-help-preview {
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 12px);
+      transform: translateX(-50%) translateY(6px);
+      width: min(560px, 82vw);
+      padding: 10px;
+      border-radius: 18px;
+      border: 1px solid var(--wiki-border-strong);
+      background: var(--wiki-card-strong);
+      box-shadow: var(--wiki-shadow);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity .16s ease, transform .16s ease, visibility .16s ease;
+    }
+
+    .folder-help-preview::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -8px;
+      width: 14px;
+      height: 14px;
+      transform: translateX(-50%) rotate(45deg);
+      border-right: 1px solid var(--wiki-border-strong);
+      border-bottom: 1px solid var(--wiki-border-strong);
+      background: var(--wiki-card-strong);
+    }
+
+    .folder-help-preview img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      border: 1px solid var(--wiki-border);
+    }
+
+    .folder-help:hover .folder-help-preview,
+    .folder-help:focus .folder-help-preview,
+    .folder-help:focus-within .folder-help-preview {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
     .button-row {
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
       gap: 10px;
       margin-top: 10px;
+    }
+
+
+    .folder-picker-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .primary-btn,
@@ -287,7 +361,15 @@
         <span>Le bon dossier est celui où se trouve le fichier .exe du jeu.</span>
 
         <div class="button-row">
-          <label class="primary-btn" for="folderInput">📁 Choisir le dossier contenant le .exe</label>
+          <div class="folder-picker-wrap">
+            <label class="primary-btn" for="folderInput">📁 Choisir le dossier contenant le .exe</label>
+            <span class="folder-help" tabindex="0" aria-label="Aide visuelle pour choisir le bon dossier">
+              i
+              <span class="folder-help-preview" role="tooltip">
+                <img src="img/verifier_traduction_renpy_folder.png" alt="Exemple du dossier du jeu à sélectionner, celui qui contient le fichier .exe" loading="lazy">
+              </span>
+            </span>
+          </div>
           <button id="resetBtn" class="secondary-btn" type="button" disabled>Réinitialiser</button>
         </div>
 

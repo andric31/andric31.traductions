@@ -457,3 +457,15 @@ code{
     font-size: 22px;
   }
 }
+
+
+/* Ajustements spécifiques au dossier labo */
+.labo-home .wiki-kicker{
+  border-color: color-mix(in srgb, var(--accent, #6ce0b0) 26%, var(--wiki-border) 74%);
+  background: var(--wiki-accent-soft);
+}
+
+.labo-home .tuto-card:not(.disabled) .icon{
+  background: var(--wiki-accent-soft);
+  border-color: var(--wiki-border-strong);
+}

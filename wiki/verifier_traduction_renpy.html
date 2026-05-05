@@ -648,15 +648,26 @@
       setSteps(2);
       report.innerHTML = renderLoading();
 
-      setTimeout(function() {
+      setTimeout(async function() {
         try {
-          const normalizedFiles = files.map(function(file) {
-            return {
+          const normalizedFiles = await Promise.all(files.map(async function(file) {
+            const normalized = {
               path: normalizePath(file._relativePath || file.webkitRelativePath || file.name),
               name: file.name,
-              size: file.size
+              size: file.size,
+              text: ""
             };
-          });
+
+            if (file.name.toLowerCase() === "script_version.txt" && file.size <= 4096 && typeof file.text === "function") {
+              try {
+                normalized.text = await file.text();
+              } catch (error) {
+                console.warn("Impossible de lire script_version.txt :", error);
+              }
+            }
+
+            return normalized;
+          }));
 
           const result = buildReport(normalizedFiles, source || "selection", Boolean(stopped));
           setSteps(3);
@@ -682,10 +693,16 @@
         return stripRoot(path, rootName);
       });
 
-      const exeFiles = files.filter(function(item) {
+      const allExeFiles = files.filter(function(item) {
         return item.name.toLowerCase().endsWith(".exe");
       });
 
+      const exeFiles = allExeFiles.filter(function(item) {
+        const relativePath = stripRoot(item.path, rootName);
+        return isTopLevelFile(relativePath);
+      });
+
+      const ignoredNestedExeCount = Math.max(0, allExeFiles.length - exeFiles.length);
       const anyExe = exeFiles.length > 0;
 
       const exeNames = exeFiles.map(function(item) {
@@ -722,6 +739,19 @@
         return item.name.toLowerCase().endsWith(".json");
       });
 
+      const jsonInTranslation = jsonFiles.filter(function(item) {
+        const relativePath = stripRoot(item.path, rootName);
+
+        if (preferredLanguageDir) {
+          return relativePath.startsWith(preferredLanguageDir + "/");
+        }
+
+        const lowerPath = relativePath.toLowerCase();
+        return lowerPath.startsWith("game/tl/") || lowerPath.startsWith("tl/");
+      });
+
+      const renpyVersionInfo = findRenpyVersionInfo(files, rootName);
+
       const emptyRpy = rpyInTranslation.filter(function(item) {
         return item.size === 0;
       });
@@ -735,7 +765,11 @@
       }
 
       if (!anyExe) {
-        warnings.push("Aucun fichier .exe détecté. Tu n’as probablement pas choisi le dossier principal du jeu. Choisis le dossier où se trouve le fichier .exe.");
+        warnings.push("Aucun fichier .exe détecté à la racine du dossier choisi. Tu n’as probablement pas choisi le dossier principal du jeu. Choisis le dossier où se trouve le fichier .exe.");
+      }
+
+      if (ignoredNestedExeCount) {
+        warnings.push(ignoredNestedExeCount + " fichier(s) .exe trouvé(s) dans des sous-dossiers ont été ignorés pour éviter les faux positifs.");
       }
 
       if (!hasGameTl && !hasTlRoot && !preferredLanguageDir) {
@@ -783,8 +817,9 @@
         "Nom du .exe : " + exeDisplay,
         "Chemin game/tl détecté : " + (hasGameTl ? "oui" : "non"),
         "Dossier de traduction : " + (preferredLanguageDir || "non détecté clairement"),
+        "Version Ren'Py : " + (renpyVersionInfo.version || "non détectée"),
         "Fichiers .rpy détectés : " + rpyInTranslation.length,
-        "Fichiers JSON détectés : " + jsonFiles.length
+        "Fichiers JSON détectés dans la traduction : " + jsonInTranslation.length
       ];
 
       if (problems.length) {
@@ -814,8 +849,10 @@
         exeDisplay: exeDisplay,
         hasGameTl: hasGameTl,
         preferredLanguageDir: preferredLanguageDir,
+        renpyVersion: renpyVersionInfo.version,
+        renpyVersionPath: renpyVersionInfo.path,
         rpyCount: rpyInTranslation.length,
-        jsonCount: jsonFiles.length,
+        jsonCount: jsonInTranslation.length,
         emptyRpyCount: emptyRpy.length,
         problems: problems,
         warnings: warnings,
@@ -845,11 +882,12 @@
           ? '<div class="status-card ok"><h3 class="status-title">🎮 .exe trouvé : ' + escapeHtml(result.exeDisplay) + '</h3><p class="status-text">Si ce nom correspond au jeu, tu as bien sélectionné le dossier principal.</p></div>'
           : '<div class="status-card warn"><h3 class="status-title">⚠️ Aucun .exe visible après import</h3><p class="status-text">Tu n’es probablement pas dans le dossier principal du jeu. Remonte ou descends d’un niveau, puis réessaie.</p></div>')
         + '<div class="result-grid">'
-        + renderCheck("🎮 Fichier .exe", result.anyExe ? "✅ " + result.exeDisplay : "⚠️ Non détecté", result.anyExe ? "Si ce nom correspond au jeu, tu es probablement dans le bon dossier." : "Aucun .exe trouvé : tu n’es probablement pas dans le dossier racine du jeu.")
+        + renderCheck("🎮 Fichier .exe", result.anyExe ? "✅ " + result.exeDisplay : "⚠️ Non détecté", result.anyExe ? "Seulement les .exe à la racine du dossier choisi sont pris en compte." : "Aucun .exe trouvé à la racine : tu n’es probablement pas dans le dossier principal du jeu.")
         + renderCheck("🌍 Chemin game/tl", result.hasGameTl ? "✅ Détecté" : "⚠️ Non détecté", "Chemin attendu : game/tl/")
         + renderCheck("🇫🇷 Dossier de traduction", result.preferredLanguageDir ? "✅ Détecté" : "⚠️ Non détecté clairement", result.preferredLanguageDir || "Exemple : game/tl/french/")
+        + renderCheck("🐍 Version Ren'Py", result.renpyVersion ? "✅ " + result.renpyVersion : "Non détectée", result.renpyVersionPath || "Fichier attendu : game/script_version.txt")
         + renderCheck("📜 Fichiers .rpy", result.rpyCount ? "✅ " + result.rpyCount + " fichier(s)" : "❌ Aucun fichier", "Les traductions Ren\'Py utilisent généralement des fichiers .rpy.")
-        + renderCheck("🧾 Fichiers JSON", result.jsonCount ? "✅ " + result.jsonCount + " fichier(s)" : "Aucun JSON", "Simple détection, sans affichage des fichiers.")
+        + renderCheck("🧾 Fichiers JSON", result.jsonCount ? "✅ " + result.jsonCount + " fichier(s)" : "Aucun JSON", "Comptage limité au dossier de traduction détecté.")
         + renderCheck("🙈 Liste des fichiers", "Masquée", "Seul le nom du .exe est affiché pour confirmer le bon dossier.")
         + "</div>"
         + renderListSection("❌ Problèmes détectés", result.problems, "Aucun problème bloquant détecté.")
@@ -940,6 +978,53 @@
       }
 
       return normalized;
+    }
+
+    function isTopLevelFile(path) {
+      const normalized = normalizePath(path);
+      return normalized && !normalized.includes("/");
+    }
+
+    function findRenpyVersionInfo(files, rootName) {
+      const candidates = files.filter(function(item) {
+        return item.name.toLowerCase() === "script_version.txt";
+      }).map(function(item) {
+        const relativePath = stripRoot(item.path, rootName);
+        const lowerPath = relativePath.toLowerCase();
+        let score = 0;
+
+        if (lowerPath === "game/script_version.txt") score += 100;
+        if (lowerPath.endsWith("/game/script_version.txt")) score += 70;
+        if (lowerPath === "script_version.txt") score += 30;
+
+        return { item: item, relativePath: relativePath, score: score };
+      }).sort(function(a, b) {
+        return b.score - a.score || a.relativePath.localeCompare(b.relativePath);
+      });
+
+      if (!candidates.length) {
+        return { version: "", path: "" };
+      }
+
+      const best = candidates[0];
+      const content = String(best.item.text || "").trim();
+      const versionMatch = content.match(/\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)/);
+
+      if (versionMatch) {
+        return {
+          version: versionMatch[0].replace(/\s+/g, ""),
+          path: best.relativePath
+        };
+      }
+
+      const firstLine = content.split(/\r?\n/).map(function(line) {
+        return line.trim();
+      }).filter(Boolean)[0] || "";
+
+      return {
+        version: firstLine.slice(0, 60),
+        path: best.relativePath
+      };
     }
 
     function findLanguageDirs(relativePaths) {

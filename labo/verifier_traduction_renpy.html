@@ -1001,7 +1001,6 @@
         + renderCheck("🧾 Fichier crédits", check.creditsPath || "Non trouvé", "Chemin du fichier fr_credits.txt détecté.")
         + renderCheck("🎮 Titre crédits", check.creditTitle || "Non détecté", "Titre lu dans la première section du fr_credits.txt.")
         + renderCheck("📦 Correspondance dossier", check.folderMatchLabel || "Non vérifiable", check.folderMatchHint || "Validation avec la section NOM DU FICHIER TRADUIT.")
-        + renderCheck("📋 Nom(s) dans fr_credits.txt", check.translatedFileNames.length ? check.translatedFileNames.join(", ") : "Aucun nom détecté", "Section #NOM DU FICHIER TRADUIT du fr_credits.txt.")
         + renderCheckHtml("🔗 Thread F95", buildLinkHtml(check.f95Url, check.f95Id || "Non détecté"), "Lien vers le thread F95Zone.")
         + renderCheckHtml("🔗 Page traduction", buildLinkHtml(check.translationPageUrl, check.databaseTitle || check.databaseLabel), check.databaseHint)
         + '</div>'

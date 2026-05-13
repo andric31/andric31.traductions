@@ -50,6 +50,38 @@ function escapeHtml(s) {
     .replace(/'/g, "&#39;");
 }
 
+
+function formatRichText(s) {
+  const raw = String(s ?? "");
+  const anchors = [];
+
+  // Format conseillé dans le JSON : [Texte cliquable](https://exemple.com)
+  let text = raw.replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g, (m, label, url) => {
+    const token = `@@LINK_${anchors.length}@@`;
+    anchors.push(`<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`);
+    return token;
+  });
+
+  text = escapeHtml(text);
+
+  // Rend aussi les URL simples cliquables.
+  text = text.replace(/(https?:\/\/[^\s<]+)/g, (url) => {
+    let clean = url;
+    let end = "";
+    while (/[.,;:!?)]$/.test(clean)) {
+      end = clean.slice(-1) + end;
+      clean = clean.slice(0, -1);
+    }
+    return `<a href="${clean}" target="_blank" rel="noopener noreferrer">${clean}</a>${end}`;
+  });
+
+  anchors.forEach((html, i) => {
+    text = text.replaceAll(`@@LINK_${i}@@`, html);
+  });
+
+  return text.replace(/\n/g, "<br>");
+}
+
 function setHtml(id, html) {
   const el = document.getElementById(id);
   if (el) el.innerHTML = html ?? "";
@@ -1702,7 +1734,7 @@ function renderVideoBlock({ id, videoUrl }) {
 
     const notes = (entry.notes || "").trim();
     if (notes) {
-      setHtml("notesText", escapeHtml(notes).replace(/\n/g, "<br>"));
+      setHtml("notesText", formatRichText(notes));
       show("notesBox", true);
     } else {
       show("notesBox", false);

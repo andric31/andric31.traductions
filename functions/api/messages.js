@@ -22,6 +22,17 @@ function clampMessage(value) {
   return String(value ?? '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
 }
 
+function messageBodyOnly(value) {
+  const text = String(value || '');
+  const prefix = '[[reply:';
+  if (!text.startsWith(prefix)) return text.trim();
+
+  const end = text.indexOf(']]');
+  if (end === -1) return text.trim();
+
+  return text.slice(end + 2).replace(/^\n+/, '').trim();
+}
+
 
 function hasLink(value) {
   return /\b((?:https?:\/\/|www\.)[^\s<>()]+|[a-z0-9][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+\/[^^\s<>()]*)/i.test(String(value || ''));
@@ -194,12 +205,14 @@ export async function onRequest(context) {
     if (!nickname || nickname.length < 2 || nickname.length > 40) {
       return json({ ok: false, error: 'Pseudo invalide.' }, 400);
     }
-    if (!message || message.length < 1 || message.length > 500) {
+    const messageBody = messageBodyOnly(message);
+
+    if (!messageBody || messageBody.length < 1 || messageBody.length > 500) {
       return json({ ok: false, error: 'Message invalide.' }, 400);
     }
 
     const isAdmin = roleLevel(sessionUser?.role) >= roleLevel('admin');
-    const messageHasLink = hasLink(message);
+    const messageHasLink = hasLink(messageBody);
     if (roomInfo.roomKey === 'global' && messageHasLink && !isAdmin) {
       return json({ ok: false, error: 'Les liens sont interdits dans le salon public, sauf pour les administrateurs.' }, 403);
     }

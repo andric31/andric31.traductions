@@ -22,6 +22,11 @@ function clampMessage(value) {
   return String(value ?? '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
 }
 
+
+function hasLink(value) {
+  return /\b((?:https?:\/\/|www\.)[^\s<>()]+|[a-z0-9][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+\/[^^\s<>()]*)/i.test(String(value || ''));
+}
+
 async function ensureTable(db) {
   await db.prepare(`
     CREATE TABLE IF NOT EXISTS messages_global (
@@ -42,6 +47,7 @@ async function ensureTable(db) {
   if (!names.has('room_type')) await db.prepare(`ALTER TABLE messages_global ADD COLUMN room_type TEXT NOT NULL DEFAULT 'global'`).run();
   if (!names.has('room_key')) await db.prepare(`ALTER TABLE messages_global ADD COLUMN room_key TEXT NOT NULL DEFAULT 'global'`).run();
   if (!names.has('owner_user_id')) await db.prepare(`ALTER TABLE messages_global ADD COLUMN owner_user_id INTEGER`).run();
+  if (!names.has('links_allowed')) await db.prepare(`ALTER TABLE messages_global ADD COLUMN links_allowed INTEGER NOT NULL DEFAULT 0`).run();
 
   await db.prepare(`
     CREATE INDEX IF NOT EXISTS idx_messages_global_created_at
@@ -147,7 +153,7 @@ export async function onRequest(context) {
       const allowedRooms = getAllowedRooms(sessionUser);
       const placeholders = allowedRooms.map((_, idx) => `?${idx + 1}`).join(', ');
       const rows = await env.DB.prepare(`
-        SELECT id, nickname, message, created_at, room_key
+        SELECT id, nickname, message, created_at, room_key, links_allowed
         FROM messages_global
         WHERE room_key IN (${placeholders})
         ORDER BY id DESC
@@ -161,7 +167,7 @@ export async function onRequest(context) {
     const roomInfo = parseRoom(url.searchParams.get('room') || 'global', sessionUser);
     if (!roomInfo.ok) return json({ ok: false, error: roomInfo.error }, roomInfo.status || 400);
     const rows = await env.DB.prepare(`
-      SELECT id, nickname, message, created_at
+      SELECT id, nickname, message, created_at, links_allowed
       FROM messages_global
       WHERE room_key = ?1
       ORDER BY id DESC
@@ -192,6 +198,13 @@ export async function onRequest(context) {
       return json({ ok: false, error: 'Message invalide.' }, 400);
     }
 
+    const isAdmin = roleLevel(sessionUser?.role) >= roleLevel('admin');
+    const messageHasLink = hasLink(message);
+    if (roomInfo.roomKey === 'global' && messageHasLink && !isAdmin) {
+      return json({ ok: false, error: 'Les liens sont interdits dans le salon public, sauf pour les administrateurs.' }, 403);
+    }
+    const linksAllowed = messageHasLink && (roomInfo.roomKey !== 'global' || isAdmin) ? 1 : 0;
+
     const ip = request.headers.get('cf-connecting-ip') || '';
     const userAgent = cleanString(request.headers.get('user-agent') || '').slice(0, 180);
     const ipHash = ip ? await sha256Hex(`messages:${ip}`) : '';
@@ -203,9 +216,9 @@ export async function onRequest(context) {
     const finalNickname = sessionUser ? cleanString(sessionUser.display_name || sessionUser.username) : nickname;
 
     await env.DB.prepare(`
-      INSERT INTO messages_global (nickname, message, created_at, ip_hash, user_agent, room_type, room_key, owner_user_id)
-      VALUES (?1, ?2, strftime('%Y-%m-%dT%H:%M:%fZ','now'), ?3, ?4, ?5, ?6, ?7)
-    `).bind(finalNickname, message, ipHash, userAgent, roomInfo.roomType, roomInfo.roomKey, roomInfo.ownerUserId).run();
+      INSERT INTO messages_global (nickname, message, created_at, ip_hash, user_agent, room_type, room_key, owner_user_id, links_allowed)
+      VALUES (?1, ?2, strftime('%Y-%m-%dT%H:%M:%fZ','now'), ?3, ?4, ?5, ?6, ?7, ?8)
+    `).bind(finalNickname, message, ipHash, userAgent, roomInfo.roomType, roomInfo.roomKey, roomInfo.ownerUserId, linksAllowed).run();
 
     return json({ ok: true });
   }

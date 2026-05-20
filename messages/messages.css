@@ -2070,3 +2070,16 @@ button { border: 0; }
     align-self: flex-start;
   }
 }
+
+
+.msg-link {
+  color: inherit;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+
+.msg-link:hover {
+  opacity: .82;
+}

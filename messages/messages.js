@@ -53,6 +53,46 @@
       .replaceAll("'", '&#039;');
   }
 
+
+  const LINK_RE = /\b((?:https?:\/\/|www\.)[^\s<>()]+|[a-z0-9][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+\/[^^\s<>()]*)/ig;
+
+  function isAdminUser() {
+    const me = getAuthUser();
+    return roleLevel(me?.role) >= roleLevel('admin');
+  }
+
+  function hasLink(value) {
+    LINK_RE.lastIndex = 0;
+    return LINK_RE.test(String(value || ''));
+  }
+
+  function normalizeUrlForHref(raw) {
+    const value = String(raw || '').trim();
+    if (/^https?:\/\//i.test(value)) return value;
+    return `https://${value}`;
+  }
+
+  function renderMessageText(value, allowLinks = false) {
+    const text = String(value || '');
+    if (!allowLinks) return escapeHtml(text);
+
+    LINK_RE.lastIndex = 0;
+    let out = '';
+    let last = 0;
+    let match;
+    while ((match = LINK_RE.exec(text))) {
+      const raw = match[0].replace(/[.,!?;:)]$/, '');
+      const trailing = match[0].slice(raw.length);
+      const start = match.index;
+      out += escapeHtml(text.slice(last, start));
+      const href = normalizeUrlForHref(raw);
+      out += `<a class="msg-link" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(raw)}</a>${escapeHtml(trailing)}`;
+      last = start + match[0].length;
+    }
+    out += escapeHtml(text.slice(last));
+    return out;
+  }
+
   function setInfo(text, type = '') {
     els.info.textContent = text;
     els.info.classList.remove('error', 'success');
@@ -370,8 +410,7 @@
     els.list.innerHTML = '';
     els.empty.classList.toggle('hidden', messages.length > 0);
 
-    const me = getAuthUser();
-    const isAdmin = roleLevel(me?.role) >= roleLevel('admin');
+    const isAdmin = isAdminUser();
 
     for (const item of messages) {
       const parsed = parseMessage(item.message);
@@ -392,7 +431,7 @@
                 <span class="msg-date">${escapeHtml(formatDate(item.created_at))}</span>
               </div>
               ${parsed.reply ? `<div class="msg-quote"><span class="msg-quote-author">${escapeHtml(parsed.reply.author)}</span><span class="msg-quote-text">${escapeHtml(parsed.reply.excerpt)}</span></div>` : ''}
-              <div class="msg-text">${escapeHtml(parsed.body)}</div>
+              <div class="msg-text">${renderMessageText(parsed.body, Boolean(item.links_allowed) || getSelectedRoom() !== 'global')}</div>
               ${reactionHtml ? `<div class="msg-reactions">${reactionHtml}</div>` : ''}
               <div class="msg-actions">
                 <div class="msg-tools-left">
@@ -498,6 +537,9 @@
     if (!nickname) return setInfo('Le pseudo est obligatoire.', 'error'), els.nickname.focus();
     if (nickname.length < 2) return setInfo('Le pseudo est trop court.', 'error'), els.nickname.focus();
     if (!message) return setInfo('Le message est vide.', 'error'), els.message.focus();
+    if (room === 'global' && !isAdminUser() && hasLink(message)) {
+      return setInfo('Les liens sont interdits dans le salon public, sauf pour les administrateurs.', 'error'), els.message.focus();
+    }
 
     els.send.disabled = true;
     setInfo('Envoi du message…');

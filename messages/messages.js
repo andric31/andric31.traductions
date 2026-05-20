@@ -5,6 +5,7 @@
   const ROOM_KEY = 'andric31_messages_room';
   const REFRESH_KEY = 'andric31_messages_refresh_ms';
   const REPLY_PREFIX = '[[reply:';
+  const MESSAGE_MAX_LENGTH = 500;
   const REACT_KEY = 'andric31_messages_reactions';
   const EMOJIS = ['😀','😁','😂','🤣','😊','😍','🥰','😘','😎','🤔','😅','😢','😭','😡','👍','👎','👏','🙏','🔥','✅','❌','🎉','💬','❤️'];
   const QUICK_REACTIONS = ['👍','❤️','😂','🔥','👏','🎉','😮','🤔','😢','😡'];
@@ -537,6 +538,7 @@
     if (!nickname) return setInfo('Le pseudo est obligatoire.', 'error'), els.nickname.focus();
     if (nickname.length < 2) return setInfo('Le pseudo est trop court.', 'error'), els.nickname.focus();
     if (!message) return setInfo('Le message est vide.', 'error'), els.message.focus();
+    if (message.length > MESSAGE_MAX_LENGTH) return setInfo(`Le message est trop long (${MESSAGE_MAX_LENGTH} caractères max, hors réponse épinglée).`, 'error'), els.message.focus();
     if (room === 'global' && !isAdminUser() && hasLink(message)) {
       return setInfo('Les liens sont interdits dans le salon public, sauf pour les administrateurs.', 'error'), els.message.focus();
     }
@@ -635,7 +637,7 @@
       keepLastMessageVisible({ force: true, smooth: true });
     });
     els.message.addEventListener('input', () => {
-      const left = 500 - els.message.value.length;
+      const left = MESSAGE_MAX_LENGTH - els.message.value.length;
       setInfo(`${left} caractère${left > 1 ? 's' : ''} restant${left > 1 ? 's' : ''}.`);
     });
 

@@ -1,6 +1,7 @@
 (() => {
   const IDS = {
     wiki: "quickWikiBtn",
+    labo: "quickLaboBtn",
     blog: "quickBlogBtn",
     messages: "quickMessagesBtn",
     notifications: "quickNotificationsBtn",
@@ -25,6 +26,16 @@
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
       <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
       <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+    </svg>`;
+  }
+
+  function iconLabo() {
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M9 3h6"/>
+      <path d="M10 3v5.25L5.35 17.1A2.6 2.6 0 0 0 7.65 21h8.7a2.6 2.6 0 0 0 2.3-3.9L14 8.25V3"/>
+      <path d="M8.35 15h7.3"/>
+      <path d="M10 18h4"/>
+      <circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/>
     </svg>`;
   }
 
@@ -250,10 +261,11 @@
 
   function insertButtons(afterEl) {
     if (!afterEl) return;
-    if (document.getElementById(IDS.wiki) || document.getElementById(IDS.blog) || document.getElementById(IDS.messages) || document.getElementById(IDS.notifications)) return;
+    if (document.getElementById(IDS.wiki) || document.getElementById(IDS.labo) || document.getElementById(IDS.blog) || document.getElementById(IDS.messages) || document.getElementById(IDS.notifications)) return;
 
     const refClass = afterEl.className || "hamburger-btn";
     const wiki = makeLink(IDS.wiki, "/wiki/", "Wiki", iconWiki(), refClass);
+    const labo = makeLink(IDS.labo, "/labo/", "Labo", iconLabo(), refClass);
     const blog = makeLink(IDS.blog, "/blog/", "Blog", iconBlog(), refClass);
     const notifications = makeButton(IDS.notifications, "Notifications", iconNotifications(), refClass);
     const messages = makeLink(IDS.messages, "/messages/", "Messages", iconMessages(), refClass);
@@ -288,6 +300,7 @@
     afterEl.insertAdjacentElement("afterend", notifications);
     afterEl.insertAdjacentElement("afterend", messages);
     afterEl.insertAdjacentElement("afterend", blog);
+    afterEl.insertAdjacentElement("afterend", labo);
     afterEl.insertAdjacentElement("afterend", wiki);
 
     initIndicators(blog, messages, notifications);

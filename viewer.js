@@ -4,6 +4,16 @@
 // ✅ UID ONLY pour stats (aligné sur game.js)
 (() => {
   const DEFAULT_URL = "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json";
+  const TRANSLATORS_MANIFEST_URL = "https://raw.githubusercontent.com/andric31/traductions/refs/heads/main/traducteurs_manifest.json";
+  const TRANSLATORS_RAW_BASE = "https://raw.githubusercontent.com/andric31/traductions/refs/heads/main/";
+  const GLOBAL_LIST_ENTRY = {
+    key: "globale",
+    name: "globale",
+    listUrl: "https://traductions.pages.dev/liste/",
+    siteUrl: "https://traductions.pages.dev/liste/",
+    openBase: "",
+    label: "f95list",
+  };
 
   const $ = (sel) => document.querySelector(sel);
 
@@ -12,6 +22,23 @@
     const coll = (g.collection || "").toString().trim();
     const id = (g.id || "").toString().trim();
     const uid = (g.uid ?? "").toString().trim();
+
+    const openBase = getCurrentOpenBase();
+
+    const qs = new URLSearchParams();
+    if (coll) {
+      qs.set("id", coll);
+      if (uid) qs.set("uid", uid);
+    } else if (id) {
+      qs.set("id", id);
+    } else if (uid) {
+      qs.set("uid", uid);
+    }
+
+    if (openBase) {
+      const sep = openBase.includes("?") ? "&" : "?";
+      return `${openBase}${sep}${qs.toString()}`;
+    }
 
     // Sous-jeu de collection : /game/?id=<collection>&uid=<uid>
     if (coll) return `/game/?id=${encodeURIComponent(coll)}&uid=${encodeURIComponent(uid)}`;
@@ -40,6 +67,9 @@
     pageSize: "auto",
     visibleCount: 0,
     infiniteLoading: false,
+    currentListUrl: DEFAULT_URL,
+    currentListProfile: { key: "andric31", name: "andric31", listUrl: DEFAULT_URL, openBase: "https://andric31-traductions.pages.dev/game/" },
+    manifestEntries: [],
   };
 
   // =========================
@@ -329,6 +359,275 @@
     root.setAttribute("data-theme", v);
   }
 
+
+  // =========================
+  // Sélecteur de liste (titre cliquable)
+  // =========================
+
+  function sanitizeListName(s) {
+    return String(s || "")
+      .trim()
+      .replace(/^f95list[_\s-]*/i, "")
+      .replace(/[_\s-]*viewer$/i, "")
+      .replace(/\s+/g, "_")
+      .replace(/__+/g, "_")
+      || "andric31";
+  }
+
+  // ✅ Libellés locaux : permet d'avoir un nom plus propre dans le menu
+  // sans modifier traducteurs_manifest.json.
+  const LOCAL_LIST_LABELS = {
+    vofr: "VO Française - Intégrée",
+  };
+
+  function getLocalListLabel(entry) {
+    const key = String(entry?.key || "").trim().toLowerCase();
+    if (key && LOCAL_LIST_LABELS[key]) return LOCAL_LIST_LABELS[key];
+
+    const listUrl = String(entry?.listUrl || "").trim().toLowerCase();
+    const openBase = String(entry?.openBase || "").trim().toLowerCase();
+    const siteUrl = String(entry?.siteUrl || "").trim().toLowerCase();
+
+    if (
+      listUrl.includes("f95list_vofr") ||
+      openBase.includes("/vofr/") ||
+      siteUrl.includes("/vofr/")
+    ) {
+      return LOCAL_LIST_LABELS.vofr;
+    }
+
+    return "";
+  }
+
+  function makeListTitle(entry) {
+    const localLabel = getLocalListLabel(entry);
+    if (localLabel) return localLabel;
+
+    const raw = entry?.label || entry?.name || entry?.key || "andric31";
+    return `f95list_${sanitizeListName(raw)}_viewer`;
+  }
+
+  function getCurrentOpenBase() {
+    const p = state.currentListProfile || {};
+    return String(p.openBase || "").trim();
+  }
+
+  function resolveTranslatorListUrl(listUrl) {
+    const v = String(listUrl || "").trim();
+    if (!v) return DEFAULT_URL;
+    if (/^https?:\/\//i.test(v)) return v;
+    if (v.startsWith("/")) return TRANSLATORS_RAW_BASE + v.replace(/^\/+/, "");
+    return TRANSLATORS_RAW_BASE + v;
+  }
+
+  function sameListUrl(a, b) {
+    return String(a || "").trim() === String(b || "").trim();
+  }
+
+  function normalizeSiteUrl(u) {
+    const v = String(u || "").trim();
+    if (!v) return "";
+    if (/^https?:\/\//i.test(v)) return v;
+    return "https://" + v.replace(/^\/+/, "");
+  }
+
+  function getTranslatorSiteUrl(entry) {
+    const direct = normalizeSiteUrl(
+      entry?.siteUrl || entry?.site || entry?.viewerUrl || entry?.homeUrl || entry?.pageUrl
+    );
+    if (direct) return direct;
+
+    const openBase = normalizeSiteUrl(entry?.openBase);
+    if (openBase) {
+      return openBase
+        .replace(/\/game\/?$/i, "/")
+        .replace(/\/game\/\?$/i, "/");
+    }
+
+    const key = sanitizeListName(entry?.key || entry?.name || "").toLowerCase();
+    if (key && key !== "andric31") return `https://traductions.pages.dev/${encodeURIComponent(key)}/`;
+    return "https://andric31-traductions.pages.dev/";
+  }
+
+  function openTranslatorSite(entry) {
+    const url = getTranslatorSiteUrl(entry);
+    if (!url) return;
+    const w = window.open(url, "_blank");
+    if (w) {
+      try { w.focus(); } catch {}
+    } else {
+      // Fallback si le navigateur bloque l'ouverture : on garde quand même un lien fonctionnel.
+      location.href = url;
+    }
+  }
+
+  function getStoredListProfile() {
+    try {
+      const raw = localStorage.getItem("viewerListProfile") || "";
+      const obj = raw ? JSON.parse(raw) : null;
+      if (obj && typeof obj === "object") return obj;
+    } catch {}
+    return null;
+  }
+
+  function setStoredListProfile(entry) {
+    try {
+      localStorage.setItem("viewerListProfile", JSON.stringify(entry || {}));
+      localStorage.setItem("f95listUrl", resolveTranslatorListUrl(entry?.listUrl || DEFAULT_URL));
+    } catch {}
+  }
+
+  function getFallbackProfileForUrl(url) {
+    const u = String(url || DEFAULT_URL).trim() || DEFAULT_URL;
+    if (u === DEFAULT_URL) {
+      return { key: "andric31", name: "andric31", listUrl: DEFAULT_URL, openBase: "https://andric31-traductions.pages.dev/game/" };
+    }
+    return { key: "custom", name: "Liste personnalisée", listUrl: u, openBase: "" };
+  }
+
+  function setListTitle(entry) {
+    const h1 = document.querySelector(".viewer-list-title-text");
+    const title = makeListTitle(entry);
+    if (h1) h1.textContent = title;
+    document.title = title;
+  }
+
+  function closeListSwitcher() {
+    const pop = document.getElementById("listSwitcherPopover");
+    if (pop) pop.classList.add("hidden");
+    const btn = document.getElementById("listSwitcherBtn");
+    if (btn) btn.setAttribute("aria-expanded", "false");
+  }
+
+  function renderListSwitcher(entries) {
+    const pop = document.getElementById("listSwitcherPopover");
+    if (!pop) return;
+
+    const fromManifest = Array.isArray(entries) ? entries : [];
+    const hasGlobal = fromManifest.some((it) => getTranslatorSiteUrl(it) === GLOBAL_LIST_ENTRY.siteUrl);
+    const list = hasGlobal ? fromManifest : [GLOBAL_LIST_ENTRY, ...fromManifest];
+    if (!list.length) {
+      pop.innerHTML = `<div class="list-switcher-empty">Aucune autre liste trouvée.</div>`;
+      return;
+    }
+
+    const currentUrl = state.currentListUrl || DEFAULT_URL;
+    pop.innerHTML = `
+      <div class="list-switcher-head">
+        <strong>Listes des traductions</strong>
+      </div>
+      <div class="list-switcher-items">
+        ${list.map((it, i) => {
+          const url = resolveTranslatorListUrl(it.listUrl);
+          const active = sameListUrl(url, currentUrl);
+          const title = escapeHtml(it.label || makeListTitle(it));
+          const siteUrl = getTranslatorSiteUrl(it);
+          const sub = escapeHtml(siteUrl || it.openBase || url);
+          return `
+            <button type="button" class="list-switcher-item${active ? " is-active" : ""}" data-list-idx="${i}" title="Ouvrir dans un nouvel onglet">
+              <span class="list-switcher-dot" aria-hidden="true"></span>
+              <span class="list-switcher-text">
+                <span class="list-switcher-name">${title}</span>
+                <span class="list-switcher-url">${sub}</span>
+              </span>
+            </button>
+          `;
+        }).join("")}
+      </div>
+    `;
+
+    pop.querySelectorAll("[data-list-idx]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const idx = parseInt(btn.getAttribute("data-list-idx"), 10);
+        const entry = list[idx];
+        if (!entry) return;
+        closeListSwitcher();
+        openTranslatorSite(entry);
+      });
+    });
+  }
+
+  async function fetchTranslatorManifest() {
+    try {
+      const r = await fetch(TRANSLATORS_MANIFEST_URL, { cache: "no-store" });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const raw = await r.json();
+      const arr = Array.isArray(raw) ? raw : [];
+      return arr.map((it) => {
+        const entry = {
+          key: String(it.key || it.name || "").trim(),
+          name: String(it.name || it.key || "").trim(),
+          listUrl: resolveTranslatorListUrl(it.listUrl || DEFAULT_URL),
+          openBase: String(it.openBase || "").trim(),
+          siteUrl: String(it.siteUrl || it.site || it.viewerUrl || it.homeUrl || it.pageUrl || "").trim(),
+        };
+        const localLabel = getLocalListLabel(entry);
+        if (localLabel) entry.label = localLabel;
+        return entry;
+      }).filter((it) => it.listUrl);
+    } catch (e) {
+      console.warn("[viewer] manifest indisponible:", e);
+      return [getFallbackProfileForUrl(state.currentListUrl || DEFAULT_URL)];
+    }
+  }
+
+  async function initListSwitcher() {
+    const btn = document.getElementById("listSwitcherBtn");
+    const pop = document.getElementById("listSwitcherPopover");
+    if (!btn || !pop || btn.dataset.bound === "1") return;
+    btn.dataset.bound = "1";
+
+    btn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const isOpen = !pop.classList.contains("hidden");
+      if (isOpen) {
+        closeListSwitcher();
+        return;
+      }
+
+      if (!state.manifestEntries.length) {
+        pop.innerHTML = `<div class="list-switcher-empty">Chargement des listes…</div>`;
+        state.manifestEntries = await fetchTranslatorManifest();
+      }
+      renderListSwitcher(state.manifestEntries);
+      pop.classList.remove("hidden");
+      btn.setAttribute("aria-expanded", "true");
+      positionPopover(pop, btn);
+    });
+  }
+
+  async function switchToList(entry) {
+    const next = {
+      key: String(entry?.key || entry?.name || "custom").trim(),
+      name: String(entry?.name || entry?.key || "Liste personnalisée").trim(),
+      listUrl: resolveTranslatorListUrl(entry?.listUrl || DEFAULT_URL),
+      openBase: String(entry?.openBase || "").trim(),
+      label: String(entry?.label || getLocalListLabel(entry) || "").trim(),
+    };
+
+    state.currentListUrl = next.listUrl;
+    state.currentListProfile = next;
+    setStoredListProfile(next);
+    setListTitle(next);
+
+    state.filterTags = [];
+    saveTags([]);
+    state.pageSize = "auto";
+    const ps = $("#pageSize");
+    if (ps) ps.value = "auto";
+
+    GAME_STATS.loaded = false;
+    GAME_STATS.views.clear();
+    GAME_STATS.mega.clear();
+    GAME_STATS.likes.clear();
+    GAME_RATINGS.loaded = false;
+    GAME_RATINGS.byKey.clear();
+
+    await init();
+  }
+
   // =========================
   // Header tools
   // =========================
@@ -361,8 +660,27 @@
     const tools = document.createElement("div");
     tools.className = "top-title-tools";
 
-    row.insertBefore(btn, h1);
+    const titleBtn = document.createElement("button");
+    titleBtn.type = "button";
+    titleBtn.id = "listSwitcherBtn";
+    titleBtn.className = "list-switcher-btn";
+    titleBtn.setAttribute("aria-haspopup", "menu");
+    titleBtn.setAttribute("aria-expanded", "false");
+    titleBtn.title = "Listes des traductions";
+    h1.classList.add("viewer-list-title-text");
+    h1.replaceWith(titleBtn);
+    titleBtn.appendChild(h1);
+    titleBtn.insertAdjacentHTML("beforeend", `<span class="list-switcher-chevron" aria-hidden="true">▾</span>`);
+
+    const listPop = document.createElement("div");
+    listPop.id = "listSwitcherPopover";
+    listPop.className = "list-switcher-popover hidden";
+    document.body.appendChild(listPop);
+
+    row.insertBefore(btn, titleBtn);
     row.appendChild(tools);
+    setListTitle(state.currentListProfile);
+    initListSwitcher();
 
     const total = document.querySelector("#countTotal")?.closest(".total-inline");
     const cols = document.getElementById("cols");
@@ -448,6 +766,13 @@
         if (!pop.contains(t) && !hb.contains(t)) closeTopMenu();
       }
 
+      const listPop = document.getElementById("listSwitcherPopover");
+      const listBtn = document.getElementById("listSwitcherBtn");
+      if (listPop && listBtn) {
+        const t = e.target;
+        if (!listPop.contains(t) && !listBtn.contains(t)) closeListSwitcher();
+      }
+
       const tagsPop = document.getElementById("tagsPopover");
       const tagsBtn = document.getElementById("tagsBtn");
       if (tagsPop && tagsBtn) {
@@ -460,6 +785,10 @@
       const pop = document.getElementById("topMenuPopover");
       const hb = document.getElementById("hamburgerBtn");
       if (pop && hb && !pop.classList.contains("hidden")) positionPopover(pop, hb);
+
+      const lp = document.getElementById("listSwitcherPopover");
+      const lb = document.getElementById("listSwitcherBtn");
+      if (lp && lb && !lp.classList.contains("hidden")) positionPopover(lp, lb);
 
       const tp = document.getElementById("tagsPopover");
       const tb = document.getElementById("tagsBtn");
@@ -474,6 +803,7 @@
         try { window.ViewerMenuAbout?.close?.(); } catch {}
         try { window.ViewerMenuExtension?.close?.(); } catch {}
         closeTagsPopover();
+        closeListSwitcher();
       }
     });
   }
@@ -758,13 +1088,18 @@
     try {
       const p = new URLSearchParams(location.search);
       const src = (p.get("src") || "").trim();
-      if (src) return src;
+      if (src) {
+        state.currentListUrl = src;
+        state.currentListProfile = getFallbackProfileForUrl(src);
+        return src;
+      }
     } catch {}
-    try {
-      return (localStorage.getItem("f95listUrl") || "").trim() || DEFAULT_URL;
-    } catch {
-      return DEFAULT_URL;
-    }
+
+    // Par défaut, cette page reste toujours sur la liste Andric31.
+    // Le choix d'une autre liste ouvre son site dans un nouvel onglet et ne modifie pas cette page.
+    state.currentListUrl = DEFAULT_URL;
+    state.currentListProfile = getFallbackProfileForUrl(DEFAULT_URL);
+    return DEFAULT_URL;
   }
 
   async function getViewerCols() {
@@ -1802,6 +2137,8 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
       if (pageSizeSelInit) pageSizeSelInit.value = state.pageSize;
 
       const raw = await loadList();
+      setListTitle(state.currentListProfile);
+      renderListSwitcher(state.manifestEntries);
       state.all = Array.isArray(raw) ? raw.map(normalizeGame) : [];
 
       if (!state.filterTags || !state.filterTags.length) {

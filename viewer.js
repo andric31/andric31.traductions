@@ -685,12 +685,26 @@
     const total = document.querySelector("#countTotal")?.closest(".total-inline");
     const cols = document.getElementById("cols");
     const pageSize = document.getElementById("pageSize");
+    const updateBadgesToggle = document.getElementById("updateBadgesToggle");
     const themeSel = document.getElementById("theme");
 
     if (total) tools.appendChild(total);
     if (cols) tools.appendChild(cols);
     if (pageSize) tools.appendChild(pageSize);
+    if (updateBadgesToggle) tools.appendChild(updateBadgesToggle);
     if (themeSel) tools.appendChild(themeSel);
+
+    if (updateBadgesToggle) {
+      const enabled = areUpdateBadgesEnabled();
+      updateBadgesToggle.value = enabled ? "on" : "off";
+      setUpdateBadgesEnabled(enabled);
+
+      updateBadgesToggle.addEventListener("change", (e) => {
+        const enabledNow = (e.target?.value || "on") !== "off";
+        setUpdateBadgesEnabled(enabledNow);
+        render();
+      });
+    }
 
     try {
       window.ViewerMenu?.init?.();
@@ -823,6 +837,77 @@
       "'": "&#39;",
     }[m]));
   }
+
+
+  // =========================
+  // ✅ Affichage des badges Ajout / MAJ
+  // Par défaut : activé
+  // =========================
+  const UPDATE_BADGES_STORE_KEY = "viewerShowUpdateBadges";
+
+  function areUpdateBadgesEnabled() {
+    try {
+      return localStorage.getItem(UPDATE_BADGES_STORE_KEY) !== "off";
+    } catch {
+      return true;
+    }
+  }
+
+  function setUpdateBadgesEnabled(enabled) {
+    try {
+      localStorage.setItem(UPDATE_BADGES_STORE_KEY, enabled ? "on" : "off");
+    } catch {}
+
+    try {
+      document.documentElement.classList.toggle("update-badges-hidden", !enabled);
+    } catch {}
+  }
+
+  // =========================
+  // ✅ Badge Ajout / MAJ
+  // createdAtLocal == updatedAtLocal => ajout initial
+  // createdAtLocal != updatedAtLocal => mise à jour de traduction
+  // =========================
+  function normalizeLocalDateValue(v) {
+    return String(v || "").trim();
+  }
+
+  function getEntryUpdateKind(rawEntry) {
+    const created = normalizeLocalDateValue(rawEntry?.createdAtLocal);
+    const updated = normalizeLocalDateValue(rawEntry?.updatedAtLocal);
+
+    // Si une date manque, on évite d'afficher un statut faux.
+    if (!created || !updated) {
+      return {
+        key: "unknown",
+        label: "",
+        title: "",
+      };
+    }
+
+    if (created === updated) {
+      return {
+        key: "add",
+        label: "AJOUT",
+        title: `Ajout de la traduction : ${updated}`,
+      };
+    }
+
+    return {
+      key: "update",
+      label: "MAJ",
+      title: `Mise à jour de la traduction : ${updated} • Ajout initial : ${created}`,
+    };
+  }
+
+  function updateKindRibbonHtml(rawEntry) {
+    if (!areUpdateBadgesEnabled()) return "";
+
+    const k = getEntryUpdateKind(rawEntry);
+    if (!k.label) return "";
+    return `<span class="update-ribbon update-ribbon--${escapeHtml(k.key)}" title="${escapeHtml(k.title)}">${escapeHtml(k.label)}</span>`;
+  }
+
 
   function getSavedTags() {
     try {
@@ -1919,6 +2004,7 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
       const ratingText = formatRatingForCard(rating.avg, rating.count);
       const translationText = formatRelativeTranslationTime(g.lastTranslationTs);
       const translationTitle = formatAbsoluteDateTime(g.lastTranslationTs);
+      const updateRibbon = updateKindRibbonHtml(g.__raw || g);
 
       card.href = pageHref;
       card.target = "_blank";
@@ -1930,6 +2016,7 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
              referrerpolicy="no-referrer"
              loading="lazy"
              onerror="this.onerror=null;this.src='/favicon.png';this.classList.add('is-fallback');">
+        ${updateRibbon}
         <div class="body">
           <h3 class="name clamp-2">${escapeHtml(getDisplayTitle(g.__raw || g))}</h3>
           <div class="badges-line one-line">${badgesLineHtml(g)}</div>

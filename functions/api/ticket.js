@@ -114,7 +114,8 @@ export async function onRequestGet(context) {
   query += ` ORDER BY id DESC LIMIT ?`;
   binds.push(limit);
   const result = await db.prepare(query).bind(...binds).all();
-  return json({ ok: true, tickets: result.results || [] });
+  const countRow = await db.prepare(`SELECT COUNT(*) AS count FROM tickets_global WHERE status = 'open'`).first();
+  return json({ ok: true, tickets: result.results || [], open_count: Number(countRow?.count || 0) });
 }
 
 export async function onRequestPost(context) {

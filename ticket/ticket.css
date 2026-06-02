@@ -1,14 +1,21 @@
-html,body{min-height:100%}
+html,body{
+  min-height:100%;
+  height:auto !important;
+}
+
 body{
   display:block !important;
   align-items:initial !important;
   justify-content:initial !important;
   padding-top:0 !important;
   padding-bottom:0 !important;
+  margin:0 !important;
 }
 .ticket-shell{
   width:min(980px,calc(100% - 22px));
-  margin:1px auto 24px;
+  margin:14px auto 24px !important;
+  padding-top:0 !important;
+  padding-bottom:0 !important;
   display:grid;
   gap:10px;
   color:var(--fg);
@@ -162,23 +169,7 @@ body{
 .ticket-status.err{color:#ff6b7a}
 
 @media(max-width:720px){
-  .ticket-shell{margin:0 auto 20px;border-radius:18px}
-}
-
-/* Correction position page ticket */
-html,
-body {
-  min-height: auto !important;
-}
-
-body {
-  display: block !important;
-  align-items: initial !important;
-  justify-content: initial !important;
-  padding-top: 0 !important;
-  margin: 0 !important;
-}
-
-.ticket-shell {
-  margin-top: 14px !important;
+  .ticket-shell{margin:10px auto 20px !important;padding-top:0 !important}
+  .ticket-grid.two{grid-template-columns:1fr}
+  .ticket-hero,.ticket-card{padding:16px;border-radius:18px}
 }

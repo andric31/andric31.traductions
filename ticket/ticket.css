@@ -164,3 +164,21 @@ body{
 @media(max-width:720px){
   .ticket-shell{margin:0 auto 20px;border-radius:18px}
 }
+
+/* Correction position page ticket */
+html,
+body {
+  min-height: auto !important;
+}
+
+body {
+  display: block !important;
+  align-items: initial !important;
+  justify-content: initial !important;
+  padding-top: 0 !important;
+  margin: 0 !important;
+}
+
+.ticket-shell {
+  margin-top: 14px !important;
+}

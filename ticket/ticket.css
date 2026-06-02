@@ -58,6 +58,30 @@ body{
   line-height:1.5;
 }
 
+
+
+.ticket-note{
+  margin-top:10px;
+  max-width:760px;
+  display:grid;
+  gap:4px;
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:color-mix(in srgb,var(--primary) 10%,var(--card));
+  color:var(--fg);
+}
+
+.ticket-note strong{
+  color:var(--title,var(--fg));
+  font-size:13px;
+}
+
+.ticket-note span{
+  color:var(--muted);
+  line-height:1.45;
+}
+
 .ticket-actions,
 .ticket-form-footer{
   display:flex;

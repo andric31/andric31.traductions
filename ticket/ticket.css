@@ -1,15 +1,16 @@
-html,body{min-height:auto}
+html,body{min-height:100%}
 body{
   display:block !important;
   align-items:initial !important;
   justify-content:initial !important;
   padding-top:0 !important;
+  padding-bottom:0 !important;
 }
 .ticket-shell{
   width:min(980px,calc(100% - 22px));
-  margin:12px auto 24px;
+  margin:8px auto 24px;
   display:grid;
-  gap:12px;
+  gap:10px;
   color:var(--fg);
 }
 

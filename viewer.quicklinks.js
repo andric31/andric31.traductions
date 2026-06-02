@@ -3,6 +3,7 @@
     wiki: "quickWikiBtn",
     labo: "quickLaboBtn",
     blog: "quickBlogBtn",
+    ticket: "quickTicketBtn",
     messages: "quickMessagesBtn",
     notifications: "quickNotificationsBtn",
     notificationsPopover: "quickNotificationsPopover",
@@ -12,12 +13,15 @@
     seenMessageId: "andric31_seen_message_id",
     seenBlogSignature: "andric31_seen_blog_signature",
     seenNotificationId: "andric31_seen_notification_id",
+    seenTicketOpenCount: "andric31_seen_ticket_open_count",
     firstVisitShown: "andric31_first_visit_notification_shown",
     hiddenNotificationId: "andric31_hidden_notification_id",
   };
 
   const MESSAGES_API_URL = "/api/messages?limit=1&scope=allowed";
   const BLOG_INDEX_URL = "/blog/";
+  const TICKETS_ADMIN_URL = "/compte/ticket-admin.html";
+  const TICKETS_PUBLIC_URL = "/ticket/";
   const NOTIFICATIONS_JSON_URL = "/notifications/notifications.json";
   const NOTIFICATION_URL = "https://andric31-traductions.pages.dev/notifications/";
 
@@ -46,6 +50,16 @@
       <path d="M7.5 12h9"/>
       <path d="M7.5 16h5"/>
       <circle cx="16.75" cy="16.25" r=".9" fill="currentColor" stroke="none"/>
+    </svg>`;
+  }
+
+
+  function iconTicket() {
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M3.5 8A2.5 2.5 0 0 1 6 5.5h12A2.5 2.5 0 0 1 20.5 8v1.4a2.6 2.6 0 0 0 0 5.2V16A2.5 2.5 0 0 1 18 18.5H6A2.5 2.5 0 0 1 3.5 16v-1.4a2.6 2.6 0 0 0 0-5.2Z"/>
+      <path d="M14.5 6.5v2"/>
+      <path d="M14.5 10.5v2"/>
+      <path d="M14.5 14.5v2"/>
     </svg>`;
   }
 
@@ -261,12 +275,13 @@
 
   function insertButtons(afterEl) {
     if (!afterEl) return;
-    if (document.getElementById(IDS.wiki) || document.getElementById(IDS.labo) || document.getElementById(IDS.blog) || document.getElementById(IDS.messages) || document.getElementById(IDS.notifications)) return;
+    if (document.getElementById(IDS.wiki) || document.getElementById(IDS.labo) || document.getElementById(IDS.blog) || document.getElementById(IDS.ticket) || document.getElementById(IDS.messages) || document.getElementById(IDS.notifications)) return;
 
     const refClass = afterEl.className || "hamburger-btn";
     const wiki = makeLink(IDS.wiki, "/wiki/", "Wiki", iconWiki(), refClass);
     const labo = makeLink(IDS.labo, "/labo/", "Labo", iconLabo(), refClass);
     const blog = makeLink(IDS.blog, "/blog/", "Blog", iconBlog(), refClass);
+    const ticket = makeLink(IDS.ticket, TICKETS_PUBLIC_URL, "Ticket", iconTicket(), refClass);
     const notifications = makeButton(IDS.notifications, "Notifications", iconNotifications(), refClass);
     const messages = makeLink(IDS.messages, "/messages/", "Messages", iconMessages(), refClass);
 
@@ -279,6 +294,11 @@
     blog.addEventListener("click", () => {
       localStorage.setItem(STORAGE.seenBlogSignature, String(blog.dataset.latestBlogSignature || ""));
       setDotVisible(blog, false);
+    });
+
+    ticket.addEventListener("click", () => {
+      localStorage.setItem(STORAGE.seenTicketOpenCount, String(ticket.dataset.openTicketCount || "0"));
+      setDotVisible(ticket, false);
     });
 
     messages.addEventListener("click", () => {
@@ -299,11 +319,12 @@
 
     afterEl.insertAdjacentElement("afterend", notifications);
     afterEl.insertAdjacentElement("afterend", messages);
+    afterEl.insertAdjacentElement("afterend", ticket);
     afterEl.insertAdjacentElement("afterend", blog);
     afterEl.insertAdjacentElement("afterend", labo);
     afterEl.insertAdjacentElement("afterend", wiki);
 
-    initIndicators(blog, messages, notifications);
+    initIndicators(blog, ticket, messages, notifications);
   }
 
   function escapeHtml(value) {
@@ -316,11 +337,12 @@
     }[char]));
   }
 
-  async function initIndicators(blogEl, messagesEl, notificationsEl) {
+  async function initIndicators(blogEl, ticketEl, messagesEl, notificationsEl) {
     await initBlogIndicator(blogEl);
+    await initTicketIndicator(ticketEl);
     await initNotificationIndicator(notificationsEl);
     await initMessageIndicator(messagesEl);
-    startIndicatorRefresh(blogEl, messagesEl, notificationsEl);
+    startIndicatorRefresh(blogEl, ticketEl, messagesEl, notificationsEl);
   }
 
   async function loadLatestBlogSignature() {
@@ -355,6 +377,49 @@
     setDotVisible(blogEl, latestSignature !== seenBlogSignature);
   }
 
+
+  async function getCurrentUser() {
+    if (window.SiteAuth?.fetchMe && !window.SiteAuth.loaded) {
+      try { await window.SiteAuth.fetchMe(); } catch {}
+    }
+    return window.SiteAuth?.me || null;
+  }
+
+  async function initTicketIndicator(ticketEl) {
+    if (!ticketEl) return;
+    try {
+      const me = await getCurrentUser();
+      const isAdmin = String(me?.role || "").toLowerCase() === "admin";
+      ticketEl.href = isAdmin ? TICKETS_ADMIN_URL : TICKETS_PUBLIC_URL;
+      ticketEl.title = isAdmin ? "Admin tickets" : "Ticket";
+      ticketEl.setAttribute("aria-label", isAdmin ? "Admin tickets" : "Ticket");
+
+      if (!isAdmin) {
+        ticketEl.dataset.openTicketCount = "0";
+        setDotVisible(ticketEl, false);
+        return;
+      }
+
+      const res = await fetch("/api/ticket?admin=1&status=open&limit=1", {
+        cache: "no-store",
+        credentials: "same-origin",
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        ticketEl.dataset.openTicketCount = "0";
+        setDotVisible(ticketEl, false);
+        return;
+      }
+
+      const openCount = Number(data.open_count ?? data.tickets?.length ?? 0);
+      ticketEl.dataset.openTicketCount = String(openCount);
+      const seenCount = Number(localStorage.getItem(STORAGE.seenTicketOpenCount) || 0);
+      setDotVisible(ticketEl, openCount > 0 && openCount !== seenCount);
+    } catch {
+      setDotVisible(ticketEl, false);
+    }
+  }
+
   async function initNotificationIndicator(notificationsEl) {
     const items = await loadNotificationsList();
     const latest = toNotificationPreview(items[0] || null);
@@ -375,9 +440,10 @@
     }
   }
 
-  function startIndicatorRefresh(blogEl, messagesEl, notificationsEl) {
+  function startIndicatorRefresh(blogEl, ticketEl, messagesEl, notificationsEl) {
     window.setInterval(() => {
       if (blogEl) initBlogIndicator(blogEl);
+      if (ticketEl) initTicketIndicator(ticketEl);
       if (messagesEl) initMessageIndicator(messagesEl);
       if (notificationsEl) initNotificationIndicator(notificationsEl);
     }, 10000);

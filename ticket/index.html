@@ -1,1 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Créer un ticket</title>
+  <link rel="icon" href="/favicon.png" />
+  <link rel="stylesheet" href="/viewer.css" />
+  <link rel="stylesheet" href="/themes.css" />
+  <link rel="stylesheet" href="/ticket/ticket.css" />
+  <script src="/theme-init.js"></script>
+</head>
+<body>
+  <main class="ticket-shell">
+    <section class="ticket-hero">
+      <div class="ticket-kicker">🎫 Support</div>
+      <h1>Créer un ticket</h1>
+      <p>Utilise ce formulaire pour signaler un problème, demander une traduction, proposer une correction ou contacter Andric31 sans passer par les messages publics.</p>
+      <div class="ticket-actions">
+        <a class="ticket-btn" href="/">Retour au site</a>
+        <a class="ticket-btn ghost" href="/messages/">Voir les messages</a>
+      </div>
+    </section>
 
+    <section class="ticket-card">
+      <form id="ticketForm" class="ticket-form" autocomplete="on">
+        <div class="ticket-grid two">
+          <label>
+            <span>Pseudo / Nom</span>
+            <input id="ticketName" name="name" type="text" maxlength="80" placeholder="Ton pseudo" required />
+          </label>
+          <label>
+            <span>Email ou Discord <em>optionnel</em></span>
+            <input id="ticketContact" name="contact" type="text" maxlength="160" placeholder="Pour pouvoir te répondre" />
+          </label>
+        </div>
+
+        <div class="ticket-grid two">
+          <label>
+            <span>Type de demande</span>
+            <select id="ticketCategory" name="category">
+              <option value="question">Question</option>
+              <option value="probleme">Problème sur le site</option>
+              <option value="traduction">Demande de traduction</option>
+              <option value="correction">Correction / erreur de traduction</option>
+              <option value="autre">Autre</option>
+            </select>
+          </label>
+          <label>
+            <span>Priorité</span>
+            <select id="ticketPriority" name="priority">
+              <option value="normal">Normal</option>
+              <option value="faible">Faible</option>
+              <option value="urgent">Urgent</option>
+            </select>
+          </label>
+        </div>
+
+        <label>
+          <span>Titre</span>
+          <input id="ticketTitle" name="title" type="text" maxlength="160" placeholder="Résumé rapide de la demande" required />
+        </label>
+
+        <label>
+          <span>Message</span>
+          <textarea id="ticketMessage" name="message" rows="9" maxlength="5000" placeholder="Explique ta demande le plus clairement possible…" required></textarea>
+        </label>
+
+        <div class="ticket-form-footer">
+          <button id="ticketSubmit" class="ticket-btn primary" type="submit">Envoyer le ticket</button>
+          <p id="ticketStatus" class="ticket-status" aria-live="polite"></p>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script src="/ticket/ticket.js"></script>
+</body>
+</html>

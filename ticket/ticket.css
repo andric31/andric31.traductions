@@ -1,0 +1,15 @@
+.ticket-shell{width:min(980px,calc(100% - 22px));margin:22px auto 34px;display:grid;gap:16px;color:var(--text,#e9eef8)}
+.ticket-hero,.ticket-card{border:1px solid var(--border,rgba(255,255,255,.12));background:color-mix(in srgb,var(--card,#151a24) 92%,transparent);border-radius:22px;box-shadow:0 16px 36px rgba(0,0,0,.22);padding:20px}
+.ticket-kicker{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border,rgba(255,255,255,.12));border-radius:999px;padding:7px 12px;background:rgba(80,160,255,.1);font-weight:800;font-size:13px}
+.ticket-hero h1{margin:12px 0 8px;font-size:clamp(30px,5vw,48px);line-height:1.05;color:var(--title,#fff)}
+.ticket-hero p{margin:0;max-width:760px;color:var(--muted,#aeb7c8);line-height:1.65}
+.ticket-actions,.ticket-form-footer{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+.ticket-form{display:grid;gap:14px}
+.ticket-grid{display:grid;gap:14px}.ticket-grid.two{grid-template-columns:1fr 1fr}
+.ticket-form label{display:grid;gap:7px;font-weight:800;color:var(--title,#fff)}
+.ticket-form label em{font-style:normal;color:var(--muted,#aeb7c8);font-weight:600;font-size:12px}
+.ticket-form input,.ticket-form select,.ticket-form textarea{width:100%;box-sizing:border-box;border:1px solid var(--border,rgba(255,255,255,.12));border-radius:14px;background:rgba(255,255,255,.055);color:var(--text,#e9eef8);padding:12px 13px;font:inherit;outline:none}
+.ticket-form textarea{resize:vertical;line-height:1.55}.ticket-form input:focus,.ticket-form select:focus,.ticket-form textarea:focus{border-color:color-mix(in srgb,var(--primary,#66aaff) 62%,var(--border,rgba(255,255,255,.12)));box-shadow:0 0 0 3px color-mix(in srgb,var(--primary,#66aaff) 18%,transparent)}
+.ticket-btn{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 14px;border-radius:14px;border:1px solid var(--border,rgba(255,255,255,.12));background:rgba(255,255,255,.07);color:var(--title,#fff);font-weight:800;text-decoration:none;cursor:pointer}.ticket-btn:hover{filter:brightness(1.08)}.ticket-btn.primary{background:rgba(80,160,255,.2)}.ticket-btn.ghost{background:transparent}.ticket-btn:disabled{opacity:.58;cursor:wait}
+.ticket-status{margin:0;color:var(--muted,#aeb7c8);font-weight:700}.ticket-status.ok{color:#7ff0a0}.ticket-status.err{color:#ff9b9b}
+@media(max-width:720px){.ticket-grid.two{grid-template-columns:1fr}.ticket-hero,.ticket-card{padding:16px;border-radius:18px}}

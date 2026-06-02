@@ -6,7 +6,7 @@ const json = (data, status = 200) => new Response(JSON.stringify(data, null, 2),
   },
 });
 
-const DB_NAMES = ['DB', 'TICKETS_DB', 'AUTH_DB'];
+const DB_NAMES = ['TICKETS_DB', 'DB', 'AUTH_DB'];
 
 function getDb(env) {
   for (const name of DB_NAMES) {

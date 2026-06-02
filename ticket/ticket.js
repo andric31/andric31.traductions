@@ -8,7 +8,7 @@
     event.preventDefault();
     const payload = {
       name: val('ticketName'),
-      contact: val('ticketContact'),
+      contact: '',
       category: val('ticketCategory') || 'question',
       priority: val('ticketPriority') || 'normal',
       title: val('ticketTitle'),

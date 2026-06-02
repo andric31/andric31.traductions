@@ -1,9 +1,13 @@
 html,body{min-height:auto}
-body{display:block;align-items:initial;justify-content:initial;padding-top:0}
-
-.ticket-shell{
+body{
+  display:block !important;
+  align-items:initial !important;
+  justify-content:initial !important;
+  padding-top:0 !important;
+}
+.ticket-shell{padding-top:4px;
   width:min(980px,calc(100% - 22px));
-  margin:0 auto 24px;
+  margin:0 auto 20px;
   display:grid;
   gap:12px;
   color:var(--fg);
@@ -157,7 +161,5 @@ body{display:block;align-items:initial;justify-content:initial;padding-top:0}
 .ticket-status.err{color:#ff6b7a}
 
 @media(max-width:720px){
-  .ticket-shell{margin:0 auto 22px}
-  .ticket-grid.two{grid-template-columns:1fr}
-  .ticket-hero,.ticket-card{padding:16px;border-radius:18px}
+  .ticket-shell{margin:0 auto 20px;border-radius:18px}
 }

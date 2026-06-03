@@ -55,11 +55,10 @@
 
 
   function iconTicket() {
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-      <path d="M3.5 8A2.5 2.5 0 0 1 6 5.5h12A2.5 2.5 0 0 1 20.5 8v1.4a2.6 2.6 0 0 0 0 5.2V16A2.5 2.5 0 0 1 18 18.5H6A2.5 2.5 0 0 1 3.5 16v-1.4a2.6 2.6 0 0 0 0-5.2Z"/>
-      <path d="M14.5 6.5v2"/>
-      <path d="M14.5 10.5v2"/>
-      <path d="M14.5 14.5v2"/>
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M5 6.5h14a1.5 1.5 0 0 1 1.5 1.5v2a2 2 0 0 0 0 4v2a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 16v-2a2 2 0 0 0 0-4V8A1.5 1.5 0 0 1 5 6.5Z"/>
+      <path d="M9 10h6"/>
+      <path d="M9 14h6"/>
     </svg>`;
   }
 

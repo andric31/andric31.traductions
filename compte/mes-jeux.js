@@ -11,8 +11,6 @@
     search: $('#accountGamesSearch'),
     sort: $('#accountGamesSort'),
     refresh: $('#accountGamesRefresh'),
-    logout: $('#accountGamesLogout'),
-    logoutMsg: $('#accountGamesLogoutMsg'),
     total: $('#statTotal'),
     watch: $('#statWatch'),
     likes: $('#statLikes'),
@@ -261,10 +259,6 @@
     els.sort?.addEventListener('change', () => { state.sort = els.sort.value || 'recent'; render(); });
     els.refresh?.addEventListener('click', loadAll);
     els.grid?.addEventListener('click', handleAction);
-    els.logout?.addEventListener('click', async () => {
-      try { await window.SiteAuth.logout(); location.href = '/connexion/'; }
-      catch (err) { if (els.logoutMsg) els.logoutMsg.textContent = err?.message || 'Erreur de déconnexion.'; }
-    });
   }
 
   function showGuest() {

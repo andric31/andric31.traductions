@@ -1211,7 +1211,7 @@ function setWatchlistButton(inList, loading) {
   btn.classList.toggle("is-in-watchlist", !!inList);
   btn.textContent = loading
     ? "Traitement…"
-    : (inList ? "✅ Dans ma Watchlist" : "👁️ Ajouter à la Watchlist");
+    : (inList ? "✅ Dans ma Watchlist" : "🔖 Ajouter à la Watchlist");
   btn.setAttribute("aria-label", inList ? "Retirer de la Watchlist" : "Ajouter à la Watchlist");
 }
 

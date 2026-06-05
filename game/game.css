@@ -1248,3 +1248,22 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
 }
 .watchlistMsg.ok { color: #7ff0a0; }
 .watchlistMsg.err { color: #ff9b9b; }
+
+
+/* ===== Placement et icône Watchlist ===== */
+.gameActionsCard{ order:1; }
+.translationWatchlistCard{ order:2; }
+.translationRatingCard{ order:3; }
+.translationLikeCard{ order:4; }
+
+.watchlistBookmarkIcon{
+  display:inline-block;
+  transform:translateY(1px);
+}
+
+.translationWatchlistCard h3{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+}

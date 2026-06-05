@@ -1262,12 +1262,8 @@ function initWatchlistForGame({ entry, display, title, counterKey, idParam, uidP
 
   const refresh = async (me) => {
     if (!me) {
-      box.style.display = "";
-      btn.disabled = false;
-      btn.classList.remove("is-in-watchlist");
-      btn.textContent = "🔐 Connecte-toi pour l’ajouter";
-      btn.setAttribute("aria-label", "Connexion requise");
-      watchlistSetMsg("Accessible aux personnes connectées.", false);
+      box.style.display = "none";
+      watchlistSetMsg("", true);
       return;
     }
 

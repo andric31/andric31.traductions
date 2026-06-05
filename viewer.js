@@ -311,6 +311,68 @@
     return `${text}/4`;
   }
 
+
+  function isViewerAccountConnected() {
+    return !!window.SiteAuth?.me;
+  }
+
+  function isRatingSortValue(value) {
+    return /^(rating|ratings|note|notes)(-|$)/i.test(String(value || ""));
+  }
+
+  function syncRatingVisibilityForAuth() {
+    const connected = isViewerAccountConnected();
+    const sort = $("#sort");
+
+    if (sort) {
+      Array.from(sort.options || []).forEach((opt) => {
+        if (!isRatingSortValue(opt.value)) return;
+        opt.hidden = !connected;
+        opt.disabled = !connected;
+      });
+
+      if (!connected && isRatingSortValue(sort.value)) {
+        state.sort = "updatedAtLocal-desc";
+        sort.value = state.sort;
+        sortNow();
+      }
+    }
+  }
+
+  function bindRatingAuthRefresh() {
+    if (window.__viewerRatingAuthRefreshBound) return;
+    window.__viewerRatingAuthRefreshBound = true;
+
+    let lastConnected = null;
+    const refresh = () => {
+      const connected = isViewerAccountConnected();
+      if (connected === lastConnected) return;
+      lastConnected = connected;
+      syncRatingVisibilityForAuth();
+      renderGrid();
+    };
+
+    const attach = () => {
+      if (window.SiteAuth?.onChange) {
+        window.SiteAuth.onChange(() => refresh());
+        refresh();
+        return true;
+      }
+      return false;
+    };
+
+    if (attach()) return;
+
+    let tries = 0;
+    const timer = setInterval(() => {
+      tries += 1;
+      if (attach() || tries > 80) {
+        clearInterval(timer);
+        refresh();
+      }
+    }, 100);
+  }
+
   // =========================
   // ☰ MENU
   // =========================
@@ -1604,6 +1666,33 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
       });
       return;
     }
+
+    if (k === "rating" || k === "ratings" || k === "note" || k === "notes") {
+      if (!isViewerAccountConnected()) {
+        state.sort = "updatedAtLocal-desc";
+        state.filtered.sort((a, b) => ((a.updatedAtLocalTs || 0) - (b.updatedAtLocalTs || 0)) * -1);
+        return;
+      }
+
+      state.filtered.sort((a, b) => {
+        const ra = GAME_RATINGS.byKey.get(a.ckey) || { avg: 0, count: 0 };
+        const rb = GAME_RATINGS.byKey.get(b.ckey) || { avg: 0, count: 0 };
+        const da = Number(ra.avg || 0);
+        const db = Number(rb.avg || 0);
+        if (da !== db) return (da - db) * mul;
+
+        const ca = Number(ra.count || 0);
+        const cb = Number(rb.count || 0);
+        if (ca !== cb) return (ca - cb) * mul;
+
+        const ta = a.updatedAtLocalTs || 0;
+        const tb = b.updatedAtLocalTs || 0;
+        if (ta !== tb) return (ta - tb) * -1;
+
+        return a.title.localeCompare(b.title);
+      });
+      return;
+    }
   }
 
   function applyFilters() {
@@ -2002,6 +2091,12 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
       const likes = GAME_STATS.likes.get(g.ckey) || 0;
       const rating = GAME_RATINGS.byKey.get(g.ckey) || { avg: 0, count: 0, sum: 0 };
       const ratingText = formatRatingForCard(rating.avg, rating.count);
+      const showRatingOnCard = isViewerAccountConnected();
+      const ratingStatHtml = showRatingOnCard ? `
+              <span class="card-stat card-stat-rating" title="Note étoile moyenne et nombre de votes">
+                <span class="stat-icon stat-icon-rating" aria-hidden="true"></span>
+                <span>${escapeHtml(ratingText)}</span>
+              </span>` : "";
       const translationText = formatRelativeTranslationTime(g.lastTranslationTs);
       const translationTitle = formatAbsoluteDateTime(g.lastTranslationTs);
       const updateRibbon = updateKindRibbonHtml(g.__raw || g);
@@ -2039,10 +2134,7 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
                 <span class="stat-icon stat-icon-likes" aria-hidden="true"></span>
                 <span>${formatInt(likes)}</span>
               </span>
-              <span class="card-stat" title="Note étoile moyenne et nombre de votes">
-                <span class="stat-icon stat-icon-rating" aria-hidden="true"></span>
-                <span>${escapeHtml(ratingText)}</span>
-              </span>
+              ${ratingStatHtml}
             </div>
           </div>
         </div>
@@ -2090,8 +2182,19 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
   $("#sort")?.addEventListener("change", async (e) => {
     state.sort = e.target.value;
 
+    syncRatingVisibilityForAuth();
+
+    if (!isViewerAccountConnected() && isRatingSortValue(state.sort)) {
+      state.sort = "updatedAtLocal-desc";
+      e.target.value = state.sort;
+    }
+
     if (state.sort.startsWith("views") || state.sort.startsWith("mega") || state.sort.startsWith("likes")) {
       await forceReloadGameStats();
+    }
+
+    if (isRatingSortValue(state.sort)) {
+      await forceReloadGameRatings();
     }
 
     sortNow();
@@ -2215,6 +2318,8 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
     try {
       initHeaderMenuAndDisplayTools();
       syncTopbarHeight();
+      syncRatingVisibilityForAuth();
+      bindRatingAuthRefresh();
 
       state.cols = await getViewerCols();
       const colsSel = $("#cols");

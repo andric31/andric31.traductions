@@ -11,6 +11,76 @@
   <script src="/theme-init.js"></script>
   <style>
     html:not(.auth-ready) body { visibility: hidden; }
+
+    .watchlist-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .watchlist-head h3 { margin: 0 0 6px; }
+    .watchlist-help { margin: 0; color: var(--muted); }
+    .watchlist-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .watchlist-empty {
+      color: var(--muted);
+      padding: 12px;
+      border: 1px dashed var(--border, var(--auth-border));
+      border-radius: 14px;
+      background: rgba(255,255,255,.03);
+    }
+    .watchlist-item {
+      display: grid;
+      grid-template-columns: 74px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      border: 1px solid var(--border, var(--auth-border));
+      border-radius: 14px;
+      padding: 10px;
+      background: rgba(255,255,255,.035);
+    }
+    .watchlist-cover {
+      width: 74px;
+      height: 52px;
+      object-fit: cover;
+      border-radius: 10px;
+      background: rgba(0,0,0,.25);
+      border: 1px solid var(--border, var(--auth-border));
+    }
+    .watchlist-title {
+      font-weight: 900;
+      color: var(--text, #fff);
+      text-decoration: none;
+      line-height: 1.25;
+    }
+    .watchlist-title:hover { text-decoration: underline; }
+    .watchlist-meta {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .watchlist-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .watchlist-mini {
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 13px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    @media (max-width: 700px) {
+      .watchlist-item { grid-template-columns: 62px 1fr; }
+      .watchlist-actions { grid-column: 1 / -1; justify-content: flex-start; }
+      .watchlist-cover { width: 62px; height: 48px; }
+    }
   </style>
 </head>
 <body>
@@ -18,6 +88,13 @@
     <section class="auth-card auth-hidden" id="guestCard">
       <h1 class="auth-title">🔒 Accès au compte</h1>
       <p class="auth-subtitle">Tu dois être connecté pour accéder à cette page.</p>
+      <div class="auth-box" style="margin-top:14px;">
+        <h3>📝 Inscription privée</h3>
+        <p>Toute nouvelle inscription est privée. Merci d’ouvrir un ticket pour me communiquer ton nom d’utilisateur et ton mot de passe.</p>
+        <div class="auth-actions">
+          <a class="auth-btn primary" href="/ticket/">Ouvrir un ticket</a>
+        </div>
+      </div>
       <div class="auth-actions">
         <a class="auth-btn primary" href="/connexion/">Se connecter</a>
         <a class="auth-btn" href="/">Retour au site</a>
@@ -38,6 +115,18 @@
         </div>
         <div id="logoutMsg" class="auth-msg"></div>
       </div>
+
+      <div class="auth-box watchlist-box" id="watchlistBox" style="margin-top:14px;">
+        <div class="watchlist-head">
+          <div>
+            <h3>👁️ Watchlist</h3>
+            <p class="watchlist-help">Les jeux que tu as ajoutés depuis leur fiche apparaissent ici.</p>
+          </div>
+          <button class="auth-btn" id="refreshWatchlistBtn" type="button">Actualiser</button>
+        </div>
+        <div id="watchlistMsg" class="auth-msg"></div>
+        <div id="watchlistList" class="watchlist-list"></div>
+      </div>
     </section>
 
     <div id="adminQuickMount"></div>
@@ -50,6 +139,9 @@
     const guestCard = document.getElementById('guestCard');
     const accountCard = document.getElementById('accountCard');
     const adminQuickMount = document.getElementById('adminQuickMount');
+    const watchlistList = document.getElementById('watchlistList');
+    const watchlistMsg = document.getElementById('watchlistMsg');
+    const refreshWatchlistBtn = document.getElementById('refreshWatchlistBtn');
 
     function setMsg(el, text, ok) {
       if (!el) return;
@@ -57,6 +149,94 @@
       el.className = 'auth-msg ' + (text ? (ok ? 'ok' : 'err') : '');
     }
 
+
+    function escapeHtml(s) {
+      return String(s ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatWatchDate(value) {
+      const d = new Date(value || '');
+      if (!Number.isFinite(d.getTime())) return '';
+      return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    function normalizeGameUrl(url) {
+      const u = String(url || '').trim();
+      if (!u) return '#';
+      try { return new URL(u, location.origin).pathname + new URL(u, location.origin).search; }
+      catch { return u; }
+    }
+
+    async function loadWatchlist() {
+      if (!window.SiteAuth?.me || !watchlistList) return;
+      setMsg(watchlistMsg, 'Chargement de la Watchlist…', true);
+      try {
+        const resp = await fetch('/api/watchlist', { credentials: 'same-origin', cache: 'no-store' });
+        const data = await resp.json();
+        if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Chargement impossible.');
+        const items = Array.isArray(data.items) ? data.items : [];
+        if (!items.length) {
+          watchlistList.innerHTML = '<div class="watchlist-empty">Aucun jeu dans ta Watchlist pour le moment.</div>';
+          setMsg(watchlistMsg, '', true);
+          return;
+        }
+        watchlistList.innerHTML = items.map((item) => {
+          const title = escapeHtml(item.title || 'Jeu sans titre');
+          const img = escapeHtml(item.image_url || '/favicon.png');
+          const gameUrl = escapeHtml(normalizeGameUrl(item.game_url));
+          const date = formatWatchDate(item.created_at);
+          const f95 = item.f95_url ? `<a class="auth-btn watchlist-mini" href="${escapeHtml(item.f95_url)}" target="_blank" rel="noopener">F95Zone</a>` : '';
+          const discord = item.discord_url ? `<a class="auth-btn watchlist-mini" href="${escapeHtml(item.discord_url)}" target="_blank" rel="noopener">Discord</a>` : '';
+          return `
+            <article class="watchlist-item" data-watch-id="${escapeHtml(item.id)}">
+              <img class="watchlist-cover" src="${img}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='/favicon.png'">
+              <div>
+                <a class="watchlist-title" href="${gameUrl}">${title}</a>
+                <div class="watchlist-meta">${date ? `Ajouté le ${escapeHtml(date)}` : 'Ajout récent'}</div>
+              </div>
+              <div class="watchlist-actions">
+                <a class="auth-btn watchlist-mini" href="${gameUrl}">Voir la fiche</a>
+                ${f95}
+                ${discord}
+                <button class="auth-btn warn watchlist-mini" type="button" data-remove-watch="${escapeHtml(item.id)}">Retirer</button>
+              </div>
+            </article>`;
+        }).join('');
+        setMsg(watchlistMsg, `${items.length} jeu${items.length > 1 ? 'x' : ''} dans ta Watchlist.`, true);
+      } catch (err) {
+        watchlistList.innerHTML = '';
+        setMsg(watchlistMsg, err?.message || 'Erreur Watchlist.', false);
+      }
+    }
+
+    watchlistList?.addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-remove-watch]');
+      if (!btn) return;
+      const id = btn.getAttribute('data-remove-watch') || '';
+      btn.disabled = true;
+      setMsg(watchlistMsg, 'Suppression…', true);
+      try {
+        const resp = await fetch('/api/watchlist', {
+          method: 'DELETE',
+          credentials: 'same-origin',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ id })
+        });
+        const data = await resp.json();
+        if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Suppression impossible.');
+        await loadWatchlist();
+      } catch (err) {
+        btn.disabled = false;
+        setMsg(watchlistMsg, err?.message || 'Erreur de suppression.', false);
+      }
+    });
+
+    refreshWatchlistBtn?.addEventListener('click', loadWatchlist);
     function renderAdminCard(me) {
       if (!adminQuickMount) return;
       const role = String(me?.role || '').toLowerCase();
@@ -87,6 +267,7 @@
       guestCard?.classList.add('auth-hidden');
       accountCard?.classList.remove('auth-hidden');
       renderAdminCard(me);
+      loadWatchlist();
     }
 
     window.SiteAuth.onChange(guardAccount);

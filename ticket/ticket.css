@@ -152,7 +152,7 @@ body{
 
 .ticket-form textarea{
   resize:vertical;
-  min-height:130px;
+  min-height:180px;
   line-height:1.55;
 }
 
@@ -240,7 +240,24 @@ body{
     padding-bottom:72px;
   }
 }
-/* Retire le trait visible en haut de la carte principale */
+
+/* Fix : retire la barre/ligne visible en haut de la page ticket */
+html,
+body{
+  border-top:0 !important;
+  box-shadow:none !important;
+}
+
+body::before,
+body::after{
+  content:none !important;
+  display:none !important;
+}
+
+.ticket-shell{
+  margin-top:18px !important;
+}
+
 .ticket-hero{
-  border-top:0;
+  border-top-color:transparent !important;
 }

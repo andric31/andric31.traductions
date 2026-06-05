@@ -1353,7 +1353,7 @@ function initWatchlistForGame({ entry, display, title, counterKey, idParam, uidP
       const data = await watchlistApi("GET", counterKey);
       inList = !!data.in_watchlist;
       setWatchlistButton(inList, false);
-      watchlistSetMsg(inList ? "Ce jeu est déjà dans ta Watchlist." : "", true);
+      watchlistSetMsg(inList ? "Ce jeu est dans ta Watchlist." : "", true);
     } catch (err) {
       setWatchlistButton(false, false);
       watchlistSetMsg(err?.message || "Impossible de vérifier la Watchlist.", false);

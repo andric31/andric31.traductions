@@ -1,5 +1,5 @@
 html:not(.auth-ready) body{visibility:hidden;}
-.account-games-shell{width:min(1280px,calc(100% - 28px));margin:24px auto 44px;}
+.account-games-shell{width:min(1280px,calc(100% - 28px));margin:0 auto 44px;}
 .account-games-hero{border:1px solid var(--border);background:linear-gradient(135deg,color-mix(in srgb,var(--card) 94%, transparent),color-mix(in srgb,var(--primary) 10%, transparent));border-radius:24px;padding:20px;box-shadow:0 18px 60px rgba(0,0,0,.18);}
 .account-games-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;}
 .account-games-title{margin:0;color:var(--title);font-size:clamp(26px,4vw,42px);line-height:1.05;}
@@ -40,3 +40,57 @@ html:not(.auth-ready) body{visibility:hidden;}
 .account-games-guest{width:min(760px,calc(100% - 28px));margin:38px auto;}
 @media (max-width:860px){.account-games-stats{grid-template-columns:repeat(2,minmax(0,1fr));}.account-games-tools{grid-template-columns:1fr;}.account-games-actions{justify-content:flex-start;}}
 @media (max-width:520px){.account-games-shell{width:min(100% - 18px,1280px);margin-top:14px}.account-games-hero{padding:15px;border-radius:20px}.account-games-stats{grid-template-columns:1fr}.account-games-grid{grid-template-columns:1fr}.account-games-btn{width:100%;justify-content:center}.account-games-actions{width:100%;}.account-games-tab{flex:1;justify-content:center;}}
+
+/* Page Mes jeux : moins d'espace en haut + icône Watchlist identique à la fiche jeu */
+body.account-games-page{
+  padding-top:4px;
+}
+
+.account-watchlist-icon{
+  display:inline-flex;
+  width:20px;
+  height:20px;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  transform:translateY(1px);
+}
+
+.account-watchlist-icon svg{
+  width:20px;
+  height:20px;
+  display:block;
+  overflow:visible;
+}
+
+.account-games-stat-icon-watch .account-watchlist-icon{
+  width:24px;
+  height:24px;
+}
+
+.account-games-stat-icon-watch .account-watchlist-icon svg{
+  width:24px;
+  height:24px;
+}
+
+.account-game-meta .account-watchlist-icon{
+  width:15px;
+  height:15px;
+  vertical-align:-2px;
+  margin-right:4px;
+}
+
+.account-game-meta .account-watchlist-icon svg{
+  width:15px;
+  height:15px;
+}
+
+.account-game-badge .account-watchlist-icon{
+  width:14px;
+  height:14px;
+}
+
+.account-game-badge .account-watchlist-icon svg{
+  width:14px;
+  height:14px;
+}

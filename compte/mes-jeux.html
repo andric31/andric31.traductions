@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="/compte/mes-jeux.css" />
   <script src="/theme-init.js"></script>
 </head>
-<body>
+<body class="account-games-page">
   <section class="auth-card account-games-guest auth-hidden" id="accountGamesGuest">
     <h1 class="auth-title">🔒 Mes jeux</h1>
     <p class="auth-subtitle">Tu dois être connecté pour accéder à ta Watchlist, tes likes et tes notes.</p>
@@ -37,14 +37,14 @@
 
       <div class="account-games-stats" aria-label="Résumé de mes jeux">
         <div class="account-games-stat"><span class="account-games-stat-icon">🎮</span><span><strong id="statTotal">0</strong><span>Total</span></span></div>
-        <div class="account-games-stat"><span class="account-games-stat-icon">🔖</span><span><strong id="statWatch">0</strong><span>Watchlist</span></span></div>
+        <div class="account-games-stat"><span class="account-games-stat-icon account-games-stat-icon-watch"><span class="account-watchlist-icon" aria-hidden="true"><svg viewBox="0 0 24 24" role="img" aria-hidden="true"><path d="M7 3.5h10a1 1 0 0 1 1 1v16.2l-6-3.9-6 3.9V4.5a1 1 0 0 1 1-1z" fill="none" stroke="#ff7a00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span><span><strong id="statWatch">0</strong><span>Watchlist</span></span></div>
         <div class="account-games-stat"><span class="account-games-stat-icon">❤️</span><span><strong id="statLikes">0</strong><span>Jeux likés</span></span></div>
         <div class="account-games-stat"><span class="account-games-stat-icon">⭐</span><span><strong id="statNotes">0</strong><span>Jeux notés</span></span></div>
       </div>
 
       <div class="account-games-tabs" role="tablist" aria-label="Catégories de mes jeux">
         <button class="account-games-tab active" type="button" data-account-tab="all">Tout <b>0</b></button>
-        <button class="account-games-tab" type="button" data-account-tab="watchlist">🔖 Watchlist <b>0</b></button>
+        <button class="account-games-tab" type="button" data-account-tab="watchlist"><span class="account-watchlist-icon" aria-hidden="true"><svg viewBox="0 0 24 24" role="img" aria-hidden="true"><path d="M7 3.5h10a1 1 0 0 1 1 1v16.2l-6-3.9-6 3.9V4.5a1 1 0 0 1 1-1z" fill="none" stroke="#ff7a00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Watchlist <b>0</b></button>
         <button class="account-games-tab" type="button" data-account-tab="likes">❤️ Likes <b>0</b></button>
         <button class="account-games-tab" type="button" data-account-tab="notes">⭐ Notes <b>0</b></button>
       </div>

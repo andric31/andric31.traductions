@@ -1,6 +1,8 @@
 (() => {
   'use strict';
 
+  const WATCHLIST_ICON = '<span class="account-watchlist-icon" aria-hidden="true"><svg viewBox="0 0 24 24" role="img" aria-hidden="true"><path d="M7 3.5h10a1 1 0 0 1 1 1v16.2l-6-3.9-6 3.9V4.5a1 1 0 0 1 1-1z" fill="none" stroke="#ff7a00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+
   const $ = (sel) => document.querySelector(sel);
   const els = {
     guest: $('#accountGamesGuest'),
@@ -161,7 +163,7 @@
 
   function badges(item) {
     const out = [];
-    if (item.watchlist) out.push('<span class="account-game-badge">🔖 Watchlist</span>');
+    if (item.watchlist) out.push(`<span class="account-game-badge">${WATCHLIST_ICON} Watchlist</span>`);
     if (item.liked) out.push('<span class="account-game-badge">❤️ Liké</span>');
     if (Number(item.rating || 0) > 0) out.push(`<span class="account-game-badge">⭐ ${Number(item.rating)}/4</span>`);
     return out.join('');
@@ -169,7 +171,7 @@
 
   function metaLines(item) {
     const lines = [];
-    if (item.watchlist) lines.push(`🔖 Ajouté à la Watchlist${formatDate(item.watchDate) ? ' le ' + escapeHtml(formatDate(item.watchDate)) : ''}`);
+    if (item.watchlist) lines.push(`${WATCHLIST_ICON} Ajouté à la Watchlist${formatDate(item.watchDate) ? ' le ' + escapeHtml(formatDate(item.watchDate)) : ''}`);
     if (item.liked) lines.push(`❤️ Liké${formatDate(item.likedDate) ? ' le ' + escapeHtml(formatDate(item.likedDate)) : ''}`);
     if (Number(item.rating || 0) > 0) lines.push(`<span class="account-game-rating">⭐ Note : ${Number(item.rating)}/4${formatDate(item.ratedDate) ? ' · ' + escapeHtml(formatDate(item.ratedDate)) : ''}</span>`);
     return lines.map((line) => `<div>${line}</div>`).join('');

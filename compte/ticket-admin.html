@@ -123,7 +123,7 @@
         }
       }
       if (action === 'notifyPassword') {
-        const message = `🔐 Compte / mot de passe — Ticket #${id} : ta demande a été traitée. Vérifie ton accès et confirme ici si tout est bon.`;
+        const message = `🔐 Compte / mot de passe — Ticket #${id} : ta demande a été traitée/validé.`;
         if (!confirm(`Envoyer le message de confirmation pour le ticket #${id} sur la page Messages ?`)) return;
         btn.disabled = true;
         try {

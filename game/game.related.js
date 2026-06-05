@@ -89,6 +89,15 @@
     return `${Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1)}/4`;
   }
 
+  function isAccountConnected(){
+    return !!window.SiteAuth?.me;
+  }
+
+  function syncGridRatingClass(grid){
+    if (!grid) return;
+    grid.classList.toggle('no-rating', !isAccountConnected());
+  }
+
   function getDisplayData(g){
     return g && g.gameData ? g.gameData : g || {};
   }
@@ -551,9 +560,12 @@
   }
 
   async function enrichPicked(picked){
+    const showRating = isAccountConnected();
     await Promise.all(picked.map(async (x) => {
       const counterKey = buildCounterKeyFromEntry(x.g);
-      const [stats, rating] = await Promise.all([fetchStats(counterKey), fetchRating(counterKey)]);
+      const statsPromise = fetchStats(counterKey);
+      const ratingPromise = showRating ? fetchRating(counterKey) : Promise.resolve({ avg:0, count:0 });
+      const [stats, rating] = await Promise.all([statsPromise, ratingPromise]);
       x.counterKey = counterKey;
       x.stats = stats;
       x.rating = rating;
@@ -566,9 +578,15 @@
     const title = helpers.getDisplayTitle(candidate) || d.title || candidate.title || 'Sans titre';
     const href = helpers.buildGameUrl(candidate);
     const image = String(d.imageUrl || candidate.imageUrl || '/favicon.png').trim() || '/favicon.png';
+    const showRating = isAccountConnected();
     const ratingText = formatRatingForCard(extra?.rating?.avg, extra?.rating?.count);
     const translationText = formatRelativeTranslationTime(extra?.lastTranslationTs);
     const translationTitle = formatAbsoluteDateTime(extra?.lastTranslationTs);
+    const ratingStatHtml = showRating ? `
+              <span class="card-stat card-stat-rating" title="Note étoile moyenne et nombre de votes">
+                <span class="stat-icon stat-icon-rating" aria-hidden="true"></span>
+                <span>${escapeHtml(ratingText)}</span>
+              </span>` : '';
 
     return `
       <a class="similarCard card card-link" href="${href}" target="_blank" rel="noopener" aria-label="Ouvrir : ${escapeHtml(title)}">
@@ -596,10 +614,7 @@
                 <span class="stat-icon stat-icon-likes" aria-hidden="true"></span>
                 <span>${formatInt(extra?.stats?.likes)}</span>
               </span>
-              <span class="card-stat" title="Note étoile moyenne et nombre de votes">
-                <span class="stat-icon stat-icon-rating" aria-hidden="true"></span>
-                <span>${escapeHtml(ratingText)}</span>
-              </span>
+${ratingStatHtml}
             </div>
           </div>
         </div>
@@ -651,13 +666,43 @@
       </a>
     `;
   }
+  let lastRenderCtx = null;
+  let authRefreshBound = false;
+
+  function bindAuthRefresh(){
+    if (authRefreshBound) return;
+    authRefreshBound = true;
+    const refresh = () => {
+      if (!lastRenderCtx) return;
+      render(lastRenderCtx).catch((e) => console.warn('GameRelated auth refresh failed', e));
+    };
+    const attach = () => {
+      if (window.SiteAuth?.onChange) {
+        window.SiteAuth.onChange(() => refresh());
+        return true;
+      }
+      return false;
+    };
+    if (!attach()) {
+      let tries = 0;
+      const timer = setInterval(() => {
+        tries += 1;
+        if (attach() || tries > 40) clearInterval(timer);
+      }, 100);
+    }
+  }
+
   async function render(ctx){
+    lastRenderCtx = ctx || lastRenderCtx;
+    bindAuthRefresh();
     const block = document.getElementById('similarGamesBlock');
     const grid = document.getElementById('similarGamesGrid');
     const sub = document.getElementById('similarGamesSub');
     const authorBlock = document.getElementById('sameAuthorBlock');
     const authorGrid = document.getElementById('sameAuthorGrid');
     const authorSub = document.getElementById('sameAuthorSub');
+    syncGridRatingClass(grid);
+    syncGridRatingClass(authorGrid);
     if (!ctx?.list || !ctx?.entry) return;
 
     const current = ctx.entry;

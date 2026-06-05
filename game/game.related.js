@@ -560,7 +560,7 @@
   }
 
   async function enrichPicked(picked){
-    const showRating = isAccountConnected();
+    const showRating = true;
     await Promise.all(picked.map(async (x) => {
       const counterKey = buildCounterKeyFromEntry(x.g);
       const statsPromise = fetchStats(counterKey);
@@ -578,7 +578,7 @@
     const title = helpers.getDisplayTitle(candidate) || d.title || candidate.title || 'Sans titre';
     const href = helpers.buildGameUrl(candidate);
     const image = String(d.imageUrl || candidate.imageUrl || '/favicon.png').trim() || '/favicon.png';
-    const showRating = isAccountConnected();
+    const showRating = true;
     const ratingText = formatRatingForCard(extra?.rating?.avg, extra?.rating?.count);
     const translationText = formatRelativeTranslationTime(extra?.lastTranslationTs);
     const translationTitle = formatAbsoluteDateTime(extra?.lastTranslationTs);

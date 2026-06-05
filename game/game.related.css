@@ -363,3 +363,19 @@ html[data-theme="light"] .similarCard,
 .similarGrid:not(.is-ready) .similarThumb{
   visibility:hidden;
 }
+
+
+/* Notes des cartes liées :
+   - masquées par défaut pour les visiteurs non connectés ;
+   - affichées uniquement quand game.js confirme un compte connecté. */
+html:not(.game-rating-visible) .similarGrid .card-stat-rating{
+  display:none !important;
+}
+
+html:not(.game-rating-visible) .similarGrid .card-stats{
+  gap:6px 14px;
+}
+
+html:not(.game-rating-visible) .similarGrid .card-stat{
+  gap:4px;
+}

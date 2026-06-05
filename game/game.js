@@ -1473,11 +1473,20 @@ function setRatingVisibleForConnected(visible) {
   const statWrap = $("statRatingWrap");
   const choices = $("ratingChoices");
   const msgEl = $("ratingMsg");
+  const isVisible = !!visible;
 
-  if (box) box.style.display = visible ? "" : "none";
-  if (statWrap) statWrap.style.display = visible ? "" : "none";
+  // Sert aussi aux cartes "Du même auteur" et "Jeux similaires".
+  // Par défaut, les notes restent masquées tant que le compte connecté n'est pas confirmé.
+  window.__GAME_RATING_VISIBLE = isVisible;
+  try {
+    document.documentElement.classList.toggle("game-rating-visible", isVisible);
+    document.documentElement.classList.toggle("game-rating-hidden", !isVisible);
+  } catch {}
 
-  if (!visible) {
+  if (box) box.style.display = isVisible ? "" : "none";
+  if (statWrap) statWrap.style.display = isVisible ? "" : "none";
+
+  if (!isVisible) {
     if (choices) choices.innerHTML = "";
     if (msgEl) msgEl.textContent = "";
     setStatRating(0, 0);

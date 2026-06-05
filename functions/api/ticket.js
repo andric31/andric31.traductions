@@ -42,7 +42,7 @@ function clean(value, max = 1000) {
 }
 
 function normalizeCategory(value) {
-  const allowed = new Set(['question', 'probleme', 'suggestion', 'autre']);
+  const allowed = new Set(['question', 'probleme', 'suggestion', 'inscription', 'autre']);
   const v = clean(value, 40).toLowerCase();
   return allowed.has(v) ? v : 'question';
 }

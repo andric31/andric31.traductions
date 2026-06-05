@@ -141,7 +141,10 @@
             Ajouter à ma Watchlist
           </button>
           <div id="watchlistMsg" class="watchlistMsg"></div>
-        </div>
+        </div><div id="likeBox" class="infoBlock translationLikeCard translationSideCard" style="text-align:center;">
+          <h3>❤️ Tu aimes ce jeu ?</h3>
+          <div class="likeIntro">Laisse un like pour cette fiche et cette traduction.</div>
+          
 
         <div id="ratingBox" class="infoBlock translationRatingCard translationSideCard" style="text-align:center;">
           <h3>⭐ Donne ton avis !</h3>
@@ -154,74 +157,4 @@
           <div id="ratingChoices" style="display:flex; justify-content:center; gap:8px;"></div>
           <div id="ratingMsg" style="margin-top:6px; color:var(--muted); font-size:12px;"></div>
         </div>
-        <div id="likeBox" class="infoBlock translationLikeCard translationSideCard" style="text-align:center;">
-          <h3>❤️ Tu aimes ce jeu ?</h3>
-          <div class="likeIntro">Laisse un like pour cette fiche et cette traduction.</div>
-          <button class="btnLike sideLikeBtn" id="btnLike" type="button" aria-label="J’aime">
-          </button>
-        </div>
-      </aside>
-    </div>
-
-    <div class="infoBlock similarGamesBlock sameAuthorBlock" id="sameAuthorBlock" style="display:none;">
-      <div class="similarHead">
-        <h3>Du même auteur</h3>
-        <div class="similarSub" id="sameAuthorSub"></div>
-      </div>
-      <div class="similarGrid sameAuthorGrid" id="sameAuthorGrid"></div>
-    </div>
-
-    <div class="infoBlock similarGamesBlock" id="similarGamesBlock" style="display:none;">
-      <div class="similarHead">
-        <h3>Jeux similaires</h3>
-        <div class="similarSub" id="similarGamesSub">Basé sur les tags les plus proches</div>
-      </div>
-      <div class="similarGrid" id="similarGamesGrid"></div>
-    </div>
-
-    <div class="err" id="errBox"></div>
-  </div>
-
-  <script>
-    (function(){
-      const msg = document.getElementById("ratingMsg");
-      if (!msg) return;
-
-      const flash = () => {
-        msg.classList.remove("msgFade");
-        void msg.offsetWidth;
-        msg.classList.add("msgFade");
-      };
-
-      const obs = new MutationObserver(() => flash());
-      obs.observe(msg, { childList: true, characterData: true, subtree: true });
-
-      if ((msg.textContent || "").trim()) flash();
-    })();
-  </script>
-
-  <!-- ✅ Si le thème change dans un autre onglet (viewer), la page jeu suit -->
-  <script>
-  window.addEventListener("storage", (e) => {
-    if (e.key !== "viewerTheme") return;
-    try{
-      const t = (localStorage.getItem("viewerTheme") || "auto").trim() || "auto";
-      const root = document.documentElement;
-      root.removeAttribute("data-theme");
-      if (t !== "auto") root.setAttribute("data-theme", t);
-    }catch{}
-  });
-  </script>
-
-  <script src="../viewer.menu.js"></script>
-  <script src="../viewer.menu.about.js"></script>
-  <script src="../viewer.menu.extension.js"></script>
-  <script src="../viewer.menu.confidentialite.js"></script>
-  <script src="../auth/auth.client.js"></script>
-  <script src="../viewer.quicklinks.js"></script>
-  <script src="../viewer.account.quicklinks.js"></script>
-  <script src="./game.js"></script>
-  <script src="./game.related.js"></script>
-
-</body>
-</html>
+        <

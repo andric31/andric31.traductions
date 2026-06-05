@@ -94,3 +94,14 @@ body.account-games-page{
   width:14px;
   height:14px;
 }
+
+
+/* Correctif : viewer.css applique un padding sur <main>, on le neutralise pour remonter la tuile Mes jeux */
+body.account-games-page{
+  padding-top:0 !important;
+}
+
+body.account-games-page .account-games-shell{
+  padding:0 !important;
+  margin-top:10px !important;
+}

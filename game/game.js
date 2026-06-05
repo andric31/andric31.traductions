@@ -1394,6 +1394,30 @@ function initWatchlistForGame({ entry, display, title, counterKey, idParam, uidP
   else document.addEventListener("DOMContentLoaded", () => refresh(window.SiteAuth?.me || null));
 }
 
+
+// ============================================================================
+// ✅ Ordre des blocs côté droit
+// ============================================================================
+// Force l'ordre : Watchlist -> Like -> Note.
+// Ça évite que le bloc note reste au-dessus si le HTML est reconstruit ou mis en cache.
+function normalizeSidePanelOrder() {
+  try {
+    const side = document.querySelector(".gameSidePanel");
+    const likeBox = document.getElementById("likeBox");
+    const ratingBox = document.getElementById("ratingBox");
+    if (!side || !likeBox || !ratingBox) return;
+    if (likeBox.parentElement !== side) side.appendChild(likeBox);
+    if (ratingBox.parentElement !== side) side.appendChild(ratingBox);
+    side.insertBefore(likeBox, ratingBox);
+  } catch {}
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", normalizeSidePanelOrder);
+} else {
+  normalizeSidePanelOrder();
+}
+
 // ====== Rating 4 ======
 
 const RATING4_LABELS = {

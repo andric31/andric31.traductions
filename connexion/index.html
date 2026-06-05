@@ -14,11 +14,15 @@
   <main class="auth-shell">
     <section class="auth-card">
       <h1 class="auth-title">🔐 Connexion</h1>
-      <p class="auth-subtitle">
-        Connecte-toi pour accéder à ton compte.
-        <br>
-        <span class="auth-subnote">Toute nouvelle inscription est privée. Merci d’ouvrir un ticket pour me communiquer ton nom d’utilisateur et ton mot de passe.</span>
-      </p>
+      <p class="auth-subtitle">Connecte-toi pour accéder à ton compte.</p>
+
+      <div class="auth-request-box">
+        <div>
+          <strong>Besoin d’un compte ?</strong>
+          <p>Toute nouvelle inscription est privée. Ouvre un ticket pour transmettre le nom d’utilisateur et le mot de passe souhaités.</p>
+        </div>
+        <a class="auth-btn primary" href="/ticket/">Ouvrir un ticket</a>
+      </div>
 
       <div class="auth-grid">
         <div>
@@ -43,9 +47,6 @@
           <div id="guestBox" data-guest-only>
             <h3>👋 Bienvenue</h3>
             <p>Une fois connecté, tu pourras accéder à ton compte et aux fonctionnalités réservées.</p>
-            <div class="auth-actions" style="margin-bottom:12px;">
-              <a class="auth-btn primary" href="/ticket/">Ouvrir un ticket</a>
-            </div>
             <ul class="auth-list">
               <li>accès à ton compte</li>
               <li>accès à de nouveaux salons de discussion</li>

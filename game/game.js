@@ -1028,7 +1028,61 @@ async function counterUnhit(id, kind) {
   return await r.json();
 }
 
+let connectedGameState = null;
+
+function isConnectedUser() {
+  return !!window.SiteAuth?.me;
+}
+
+function waitForAuthReady() {
+  if (!window.SiteAuth) return Promise.resolve(null);
+  if (window.SiteAuth.loaded) return Promise.resolve(window.SiteAuth.me || null);
+  return new Promise((resolve) => {
+    const off = window.SiteAuth.onChange?.((me) => {
+      try { off?.(); } catch {}
+      resolve(me || null);
+    });
+    setTimeout(() => resolve(window.SiteAuth?.me || null), 2500);
+  });
+}
+
+function buildUserGamePayload(extra = {}) {
+  const meta = window.__currentGameAccountMeta || {};
+  return {
+    game_key: meta.game_key || '',
+    title: meta.title || 'Jeu sans titre',
+    game_url: meta.game_url || '',
+    image_url: meta.image_url || '',
+    f95_url: meta.f95_url || '',
+    discord_url: meta.discord_url || '',
+    ...extra,
+  };
+}
+
+async function userGameStateApi(method, payloadOrKey) {
+  const options = {
+    method,
+    credentials: 'same-origin',
+    cache: 'no-store',
+    headers: { 'content-type': 'application/json' },
+  };
+  let url = '/api/user-game-state';
+  if (method === 'GET') {
+    url += `?game_key=${encodeURIComponent(payloadOrKey || '')}`;
+    delete options.headers;
+  } else {
+    options.body = JSON.stringify(payloadOrKey || {});
+  }
+  const resp = await fetch(url, options);
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Erreur compte.');
+  return data;
+}
+
 function getMyLike(gameId) {
+  if (isConnectedUser() && connectedGameState && connectedGameState.game_key === gameId) {
+    return !!connectedGameState.liked;
+  }
   try {
     return localStorage.getItem(`like_${gameId}`) === "1";
   } catch {
@@ -1036,6 +1090,10 @@ function getMyLike(gameId) {
   }
 }
 function setMyLike(gameId, v) {
+  if (isConnectedUser()) {
+    connectedGameState = { ...(connectedGameState || {}), game_key: gameId, liked: !!v };
+    return;
+  }
   try {
     localStorage.setItem(`like_${gameId}`, v ? "1" : "0");
   } catch {}
@@ -1105,6 +1163,17 @@ async function initCounters(gameId, megaHref, archiveHref) {
   const VIEW_COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
   const MEGA_COOLDOWN_MS = 5 * 60 * 1000;  // 5 minutes
 
+  await waitForAuthReady();
+  if (isConnectedUser()) {
+    try {
+      const stateData = await userGameStateApi('GET', gameId);
+      connectedGameState = stateData?.state || { game_key: gameId, liked: false, rating: 0 };
+      if (stateData?.counters?.ok || typeof stateData?.counters?.likes !== 'undefined') setLikesFromJson(stateData.counters);
+    } catch {
+      connectedGameState = { game_key: gameId, liked: false, rating: 0 };
+    }
+  }
+
   // 1) Vue (anti-refresh abusif)
   const skipViewHit = inCooldown("view", gameId, VIEW_COOLDOWN_MS);
 
@@ -1163,6 +1232,16 @@ async function initCounters(gameId, megaHref, archiveHref) {
 
       try {
         let j;
+        if (isConnectedUser()) {
+          const data = await userGameStateApi('POST', buildUserGamePayload({ liked: !liked }));
+          connectedGameState = data?.state || { game_key: gameId, liked: !liked, rating: getMyVote4(gameId) };
+          setMyLike(gameId, !!connectedGameState.liked);
+          if (data?.counters) setLikesFromJson(data.counters);
+          updateLikeBtn(gameId);
+          showStatsBox();
+          return;
+        }
+
         if (!liked) {
           j = await counterHit(gameId, "like");
           if (j?.ok) {
@@ -1343,6 +1422,10 @@ async function rating4Vote(id, v, prev) {
 }
 
 function getMyVote4(gameId) {
+  if (isConnectedUser() && connectedGameState && connectedGameState.game_key === gameId) {
+    const v = Number(connectedGameState.rating || 0);
+    return Number.isFinite(v) ? v : 0;
+  }
   try {
     const v = Number(localStorage.getItem(`rating4_${gameId}`) || "0");
     return Number.isFinite(v) ? v : 0;
@@ -1352,6 +1435,10 @@ function getMyVote4(gameId) {
 }
 
 function setMyVote4(gameId, v) {
+  if (isConnectedUser()) {
+    connectedGameState = { ...(connectedGameState || {}), game_key: gameId, rating: Number(v || 0) };
+    return;
+  }
   try {
     localStorage.setItem(`rating4_${gameId}`, String(v));
   } catch {}
@@ -1411,12 +1498,18 @@ function renderRating4UI(gameId, data) {
       const prev = getMyVote4(gameId);
       if (!prev) return;
       try {
-        const res = await rating4Vote(gameId, 0, prev);
-        if (res?.ok) {
-          try {
-            localStorage.removeItem(`rating4_${gameId}`);
-          } catch {}
-          renderRating4UI(gameId, res);
+        const res = isConnectedUser()
+          ? await userGameStateApi('POST', buildUserGamePayload({ rating: 0 }))
+          : await rating4Vote(gameId, 0, prev);
+        const stats = isConnectedUser() ? res?.rating_stats : res;
+        if (res?.ok && stats) {
+          if (isConnectedUser()) {
+            connectedGameState = res?.state || { game_key: gameId, liked: getMyLike(gameId), rating: 0 };
+            setMyVote4(gameId, 0);
+          } else {
+            try { localStorage.removeItem(`rating4_${gameId}`); } catch {}
+          }
+          renderRating4UI(gameId, stats);
           if (msgEl) msgEl.textContent = "Note supprimée ✅";
         }
       } catch {
@@ -1450,10 +1543,14 @@ function renderRating4UI(gameId, data) {
         return;
       }
       try {
-        const res = await rating4Vote(gameId, i, prev);
-        if (res?.ok) {
+        const res = isConnectedUser()
+          ? await userGameStateApi('POST', buildUserGamePayload({ rating: i }))
+          : await rating4Vote(gameId, i, prev);
+        const stats = isConnectedUser() ? res?.rating_stats : res;
+        if (res?.ok && stats) {
+          if (isConnectedUser()) connectedGameState = res?.state || { game_key: gameId, liked: getMyLike(gameId), rating: i };
           setMyVote4(gameId, i);
-          renderRating4UI(gameId, res);
+          renderRating4UI(gameId, stats);
           if (msgEl) msgEl.textContent = prev ? "Note modifiée ✅" : "Merci pour ton vote ⭐";
         }
       } catch {
@@ -1542,6 +1639,14 @@ function renderVideoBlock({ id, videoUrl }) {
     const isCollectionChild = page.kind === "collectionChild" && entry && entry.gameData;
 
     const title = (getDisplayTitle(entry) || getDisplayTitle(display) || `Jeu ${idParam || uidParam}`).trim();
+    window.__currentGameAccountMeta = {
+      game_key: counterKey,
+      title,
+      game_url: getWatchlistGameUrl(idParam, uidParam),
+      image_url: String(display?.imageUrl || entry?.imageUrl || '').trim(),
+      f95_url: String(display?.url || entry?.url || '').trim(),
+      discord_url: String(entry?.discordlink || '').trim(),
+    };
     document.title = title;
 
     setText("title", title);
@@ -1894,9 +1999,20 @@ function renderVideoBlock({ id, videoUrl }) {
 
     setStatRating(0, 0);
     try {
-      const j = await rating4Get(analyticsKey);
-      if (j?.ok) renderRating4UI(analyticsKey, j);
-    } catch {}
+      if (isConnectedUser()) {
+        const stateData = await userGameStateApi('GET', analyticsKey);
+        connectedGameState = stateData?.state || { game_key: analyticsKey, liked: false, rating: 0 };
+        if (stateData?.rating_stats) renderRating4UI(analyticsKey, stateData.rating_stats);
+      } else {
+        const j = await rating4Get(analyticsKey);
+        if (j?.ok) renderRating4UI(analyticsKey, j);
+      }
+    } catch {
+      try {
+        const j = await rating4Get(analyticsKey);
+        if (j?.ok) renderRating4UI(analyticsKey, j);
+      } catch {}
+    }
 
     try {
       if (window.GameRelated && typeof window.GameRelated.render === "function") {

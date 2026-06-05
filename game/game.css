@@ -1303,3 +1303,27 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
   display: block !important;
   margin-top: 6px !important;
 }
+
+/* ===== Watchlist compact : phrase supprimée ===== */
+#watchlistIntro,
+.translationWatchlistCard .likeIntro{
+  display:none !important;
+}
+
+.translationWatchlistCard{
+  padding-top:12px !important;
+  padding-bottom:12px !important;
+}
+
+.translationWatchlistCard h3{
+  margin:0 0 10px !important;
+}
+
+.sideWatchlistBtn{
+  margin-top:0 !important;
+  margin-bottom:0 !important;
+}
+
+.watchlistMsg:empty{
+  display:none !important;
+}

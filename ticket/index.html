@@ -26,12 +26,18 @@
       display: none !important;
     }
 
-    .ticket-choice-help {
-      margin-top: 8px !important;
-      max-width: 760px;
-      font-size: 14px;
-      line-height: 1.45;
+    .ticket-hero .ticket-note {
+      max-width: 100%;
+    }
+
+    .ticket-message-hint {
+      display: block;
+      margin-top: 4px;
       color: var(--muted);
+    }
+
+    #privateSignupNote span {
+      font-weight: 700;
     }
   </style>
 </head>
@@ -40,16 +46,16 @@
     <section class="ticket-hero">
       <div class="ticket-kicker">🎫 Support</div>
       <h1>Envoyer un ticket</h1>
-      <p>Utilise ce formulaire pour envoyer une demande simple à un administrateur : problème sur le site, suggestion d’amélioration, signalement ou demande d’accès privé.</p>
+      <p>Utilise ce formulaire pour envoyer une demande simple à un administrateur : signalement, problème sur le site, suggestion d’amélioration ou demande d’accès privé.</p>
       <div class="ticket-note" role="note">
         <strong>Information importante</strong>
-        <span>Le ticket sera visible uniquement par un administrateur. Ce formulaire ne crée pas de conversation : aucune réponse ne sera envoyée. Pour une question qui demande un échange ou une réponse, utilise plutôt la page Messages.</span>
+        <span>Le ticket est visible uniquement par un administrateur et ne crée pas de conversation : aucune réponse ne sera envoyée.</span>
+        <span class="ticket-message-hint">Pour une question qui demande un échange, utilise plutôt la page Messages.</span>
       </div>
       <div class="ticket-actions">
         <a class="ticket-btn" href="/">Retour au site</a>
         <a class="ticket-btn" href="/messages/">Aller aux messages</a>
       </div>
-      <p class="ticket-choice-help">Pour une vraie conversation, les messages sont plus adaptés. Le ticket sert surtout à envoyer une information ou une demande sans suivi direct.</p>
     </section>
 
     <section class="ticket-card">

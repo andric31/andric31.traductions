@@ -31,7 +31,7 @@
       <div class="ticket-toolbar">
         <label class="auth-label"><span>Recherche</span><input class="auth-input" id="ticketSearch" type="search" placeholder="Titre, pseudo, contact, message…"></label>
         <label class="auth-label"><span>Statut</span><select class="auth-select" id="ticketStatusFilter"><option value="all">Tous</option><option value="open">Ouverts</option><option value="closed">Fermés</option></select></label>
-        <label class="auth-label"><span>Type</span><select class="auth-select" id="ticketCategoryFilter"><option value="all">Tous</option><option value="inscription">Création de compte</option><option value="question">Support</option><option value="probleme">Signalement</option><option value="suggestion">Suggestion</option><option value="autre">Autre</option></select></label>
+        <label class="auth-label"><span>Type</span><select class="auth-select" id="ticketCategoryFilter"><option value="all">Tous</option><option value="inscription">Création de compte</option><option value="compte">Compte / mot de passe</option><option value="question">Support</option><option value="probleme">Signalement</option><option value="suggestion">Suggestion</option><option value="autre">Autre</option></select></label>
       </div>
       <div id="ticketsMsg" class="auth-msg"></div>
       <div id="ticketsList" class="ticket-list"></div>
@@ -83,6 +83,7 @@
           <div class="ticket-message">${esc(t.message || '')}</div>
           <div class="ticket-actions-row">
             ${String(t.category || '') === 'inscription' ? `<button class="auth-btn ticket-info" data-action="notifyAccount" type="button">Message compte créé</button>` : ''}
+            ${String(t.category || '') === 'compte' ? `<button class="auth-btn ticket-info" data-action="notifyPassword" type="button">Message accès compte</button>` : ''}
             <button class="auth-btn ${closed ? '' : 'ticket-ok'}" data-action="toggle" type="button">${closed ? 'Rouvrir' : 'Fermer'}</button>
             <button class="auth-btn ticket-danger" data-action="delete" type="button">Supprimer</button>
           </div>
@@ -107,6 +108,22 @@
       }
       if (action === 'notifyAccount') {
         const message = `✅ Création de compte — Ticket #${id} : ta demande a été traitée et le compte a été créé/validé.`;
+        if (!confirm(`Envoyer le message de confirmation pour le ticket #${id} sur la page Messages ?`)) return;
+        btn.disabled = true;
+        try {
+          await api('/api/messages', {
+            method:'POST',
+            body:JSON.stringify({ nickname:'Admin', message, room:'global' })
+          });
+          setMsg(`Message de confirmation envoyé pour le ticket #${id}.`, true);
+        } catch(e){
+          setMsg(e.message || 'Envoi du message impossible.', false);
+        } finally {
+          btn.disabled = false;
+        }
+      }
+      if (action === 'notifyPassword') {
+        const message = `🔐 Compte / mot de passe — Ticket #${id} : ta demande a été traitée. Vérifie ton accès et confirme ici si tout est bon.`;
         if (!confirm(`Envoyer le message de confirmation pour le ticket #${id} sur la page Messages ?`)) return;
         btn.disabled = true;
         try {

@@ -1253,8 +1253,8 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
 /* ===== Placement et icône Watchlist ===== */
 .gameActionsCard{ order:1; }
 .translationWatchlistCard{ order:2; }
-.translationRatingCard{ order:3; }
-.translationLikeCard{ order:4; }
+.translationLikeCard{ order:3; }
+.translationRatingCard{ order:4; }
 
 .watchlistBookmarkIcon{
   display:inline-flex;

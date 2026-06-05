@@ -152,7 +152,7 @@ body{
 
 .ticket-form textarea{
   resize:vertical;
-  min-height:180px;
+  min-height:130px;
   line-height:1.55;
 }
 
@@ -239,4 +239,8 @@ body{
   .ticket-message-wrap textarea{
     padding-bottom:72px;
   }
+}
+/* Retire le trait visible en haut de la carte principale */
+.ticket-hero{
+  border-top:0;
 }

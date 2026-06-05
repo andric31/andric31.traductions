@@ -19,7 +19,22 @@
       gap: 12px;
       flex-wrap: wrap;
     }
-    .watchlist-head h3 { margin: 0 0 6px; }
+    .watchlist-head h3 { margin: 0 0 6px; display: flex; align-items: center; gap: 7px; }
+    .watchlist-bookmark-icon {
+      display: inline-flex;
+      width: 24px;
+      height: 24px;
+      align-items: center;
+      justify-content: center;
+      transform: translateY(1px);
+      flex: 0 0 auto;
+    }
+    .watchlist-bookmark-icon svg {
+      width: 24px;
+      height: 24px;
+      display: block;
+      overflow: visible;
+    }
     .watchlist-help { margin: 0; color: var(--muted); }
     .watchlist-list {
       display: grid;
@@ -132,7 +147,7 @@
       <div class="auth-box watchlist-box" id="watchlistBox" style="margin-top:14px;">
         <div class="watchlist-head">
           <div>
-            <h3>👁️ Watchlist</h3>
+            <h3><span class="watchlist-bookmark-icon" aria-hidden="true"><svg viewBox="0 0 24 24" role="img" aria-hidden="true"><path d="M7 3.5h10a1 1 0 0 1 1 1v16.2l-6-3.9-6 3.9V4.5a1 1 0 0 1 1-1z" fill="none" stroke="#ff7a00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Watchlist</h3>
             <p class="watchlist-help">Les jeux que tu as ajoutés depuis leur fiche apparaissent ici.</p>
           </div>
           <button class="auth-btn" id="refreshWatchlistBtn" type="button">Actualiser</button>

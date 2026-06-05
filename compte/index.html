@@ -76,6 +76,19 @@
       text-decoration: none;
       white-space: nowrap;
     }
+    .account-rating-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 6px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border, var(--auth-border));
+      background: rgba(255,255,255,.04);
+      color: var(--title, var(--fg));
+      font-weight: 800;
+      font-size: 12px;
+    }
     @media (max-width: 700px) {
       .watchlist-item { grid-template-columns: 62px 1fr; }
       .watchlist-actions { grid-column: 1 / -1; justify-content: flex-start; }
@@ -127,6 +140,30 @@
         <div id="watchlistMsg" class="auth-msg"></div>
         <div id="watchlistList" class="watchlist-list"></div>
       </div>
+
+      <div class="auth-box watchlist-box" id="likedGamesBox" style="margin-top:14px;">
+        <div class="watchlist-head">
+          <div>
+            <h3>❤️ Jeux likés</h3>
+            <p class="watchlist-help">Les likes faits avec ton compte connecté apparaissent ici.</p>
+          </div>
+          <button class="auth-btn" id="refreshLikedBtn" type="button">Actualiser</button>
+        </div>
+        <div id="likedGamesMsg" class="auth-msg"></div>
+        <div id="likedGamesList" class="watchlist-list"></div>
+      </div>
+
+      <div class="auth-box watchlist-box" id="ratedGamesBox" style="margin-top:14px;">
+        <div class="watchlist-head">
+          <div>
+            <h3>⭐ Jeux notés</h3>
+            <p class="watchlist-help">Les notes envoyées avec ton compte connecté apparaissent ici.</p>
+          </div>
+          <button class="auth-btn" id="refreshRatedBtn" type="button">Actualiser</button>
+        </div>
+        <div id="ratedGamesMsg" class="auth-msg"></div>
+        <div id="ratedGamesList" class="watchlist-list"></div>
+      </div>
     </section>
 
     <div id="adminQuickMount"></div>
@@ -142,6 +179,12 @@
     const watchlistList = document.getElementById('watchlistList');
     const watchlistMsg = document.getElementById('watchlistMsg');
     const refreshWatchlistBtn = document.getElementById('refreshWatchlistBtn');
+    const likedGamesList = document.getElementById('likedGamesList');
+    const likedGamesMsg = document.getElementById('likedGamesMsg');
+    const refreshLikedBtn = document.getElementById('refreshLikedBtn');
+    const ratedGamesList = document.getElementById('ratedGamesList');
+    const ratedGamesMsg = document.getElementById('ratedGamesMsg');
+    const refreshRatedBtn = document.getElementById('refreshRatedBtn');
 
     function setMsg(el, text, ok) {
       if (!el) return;
@@ -214,6 +257,73 @@
       }
     }
 
+
+    function renderAccountGameItem(item, mode) {
+      const title = escapeHtml(item.title || 'Jeu sans titre');
+      const img = escapeHtml(item.image_url || '/favicon.png');
+      const gameUrl = escapeHtml(normalizeGameUrl(item.game_url));
+      const f95 = item.f95_url ? `<a class="auth-btn watchlist-mini" href="${escapeHtml(item.f95_url)}" target="_blank" rel="noopener">F95Zone</a>` : '';
+      const discord = item.discord_url ? `<a class="auth-btn watchlist-mini" href="${escapeHtml(item.discord_url)}" target="_blank" rel="noopener">Discord</a>` : '';
+      const rating = Number(item.rating || 0);
+      const dateValue = mode === 'rated' ? item.rated_at : item.liked_at;
+      const date = formatWatchDate(dateValue);
+      const meta = mode === 'rated'
+        ? `${date ? `Noté le ${escapeHtml(date)}` : 'Note enregistrée'}${rating ? ` <span class="account-rating-badge">⭐ ${rating}/4</span>` : ''}`
+        : (date ? `Liké le ${escapeHtml(date)}` : 'Like enregistré');
+      const removeAttr = mode === 'rated' ? 'data-remove-rating' : 'data-remove-like';
+      const removeLabel = mode === 'rated' ? 'Supprimer la note' : 'Retirer le like';
+      return `
+        <article class="watchlist-item" data-game-key="${escapeHtml(item.game_key || '')}">
+          <img class="watchlist-cover" src="${img}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='/favicon.png'">
+          <div>
+            <a class="watchlist-title" href="${gameUrl}">${title}</a>
+            <div class="watchlist-meta">${meta}</div>
+          </div>
+          <div class="watchlist-actions">
+            <a class="auth-btn watchlist-mini" href="${gameUrl}">Voir la fiche</a>
+            ${f95}
+            ${discord}
+            <button class="auth-btn warn watchlist-mini" type="button" ${removeAttr}="${escapeHtml(item.game_key || '')}">${removeLabel}</button>
+          </div>
+        </article>`;
+    }
+
+    async function loadUserGameList(kind) {
+      const isRated = kind === 'rated';
+      const listEl = isRated ? ratedGamesList : likedGamesList;
+      const msgEl = isRated ? ratedGamesMsg : likedGamesMsg;
+      if (!window.SiteAuth?.me || !listEl) return;
+      setMsg(msgEl, isRated ? 'Chargement des jeux notés…' : 'Chargement des jeux likés…', true);
+      try {
+        const resp = await fetch(`/api/user-game-state?list=${encodeURIComponent(kind)}`, { credentials: 'same-origin', cache: 'no-store' });
+        const data = await resp.json();
+        if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Chargement impossible.');
+        const items = Array.isArray(data.items) ? data.items : [];
+        if (!items.length) {
+          listEl.innerHTML = `<div class="watchlist-empty">Aucun jeu ${isRated ? 'noté' : 'liké'} pour le moment.</div>`;
+          setMsg(msgEl, '', true);
+          return;
+        }
+        listEl.innerHTML = items.map((item) => renderAccountGameItem(item, kind)).join('');
+        setMsg(msgEl, `${items.length} jeu${items.length > 1 ? 'x' : ''} ${isRated ? 'noté' + (items.length > 1 ? 's' : '') : 'liké' + (items.length > 1 ? 's' : '')}.`, true);
+      } catch (err) {
+        listEl.innerHTML = '';
+        setMsg(msgEl, err?.message || 'Erreur de chargement.', false);
+      }
+    }
+
+    async function updateUserGameState(payload) {
+      const resp = await fetch('/api/user-game-state', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload || {})
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Modification impossible.');
+      return data;
+    }
+
     watchlistList?.addEventListener('click', async (e) => {
       const btn = e.target.closest('[data-remove-watch]');
       if (!btn) return;
@@ -237,6 +347,38 @@
     });
 
     refreshWatchlistBtn?.addEventListener('click', loadWatchlist);
+    refreshLikedBtn?.addEventListener('click', () => loadUserGameList('liked'));
+    refreshRatedBtn?.addEventListener('click', () => loadUserGameList('rated'));
+
+    likedGamesList?.addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-remove-like]');
+      if (!btn) return;
+      const gameKey = btn.getAttribute('data-remove-like') || '';
+      btn.disabled = true;
+      setMsg(likedGamesMsg, 'Suppression du like…', true);
+      try {
+        await updateUserGameState({ game_key: gameKey, liked: false });
+        await loadUserGameList('liked');
+      } catch (err) {
+        btn.disabled = false;
+        setMsg(likedGamesMsg, err?.message || 'Suppression impossible.', false);
+      }
+    });
+
+    ratedGamesList?.addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-remove-rating]');
+      if (!btn) return;
+      const gameKey = btn.getAttribute('data-remove-rating') || '';
+      btn.disabled = true;
+      setMsg(ratedGamesMsg, 'Suppression de la note…', true);
+      try {
+        await updateUserGameState({ game_key: gameKey, rating: 0 });
+        await loadUserGameList('rated');
+      } catch (err) {
+        btn.disabled = false;
+        setMsg(ratedGamesMsg, err?.message || 'Suppression impossible.', false);
+      }
+    });
     function renderAdminCard(me) {
       if (!adminQuickMount) return;
       const role = String(me?.role || '').toLowerCase();
@@ -268,6 +410,8 @@
       accountCard?.classList.remove('auth-hidden');
       renderAdminCard(me);
       loadWatchlist();
+      loadUserGameList('liked');
+      loadUserGameList('rated');
     }
 
     window.SiteAuth.onChange(guardAccount);

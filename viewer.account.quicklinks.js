@@ -1,4 +1,9 @@
 (() => {
+  const GLOBAL_KEY = "__andric31AccountQuickLinks";
+  if (window[GLOBAL_KEY]?.loaded) return;
+  window[GLOBAL_KEY] = { loaded: true, inserting: false };
+  const STATE = window[GLOBAL_KEY];
+
   const IDS = {
     btn: "quickAccountGamesBtn",
     popover: "quickAccountGamesPopover",
@@ -184,19 +189,33 @@
   }
 
   async function insertButton() {
-    if (document.getElementById(IDS.btn)) return;
-    const me = await getCurrentUser();
-    if (!me) return;
+    const existingButtons = Array.from(document.querySelectorAll(`#${IDS.btn}`));
+    if (existingButtons.length) {
+      existingButtons.slice(1).forEach((el) => el.remove());
+      return;
+    }
+    if (STATE.inserting) return;
+    STATE.inserting = true;
 
-    const afterEl = document.getElementById("quickNotificationsBtn")
-      || document.getElementById("quickMessagesBtn")
-      || document.getElementById("menuHelpBtn")
-      || document.getElementById("hamburgerBtn");
-    if (!afterEl) return;
+    try {
+      const me = await getCurrentUser();
+      if (!me) return;
 
-    const refClass = afterEl.className || "hamburger-btn";
-    const btn = makeButton(refClass);
-    afterEl.insertAdjacentElement("afterend", btn);
+      const existingAfterAuth = Array.from(document.querySelectorAll(`#${IDS.btn}`));
+      if (existingAfterAuth.length) {
+        existingAfterAuth.slice(1).forEach((el) => el.remove());
+        return;
+      }
+
+      const afterEl = document.getElementById("quickNotificationsBtn")
+        || document.getElementById("quickMessagesBtn")
+        || document.getElementById("menuHelpBtn")
+        || document.getElementById("hamburgerBtn");
+      if (!afterEl) return;
+
+      const refClass = afterEl.className || "hamburger-btn";
+      const btn = makeButton(refClass);
+      afterEl.insertAdjacentElement("afterend", btn);
 
     btn.addEventListener("click", async (event) => {
       event.preventDefault();
@@ -217,8 +236,11 @@
       if (event.key === "Escape") closePopover();
     });
 
-    window.addEventListener("resize", () => placePopover(btn, document.getElementById(IDS.popover)), { passive: true });
-    window.addEventListener("scroll", () => placePopover(btn, document.getElementById(IDS.popover)), { passive: true });
+      window.addEventListener("resize", () => placePopover(btn, document.getElementById(IDS.popover)), { passive: true });
+      window.addEventListener("scroll", () => placePopover(btn, document.getElementById(IDS.popover)), { passive: true });
+    } finally {
+      STATE.inserting = false;
+    }
   }
 
   function init() {

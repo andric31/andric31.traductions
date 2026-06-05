@@ -9,15 +9,15 @@
     const payload = {
       name: val('ticketName'),
       contact: '',
-      category: val('ticketCategory') || 'question',
+      category: val('ticketCategory'),
       priority: val('ticketPriority') || 'normal',
       title: val('ticketTitle'),
       message: val('ticketMessage'),
       page_url: location.href,
       user_agent: navigator.userAgent || '',
     };
-    if (!payload.name || !payload.title || !payload.message) {
-      setStatus('Nom, titre et message sont obligatoires.', 'err');
+    if (!payload.name || !payload.category || !payload.title || !payload.message) {
+      setStatus('Pseudo, type de demande, titre et message sont obligatoires.', 'err');
       return;
     }
     btn.disabled = true;

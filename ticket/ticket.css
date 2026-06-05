@@ -152,7 +152,7 @@ body{
 
 .ticket-form textarea{
   resize:vertical;
-  min-height:180px;
+  min-height:130px;
   line-height:1.55;
 }
 
@@ -260,4 +260,30 @@ body::after{
 
 .ticket-hero{
   border-top-color:transparent !important;
+}
+
+
+/* Fix visuel : supprime la fine barre visible tout en haut */
+html{
+  margin:0 !important;
+  padding:0 !important;
+  border:0 !important;
+  outline:0 !important;
+  background:var(--bg) !important;
+}
+
+html::before{
+  content:"";
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  height:3px;
+  background:var(--bg);
+  z-index:2147483647;
+  pointer-events:none;
+}
+
+.ticket-hero{
+  border-top:0 !important;
 }

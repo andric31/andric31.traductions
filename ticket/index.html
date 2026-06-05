@@ -46,7 +46,7 @@
     <section class="ticket-hero">
       <div class="ticket-kicker">🎫 Support</div>
       <h1>Envoyer un ticket</h1>
-      <p>Pour signaler un souci, proposer une amélioration ou demander un accès privé, envoie simplement un ticket.</p>
+      <p>Envoie un ticket pour une demande simple ou une information à transmettre à l’administrateur. Pour une vraie discussion, utilise plutôt les messages.</p>
       <div class="ticket-note" role="note">
         <strong>Information importante</strong>
         <span>Le ticket est visible uniquement par un administrateur et ne crée pas de conversation : aucune réponse ne sera envoyée.</span>
@@ -70,7 +70,8 @@
         <div class="ticket-grid two">
           <label>
             <span>Type de demande</span>
-            <select id="ticketCategory" name="category">
+            <select id="ticketCategory" name="category" required>
+              <option value="" selected disabled>Choisir le type de demande</option>
               <option value="question">Question</option>
               <option value="probleme">Problème sur le site</option>
               <option value="suggestion">Suggestion d’amélioration</option>

@@ -292,8 +292,19 @@ body::after,
   border-top-color:transparent !important;
 }
 
-/* Version forte : fond clair sans dégradé vertical */
-:root[data-theme="clair"] body,
-:root:not([data-theme]) body{
-  background: var(--bg) !important;
+/* Supprime la bande bleutée du thème clair sur la page ticket */
+html,
+body{
+  background-color:#f6f7fb !important;
+  background-image:none !important;
+  background:none !important;
+}
+
+body{
+  min-height:100vh;
+}
+
+/* Garde juste un fond propre pour la page ticket */
+.ticket-shell{
+  background:transparent !important;
 }

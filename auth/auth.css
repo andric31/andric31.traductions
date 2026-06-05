@@ -48,6 +48,38 @@
   color: var(--muted);
 }
 
+
+.auth-request-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  border: 1px solid var(--auth-border);
+  border-radius: 14px;
+  background: var(--auth-soft-bg);
+  color: var(--fg);
+}
+
+.auth-request-box strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--title, var(--fg));
+}
+
+.auth-request-box p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.auth-request-box .auth-btn {
+  white-space: nowrap;
+}
+
+
 .auth-grid {
   display: grid;
   grid-template-columns: 1.05fr .95fr;
@@ -168,4 +200,5 @@ html:not(.auth-ready) [data-role-min] {
 
 @media (max-width: 820px) {
   .auth-grid { grid-template-columns: 1fr; }
+  .auth-request-box { align-items: flex-start; flex-direction: column; }
 }

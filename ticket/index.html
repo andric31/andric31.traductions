@@ -97,13 +97,15 @@
           <input id="ticketTitle" name="title" type="text" maxlength="160" placeholder="Résumé rapide de la demande" required />
         </label>
 
-        <label>
-          <span>Message</span>
-          <textarea id="ticketMessage" name="message" rows="9" maxlength="5000" placeholder="Explique ta demande le plus clairement possible…" required></textarea>
-        </label>
+        <div class="ticket-message-label">
+          <label for="ticketMessage">Message</label>
+          <div class="ticket-message-wrap">
+            <textarea id="ticketMessage" name="message" rows="9" maxlength="5000" placeholder="Explique ta demande le plus clairement possible…" required></textarea>
+            <button id="ticketSubmit" class="ticket-btn primary ticket-submit-inside" type="submit">Envoyer le ticket</button>
+          </div>
+        </div>
 
         <div class="ticket-form-footer">
-          <button id="ticketSubmit" class="ticket-btn primary" type="submit">Envoyer le ticket</button>
           <p id="ticketStatus" class="ticket-status" aria-live="polite"></p>
         </div>
       </form>

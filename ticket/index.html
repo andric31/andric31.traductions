@@ -9,6 +9,23 @@
   <link rel="stylesheet" href="/themes.css" />
   <link rel="stylesheet" href="/ticket/ticket.css" />
   <script src="/theme-init.js"></script>
+  <style>
+    .ticket-form input,
+    .ticket-form select,
+    .ticket-form textarea {
+      font-weight: 400;
+    }
+
+    .ticket-form input::placeholder,
+    .ticket-form textarea::placeholder {
+      font-weight: 400;
+      opacity: .78;
+    }
+
+    .ticket-hidden {
+      display: none !important;
+    }
+  </style>
 </head>
 <body>
   <main class="ticket-shell">
@@ -55,12 +72,12 @@
           </label>
         </div>
 
-        <div class="ticket-note" role="note">
+        <div id="privateSignupNote" class="ticket-note ticket-hidden" role="note">
           <strong>Inscription privée</strong>
-          <span>Pour demander un accès, choisis “Inscription privée”, puis indique dans le message le pseudo et le mot de passe souhaité.</span>
+          <span>Indique dans le message le pseudo et le mot de passe souhaité.</span>
         </div>
 
-        <label>
+        <label id="ticketTitleWrap">
           <span>Titre</span>
           <input id="ticketTitle" name="title" type="text" maxlength="160" placeholder="Résumé rapide de la demande" required />
         </label>
@@ -78,6 +95,37 @@
     </section>
   </main>
 
+
+  <script>
+    (() => {
+      const category = document.getElementById('ticketCategory');
+      const note = document.getElementById('privateSignupNote');
+      const titleWrap = document.getElementById('ticketTitleWrap');
+      const title = document.getElementById('ticketTitle');
+      let previousTitle = '';
+
+      function updatePrivateSignupMode() {
+        const isPrivateSignup = category?.value === 'inscription';
+
+        note?.classList.toggle('ticket-hidden', !isPrivateSignup);
+        titleWrap?.classList.toggle('ticket-hidden', isPrivateSignup);
+
+        if (!title) return;
+
+        if (isPrivateSignup) {
+          if (title.value && title.value !== 'Inscription privée') previousTitle = title.value;
+          title.required = false;
+          title.value = 'Inscription privée';
+        } else {
+          title.required = true;
+          if (title.value === 'Inscription privée') title.value = previousTitle;
+        }
+      }
+
+      category?.addEventListener('change', updatePrivateSignupMode);
+      updatePrivateSignupMode();
+    })();
+  </script>
   <script src="/ticket/ticket.js"></script>
 </body>
 </html>

@@ -188,15 +188,15 @@
     const removeRating = Number(item.rating || 0) > 0 ? `<button class="account-games-btn warn" type="button" data-remove-rating="${escapeHtml(item.game_key)}">Supprimer note</button>` : '';
     return `
       <article class="account-game-card" data-game-key="${escapeHtml(item.game_key)}">
-        <a class="account-game-cover-link" href="${gameUrl}">
+        <a class="account-game-cover-link" href="${gameUrl}" target="_blank" rel="noopener">
           <img class="account-game-cover" src="${img}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='/favicon.png'">
           <div class="account-game-badges">${badges(item)}</div>
         </a>
         <div class="account-game-body">
-          <a class="account-game-title" href="${gameUrl}">${title}</a>
+          <a class="account-game-title" href="${gameUrl}" target="_blank" rel="noopener">${title}</a>
           <div class="account-game-meta">${metaLines(item)}</div>
           <div class="account-game-card-actions">
-            <a class="account-games-btn primary" href="${gameUrl}">Voir la fiche</a>
+            <a class="account-games-btn primary" href="${gameUrl}" target="_blank" rel="noopener">Voir la fiche</a>
             ${f95}${discord}${removeWatch}${removeLike}${removeRating}
           </div>
         </div>

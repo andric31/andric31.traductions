@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="/auth/auth.css" />
   <script src="/theme-init.js"></script>
   <style>
-    html:not(.auth-ready) body{visibility:hidden}.ticket-admin-layout{width:min(1180px,calc(100% - 18px));margin:14px auto 28px;display:grid;gap:12px}.ticket-toolbar{display:flex;flex-wrap:wrap;gap:9px;align-items:end}.ticket-toolbar .auth-label{min-width:190px;flex:1;margin:0}.ticket-list{display:grid;gap:10px}.ticket-card-admin{border:1px solid var(--border,var(--auth-border));background:rgba(255,255,255,.045);border-radius:18px;padding:13px;display:grid;gap:10px}.ticket-card-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px}.ticket-title{font-size:17px;font-weight:900;color:var(--title)}.ticket-meta{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:7px}.ticket-pill{display:inline-flex;align-items:center;border:1px solid var(--border,var(--auth-border));background:rgba(255,255,255,.07);border-radius:999px;padding:4px 8px;font-size:12px}.ticket-message{white-space:pre-wrap;line-height:1.55;background:rgba(0,0,0,.12);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:11px}.ticket-actions-row{display:flex;flex-wrap:wrap;gap:8px}.ticket-empty{color:var(--muted);padding:14px}.ticket-card-admin.closed{opacity:.68}.ticket-card-admin.closed .ticket-title{text-decoration:line-through}.ticket-danger{background:rgba(255,90,90,.13)!important}.ticket-ok{background:rgba(90,255,150,.12)!important}@media(max-width:720px){.ticket-toolbar .auth-label{min-width:100%}}
+    html:not(.auth-ready) body{visibility:hidden}.ticket-admin-layout{width:min(1180px,calc(100% - 18px));margin:14px auto 28px;display:grid;gap:12px}.ticket-toolbar{display:flex;flex-wrap:wrap;gap:9px;align-items:end}.ticket-toolbar .auth-label{min-width:190px;flex:1;margin:0}.ticket-list{display:grid;gap:10px}.ticket-card-admin{border:1px solid var(--border,var(--auth-border));background:rgba(255,255,255,.045);border-radius:18px;padding:13px;display:grid;gap:10px}.ticket-card-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px}.ticket-title{font-size:17px;font-weight:900;color:var(--title)}.ticket-meta{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:7px}.ticket-pill{display:inline-flex;align-items:center;border:1px solid var(--border,var(--auth-border));background:rgba(255,255,255,.07);border-radius:999px;padding:4px 8px;font-size:12px}.ticket-message{white-space:pre-wrap;line-height:1.55;background:rgba(0,0,0,.12);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:11px}.ticket-actions-row{display:flex;flex-wrap:wrap;gap:8px}.ticket-empty{color:var(--muted);padding:14px}.ticket-card-admin.closed{opacity:.68}.ticket-card-admin.closed .ticket-title{text-decoration:line-through}.ticket-danger{background:rgba(255,90,90,.13)!important}.ticket-ok{background:rgba(90,255,150,.12)!important}.ticket-info{background:rgba(90,160,255,.12)!important}@media(max-width:720px){.ticket-toolbar .auth-label{min-width:100%}}
   </style>
 </head>
 <body>
@@ -31,7 +31,7 @@
       <div class="ticket-toolbar">
         <label class="auth-label"><span>Recherche</span><input class="auth-input" id="ticketSearch" type="search" placeholder="Titre, pseudo, contact, message…"></label>
         <label class="auth-label"><span>Statut</span><select class="auth-select" id="ticketStatusFilter"><option value="all">Tous</option><option value="open">Ouverts</option><option value="closed">Fermés</option></select></label>
-        <label class="auth-label"><span>Type</span><select class="auth-select" id="ticketCategoryFilter"><option value="all">Tous</option><option value="question">Question</option><option value="probleme">Problème</option><option value="suggestion">Suggestion</option><option value="autre">Autre</option></select></label>
+        <label class="auth-label"><span>Type</span><select class="auth-select" id="ticketCategoryFilter"><option value="all">Tous</option><option value="inscription">Création de compte</option><option value="question">Support</option><option value="probleme">Signalement</option><option value="suggestion">Suggestion</option><option value="autre">Autre</option></select></label>
       </div>
       <div id="ticketsMsg" class="auth-msg"></div>
       <div id="ticketsList" class="ticket-list"></div>
@@ -82,6 +82,7 @@
           </div>
           <div class="ticket-message">${esc(t.message || '')}</div>
           <div class="ticket-actions-row">
+            ${String(t.category || '') === 'inscription' ? `<button class="auth-btn ticket-info" data-action="notifyAccount" type="button">Message compte créé</button>` : ''}
             <button class="auth-btn ${closed ? '' : 'ticket-ok'}" data-action="toggle" type="button">${closed ? 'Rouvrir' : 'Fermer'}</button>
             <button class="auth-btn ticket-danger" data-action="delete" type="button">Supprimer</button>
           </div>
@@ -103,6 +104,22 @@
       if (action === 'delete') {
         if (!confirm(`Supprimer le ticket #${id} ?`)) return;
         try { await api('/api/ticket', { method:'DELETE', body:JSON.stringify({ id }) }); tickets = tickets.filter(x => String(x.id) !== String(id)); render(); setMsg(`Ticket #${id} supprimé.`, true); } catch(e){ setMsg(e.message, false); }
+      }
+      if (action === 'notifyAccount') {
+        const message = `✅ Création de compte — Ticket #${id} : ta demande a été traitée et le compte a été créé/validé.`;
+        if (!confirm(`Envoyer le message de confirmation pour le ticket #${id} sur la page Messages ?`)) return;
+        btn.disabled = true;
+        try {
+          await api('/api/messages', {
+            method:'POST',
+            body:JSON.stringify({ nickname:'Admin', message, room:'global' })
+          });
+          setMsg(`Message de confirmation envoyé pour le ticket #${id}.`, true);
+        } catch(e){
+          setMsg(e.message || 'Envoi du message impossible.', false);
+        } finally {
+          btn.disabled = false;
+        }
       }
       if (action === 'toggle') {
         const status = String(t.status || 'open') === 'closed' ? 'open' : 'closed';

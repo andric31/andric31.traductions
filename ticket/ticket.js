@@ -17,7 +17,7 @@
       user_agent: navigator.userAgent || '',
     };
     if (!payload.name || !payload.category || !payload.title || !payload.message) {
-      setStatus('Pseudo, type de demande, titre et message sont obligatoires.', 'err');
+      setStatus('Pseudo, type de demande et message sont obligatoires.', 'err');
       return;
     }
     btn.disabled = true;
@@ -27,6 +27,7 @@
       const data = await resp.json().catch(() => null);
       if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Envoi impossible.');
       form.reset();
+      document.getElementById('ticketCategory')?.dispatchEvent(new Event('change'));
       setStatus(`Ticket envoyé ✅ Référence #${data.ticket?.id || data.id}.`, 'ok');
     } catch (err) {
       setStatus(err?.message || 'Erreur pendant l’envoi du ticket.', 'err');

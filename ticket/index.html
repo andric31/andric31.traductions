@@ -73,6 +73,7 @@
             <select id="ticketCategory" name="category" required>
               <option value="" selected disabled>Choisir le type de demande</option>
               <option value="inscription">Création de compte</option>
+              <option value="compte">Compte / mot de passe</option>
               <option value="question">Support</option>
               <option value="probleme">Signalement</option>
               <option value="suggestion">Suggestion</option>
@@ -91,6 +92,10 @@
 
         <div id="privateSignupNote" class="ticket-note ticket-hidden" role="note">
           <span>Indique dans le message le pseudo et le mot de passe souhaité. Après l’envoi, pense à noter le numéro du ticket : un message sera envoyé sur la page Messages avec ce numéro pour confirmer la validation par un administrateur.</span>
+        </div>
+
+        <div id="accountPasswordNote" class="ticket-note ticket-hidden" role="note">
+          <span>Indique dans le message si tu veux récupérer l’accès à ton compte ou changer ton mot de passe. Ne mets pas ton ancien mot de passe dans le ticket. Si tu veux un nouveau mot de passe, indique seulement le nouveau mot de passe souhaité.</span>
         </div>
 
         <label id="ticketTitleWrap">
@@ -118,6 +123,7 @@
     (() => {
       const category = document.getElementById('ticketCategory');
       const note = document.getElementById('privateSignupNote');
+      const accountNote = document.getElementById('accountPasswordNote');
       const titleWrap = document.getElementById('ticketTitleWrap');
       const title = document.getElementById('ticketTitle');
       let previousTitle = '';
@@ -127,7 +133,12 @@
         const raw = String(params.get('category') || params.get('type') || params.get('motif') || '').toLowerCase().trim();
         const aliases = {
           inscription: 'inscription',
-          compte: 'inscription',
+          compte: 'compte',
+          account: 'compte',
+          password: 'compte',
+          motdepasse: 'compte',
+          'mot-de-passe': 'compte',
+          'mot_de_passe': 'compte',
           creation: 'inscription',
           'creation-compte': 'inscription',
           'creation_de_compte': 'inscription',
@@ -139,27 +150,31 @@
         }
       }
 
-      function updatePrivateSignupMode() {
+      function updateTicketCategoryMode() {
         const isPrivateSignup = category?.value === 'inscription';
+        const isAccountPassword = category?.value === 'compte';
+        const usesAutoTitle = isPrivateSignup || isAccountPassword;
+        const autoTitle = isPrivateSignup ? 'Création de compte' : (isAccountPassword ? 'Compte / mot de passe' : '');
 
         note?.classList.toggle('ticket-hidden', !isPrivateSignup);
-        titleWrap?.classList.toggle('ticket-hidden', isPrivateSignup);
+        accountNote?.classList.toggle('ticket-hidden', !isAccountPassword);
+        titleWrap?.classList.toggle('ticket-hidden', usesAutoTitle);
 
         if (!title) return;
 
-        if (isPrivateSignup) {
-          if (title.value && title.value !== 'Inscription privée') previousTitle = title.value;
+        if (usesAutoTitle) {
+          if (title.value && title.value !== 'Inscription privée' && title.value !== 'Création de compte' && title.value !== 'Compte / mot de passe') previousTitle = title.value;
           title.required = false;
-          title.value = 'Inscription privée';
+          title.value = autoTitle;
         } else {
           title.required = true;
-          if (title.value === 'Inscription privée') title.value = previousTitle;
+          if (title.value === 'Inscription privée' || title.value === 'Création de compte' || title.value === 'Compte / mot de passe') title.value = previousTitle;
         }
       }
 
       applyCategoryFromUrl();
-      category?.addEventListener('change', updatePrivateSignupMode);
-      updatePrivateSignupMode();
+      category?.addEventListener('change', updateTicketCategoryMode);
+      updateTicketCategoryMode();
     })();
   </script>
   <script src="/ticket/ticket.js"></script>

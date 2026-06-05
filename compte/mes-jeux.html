@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mes jeux</title>
+  <link rel="icon" href="/favicon.png" />
+  <link rel="stylesheet" href="/viewer.css" />
+  <link rel="stylesheet" href="/themes.css" />
+  <link rel="stylesheet" href="/auth/auth.css" />
+  <link rel="stylesheet" href="/compte/mes-jeux.css" />
+  <script src="/theme-init.js"></script>
+</head>
+<body>
+  <section class="auth-card account-games-guest auth-hidden" id="accountGamesGuest">
+    <h1 class="auth-title">🔒 Mes jeux</h1>
+    <p class="auth-subtitle">Tu dois être connecté pour accéder à ta Watchlist, tes likes et tes notes.</p>
+    <div class="auth-actions">
+      <a class="auth-btn primary" href="/connexion/">Se connecter</a>
+      <a class="auth-btn" href="/">Retour au site</a>
+    </div>
+  </section>
+
+  <main class="account-games-shell auth-hidden" id="accountGamesApp">
+    <section class="account-games-hero">
+      <div class="account-games-top">
+        <div>
+          <h1 class="account-games-title">🎮 Mes jeux</h1>
+          <p class="account-games-subtitle">Une page dédiée pour retrouver et gérer rapidement ta Watchlist, tes jeux likés et tes jeux notés.</p>
+          <p class="account-games-subtitle">Connecté : <strong id="accountGamesUser"></strong></p>
+        </div>
+        <div class="account-games-actions">
+          <a class="account-games-btn" href="/compte/">Mon compte</a>
+          <a class="account-games-btn" href="/">Retour au viewer</a>
+          <button class="account-games-btn" id="accountGamesRefresh" type="button">Actualiser</button>
+          <button class="account-games-btn warn" id="accountGamesLogout" type="button">Déconnexion</button>
+        </div>
+      </div>
+      <div id="accountGamesLogoutMsg" class="auth-msg"></div>
+
+      <div class="account-games-stats" aria-label="Résumé de mes jeux">
+        <div class="account-games-stat"><span class="account-games-stat-icon">🎮</span><span><strong id="statTotal">0</strong><span>Total</span></span></div>
+        <div class="account-games-stat"><span class="account-games-stat-icon">🔖</span><span><strong id="statWatch">0</strong><span>Watchlist</span></span></div>
+        <div class="account-games-stat"><span class="account-games-stat-icon">❤️</span><span><strong id="statLikes">0</strong><span>Jeux likés</span></span></div>
+        <div class="account-games-stat"><span class="account-games-stat-icon">⭐</span><span><strong id="statNotes">0</strong><span>Jeux notés</span></span></div>
+      </div>
+
+      <div class="account-games-tabs" role="tablist" aria-label="Catégories de mes jeux">
+        <button class="account-games-tab active" type="button" data-account-tab="all">Tout <b>0</b></button>
+        <button class="account-games-tab" type="button" data-account-tab="watchlist">🔖 Watchlist <b>0</b></button>
+        <button class="account-games-tab" type="button" data-account-tab="likes">❤️ Likes <b>0</b></button>
+        <button class="account-games-tab" type="button" data-account-tab="notes">⭐ Notes <b>0</b></button>
+      </div>
+    </section>
+
+    <section class="account-games-tools" aria-label="Filtres">
+      <input class="account-games-search" id="accountGamesSearch" type="search" placeholder="Rechercher dans mes jeux…" autocomplete="off" />
+      <select class="account-games-select" id="accountGamesSort" aria-label="Tri">
+        <option value="recent">Tri : plus récent</option>
+        <option value="title">Tri : titre A-Z</option>
+        <option value="rating">Tri : meilleure note</option>
+      </select>
+    </section>
+
+    <div class="account-games-status" id="accountGamesStatus"></div>
+    <section class="account-games-grid" id="accountGamesGrid" aria-live="polite"></section>
+  </main>
+
+  <script src="/auth/auth.client.js"></script>
+  <script src="/compte/mes-jeux.js"></script>
+</body>
+</html>

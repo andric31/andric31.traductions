@@ -188,36 +188,10 @@
     document.head.appendChild(style);
   }
 
-  function placeButtonBeforeQuicklinks(btn) {
-    const firstQuickLink = document.getElementById("quickWikiBtn")
-      || document.getElementById("quickLaboBtn")
-      || document.getElementById("quickBlogBtn")
-      || document.getElementById("quickTicketBtn")
-      || document.getElementById("quickMessagesBtn")
-      || document.getElementById("quickNotificationsBtn");
-
-    if (firstQuickLink) {
-      firstQuickLink.insertAdjacentElement("beforebegin", btn);
-      return true;
-    }
-
-    const fallback = document.getElementById("menuHelpBtn")
-      || document.getElementById("hamburgerBtn");
-
-    if (fallback) {
-      fallback.insertAdjacentElement("afterend", btn);
-      return true;
-    }
-
-    return false;
-  }
-
   async function insertButton() {
     const existingButtons = Array.from(document.querySelectorAll(`#${IDS.btn}`));
     if (existingButtons.length) {
       existingButtons.slice(1).forEach((el) => el.remove());
-      const btn = existingButtons[0];
-      placeButtonBeforeQuicklinks(btn);
       return;
     }
     if (STATE.inserting) return;
@@ -230,23 +204,18 @@
       const existingAfterAuth = Array.from(document.querySelectorAll(`#${IDS.btn}`));
       if (existingAfterAuth.length) {
         existingAfterAuth.slice(1).forEach((el) => el.remove());
-        placeButtonBeforeQuicklinks(existingAfterAuth[0]);
         return;
       }
 
-      const refEl = document.getElementById("quickWikiBtn")
-        || document.getElementById("quickLaboBtn")
-        || document.getElementById("quickBlogBtn")
-        || document.getElementById("quickTicketBtn")
+      const afterEl = document.getElementById("quickNotificationsBtn")
         || document.getElementById("quickMessagesBtn")
-        || document.getElementById("quickNotificationsBtn")
         || document.getElementById("menuHelpBtn")
         || document.getElementById("hamburgerBtn");
-      if (!refEl) return;
+      if (!afterEl) return;
 
-      const refClass = refEl.className || "hamburger-btn";
+      const refClass = afterEl.className || "hamburger-btn";
       const btn = makeButton(refClass);
-      placeButtonBeforeQuicklinks(btn);
+      afterEl.insertAdjacentElement("afterend", btn);
 
     btn.addEventListener("click", async (event) => {
       event.preventDefault();

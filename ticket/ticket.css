@@ -273,23 +273,12 @@ body::after,
   display:none !important;
 }
 
+/* Encadré du haut conservé, sans bande de fond du thème clair */
 .ticket-hero{
-  border:0 !important;
+  border:1px solid var(--border) !important;
   outline:0 !important;
-}
-
-
-/* Correction finale : supprime complètement la ligne/ombre du bloc haut */
-.ticket-hero{
-  border:0 !important;
-  outline:0 !important;
-  box-shadow:none !important;
-  background:transparent !important;
-}
-
-.ticket-hero,
-.ticket-hero *{
-  border-top-color:transparent !important;
+  background:var(--card) !important;
+  box-shadow:var(--card-hover-shadow,0 16px 36px rgba(0,0,0,.18)) !important;
 }
 
 /* Supprime la bande bleutée du thème clair sur la page ticket */

@@ -1468,6 +1468,55 @@ function setMyVote4(gameId, v) {
   } catch {}
 }
 
+function setRatingVisibleForConnected(visible) {
+  const box = $("ratingBox");
+  const statWrap = $("statRatingWrap");
+  const choices = $("ratingChoices");
+  const msgEl = $("ratingMsg");
+
+  if (box) box.style.display = visible ? "" : "none";
+  if (statWrap) statWrap.style.display = visible ? "" : "none";
+
+  if (!visible) {
+    if (choices) choices.innerHTML = "";
+    if (msgEl) msgEl.textContent = "";
+    setStatRating(0, 0);
+  }
+}
+
+async function refreshConnectedRatingBox(gameId) {
+  await waitForAuthReady();
+
+  if (!isConnectedUser()) {
+    setRatingVisibleForConnected(false);
+    return;
+  }
+
+  setRatingVisibleForConnected(true);
+  try {
+    const stateData = await userGameStateApi('GET', gameId);
+    connectedGameState = stateData?.state || { game_key: gameId, liked: getMyLike(gameId), rating: 0 };
+    if (stateData?.rating_stats) {
+      renderRating4UI(gameId, stateData.rating_stats);
+      return;
+    }
+  } catch {}
+
+  try {
+    const j = await rating4Get(gameId);
+    if (j?.ok) renderRating4UI(gameId, j);
+  } catch {}
+}
+
+function initConnectedOnlyRating(gameId) {
+  if (!gameId) return;
+  refreshConnectedRatingBox(gameId);
+  if (window.SiteAuth?.onChange) {
+    window.SiteAuth.onChange(() => refreshConnectedRatingBox(gameId));
+  }
+}
+
+
 function renderRating4UI(gameId, data) {
   const choices = $("ratingChoices");
   const avgEl = $("ratingAvg");
@@ -2021,22 +2070,8 @@ function renderVideoBlock({ id, videoUrl }) {
       });
     }
 
-    setStatRating(0, 0);
-    try {
-      if (isConnectedUser()) {
-        const stateData = await userGameStateApi('GET', analyticsKey);
-        connectedGameState = stateData?.state || { game_key: analyticsKey, liked: false, rating: 0 };
-        if (stateData?.rating_stats) renderRating4UI(analyticsKey, stateData.rating_stats);
-      } else {
-        const j = await rating4Get(analyticsKey);
-        if (j?.ok) renderRating4UI(analyticsKey, j);
-      }
-    } catch {
-      try {
-        const j = await rating4Get(analyticsKey);
-        if (j?.ok) renderRating4UI(analyticsKey, j);
-      } catch {}
-    }
+    setRatingVisibleForConnected(false);
+    initConnectedOnlyRating(analyticsKey);
 
     try {
       if (window.GameRelated && typeof window.GameRelated.render === "function") {

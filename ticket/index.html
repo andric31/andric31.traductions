@@ -36,8 +36,14 @@
       color: var(--muted);
     }
 
-    #privateSignupNote span {
+    #privateSignupNote .signup-main,
+    #accountPasswordNote strong {
       font-weight: 700;
+    }
+
+    #accountPasswordNote strong {
+      display: block;
+      margin-bottom: 4px;
     }
   </style>
 </head>
@@ -91,10 +97,11 @@
         </div>
 
         <div id="privateSignupNote" class="ticket-note ticket-hidden" role="note">
-          <span>Indique dans le message le pseudo et le mot de passe souhaité. Après l’envoi, pense à noter le numéro du ticket : un message sera envoyé sur la page Messages avec ce numéro pour confirmer la validation par un administrateur.</span>
+          <span><strong class="signup-main">Indique dans le message le pseudo et le mot de passe souhaité.</strong> Après l’envoi, pense à noter le numéro du ticket : un message sera envoyé sur la page Messages avec ce numéro pour confirmer la validation par un administrateur.</span>
         </div>
 
         <div id="accountPasswordNote" class="ticket-note ticket-hidden" role="note">
+          <strong>Ticket pour un compte existant</strong>
           <span>Après l’envoi, pense à noter le numéro du ticket : un message sera envoyé sur la page Messages avec ce numéro pour confirmer la validation par un administrateur.</span>
         </div>
 

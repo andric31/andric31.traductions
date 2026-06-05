@@ -1271,11 +1271,6 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
   display:block;
   overflow:visible;
 }
-.watchlistLogoOrbit,
-.watchlistLogoMark,
-.watchlistLogoPlay{
-  fill:#ff7a00;
-}
 
 .translationWatchlistCard h3{
   display:flex;

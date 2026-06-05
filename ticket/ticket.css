@@ -278,3 +278,25 @@ body::after,
   outline:0 !important;
 }
 
+
+/* Correction finale : supprime complètement la ligne/ombre du bloc haut */
+.ticket-hero{
+  border:0 !important;
+  outline:0 !important;
+  box-shadow:none !important;
+  background:transparent !important;
+}
+
+.ticket-hero,
+.ticket-hero *{
+  border-top-color:transparent !important;
+}
+
+/* Correction thème clair : supprime la fine barre horizontale en haut */
+:root[data-theme="clair"] body,
+:root:not([data-theme]) body{
+  background-image:
+    radial-gradient(1200px 600px at 18% 0%, rgba(45,108,223,.10), transparent 55%),
+    radial-gradient(900px 500px at 90% 10%, rgba(15,123,80,.08), transparent 55%) !important;
+  background-color: var(--bg) !important;
+}

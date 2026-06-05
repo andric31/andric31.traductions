@@ -1194,6 +1194,131 @@ function buildCounterKeyFromEntry(entry) {
   return uid ? `uid:${uid}` : "";
 }
 
+// ============================================================================
+// ✅ WATCHLIST (compte connecté)
+// ============================================================================
+function watchlistSetMsg(text, ok) {
+  const el = $("watchlistMsg");
+  if (!el) return;
+  el.textContent = text || "";
+  el.className = "watchlistMsg " + (text ? (ok ? "ok" : "err") : "");
+}
+
+function setWatchlistButton(inList, loading) {
+  const btn = $("btnWatchlist");
+  if (!btn) return;
+  btn.disabled = !!loading;
+  btn.classList.toggle("is-in-watchlist", !!inList);
+  btn.textContent = loading
+    ? "Traitement…"
+    : (inList ? "✅ Dans ma Watchlist" : "👁️ Ajouter à la Watchlist");
+  btn.setAttribute("aria-label", inList ? "Retirer de la Watchlist" : "Ajouter à la Watchlist");
+}
+
+function getWatchlistGameUrl(idParam, uidParam) {
+  const p = new URLSearchParams();
+  if (idParam) p.set("id", idParam);
+  if (uidParam) p.set("uid", uidParam);
+  const qs = p.toString();
+  return `/game/${qs ? `?${qs}` : ""}`;
+}
+
+async function watchlistApi(method, payloadOrKey) {
+  const options = {
+    method,
+    credentials: "same-origin",
+    cache: "no-store",
+    headers: { "content-type": "application/json" },
+  };
+  let url = "/api/watchlist";
+  if (method === "GET") {
+    url += `?game_key=${encodeURIComponent(payloadOrKey || "")}`;
+    delete options.headers;
+  } else {
+    options.body = JSON.stringify(payloadOrKey || {});
+  }
+  const resp = await fetch(url, options);
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data?.ok) throw new Error(data?.error || "Erreur Watchlist.");
+  return data;
+}
+
+function initWatchlistForGame({ entry, display, title, counterKey, idParam, uidParam }) {
+  const box = $("watchlistBox");
+  const btn = $("btnWatchlist");
+  if (!box || !btn || !counterKey) return;
+
+  let inList = false;
+  let bound = false;
+
+  const payload = () => ({
+    game_key: counterKey,
+    title: title || "Jeu sans titre",
+    game_url: getWatchlistGameUrl(idParam, uidParam),
+    image_url: String(display?.imageUrl || entry?.imageUrl || "").trim(),
+    f95_url: String(display?.url || entry?.url || "").trim(),
+    discord_url: String(entry?.discordlink || "").trim(),
+  });
+
+  const refresh = async (me) => {
+    if (!me) {
+      box.style.display = "";
+      btn.disabled = false;
+      btn.classList.remove("is-in-watchlist");
+      btn.textContent = "🔐 Connecte-toi pour l’ajouter";
+      btn.setAttribute("aria-label", "Connexion requise");
+      watchlistSetMsg("Accessible aux personnes connectées.", false);
+      return;
+    }
+
+    box.style.display = "";
+    setWatchlistButton(false, true);
+    watchlistSetMsg("", true);
+    try {
+      const data = await watchlistApi("GET", counterKey);
+      inList = !!data.in_watchlist;
+      setWatchlistButton(inList, false);
+      watchlistSetMsg(inList ? "Ce jeu est déjà dans ta Watchlist." : "", true);
+    } catch (err) {
+      setWatchlistButton(false, false);
+      watchlistSetMsg(err?.message || "Impossible de vérifier la Watchlist.", false);
+    }
+  };
+
+  const bindClick = () => {
+    if (bound) return;
+    bound = true;
+    btn.addEventListener("click", async () => {
+      if (!window.SiteAuth?.me) {
+        location.href = "/connexion/";
+        return;
+      }
+      setWatchlistButton(inList, true);
+      try {
+        if (inList) {
+          await watchlistApi("DELETE", { game_key: counterKey });
+          inList = false;
+          setWatchlistButton(false, false);
+          watchlistSetMsg("Retiré de ta Watchlist.", true);
+          return;
+        }
+        await watchlistApi("POST", payload());
+        inList = true;
+        setWatchlistButton(true, false);
+        watchlistSetMsg("Ajouté à ta Watchlist ✅", true);
+      } catch (err) {
+        setWatchlistButton(inList, false);
+        watchlistSetMsg(err?.message || "Erreur Watchlist.", false);
+      }
+    });
+  };
+
+  bindClick();
+  if (window.SiteAuth?.onChange) window.SiteAuth.onChange(refresh);
+  if (window.SiteAuth?.loaded) refresh(window.SiteAuth.me);
+  else document.addEventListener("DOMContentLoaded", () => refresh(window.SiteAuth?.me || null));
+}
+
 // ====== Rating 4 ======
 
 const RATING4_LABELS = {
@@ -1430,6 +1555,7 @@ function renderVideoBlock({ id, videoUrl }) {
 
     renderBadgesFromGame(display, entry, isCollectionChild);
     renderTranslationStatus(entry);
+    initWatchlistForGame({ entry, display, title, counterKey, idParam, uidParam });
 
     const relatedOut = ensureRelatedContainer();
     if (relatedOut) {

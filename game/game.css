@@ -1221,3 +1221,30 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
   line-height:1.35;
   color:var(--muted);
 }
+
+/* ===== Watchlist ===== */
+.translationWatchlistCard {
+  position: relative;
+}
+.sideWatchlistBtn {
+  width: 100%;
+  justify-content: center;
+  margin-top: 10px;
+  font-weight: 900;
+}
+.sideWatchlistBtn.is-in-watchlist {
+  background: rgba(74, 222, 128, .16);
+  border-color: rgba(74, 222, 128, .35);
+}
+.sideWatchlistBtn[disabled] {
+  opacity: .65;
+  cursor: wait;
+}
+.watchlistMsg {
+  min-height: 18px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.watchlistMsg.ok { color: #7ff0a0; }
+.watchlistMsg.err { color: #ff9b9b; }

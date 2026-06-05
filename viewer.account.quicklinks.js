@@ -101,23 +101,23 @@
         <small>${escapeHtml(pseudo)}</small>
       </div>
       <div class="account-quick-list">
-        <a class="account-quick-item" href="${URLS.watchlist}">
+        <a class="account-quick-item" href="${URLS.watchlist}" target="_blank" rel="noopener">
           <span class="account-quick-icon account-quick-icon--watch">${iconWatchlist()}</span>
           <span><strong>Watchlist</strong><small>Jeux à suivre</small></span>
           <b>${counts.watchlist}</b>
         </a>
-        <a class="account-quick-item" href="${URLS.likes}">
+        <a class="account-quick-item" href="${URLS.likes}" target="_blank" rel="noopener">
           <span class="account-quick-icon account-quick-icon--like">${iconHeart()}</span>
           <span><strong>Jeux likés</strong><small>Tes favoris</small></span>
           <b>${counts.likes}</b>
         </a>
-        <a class="account-quick-item" href="${URLS.notes}">
+        <a class="account-quick-item" href="${URLS.notes}" target="_blank" rel="noopener">
           <span class="account-quick-icon account-quick-icon--note">${iconStar()}</span>
           <span><strong>Jeux notés</strong><small>Tes notes</small></span>
           <b>${counts.notes}</b>
         </a>
       </div>
-      <a class="account-quick-open" href="${URLS.mesJeux}">Ouvrir la page Mes jeux <span aria-hidden="true">→</span></a>
+      <a class="account-quick-open" href="${URLS.mesJeux}" target="_blank" rel="noopener">Ouvrir la page Mes jeux <span aria-hidden="true">→</span></a>
       <a class="account-quick-open" href="${URLS.compte}">Ouvrir mon compte <span aria-hidden="true">→</span></a>
     `;
   }

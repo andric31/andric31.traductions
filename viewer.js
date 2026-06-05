@@ -322,6 +322,12 @@
 
   function syncRatingVisibilityForAuth() {
     const connected = isViewerAccountConnected();
+
+    // Sert aussi au CSS : en non connecté, l'étoile est masquée
+    // et les icônes restantes ont plus d'espace.
+    document.documentElement.classList.toggle("viewer-rating-visible", connected);
+    document.documentElement.classList.toggle("viewer-rating-hidden", !connected);
+
     const sort = $("#sort");
 
     if (sort) {
@@ -2117,7 +2123,7 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
           <div class="badges-line one-line">${badgesLineHtml(g)}</div>
 
           <div class="card-meta">
-            <div class="card-stats" aria-label="Statistiques de la vignette">
+            <div class="card-stats ${showRatingOnCard ? 'has-rating' : 'no-rating'}" aria-label="Statistiques de la vignette">
               <span class="card-stat" title="${escapeHtml(translationTitle)}">
                 <span class="stat-icon stat-icon-time" aria-hidden="true"></span>
                 <span>${escapeHtml(translationText)}</span>

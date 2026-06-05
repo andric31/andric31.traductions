@@ -1492,6 +1492,18 @@ body.age-gate-active footer {
   opacity: .8 !important;
 }
 
+
+/* Plus d'espace entre les icônes quand la note est masquée pour les non connectés */
+html.viewer-rating-hidden .card-meta .card-stats,
+.card-meta .card-stats.no-rating{
+  gap:6px 14px;
+}
+
+html.viewer-rating-hidden .card-meta .card-stat,
+.card-meta .card-stats.no-rating .card-stat{
+  gap:4px;
+}
+
 /* ---------- Sélecteur de liste dans le titre ---------- */
 .list-switcher-btn{
   height:34px;

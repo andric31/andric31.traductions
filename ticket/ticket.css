@@ -21,7 +21,16 @@ body{
   color:var(--fg);
 }
 
-.ticket-hero,
+.ticket-hero{
+  border:0 !important;
+  outline:0 !important;
+  background:var(--card);
+  color:var(--fg);
+  border-radius:22px;
+  box-shadow:var(--card-hover-shadow,0 16px 36px rgba(0,0,0,.18));
+  padding:16px;
+}
+
 .ticket-card{
   border:1px solid var(--border);
   background:var(--card);
@@ -241,49 +250,31 @@ body{
   }
 }
 
-/* Fix : retire la barre/ligne visible en haut de la page ticket */
+
+/* Correction : supprime la fine barre générée en haut de la page ticket */
 html,
 body{
+  margin:0 !important;
+  padding-top:0 !important;
   border-top:0 !important;
+  outline:0 !important;
   box-shadow:none !important;
 }
 
+html::before,
+html::after,
 body::before,
-body::after{
+body::after,
+.ticket-shell::before,
+.ticket-shell::after,
+.ticket-hero::before,
+.ticket-hero::after{
   content:none !important;
   display:none !important;
 }
 
-.ticket-shell{
-  margin-top:18px !important;
-}
-
 .ticket-hero{
-  border-top-color:transparent !important;
-}
-
-
-/* Fix visuel : supprime la fine barre visible tout en haut */
-html{
-  margin:0 !important;
-  padding:0 !important;
   border:0 !important;
   outline:0 !important;
-  background:var(--bg) !important;
 }
 
-html::before{
-  content:"";
-  position:fixed;
-  top:0;
-  left:0;
-  right:0;
-  height:3px;
-  background:var(--bg);
-  z-index:2147483647;
-  pointer-events:none;
-}
-
-.ticket-hero{
-  border-top:0 !important;
-}

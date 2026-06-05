@@ -11,9 +11,10 @@
 
   const URLS = {
     compte: "/compte/",
-    watchlist: "/compte/#watchlistBox",
-    likes: "/compte/#likedGamesBox",
-    notes: "/compte/#ratedGamesBox",
+    mesJeux: "/compte/mes-jeux.html",
+    watchlist: "/compte/mes-jeux.html#watchlist",
+    likes: "/compte/mes-jeux.html#likes",
+    notes: "/compte/mes-jeux.html#notes",
   };
 
   function escapeHtml(value) {
@@ -116,6 +117,7 @@
           <b>${counts.notes}</b>
         </a>
       </div>
+      <a class="account-quick-open" href="${URLS.mesJeux}">Ouvrir la page Mes jeux <span aria-hidden="true">→</span></a>
       <a class="account-quick-open" href="${URLS.compte}">Ouvrir mon compte <span aria-hidden="true">→</span></a>
     `;
   }

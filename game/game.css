@@ -1257,8 +1257,24 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
 .translationLikeCard{ order:4; }
 
 .watchlistBookmarkIcon{
-  display:inline-block;
+  display:inline-flex;
+  width:24px;
+  height:24px;
+  align-items:center;
+  justify-content:center;
   transform:translateY(1px);
+  flex:0 0 auto;
+}
+.watchlistBookmarkIcon svg{
+  width:24px;
+  height:24px;
+  display:block;
+  overflow:visible;
+}
+.watchlistLogoOrbit,
+.watchlistLogoMark,
+.watchlistLogoPlay{
+  fill:#ff7a00;
 }
 
 .translationWatchlistCard h3{

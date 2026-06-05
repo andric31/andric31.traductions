@@ -164,6 +164,9 @@
           window.ViewerMenu.addItem(label, () => { location.href = '/compte/'; });
           const items1 = window.ViewerMenu.__getItems?.();
           if (items1?.[items1.length - 1]) items1[items1.length - 1].__authManaged = true;
+          window.ViewerMenu.addItem('🎮 Mes jeux', () => { location.href = '/compte/mes-jeux.html'; });
+          const itemsMesJeux = window.ViewerMenu.__getItems?.();
+          if (itemsMesJeux?.[itemsMesJeux.length - 1]) itemsMesJeux[itemsMesJeux.length - 1].__authManaged = true;
           window.ViewerMenu.addItem(logoutLabel, async () => {
             try { await logout(); } catch (e) { alert(e.message || 'Erreur.'); }
           });

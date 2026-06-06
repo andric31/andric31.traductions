@@ -578,7 +578,7 @@ function renderTags(tags) {
 // ====== Badges ======
 
 const CAT_ALLOWED = ["VN", "Collection"];
-const ENGINE_ALLOWED = ["Ren'Py", "RPGM", "Unity", "Unreal Engine", "HTML", "Java", "Flash", "QSP", "WebGL", "RAGS", "Tads", "ADRIFT", "Others", "Wolf RPG"];
+const ENGINE_ALLOWED = ["Ren'Py", "RPGM", "Unity", "Godot", "Unreal Engine", "HTML", "Java", "Flash", "QSP", "WebGL", "RAGS", "Tads", "ADRIFT", "Others", "Wolf RPG"];
 const STATUS_ALLOWED = ["Completed", "Abandoned", "Onhold"];
 
 const ENGINE_RAW = {
@@ -589,6 +589,7 @@ const ENGINE_RAW = {
   rpgmakermv: "RPGM",
   rpgmakermz: "RPGM",
   unity: "Unity",
+  godot: "Godot",
   unreal: "Unreal Engine",
   "unrealengine": "Unreal Engine",
   "unreal engine": "Unreal Engine",

@@ -21,13 +21,14 @@
 
 
   const CAT_ALLOWED = ['Collection', 'VN'];
-  const ENGINE_ALLOWED = ["Ren'Py", 'RPGM', 'Unity', 'HTML', 'Flash', 'Unreal Engine', 'Wolf RPG', 'Others'];
+  const ENGINE_ALLOWED = ["Ren'Py", 'RPGM', 'Unity', 'Godot', 'HTML', 'Flash', 'Unreal Engine', 'Wolf RPG', 'Others'];
   const STATUS_ALLOWED = ['Completed', 'Abandoned', 'Onhold', 'En cours'];
   const ENGINE_RAW = {
     "ren'py": "Ren'Py",
     renpy: "Ren'Py",
     rpgm: 'RPGM',
     unity: 'Unity',
+    godot: 'Godot',
     html: 'HTML',
     flash: 'Flash',
     unreal: 'Unreal Engine',
@@ -230,7 +231,7 @@
       .replace(/[^a-z0-9 ]+/g, ' ')
       .split(/\s+/)
       .map(x => x.trim())
-      .filter(x => x && x.length >= 4 && !['others','unity','renpy','collection','completed','ongoing','abandoned','onhold','flash','html'].includes(x))
+      .filter(x => x && x.length >= 4 && !['others','unity','godot','renpy','collection','completed','ongoing','abandoned','onhold','flash','html'].includes(x))
     )];
   }
 

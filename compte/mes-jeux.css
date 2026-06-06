@@ -105,3 +105,26 @@ body.account-games-page .account-games-shell{
   padding:0 !important;
   margin-top:10px !important;
 }
+
+/* Cartes Mes jeux : boutons plus compacts */
+.account-game-card-actions{
+  gap:6px;
+}
+
+.account-game-card-actions .account-games-btn{
+  min-height:32px;
+  padding:7px 10px;
+  border-radius:11px;
+  font-size:13px;
+  line-height:1;
+  gap:5px;
+}
+
+.account-game-card-actions .account-games-btn.primary{
+  padding:8px 11px;
+}
+
+.account-game-card-actions .account-games-btn.warn{
+  font-size:12px;
+  padding:7px 9px;
+}

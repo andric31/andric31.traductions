@@ -45,6 +45,16 @@
 
       .menu-help-section{margin:14px 0 18px}
       .menu-help-h3{margin:0 0 10px;font-size:15px;font-weight:800;letter-spacing:.2px;color:var(--title, inherit)}
+      .menu-help-section-sep{
+        height:1px;
+        margin:20px 0 18px;
+        background:var(--border-soft, rgba(255,255,255,0.12));
+      }
+      .mh-connected-note{
+        margin:0 0 12px;
+        font-size:13px;
+        line-height:1.4;
+      }
 
       .menu-help-grid{display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
       .menu-help-media{width:100%;border-radius:14px;overflow:hidden;
@@ -134,6 +144,9 @@
               <div class="menu-help-media">
                 <img class="menu-help-img" src="img/menu/Menu_barre_haut.png" alt="Barre du haut" loading="lazy">
               </div>
+              <div class="mh-subpanel mh-connected-note">
+                <strong>Mode connecté :</strong> la barre du haut peut changer quand un compte est connecté, avec des informations de compte ou des options supplémentaires.
+              </div>
               <dl class="menu-help-dl">
 
                 <div class="menu-help-row">
@@ -173,7 +186,9 @@
 
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 18H5.75A1.75 1.75 0 0 1 4 16.25c0-.55.27-1.07.72-1.39l.73-.53a2.5 2.5 0 0 0 1.05-2.03V10a5.5 5.5 0 1 1 11 0v2.3a2.5 2.5 0 0 0 1.05 2.03l.73.53c.45.32.72.84.72 1.39A1.75 1.75 0 0 1 18.25 18H17"/><path d="M9.5 18a2.5 2.5 0 0 0 5 0"/></svg></span><span>Notifications</span></dt><dd>Affiche les dernières notifications.</dd></div>
 
-                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span>Profil</span></dt><dd>Nom de la liste.</dd></div>
+                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="4"/><path d="M17 11l2 2 4-4"/></svg></span><span>Mode connecté</span></dt><dd>Indique que la barre du haut peut afficher des options différentes quand un compte est connecté.</dd></div>
+
+                <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span>Profil</span></dt><dd>Nom de la liste ou informations du compte connecté.</dd></div>
 
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/><path d="M8 4v16"/></svg></span><span>Total</span></dt><dd>Nombre total de jeux référencés.</dd></div>
 
@@ -188,6 +203,8 @@
               </dl>
               </div>
           </section>
+
+          <div class="menu-help-section-sep" aria-hidden="true"></div>
 
           <section class="menu-help-section">
             <h3 class="menu-help-h3">Recherche & filtres</h3>

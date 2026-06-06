@@ -249,8 +249,6 @@
           const img = escapeHtml(item.image_url || '/favicon.png');
           const gameUrl = escapeHtml(normalizeGameUrl(item.game_url));
           const date = formatWatchDate(item.created_at);
-          const f95 = item.f95_url ? `<a class="auth-btn watchlist-mini" href="${escapeHtml(item.f95_url)}" target="_blank" rel="noopener">F95Zone</a>` : '';
-          const discord = item.discord_url ? `<a class="auth-btn watchlist-mini" href="${escapeHtml(item.discord_url)}" target="_blank" rel="noopener">Discord</a>` : '';
           return `
             <article class="watchlist-item" data-watch-id="${escapeHtml(item.id)}">
               <img class="watchlist-cover" src="${img}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='/favicon.png'">
@@ -259,9 +257,6 @@
                 <div class="watchlist-meta">${date ? `Ajouté le ${escapeHtml(date)}` : 'Ajout récent'}</div>
               </div>
               <div class="watchlist-actions">
-                <a class="auth-btn watchlist-mini" href="${gameUrl}">Voir la fiche</a>
-                ${f95}
-                ${discord}
                 <button class="auth-btn warn watchlist-mini" type="button" data-remove-watch="${escapeHtml(item.id)}">Retirer</button>
               </div>
             </article>`;
@@ -278,8 +273,6 @@
       const title = escapeHtml(item.title || 'Jeu sans titre');
       const img = escapeHtml(item.image_url || '/favicon.png');
       const gameUrl = escapeHtml(normalizeGameUrl(item.game_url));
-      const f95 = item.f95_url ? `<a class="auth-btn watchlist-mini" href="${escapeHtml(item.f95_url)}" target="_blank" rel="noopener">F95Zone</a>` : '';
-      const discord = item.discord_url ? `<a class="auth-btn watchlist-mini" href="${escapeHtml(item.discord_url)}" target="_blank" rel="noopener">Discord</a>` : '';
       const rating = Number(item.rating || 0);
       const dateValue = mode === 'rated' ? item.rated_at : item.liked_at;
       const date = formatWatchDate(dateValue);
@@ -296,9 +289,6 @@
             <div class="watchlist-meta">${meta}</div>
           </div>
           <div class="watchlist-actions">
-            <a class="auth-btn watchlist-mini" href="${gameUrl}">Voir la fiche</a>
-            ${f95}
-            ${discord}
             <button class="auth-btn warn watchlist-mini" type="button" ${removeAttr}="${escapeHtml(item.game_key || '')}">${removeLabel}</button>
           </div>
         </article>`;

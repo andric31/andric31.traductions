@@ -154,6 +154,7 @@
                       <div class="mh-subitem">🧩 <strong>Extension</strong> — Description de l’extension.</div>
                       <div class="mh-subitem" style="height:1px; margin:8px 0; background:rgba(255,255,255,0.08);"></div>
                       <div class="mh-subitem">🔐 <strong>Se connecter</strong> — Accès au compte utilisateur.</div>
+                      <div class="mh-subitem">🛡️ <strong>Confidentialité</strong> — Informations sur les données locales et la session du compte.</div>
                     </div>
                   </dd>
                 </div>

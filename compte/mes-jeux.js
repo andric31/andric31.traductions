@@ -183,9 +183,13 @@
     const gameUrl = escapeHtml(normalizeGameUrl(item.game_url));
     const f95 = item.f95_url ? `<a class="account-games-btn" href="${escapeHtml(item.f95_url)}" target="_blank" rel="noopener">F95</a>` : '';
     const discord = item.discord_url ? `<a class="account-games-btn" href="${escapeHtml(item.discord_url)}" target="_blank" rel="noopener">Discord</a>` : '';
-    const removeWatch = item.watchlist ? `<button class="account-games-btn warn" type="button" data-remove-watch="${escapeHtml(item.game_key)}">Retirer Watchlist</button>` : '';
-    const removeLike = item.liked ? `<button class="account-games-btn warn" type="button" data-remove-like="${escapeHtml(item.game_key)}">Retirer like</button>` : '';
-    const removeRating = Number(item.rating || 0) > 0 ? `<button class="account-games-btn warn" type="button" data-remove-rating="${escapeHtml(item.game_key)}">Supprimer note</button>` : '';
+    const tab = state.currentTab || 'all';
+    const showWatchAction = item.watchlist && (tab === 'all' || tab === 'watchlist');
+    const showLikeAction = item.liked && (tab === 'all' || tab === 'likes');
+    const showRatingAction = Number(item.rating || 0) > 0 && (tab === 'all' || tab === 'notes');
+    const removeWatch = showWatchAction ? `<button class="account-games-btn warn" type="button" data-remove-watch="${escapeHtml(item.game_key)}">Retirer Watchlist</button>` : '';
+    const removeLike = showLikeAction ? `<button class="account-games-btn warn" type="button" data-remove-like="${escapeHtml(item.game_key)}">Retirer like</button>` : '';
+    const removeRating = showRatingAction ? `<button class="account-games-btn warn" type="button" data-remove-rating="${escapeHtml(item.game_key)}">Supprimer note</button>` : '';
     return `
       <article class="account-game-card" data-game-key="${escapeHtml(item.game_key)}">
         <a class="account-game-cover-link" href="${gameUrl}" target="_blank" rel="noopener">

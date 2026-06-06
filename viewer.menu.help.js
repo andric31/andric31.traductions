@@ -145,7 +145,7 @@
                 <img class="menu-help-img" src="img/menu/Menu_barre_haut.png" alt="Barre du haut" loading="lazy">
               </div>
               <div class="mh-subpanel mh-connected-note">
-                <strong>Mode connecté :</strong> la barre du haut change lorsqu’un compte est connecté, avec des options supplémentaires.
+                <strong>Mode connecté :</strong> la barre du haut change lorsqu’un compte est connecté.
               </div>
               <dl class="menu-help-dl">
 

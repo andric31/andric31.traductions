@@ -105,23 +105,21 @@
       font-size: 12px;
     }
 
-
-    /* Remonte la tuile Compte : on neutralise le centrage vertical hérité */
-    body {
-      align-items: flex-start !important;
-    }
-    .auth-shell {
+    /* Page Compte : on enlève le gros padding hérité du viewer, sans réduire la largeur */
+    main.auth-shell {
+      width: min(920px, calc(100% - 24px)) !important;
+      max-width: 920px !important;
+      margin: 14px auto 40px !important;
+      padding: 0 !important;
       min-height: auto !important;
-      padding-top: 34px !important;
-      padding-bottom: 34px !important;
-      justify-content: flex-start !important;
-      align-items: center !important;
+      align-items: stretch !important;
     }
-    .auth-card {
-      margin-top: 0 !important;
+    main.auth-shell .auth-card {
+      width: 100% !important;
+      margin: 0 !important;
     }
 
-    @media (max-width: 700px) {
+@media (max-width: 700px) {
       .watchlist-item { grid-template-columns: 62px 1fr; }
       .watchlist-actions { grid-column: 1 / -1; justify-content: flex-start; }
       .watchlist-cover { width: 62px; height: 48px; }

@@ -115,8 +115,13 @@
 
   function getGameDescription(g) {
     return String(g.gameData?.description || g.description || '')
-      .replace(/<[^>]*>/g, ' ')
-      .replace(/\s+/g, ' ')
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/p\s*>/gi, '\n\n')
+      .replace(/<[^>]*>/g, '')
+      .replace(/\r\n/g, '\n')
+      .replace(/[ \t]+\n/g, '\n')
+      .replace(/\n[ \t]+/g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
       .trim();
   }
 
@@ -321,7 +326,6 @@
     return `
       <section class="event-details" aria-label="Détails du jeu sélectionné">
         <article class="event-detail-card event-detail-summary">
-          <h3>Résumé</h3>
           <p>${escapeHtml(summaryText)}</p>
           <div class="event-tags-list event-tags-in-summary">
             ${safeTags.length ? safeTags.map((tag) => `<span class="event-tag-pill">${escapeHtml(tag)}</span>`).join('') : '<span class="event-no-tags">Aucun tag disponible.</span>'}

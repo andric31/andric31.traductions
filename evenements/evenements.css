@@ -789,3 +789,15 @@ body {
   padding-top: 14px;
   border-top: 1px solid var(--border);
 }
+
+
+/* Respecte les sauts de ligne du résumé venant de la base */
+.event-detail-summary p {
+  white-space: pre-line;
+}
+
+
+/* Résumé : conserve vraiment les sauts de ligne de la base */
+.event-detail-summary p {
+  white-space: pre-line !important;
+}

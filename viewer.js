@@ -1518,6 +1518,7 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
       translationType: String(game.translationType || "").trim(),
       discord: String(game.discordlink || ""),
       translation: String(game.translation || ""),
+      description: String(game.gameData?.description || game.description || "").trim(),
       image: displayImageRaw,
       url: String(game.url || game.threadUrl || ""),
       tags: displayTags,
@@ -1541,6 +1542,28 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
   // =========================
   // Render
   // =========================
+
+  function cardListDescriptionHtml(g) {
+    const raw = String(g.description || g.__raw?.description || "").replace(/\s+/g, " ").trim();
+    if (!raw) return "";
+    return escapeHtml(raw);
+  }
+
+  function cardListTagsHtml(g) {
+    const tags = Array.isArray(g.tags) ? g.tags : [];
+    const seen = new Set();
+    const clean = [];
+    for (const tag of tags) {
+      const value = String(tag || "").trim();
+      if (!value) continue;
+      const key = value.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      clean.push(value);
+    }
+    if (!clean.length) return "";
+    return clean.map((tag) => `<span class="list-tag">${escapeHtml(tag)}</span>`).join("");
+  }
 
   function badgesLineHtml(g) {
     const out = [];
@@ -2107,6 +2130,8 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
       const translationText = formatRelativeTranslationTime(g.lastTranslationTs);
       const translationTitle = formatAbsoluteDateTime(g.lastTranslationTs);
       const updateRibbon = updateKindRibbonHtml(g.__raw || g);
+      const listDescriptionHtml = cardListDescriptionHtml(g);
+      const listTagsHtml = cardListTagsHtml(g);
 
       card.href = pageHref;
       card.target = "_blank";
@@ -2121,7 +2146,10 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
         ${updateRibbon}
         <div class="body">
           <h3 class="name clamp-2">${escapeHtml(getDisplayTitle(g.__raw || g))}</h3>
-          <div class="badges-line one-line">${badgesLineHtml(g)}</div>
+          <div class="badges-line one-line">${badgesLineHtml(g)} ${listTagsHtml}</div>
+          <div class="list-extras ${listDescriptionHtml ? '' : 'is-empty'}">
+            ${listDescriptionHtml ? `<div class="list-desc" title="${escapeHtml(String(g.description || '').replace(/\s+/g, ' ').trim())}">${listDescriptionHtml}</div>` : ''}
+          </div>
 
           <div class="card-meta">
             <div class="card-stats ${showRatingOnCard ? 'has-rating' : 'no-rating'}" aria-label="Statistiques de la vignette">

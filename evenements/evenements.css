@@ -681,3 +681,111 @@ body {
     padding: 10px 0 22px !important;
   }
 }
+
+/* Détails sous la tuile de l'événement */
+.event-details {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.event-detail-card {
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--card) 94%, transparent);
+  box-shadow: var(--card-hover-shadow, 0 16px 36px rgba(0,0,0,.18));
+  padding: 18px 20px;
+}
+
+.event-detail-card h3 {
+  margin: 0 0 10px;
+  color: var(--title, var(--fg));
+  font-size: 18px;
+}
+
+.event-detail-card p {
+  margin: 0;
+  color: var(--fg);
+  line-height: 1.6;
+}
+
+.event-detail-summary p {
+  white-space: pre-line;
+}
+
+.event-tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.event-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--border));
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--title, var(--fg));
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.event-no-tags {
+  color: var(--muted);
+}
+
+.summer-game-why {
+  color: var(--fg) !important;
+  margin-top: 10px !important;
+}
+
+@media (max-width: 720px) {
+  .event-details {
+    gap: 12px;
+  }
+
+  .event-detail-card {
+    border-radius: 18px;
+    padding: 16px;
+  }
+}
+
+
+/* Lisibilité renforcée de la vignette jeu, surtout en mode clair */
+.summer-game-card {
+  background: linear-gradient(180deg, rgba(18, 23, 38, 0.96), rgba(18, 23, 38, 0.92)) !important;
+}
+
+.summer-game-cover::after {
+  height: 52% !important;
+  background: linear-gradient(to top, rgba(0,0,0,.58), rgba(0,0,0,.18), transparent) !important;
+}
+
+.summer-game-info {
+  background: linear-gradient(180deg, rgba(18, 23, 38, 0.96), rgba(24, 31, 49, 0.94)) !important;
+}
+
+.summer-game-info h3 {
+  color: #f8fbff !important;
+  text-shadow: 0 2px 8px rgba(0,0,0,.35) !important;
+}
+
+.summer-game-info p,
+.summer-game-why {
+  color: #dfe8f6 !important;
+}
+
+.summer-game-label {
+  color: #8ec6ff !important;
+  border-color: rgba(91, 156, 255, 0.38) !important;
+  background: rgba(36, 96, 165, 0.24) !important;
+}
+
+
+/* Tags déplacés à la fin du bloc résumé */
+.event-tags-in-summary {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}

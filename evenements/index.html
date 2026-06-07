@@ -1,1 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="referrer" content="no-referrer" />
+  <title>Événements</title>
+  <link rel="icon" href="/favicon.png" />
+  <link rel="stylesheet" href="/viewer.css" />
+  <link rel="stylesheet" href="/themes.css" />
+  <link rel="stylesheet" href="/evenements/evenements.css" />
+  <script src="/theme-init.js"></script>
+</head>
+<body>
+  <main class="events-shell">
+    <section class="events-hero" aria-label="Événements">
+      <div class="events-kicker">📅 Événements</div>
+      <h1>Événements andric31</h1>
+      <p>Les événements et mises en avant du moment.</p>
+    </section>
 
+    <section id="activeEvent" class="active-event" aria-label="Événement actif">
+      <div class="event-loading">Chargement de l’événement…</div>
+    </section>
+  </main>
+
+  <script src="/evenements/evenements.js"></script>
+</body>
+</html>

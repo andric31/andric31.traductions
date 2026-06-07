@@ -1,0 +1,21 @@
+{
+  "id": "calendrier-avent-2025",
+  "title": "Calendrier de l’avent 2025",
+  "days": [
+    {
+      "day": 1,
+      "title": "Surprise du jour 1",
+      "text": "À remplir plus tard.",
+      "locked": true
+    },
+    {
+      "day": 2,
+      "title": "Surprise du jour 2",
+      "text": "À remplir plus tard.",
+      "locked": true
+    }
+  ],
+  "period": "1 déc. 2025 → 24 déc. 2025",
+  "date": "1 déc. 2025 → 24 déc. 2025",
+  "description": "Exemple d’ancien événement."
+}

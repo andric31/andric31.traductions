@@ -1,0 +1,683 @@
+html,
+body {
+  min-height: 100%;
+  height: auto !important;
+}
+
+body {
+  display: block !important;
+  align-items: initial !important;
+  justify-content: initial !important;
+  margin: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  color: var(--fg);
+}
+
+.events-shell {
+  width: min(1080px, calc(100% - 22px));
+  margin: 14px auto 30px !important;
+  display: grid;
+  gap: 14px;
+  color: var(--fg);
+}
+
+.events-head,
+.active-event,
+.events-history-section {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--fg);
+  border-radius: 22px;
+  box-shadow: var(--card-hover-shadow, 0 16px 36px rgba(0, 0, 0, .18));
+}
+
+.events-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+}
+
+.events-kicker,
+.event-pill,
+.history-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--hover-bg);
+  color: var(--title, var(--fg));
+  font-weight: 900;
+  padding: 6px 11px;
+  font-size: 13px;
+}
+
+.events-head h1 {
+  margin: 8px 0 0;
+  color: var(--title, var(--fg));
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1.05;
+}
+
+.events-back,
+.event-main-link,
+.event-secondary-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--btn);
+  color: var(--title, var(--fg));
+  font-weight: 900;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.events-back:hover,
+.event-main-link:hover,
+.event-secondary-link:hover,
+.history-link:hover {
+  filter: brightness(1.08);
+  text-decoration: none;
+}
+
+.active-event {
+  overflow: hidden;
+  border: 0 !important;
+}
+
+.event-loading,
+.event-empty,
+.history-empty {
+  padding: 18px;
+  border: 1px dashed var(--border);
+  border-radius: 18px;
+  background: var(--soft-04);
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.active-card {
+  position: relative;
+  min-height: 370px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(310px, 390px);
+  gap: 20px;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 15% 12%, color-mix(in srgb, var(--primary) 22%, transparent), transparent 30%),
+    linear-gradient(135deg, color-mix(in srgb, var(--primary) 12%, var(--card)), var(--card) 60%);
+}
+
+.active-card.summer-card {
+  border: 1px solid color-mix(in srgb, var(--primary) 34%, var(--border));
+}
+
+.active-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.event-icon {
+  font-size: 50px;
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.event-state-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.event-pill.is-live {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 13%, transparent);
+  border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
+}
+
+.event-title {
+  margin: 0;
+  color: var(--title, var(--fg));
+  font-size: clamp(36px, 6vw, 66px);
+  line-height: .98;
+  letter-spacing: -.04em;
+}
+
+.event-text {
+  margin: 16px 0 0;
+  max-width: 720px;
+  color: var(--fg);
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.event-help {
+  margin: 12px 0 0;
+  color: var(--muted);
+}
+
+.event-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 22px;
+}
+
+.event-main-link {
+  min-height: 46px;
+  background: var(--primary);
+  border-color: color-mix(in srgb, var(--primary) 70%, var(--border));
+  color: var(--primary-fg, #fff);
+}
+
+.event-secondary-link {
+  min-height: 46px;
+}
+
+.summer-game-card {
+  align-self: stretch;
+  display: grid;
+  grid-template-rows: 180px 1fr;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--primary) 28%, var(--border));
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--card) 90%, transparent);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, .20);
+}
+
+.summer-game-cover {
+  position: relative;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, #ffd66b 42%, var(--card)), color-mix(in srgb, #2f8fd3 36%, var(--card)));
+  overflow: hidden;
+}
+
+.summer-game-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.summer-game-cover::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 46%;
+  background: linear-gradient(to top, rgba(0,0,0,.42), transparent);
+  pointer-events: none;
+}
+
+.summer-game-placeholder {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 64px;
+}
+
+.summer-game-info {
+  padding: 16px;
+}
+
+.summer-game-label {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--border));
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  font-weight: 900;
+  font-size: 12px;
+  padding: 5px 9px;
+  margin-bottom: 10px;
+}
+
+.summer-game-info h3 {
+  margin: 0;
+  color: var(--title, var(--fg));
+  font-size: clamp(22px, 2.4vw, 30px);
+  line-height: 1.05;
+}
+
+.summer-game-info p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  line-height: 1.45;
+  font-size: 14px;
+}
+
+.event-tags {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.event-tag {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--primary) 35%, var(--border));
+  background: color-mix(in srgb, var(--primary) 11%, transparent);
+  color: var(--title, var(--fg));
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.events-history-section {
+  padding: 16px;
+}
+
+.history-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.history-title-row h2 {
+  margin: 0;
+  color: var(--title, var(--fg));
+  font-size: 24px;
+}
+
+.history-note {
+  color: var(--muted);
+}
+
+.events-history {
+  display: grid;
+  gap: 9px;
+}
+
+.history-item {
+  display: grid;
+  grid-template-columns: 150px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: var(--soft-04);
+}
+
+.history-date {
+  color: var(--muted);
+  font-weight: 850;
+}
+
+.history-name {
+  color: var(--title, var(--fg));
+  font-weight: 950;
+}
+
+.history-link {
+  color: var(--primary);
+  font-weight: 900;
+  text-decoration: none;
+}
+
+@media (max-width: 900px) {
+  .active-card {
+    grid-template-columns: 1fr;
+  }
+
+  .summer-game-card {
+    grid-template-rows: 220px 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .events-shell {
+    width: min(100% - 16px, 1080px);
+    margin-top: 8px !important;
+  }
+
+  .events-head {
+    align-items: flex-start;
+    flex-direction: column;
+    border-radius: 18px;
+  }
+
+  .active-card {
+    padding: 18px;
+    min-height: initial;
+  }
+
+  .event-title {
+    font-size: clamp(34px, 10vw, 48px);
+  }
+
+  .event-text {
+    font-size: 16px;
+  }
+
+  .history-item {
+    grid-template-columns: 1fr;
+  }
+
+  .events-history-section {
+    border-radius: 18px;
+  }
+}
+
+
+
+/* Timer dans la tuile principale */
+.event-next-game-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  margin-top: 12px;
+  padding: 9px 13px;
+  border-radius: 999px;
+  background: rgba(74, 45, 0, 0.28);
+  border: 1px solid rgba(255, 250, 220, 0.52);
+  color: #fff7d6;
+  font-weight: 900;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.event-next-game-timer * {
+  color: #fff7d6;
+}
+
+/* Historique : date / titre / bouton Voir sur une seule ligne */
+.history-item {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+}
+
+.history-link {
+  justify-self: end;
+  align-self: center;
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* Plus de tags sous la carte du jeu */
+.event-tags,
+.event-tag {
+  display: none !important;
+}
+
+
+/* Andric31 - été : jaune sable restauré */
+.active-card.summer-card {
+  background:
+    radial-gradient(circle at 13% 16%, rgba(255, 245, 182, 0.95), transparent 28%),
+    linear-gradient(135deg, #ffe68f 0%, #f5c464 34%, #e6a046 68%, #5aa7c8 100%) !important;
+  border-color: rgba(255, 232, 164, 0.95) !important;
+  box-shadow: 0 22px 52px rgba(219, 151, 47, 0.28) !important;
+}
+
+.active-card.summer-card .event-title,
+.active-card.summer-card .event-text {
+  color: #fff8df !important;
+  text-shadow: 0 3px 10px rgba(88, 51, 0, 0.34) !important;
+}
+
+.active-card.summer-card .event-pill {
+  background: rgba(78, 50, 0, 0.18) !important;
+  border-color: rgba(255, 255, 255, 0.44) !important;
+  color: #fff7d6 !important;
+}
+
+.active-card.summer-card .event-main-link,
+.active-card.summer-card .event-secondary-link {
+  background: linear-gradient(135deg, #fff0a8, #f4bb4f) !important;
+  color: #382400 !important;
+  border-color: rgba(255, 255, 255, 0.42) !important;
+}
+
+/* Timer placé sous le texte, avant les boutons */
+.event-next-game-timer {
+  margin-top: 10px !important;
+  margin-bottom: 4px !important;
+  background: rgba(74, 45, 0, 0.26) !important;
+  border-color: rgba(255, 250, 220, 0.56) !important;
+  color: #fff7d6 !important;
+}
+
+.event-next-game-timer * {
+  color: #fff7d6 !important;
+}
+
+/* Carte jeu lisible sur fond été */
+.summer-game-card {
+  background: rgba(18, 23, 38, 0.88) !important;
+  border-color: rgba(255, 232, 164, 0.44) !important;
+}
+
+.summer-game-label {
+  background: rgba(36, 96, 165, 0.22) !important;
+}
+
+
+/* Page dédiée été 2026 */
+.ete-page-shell {
+  margin-top: clamp(28px, 5vw, 86px);
+}
+
+.ete-dedicated-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  gap: 22px;
+  padding: 24px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 232, 164, 0.95);
+  background:
+    radial-gradient(circle at 13% 16%, rgba(255, 245, 182, 0.95), transparent 28%),
+    linear-gradient(135deg, #ffe68f 0%, #f5c464 34%, #e6a046 68%, #5aa7c8 100%);
+  box-shadow: 0 22px 52px rgba(219, 151, 47, 0.28);
+}
+
+.ete-dedicated-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.ete-dedicated-card .event-title,
+.ete-dedicated-card .event-text {
+  color: #fff8df;
+  text-shadow: 0 3px 10px rgba(88, 51, 0, 0.34);
+}
+
+.ete-dedicated-card .event-pill {
+  background: rgba(78, 50, 0, 0.18);
+  border-color: rgba(255, 255, 255, 0.44);
+  color: #fff7d6;
+}
+
+.ete-dedicated-card .event-main-link {
+  background: linear-gradient(135deg, #fff0a8, #f4bb4f);
+  color: #382400;
+  border-color: rgba(255, 255, 255, 0.42);
+}
+
+.ete-dedicated-info {
+  align-self: stretch;
+  padding: 22px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 232, 164, 0.44);
+  background: rgba(18, 23, 38, 0.88);
+  color: var(--fg);
+}
+
+.ete-dedicated-info h3 {
+  margin: 14px 0 8px;
+  color: var(--title, var(--fg));
+  font-size: 26px;
+}
+
+.ete-dedicated-info p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+@media (max-width: 900px) {
+  .ete-dedicated-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* Andric31 - page événements sans historique et sans grand titre */
+.events-history-section {
+  display: none !important;
+}
+
+.events-head h1 {
+  display: none !important;
+}
+
+.events-head {
+  min-height: 58px;
+}
+
+
+/* Andric31 - haut de page comme Wiki/Labo */
+.events-shell {
+  width: min(1080px, calc(100% - 32px)) !important;
+  margin: 0 auto 42px !important;
+  padding: 18px 0 54px !important;
+  gap: 18px !important;
+}
+
+.events-head,
+.events-title-center {
+  display: none !important;
+}
+
+.events-hero {
+  text-align: center;
+  padding: 6px 0 10px;
+}
+
+.events-hero .events-kicker {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--hover-bg);
+  color: var(--muted, var(--fg));
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 16px;
+  box-shadow: none !important;
+}
+
+.events-hero h1 {
+  margin: 0;
+  font-size: clamp(34px, 5vw, 54px);
+  line-height: 1.05;
+  color: var(--title, var(--fg));
+  letter-spacing: -0.04em;
+}
+
+.active-event {
+  margin-top: 0 !important;
+}
+
+/* On annule les anciennes retouches du petit header */
+.events-back {
+  display: none !important;
+}
+
+@media (max-width: 720px) {
+  .events-shell {
+    width: min(100% - 16px, 1080px) !important;
+    padding-top: 12px !important;
+  }
+
+  .events-hero {
+    padding-top: 4px;
+  }
+}
+
+
+/* ==== Alignement du haut de page sur Wiki / Labo ==== */
+.events-shell {
+  width: min(1100px, calc(100% - 32px)) !important;
+  margin: 0 auto !important;
+  padding: 30px 0 64px !important;
+  gap: 0 !important;
+}
+
+.events-hero {
+  text-align: center;
+  padding: 14px 0 28px !important;
+}
+
+.events-hero .events-kicker {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--fg, #e8eaf0) 5%, transparent);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500 !important;
+  margin-bottom: 18px;
+  box-shadow: none !important;
+}
+
+.events-hero h1 {
+  margin: 0;
+  font-size: clamp(30px, 5vw, 52px) !important;
+  line-height: 1.05;
+  letter-spacing: 0;
+  color: var(--title, var(--fg));
+}
+
+.events-hero p {
+  max-width: 900px;
+  margin: 14px auto 0;
+  font-size: clamp(15px, 2vw, 18px);
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.active-event {
+  margin-top: 0 !important;
+}
+
+@media (max-width: 720px) {
+  .events-shell {
+    width: min(1100px, calc(100% - 16px)) !important;
+    padding: 20px 0 52px !important;
+  }
+
+  .events-hero {
+    padding: 10px 0 22px !important;
+  }
+}

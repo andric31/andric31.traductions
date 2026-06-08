@@ -219,6 +219,7 @@
     const DEFAULT_LIST_URL = 'https://raw.githubusercontent.com/andric31/f95list/main/f95list.json';
     let activeEvent = null;
     let activeState = { active_event:'', enabled:true };
+    let configDefaultEventId = '';
     let eventCatalog = [];
     let allGames = [];
     let currentSelection = null;
@@ -316,8 +317,12 @@
     function renderEventsList() {
       const wrap = $('eventsList');
       if (!wrap) return;
-      const activeId = String(activeState.active_event || '').trim();
-      const activeLabel = activeState.enabled && activeId ? `✅ Événement en cours : ${activeId}` : '🚫 Aucun événement en cours';
+      const savedActiveId = String(activeState.active_event || '').trim();
+      const defaultActiveId = String(configDefaultEventId || '').trim();
+      const activeId = activeState.enabled === false ? '' : (savedActiveId || defaultActiveId);
+      const activeLabel = activeState.enabled && activeId
+        ? `✅ Événement en cours : ${activeId}${savedActiveId ? ' (sauvegardé)' : ' (depuis config.json)'}`
+        : '🚫 Aucun événement en cours';
       const banner = $('activeEventState');
       if (banner) {
         banner.textContent = activeLabel;
@@ -602,11 +607,12 @@
     async function init() {
       if (window.__ensureEventAdminPage && !window.__ensureEventAdminPage()) return;
       const config = await fetchJson('/evenements/config.json', { event_actif:'ete-2026', event_files:['ete-2026'] });
+      configDefaultEventId = String(config.event_actif || config.active_event || '').trim();
       await loadEventsState();
       await loadEventCatalog(config);
       renderEventsList();
 
-      const eventId = String(activeState.active_event || config.event_actif || config.active_event || eventCatalog[0]?.id || 'ete-2026').trim() || 'ete-2026';
+      const eventId = String((activeState.enabled === false ? '' : activeState.active_event) || configDefaultEventId || eventCatalog[0]?.id || 'ete-2026').trim() || 'ete-2026';
       await selectEvent(eventId);
       $('eventMsg').textContent = `Événement chargé : ${eventId}. Chargement de la liste des jeux…`;
       $('eventMsg').className = 'event-admin-msg ok';

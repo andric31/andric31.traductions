@@ -4,6 +4,7 @@
   const status = document.getElementById('ticketStatus');
   function setStatus(text, type){ status.textContent = text || ''; status.className = 'ticket-status ' + (type || ''); }
   function val(id){ return document.getElementById(id)?.value?.trim() || ''; }
+  function rawVal(id){ return document.getElementById(id)?.value || ''; }
   form?.addEventListener('submit', async (event) => {
     event.preventDefault();
     const payload = {
@@ -13,12 +14,28 @@
       priority: val('ticketPriority') || 'normal',
       title: val('ticketTitle'),
       message: val('ticketMessage'),
+      password: rawVal('ticketPassword'),
+      password_confirm: rawVal('ticketPasswordConfirm'),
       page_url: location.href,
       user_agent: navigator.userAgent || '',
     };
     if (!payload.name || !payload.category || !payload.title || !payload.message) {
       setStatus('Pseudo, type de demande et message sont obligatoires.', 'err');
       return;
+    }
+    if (payload.category === 'inscription') {
+      if (!payload.name || !payload.password || !payload.password_confirm) {
+        setStatus('Pour créer un compte, le pseudo et les deux cases mot de passe sont obligatoires.', 'err');
+        return;
+      }
+      if (payload.password !== payload.password_confirm) {
+        setStatus('Les deux mots de passe ne sont pas identiques.', 'err');
+        return;
+      }
+      if (payload.password.length < 6) {
+        setStatus('Le mot de passe doit contenir au moins 6 caractères.', 'err');
+        return;
+      }
     }
     btn.disabled = true;
     setStatus('Envoi du ticket…', '');

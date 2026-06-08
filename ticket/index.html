@@ -44,6 +44,10 @@
       color: var(--title, var(--fg));
     }
 
+    .ticket-password-grid {
+      margin-top: -4px;
+    }
+
     #accountPasswordNote strong {
       display: block;
       margin-bottom: 4px;
@@ -103,8 +107,20 @@
         </div>
 
         <div id="privateSignupNote" class="ticket-note ticket-hidden" role="note">
-          <strong>Indique dans le message le pseudo et le mot de passe souhaité.</strong>
+          <strong>Création de compte</strong>
+          <span>Pour une création de compte, le pseudo et le mot de passe souhaité sont obligatoires. Le ticket ne pourra pas être envoyé sans ces informations.</span>
           <span>Après l’envoi, pense à noter le numéro du ticket : un message sera envoyé sur la page Messages avec ce numéro pour confirmer la validation par un administrateur.</span>
+        </div>
+
+        <div id="ticketSignupPasswordWrap" class="ticket-grid two ticket-password-grid ticket-hidden">
+          <label>
+            <span>Mot de passe souhaité</span>
+            <input id="ticketPassword" name="password" type="password" maxlength="120" placeholder="Mot de passe du compte" autocomplete="new-password" />
+          </label>
+          <label>
+            <span>Confirmer le mot de passe</span>
+            <input id="ticketPasswordConfirm" name="password_confirm" type="password" maxlength="120" placeholder="Répète le mot de passe" autocomplete="new-password" />
+          </label>
         </div>
 
         <div id="accountPasswordNote" class="ticket-note ticket-hidden" role="note">
@@ -140,6 +156,9 @@
       const accountNote = document.getElementById('accountPasswordNote');
       const titleWrap = document.getElementById('ticketTitleWrap');
       const title = document.getElementById('ticketTitle');
+      const passwordWrap = document.getElementById('ticketSignupPasswordWrap');
+      const password = document.getElementById('ticketPassword');
+      const passwordConfirm = document.getElementById('ticketPasswordConfirm');
       let previousTitle = '';
 
       function applyCategoryFromUrl() {
@@ -172,7 +191,15 @@
 
         note?.classList.toggle('ticket-hidden', !isPrivateSignup);
         accountNote?.classList.toggle('ticket-hidden', !isAccountPassword);
+        passwordWrap?.classList.toggle('ticket-hidden', !isPrivateSignup);
         titleWrap?.classList.toggle('ticket-hidden', usesAutoTitle);
+
+        if (password) password.required = isPrivateSignup;
+        if (passwordConfirm) passwordConfirm.required = isPrivateSignup;
+        if (!isPrivateSignup) {
+          if (password) password.value = '';
+          if (passwordConfirm) passwordConfirm.value = '';
+        }
 
         if (!title) return;
 

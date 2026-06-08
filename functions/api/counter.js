@@ -159,6 +159,30 @@ export async function onRequest(context) {
   }
 
 
+  async function resolvePageViewTitle(userId, gameKey, incomingTitle = "") {
+    const directTitle = String(incomingTitle || "").trim().slice(0, 300);
+    if (directTitle) return directTitle;
+
+    // Le compteur peut recevoir seulement uid:xxx.
+    // On essaie donc de récupérer le titre déjà connu côté compte membre
+    // pour éviter d'afficher uid:xxx dans le Centre admin.
+    const sources = [
+      `SELECT title FROM user_page_views WHERE user_id = ?1 AND game_key = ?2 AND COALESCE(title, '') != '' LIMIT 1`,
+      `SELECT title FROM user_game_state WHERE user_id = ?1 AND game_key = ?2 AND COALESCE(title, '') != '' LIMIT 1`,
+      `SELECT title FROM user_watchlist WHERE user_id = ?1 AND game_key = ?2 AND COALESCE(title, '') != '' LIMIT 1`,
+    ];
+
+    for (const sql of sources) {
+      try {
+        const row = await env.DB.prepare(sql).bind(userId, gameKey).first();
+        const found = String(row?.title || "").trim().slice(0, 300);
+        if (found) return found;
+      } catch {}
+    }
+
+    return "";
+  }
+
   async function shouldCountGlobalView() {
     try {
       await ensureAuthTables(env.DB);
@@ -198,10 +222,12 @@ export async function onRequest(context) {
       // On ne compte qu'une vue par membre / jeu toutes les 2 minutes.
       // Important : on ne met plus last_viewed_at à jour quand la vue est refusée,
       // sinon deux appels proches peuvent donner l'impression d'une vue récente en double.
+      const viewTitle = await resolvePageViewTitle(user.id, id, title);
+
       const inserted = await env.DB.prepare(`
         INSERT OR IGNORE INTO user_page_views (user_id, game_key, title, view_count, first_viewed_at, last_viewed_at)
         VALUES (?1, ?2, ?3, 1, strftime('%Y-%m-%dT%H:%M:%fZ','now'), strftime('%Y-%m-%dT%H:%M:%fZ','now'))
-      `).bind(user.id, id, title).run();
+      `).bind(user.id, id, viewTitle).run();
 
       if (Number(inserted?.meta?.changes || 0) > 0) {
         return { hasUser: true, counted: true };
@@ -216,9 +242,25 @@ export async function onRequest(context) {
         WHERE user_id = ?1
           AND game_key = ?2
           AND unixepoch('now') - unixepoch(last_viewed_at) >= 120
-      `).bind(user.id, id, title).run();
+      `).bind(user.id, id, viewTitle).run();
 
-      return { hasUser: true, counted: Number(updated?.meta?.changes || 0) > 0 };
+      const counted = Number(updated?.meta?.changes || 0) > 0;
+
+      // Si la vue est refusée par la protection 2 minutes, on peut quand même
+      // compléter le titre manquant sans augmenter view_count ni toucher last_viewed_at.
+      if (!counted && viewTitle) {
+        try {
+          await env.DB.prepare(`
+            UPDATE user_page_views
+            SET title = ?3
+            WHERE user_id = ?1
+              AND game_key = ?2
+              AND COALESCE(title, '') = ''
+          `).bind(user.id, id, viewTitle).run();
+        } catch {}
+      }
+
+      return { hasUser: true, counted };
     } catch {
       return { hasUser: false, counted: true };
     }

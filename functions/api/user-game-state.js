@@ -108,9 +108,32 @@ async function getUserContext(context) {
 }
 
 
+async function resolvePageViewTitle(db, userId, gameKey, incomingTitle = '') {
+  const directTitle = clean(incomingTitle, 300);
+  if (directTitle) return directTitle;
+
+  // Si l'appel de vue ne donne que uid:xxx, on récupère le titre déjà connu
+  // dans les likes/notes ou la watchlist pour l'affichage du Centre admin.
+  const sources = [
+    `SELECT title FROM user_page_views WHERE user_id = ?1 AND game_key = ?2 AND COALESCE(title, '') != '' LIMIT 1`,
+    `SELECT title FROM user_game_state WHERE user_id = ?1 AND game_key = ?2 AND COALESCE(title, '') != '' LIMIT 1`,
+    `SELECT title FROM user_watchlist WHERE user_id = ?1 AND game_key = ?2 AND COALESCE(title, '') != '' LIMIT 1`,
+  ];
+
+  for (const sql of sources) {
+    try {
+      const row = await db.prepare(sql).bind(userId, gameKey).first();
+      const found = clean(row?.title, 300);
+      if (found) return found;
+    } catch {}
+  }
+
+  return '';
+}
+
 async function recordPageView(db, userId, gameKey, title = '') {
   if (!userId || !gameKey) return false;
-  const cleanTitle = clean(title, 300);
+  const cleanTitle = await resolvePageViewTitle(db, userId, gameKey, title);
 
   // Anti-doublon renforcé : une même page peut appeler plusieurs API au chargement.
   // On ne compte qu'une vue par membre / jeu toutes les 2 minutes.
@@ -133,7 +156,23 @@ async function recordPageView(db, userId, gameKey, title = '') {
       AND unixepoch('now') - unixepoch(last_viewed_at) >= 120
   `).bind(userId, gameKey, cleanTitle).run();
 
-  return Number(updated?.meta?.changes || 0) > 0;
+  const counted = Number(updated?.meta?.changes || 0) > 0;
+
+  // Si la protection 2 minutes bloque la vue, on complète quand même le titre manquant
+  // sans augmenter le compteur et sans changer la date de dernière vue.
+  if (!counted && cleanTitle) {
+    try {
+      await db.prepare(`
+        UPDATE user_page_views
+        SET title = ?3
+        WHERE user_id = ?1
+          AND game_key = ?2
+          AND COALESCE(title, '') = ''
+      `).bind(userId, gameKey, cleanTitle).run();
+    } catch {}
+  }
+
+  return counted;
 }
 
 async function getCounterRow(db, gameKey) {

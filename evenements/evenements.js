@@ -150,6 +150,57 @@
     return Math.abs(h >>> 0);
   }
 
+
+  function getGameKey(g) {
+    const id = String(g.collection || g.id || '').trim();
+    const uid = String(g.uid ?? '').trim();
+    const title = normalizeText(getGameTitle(g))
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    return [id, uid, title].filter(Boolean).join('|') || title || 'jeu';
+  }
+
+  function getBlockedGameKeys(event) {
+    const values = [];
+    ['blocked_game_keys', 'used_game_keys', 'previous_game_keys'].forEach((field) => {
+      if (Array.isArray(event?.[field])) values.push(...event[field]);
+    });
+    if (Array.isArray(event?.used_games)) {
+      event.used_games.forEach((item) => {
+        if (!item) return;
+        if (typeof item === 'string') values.push(item);
+        else {
+          values.push(item.key, item.id, item.uid, item.title);
+          if (item.collection) values.push(item.collection);
+        }
+      });
+    }
+    return new Set(values.map((value) => String(value || '').trim()).filter(Boolean).flatMap((value) => [value, normalizeText(value)]));
+  }
+
+  function isBlockedGame(g, event) {
+    const blocked = getBlockedGameKeys(event);
+    if (!blocked.size) return false;
+    const checks = [
+      getGameKey(g),
+      String(g.collection || '').trim(),
+      String(g.id || '').trim(),
+      String(g.uid ?? '').trim(),
+      getGameTitle(g)
+    ].filter(Boolean);
+    return checks.some((value) => blocked.has(value) || blocked.has(normalizeText(value)));
+  }
+
+  function dedupeRotationPool(entries) {
+    const seen = new Set();
+    return entries.filter((entry) => {
+      const key = getGameKey(entry.game);
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
   const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
   const CHANGE_DAYS = {
     sunday: 0, dimanche: 0,
@@ -312,10 +363,22 @@
         return getGameTitle(a.game).localeCompare(getGameTitle(b.game), 'fr');
       });
 
-    let rotationPool = candidates;
+    let rotationPool = dedupeRotationPool(candidates);
+    let blockedApplied = false;
 
-    if (!rotationPool.length && String(event.fallback_mode || '').trim() === 'weekly_random') {
-      rotationPool = validGames
+    const applyBlockedFilter = (pool) => {
+      const filtered = dedupeRotationPool(pool).filter((entry) => !isBlockedGame(entry.game, event));
+      if (filtered.length) {
+        blockedApplied = filtered.length !== dedupeRotationPool(pool).length;
+        return filtered;
+      }
+      return dedupeRotationPool(pool);
+    };
+
+    rotationPool = applyBlockedFilter(rotationPool);
+
+    if ((!rotationPool.length || rotationPool.every((entry) => isBlockedGame(entry.game, event))) && String(event.fallback_mode || '').trim() === 'weekly_random') {
+      rotationPool = applyBlockedFilter(validGames
         .map((g) => ({
           game: g,
           analysis: {
@@ -325,7 +388,7 @@
             tags: getGameTags(g)
           }
         }))
-        .sort((a, b) => getGameTitle(a.game).localeCompare(getGameTitle(b.game), 'fr'));
+        .sort((a, b) => getGameTitle(a.game).localeCompare(getGameTitle(b.game), 'fr')));
     }
 
     if (!rotationPool.length) {
@@ -345,9 +408,12 @@
     const selected = rotationPool[(rotationIndex + eventOffset) % rotationPool.length];
 
     const uniqueKeywords = [...new Set((selected.analysis.found || []).map((item) => item.keyword))];
-    const reason = uniqueKeywords.length
+    const reasonBase = uniqueKeywords.length
       ? `Sélection automatique de la semaine, basée sur le thème ${uniqueKeywords.join(', ')}.`
       : 'Sélection automatique de la semaine.';
+    const reason = blockedApplied
+      ? `${reasonBase} Les jeux déjà utilisés ont été ignorés.`
+      : reasonBase;
 
     return {
       game: selected.game,

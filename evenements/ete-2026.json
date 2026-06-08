@@ -54,5 +54,8 @@
   "change_day": "monday",
   "change_hour": 0,
   "timer_label": "Nouveau jeu dans",
-  "date_label": "1 juil. 2026 → 31 août 2026"
+  "date_label": "1 juil. 2026 → 31 août 2026",
+  "blocked_game_keys": [],
+  "repeat_prevention": true,
+  "repeat_prevention_note": "Ajoute ici les clés des jeux déjà affichés pour empêcher une nouvelle sélection pendant l’événement."
 }

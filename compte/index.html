@@ -182,7 +182,7 @@
 
     .account-hero {
       display: grid;
-      grid-template-columns: 1.15fr .85fr;
+      grid-template-columns: 1fr;
       gap: 14px;
       align-items: stretch;
       margin-bottom: 14px;
@@ -331,20 +331,11 @@
           <div class="account-user-pill">✅ <span data-auth-name></span> · <span data-auth-role></span></div>
           <div class="account-quick-grid">
             <a class="account-quick-card" href="/compte/mes-jeux.html" target="_blank" rel="noopener"><span class="account-quick-ico">🎮</span><span><strong>Mes jeux</strong><span>Voir Watchlist, likes et notes.</span></span></a>
-            <button class="account-quick-card" id="openPasswordModalBtn" type="button"><span class="account-quick-ico">🔐</span><span><strong>Mot de passe</strong><span>Modifier ton accès.</span></span></button>
+            <button class="account-quick-card" id="openPasswordModalBtn" type="button"><span class="account-quick-ico">🔐</span><span><strong>Changer mon mot de passe</strong><span>Modifier ton accès.</span></span></button>
             <a class="account-quick-card" href="/"><span class="account-quick-ico">🏠</span><span><strong>Retour au site</strong><span>Revenir au viewer.</span></span></a>
             <button class="account-quick-card" id="logoutBtn" type="button"><span class="account-quick-ico">🚪</span><span><strong>Déconnexion</strong><span>Fermer ta session.</span></span></button>
           </div>
           <div id="logoutMsg" class="auth-msg"></div>
-        </div>
-        <div class="account-hero-side">
-          <p class="account-hero-side-title">📌 Résumé</p>
-          <div class="account-mini-stats">
-            <div class="account-mini-stat"><b id="accountWatchCount">—</b><span>Watchlist</span></div>
-            <div class="account-mini-stat"><b id="accountLikedCount">—</b><span>Likés</span></div>
-            <div class="account-mini-stat"><b id="accountRatedCount">—</b><span>Notés</span></div>
-          </div>
-          <p style="margin:0;color:var(--muted);font-size:13px;line-height:1.4;">Les listes sont rangées juste en dessous dans des blocs ouvrables/fermables.</p>
         </div>
       </div>
 

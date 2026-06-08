@@ -100,6 +100,10 @@
               <p class="event-admin-action-desc">Annule le choix manuel et laisse l’événement choisir seul le jeu.</p>
             </div>
             <div class="event-admin-action-box">
+              <button class="auth-btn danger" id="resetEventBtn" type="button" title="Remet l’événement à zéro : enlève le jeu forcé et vide la liste anti-répétition.">🧹 Réinitialiser cet événement <span class="event-admin-help" tabindex="0" data-tip="À utiliser quand tu changes d’événement, par exemple après l’été. Ça vide les jeux déjà bloqués et enlève le jeu forcé, sans modifier le titre ni les mots-clés.">?</span></button>
+              <p class="event-admin-action-desc">Vide l’historique anti-répétition pour repartir proprement sur un nouvel événement.</p>
+            </div>
+            <div class="event-admin-action-box">
               <button class="auth-btn" id="saveEventBtn" type="button" title="Sauvegarde uniquement les changements faits dans les réglages avancés : titre, texte, jour, heure et mots-clés.">💾 Enregistrer le titre / texte <span class="event-admin-help" tabindex="0" data-tip="À utiliser seulement après avoir modifié les réglages avancés : titre, texte affiché, jour de changement, heure ou mots-clés.">?</span></button>
               <p class="event-admin-action-desc">Sauvegarde les textes et règles si tu les as modifiés plus bas.</p>
             </div>
@@ -472,6 +476,18 @@
       renderCurrent();
       saveEventToSite(formEvent(), 'Retour au choix automatique sauvegardé.').catch((err)=>{
         $('jsonMsg').textContent = err?.message || 'Sauvegarde impossible.';
+        $('jsonMsg').className = 'event-admin-msg err';
+      });
+    });
+    $('resetEventBtn')?.addEventListener('click', () => {
+      const ok = confirm('Réinitialiser cet événement ?\n\nCela va vider la liste des jeux déjà bloqués et enlever le jeu forcé. Le titre, le texte et les mots-clés seront gardés.');
+      if (!ok) return;
+      $('selectedId').value = '';
+      $('selectedUid').value = '';
+      $('blockedGameKeys').value = '';
+      renderCurrent();
+      saveEventToSite(formEvent(), 'Événement réinitialisé : liste anti-répétition vidée et jeu forcé supprimé.').catch((err)=>{
+        $('jsonMsg').textContent = err?.message || 'Réinitialisation impossible.';
         $('jsonMsg').className = 'event-admin-msg err';
       });
     });

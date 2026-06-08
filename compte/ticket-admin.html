@@ -18,14 +18,18 @@
     .ticket-toolbar{display:grid;grid-template-columns:minmax(220px,1.7fr) minmax(150px,.7fr) minmax(170px,.85fr) auto;gap:9px;align-items:end}
     .ticket-toolbar .auth-label{margin:0}.ticket-toolbar .auth-btn{min-height:42px;white-space:nowrap}
     .ticket-stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;color:var(--muted);font-size:13px}
+    #ticketsMsg{margin-top:12px;padding:9px 12px;border:1px solid var(--border,var(--auth-border));background:rgba(255,255,255,.04);border-radius:12px;line-height:1.45;min-height:0;display:inline-flex;align-items:center;max-width:100%}
+    #ticketsMsg:empty{display:none}
     .ticket-stat{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border,var(--auth-border));background:rgba(255,255,255,.055);border-radius:999px;padding:5px 9px;font-weight:800}
     .ticket-stat strong{color:var(--title,var(--fg))}
-    .ticket-columns{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+    .ticket-columns{display:grid;grid-template-columns:1fr;gap:14px;align-items:start}
     .ticket-section{border:1px solid var(--border,var(--auth-border));background:rgba(255,255,255,.035);border-radius:20px;overflow:hidden}
     .ticket-section-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border,var(--auth-border));background:rgba(255,255,255,.035)}
     .ticket-section-title{font-size:16px;font-weight:950;color:var(--title,var(--fg));display:flex;align-items:center;gap:8px}
     .ticket-section-sub{font-size:12px;color:var(--muted);font-weight:800}
     .ticket-scroll{display:grid;gap:10px;max-height:640px;overflow:auto;padding:12px;scrollbar-width:thin}
+    #openTicketsList{max-height:720px}
+    #closedTicketsList{max-height:420px}
     .ticket-list{display:grid;gap:10px}
     .ticket-card-admin{border:1px solid var(--border,var(--auth-border));background:rgba(255,255,255,.045);border-radius:18px;padding:13px;display:grid;gap:10px;box-shadow:0 8px 22px rgba(0,0,0,.08)}
     .ticket-card-admin.is-urgent{border-color:rgba(255,120,120,.55);background:rgba(255,90,90,.07)}
@@ -37,7 +41,7 @@
     .ticket-actions-row{display:flex;flex-wrap:wrap;gap:8px}.ticket-empty{color:var(--muted);padding:14px;border:1px dashed var(--border,var(--auth-border));border-radius:16px;background:rgba(255,255,255,.025)}
     .ticket-card-admin.closed{opacity:.75}.ticket-card-admin.closed .ticket-title{text-decoration:line-through;text-decoration-thickness:2px}.ticket-danger{background:rgba(255,90,90,.13)!important}.ticket-ok{background:rgba(90,255,150,.12)!important}.ticket-info{background:rgba(90,160,255,.12)!important}.ticket-muted-btn{background:rgba(255,255,255,.055)!important}.ticket-copy-ok{color:#7ee0a1;font-weight:900}
     details.ticket-help{border:1px solid var(--border,var(--auth-border));border-radius:16px;background:rgba(255,255,255,.03);overflow:hidden}details.ticket-help summary{cursor:pointer;padding:12px 14px;font-weight:950;color:var(--title,var(--fg));list-style:none}details.ticket-help summary::-webkit-details-marker{display:none}.ticket-help-body{padding:0 14px 14px;color:var(--muted);line-height:1.55;font-size:14px}.ticket-help-body ul{margin:8px 0 0 18px;padding:0}.ticket-help-body li{margin:4px 0}
-    @media(max-width:900px){.ticket-toolbar{grid-template-columns:1fr 1fr}.ticket-toolbar .auth-label:first-child{grid-column:1/-1}.ticket-columns{grid-template-columns:1fr}.ticket-scroll{max-height:520px}}
+    @media(max-width:900px){.ticket-toolbar{grid-template-columns:1fr 1fr}.ticket-toolbar .auth-label:first-child{grid-column:1/-1}.ticket-scroll{max-height:520px}#openTicketsList,#closedTicketsList{max-height:520px}}
     @media(max-width:620px){.ticket-toolbar{grid-template-columns:1fr}.ticket-admin-head{display:grid}.ticket-admin-head .auth-actions{display:grid}.ticket-scroll{max-height:500px}}
   </style>
 </head>
@@ -197,7 +201,8 @@
         const data = await api('/api/ticket?admin=1&limit=300');
         tickets = data.tickets || [];
         render();
-        setMsg(`${tickets.length} ticket(s) chargé(s).`, true);
+        const plural = tickets.length > 1;
+        setMsg(`${tickets.length} ticket${plural ? 's' : ''} chargé${plural ? 's' : ''}.`, true);
       } catch(e){
         setMsg(e.message || 'Chargement impossible.', false);
       }

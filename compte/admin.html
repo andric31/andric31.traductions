@@ -467,36 +467,35 @@
       return 'Activité';
     }
 
-    function renderActivity(items) {
-      if (!Array.isArray(items) || !items.length) {
+    function renderActivity(items, viewedGames) {
+      const activityItems = Array.isArray(items) ? items.map((item) => ({ ...item, _historyKind: 'activity' })) : [];
+      const viewedItems = Array.isArray(viewedGames) ? viewedGames.map((item) => ({ ...item, type: 'page_view', _historyKind: 'viewed_game' })) : [];
+      const allItems = [...activityItems, ...viewedItems].sort((a, b) => {
+        const ad = new Date(a?.date || 0).getTime() || 0;
+        const bd = new Date(b?.date || 0).getTime() || 0;
+        return bd - ad;
+      });
+
+      if (!allItems.length) {
         return '<p class="member-history-empty">Aucune activité enregistrée pour le moment.</p>';
       }
-      return `<div class="member-history-scroll"><ul class="member-history-list">${items.map((item) => `
-        <li class="member-history-item">
-          <span class="member-history-main">
-            <span class="member-history-kind">${esc(activityLabel(item))}</span>
-            <span class="member-history-game">${esc(item?.title || item?.game_key || 'Jeu sans titre')}</span>
-          </span>
-          <span class="member-history-date">${esc(fmtDate(item?.date))}</span>
-        </li>
-      `).join('')}</ul></div>`;
-    }
 
-    function renderViewedGames(items) {
-      if (!Array.isArray(items) || !items.length) {
-        return '<p class="member-history-empty">Aucun jeu consulté pour le moment.</p>';
-      }
-      return `<div class="member-history-scroll"><ul class="member-history-list">${items.map((item) => `
-        <li class="member-history-item member-view-row">
+      return `<div class="member-history-scroll"><ul class="member-history-list">${allItems.map((item) => {
+        const isViewedGame = item?._historyKind === 'viewed_game';
+        return `
+        <li class="member-history-item${isViewedGame ? ' member-view-row' : ''}">
           <span class="member-history-main">
+            <span class="member-history-kind">${isViewedGame ? 'Jeu consulté' : esc(activityLabel(item))}</span>
             <span class="member-history-game">${esc(item?.title || item?.game_key || 'Jeu sans titre')}</span>
-            <span class="member-view-meta">
-              <span class="member-view-chip">👁️ ${Number(item?.value || 0)} vue(s)</span>
-              <span class="member-view-chip">Dernière vue : ${esc(fmtDate(item?.date))}</span>
-            </span>
           </span>
-        </li>
-      `).join('')}</ul></div>`;
+          ${isViewedGame ? `
+          <span class="member-view-meta">
+            <span class="member-view-chip">👁️ ${Number(item?.value || 0)} vue(s)</span>
+            <span class="member-view-chip">Dernière vue : ${esc(fmtDate(item?.date))}</span>
+          </span>` : `
+          <span class="member-history-date">${esc(fmtDate(item?.date))}</span>`}
+        </li>`;
+      }).join('')}</ul></div>`;
     }
 
     function updateStats(list) {
@@ -646,13 +645,8 @@
               </div>
 
               <div class="member-history">
-                <h4 class="member-history-title">🕘 Historique récent <span class="member-history-count">${Array.isArray(u.recent_activity) ? u.recent_activity.length : 0} ligne(s)</span></h4>
-                ${renderActivity(u.recent_activity)}
-              </div>
-
-              <div class="member-history">
-                <h4 class="member-history-title">🎮 Liste des jeux consultés <span class="member-history-count">${Number(u.unique_pages_viewed || 0)} jeu(x) différent(s)</span></h4>
-                ${renderViewedGames(u.recent_page_views)}
+                <h4 class="member-history-title">🕘 Historique récent <span class="member-history-count">${(Array.isArray(u.recent_activity) ? u.recent_activity.length : 0) + (Array.isArray(u.recent_page_views) ? u.recent_page_views.length : 0)} ligne(s)</span></h4>
+                ${renderActivity(u.recent_activity, u.recent_page_views)}
               </div>
 
               <div class="member-actions">

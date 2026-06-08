@@ -436,6 +436,77 @@
     const sortUsersSelect = document.getElementById('sortUsersSelect');
     const quickRoleFilters = document.getElementById('quickRoleFilters');
     let allUsers = [];
+    let f95GameTitleMapPromise = null;
+
+    const F95LIST_DEFAULT_URL = 'https://raw.githubusercontent.com/andric31/f95list/main/f95list.json';
+
+    function getF95ListUrl() {
+      try {
+        const p = new URLSearchParams(location.search);
+        const src = (p.get('src') || '').trim();
+        if (src) return src;
+      } catch {}
+      try {
+        return (localStorage.getItem('f95listUrl') || '').trim() || F95LIST_DEFAULT_URL;
+      } catch {
+        return F95LIST_DEFAULT_URL;
+      }
+    }
+
+    function extractF95Games(raw) {
+      if (Array.isArray(raw)) return raw;
+      if (!raw || typeof raw !== 'object') return [];
+      if (Array.isArray(raw.games)) return raw.games;
+      if (Array.isArray(raw.items)) return raw.items;
+      return [];
+    }
+
+    function gameKeyOfF95Entry(g) {
+      const uid = String(g?.uid ?? '').trim();
+      return uid ? `uid:${uid}` : '';
+    }
+
+    async function getF95GameTitleMap() {
+      if (!f95GameTitleMapPromise) {
+        f95GameTitleMapPromise = (async () => {
+          const map = new Map();
+          try {
+            const r = await fetch(getF95ListUrl(), { cache: 'no-store' });
+            if (!r.ok) return map;
+            const raw = await r.json();
+            for (const g of extractF95Games(raw)) {
+              const key = gameKeyOfF95Entry(g);
+              const title = String(g?.cleanTitle || g?.title || '').trim();
+              if (key && title) map.set(key, title);
+            }
+          } catch {}
+          return map;
+        })();
+      }
+      return f95GameTitleMapPromise;
+    }
+
+    async function hydrateMemberGameTitles(card) {
+      if (!card || card.dataset.titlesHydrated === '1' || card.dataset.titlesLoading === '1') return;
+      const targets = [...card.querySelectorAll('[data-game-key]')];
+      const hasUidToResolve = targets.some((el) => /^uid:\d+$/i.test(String(el.dataset.gameKey || '').trim()));
+      if (!hasUidToResolve) return;
+
+      card.dataset.titlesLoading = '1';
+      try {
+        const titleMap = await getF95GameTitleMap();
+        targets.forEach((el) => {
+          const key = String(el.dataset.gameKey || '').trim();
+          const title = titleMap.get(key);
+          if (!title) return;
+          el.textContent = title;
+          el.title = `${title} (${key})`;
+        });
+        card.dataset.titlesHydrated = '1';
+      } finally {
+        card.dataset.titlesLoading = '0';
+      }
+    }
 
     function setMsg(el, text, ok) {
       if (!el) return;
@@ -486,7 +557,7 @@
         <li class="member-history-item${isViewedGame ? ' member-view-row' : ''}">
           <span class="member-history-main">
             <span class="member-history-kind">${isViewedGame ? 'Jeu consulté' : esc(activityLabel(item))}</span>
-            <span class="member-history-game">${esc(item?.title || item?.game_key || 'Jeu sans titre')}</span>
+            <span class="member-history-game" data-game-key="${esc(item?.game_key || '')}">${esc(item?.title || item?.game_key || 'Jeu sans titre')}</span>
           </span>
           ${isViewedGame ? `
           <span class="member-view-meta">
@@ -765,7 +836,9 @@
       if (!card) return;
       const btn = card.querySelector('button[data-action="toggle"]');
       card.classList.toggle('is-open');
-      if (btn) btn.textContent = card.classList.contains('is-open') ? 'Fermer' : 'Modifier';
+      const isOpen = card.classList.contains('is-open');
+      if (btn) btn.textContent = isOpen ? 'Fermer' : 'Modifier';
+      if (isOpen) hydrateMemberGameTitles(card);
     }
 
     usersTbody?.addEventListener('click', async (e) => {

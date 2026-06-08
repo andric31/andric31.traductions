@@ -104,6 +104,19 @@
   }
   .member-title { margin:0; font-size:20px; }
   .member-sub { margin-top:6px; display:flex; flex-wrap:wrap; gap:8px; }
+  .member-head { cursor:pointer; }
+  .member-top-actions, .member-body { cursor:auto; }
+  .member-mini-stats { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 14px; }
+  .member-history { margin-top:14px; padding:12px; border-radius:14px; background:rgba(0,0,0,.13); border:1px solid rgba(255,255,255,.06); }
+  .member-history-title { margin:0 0 10px; font-size:14px; color:var(--title,var(--fg)); }
+  .member-history-list { display:grid; gap:8px; margin:0; padding:0; list-style:none; }
+  .member-history-item { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; padding:9px 10px; border-radius:12px; background:rgba(255,255,255,.045); }
+  .member-history-main { min-width:0; }
+  .member-history-kind { display:block; color:var(--muted); font-size:12px; margin-bottom:3px; }
+  .member-history-game { display:block; color:var(--text,#fff); font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:520px; }
+  .member-history-date { color:var(--muted); font-size:12px; white-space:nowrap; }
+  .member-history-empty { color:var(--muted); font-size:13px; margin:0; }
+  .member-card.is-open .member-head { cursor:default; }
   .admin-pill, .auth-badge {
     display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border-radius:999px;
     background:rgba(255,255,255,.08); border:1px solid var(--border, var(--auth-border)); font-size:13px;
@@ -366,10 +379,35 @@
     function fmtDate(v) {
       if (!v) return '—';
       try {
-        return new Date(v).toLocaleString('fr-FR');
+        const d = new Date(v);
+        if (Number.isNaN(d.getTime())) return v;
+        return d.toLocaleString('fr-FR');
       } catch {
         return v;
       }
+    }
+
+    function activityLabel(item) {
+      const type = String(item?.type || '');
+      if (type === 'watchlist') return 'Ajout Watchlist';
+      if (type === 'like') return 'Jeu liké';
+      if (type === 'rating') return `Jeu noté${item?.value ? ' : ' + item.value + '/4' : ''}`;
+      return 'Activité';
+    }
+
+    function renderActivity(items) {
+      if (!Array.isArray(items) || !items.length) {
+        return '<p class="member-history-empty">Aucune activité enregistrée pour le moment.</p>';
+      }
+      return `<ul class="member-history-list">${items.map((item) => `
+        <li class="member-history-item">
+          <span class="member-history-main">
+            <span class="member-history-kind">${esc(activityLabel(item))}</span>
+            <span class="member-history-game">${esc(item?.title || item?.game_key || 'Jeu sans titre')}</span>
+          </span>
+          <span class="member-history-date">${esc(fmtDate(item?.date))}</span>
+        </li>
+      `).join('')}</ul>`;
     }
 
     function updateStats(list) {
@@ -465,8 +503,10 @@
                   <h3 class="member-title">${esc(u.display_name || u.username)}</h3>
                   <div class="member-sub">
                     <span class="admin-pill">ID ${u.id}</span>
+                    <span class="admin-pill">Pseudo : ${esc(u.username || '—')}</span>
                     <span class="admin-pill">Rôle : ${esc(u.role)}</span>
                     <span class="admin-pill ${u.is_active ? 'ok' : 'off'}">${u.is_active ? 'Actif' : 'Désactivé'}</span>
+                    <span class="admin-pill">Dernier login : ${esc(fmtDate(u.last_login_at))}</span>
                     ${isSelf ? '<span class="admin-pill me">Ton compte</span>' : ''}
                   </div>
                 </div>
@@ -477,6 +517,11 @@
               </div>
 
               <div class="member-body">
+              <div class="member-mini-stats">
+                <span class="admin-pill">📌 Watchlist : ${Number(u.watchlist_count || 0)}</span>
+                <span class="admin-pill">❤️ Likés : ${Number(u.liked_count || 0)}</span>
+                <span class="admin-pill">⭐ Notés : ${Number(u.rated_count || 0)}</span>
+              </div>
               <div class="member-grid">
                 <label class="auth-label">
                   <span>Nom d’utilisateur de connexion - Pseudo</span>
@@ -507,6 +552,11 @@
                 <div class="meta-box"><strong>Créé</strong>${esc(fmtDate(u.created_at))}</div>
                 <div class="meta-box"><strong>Mis à jour</strong>${esc(fmtDate(u.updated_at))}</div>
                 <div class="meta-box"><strong>Dernier login</strong>${esc(fmtDate(u.last_login_at))}</div>
+              </div>
+
+              <div class="member-history">
+                <h4 class="member-history-title">🕘 Historique récent</h4>
+                ${renderActivity(u.recent_activity)}
               </div>
 
               <div class="member-actions">
@@ -621,15 +671,28 @@
       applyUserFilters();
     });
 
+    function toggleMemberCard(card) {
+      if (!card) return;
+      const btn = card.querySelector('button[data-action="toggle"]');
+      card.classList.toggle('is-open');
+      if (btn) btn.textContent = card.classList.contains('is-open') ? 'Fermer' : 'Modifier';
+    }
+
     usersTbody?.addEventListener('click', async (e) => {
+      const cardHead = e.target.closest('.member-head');
+      const clickedControl = e.target.closest('button, a, input, select, textarea, label');
+      if (cardHead && !clickedControl) {
+        toggleMemberCard(cardHead.closest('article[data-user-id]'));
+        return;
+      }
+
       const btn = e.target.closest('button[data-action]');
       if (!btn) return;
       const tr = btn.closest('article[data-user-id]');
       if (!tr) return;
       const id = Number(tr.getAttribute('data-user-id') || 0);
       if (btn.dataset.action === 'toggle') {
-        tr.classList.toggle('is-open');
-        btn.textContent = tr.classList.contains('is-open') ? 'Fermer' : 'Modifier';
+        toggleMemberCard(tr);
         return;
       }
       const rowMsg = tr.querySelector('[data-row-msg]');

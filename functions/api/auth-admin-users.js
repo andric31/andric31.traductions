@@ -35,12 +35,27 @@ async function ensureAdminMemberInfoTables(db) {
       UNIQUE(user_id, game_key)
     )
   `).run();
+  await db.prepare(`
+    CREATE TABLE IF NOT EXISTS user_page_views (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      game_key TEXT NOT NULL,
+      title TEXT NOT NULL DEFAULT '',
+      first_viewed_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+      last_viewed_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+      view_count INTEGER NOT NULL DEFAULT 0,
+      UNIQUE(user_id, game_key)
+    )
+  `).run();
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_user_page_views_user_last ON user_page_views(user_id, last_viewed_at DESC)`).run();
 }
 
 async function getMemberStats(db, userId) {
   const watch = await db.prepare(`SELECT COUNT(*) AS n FROM user_watchlist WHERE user_id = ?1`).bind(userId).first();
   const liked = await db.prepare(`SELECT COUNT(*) AS n FROM user_game_state WHERE user_id = ?1 AND liked = 1`).bind(userId).first();
   const rated = await db.prepare(`SELECT COUNT(*) AS n FROM user_game_state WHERE user_id = ?1 AND rating > 0`).bind(userId).first();
+  const pageViews = await db.prepare(`SELECT COALESCE(SUM(view_count), 0) AS n FROM user_page_views WHERE user_id = ?1`).bind(userId).first();
+  const uniquePages = await db.prepare(`SELECT COUNT(*) AS n FROM user_page_views WHERE user_id = ?1`).bind(userId).first();
   const recent = await db.prepare(`
     SELECT type, title, game_key, value, date FROM (
       SELECT 'watchlist' AS type, title, game_key, '' AS value, COALESCE(created_at, updated_at, '') AS date
@@ -57,13 +72,29 @@ async function getMemberStats(db, userId) {
     )
     WHERE date IS NOT NULL AND date != ''
     ORDER BY date DESC
-    LIMIT 6
+    LIMIT 50
+  `).bind(userId).all();
+  const recentViews = await db.prepare(`
+    SELECT 'page_view' AS type, title, game_key, CAST(view_count AS TEXT) AS value, last_viewed_at AS date
+    FROM user_page_views
+    WHERE user_id = ?1
+    ORDER BY last_viewed_at DESC
+    LIMIT 50
   `).bind(userId).all();
   return {
     watchlist_count: Number(watch?.n || 0),
     liked_count: Number(liked?.n || 0),
     rated_count: Number(rated?.n || 0),
+    page_views_count: Number(pageViews?.n || 0),
+    unique_pages_viewed: Number(uniquePages?.n || 0),
     recent_activity: (recent?.results || []).map((r) => ({
+      type: r.type || '',
+      title: r.title || r.game_key || 'Jeu sans titre',
+      game_key: r.game_key || '',
+      value: r.value || '',
+      date: r.date || ''
+    })),
+    recent_page_views: (recentViews?.results || []).map((r) => ({
       type: r.type || '',
       title: r.title || r.game_key || 'Jeu sans titre',
       game_key: r.game_key || '',
@@ -91,7 +122,7 @@ export async function onRequest(context) {
   `).all();
 
   const users = await Promise.all((results || []).map(async (u) => {
-    let extra = { watchlist_count: 0, liked_count: 0, rated_count: 0, recent_activity: [] };
+    let extra = { watchlist_count: 0, liked_count: 0, rated_count: 0, page_views_count: 0, unique_pages_viewed: 0, recent_activity: [], recent_page_views: [] };
     try { extra = await getMemberStats(env.DB, u.id); } catch {}
     return {
       id: u.id,

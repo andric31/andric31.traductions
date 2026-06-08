@@ -1,3 +1,4 @@
+import { ensureAuthTables, getSessionUser } from './_auth.js';
 export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
@@ -5,6 +6,7 @@ export async function onRequest(context) {
   const op = (url.searchParams.get("op") || "get").trim().toLowerCase();   // get | hit | unhit
   const kind = (url.searchParams.get("kind") || "").trim().toLowerCase();  // view | mega | like
   const id = (url.searchParams.get("id") || "").trim();
+  const title = (url.searchParams.get("title") || "").trim().slice(0, 300);
 
   const headers = {
     "content-type": "application/json; charset=utf-8",
@@ -61,11 +63,25 @@ export async function onRequest(context) {
     );
   `).run();
 
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS user_page_views (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      game_key TEXT NOT NULL,
+      title TEXT NOT NULL DEFAULT '',
+      first_viewed_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+      last_viewed_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+      view_count INTEGER NOT NULL DEFAULT 0,
+      UNIQUE(user_id, game_key)
+    );
+  `).run();
+
   // indexes (si déjà créés, OK)
   try {
     await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_counter_daily_day ON counter_daily(day);`).run();
     await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_counter_daily_kind_day ON counter_daily(kind, day);`).run();
     await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_counter_daily_id_kind_day ON counter_daily(id, kind, day);`).run();
+    await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_user_page_views_user_last ON user_page_views(user_id, last_viewed_at DESC);`).run();
   } catch {}
 
   // ✅ Migration douce: si ancienne table sans likes, on tente et on ignore si déjà OK
@@ -131,6 +147,23 @@ export async function onRequest(context) {
     `).bind(id, d).run();
   }
 
+
+  async function recordLoggedPageView() {
+    try {
+      await ensureAuthTables(env.DB);
+      const user = await getSessionUser(env.DB, env, request);
+      if (!user?.id) return;
+      await env.DB.prepare(`
+        INSERT INTO user_page_views (user_id, game_key, title, view_count, first_viewed_at, last_viewed_at)
+        VALUES (?1, ?2, ?3, 1, strftime('%Y-%m-%dT%H:%M:%fZ','now'), strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+        ON CONFLICT(user_id, game_key) DO UPDATE SET
+          title = CASE WHEN excluded.title != '' THEN excluded.title ELSE user_page_views.title END,
+          view_count = user_page_views.view_count + 1,
+          last_viewed_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
+      `).bind(user.id, id, title).run();
+    } catch {}
+  }
+
   // ===================== op=get =====================
   if (op === "get") {
     const row = await getRow();
@@ -150,6 +183,7 @@ export async function onRequest(context) {
 
       await addEvent("view");
       await dailyPlus1("view");
+      await recordLoggedPageView();
 
     } else if (kind === "mega") {
       await env.DB.prepare(`

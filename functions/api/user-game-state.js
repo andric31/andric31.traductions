@@ -39,6 +39,19 @@ async function ensureGameStateTables(db) {
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_user_game_state_user_like ON user_game_state(user_id, liked, liked_at DESC)`).run();
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_user_game_state_user_rating ON user_game_state(user_id, rating, rated_at DESC)`).run();
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_user_game_state_key ON user_game_state(game_key)`).run();
+  await db.prepare(`
+    CREATE TABLE IF NOT EXISTS user_page_views (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      game_key TEXT NOT NULL,
+      title TEXT NOT NULL DEFAULT '',
+      first_viewed_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+      last_viewed_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+      view_count INTEGER NOT NULL DEFAULT 0,
+      UNIQUE(user_id, game_key)
+    )
+  `).run();
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_user_page_views_user_last ON user_page_views(user_id, last_viewed_at DESC)`).run();
 
   await db.prepare(`
     CREATE TABLE IF NOT EXISTS counters (
@@ -92,6 +105,20 @@ async function getUserContext(context) {
   const auth = await requireUser(db, context.env, context.request);
   if (!auth.ok) return { db, error: auth.response };
   return { db, user: auth.user, error: null };
+}
+
+
+async function recordPageView(db, userId, gameKey, title = '') {
+  if (!userId || !gameKey) return;
+  const cleanTitle = clean(title, 300);
+  await db.prepare(`
+    INSERT INTO user_page_views (user_id, game_key, title, view_count, first_viewed_at, last_viewed_at)
+    VALUES (?1, ?2, ?3, 1, strftime('%Y-%m-%dT%H:%M:%fZ','now'), strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+    ON CONFLICT(user_id, game_key) DO UPDATE SET
+      title = CASE WHEN excluded.title != '' THEN excluded.title ELSE user_page_views.title END,
+      view_count = user_page_views.view_count + 1,
+      last_viewed_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
+  `).bind(userId, gameKey, cleanTitle).run();
 }
 
 async function getCounterRow(db, gameKey) {
@@ -219,6 +246,8 @@ export async function onRequestGet(context) {
   const limit = Math.min(Math.max(Number(url.searchParams.get('limit') || 200), 1), 500);
 
   if (gameKey) {
+    const titleParam = clean(url.searchParams.get('title'), 300);
+    try { await recordPageView(db, user.id, gameKey, titleParam); } catch {}
     const row = await db.prepare(`
       SELECT id, game_key, title, game_url, image_url, f95_url, discord_url, liked, rating, liked_at, rated_at, updated_at
       FROM user_game_state

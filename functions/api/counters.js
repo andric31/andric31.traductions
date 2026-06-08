@@ -1,3 +1,4 @@
+import { ensureAuthTables, getSessionUser } from './_auth.js';
 export async function onRequest(context) {
   const { request, env } = context;
 
@@ -36,6 +37,7 @@ export async function onRequest(context) {
     let op = "get";
     let type = "view";
     let id = "";
+    let title = "";
     let ids = [];
 
     if (request.method === "POST") {
@@ -46,6 +48,7 @@ export async function onRequest(context) {
       op = String(body?.op || "get").trim().toLowerCase();
       type = normType(body?.type || "view");
       id = normId(body?.id || "");
+      title = String(body?.title || "").trim().slice(0, 300);
 
       const idsRaw = Array.isArray(body?.ids) ? body.ids : [];
       ids = idsRaw.map(normId).filter(x => x);
@@ -57,6 +60,7 @@ export async function onRequest(context) {
       op = (u.searchParams.get("op") || "get").trim().toLowerCase();
       type = normType(u.searchParams.get("type") || "view");
       id = normId(u.searchParams.get("id") || "");
+      title = String(u.searchParams.get("title") || "").trim().slice(0, 300);
 
       const idsParam = u.searchParams.getAll("ids").flatMap(v => String(v || "").split(","));
       ids = []
@@ -102,11 +106,25 @@ export async function onRequest(context) {
       );
     `).run();
 
+    await env.DB.prepare(`
+      CREATE TABLE IF NOT EXISTS user_page_views (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        game_key TEXT NOT NULL,
+        title TEXT NOT NULL DEFAULT '',
+        first_viewed_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+        last_viewed_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+        view_count INTEGER NOT NULL DEFAULT 0,
+        UNIQUE(user_id, game_key)
+      );
+    `).run();
+
     // indexes
     try {
       await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_counter_daily_day ON counter_daily(day);`).run();
       await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_counter_daily_kind_day ON counter_daily(kind, day);`).run();
       await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_counter_daily_id_kind_day ON counter_daily(id, kind, day);`).run();
+      await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_user_page_views_user_last ON user_page_views(user_id, last_viewed_at DESC);`).run();
     } catch {}
 
     // si table counters existait sans likes
@@ -119,6 +137,23 @@ export async function onRequest(context) {
       const pruneBefore = nowSec - (8 * 24 * 60 * 60);
       await env.DB.prepare(`DELETE FROM counter_events WHERE ts < ?1`).bind(pruneBefore).run();
     } catch {}
+
+
+    async function recordLoggedPageView() {
+      try {
+        await ensureAuthTables(env.DB);
+        const user = await getSessionUser(env.DB, env, request);
+        if (!user?.id) return;
+        await env.DB.prepare(`
+          INSERT INTO user_page_views (user_id, game_key, title, view_count, first_viewed_at, last_viewed_at)
+          VALUES (?1, ?2, ?3, 1, strftime('%Y-%m-%dT%H:%M:%fZ','now'), strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+          ON CONFLICT(user_id, game_key) DO UPDATE SET
+            title = CASE WHEN excluded.title != '' THEN excluded.title ELSE user_page_views.title END,
+            view_count = user_page_views.view_count + 1,
+            last_viewed_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
+        `).bind(user.id, id, title).run();
+      } catch {}
+    }
 
     // ===================== op=hit / op=unhit =====================
     if (op === "hit" || op === "unhit") {
@@ -137,6 +172,7 @@ export async function onRequest(context) {
         if (type === "view") {
           await env.DB.prepare(`UPDATE counters SET views = views + 1, updated_at = unixepoch() WHERE id = ?1`).bind(id).run();
           await env.DB.prepare(`INSERT INTO counter_events (id, kind, ts) VALUES (?1, 'view', unixepoch())`).bind(id).run();
+          await recordLoggedPageView();
         } else if (type === "mega") {
           await env.DB.prepare(`UPDATE counters SET mega = mega + 1, updated_at = unixepoch() WHERE id = ?1`).bind(id).run();
           await env.DB.prepare(`INSERT INTO counter_events (id, kind, ts) VALUES (?1, 'mega', unixepoch())`).bind(id).run();

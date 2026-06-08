@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin événements</title>
+  <link rel="icon" href="/favicon.png" />
+  <link rel="stylesheet" href="/viewer.css" />
+  <link rel="stylesheet" href="/themes.css" />
+  <link rel="stylesheet" href="/auth/auth.css" />
+  <script src="/theme-init.js"></script>
+  <style>
+    html:not(.auth-ready) body { visibility:hidden; }
+    html.auth-denied body { visibility:visible; }
+    .event-admin-layout { width:min(1180px, calc(100% - 18px)); margin:12px auto 18px !important; display:grid; gap:14px; }
+    body .auth-shell.event-admin-layout { margin-top:12px !important; }
+    .event-admin-grid { display:grid; grid-template-columns:minmax(320px,.95fr) minmax(360px,1.25fr); gap:14px; align-items:start; }
+    .event-admin-toolbar { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+    .event-admin-note { color:var(--muted); font-size:13px; line-height:1.55; }
+    .event-admin-card { border:1px solid var(--border, var(--auth-border)); border-radius:16px; background:rgba(255,255,255,.035); padding:14px; }
+    .event-admin-card h2, .event-admin-card h3 { margin-top:0; }
+    .event-admin-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .event-admin-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+    .event-admin-current { display:grid; grid-template-columns:120px 1fr; gap:12px; align-items:start; }
+    .event-admin-cover { width:120px; aspect-ratio:3/4; border-radius:14px; overflow:hidden; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); display:grid; place-items:center; }
+    .event-admin-cover img { width:100%; height:100%; object-fit:cover; display:block; }
+    .event-admin-cover span { font-size:34px; }
+    .event-admin-pill-list { display:flex; flex-wrap:wrap; gap:7px; margin-top:8px; }
+    .event-admin-pill { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; border:1px solid var(--border, var(--auth-border)); background:rgba(255,255,255,.07); font-size:12px; color:var(--text,#fff); }
+    .event-admin-pill.ok { background:rgba(126,224,161,.13); border-color:rgba(126,224,161,.38); color:#7ee0a1; }
+    .event-admin-pill.warn { background:rgba(255,184,77,.12); border-color:rgba(255,184,77,.35); color:#ffbf5f; }
+    .event-admin-results { display:grid; gap:8px; max-height:520px; overflow:auto; padding-right:4px; }
+    .event-admin-game { display:grid; grid-template-columns:58px 1fr auto; gap:10px; align-items:center; padding:9px; border-radius:14px; border:1px solid var(--border, var(--auth-border)); background:rgba(255,255,255,.035); }
+    .event-admin-game img, .event-admin-game .placeholder { width:58px; height:76px; object-fit:cover; border-radius:10px; background:rgba(255,255,255,.06); display:grid; place-items:center; }
+    .event-admin-game strong { display:block; line-height:1.25; }
+    .event-admin-game small { color:var(--muted); display:block; margin-top:4px; }
+    .event-admin-json { min-height:260px; font-family:ui-monospace, SFMono-Regular, Consolas, monospace; font-size:12px; line-height:1.45; white-space:pre; }
+    .event-admin-msg { margin-top:10px; color:var(--muted); font-size:13px; }
+    .event-admin-msg.ok { color:#7ee0a1; }
+    .event-admin-msg.err { color:#ff8a8a; }
+    @media (max-width:850px){ .event-admin-grid, .event-admin-row, .event-admin-current { grid-template-columns:1fr; } .event-admin-cover { width:150px; } .event-admin-game { grid-template-columns:50px 1fr; } .event-admin-game .auth-btn { grid-column:1 / -1; } }
+  </style>
+</head>
+<body>
+  <main class="auth-shell event-admin-layout">
+    <section class="auth-card auth-hidden" data-guest-only>
+      <h1 class="auth-title">⛔ Accès refusé</h1>
+      <p class="auth-subtitle">Cette page est réservée aux administrateurs.</p>
+      <div class="auth-actions">
+        <a class="auth-btn primary" href="/connexion/">Se connecter</a>
+        <a class="auth-btn" href="/">Retour au site</a>
+      </div>
+    </section>
+
+    <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
+      <div class="event-admin-toolbar">
+        <div>
+          <h1 class="auth-title" style="margin-bottom:6px;">☀️ Gestion des événements</h1>
+          <p class="auth-subtitle" style="margin:0;">Prévisualise le jeu choisi, force un jeu précis et prépare le fichier JSON à remplacer.</p>
+        </div>
+        <div class="auth-actions" style="margin:0;">
+          <a class="auth-btn" href="/compte/admin.html">Centre admin</a>
+          <a class="auth-btn" href="/evenements/" target="_blank" rel="noopener">Voir la page</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
+      <div class="event-admin-grid">
+        <div class="event-admin-card">
+          <h2>🎯 Événement actif</h2>
+          <div id="eventMsg" class="event-admin-msg">Chargement…</div>
+          <div id="currentGame" style="margin-top:12px;"></div>
+        </div>
+
+        <form id="eventForm" class="event-admin-card" autocomplete="off">
+          <h2>⚙️ Réglages rapides</h2>
+          <label class="auth-label"><span>Fichier événement actif</span><input class="auth-input" id="eventId" placeholder="ete-2026" /></label>
+          <label class="auth-label"><span>Titre</span><input class="auth-input" id="eventTitle" /></label>
+          <label class="auth-label"><span>Texte affiché</span><textarea class="auth-input" id="eventText" rows="3"></textarea></label>
+          <div class="event-admin-row">
+            <label class="auth-label"><span>Changer le jeu le</span>
+              <select class="auth-select" id="changeDay">
+                <option value="monday">Lundi</option><option value="tuesday">Mardi</option><option value="wednesday">Mercredi</option><option value="thursday">Jeudi</option><option value="friday">Vendredi</option><option value="saturday">Samedi</option><option value="sunday">Dimanche</option>
+              </select>
+            </label>
+            <label class="auth-label"><span>Heure du changement</span><input class="auth-input" id="changeHour" type="number" min="0" max="23" step="1" /></label>
+          </div>
+          <div class="event-admin-row">
+            <label class="auth-label"><span>ID du jeu forcé</span><input class="auth-input" id="selectedId" placeholder="laisser vide = automatique" /></label>
+            <label class="auth-label"><span>UID du jeu forcé</span><input class="auth-input" id="selectedUid" placeholder="optionnel" /></label>
+          </div>
+          <label class="auth-label"><span>Mots-clés de sélection automatique</span><textarea class="auth-input" id="keywords" rows="4" placeholder="summer, beach, plage..."></textarea></label>
+          <label class="auth-label"><span>Mode si aucun jeu ne correspond</span>
+            <select class="auth-select" id="fallbackMode">
+              <option value="weekly_random">Choisir un jeu au hasard chaque semaine</option>
+              <option value="">Ne rien afficher</option>
+            </select>
+          </label>
+          <div class="event-admin-actions">
+            <button class="auth-btn primary" type="submit">Prévisualiser</button>
+            <button class="auth-btn" id="clearForcedBtn" type="button">Revenir en auto</button>
+            <button class="auth-btn" id="copyJsonBtn" type="button">Copier le JSON</button>
+            <button class="auth-btn" id="downloadJsonBtn" type="button">Télécharger le JSON</button>
+          </div>
+          <p class="event-admin-note">Le site est statique : pour appliquer vraiment les changements, remplace le fichier <strong>/evenements/<span id="fileNameHint">ete-2026</span>.json</strong> par le JSON généré.</p>
+        </form>
+      </div>
+    </section>
+
+    <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
+      <div class="event-admin-grid">
+        <div class="event-admin-card">
+          <h2>🔎 Choisir un jeu manuellement</h2>
+          <label class="auth-label"><span>Recherche</span><input class="auth-input" id="gameSearch" placeholder="Titre, tag, ID…" /></label>
+          <div class="event-admin-pill-list" id="gamesSummary"></div>
+          <div class="event-admin-results" id="gamesResults"><div class="event-admin-msg">Chargement des jeux…</div></div>
+        </div>
+
+        <div class="event-admin-card">
+          <h2>📄 JSON généré</h2>
+          <textarea class="auth-input event-admin-json" id="jsonOutput" spellcheck="false"></textarea>
+          <div id="jsonMsg" class="event-admin-msg"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/auth/auth.client.js"></script>
+  <script>
+    (function(){
+      function showDenied(){
+        document.documentElement.classList.add('auth-ready','auth-denied');
+        document.querySelectorAll('[data-auth-only]').forEach((el)=>el.remove());
+        document.querySelectorAll('[data-guest-only]').forEach((el)=>el.classList.remove('auth-hidden'));
+      }
+      function check(){
+        if (!window.SiteAuth?.loaded) return false;
+        const ok = !!(window.SiteAuth.me && String(window.SiteAuth.me.role || '').toLowerCase() === 'admin');
+        if (ok) { document.documentElement.classList.add('auth-ready'); return true; }
+        showDenied(); return false;
+      }
+      window.__ensureEventAdminPage = function(){ return check(); };
+      document.addEventListener('DOMContentLoaded', function(){ setTimeout(window.__ensureEventAdminPage, 0); });
+      if (window.SiteAuth?.onChange) window.SiteAuth.onChange(function(me){
+        if (window.SiteAuth?.loaded && me && String(me.role || '').toLowerCase() === 'admin') document.documentElement.classList.add('auth-ready');
+        else showDenied();
+      });
+    })();
+  </script>
+  <script>
+    const DEFAULT_LIST_URL = 'https://raw.githubusercontent.com/andric31/f95list/main/f95list.json';
+    let activeEvent = null;
+    let allGames = [];
+    let currentSelection = null;
+
+    const $ = (id) => document.getElementById(id);
+    const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const norm = (v) => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+    async function fetchJson(url, fallback) {
+      try {
+        const glue = url.includes('?') ? '&' : '?';
+        const res = await fetch(`${url}${glue}v=${Date.now()}`, { cache:'no-store' });
+        if (!res.ok) return fallback;
+        return await res.json();
+      } catch { return fallback; }
+    }
+
+    function cleanTitle(title) {
+      return String(title || '').replace(/\[[^\]]*\]/g, ' ').replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim() || String(title || '').trim() || 'Jeu traduit';
+    }
+    function getTitle(g){ return cleanTitle(g?.gameData?.title || g?.cleanTitle || g?.title || ''); }
+    function getImage(g){ return String(g?.gameData?.imageUrl || g?.imageUrl || g?.image || '').trim(); }
+    function getDesc(g){ return String(g?.gameData?.description || g?.description || '').replace(/<br\s*\/?>(\s*)/gi,'\n').replace(/<[^>]*>/g,'').trim(); }
+    function getTags(g){ const raw = g?.gameData?.tags || g?.tags || []; return Array.isArray(raw) ? raw.map(String).filter(Boolean) : String(raw || '').split(',').map(s=>s.trim()).filter(Boolean); }
+    function buildUrl(g){ const coll=String(g?.collection||'').trim(); const id=String(g?.id||'').trim(); const uid=String(g?.uid??'').trim(); if(coll) return `/game/?id=${encodeURIComponent(coll)}${uid ? `&uid=${encodeURIComponent(uid)}` : ''}`; if(id) return `/game/?id=${encodeURIComponent(id)}`; if(uid) return `/game/?uid=${encodeURIComponent(uid)}`; return '/'; }
+    function hashText(text){ let h=2166136261; for(const ch of String(text)){ h ^= ch.charCodeAt(0); h = Math.imul(h,16777619); } return Math.abs(h>>>0); }
+
+    function flattenGames(raw) {
+      const out = [];
+      const seen = new Set();
+      function add(g, parentCollection = '') {
+        if (!g || typeof g !== 'object') return;
+        const title = String(g.gameData?.title || g.cleanTitle || g.title || '').trim();
+        const id = String(g.id || '').trim();
+        const uid = String(g.uid ?? '').trim();
+        const key = `${id}|${uid}|${title}`;
+        if (title && !seen.has(key)) { seen.add(key); out.push(parentCollection && !g.collection ? { ...g, collection: parentCollection } : g); }
+        const collectionId = id || String(g.collection || parentCollection || '').trim();
+        ['games','children','items','entries','subgames','subGames'].forEach((field) => { if (Array.isArray(g[field])) g[field].forEach((child) => add(child, collectionId)); });
+      }
+      if (Array.isArray(raw)) raw.forEach((g) => add(g));
+      else if (Array.isArray(raw?.games)) raw.games.forEach((g) => add(g));
+      else if (raw && typeof raw === 'object') Object.values(raw).forEach((v) => { if (Array.isArray(v)) v.forEach((g) => add(g)); });
+      return out.filter((g) => getTitle(g));
+    }
+
+    const CHANGE_DAYS = { sunday:0, dimanche:0, monday:1, lundi:1, tuesday:2, mardi:2, wednesday:3, mercredi:3, thursday:4, jeudi:4, friday:5, vendredi:5, saturday:6, samedi:6 };
+    function getChangeDay(event){ const raw=norm(event?.change_day || 'monday').trim(); return Object.prototype.hasOwnProperty.call(CHANGE_DAYS, raw) ? CHANGE_DAYS[raw] : 1; }
+    function getChangeHour(event){ const h=Number(event?.change_hour); return Number.isFinite(h) ? Math.min(23, Math.max(0, Math.floor(h))) : 0; }
+    function getLastChangeBoundary(date, event){ const b=new Date(date); b.setHours(getChangeHour(event),0,0,0); const diff=(b.getDay() - getChangeDay(event) + 7) % 7; b.setDate(b.getDate()-diff); if (b.getTime() > date.getTime()) b.setDate(b.getDate()-7); return b; }
+    function getRotationIndex(event){ const now=new Date(); const start=new Date(event?.start_at || ''); const baselineDate=!Number.isNaN(start.getTime()) && now >= start ? start : new Date(now.getFullYear(),0,1); const base=getLastChangeBoundary(baselineDate,event); const cur=getLastChangeBoundary(now,event); return Math.max(0, Math.floor((cur-base)/(7*24*60*60*1000))); }
+    function keywordRegex(keyword){ const n=norm(keyword).trim(); if(!n) return null; return new RegExp(`(^|[^a-z0-9])${n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}([^a-z0-9]|$)`, 'i'); }
+    function analyse(g,event){
+      const keywords = (Array.isArray(event.selection_keywords) ? event.selection_keywords : []).map(s=>String(s||'').trim()).filter(Boolean);
+      const src = { title:norm(getTitle(g)), description:norm(getDesc(g)), tags:norm(getTags(g).join(' ')) };
+      const found=[]; let score=0;
+      keywords.forEach((kw)=>{ const re=keywordRegex(kw); if(!re) return; const hits=[]; if(re.test(src.title)) hits.push('titre'); if(re.test(src.description)) hits.push('description'); if(re.test(src.tags)) hits.push('tags'); if(!hits.length) return; let s=0; if(hits.includes('titre')) s+=8; if(hits.includes('description')) s+=5; if(hits.includes('tags')) s+=2; score+=s; found.push(kw); });
+      return { score, found, description:getDesc(g), tags:getTags(g) };
+    }
+    function pickGame(games,event){
+      const wantedId=String(event?.selected_game_id||'').trim(); const wantedUid=String(event?.selected_game_uid||'').trim();
+      if(wantedId || wantedUid){
+        const forced=games.find((g)=>(!wantedId || String(g.id||'').trim()===wantedId || String(g.collection||'').trim()===wantedId) && (!wantedUid || String(g.uid??'').trim()===wantedUid));
+        if(forced) return { game:forced, reason:'Jeu forcé manuellement.', matchedKeywords:[], score:null };
+      }
+      const valid = games.filter((g)=>getImage(g)).filter((g)=>buildUrl(g) !== '/');
+      let pool = valid.map((g)=>({game:g, analysis:analyse(g,event)})).filter(e=>e.analysis.score>0).sort((a,b)=>b.analysis.score-a.analysis.score || getTitle(a.game).localeCompare(getTitle(b.game),'fr'));
+      if(!pool.length && String(event?.fallback_mode||'').trim()==='weekly_random') pool = valid.map((g)=>({game:g, analysis:{score:0, found:[]}})).sort((a,b)=>getTitle(a.game).localeCompare(getTitle(b.game),'fr'));
+      if(!pool.length) return { game:null, reason:'Aucun jeu trouvé.', matchedKeywords:[], score:null };
+      const selected = pool[(getRotationIndex(event) + (hashText(event?.id || event?.title || 'event') % pool.length)) % pool.length];
+      return { game:selected.game, reason:selected.analysis.found?.length ? `Auto : ${selected.analysis.found.join(', ')}` : 'Auto : rotation hebdomadaire', matchedKeywords:selected.analysis.found || [], score:selected.analysis.score };
+    }
+
+    function fillForm(event) {
+      $('eventId').value = event.id || 'ete-2026';
+      $('eventTitle').value = event.title || '';
+      $('eventText').value = event.text || '';
+      $('changeDay').value = event.change_day || 'monday';
+      $('changeHour').value = Number.isFinite(Number(event.change_hour)) ? Number(event.change_hour) : 0;
+      $('selectedId').value = event.selected_game_id || '';
+      $('selectedUid').value = event.selected_game_uid || '';
+      $('keywords').value = Array.isArray(event.selection_keywords) ? event.selection_keywords.join(', ') : '';
+      $('fallbackMode').value = event.fallback_mode || '';
+      $('fileNameHint').textContent = event.id || 'ete-2026';
+    }
+
+    function formEvent() {
+      const next = { ...(activeEvent || {}) };
+      next.id = $('eventId').value.trim() || next.id || 'ete-2026';
+      next.title = $('eventTitle').value.trim() || next.title || 'Événement';
+      next.text = $('eventText').value.trim();
+      next.change_day = $('changeDay').value || 'monday';
+      next.change_hour = Math.min(23, Math.max(0, parseInt($('changeHour').value || '0', 10) || 0));
+      next.selected_game_id = $('selectedId').value.trim();
+      next.selected_game_uid = $('selectedUid').value.trim();
+      next.selection_keywords = $('keywords').value.split(',').map((s)=>s.trim()).filter(Boolean);
+      next.fallback_mode = $('fallbackMode').value;
+      return next;
+    }
+
+    function renderCurrent() {
+      const event = formEvent();
+      currentSelection = pickGame(allGames, event);
+      const game = currentSelection.game;
+      $('fileNameHint').textContent = event.id || 'ete-2026';
+      $('jsonOutput').value = JSON.stringify(event, null, 2);
+      if (!game) {
+        $('currentGame').innerHTML = '<div class="event-admin-msg err">Aucun jeu sélectionné avec ces réglages.</div>';
+        return;
+      }
+      const image = getImage(game);
+      const tags = getTags(game).slice(0,8);
+      $('currentGame').innerHTML = `
+        <div class="event-admin-current">
+          <div class="event-admin-cover">${image ? `<img src="${esc(image)}" alt="">` : '<span>🎮</span>'}</div>
+          <div>
+            <h3 style="margin:0 0 6px;">${esc(getTitle(game))}</h3>
+            <p class="event-admin-note" style="margin:0 0 8px;">${esc(currentSelection.reason || '')}</p>
+            <div class="event-admin-pill-list">
+              <span class="event-admin-pill ok">ID : ${esc(game.collection || game.id || '—')}</span>
+              <span class="event-admin-pill ${String(game.uid ?? '').trim() ? 'ok' : 'warn'}">UID : ${esc(String(game.uid ?? '').trim() || '—')}</span>
+              <span class="event-admin-pill">Score : ${esc(currentSelection.score ?? 'manuel')}</span>
+            </div>
+            <div class="event-admin-pill-list">${tags.map((t)=>`<span class="event-admin-pill">${esc(t)}</span>`).join('')}</div>
+            <div class="event-admin-actions">
+              <a class="auth-btn mini" href="${esc(buildUrl(game))}" target="_blank" rel="noopener">Fiche</a>
+              ${game.url ? `<a class="auth-btn mini" href="${esc(game.url)}" target="_blank" rel="noopener">F95Zone</a>` : ''}
+              ${game.discordlink ? `<a class="auth-btn mini" href="${esc(game.discordlink)}" target="_blank" rel="noopener">Discord</a>` : ''}
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function renderGames() {
+      const q = norm($('gameSearch').value);
+      const terms = q.split(/\s+/).filter(Boolean);
+      const filtered = allGames.filter((g) => {
+        const hay = norm([getTitle(g), g.id, g.uid, g.collection, getTags(g).join(' ')].join(' '));
+        return !terms.length || terms.every((t)=>hay.includes(t));
+      }).slice(0,80);
+      $('gamesSummary').innerHTML = `<span class="event-admin-pill">Jeux : ${allGames.length}</span><span class="event-admin-pill">Résultats : ${filtered.length}</span>`;
+      $('gamesResults').innerHTML = filtered.map((g) => {
+        const image = getImage(g);
+        const id = String(g.collection || g.id || '').trim();
+        const uid = String(g.uid ?? '').trim();
+        return `<article class="event-admin-game">
+          ${image ? `<img src="${esc(image)}" alt="">` : '<div class="placeholder">🎮</div>'}
+          <div><strong>${esc(getTitle(g))}</strong><small>ID : ${esc(id || '—')} ${uid ? `• UID : ${esc(uid)}` : ''}</small></div>
+          <button class="auth-btn mini" type="button" data-pick-id="${esc(id)}" data-pick-uid="${esc(uid)}">Forcer</button>
+        </article>`;
+      }).join('') || '<div class="event-admin-msg">Aucun résultat.</div>';
+    }
+
+    async function init() {
+      if (window.__ensureEventAdminPage && !window.__ensureEventAdminPage()) return;
+      const config = await fetchJson('/evenements/config.json', { event_actif:'ete-2026' });
+      const eventId = String(config.event_actif || config.active_event || 'ete-2026').trim() || 'ete-2026';
+      activeEvent = await fetchJson(`/evenements/${eventId}.json`, null);
+      if (!activeEvent) throw new Error('Impossible de charger le fichier événement.');
+      const rawGames = await fetchJson(activeEvent.list_url || DEFAULT_LIST_URL, []);
+      allGames = flattenGames(rawGames);
+      fillForm(activeEvent);
+      renderCurrent();
+      renderGames();
+      $('eventMsg').textContent = `Événement chargé : ${eventId}.`;
+      $('eventMsg').className = 'event-admin-msg ok';
+    }
+
+    $('eventForm')?.addEventListener('submit', (e) => { e.preventDefault(); renderCurrent(); $('jsonMsg').textContent = 'Prévisualisation mise à jour.'; $('jsonMsg').className = 'event-admin-msg ok'; });
+    $('clearForcedBtn')?.addEventListener('click', () => { $('selectedId').value=''; $('selectedUid').value=''; renderCurrent(); });
+    $('gameSearch')?.addEventListener('input', renderGames);
+    $('gamesResults')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-pick-id]');
+      if (!btn) return;
+      $('selectedId').value = btn.dataset.pickId || '';
+      $('selectedUid').value = btn.dataset.pickUid || '';
+      renderCurrent();
+      window.scrollTo({ top:0, behavior:'smooth' });
+    });
+    $('copyJsonBtn')?.addEventListener('click', async () => {
+      renderCurrent();
+      try { await navigator.clipboard.writeText($('jsonOutput').value); $('jsonMsg').textContent='JSON copié.'; $('jsonMsg').className='event-admin-msg ok'; }
+      catch { $('jsonOutput').select(); document.execCommand('copy'); $('jsonMsg').textContent='JSON copié.'; $('jsonMsg').className='event-admin-msg ok'; }
+    });
+    $('downloadJsonBtn')?.addEventListener('click', () => {
+      renderCurrent();
+      const name = `${($('eventId').value.trim() || 'evenement')}.json`;
+      const blob = new Blob([$('jsonOutput').value], { type:'application/json;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+      $('jsonMsg').textContent=`Fichier ${name} téléchargé.`; $('jsonMsg').className='event-admin-msg ok';
+    });
+
+    document.addEventListener('DOMContentLoaded', () => setTimeout(() => init().catch((err)=>{ $('eventMsg').textContent = err?.message || 'Erreur.'; $('eventMsg').className = 'event-admin-msg err'; }), 120));
+  </script>
+</body>
+</html>

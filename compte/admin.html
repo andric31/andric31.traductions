@@ -173,8 +173,15 @@
   .member-history-kind { display:block; color:var(--muted); font-size:12px; margin-bottom:3px; }
   .member-history-game { display:block; color:var(--text,#fff); font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:520px; }
   .member-history-date { color:var(--muted); font-size:12px; white-space:nowrap; }
-  .member-view-meta { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
-  .member-view-chip { display:inline-flex; align-items:center; gap:5px; padding:4px 8px; border-radius:999px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.07); color:var(--muted); font-size:12px; font-weight:700; }
+  .member-view-row { align-items:center; padding:8px 10px; }
+  .member-view-row .member-history-main { display:flex; align-items:center; gap:10px; width:100%; min-width:0; }
+  .member-view-row .member-history-game { flex:1 1 auto; max-width:none; }
+  .member-view-meta { flex:0 0 auto; display:flex; align-items:center; flex-wrap:nowrap; gap:6px; margin-top:0; }
+  .member-view-chip { display:inline-flex; align-items:center; gap:5px; padding:4px 8px; border-radius:999px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.07); color:var(--muted); font-size:12px; font-weight:700; white-space:nowrap; }
+  @media (max-width: 760px) {
+    .member-view-row .member-history-main { flex-wrap:wrap; gap:6px; }
+    .member-view-meta { flex-wrap:wrap; }
+  }
   .member-history-empty { color:var(--muted); font-size:13px; margin:0; }
   .member-card.is-open .member-head { cursor:default; }
   .admin-pill, .auth-badge {
@@ -480,9 +487,8 @@
         return '<p class="member-history-empty">Aucun jeu consulté pour le moment.</p>';
       }
       return `<div class="member-history-scroll"><ul class="member-history-list">${items.map((item) => `
-        <li class="member-history-item">
+        <li class="member-history-item member-view-row">
           <span class="member-history-main">
-            <span class="member-history-kind">Jeu consulté</span>
             <span class="member-history-game">${esc(item?.title || item?.game_key || 'Jeu sans titre')}</span>
             <span class="member-view-meta">
               <span class="member-view-chip">👁️ ${Number(item?.value || 0)} vue(s)</span>

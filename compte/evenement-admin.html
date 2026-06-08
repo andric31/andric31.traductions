@@ -103,6 +103,7 @@
           <div class="event-admin-actions">
             <button class="auth-btn primary" type="submit">Prévisualiser</button>
             <button class="auth-btn" id="clearForcedBtn" type="button">Revenir en auto</button>
+            <button class="auth-btn" id="autoChangeGameBtn" type="button">Changer le jeu automatiquement</button>
             <button class="auth-btn" id="copyJsonBtn" type="button">Copier le JSON</button>
             <button class="auth-btn" id="downloadJsonBtn" type="button">Télécharger le JSON</button>
           </div>
@@ -235,6 +236,63 @@
       return { game:selected.game, reason: blockedApplied ? `${reasonBase} — jeux déjà utilisés ignorés` : reasonBase, matchedKeywords:selected.analysis.found || [], score:selected.analysis.score };
     }
 
+
+    function getAutoChangePool(games, event, currentGame) {
+      const valid = games.filter((g)=>getImage(g)).filter((g)=>buildUrl(g) !== '/');
+      const currentKey = currentGame ? getGameKey(currentGame) : '';
+      const withoutCurrent = (entries) => dedupePool(entries).filter((entry)=>getGameKey(entry.game) !== currentKey && !isBlockedGame(entry.game, event));
+
+      let pool = valid
+        .map((g)=>({ game:g, analysis:analyse(g,event) }))
+        .filter((entry)=>entry.analysis.score > 0)
+        .sort((a,b)=>b.analysis.score-a.analysis.score || getTitle(a.game).localeCompare(getTitle(b.game),'fr'));
+
+      pool = withoutCurrent(pool);
+      if (!pool.length && String(event?.fallback_mode || '').trim() === 'weekly_random') {
+        pool = withoutCurrent(valid.map((g)=>({ game:g, analysis:{ score:0, found:[] } })).sort((a,b)=>getTitle(a.game).localeCompare(getTitle(b.game),'fr')));
+      }
+      return pool;
+    }
+
+    function addBlockedGameKey(game) {
+      if (!game) return false;
+      const key = getGameKey(game);
+      const existing = $('blockedGameKeys').value.split(/\n|,/).map((s)=>s.trim()).filter(Boolean);
+      if (existing.includes(key)) return false;
+      $('blockedGameKeys').value = [...existing, key].join('\n');
+      return true;
+    }
+
+    function forceGame(game) {
+      if (!game) return;
+      $('selectedId').value = String(game.collection || game.id || '').trim();
+      $('selectedUid').value = String(game.uid ?? '').trim();
+    }
+
+    function changeGameAutomatically() {
+      const previousGame = currentSelection?.game || null;
+      addBlockedGameKey(previousGame);
+      $('selectedId').value = '';
+      $('selectedUid').value = '';
+
+      const event = formEvent();
+      const pool = getAutoChangePool(allGames, event, previousGame);
+      if (!pool.length) {
+        renderCurrent();
+        $('jsonMsg').textContent = 'Impossible de changer automatiquement : aucun autre jeu disponible avec ces réglages.';
+        $('jsonMsg').className = 'event-admin-msg err';
+        return;
+      }
+
+      const index = (getRotationIndex(event) + hashText(`${event.id || event.title || 'event'}|${Date.now()}|${pool.length}`)) % pool.length;
+      const nextGame = pool[index].game;
+      forceGame(nextGame);
+      renderCurrent();
+      $('jsonMsg').textContent = `Nouveau jeu choisi automatiquement : ${getTitle(nextGame)}. Copie ou télécharge le JSON pour appliquer.`;
+      $('jsonMsg').className = 'event-admin-msg ok';
+      window.scrollTo({ top:0, behavior:'smooth' });
+    }
+
     function fillForm(event) {
       $('eventId').value = event.id || 'ete-2026';
       $('eventTitle').value = event.title || '';
@@ -336,11 +394,10 @@
 
     $('eventForm')?.addEventListener('submit', (e) => { e.preventDefault(); renderCurrent(); $('jsonMsg').textContent = 'Prévisualisation mise à jour.'; $('jsonMsg').className = 'event-admin-msg ok'; });
     $('clearForcedBtn')?.addEventListener('click', () => { $('selectedId').value=''; $('selectedUid').value=''; renderCurrent(); });
+    $('autoChangeGameBtn')?.addEventListener('click', changeGameAutomatically);
     document.addEventListener('click', (e) => {
       if (!e.target.closest('#blockCurrentGameBtn') || !currentSelection?.game) return;
-      const key = getGameKey(currentSelection.game);
-      const existing = $('blockedGameKeys').value.split(/[\n,]+/).map((s)=>s.trim()).filter(Boolean);
-      if (!existing.includes(key)) $('blockedGameKeys').value = [...existing, key].join('\n');
+      addBlockedGameKey(currentSelection.game);
       $('selectedId').value=''; $('selectedUid').value='';
       renderCurrent();
       $('jsonMsg').textContent = 'Jeu ajouté aux blocages. Copie ou télécharge le JSON pour appliquer.';

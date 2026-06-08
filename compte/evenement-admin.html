@@ -56,7 +56,7 @@
       <div class="event-admin-toolbar">
         <div>
           <h1 class="auth-title" style="margin-bottom:6px;">📅 Page événements</h1>
-          <p class="auth-subtitle" style="margin:0;">Prévisualise le jeu choisi, force un jeu précis et prépare le fichier JSON à remplacer.</p>
+          <p class="auth-subtitle" style="margin:0;">Prévisualise le jeu choisi, force un jeu précis et sauvegarde l’événement dans la base Cloudflare.</p>
         </div>
         <div class="auth-actions" style="margin:0;">
           <a class="auth-btn" href="/compte/">Retour au compte</a>
@@ -104,10 +104,11 @@
             <button class="auth-btn primary" type="submit">Prévisualiser</button>
             <button class="auth-btn" id="clearForcedBtn" type="button">Revenir en auto</button>
             <button class="auth-btn" id="autoChangeGameBtn" type="button">Changer le jeu automatiquement</button>
+            <button class="auth-btn primary" id="saveEventBtn" type="button">Sauvegarder sur le site</button>
             <button class="auth-btn" id="copyJsonBtn" type="button">Copier le JSON</button>
             <button class="auth-btn" id="downloadJsonBtn" type="button">Télécharger le JSON</button>
           </div>
-          <p class="event-admin-note">Le site est statique : pour appliquer vraiment les changements, remplace le fichier <strong>/evenements/<span id="fileNameHint">ete-2026</span>.json</strong> par le JSON généré.</p>
+          <p class="event-admin-note">Les changements sont maintenant sauvegardés dans Cloudflare via <strong>/api/evenement</strong>. Le fichier <strong>/evenements/<span id="fileNameHint">ete-2026</span>.json</strong> sert seulement de configuration de base.</p>
         </form>
       </div>
     </section>
@@ -169,6 +170,35 @@
         if (!res.ok) return fallback;
         return await res.json();
       } catch { return fallback; }
+    }
+
+    async function loadSavedEvent(baseEvent) {
+      const id = String(baseEvent?.id || '').trim();
+      if (!id) return baseEvent;
+      const saved = await fetchJson(`/api/evenement?id=${encodeURIComponent(id)}`, null);
+      if (saved?.ok && saved.event && typeof saved.event === 'object') {
+        return { ...baseEvent, ...saved.event };
+      }
+      return baseEvent;
+    }
+
+    async function saveEventToSite(event, message = 'Événement sauvegardé sur le site.') {
+      const res = await fetch('/api/evenement', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ event })
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) throw new Error(data?.error || 'Sauvegarde impossible.');
+      activeEvent = { ...(activeEvent || {}), ...(data.event || event) };
+      fillForm(activeEvent);
+      renderCurrent();
+      $('jsonMsg').textContent = message;
+      $('jsonMsg').className = 'event-admin-msg ok';
+      $('eventMsg').textContent = `Événement chargé : ${activeEvent.id || event.id}. Sauvegarde Cloudflare active.`;
+      $('eventMsg').className = 'event-admin-msg ok';
+      return data;
     }
 
     function cleanTitle(title) {
@@ -269,7 +299,7 @@
       $('selectedUid').value = String(game.uid ?? '').trim();
     }
 
-    function changeGameAutomatically() {
+    async function changeGameAutomatically() {
       const previousGame = currentSelection?.game || null;
       addBlockedGameKey(previousGame);
       $('selectedId').value = '';
@@ -288,8 +318,12 @@
       const nextGame = pool[index].game;
       forceGame(nextGame);
       renderCurrent();
-      $('jsonMsg').textContent = `Nouveau jeu choisi automatiquement : ${getTitle(nextGame)}. Copie ou télécharge le JSON pour appliquer.`;
-      $('jsonMsg').className = 'event-admin-msg ok';
+      try {
+        await saveEventToSite(formEvent(), `Nouveau jeu choisi automatiquement et sauvegardé : ${getTitle(nextGame)}.`);
+      } catch (err) {
+        $('jsonMsg').textContent = `${err?.message || 'Sauvegarde impossible.'} Le JSON reste disponible en secours.`;
+        $('jsonMsg').className = 'event-admin-msg err';
+      }
       window.scrollTo({ top:0, behavior:'smooth' });
     }
 
@@ -381,27 +415,31 @@
       if (window.__ensureEventAdminPage && !window.__ensureEventAdminPage()) return;
       const config = await fetchJson('/evenements/config.json', { event_actif:'ete-2026' });
       const eventId = String(config.event_actif || config.active_event || 'ete-2026').trim() || 'ete-2026';
-      activeEvent = await fetchJson(`/evenements/${eventId}.json`, null);
-      if (!activeEvent) throw new Error('Impossible de charger le fichier événement.');
+      const baseEvent = await fetchJson(`/evenements/${eventId}.json`, null);
+      if (!baseEvent) throw new Error('Impossible de charger le fichier événement.');
+      activeEvent = await loadSavedEvent(baseEvent);
       const rawGames = await fetchJson(activeEvent.list_url || DEFAULT_LIST_URL, []);
       allGames = flattenGames(rawGames);
       fillForm(activeEvent);
       renderCurrent();
       renderGames();
-      $('eventMsg').textContent = `Événement chargé : ${eventId}.`;
+      $('eventMsg').textContent = `Événement chargé : ${eventId}. Sauvegarde Cloudflare active.`;
       $('eventMsg').className = 'event-admin-msg ok';
     }
 
     $('eventForm')?.addEventListener('submit', (e) => { e.preventDefault(); renderCurrent(); $('jsonMsg').textContent = 'Prévisualisation mise à jour.'; $('jsonMsg').className = 'event-admin-msg ok'; });
     $('clearForcedBtn')?.addEventListener('click', () => { $('selectedId').value=''; $('selectedUid').value=''; renderCurrent(); });
-    $('autoChangeGameBtn')?.addEventListener('click', changeGameAutomatically);
+    $('autoChangeGameBtn')?.addEventListener('click', () => changeGameAutomatically().catch((err)=>{ $('jsonMsg').textContent = err?.message || 'Erreur.'; $('jsonMsg').className = 'event-admin-msg err'; }));
+    $('saveEventBtn')?.addEventListener('click', () => { renderCurrent(); saveEventToSite(formEvent()).catch((err)=>{ $('jsonMsg').textContent = err?.message || 'Sauvegarde impossible.'; $('jsonMsg').className = 'event-admin-msg err'; }); });
     document.addEventListener('click', (e) => {
       if (!e.target.closest('#blockCurrentGameBtn') || !currentSelection?.game) return;
       addBlockedGameKey(currentSelection.game);
       $('selectedId').value=''; $('selectedUid').value='';
       renderCurrent();
-      $('jsonMsg').textContent = 'Jeu ajouté aux blocages. Copie ou télécharge le JSON pour appliquer.';
-      $('jsonMsg').className = 'event-admin-msg ok';
+      saveEventToSite(formEvent(), 'Jeu ajouté aux blocages et sauvegardé sur le site.').catch((err)=>{
+        $('jsonMsg').textContent = `${err?.message || 'Sauvegarde impossible.'} Le JSON reste disponible en secours.`;
+        $('jsonMsg').className = 'event-admin-msg err';
+      });
     });
     $('gameSearch')?.addEventListener('input', renderGames);
     $('gamesResults')?.addEventListener('click', (e) => {

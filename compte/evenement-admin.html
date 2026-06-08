@@ -148,8 +148,10 @@
       window.__ensureEventAdminPage = function(){ return check(); };
       document.addEventListener('DOMContentLoaded', function(){ setTimeout(window.__ensureEventAdminPage, 0); });
       if (window.SiteAuth?.onChange) window.SiteAuth.onChange(function(me){
-        if (window.SiteAuth?.loaded && me && String(me.role || '').toLowerCase() === 'admin') document.documentElement.classList.add('auth-ready');
-        else showDenied();
+        if (window.SiteAuth?.loaded && me && String(me.role || '').toLowerCase() === 'admin') {
+          document.documentElement.classList.add('auth-ready');
+          if (window.__startEventAdminInit) window.__startEventAdminInit();
+        } else showDenied();
       });
     })();
   </script>
@@ -481,7 +483,36 @@
       $('jsonMsg').textContent=`Fichier ${name} téléchargé.`; $('jsonMsg').className='event-admin-msg ok';
     });
 
-    document.addEventListener('DOMContentLoaded', () => setTimeout(() => init().catch((err)=>{ $('eventMsg').textContent = err?.message || 'Erreur.'; $('eventMsg').className = 'event-admin-msg err'; }), 120));
+    let eventAdminInitStarted = false;
+    function startEventAdminInit() {
+      if (eventAdminInitStarted) return;
+      if (document.documentElement.classList.contains('auth-denied')) return;
+
+      const ready = !window.__ensureEventAdminPage || window.__ensureEventAdminPage();
+      if (!ready) {
+        const msg = $('eventMsg');
+        if (msg) {
+          msg.textContent = 'Attente de la vérification admin…';
+          msg.className = 'event-admin-msg';
+        }
+        setTimeout(startEventAdminInit, 250);
+        return;
+      }
+
+      eventAdminInitStarted = true;
+      init().catch((err) => {
+        const msg = $('eventMsg');
+        if (msg) {
+          msg.textContent = err?.message || 'Erreur.';
+          msg.className = 'event-admin-msg err';
+        }
+      });
+    }
+
+    window.__startEventAdminInit = startEventAdminInit;
+    document.addEventListener('DOMContentLoaded', () => setTimeout(startEventAdminInit, 120));
+    if (window.SiteAuth?.onChange) window.SiteAuth.onChange(() => setTimeout(startEventAdminInit, 0));
+    setTimeout(startEventAdminInit, 800);
   </script>
 </body>
 </html>

@@ -15,6 +15,11 @@
     .event-admin-layout { width:min(1180px, calc(100% - 18px)); margin:12px auto 18px !important; display:grid; gap:14px; }
     body .auth-shell.event-admin-layout { margin-top:12px !important; }
     .event-admin-grid { display:grid; grid-template-columns:minmax(320px,.95fr) minmax(360px,1.25fr); gap:14px; align-items:start; }
+    .event-admin-simple-actions { display:grid; gap:10px; }
+    .event-admin-simple-actions .auth-btn { justify-content:center; min-height:44px; font-size:15px; }
+    .event-admin-details { margin-top:12px; border-top:1px solid var(--border, var(--auth-border)); padding-top:12px; }
+    .event-admin-details summary { cursor:pointer; color:var(--muted); font-weight:800; }
+    .event-admin-hidden { display:none !important; }
     .event-admin-toolbar { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
     .event-admin-note { color:var(--muted); font-size:13px; line-height:1.55; }
     .event-admin-card { border:1px solid var(--border, var(--auth-border)); border-radius:16px; background:rgba(255,255,255,.035); padding:14px; }
@@ -56,7 +61,7 @@
       <div class="event-admin-toolbar">
         <div>
           <h1 class="auth-title" style="margin-bottom:6px;">📅 Page événements</h1>
-          <p class="auth-subtitle" style="margin:0;">Prévisualise le jeu choisi, force un jeu précis et sauvegarde l’événement dans la base Cloudflare.</p>
+          <p class="auth-subtitle" style="margin:0;">Gère le jeu de l’événement sans toucher au JSON. Les changements sont sauvegardés automatiquement dans Cloudflare.</p>
         </div>
         <div class="auth-actions" style="margin:0;">
           <a class="auth-btn" href="/compte/">Retour au compte</a>
@@ -69,64 +74,62 @@
     <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
       <div class="event-admin-grid">
         <div class="event-admin-card">
-          <h2>🎯 Événement actif</h2>
+          <h2>🎯 Jeu affiché actuellement</h2>
           <div id="eventMsg" class="event-admin-msg">Chargement…</div>
           <div id="currentGame" style="margin-top:12px;"></div>
         </div>
 
         <form id="eventForm" class="event-admin-card" autocomplete="off">
-          <h2>⚙️ Réglages rapides</h2>
-          <label class="auth-label"><span>Fichier événement actif</span><input class="auth-input" id="eventId" placeholder="ete-2026" /></label>
-          <label class="auth-label"><span>Titre</span><input class="auth-input" id="eventTitle" /></label>
-          <label class="auth-label"><span>Texte affiché</span><textarea class="auth-input" id="eventText" rows="3"></textarea></label>
-          <div class="event-admin-row">
-            <label class="auth-label"><span>Changer le jeu le</span>
-              <select class="auth-select" id="changeDay">
-                <option value="monday">Lundi</option><option value="tuesday">Mardi</option><option value="wednesday">Mercredi</option><option value="thursday">Jeudi</option><option value="friday">Vendredi</option><option value="saturday">Samedi</option><option value="sunday">Dimanche</option>
+          <h2>✅ Actions simples</h2>
+          <p class="event-admin-note" style="margin-top:0;">Tu n’as plus de JSON à copier ou à créer. Clique, ça sauvegarde directement dans Cloudflare.</p>
+
+          <div class="event-admin-simple-actions">
+            <button class="auth-btn primary" id="autoChangeGameBtn" type="button">🔄 Changer le jeu maintenant</button>
+            <button class="auth-btn" id="clearForcedBtn" type="button">🎲 Revenir au choix automatique</button>
+            <button class="auth-btn" id="saveEventBtn" type="button">💾 Enregistrer le titre / texte</button>
+            <a class="auth-btn primary" href="/evenements/" target="_blank" rel="noopener">👀 Voir la page publique</a>
+          </div>
+
+          <div id="jsonMsg" class="event-admin-msg"></div>
+
+          <details class="event-admin-details">
+            <summary>⚙️ Modifier le texte et les règles de l’événement</summary>
+            <label class="auth-label"><span>Événement actif</span><input class="auth-input" id="eventId" placeholder="ete-2026" /></label>
+            <label class="auth-label"><span>Titre</span><input class="auth-input" id="eventTitle" /></label>
+            <label class="auth-label"><span>Texte affiché</span><textarea class="auth-input" id="eventText" rows="3"></textarea></label>
+            <div class="event-admin-row">
+              <label class="auth-label"><span>Changer le jeu le</span>
+                <select class="auth-select" id="changeDay">
+                  <option value="monday">Lundi</option><option value="tuesday">Mardi</option><option value="wednesday">Mercredi</option><option value="thursday">Jeudi</option><option value="friday">Vendredi</option><option value="saturday">Samedi</option><option value="sunday">Dimanche</option>
+                </select>
+              </label>
+              <label class="auth-label"><span>Heure du changement</span><input class="auth-input" id="changeHour" type="number" min="0" max="23" step="1" /></label>
+            </div>
+            <label class="auth-label"><span>Mots-clés pour choisir automatiquement</span><textarea class="auth-input" id="keywords" rows="4" placeholder="summer, beach, plage..."></textarea></label>
+            <label class="auth-label"><span>Mode si aucun jeu ne correspond</span>
+              <select class="auth-select" id="fallbackMode">
+                <option value="weekly_random">Choisir un jeu au hasard chaque semaine</option>
+                <option value="">Ne rien afficher</option>
               </select>
             </label>
-            <label class="auth-label"><span>Heure du changement</span><input class="auth-input" id="changeHour" type="number" min="0" max="23" step="1" /></label>
-          </div>
-          <div class="event-admin-row">
-            <label class="auth-label"><span>ID du jeu forcé</span><input class="auth-input" id="selectedId" placeholder="laisser vide = automatique" /></label>
-            <label class="auth-label"><span>UID du jeu forcé</span><input class="auth-input" id="selectedUid" placeholder="optionnel" /></label>
-          </div>
-          <label class="auth-label"><span>Mots-clés de sélection automatique</span><textarea class="auth-input" id="keywords" rows="4" placeholder="summer, beach, plage..."></textarea></label>
-          <label class="auth-label"><span>Mode si aucun jeu ne correspond</span>
-            <select class="auth-select" id="fallbackMode">
-              <option value="weekly_random">Choisir un jeu au hasard chaque semaine</option>
-              <option value="">Ne rien afficher</option>
-            </select>
-          </label>
-          <label class="auth-label"><span>Jeux déjà utilisés / à bloquer</span><textarea class="auth-input" id="blockedGameKeys" rows=4 placeholder="Une clé, un ID, un UID ou un titre par ligne"></textarea></label>
-          <p class="event-admin-note">Quand un jeu a déjà été affiché, ajoute sa clé ici pour empêcher qu’il soit repris pendant l’événement.</p>
-          <div class="event-admin-actions">
-            <button class="auth-btn primary" type="submit">Prévisualiser</button>
-            <button class="auth-btn" id="clearForcedBtn" type="button">Revenir en auto</button>
-            <button class="auth-btn" id="autoChangeGameBtn" type="button">Changer le jeu automatiquement</button>
-            <button class="auth-btn primary" id="saveEventBtn" type="button">Sauvegarder sur le site</button>
-            <button class="auth-btn" id="copyJsonBtn" type="button">Copier le JSON</button>
-            <button class="auth-btn" id="downloadJsonBtn" type="button">Télécharger le JSON</button>
-          </div>
-          <p class="event-admin-note">Les changements sont maintenant sauvegardés dans Cloudflare via <strong>/api/evenement</strong>. Le fichier <strong>/evenements/<span id="fileNameHint">ete-2026</span>.json</strong> sert seulement de configuration de base.</p>
+          </details>
+
+          <input class="event-admin-hidden" id="selectedId" />
+          <input class="event-admin-hidden" id="selectedUid" />
+          <textarea class="event-admin-hidden" id="blockedGameKeys"></textarea>
+          <textarea class="event-admin-hidden" id="jsonOutput"></textarea>
+          <span class="event-admin-hidden" id="fileNameHint">ete-2026</span>
         </form>
       </div>
     </section>
 
     <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
-      <div class="event-admin-grid">
-        <div class="event-admin-card">
-          <h2>🔎 Choisir un jeu manuellement</h2>
-          <label class="auth-label"><span>Recherche</span><input class="auth-input" id="gameSearch" placeholder="Titre, tag, ID…" /></label>
-          <div class="event-admin-pill-list" id="gamesSummary"></div>
-          <div class="event-admin-results" id="gamesResults"><div class="event-admin-msg">Chargement des jeux…</div></div>
-        </div>
-
-        <div class="event-admin-card">
-          <h2>📄 JSON généré</h2>
-          <textarea class="auth-input event-admin-json" id="jsonOutput" spellcheck="false"></textarea>
-          <div id="jsonMsg" class="event-admin-msg"></div>
-        </div>
+      <div class="event-admin-card">
+        <h2>🔎 Choisir un jeu précis</h2>
+        <p class="event-admin-note" style="margin-top:0;">Recherche un jeu puis clique sur <strong>Choisir</strong>. Il sera sauvegardé directement sur le site.</p>
+        <label class="auth-label"><span>Recherche</span><input class="auth-input" id="gameSearch" placeholder="Titre, tag, ID…" /></label>
+        <div class="event-admin-pill-list" id="gamesSummary"></div>
+        <div class="event-admin-results" id="gamesResults"><div class="event-admin-msg">Chargement des jeux…</div></div>
       </div>
     </section>
   </main>
@@ -412,7 +415,7 @@
         return `<article class="event-admin-game">
           ${image ? `<img src="${esc(image)}" alt="">` : '<div class="placeholder">🎮</div>'}
           <div><strong>${esc(getTitle(g))}</strong><small>ID : ${esc(id || '—')} ${uid ? `• UID : ${esc(uid)}` : ''}</small></div>
-          <button class="auth-btn mini" type="button" data-pick-id="${esc(id)}" data-pick-uid="${esc(uid)}">Forcer</button>
+          <button class="auth-btn mini" type="button" data-pick-id="${esc(id)}" data-pick-uid="${esc(uid)}">Choisir</button>
         </article>`;
       }).join('') || '<div class="event-admin-msg">Aucun résultat.</div>';
     }
@@ -444,7 +447,15 @@
     }
 
     $('eventForm')?.addEventListener('submit', (e) => { e.preventDefault(); renderCurrent(); $('jsonMsg').textContent = 'Prévisualisation mise à jour.'; $('jsonMsg').className = 'event-admin-msg ok'; });
-    $('clearForcedBtn')?.addEventListener('click', () => { $('selectedId').value=''; $('selectedUid').value=''; renderCurrent(); });
+    $('clearForcedBtn')?.addEventListener('click', () => {
+      $('selectedId').value='';
+      $('selectedUid').value='';
+      renderCurrent();
+      saveEventToSite(formEvent(), 'Retour au choix automatique sauvegardé.').catch((err)=>{
+        $('jsonMsg').textContent = err?.message || 'Sauvegarde impossible.';
+        $('jsonMsg').className = 'event-admin-msg err';
+      });
+    });
     $('autoChangeGameBtn')?.addEventListener('click', () => changeGameAutomatically().catch((err)=>{ $('jsonMsg').textContent = err?.message || 'Erreur.'; $('jsonMsg').className = 'event-admin-msg err'; }));
     $('saveEventBtn')?.addEventListener('click', () => { renderCurrent(); saveEventToSite(formEvent()).catch((err)=>{ $('jsonMsg').textContent = err?.message || 'Sauvegarde impossible.'; $('jsonMsg').className = 'event-admin-msg err'; }); });
     document.addEventListener('click', (e) => {
@@ -464,6 +475,11 @@
       $('selectedId').value = btn.dataset.pickId || '';
       $('selectedUid').value = btn.dataset.pickUid || '';
       renderCurrent();
+      const pickedName = currentSelection?.game ? getTitle(currentSelection.game) : 'jeu choisi';
+      saveEventToSite(formEvent(), `Jeu choisi et sauvegardé : ${pickedName}.`).catch((err)=>{
+        $('jsonMsg').textContent = err?.message || 'Sauvegarde impossible.';
+        $('jsonMsg').className = 'event-admin-msg err';
+      });
       window.scrollTo({ top:0, behavior:'smooth' });
     });
     $('copyJsonBtn')?.addEventListener('click', async () => {

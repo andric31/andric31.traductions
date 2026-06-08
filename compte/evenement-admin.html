@@ -163,13 +163,17 @@
     const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const norm = (v) => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
-    async function fetchJson(url, fallback) {
+    async function fetchJson(url, fallback, options = {}) {
+      const timeoutMs = Number(options.timeoutMs || 12000);
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
       try {
         const glue = url.includes('?') ? '&' : '?';
-        const res = await fetch(`${url}${glue}v=${Date.now()}`, { cache:'no-store' });
+        const res = await fetch(`${url}${glue}v=${Date.now()}`, { cache:'no-store', signal: controller.signal });
         if (!res.ok) return fallback;
         return await res.json();
       } catch { return fallback; }
+      finally { clearTimeout(timer); }
     }
 
     async function loadSavedEvent(baseEvent) {
@@ -418,9 +422,19 @@
       const baseEvent = await fetchJson(`/evenements/${eventId}.json`, null);
       if (!baseEvent) throw new Error('Impossible de charger le fichier événement.');
       activeEvent = await loadSavedEvent(baseEvent);
-      const rawGames = await fetchJson(activeEvent.list_url || DEFAULT_LIST_URL, []);
-      allGames = flattenGames(rawGames);
       fillForm(activeEvent);
+      $('eventMsg').textContent = `Événement chargé : ${eventId}. Chargement de la liste des jeux…`;
+      $('eventMsg').className = 'event-admin-msg ok';
+      $('gamesResults').innerHTML = '<div class="event-admin-msg">Chargement des jeux…</div>';
+
+      const rawGames = await fetchJson(activeEvent.list_url || DEFAULT_LIST_URL, [], { timeoutMs: 10000 });
+      allGames = flattenGames(rawGames);
+      if (!allGames.length) {
+        $('currentGame').innerHTML = '<div class="event-admin-msg err">Liste des jeux introuvable ou trop lente à charger. Vérifie list_url dans le JSON.</div>';
+        $('gamesResults').innerHTML = '<div class="event-admin-msg err">Aucun jeu chargé.</div>';
+        $('gamesSummary').innerHTML = '<span class="event-admin-pill warn">Jeux : 0</span>';
+        return;
+      }
       renderCurrent();
       renderGames();
       $('eventMsg').textContent = `Événement chargé : ${eventId}. Sauvegarde Cloudflare active.`;

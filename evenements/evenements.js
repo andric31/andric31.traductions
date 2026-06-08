@@ -48,9 +48,25 @@
     }
   }
 
-  function getActiveEventUrl(config) {
-    const id = String(config?.event_actif || config?.active_event || '').trim();
+  function getActiveEventUrl(config, forcedId = '') {
+    const id = String(forcedId || config?.event_actif || config?.active_event || '').trim();
     return id ? `/evenements/${id}.json` : '';
+  }
+
+  async function loadActiveState(config) {
+    const saved = await fetchJson('/api/evenements', null);
+    if (saved?.ok) {
+      return {
+        activeId: String(saved.active_event || config?.event_actif || config?.active_event || '').trim(),
+        enabled: saved.enabled !== false,
+        source: saved.active_event ? 'cloudflare' : 'config'
+      };
+    }
+    return {
+      activeId: String(config?.event_actif || config?.active_event || '').trim(),
+      enabled: true,
+      source: 'config'
+    };
   }
 
   async function loadSavedEvent(baseEvent) {
@@ -524,10 +540,23 @@
   }
 
   async function init() {
-    const config = await fetchJson(CONFIG_URL, { event_actif: 'ete-2026' });
-    const eventUrl = getActiveEventUrl(config);
+    const params = new URLSearchParams(window.location.search);
+    const testId = String(params.get('test') || '').trim();
+    const config = await fetchJson(CONFIG_URL, { event_actif: 'ete-2026', event_files: ['ete-2026'] });
+    const activeState = testId ? { activeId: testId, enabled: true, source: 'test' } : await loadActiveState(config);
+
+    if (!activeState.enabled || !activeState.activeId) {
+      renderActiveEvent(null, null);
+      return;
+    }
+
+    const eventUrl = getActiveEventUrl(config, activeState.activeId);
     const baseEvent = eventUrl ? await fetchJson(eventUrl, null) : null;
-    const event = baseEvent ? await loadSavedEvent(baseEvent) : null;
+    let event = baseEvent ? await loadSavedEvent(baseEvent) : null;
+
+    if (testId && event) {
+      event = { ...event, enabled: true, status_label: 'Mode test admin' };
+    }
 
     if (!event || event.enabled === false) {
       renderActiveEvent(event, null);

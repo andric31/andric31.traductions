@@ -98,6 +98,8 @@
               <option value="">Ne rien afficher</option>
             </select>
           </label>
+          <label class="auth-label"><span>Jeux déjà utilisés / à bloquer</span><textarea class="auth-input" id="blockedGameKeys" rows=4 placeholder="Une clé, un ID, un UID ou un titre par ligne"></textarea></label>
+          <p class="event-admin-note">Quand un jeu a déjà été affiché, ajoute sa clé ici pour empêcher qu’il soit repris pendant l’événement.</p>
           <div class="event-admin-actions">
             <button class="auth-btn primary" type="submit">Prévisualiser</button>
             <button class="auth-btn" id="clearForcedBtn" type="button">Revenir en auto</button>
@@ -178,6 +180,11 @@
     function buildUrl(g){ const coll=String(g?.collection||'').trim(); const id=String(g?.id||'').trim(); const uid=String(g?.uid??'').trim(); if(coll) return `/game/?id=${encodeURIComponent(coll)}${uid ? `&uid=${encodeURIComponent(uid)}` : ''}`; if(id) return `/game/?id=${encodeURIComponent(id)}`; if(uid) return `/game/?uid=${encodeURIComponent(uid)}`; return '/'; }
     function hashText(text){ let h=2166136261; for(const ch of String(text)){ h ^= ch.charCodeAt(0); h = Math.imul(h,16777619); } return Math.abs(h>>>0); }
 
+    function getGameKey(g){ const id=String(g?.collection||g?.id||'').trim(); const uid=String(g?.uid??'').trim(); const title=norm(getTitle(g)).replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); return [id, uid, title].filter(Boolean).join('|') || title || 'jeu'; }
+    function getBlockedGameKeys(event){ const values=[]; ['blocked_game_keys','used_game_keys','previous_game_keys'].forEach((field)=>{ if(Array.isArray(event?.[field])) values.push(...event[field]); }); if(Array.isArray(event?.used_games)){ event.used_games.forEach((item)=>{ if(!item) return; if(typeof item === 'string') values.push(item); else values.push(item.key, item.id, item.uid, item.title, item.collection); }); } return new Set(values.map((v)=>String(v||'').trim()).filter(Boolean).flatMap((v)=>[v, norm(v)])); }
+    function isBlockedGame(g,event){ const blocked=getBlockedGameKeys(event); if(!blocked.size) return false; const checks=[getGameKey(g), String(g?.collection||'').trim(), String(g?.id||'').trim(), String(g?.uid??'').trim(), getTitle(g)].filter(Boolean); return checks.some((v)=>blocked.has(v) || blocked.has(norm(v))); }
+    function dedupePool(entries){ const seen=new Set(); return entries.filter((entry)=>{ const key=getGameKey(entry.game); if(!key || seen.has(key)) return false; seen.add(key); return true; }); }
+
     function flattenGames(raw) {
       const out = [];
       const seen = new Set();
@@ -218,10 +225,14 @@
       }
       const valid = games.filter((g)=>getImage(g)).filter((g)=>buildUrl(g) !== '/');
       let pool = valid.map((g)=>({game:g, analysis:analyse(g,event)})).filter(e=>e.analysis.score>0).sort((a,b)=>b.analysis.score-a.analysis.score || getTitle(a.game).localeCompare(getTitle(b.game),'fr'));
-      if(!pool.length && String(event?.fallback_mode||'').trim()==='weekly_random') pool = valid.map((g)=>({game:g, analysis:{score:0, found:[]}})).sort((a,b)=>getTitle(a.game).localeCompare(getTitle(b.game),'fr'));
+      let blockedApplied = false;
+      const applyBlocked = (entries) => { const base=dedupePool(entries); const filtered=base.filter((entry)=>!isBlockedGame(entry.game,event)); if(filtered.length){ blockedApplied = filtered.length !== base.length; return filtered; } return base; };
+      pool = applyBlocked(pool);
+      if((!pool.length || pool.every((entry)=>isBlockedGame(entry.game,event))) && String(event?.fallback_mode||'').trim()==='weekly_random') pool = applyBlocked(valid.map((g)=>({game:g, analysis:{score:0, found:[]}})).sort((a,b)=>getTitle(a.game).localeCompare(getTitle(b.game),'fr')));
       if(!pool.length) return { game:null, reason:'Aucun jeu trouvé.', matchedKeywords:[], score:null };
       const selected = pool[(getRotationIndex(event) + (hashText(event?.id || event?.title || 'event') % pool.length)) % pool.length];
-      return { game:selected.game, reason:selected.analysis.found?.length ? `Auto : ${selected.analysis.found.join(', ')}` : 'Auto : rotation hebdomadaire', matchedKeywords:selected.analysis.found || [], score:selected.analysis.score };
+      const reasonBase = selected.analysis.found?.length ? `Auto : ${selected.analysis.found.join(', ')}` : 'Auto : rotation hebdomadaire';
+      return { game:selected.game, reason: blockedApplied ? `${reasonBase} — jeux déjà utilisés ignorés` : reasonBase, matchedKeywords:selected.analysis.found || [], score:selected.analysis.score };
     }
 
     function fillForm(event) {
@@ -234,6 +245,7 @@
       $('selectedUid').value = event.selected_game_uid || '';
       $('keywords').value = Array.isArray(event.selection_keywords) ? event.selection_keywords.join(', ') : '';
       $('fallbackMode').value = event.fallback_mode || '';
+      $('blockedGameKeys').value = Array.isArray(event.blocked_game_keys) ? event.blocked_game_keys.join('\n') : '';
       $('fileNameHint').textContent = event.id || 'ete-2026';
     }
 
@@ -248,6 +260,7 @@
       next.selected_game_uid = $('selectedUid').value.trim();
       next.selection_keywords = $('keywords').value.split(',').map((s)=>s.trim()).filter(Boolean);
       next.fallback_mode = $('fallbackMode').value;
+      next.blocked_game_keys = $('blockedGameKeys').value.split(/[\n,]+/).map((s)=>s.trim()).filter(Boolean);
       return next;
     }
 
@@ -273,12 +286,14 @@
               <span class="event-admin-pill ok">ID : ${esc(game.collection || game.id || '—')}</span>
               <span class="event-admin-pill ${String(game.uid ?? '').trim() ? 'ok' : 'warn'}">UID : ${esc(String(game.uid ?? '').trim() || '—')}</span>
               <span class="event-admin-pill">Score : ${esc(currentSelection.score ?? 'manuel')}</span>
+              <span class="event-admin-pill">Clé : ${esc(getGameKey(game))}</span>
             </div>
             <div class="event-admin-pill-list">${tags.map((t)=>`<span class="event-admin-pill">${esc(t)}</span>`).join('')}</div>
             <div class="event-admin-actions">
               <a class="auth-btn mini" href="${esc(buildUrl(game))}" target="_blank" rel="noopener">Fiche</a>
               ${game.url ? `<a class="auth-btn mini" href="${esc(game.url)}" target="_blank" rel="noopener">F95Zone</a>` : ''}
               ${game.discordlink ? `<a class="auth-btn mini" href="${esc(game.discordlink)}" target="_blank" rel="noopener">Discord</a>` : ''}
+              <button class="auth-btn mini" id="blockCurrentGameBtn" type="button">Bloquer ce jeu</button>
             </div>
           </div>
         </div>`;
@@ -321,6 +336,16 @@
 
     $('eventForm')?.addEventListener('submit', (e) => { e.preventDefault(); renderCurrent(); $('jsonMsg').textContent = 'Prévisualisation mise à jour.'; $('jsonMsg').className = 'event-admin-msg ok'; });
     $('clearForcedBtn')?.addEventListener('click', () => { $('selectedId').value=''; $('selectedUid').value=''; renderCurrent(); });
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#blockCurrentGameBtn') || !currentSelection?.game) return;
+      const key = getGameKey(currentSelection.game);
+      const existing = $('blockedGameKeys').value.split(/[\n,]+/).map((s)=>s.trim()).filter(Boolean);
+      if (!existing.includes(key)) $('blockedGameKeys').value = [...existing, key].join('\n');
+      $('selectedId').value=''; $('selectedUid').value='';
+      renderCurrent();
+      $('jsonMsg').textContent = 'Jeu ajouté aux blocages. Copie ou télécharge le JSON pour appliquer.';
+      $('jsonMsg').className = 'event-admin-msg ok';
+    });
     $('gameSearch')?.addEventListener('input', renderGames);
     $('gamesResults')?.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-pick-id]');

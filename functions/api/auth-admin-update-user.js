@@ -10,6 +10,14 @@ import {
   validatePassword,
 } from './_auth.js';
 
+
+function cleanUsernameKeepCase(value) {
+  return String(value || '')
+    .trim()
+    .replace(/\s+/g, '')
+    .slice(0, 60);
+}
+
 export async function onRequest(context) {
   try {
     const { request, env } = context;
@@ -30,7 +38,7 @@ export async function onRequest(context) {
     const existing = await env.DB.prepare(`SELECT id, username, role FROM auth_users WHERE id = ?1 LIMIT 1`).bind(userId).first();
     if (!existing) return json({ ok: false, error: 'Utilisateur introuvable.' }, 404);
 
-    const username = cleanUsername(body?.username);
+    const username = cleanUsernameKeepCase(body?.username);
     const displayName = cleanDisplayName(body?.display_name || body?.displayName || '');
     const role = cleanRole(body?.role || existing.role);
     const isActive = body?.is_active ? 1 : 0;
@@ -39,7 +47,7 @@ export async function onRequest(context) {
     if (!username || username.length < 3) return json({ ok: false, error: 'Nom d’utilisateur invalide.' }, 400);
     if (!displayName) return json({ ok: false, error: 'Nom affiché invalide.' }, 400);
 
-    const taken = await env.DB.prepare(`SELECT id FROM auth_users WHERE username = ?1 AND id <> ?2 LIMIT 1`).bind(username, userId).first();
+    const taken = await env.DB.prepare(`SELECT id FROM auth_users WHERE lower(username) = lower(?1) AND id <> ?2 LIMIT 1`).bind(username, userId).first();
     if (taken) return json({ ok: false, error: 'Ce nom d’utilisateur est déjà pris.' }, 409);
 
     if (existing.id === auth.user.id && role !== 'admin') {

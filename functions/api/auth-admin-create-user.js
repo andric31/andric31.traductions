@@ -9,6 +9,14 @@ import {
   validatePassword,
 } from './_auth.js';
 
+
+function cleanUsernameKeepCase(value) {
+  return String(value || '')
+    .trim()
+    .replace(/\s+/g, '')
+    .slice(0, 60);
+}
+
 export async function onRequest(context) {
   try {
     const { request, env } = context;
@@ -34,7 +42,7 @@ export async function onRequest(context) {
       return json({ ok: false, error: 'JSON invalide.' }, 400);
     }
 
-    const username = cleanUsername(body?.username);
+    const username = cleanUsernameKeepCase(body?.username);
     const displayName = cleanDisplayName(body?.display_name || body?.displayName || username);
     const password = String(body?.password || '');
     const role = cleanRole(body?.role);
@@ -43,7 +51,7 @@ export async function onRequest(context) {
     const pwError = validatePassword(password);
     if (pwError) return json({ ok: false, error: pwError }, 400);
 
-    const exists = await env.DB.prepare(`SELECT id FROM auth_users WHERE username = ?1 LIMIT 1`).bind(username).first();
+    const exists = await env.DB.prepare(`SELECT id FROM auth_users WHERE lower(username) = lower(?1) LIMIT 1`).bind(username).first();
     if (exists) return json({ ok: false, error: 'Cet utilisateur existe déjà.' }, 409);
 
     let passwordHash = '';

@@ -7,6 +7,14 @@ import {
   createSession,
 } from './_auth.js';
 
+
+function cleanUsernameKeepCase(value) {
+  return String(value || '')
+    .trim()
+    .replace(/\s+/g, '')
+    .slice(0, 60);
+}
+
 export async function onRequest(context) {
   const { request, env } = context;
   if (request.method !== 'POST') {
@@ -29,7 +37,7 @@ export async function onRequest(context) {
     return json({ ok: false, error: 'JSON invalide.' }, 400);
   }
 
-  const username = cleanUsername(body?.username);
+  const username = cleanUsernameKeepCase(body?.username);
   const password = String(body?.password || '');
   if (!username || !password) {
     return json({ ok: false, error: 'Identifiants invalides.' }, 400);
@@ -38,7 +46,7 @@ export async function onRequest(context) {
   const user = await env.DB.prepare(`
     SELECT id, username, display_name, password_hash, role, is_active
     FROM auth_users
-    WHERE username = ?1
+    WHERE lower(username) = lower(?1)
     LIMIT 1
   `).bind(username).first();
 

@@ -166,13 +166,17 @@
         <div class="ticket-message">${esc(t.message || '')}</div>
         ${t.admin_comment ? `<div class="ticket-admin-comment"><strong>📝 Commentaire admin</strong>${esc(t.admin_comment)}</div>` : ''}
         <div class="ticket-actions-row">
-          ${String(t.category || '') === 'inscription' ? `<button class="auth-btn primary" data-action="prefillAccount" type="button">➕ Création du compte</button>` : ''}
-          <button class="auth-btn ticket-info" data-action="comment" type="button">Ajouter un commentaire</button>
-          <button class="auth-btn ticket-muted-btn" data-action="copy" type="button">Copier référence</button>
-          ${String(t.category || '') === 'inscription' ? `<button class="auth-btn ticket-info" data-action="notifyAccount" type="button">📩 Envoyer message compte créé</button>` : ''}
-          ${String(t.category || '') === 'compte' ? `<button class="auth-btn ticket-info" data-action="notifyPassword" type="button">Message accès compte</button>` : ''}
-          <button class="auth-btn ${closed ? 'ticket-info' : 'ticket-ok'}" data-action="toggle" type="button">${closed ? 'Rouvrir' : 'Clôturer'}</button>
-          ${closed ? `<button class="auth-btn ticket-danger" data-action="delete" type="button">Supprimer</button>` : ``}
+          ${closed ? `
+            <button class="auth-btn ticket-info" data-action="toggle" type="button">Rouvrir</button>
+            <button class="auth-btn ticket-danger" data-action="delete" type="button">Supprimer</button>
+          ` : `
+            ${String(t.category || '') === 'inscription' ? `<button class="auth-btn primary" data-action="prefillAccount" type="button">➕ Création du compte</button>` : ''}
+            <button class="auth-btn ticket-info" data-action="comment" type="button">Ajouter un commentaire</button>
+            <button class="auth-btn ticket-muted-btn" data-action="copy" type="button">Copier référence</button>
+            ${String(t.category || '') === 'inscription' ? `<button class="auth-btn ticket-info" data-action="notifyAccount" type="button">📩 Envoyer message compte créé</button>` : ''}
+            ${String(t.category || '') === 'compte' ? `<button class="auth-btn ticket-info" data-action="notifyPassword" type="button">Message accès compte</button>` : ''}
+            <button class="auth-btn ticket-ok" data-action="toggle" type="button">Clôturer</button>
+          `}
         </div>
       </article>`;
     }

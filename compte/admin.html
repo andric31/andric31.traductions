@@ -162,13 +162,48 @@
   .member-sub { margin-top:6px; display:flex; flex-wrap:wrap; gap:8px; }
   .member-head { cursor:pointer; }
   .member-top-actions, .member-body { cursor:auto; }
-  .member-mini-stats { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 14px; }
+  .member-mini-stats { display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 8px; padding:10px; border-radius:14px; background:rgba(0,0,0,.10); border:1px solid rgba(255,255,255,.06); }
+  .member-mini-stat {
+    appearance:none;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:7px 12px;
+    border-radius:999px;
+    border:1px solid var(--border, var(--auth-border));
+    background:rgba(255,255,255,.08);
+    color:var(--text,#fff);
+    font:inherit;
+    font-size:13px;
+    cursor:pointer;
+    transition:background .16s ease, border-color .16s ease, transform .16s ease, box-shadow .16s ease;
+  }
+  .member-mini-stat:hover {
+    transform:translateY(-1px);
+    background:rgba(80,160,255,.14);
+    border-color:rgba(125,190,255,.48);
+  }
+  .member-mini-stat.is-active {
+    background:rgba(126,224,161,.15);
+    border-color:rgba(126,224,161,.50);
+    color:#7ee0a1;
+    box-shadow:0 0 0 2px rgba(126,224,161,.10) inset;
+  }
+  .member-mini-stat.is-muted { opacity:.72; }
+  .member-history.is-filtered .member-history-title::after {
+    content:attr(data-filter-label);
+    color:#7ee0a1;
+    font-size:12px;
+    font-weight:800;
+    margin-left:auto;
+  }
   .member-history { margin-top:14px; padding:12px; border-radius:14px; background:rgba(0,0,0,.13); border:1px solid rgba(255,255,255,.06); }
   .member-history-title { margin:0 0 10px; font-size:14px; color:var(--title,var(--fg)); display:flex; justify-content:space-between; gap:10px; align-items:center; }
   .member-history-count { color:var(--muted); font-size:12px; font-weight:700; }
   .member-history-scroll { max-height:260px; overflow:auto; padding-right:4px; scrollbar-width:thin; }
   .member-history-list { display:grid; gap:8px; margin:0; padding:0; list-style:none; }
   .member-history-item { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; padding:9px 10px; border-radius:12px; background:rgba(255,255,255,.045); }
+  .member-history-item.is-hidden-by-filter { display:none; }
   .member-history-main { min-width:0; }
   .member-history-kind { display:block; color:var(--muted); font-size:12px; margin-bottom:3px; }
   .member-history-game { display:block; color:var(--text,#fff); font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:520px; }
@@ -578,8 +613,9 @@
         const gameKey = String(item?.game_key || '').trim();
         const isMainPage = isMainPageKey(gameKey);
         const gameTitle = displayGameTitle(item);
+        const historyType = isViewedGame ? 'views' : String(item?.type || 'activity');
         return `
-        <li class="member-history-item${isViewedGame ? ' member-view-row' : ''}">
+        <li class="member-history-item${isViewedGame ? ' member-view-row' : ''}" data-history-type="${esc(historyType)}">
           <span class="member-history-main">
             <span class="member-history-kind">${isViewedGame ? 'Jeu consulté' : esc(activityLabel(item))}</span>
             <span class="member-history-game${isMainPage ? ' is-main-page' : ''}" data-game-key="${esc(gameKey)}">${esc(gameTitle)}</span>
@@ -592,6 +628,52 @@
           <span class="member-history-date">${esc(fmtDate(item?.date))}</span>`}
         </li>`;
       }).join('')}</ul></div>`;
+    }
+
+    function renderMemberStatsFilter(u) {
+      return `
+              <div class="member-mini-stats" aria-label="Filtres de l'historique du membre">
+                <button class="member-mini-stat is-active" type="button" data-history-filter="all">🕘 Tout</button>
+                <button class="member-mini-stat" type="button" data-history-filter="watchlist">📌 Watchlist : ${Number(u.watchlist_count || 0)}</button>
+                <button class="member-mini-stat" type="button" data-history-filter="like">❤️ Likés : ${Number(u.liked_count || 0)}</button>
+                <button class="member-mini-stat" type="button" data-history-filter="rating">⭐ Notés : ${Number(u.rated_count || 0)}</button>
+                <button class="member-mini-stat" type="button" data-history-filter="views">👁️ Vues totales : ${Number(u.page_views_count || 0)}</button>
+                <button class="member-mini-stat" type="button" data-history-filter="views">🎮 Jeux différents vus : ${Number(u.unique_pages_viewed || 0)}</button>
+              </div>`;
+    }
+
+    function historyFilterLabel(filter) {
+      if (filter === 'watchlist') return 'Filtre : Watchlist';
+      if (filter === 'like') return 'Filtre : Jeux likés';
+      if (filter === 'rating') return 'Filtre : Jeux notés';
+      if (filter === 'views') return 'Filtre : Jeux consultés';
+      return '';
+    }
+
+    function applyMemberHistoryFilter(card, filter) {
+      if (!card) return;
+      const wanted = String(filter || 'all');
+      const history = card.querySelector('.member-history');
+      const title = card.querySelector('.member-history-title');
+      const buttons = card.querySelectorAll('[data-history-filter]');
+      buttons.forEach((b) => {
+        const isActive = String(b.dataset.historyFilter || 'all') === wanted;
+        b.classList.toggle('is-active', isActive);
+        b.classList.toggle('is-muted', wanted !== 'all' && !isActive);
+      });
+      card.querySelectorAll('.member-history-item[data-history-type]').forEach((row) => {
+        const rowType = String(row.dataset.historyType || '');
+        row.classList.toggle('is-hidden-by-filter', wanted !== 'all' && rowType !== wanted);
+      });
+      if (history) {
+        history.classList.toggle('is-filtered', wanted !== 'all');
+        history.dataset.filterLabel = wanted !== 'all' ? historyFilterLabel(wanted) : '';
+      }
+      if (title) {
+        const visibleRows = card.querySelectorAll('.member-history-item[data-history-type]:not(.is-hidden-by-filter)').length;
+        const count = title.querySelector('.member-history-count');
+        if (count) count.textContent = `${visibleRows} ligne(s)`;
+      }
     }
 
     function updateStats(list) {
@@ -701,13 +783,6 @@
               </div>
 
               <div class="member-body">
-              <div class="member-mini-stats">
-                <span class="admin-pill">📌 Watchlist : ${Number(u.watchlist_count || 0)}</span>
-                <span class="admin-pill">❤️ Likés : ${Number(u.liked_count || 0)}</span>
-                <span class="admin-pill">⭐ Notés : ${Number(u.rated_count || 0)}</span>
-                <span class="admin-pill">👁️ Vues totales : ${Number(u.page_views_count || 0)}</span>
-                <span class="admin-pill">🎮 Jeux différents vus : ${Number(u.unique_pages_viewed || 0)}</span>
-              </div>
               <div class="member-grid">
                 <label class="auth-label">
                   <span>Nom d’utilisateur de connexion - Pseudo</span>
@@ -740,6 +815,7 @@
                 <div class="meta-box"><strong>Dernier login</strong>${esc(fmtDate(u.last_login_at))}</div>
               </div>
 
+              ${renderMemberStatsFilter(u)}
               <div class="member-history">
                 <h4 class="member-history-title">🕘 Historique récent <span class="member-history-count">${(Array.isArray(u.recent_activity) ? u.recent_activity.length : 0) + (Array.isArray(u.recent_page_views) ? u.recent_page_views.length : 0)} ligne(s)</span></h4>
                 ${renderActivity(u.recent_activity, u.recent_page_views)}
@@ -871,6 +947,15 @@
       const clickedControl = e.target.closest('button, a, input, select, textarea, label');
       if (cardHead && !clickedControl) {
         toggleMemberCard(cardHead.closest('article[data-user-id]'));
+        return;
+      }
+
+      const filterBtn = e.target.closest('[data-history-filter]');
+      if (filterBtn) {
+        const card = filterBtn.closest('article[data-user-id]');
+        const currentActive = filterBtn.classList.contains('is-active');
+        const filter = String(filterBtn.dataset.historyFilter || 'all');
+        applyMemberHistoryFilter(card, currentActive && filter !== 'all' ? 'all' : filter);
         return;
       }
 

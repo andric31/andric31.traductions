@@ -49,6 +49,10 @@
     .event-admin-action-box { display:grid; gap:5px; padding:10px; border:1px solid var(--border, var(--auth-border)); border-radius:14px; background:rgba(255,255,255,.025); }
     .event-admin-action-box .auth-btn { width:100%; }
     .event-admin-action-desc { color:var(--muted); font-size:12px; line-height:1.45; margin:0; }
+    .event-admin-stop-box { border-color:rgba(255,90,90,.48); background:rgba(255,90,90,.075); }
+    .event-admin-stop-box .auth-btn { min-height:54px; font-size:16px; font-weight:900; }
+    .event-admin-disabled-card { border:1px solid rgba(255,184,77,.35); background:rgba(255,184,77,.09); border-radius:16px; padding:16px; }
+    .event-admin-disabled-card h3 { margin:0 0 8px; }
     .event-admin-mini-help { color:var(--muted); font-size:12px; line-height:1.45; margin:6px 0 0; }
     @media (max-width:850px){ .event-admin-grid, .event-admin-row, .event-admin-current { grid-template-columns:1fr; } .event-admin-cover { width:150px; } .event-admin-game { grid-template-columns:50px 1fr; } .event-admin-game .auth-btn { grid-column:1 / -1; } }
   </style>
@@ -91,6 +95,14 @@
           <p class="event-admin-note" style="margin-top:0;">Tu n’as plus de JSON à copier ou à créer. Clique, ça sauvegarde directement dans Cloudflare.</p>
 
           <div class="event-admin-simple-actions">
+            <div class="event-admin-action-box event-admin-stop-box">
+              <button class="auth-btn danger" id="disableEventBtn" type="button" title="Désactive l’événement public. Les visiteurs verront qu’il n’y a aucun événement en cours.">🚫 Aucun événement en cours <span class="event-admin-help" tabindex="0" data-tip="À utiliser quand tu ne veux plus afficher d’événement sur la page publique. Ça sauvegarde l’événement comme désactivé dans Cloudflare, sans supprimer tes réglages.">?</span></button>
+              <p class="event-admin-action-desc">Masque l’événement sur la page publique et affiche “Aucun événement actif pour le moment”.</p>
+            </div>
+            <div class="event-admin-action-box">
+              <button class="auth-btn primary" id="enableEventBtn" type="button" title="Réactive l’événement public avec les réglages actuels.">✅ Réactiver l’événement <span class="event-admin-help" tabindex="0" data-tip="Réaffiche l’événement sur la page publique avec le jeu et les réglages actuels.">?</span></button>
+              <p class="event-admin-action-desc">Remet l’événement en ligne quand tu veux le relancer.</p>
+            </div>
             <div class="event-admin-action-box">
               <button class="auth-btn primary" id="autoChangeGameBtn" type="button" title="Choisit tout de suite un autre jeu, bloque l’actuel pour éviter qu’il revienne, puis sauvegarde automatiquement dans Cloudflare.">🔄 Changer le jeu maintenant <span class="event-admin-help" tabindex="0" data-tip="Choisit tout de suite un autre jeu compatible avec les mots-clés. Le jeu actuel est ajouté aux blocages pour éviter qu’il soit répété.">?</span></button>
               <p class="event-admin-action-desc">Change immédiatement le jeu affiché et sauvegarde le choix sur le site.</p>
@@ -390,10 +402,22 @@
 
     function renderCurrent() {
       const event = formEvent();
-      currentSelection = pickGame(allGames, event);
-      const game = currentSelection.game;
       $('fileNameHint').textContent = event.id || 'ete-2026';
       $('jsonOutput').value = JSON.stringify(event, null, 2);
+
+      if (event.enabled === false) {
+        currentSelection = { game: null, reason: 'Événement désactivé.', score: 0 };
+        $('currentGame').innerHTML = `
+          <div class="event-admin-disabled-card">
+            <h3>🚫 Aucun événement en cours</h3>
+            <p class="event-admin-note" style="margin:0 0 12px;">La page publique affichera : <strong>Aucun événement actif pour le moment.</strong></p>
+            <button class="auth-btn primary" id="reactivateCurrentEventBtn" type="button">✅ Réactiver l’événement</button>
+          </div>`;
+        return;
+      }
+
+      currentSelection = pickGame(allGames, event);
+      const game = currentSelection.game;
       if (!game) {
         $('currentGame').innerHTML = '<div class="event-admin-msg err">Aucun jeu sélectionné avec ces réglages.</div>';
         return;
@@ -470,6 +494,32 @@
     }
 
     $('eventForm')?.addEventListener('submit', (e) => { e.preventDefault(); renderCurrent(); $('jsonMsg').textContent = 'Prévisualisation mise à jour.'; $('jsonMsg').className = 'event-admin-msg ok'; });
+    $('disableEventBtn')?.addEventListener('click', () => {
+      const ok = confirm('Mettre la page événement en mode “aucun événement en cours” ?
+
+Les visiteurs ne verront plus de jeu événement, mais tes réglages seront gardés.');
+      if (!ok) return;
+      const next = formEvent();
+      next.enabled = false;
+      activeEvent = next;
+      fillForm(activeEvent);
+      renderCurrent();
+      saveEventToSite(next, 'Mode “aucun événement en cours” sauvegardé.').catch((err)=>{
+        $('jsonMsg').textContent = err?.message || 'Désactivation impossible.';
+        $('jsonMsg').className = 'event-admin-msg err';
+      });
+    });
+    $('enableEventBtn')?.addEventListener('click', () => {
+      const next = formEvent();
+      next.enabled = true;
+      activeEvent = next;
+      fillForm(activeEvent);
+      renderCurrent();
+      saveEventToSite(next, 'Événement réactivé et sauvegardé.').catch((err)=>{
+        $('jsonMsg').textContent = err?.message || 'Réactivation impossible.';
+        $('jsonMsg').className = 'event-admin-msg err';
+      });
+    });
     $('clearForcedBtn')?.addEventListener('click', () => {
       $('selectedId').value='';
       $('selectedUid').value='';
@@ -494,6 +544,18 @@
     $('autoChangeGameBtn')?.addEventListener('click', () => changeGameAutomatically().catch((err)=>{ $('jsonMsg').textContent = err?.message || 'Erreur.'; $('jsonMsg').className = 'event-admin-msg err'; }));
     $('saveEventBtn')?.addEventListener('click', () => { renderCurrent(); saveEventToSite(formEvent()).catch((err)=>{ $('jsonMsg').textContent = err?.message || 'Sauvegarde impossible.'; $('jsonMsg').className = 'event-admin-msg err'; }); });
     document.addEventListener('click', (e) => {
+      if (e.target.closest('#reactivateCurrentEventBtn')) {
+        const next = formEvent();
+        next.enabled = true;
+        activeEvent = next;
+        fillForm(activeEvent);
+        renderCurrent();
+        saveEventToSite(next, 'Événement réactivé et sauvegardé.').catch((err)=>{
+          $('jsonMsg').textContent = err?.message || 'Réactivation impossible.';
+          $('jsonMsg').className = 'event-admin-msg err';
+        });
+        return;
+      }
       if (!e.target.closest('#blockCurrentGameBtn') || !currentSelection?.game) return;
       addBlockedGameKey(currentSelection.game);
       $('selectedId').value=''; $('selectedUid').value='';

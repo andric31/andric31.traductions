@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin membres</title>
+  <link rel="icon" href="/favicon.png" />
+  <link rel="stylesheet" href="/viewer.css" />
+  <link rel="stylesheet" href="/themes.css" />
+  <link rel="stylesheet" href="/auth/auth.css" />
+  <script src="/theme-init.js"></script>
+  
+<style>
+  html:not(.auth-ready) body { visibility: hidden; }
+  html.auth-denied body { visibility: visible; }
+
+  .admin-layout { display:grid; gap:10px; width:min(1180px, calc(100% - 18px)); margin:12px auto 18px !important; padding-top:0 !important; }
+  body .auth-shell.admin-layout { margin-top:12px !important; }
+  body .auth-card { scroll-margin-top: 8px; }
+  .admin-split { display:grid; grid-template-columns: minmax(320px, 440px) 1fr; gap:16px; align-items:start; }
+  .admin-note { color:var(--muted); font-size:14px; line-height:1.55; }
+  .admin-toolbar { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:10px; }
+  .admin-summary { margin:6px 0 0; color:#7ee0a1; font-size:13px; font-weight:600; }
+  .admin-tools {
+    display:grid;
+    grid-template-columns: minmax(260px, 1.6fr) repeat(3, minmax(160px, .75fr)) auto;
+    gap:10px;
+    margin:8px 0 10px;
+    align-items:end;
+  }
+  .admin-stats {
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:0 0 12px;
+  }
+  .admin-stats .admin-pill { background:rgba(80,160,255,.10); }
+  .admin-quickfilters {
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:0 0 12px;
+  }
+  .admin-chip {
+    appearance:none;
+    border:1px solid var(--border, var(--auth-border));
+    background:rgba(255,255,255,.05);
+    color:var(--text,#fff);
+    border-radius:999px;
+    padding:8px 12px;
+    cursor:pointer;
+    font:inherit;
+  }
+  .admin-chip.active { background:rgba(80, 160, 255, .18); }
+
+  .admin-hub {
+    display:grid;
+    grid-template-columns: repeat(4, minmax(170px, 1fr));
+    gap:10px;
+    margin-top:12px;
+  }
+  .admin-hub-card {
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    padding:13px;
+    border-radius:16px;
+    border:1px solid var(--border, var(--auth-border));
+    background:rgba(255,255,255,.045);
+    color:var(--text,#fff);
+    text-decoration:none;
+    min-height:82px;
+  }
+  .admin-hub-card:hover { background:rgba(80,160,255,.12); }
+  .admin-hub-card strong { font-size:16px; color:var(--title,var(--fg)); }
+  .admin-hub-card span { color:var(--muted); font-size:13px; line-height:1.35; }
+  .admin-panel { border:1px solid var(--border, var(--auth-border)); border-radius:16px; background:rgba(255,255,255,.03); overflow:hidden; }
+  .admin-panel > summary { cursor:pointer; list-style:none; padding:14px 16px; font-weight:900; color:var(--title,var(--fg)); display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .admin-panel > summary::-webkit-details-marker { display:none; }
+  .admin-panel > summary::after { content:'Ouvrir'; color:var(--muted); font-size:12px; font-weight:800; }
+  .admin-panel[open] > summary::after { content:'Fermer'; }
+  .admin-panel-body { padding:0 16px 16px; }
+  .admin-help-grid { display:grid; grid-template-columns:1.4fr .9fr; gap:12px; align-items:start; }
+  .admin-users { display:grid; gap:10px; }
+
+  .member-card {
+    border:1px solid var(--border, var(--auth-border));
+    border-radius:16px;
+    background:rgba(255,255,255,.03);
+    padding:14px;
+  }
+  .member-card:not(.is-open) .member-body { display:none; }
+  .member-card:not(.is-open) .member-head { margin-bottom:0; padding-bottom:0; border-bottom:0; }
+  .member-top-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+  .member-body { margin-top:14px; }
+  .member-head {
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+    margin-bottom:14px;
+    padding-bottom:12px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .member-title { margin:0; font-size:20px; }
+  .member-sub { margin-top:6px; display:flex; flex-wrap:wrap; gap:8px; }
+  .member-head { cursor:pointer; }
+  .member-top-actions, .member-body { cursor:auto; }
+  .member-mini-stats { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 14px; }
+  .member-history { margin-top:14px; padding:12px; border-radius:14px; background:rgba(0,0,0,.13); border:1px solid rgba(255,255,255,.06); }
+  .member-history-title { margin:0 0 10px; font-size:14px; color:var(--title,var(--fg)); display:flex; justify-content:space-between; gap:10px; align-items:center; }
+  .member-history-count { color:var(--muted); font-size:12px; font-weight:700; }
+  .member-history-scroll { max-height:260px; overflow:auto; padding-right:4px; scrollbar-width:thin; }
+  .member-history-list { display:grid; gap:8px; margin:0; padding:0; list-style:none; }
+  .member-history-item { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; padding:9px 10px; border-radius:12px; background:rgba(255,255,255,.045); }
+  .member-history-main { min-width:0; }
+  .member-history-kind { display:block; color:var(--muted); font-size:12px; margin-bottom:3px; }
+  .member-history-game { display:block; color:var(--text,#fff); font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:520px; }
+  .member-history-date { color:var(--muted); font-size:12px; white-space:nowrap; }
+  .member-view-meta { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+  .member-view-chip { display:inline-flex; align-items:center; gap:5px; padding:4px 8px; border-radius:999px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.07); color:var(--muted); font-size:12px; font-weight:700; }
+  .member-history-empty { color:var(--muted); font-size:13px; margin:0; }
+  .member-card.is-open .member-head { cursor:default; }
+  .admin-pill, .auth-badge {
+    display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border-radius:999px;
+    background:rgba(255,255,255,.08); border:1px solid var(--border, var(--auth-border)); font-size:13px;
+  }
+  .admin-pill.me { background:rgba(80, 160, 255, .14); }
+  .admin-pill.ok { background:rgba(74, 222, 128, .14); }
+  .admin-pill.off { background:rgba(255, 99, 132, .12); }
+  .member-grid {
+    display:grid;
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+    gap:14px 16px;
+    margin-bottom:14px;
+  }
+  .member-grid .full { grid-column: 1 / -1; }
+  .member-meta {
+    display:grid;
+    grid-template-columns: repeat(3, minmax(140px, 1fr));
+    gap:10px;
+    margin-top:10px;
+    padding:12px;
+    border-radius:14px;
+    background:rgba(0,0,0,.14);
+    border:1px solid rgba(255,255,255,.06);
+  }
+  .meta-box { font-size:13px; color:var(--muted); line-height:1.45; }
+  .meta-box strong { display:block; color:var(--text,#fff); font-size:12px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px; }
+  .member-actions { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:14px; }
+  .auth-btn.mini { padding:8px 11px; font-size:13px; border-radius:11px; }
+  .row-msg { flex:1 1 240px; min-height:20px; }
+  .auth-card[data-auth-only][data-role-min="admin"] > .auth-actions { margin-top:12px; }
+  @media (max-width: 980px) {
+    .admin-split { grid-template-columns:1fr; }
+    .member-grid { grid-template-columns:1fr; }
+    .member-meta { grid-template-columns:1fr; }
+    .member-head { flex-direction:column; }
+    .admin-toolbar { flex-direction:column; align-items:stretch; }
+    .admin-tools { grid-template-columns:1fr; }
+    .admin-hub { grid-template-columns:1fr 1fr; }
+    .admin-help-grid { grid-template-columns:1fr; }
+  }
+  @media (max-width: 620px) { .admin-hub { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+  <main class="auth-shell admin-layout">
+    <section class="auth-card auth-hidden" data-guest-only>
+      <h1 class="auth-title">🛡️ Gestion des membres</h1>
+      <p class="auth-subtitle">Tu dois être connecté avec un compte admin pour gérer les comptes.</p>
+      <div class="auth-actions">
+        <a class="auth-btn primary" href="/connexion/">Se connecter</a>
+        <a class="auth-btn" href="/">Retour au site</a>
+      </div>
+    </section>
+
+    <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
+      <h1 class="auth-title">🛠️ Centre admin</h1>
+      <p class="auth-subtitle">Accès rapide aux outils, puis gestion des comptes plus bas.</p>
+      <div class="auth-actions">
+        <a class="auth-btn" href="/compte/">Compte</a>
+        <a class="auth-btn" href="/">Site</a>
+        <a class="auth-btn primary" href="#membres">Aller aux membres</a>
+      </div>
+      <nav class="admin-hub" aria-label="Navigation admin">
+        <a class="admin-hub-card" href="/compte/ticket-admin.html"><strong>🎫 Tickets</strong><span>Voir les demandes envoyées par les visiteurs.</span></a>
+        <a class="admin-hub-card" href="/compte/blog-admin.html"><strong>📝 Blog</strong><span>Ajouter ou modifier les articles.</span></a>
+        <a class="admin-hub-card" href="/compte/admin.html#membres"><strong>👥 Membres</strong><span>Modifier les comptes, rôles et mots de passe.</span></a>
+      </nav>
+    </section>
+
+    <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
+      <div class="admin-help-grid">
+        <details class="admin-panel">
+          <summary>➕ Créer un membre</summary>
+          <div class="admin-panel-body">
+          <form id="createForm" class="auth-form" autocomplete="off">
+            <label class="auth-label"><span>Token admin</span><input class="auth-input" id="adminToken" type="password" /></label>
+            <label class="auth-label"><span>Nom d’utilisateur</span><input class="auth-input" id="newUsername" type="text" /></label>
+            <label class="auth-label"><span>Nom affiché</span><input class="auth-input" id="newDisplay" type="text" /></label>
+            <label class="auth-label"><span>Mot de passe</span><input class="auth-input" id="newPassword" type="password" /></label>
+            <label class="auth-label"><span>Rôle</span>
+              <select class="auth-select" id="newRole">
+                <option value="member">member</option>
+                <option value="translator">translator</option>
+                <option value="admin">admin</option>
+              </select>
+            </label>
+            <div class="auth-actions">
+              <button class="auth-btn primary" type="submit">Créer le compte</button>
+            </div>
+            <div id="createMsg" class="auth-msg"></div>
+          </form>
+          </div>
+        </details>
+
+        <div class="auth-box">
+          <h3 style="margin-top:0;">ℹ️ Rappel rapide</h3>
+          <p class="admin-note">Les mots de passe ne sont jamais visibles, par sécurité, ils sont stockés hachés côté serveur.</p>
+          <ul class="auth-list">
+            <li>liste de tous les comptes</li>
+            <li>modification pseudo / nom affiché / rôle</li>
+            <li>activation ou désactivation</li>
+            <li>réinitialisation de mot de passe</li>
+            <li>suppression de compte</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    
+<section class="auth-card auth-hidden" data-auth-only data-role-min="admin" id="membres">
+  <div class="admin-toolbar">
+    <div>
+      <h2 style="margin:0;">👥 Membres</h2>
+      <div class="admin-summary" id="usersSummary">—</div>
+    </div>
+    <button class="auth-btn" id="refreshUsersBtn" type="button">Actualiser</button>
+  </div>
+
+  <div class="admin-tools">
+    <div class="auth-label" style="margin:0;">
+      <span>Filtre rapide des membres</span>
+      <input type="text" tabindex="-1" aria-hidden="true" autocomplete="username" style="position:absolute;left:-9999px;opacity:0;width:1px;height:1px;pointer-events:none;" />
+      <input type="password" tabindex="-1" aria-hidden="true" autocomplete="current-password" style="position:absolute;left:-9999px;opacity:0;width:1px;height:1px;pointer-events:none;" />
+      <input class="auth-input" id="searchUsersInput" name="admin_member_filter_q_91x" type="text" inputmode="search" readonly placeholder="Filtrer par ID, pseudo, nom affiché, rôle ou statut..." autocomplete="new-password" autocapitalize="none" autocorrect="off" spellcheck="false" />
+    </div>
+
+    <label class="auth-label" style="margin:0;">
+      <span>Rôle</span>
+      <select class="auth-select" id="roleFilterSelect">
+        <option value="">Tous</option>
+        <option value="admin">admin</option>
+        <option value="translator">translator</option>
+        <option value="member">member</option>
+      </select>
+    </label>
+
+    <label class="auth-label" style="margin:0;">
+      <span>Statut</span>
+      <select class="auth-select" id="statusFilterSelect">
+        <option value="">Tous</option>
+        <option value="active">Actifs</option>
+        <option value="inactive">Désactivés</option>
+      </select>
+    </label>
+
+    <label class="auth-label" style="margin:0;">
+      <span>Trier par</span>
+      <select class="auth-select" id="sortUsersSelect">
+        <option value="username_asc">Pseudo A → Z</option>
+        <option value="created_desc">Création récente</option>
+        <option value="login_desc">Dernier login</option>
+        <option value="role_asc">Rôle</option>
+      </select>
+    </label>
+
+    <div class="auth-actions" style="margin:0;">
+      <button class="auth-btn" id="resetUsersFiltersBtn" type="button">Réinitialiser</button>
+    </div>
+  </div>
+
+  <div class="admin-quickfilters" id="quickRoleFilters">
+    <button class="admin-chip active" type="button" data-quick-role="">Tous</button>
+    <button class="admin-chip" type="button" data-quick-role="admin">Admins</button>
+    <button class="admin-chip" type="button" data-quick-role="translator">Traducteurs</button>
+    <button class="admin-chip" type="button" data-quick-role="member">Membres</button>
+  </div>
+
+  <div class="admin-stats" id="usersStats">
+    <span class="admin-pill">Total : 0</span>
+    <span class="admin-pill">admin : 0</span>
+    <span class="admin-pill">translator : 0</span>
+    <span class="admin-pill">member : 0</span>
+  </div>
+
+  <div id="usersMsg" class="auth-msg"></div>
+  <div id="usersTbody" class="admin-users">
+    <div class="member-card">Chargement…</div>
+  </div>
+</section>
+
+
+    <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
+      <p class="admin-note">Astuce : après réinitialisation d’un mot de passe ou désactivation, les sessions du membre sont fermées automatiquement.</p>
+    </section>
+  </main>
+
+  <script src="/auth/auth.client.js"></script>
+  <script>
+    (function(){
+      function showDenied(){
+        document.documentElement.classList.add('auth-ready','auth-denied');
+        document.querySelectorAll('[data-auth-only]').forEach((el)=>el.remove());
+        const guest = document.querySelector('[data-guest-only]');
+        if (guest) {
+          guest.classList.remove('auth-hidden');
+          const title = guest.querySelector('.auth-title');
+          const subtitle = guest.querySelector('.auth-subtitle');
+          if (title) title.textContent = '⛔ Accès refusé';
+          if (subtitle) subtitle.textContent = 'Cette page est réservée aux administrateurs.';
+        }
+      }
+      function check(){
+        if (!window.SiteAuth?.loaded) return false;
+        const me = window.SiteAuth.me;
+        const ok = !!(me && String(me.role || '').toLowerCase() === 'admin');
+        if (ok) {
+          document.documentElement.classList.add('auth-ready');
+          return true;
+        }
+        showDenied();
+        return false;
+      }
+      window.__adminPageAllowed = false;
+      window.__ensureAdminPage = function(){
+        const ok = check();
+        window.__adminPageAllowed = ok;
+        return ok;
+      };
+      document.addEventListener('DOMContentLoaded', function(){ setTimeout(window.__ensureAdminPage, 0); });
+      if (window.SiteAuth?.onChange) {
+        window.SiteAuth.onChange(function(me){
+          const ok = !!(window.SiteAuth?.loaded && me && String(me.role || '').toLowerCase() === 'admin');
+          if (ok) {
+            window.__adminPageAllowed = true;
+            document.documentElement.classList.add('auth-ready');
+            return;
+          }
+          window.__adminPageAllowed = false;
+          showDenied();
+        });
+      }
+    })();
+  </script>
+  <script>
+    const createForm = document.getElementById('createForm');
+    const createMsg = document.getElementById('createMsg');
+    const usersMsg = document.getElementById('usersMsg');
+    const usersTbody = document.getElementById('usersTbody');
+    const refreshUsersBtn = document.getElementById('refreshUsersBtn');
+    const searchUsersInput = document.getElementById('searchUsersInput');
+    const roleFilterSelect = document.getElementById('roleFilterSelect');
+    const resetUsersFiltersBtn = document.getElementById('resetUsersFiltersBtn');
+    const usersStats = document.getElementById('usersStats');
+    const usersSummary = document.getElementById('usersSummary');
+    const statusFilterSelect = document.getElementById('statusFilterSelect');
+    const sortUsersSelect = document.getElementById('sortUsersSelect');
+    const quickRoleFilters = document.getElementById('quickRoleFilters');
+    let allUsers = [];
+
+    function setMsg(el, text, ok) {
+      if (!el) return;
+      el.textContent = text || '';
+      el.className = 'auth-msg ' + (text ? (ok ? 'ok' : 'err') : '');
+    }
+
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    function fmtDate(v) {
+      if (!v) return '—';
+      try {
+        const d = new Date(v);
+        if (Number.isNaN(d.getTime())) return v;
+        return d.toLocaleString('fr-FR');
+      } catch {
+        return v;
+      }
+    }
+
+    function activityLabel(item) {
+      const type = String(item?.type || '');
+      if (type === 'watchlist') return 'Ajout Watchlist';
+      if (type === 'like') return 'Jeu liké';
+      if (type === 'rating') return `Jeu noté${item?.value ? ' : ' + item.value + '/4' : ''}`;
+      if (type === 'page_view') return `Page vue${item?.value ? ' : ' + item.value + ' fois' : ''}`;
+      return 'Activité';
+    }
+
+    function renderActivity(items) {
+      if (!Array.isArray(items) || !items.length) {
+        return '<p class="member-history-empty">Aucune activité enregistrée pour le moment.</p>';
+      }
+      return `<div class="member-history-scroll"><ul class="member-history-list">${items.map((item) => `
+        <li class="member-history-item">
+          <span class="member-history-main">
+            <span class="member-history-kind">${esc(activityLabel(item))}</span>
+            <span class="member-history-game">${esc(item?.title || item?.game_key || 'Jeu sans titre')}</span>
+          </span>
+          <span class="member-history-date">${esc(fmtDate(item?.date))}</span>
+        </li>
+      `).join('')}</ul></div>`;
+    }
+
+    function renderViewedGames(items) {
+      if (!Array.isArray(items) || !items.length) {
+        return '<p class="member-history-empty">Aucun jeu consulté pour le moment.</p>';
+      }
+      return `<div class="member-history-scroll"><ul class="member-history-list">${items.map((item) => `
+        <li class="member-history-item">
+          <span class="member-history-main">
+            <span class="member-history-kind">Jeu consulté</span>
+            <span class="member-history-game">${esc(item?.title || item?.game_key || 'Jeu sans titre')}</span>
+            <span class="member-view-meta">
+              <span class="member-view-chip">👁️ ${Number(item?.value || 0)} vue(s)</span>
+              <span class="member-view-chip">Dernière vue : ${esc(fmtDate(item?.date))}</span>
+            </span>
+          </span>
+        </li>
+      `).join('')}</ul></div>`;
+    }
+
+    function updateStats(list) {
+      const stats = { total: list.length, active: 0, inactive: 0, admin: 0, translator: 0, member: 0 };
+      for (const u of list) {
+        const role = String(u?.role || '').toLowerCase();
+        if (role in stats) stats[role] += 1;
+        if (u?.is_active) stats.active += 1;
+        else stats.inactive += 1;
+      }
+      if (usersStats) {
+        usersStats.innerHTML = `
+          <span class="admin-pill">Total : ${stats.total}</span>
+          <span class="admin-pill ok">Actifs : ${stats.active}</span>
+          <span class="admin-pill off">Désactivés : ${stats.inactive}</span>
+          <span class="admin-pill">admin : ${stats.admin}</span>
+          <span class="admin-pill">translator : ${stats.translator}</span>
+          <span class="admin-pill">member : ${stats.member}</span>
+        `;
+      }
+    }
+
+    function updateSummary(filtered) {
+      if (!usersSummary) return;
+      const total = allUsers.length;
+      const shown = filtered.length;
+      const q = String(searchUsersInput?.value || '').trim();
+      const role = String(roleFilterSelect?.value || '').trim();
+      const status = String(statusFilterSelect?.value || '').trim();
+      const parts = [`${shown} membre(s) affiché(s) sur ${total}`];
+      if (q) parts.push(`recherche : “${q}”`);
+      if (role) parts.push(`rôle : ${role}`);
+      if (status === 'active') parts.push('statut : actifs');
+      if (status === 'inactive') parts.push('statut : désactivés');
+      usersSummary.textContent = parts.join(' • ');
+    }
+
+    function sortUsers(list) {
+      const mode = String(sortUsersSelect?.value || 'username_asc');
+      const arr = [...list];
+      arr.sort((a, b) => {
+        const au = String(a?.username || '').toLowerCase();
+        const bu = String(b?.username || '').toLowerCase();
+        const ar = String(a?.role || '').toLowerCase();
+        const br = String(b?.role || '').toLowerCase();
+        const ac = new Date(a?.created_at || 0).getTime() || 0;
+        const bc = new Date(b?.created_at || 0).getTime() || 0;
+        const al = new Date(a?.last_login_at || 0).getTime() || 0;
+        const bl = new Date(b?.last_login_at || 0).getTime() || 0;
+        if (mode === 'created_desc') return bc - ac || au.localeCompare(bu, 'fr');
+        if (mode === 'login_desc') return bl - al || au.localeCompare(bu, 'fr');
+        if (mode === 'role_asc') return ar.localeCompare(br, 'fr') || au.localeCompare(bu, 'fr');
+        return au.localeCompare(bu, 'fr');
+      });
+      return arr;
+    }
+
+    function syncQuickRoleButtons() {
+      if (!quickRoleFilters) return;
+      const current = String(roleFilterSelect?.value || '');
+      quickRoleFilters.querySelectorAll('[data-quick-role]').forEach((btn) => {
+        btn.classList.toggle('active', String(btn.dataset.quickRole || '') === current);
+      });
+    }
+
+    function getFilteredUsers() {
+      const q = String(searchUsersInput?.value || '').trim().toLowerCase();
+      const roleFilter = String(roleFilterSelect?.value || '').trim().toLowerCase();
+      const statusFilter = String(statusFilterSelect?.value || '').trim().toLowerCase();
+      const filtered = allUsers.filter((u) => {
+        const username = String(u?.username || '').toLowerCase();
+        const displayName = String(u?.display_name || '').toLowerCase();
+        const role = String(u?.role || '').toLowerCase();
+        const id = String(u?.id || '').toLowerCase();
+        const activeLabel = u?.is_active ? 'active actif' : 'inactive désactivé';
+        const haystack = [id, username, displayName, role, activeLabel].join(' ');
+        const matchText = !q || haystack.includes(q);
+        const matchRole = !roleFilter || role === roleFilter;
+        const matchStatus = !statusFilter || (statusFilter === 'active' ? !!u?.is_active : !u?.is_active);
+        return matchText && matchRole && matchStatus;
+      });
+      return sortUsers(filtered);
+    }
+
+    function renderUsers(list) {
+      const meId = Number(window.SiteAuth?.me?.id || 0);
+      const rows = (list || []).map((u) => {
+        const isSelf = Number(u.id) === meId;
+        return `
+            <article class="member-card" data-user-id="${u.id}">
+              <div class="member-head">
+                <div>
+                  <h3 class="member-title">${esc(u.display_name || u.username)}</h3>
+                  <div class="member-sub">
+                    <span class="admin-pill">ID ${u.id}</span>
+                    <span class="admin-pill">Pseudo : ${esc(u.username || '—')}</span>
+                    <span class="admin-pill">Rôle : ${esc(u.role)}</span>
+                    <span class="admin-pill ${u.is_active ? 'ok' : 'off'}">${u.is_active ? 'Actif' : 'Désactivé'}</span>
+                    <span class="admin-pill">Dernier login : ${esc(fmtDate(u.last_login_at))}</span>
+                    ${isSelf ? '<span class="admin-pill me">Ton compte</span>' : ''}
+                  </div>
+                </div>
+                <div class="member-top-actions">
+                  <label class="auth-badge"><input type="checkbox" data-field="is_active" ${u.is_active ? 'checked' : ''} /> Actif</label>
+                  <button class="auth-btn mini" type="button" data-action="toggle">Modifier</button>
+                </div>
+              </div>
+
+              <div class="member-body">
+              <div class="member-mini-stats">
+                <span class="admin-pill">📌 Watchlist : ${Number(u.watchlist_count || 0)}</span>
+                <span class="admin-pill">❤️ Likés : ${Number(u.liked_count || 0)}</span>
+                <span class="admin-pill">⭐ Notés : ${Number(u.rated_count || 0)}</span>
+                <span class="admin-pill">👁️ Vues totales : ${Number(u.page_views_count || 0)}</span>
+                <span class="admin-pill">🎮 Jeux différents vus : ${Number(u.unique_pages_viewed || 0)}</span>
+              </div>
+              <div class="member-grid">
+                <label class="auth-label">
+                  <span>Nom d’utilisateur de connexion - Pseudo</span>
+                  <input class="auth-input" data-field="username" value="${esc(u.username)}" />
+                </label>
+
+                <label class="auth-label">
+                  <span>Nom affiché</span>
+                  <input class="auth-input" data-field="display_name" value="${esc(u.display_name)}" />
+                </label>
+
+                <label class="auth-label">
+                  <span>Rôle</span>
+                  <select class="auth-select" data-field="role">
+                    <option value="member" ${u.role === 'member' ? 'selected' : ''}>member</option>
+                    <option value="translator" ${u.role === 'translator' ? 'selected' : ''}>translator</option>
+                    <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>admin</option>
+                  </select>
+                </label>
+
+                <label class="auth-label">
+                  <span>Nouveau mot de passe</span>
+                  <input class="auth-input" data-field="password" type="password" placeholder="laisser vide pour ne pas changer" />
+                </label>
+              </div>
+
+              <div class="member-meta">
+                <div class="meta-box"><strong>Créé</strong>${esc(fmtDate(u.created_at))}</div>
+                <div class="meta-box"><strong>Mis à jour</strong>${esc(fmtDate(u.updated_at))}</div>
+                <div class="meta-box"><strong>Dernier login</strong>${esc(fmtDate(u.last_login_at))}</div>
+              </div>
+
+              <div class="member-history">
+                <h4 class="member-history-title">🕘 Historique récent <span class="member-history-count">${Array.isArray(u.recent_activity) ? u.recent_activity.length : 0} ligne(s)</span></h4>
+                ${renderActivity(u.recent_activity)}
+              </div>
+
+              <div class="member-history">
+                <h4 class="member-history-title">🎮 Liste des jeux consultés <span class="member-history-count">${Number(u.unique_pages_viewed || 0)} jeu(x) différent(s)</span></h4>
+                ${renderViewedGames(u.recent_page_views)}
+              </div>
+
+              <div class="member-actions">
+                <button class="auth-btn primary" type="button" data-action="save">Enregistrer</button>
+                <button class="auth-btn warn" type="button" data-action="delete" ${isSelf ? 'disabled' : ''}>Supprimer</button>
+                <div class="auth-msg row-msg" data-row-msg></div>
+              </div>
+              </div>
+            </article>`;
+      }).join('');
+
+      usersTbody.innerHTML = rows || '<div class="member-card">Aucun membre ne correspond à la recherche.</div>';
+      updateStats(allUsers);
+      updateSummary(list);
+      setMsg(usersMsg, '', true);
+      syncQuickRoleButtons();
+    }
+
+    function applyUserFilters() {
+      renderUsers(getFilteredUsers());
+    }
+
+    async function loadUsers() {
+      if (!window.__ensureAdminPage || !window.__ensureAdminPage()) return;
+      if (!window.SiteAuth?.me || window.SiteAuth.me.role !== 'admin') return;
+      setMsg(usersMsg, 'Chargement des membres…', true);
+      try {
+        const data = await window.SiteAuth.adminListUsers();
+        allUsers = Array.isArray(data.users) ? data.users : [];
+        applyUserFilters();
+      } catch (err) {
+        allUsers = [];
+        updateStats([]);
+        usersTbody.innerHTML = '<div class="member-card">Erreur de chargement.</div>';
+        setMsg(usersMsg, err?.message || 'Erreur.', false);
+      }
+    }
+
+    function applyAccountPrefillFromTicket() {
+      let raw = '';
+      try { raw = sessionStorage.getItem('andric31_account_prefill_from_ticket') || ''; } catch {}
+      if (!raw) return;
+      let data = null;
+      try { data = JSON.parse(raw); } catch { data = null; }
+      if (!data) return;
+
+      const usernameEl = document.getElementById('newUsername');
+      const displayEl = document.getElementById('newDisplay');
+      const passwordEl = document.getElementById('newPassword');
+      const roleEl = document.getElementById('newRole');
+
+      if (usernameEl) usernameEl.value = data.username || '';
+      if (displayEl) displayEl.value = data.display_name || data.username || '';
+      if (passwordEl) passwordEl.value = data.password || '';
+      if (roleEl) roleEl.value = data.role || 'member';
+
+      setMsg(createMsg, `Création pré-remplie depuis le ticket #${data.ticket_id || ''}. Il reste à entrer le token admin puis créer le compte.`, true);
+      try { sessionStorage.removeItem('andric31_account_prefill_from_ticket'); } catch {}
+      setTimeout(() => {
+        createForm?.closest('details')?.setAttribute('open','');
+        createForm?.closest('.auth-card')?.scrollIntoView({ behavior:'smooth', block:'start' });
+        document.getElementById('adminToken')?.focus();
+      }, 150);
+    }
+
+    createForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      setMsg(createMsg, 'Création…', true);
+      try {
+        const payload = {
+          username: document.getElementById('newUsername')?.value || '',
+          display_name: document.getElementById('newDisplay')?.value || '',
+          password: document.getElementById('newPassword')?.value || '',
+          role: document.getElementById('newRole')?.value || 'member',
+        };
+        const token = document.getElementById('adminToken')?.value || '';
+        const res = await window.SiteAuth.createUserAdmin(payload, token);
+        setMsg(createMsg, `Compte créé : ${res?.created?.username || ''}`, true);
+        createForm.reset();
+        loadUsers();
+      } catch (err) {
+        setMsg(createMsg, err?.message || 'Erreur.', false);
+      }
+    });
+
+    refreshUsersBtn?.addEventListener('click', () => loadUsers());
+    if (searchUsersInput) {
+      searchUsersInput.setAttribute('autocomplete', 'new-password');
+      searchUsersInput.setAttribute('name', 'admin_member_filter_q_91x');
+      searchUsersInput.value = '';
+      requestAnimationFrame(() => { searchUsersInput.value = ''; });
+      window.addEventListener('pageshow', () => { searchUsersInput.value = ''; });
+      searchUsersInput.addEventListener('focus', () => {
+        searchUsersInput.removeAttribute('readonly');
+      }, { once:true });
+    }
+    searchUsersInput?.addEventListener('input', () => applyUserFilters());
+    roleFilterSelect?.addEventListener('change', () => applyUserFilters());
+    statusFilterSelect?.addEventListener('change', () => applyUserFilters());
+    sortUsersSelect?.addEventListener('change', () => applyUserFilters());
+    quickRoleFilters?.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-quick-role]');
+      if (!btn) return;
+      if (roleFilterSelect) roleFilterSelect.value = btn.dataset.quickRole || '';
+      applyUserFilters();
+    });
+    resetUsersFiltersBtn?.addEventListener('click', () => {
+      if (searchUsersInput) searchUsersInput.value = '';
+      if (roleFilterSelect) roleFilterSelect.value = '';
+      if (statusFilterSelect) statusFilterSelect.value = '';
+      if (sortUsersSelect) sortUsersSelect.value = 'username_asc';
+      applyUserFilters();
+    });
+
+    function toggleMemberCard(card) {
+      if (!card) return;
+      const btn = card.querySelector('button[data-action="toggle"]');
+      card.classList.toggle('is-open');
+      if (btn) btn.textContent = card.classList.contains('is-open') ? 'Fermer' : 'Modifier';
+    }
+
+    usersTbody?.addEventListener('click', async (e) => {
+      const cardHead = e.target.closest('.member-head');
+      const clickedControl = e.target.closest('button, a, input, select, textarea, label');
+      if (cardHead && !clickedControl) {
+        toggleMemberCard(cardHead.closest('article[data-user-id]'));
+        return;
+      }
+
+      const btn = e.target.closest('button[data-action]');
+      if (!btn) return;
+      const tr = btn.closest('article[data-user-id]');
+      if (!tr) return;
+      const id = Number(tr.getAttribute('data-user-id') || 0);
+      if (btn.dataset.action === 'toggle') {
+        toggleMemberCard(tr);
+        return;
+      }
+      const rowMsg = tr.querySelector('[data-row-msg]');
+      const username = tr.querySelector('[data-field="username"]')?.value || '';
+      const display_name = tr.querySelector('[data-field="display_name"]')?.value || '';
+      const role = tr.querySelector('[data-field="role"]')?.value || 'member';
+      const is_active = !!tr.querySelector('[data-field="is_active"]')?.checked;
+      const password = tr.querySelector('[data-field="password"]')?.value || '';
+
+      if (btn.dataset.action === 'save') {
+        setMsg(rowMsg, 'Enregistrement…', true);
+        try {
+          const res = await window.SiteAuth.adminUpdateUser({ id, username, display_name, role, is_active, password });
+          const pwField = tr.querySelector('[data-field="password"]');
+          if (pwField) pwField.value = '';
+          setMsg(rowMsg, res.password_reset ? 'Compte mis à jour + mot de passe remplacé.' : 'Compte mis à jour.', true);
+          loadUsers();
+        } catch (err) {
+          setMsg(rowMsg, err?.message || 'Erreur.', false);
+        }
+      }
+
+      if (btn.dataset.action === 'delete') {
+        if (!confirm('Supprimer ce compte définitivement ?')) return;
+        setMsg(rowMsg, 'Suppression…', true);
+        try {
+          await window.SiteAuth.adminDeleteUser(id);
+          setMsg(rowMsg, 'Compte supprimé.', true);
+          loadUsers();
+        } catch (err) {
+          setMsg(rowMsg, err?.message || 'Erreur.', false);
+        }
+      }
+    });
+
+    window.SiteAuth?.onChange(() => { if (window.__adminPageAllowed) loadUsers(); });
+    document.addEventListener('DOMContentLoaded', () => { if (window.__ensureAdminPage && window.__ensureAdminPage()) { setTimeout(loadUsers, 250); setTimeout(applyAccountPrefillFromTicket, 120); } });
+  </script>
+</body>
+</html>

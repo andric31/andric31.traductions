@@ -31,10 +31,12 @@ async function ensureSchema(db) {
       ip_hash TEXT DEFAULT '',
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      closed_at TEXT DEFAULT ''
+      closed_at TEXT DEFAULT '',
+      admin_comment TEXT DEFAULT ''
     )
   `).run();
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_tickets_global_status_created ON tickets_global(status, created_at)`).run();
+  try { await db.prepare(`ALTER TABLE tickets_global ADD COLUMN admin_comment TEXT DEFAULT ''`).run(); } catch {}
 }
 
 function clean(value, max = 1000) {
@@ -105,7 +107,7 @@ export async function onRequestGet(context) {
 
   const limit = Math.min(Math.max(Number(url.searchParams.get('limit') || 100), 1), 300);
   const status = url.searchParams.get('status');
-  let query = `SELECT id, name, contact, category, priority, title, message, status, page_url, created_at, updated_at, closed_at FROM tickets_global`;
+  let query = `SELECT id, name, contact, category, priority, title, message, status, page_url, created_at, updated_at, closed_at, admin_comment FROM tickets_global`;
   const binds = [];
   if (status && ['open', 'closed'].includes(status)) {
     query += ` WHERE status = ?`;
@@ -156,7 +158,7 @@ Mot de passe souhaité : ${signupPassword}`.slice(0, 5000);
   `).bind(name, contact, category, priority, title, message, pageUrl, userAgent, ipHash).run();
 
   const id = result.meta?.last_row_id || result.lastRowId || null;
-  return json({ ok: true, id, ticket: { id, name, contact, category, priority, title, status: 'open' } }, 201);
+  return json({ ok: true, id, ticket: { id, name, contact, category, priority, title, status: 'open', admin_comment: '' } }, 201);
 }
 
 export async function onRequestPatch(context) {
@@ -167,12 +169,24 @@ export async function onRequestPatch(context) {
 
   const body = await readJson(context.request);
   const id = Number(body.id || 0);
-  const status = normalizeStatus(body.status);
   if (!id) return json({ ok: false, error: 'ID du ticket manquant.' }, 400);
 
-  await db.prepare(`UPDATE tickets_global SET status = ?, updated_at = datetime('now'), closed_at = CASE WHEN ? = 'closed' THEN datetime('now') ELSE '' END WHERE id = ?`)
-    .bind(status, status, id).run();
-  const row = await db.prepare(`SELECT id, name, contact, category, priority, title, message, status, page_url, created_at, updated_at, closed_at FROM tickets_global WHERE id = ?`).bind(id).first();
+  const current = await db.prepare(`SELECT status FROM tickets_global WHERE id = ?`).bind(id).first();
+  if (!current) return json({ ok: false, error: 'Ticket introuvable.' }, 404);
+
+  const hasStatus = Object.prototype.hasOwnProperty.call(body, 'status');
+  const status = hasStatus ? normalizeStatus(body.status) : normalizeStatus(current.status);
+  const hasComment = Object.prototype.hasOwnProperty.call(body, 'admin_comment');
+  const adminComment = clean(body.admin_comment, 3000);
+
+  if (hasComment) {
+    await db.prepare(`UPDATE tickets_global SET status = ?, admin_comment = ?, updated_at = datetime('now'), closed_at = CASE WHEN ? = 'closed' THEN COALESCE(NULLIF(closed_at, ''), datetime('now')) ELSE '' END WHERE id = ?`)
+      .bind(status, adminComment, status, id).run();
+  } else {
+    await db.prepare(`UPDATE tickets_global SET status = ?, updated_at = datetime('now'), closed_at = CASE WHEN ? = 'closed' THEN COALESCE(NULLIF(closed_at, ''), datetime('now')) ELSE '' END WHERE id = ?`)
+      .bind(status, status, id).run();
+  }
+  const row = await db.prepare(`SELECT id, name, contact, category, priority, title, message, status, page_url, created_at, updated_at, closed_at, admin_comment FROM tickets_global WHERE id = ?`).bind(id).first();
   if (!row) return json({ ok: false, error: 'Ticket introuvable.' }, 404);
   return json({ ok: true, ticket: row });
 }

@@ -117,6 +117,8 @@
   .member-history-kind { display:block; color:var(--muted); font-size:12px; margin-bottom:3px; }
   .member-history-game { display:block; color:var(--text,#fff); font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:520px; }
   .member-history-date { color:var(--muted); font-size:12px; white-space:nowrap; }
+  .member-view-meta { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+  .member-view-chip { display:inline-flex; align-items:center; gap:5px; padding:4px 8px; border-radius:999px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.07); color:var(--muted); font-size:12px; font-weight:700; }
   .member-history-empty { color:var(--muted); font-size:13px; margin:0; }
   .member-card.is-open .member-head { cursor:default; }
   .admin-pill, .auth-badge {
@@ -413,6 +415,24 @@
       `).join('')}</ul></div>`;
     }
 
+    function renderViewedGames(items) {
+      if (!Array.isArray(items) || !items.length) {
+        return '<p class="member-history-empty">Aucun jeu consulté pour le moment.</p>';
+      }
+      return `<div class="member-history-scroll"><ul class="member-history-list">${items.map((item) => `
+        <li class="member-history-item">
+          <span class="member-history-main">
+            <span class="member-history-kind">Jeu consulté</span>
+            <span class="member-history-game">${esc(item?.title || item?.game_key || 'Jeu sans titre')}</span>
+            <span class="member-view-meta">
+              <span class="member-view-chip">👁️ ${Number(item?.value || 0)} vue(s)</span>
+              <span class="member-view-chip">Dernière vue : ${esc(fmtDate(item?.date))}</span>
+            </span>
+          </span>
+        </li>
+      `).join('')}</ul></div>`;
+    }
+
     function updateStats(list) {
       const stats = { total: list.length, active: 0, inactive: 0, admin: 0, translator: 0, member: 0 };
       for (const u of list) {
@@ -565,8 +585,8 @@
               </div>
 
               <div class="member-history">
-                <h4 class="member-history-title">👁️ Pages de jeux vues <span class="member-history-count">${Number(u.page_views_count || 0)} vue(s)</span></h4>
-                ${renderActivity(u.recent_page_views)}
+                <h4 class="member-history-title">🎮 Liste des jeux consultés <span class="member-history-count">${Number(u.unique_pages_viewed || 0)} jeu(x) différent(s)</span></h4>
+                ${renderViewedGames(u.recent_page_views)}
               </div>
 
               <div class="member-actions">

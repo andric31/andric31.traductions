@@ -173,14 +173,14 @@
   .member-history-kind { display:block; color:var(--muted); font-size:12px; margin-bottom:3px; }
   .member-history-game { display:block; color:var(--text,#fff); font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:520px; }
   .member-history-date { color:var(--muted); font-size:12px; white-space:nowrap; }
-  .member-view-row { align-items:center; padding:8px 10px; }
-  .member-view-row .member-history-main { display:flex; align-items:center; gap:10px; width:100%; min-width:0; }
-  .member-view-row .member-history-game { flex:1 1 auto; max-width:none; }
-  .member-view-meta { flex:0 0 auto; display:flex; align-items:center; flex-wrap:nowrap; gap:6px; margin-top:0; }
-  .member-view-chip { display:inline-flex; align-items:center; gap:5px; padding:4px 8px; border-radius:999px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.07); color:var(--muted); font-size:12px; font-weight:700; white-space:nowrap; }
+  .member-view-row { align-items:flex-start; padding:9px 10px; }
+  .member-view-row .member-history-main { min-width:0; }
+  .member-view-row .member-history-game { max-width:520px; }
+  .member-view-meta { flex:0 0 auto; display:flex; flex-direction:column; align-items:flex-end; gap:4px; margin-top:0; }
+  .member-view-chip { display:inline-flex; align-items:center; gap:5px; padding:0; border:0; background:transparent; color:var(--muted); font-size:12px; font-weight:700; white-space:nowrap; }
   @media (max-width: 760px) {
-    .member-view-row .member-history-main { flex-wrap:wrap; gap:6px; }
-    .member-view-meta { flex-wrap:wrap; }
+    .member-view-row { flex-wrap:wrap; }
+    .member-view-meta { width:100%; align-items:flex-start; flex-direction:row; flex-wrap:wrap; margin-top:2px; }
   }
   .member-history-empty { color:var(--muted); font-size:13px; margin:0; }
   .member-card.is-open .member-head { cursor:default; }

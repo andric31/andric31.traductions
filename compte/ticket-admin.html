@@ -38,6 +38,8 @@
     .ticket-meta{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:7px;align-items:center}.ticket-meta a{color:inherit;text-decoration:underline;text-underline-offset:2px}
     .ticket-pill{display:inline-flex;align-items:center;border:1px solid var(--border,var(--auth-border));background:rgba(255,255,255,.07);border-radius:999px;padding:4px 8px;font-size:12px;font-weight:850}.ticket-pill.open{background:rgba(90,255,150,.12)}.ticket-pill.closed{background:rgba(160,160,170,.12)}.ticket-pill.urgent{background:rgba(255,90,90,.15)}
     .ticket-message{white-space:pre-wrap;line-height:1.55;background:rgba(0,0,0,.12);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:11px;max-height:210px;overflow:auto}
+    .ticket-admin-comment{white-space:pre-wrap;line-height:1.5;background:rgba(90,160,255,.08);border:1px solid rgba(90,160,255,.18);border-radius:14px;padding:10px;color:var(--fg)}
+    .ticket-admin-comment strong{display:block;margin-bottom:4px;color:var(--title,var(--fg))}
     .ticket-actions-row{display:flex;flex-wrap:wrap;gap:8px}.ticket-empty{color:var(--muted);padding:14px;border:1px dashed var(--border,var(--auth-border));border-radius:16px;background:rgba(255,255,255,.025)}
     .ticket-card-admin.closed{opacity:.75}.ticket-card-admin.closed .ticket-title{text-decoration:line-through;text-decoration-thickness:2px}.ticket-danger{background:rgba(255,90,90,.13)!important}.ticket-ok{background:rgba(90,255,150,.12)!important}.ticket-info{background:rgba(90,160,255,.12)!important}.ticket-muted-btn{background:rgba(255,255,255,.055)!important}.ticket-copy-ok{color:#7ee0a1;font-weight:900}
     details.ticket-help{border:1px solid var(--border,var(--auth-border));border-radius:16px;background:rgba(255,255,255,.03);overflow:hidden}details.ticket-help summary{cursor:pointer;padding:12px 14px;font-weight:950;color:var(--title,var(--fg));list-style:none}details.ticket-help summary::-webkit-details-marker{display:none}.ticket-help-body{padding:0 14px 14px;color:var(--muted);line-height:1.55;font-size:14px}.ticket-help-body ul{margin:8px 0 0 18px;padding:0}.ticket-help-body li{margin:4px 0}
@@ -57,7 +59,7 @@
       <div class="ticket-admin-head">
         <div>
           <h1 class="auth-title">🎫 Admin tickets</h1>
-          <p class="auth-subtitle">Les tickets ouverts restent dans la gestion. Le bouton <strong>Clôturer</strong> les envoie dans l’historique.</p>
+          <p class="auth-subtitle">Les tickets ouverts restent dans la gestion.</p>
         </div>
         <div class="auth-actions"><a class="auth-btn" href="/compte/">Retour au compte</a><a class="auth-btn" href="/ticket/">Page Ticket</a><button class="auth-btn primary" id="refreshTickets" type="button">Actualiser</button></div>
       </div>
@@ -77,28 +79,16 @@
     <section class="auth-hidden" data-auth-only data-role-min="admin">
       <div class="ticket-columns">
         <section class="ticket-section" id="openSection">
-          <div class="ticket-section-head"><div><div class="ticket-section-title">📬 Tickets à traiter</div><div class="ticket-section-sub">Bouton Clôturer = envoi dans l’historique</div></div><span class="ticket-pill open" id="openCount">0</span></div>
+          <div class="ticket-section-head"><div><div class="ticket-section-title">📬 Tickets à traiter</div></div><span class="ticket-pill open" id="openCount">0</span></div>
           <div id="openTicketsList" class="ticket-scroll"></div>
         </section>
         <section class="ticket-section" id="historySection">
-          <div class="ticket-section-head"><div><div class="ticket-section-title">📚 Historique des tickets</div><div class="ticket-section-sub">Zone avec scroll pour éviter une page trop longue</div></div><span class="ticket-pill closed" id="closedCount">0</span></div>
+          <div class="ticket-section-head"><div><div class="ticket-section-title">📚 Historique des tickets</div></div><span class="ticket-pill closed" id="closedCount">0</span></div>
           <div id="closedTicketsList" class="ticket-scroll"></div>
         </section>
       </div>
     </section>
 
-    <details class="ticket-help auth-hidden" data-auth-only data-role-min="admin">
-      <summary>💡 Petites améliorations ajoutées</summary>
-      <div class="ticket-help-body">
-        <ul>
-          <li>Recherche rapide par numéro, pseudo, titre, contact, type, priorité ou message.</li>
-          <li>Historique séparé avec scroll : les tickets clôturés ne rallongent plus toute la page.</li>
-          <li>Bouton Copier pour garder la référence du ticket.</li>
-          <li>Les tickets urgents ressortent visuellement.</li>
-          <li>Suppression gardée, mais séparée de la clôture : à utiliser seulement pour nettoyer définitivement.</li>
-        </ul>
-      </div>
-    </details>
   </main>
 
   <script src="/auth/auth.client.js"></script>
@@ -136,7 +126,7 @@
         if (st !== 'all' && status !== st) return false;
         if (cat !== 'all' && String(t.category || '') !== cat) return false;
         if (!q) return true;
-        return [t.id,t.name,t.contact,t.title,t.message,t.category,t.priority,t.status,t.page_url,t.created_at,t.closed_at].some(v => String(v ?? '').toLowerCase().includes(q));
+        return [t.id,t.name,t.contact,t.title,t.message,t.category,t.priority,t.status,t.page_url,t.created_at,t.closed_at,t.admin_comment].some(v => String(v ?? '').toLowerCase().includes(q));
       });
     }
 
@@ -174,12 +164,14 @@
           <div class="ticket-meta"><span class="ticket-pill ${closed ? 'closed' : 'open'}">${closed ? 'Clôturé' : 'Ouvert'}</span><span class="ticket-pill">${esc(categoryLabel(t.category))}</span><span class="ticket-pill ${urgent ? 'urgent' : ''}">${esc(priorityLabel(t.priority))}</span></div>
         </div>
         <div class="ticket-message">${esc(t.message || '')}</div>
+        ${t.admin_comment ? `<div class="ticket-admin-comment"><strong>📝 Commentaire admin</strong>${esc(t.admin_comment)}</div>` : ''}
         <div class="ticket-actions-row">
           ${String(t.category || '') === 'inscription' ? `<button class="auth-btn primary" data-action="prefillAccount" type="button">Pré-remplir le compte</button><button class="auth-btn ticket-info" data-action="notifyAccount" type="button">Message compte créé</button>` : ''}
           ${String(t.category || '') === 'compte' ? `<button class="auth-btn ticket-info" data-action="notifyPassword" type="button">Message accès compte</button>` : ''}
+          <button class="auth-btn ticket-info" data-action="comment" type="button">Commentaire</button>
           <button class="auth-btn ticket-muted-btn" data-action="copy" type="button">Copier référence</button>
           <button class="auth-btn ${closed ? 'ticket-info' : 'ticket-ok'}" data-action="toggle" type="button">${closed ? 'Rouvrir' : 'Clôturer'}</button>
-          <button class="auth-btn ticket-danger" data-action="delete" type="button">Supprimer</button>
+          ${closed ? `<button class="auth-btn ticket-danger" data-action="delete" type="button">Supprimer</button>` : ``}
         </div>
       </article>`;
     }
@@ -213,13 +205,26 @@
       const card = btn.closest('[data-id]'); const id = card?.dataset.id; if (!id) return;
       const t = tickets.find(x => String(x.id) === String(id)); if (!t) return;
       const action = btn.dataset.action;
+      if (action === 'comment') {
+        const current = String(t.admin_comment || '');
+        const comment = prompt(`Commentaire admin pour le ticket #${id} :`, current);
+        if (comment === null) return;
+        try {
+          const data = await api('/api/ticket', { method:'PATCH', body:JSON.stringify({ id, admin_comment: comment }) });
+          Object.assign(t, data.ticket || { admin_comment: comment });
+          render();
+          setMsg(comment.trim() ? `Commentaire ajouté au ticket #${id}.` : `Commentaire retiré du ticket #${id}.`, true);
+        } catch(e){
+          setMsg(e.message || 'Impossible d’enregistrer le commentaire.', false);
+        }
+      }
       if (action === 'copy') {
         const text = `Ticket #${id} — ${t.title || 'Sans titre'} — ${t.name || 'Anonyme'}`;
         try { await navigator.clipboard.writeText(text); btn.textContent = 'Copié ✅'; btn.classList.add('ticket-copy-ok'); setTimeout(() => { btn.textContent = 'Copier référence'; btn.classList.remove('ticket-copy-ok'); }, 1300); }
         catch { setMsg('Copie impossible avec ce navigateur.', false); }
       }
       if (action === 'delete') {
-        if (!confirm(`Supprimer définitivement le ticket #${id} ?\n\nPour le garder en historique, utilise plutôt Clôturer.`)) return;
+        if (!confirm(`Supprimer définitivement le ticket #${id} ?`)) return;
         try { await api('/api/ticket', { method:'DELETE', body:JSON.stringify({ id }) }); tickets = tickets.filter(x => String(x.id) !== String(id)); render(); setMsg(`Ticket #${id} supprimé.`, true); } catch(e){ setMsg(e.message, false); }
       }
       if (action === 'prefillAccount') {

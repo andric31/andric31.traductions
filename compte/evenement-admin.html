@@ -54,6 +54,14 @@
     .event-admin-disabled-card { border:1px solid rgba(255,184,77,.35); background:rgba(255,184,77,.09); border-radius:16px; padding:16px; }
     .event-admin-disabled-card h3 { margin:0 0 8px; }
     .event-admin-mini-help { color:var(--muted); font-size:12px; line-height:1.45; margin:6px 0 0; }
+
+    .event-admin-event-list { display:grid; gap:10px; margin-top:12px; }
+    .event-admin-event-item { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; padding:12px; border-radius:15px; border:1px solid var(--border, var(--auth-border)); background:rgba(255,255,255,.035); }
+    .event-admin-event-item.is-selected { border-color:rgba(126,224,161,.55); background:rgba(126,224,161,.08); }
+    .event-admin-event-item.is-active { box-shadow:0 0 0 1px rgba(126,224,161,.34) inset; }
+    .event-admin-event-actions { display:flex; flex-wrap:wrap; gap:7px; justify-content:flex-end; }
+    .event-admin-active-banner { margin-top:10px; padding:10px 12px; border-radius:14px; border:1px solid rgba(126,224,161,.35); background:rgba(126,224,161,.09); color:#7ee0a1; font-weight:800; }
+    .event-admin-active-banner.off { border-color:rgba(255,184,77,.35); background:rgba(255,184,77,.09); color:#ffbf5f; }
     @media (max-width:850px){ .event-admin-grid, .event-admin-row, .event-admin-current { grid-template-columns:1fr; } .event-admin-cover { width:150px; } .event-admin-game { grid-template-columns:50px 1fr; } .event-admin-game .auth-btn { grid-column:1 / -1; } }
   </style>
 </head>
@@ -79,6 +87,20 @@
           <a class="auth-btn" href="/">Retour au site</a>
           <a class="auth-btn primary" href="/evenements/" target="_blank" rel="noopener">Voir la page événements</a>
         </div>
+      </div>
+    </section>
+
+
+    <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
+      <div class="event-admin-card">
+        <h2>📋 Liste des événements</h2>
+        <p class="event-admin-note" style="margin-top:0;">La liste vient de <strong>/evenements/config.json</strong>. Quand tu déploies un nouvel événement, ajoute juste son ID dans <code>event_files</code> et il apparaîtra ici.</p>
+        <div id="activeEventState" class="event-admin-active-banner off">Chargement de l’état actuel…</div>
+        <div class="event-admin-actions">
+          <button class="auth-btn danger" id="globalNoEventBtn" type="button">🚫 Aucun événement en cours</button>
+          <a class="auth-btn primary" id="eventTestBtn" href="/evenements/" target="_blank" rel="noopener">🧪 Ouvrir evenement.test</a>
+        </div>
+        <div id="eventsList" class="event-admin-event-list"><div class="event-admin-msg">Chargement de la liste…</div></div>
       </div>
     </section>
 
@@ -196,6 +218,8 @@
   <script>
     const DEFAULT_LIST_URL = 'https://raw.githubusercontent.com/andric31/f95list/main/f95list.json';
     let activeEvent = null;
+    let activeState = { active_event:'', enabled:true };
+    let eventCatalog = [];
     let allGames = [];
     let currentSelection = null;
 
@@ -224,6 +248,114 @@
         return { ...baseEvent, ...saved.event };
       }
       return baseEvent;
+    }
+
+    async function loadEventsState() {
+      const state = await fetchJson('/api/evenements', null);
+      if (state?.ok) {
+        activeState = {
+          active_event: String(state.active_event || '').trim(),
+          enabled: state.enabled !== false,
+          events: Array.isArray(state.events) ? state.events : []
+        };
+      }
+      return activeState;
+    }
+
+    async function saveActiveState(id, enabled = true) {
+      const res = await fetch('/api/evenements', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ active_event: id || '', enabled })
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) throw new Error(data?.error || 'Impossible de changer l’événement actif.');
+      activeState = { ...activeState, active_event: data.active_event || '', enabled: data.enabled !== false };
+      renderEventsList();
+      return data;
+    }
+
+    function getConfigEventIds(config) {
+      const ids = [];
+      const add = (value) => {
+        if (!value) return;
+        if (Array.isArray(value)) value.forEach(add);
+        else {
+          const id = String(value?.id || value).trim();
+          if (id && !ids.includes(id)) ids.push(id);
+        }
+      };
+      add(config.event_files);
+      add(config.events);
+      add(config.available_events);
+      add(config.event_actif || config.active_event);
+      return ids;
+    }
+
+    async function loadEventCatalog(config) {
+      const ids = getConfigEventIds(config);
+      const savedIds = (activeState.events || []).map((e)=>String(e.id || '').trim()).filter(Boolean);
+      savedIds.forEach((id)=>{ if(id && !ids.includes(id)) ids.push(id); });
+      const catalog = [];
+      for (const id of ids) {
+        const base = await fetchJson(`/evenements/${encodeURIComponent(id)}.json`, null, { timeoutMs: 6000 });
+        const saved = (activeState.events || []).find((e)=>String(e.id) === id);
+        catalog.push({
+          id,
+          title: base?.title || saved?.title || id,
+          date: base?.date || base?.period || base?.date_label || '',
+          hasFile: !!base,
+          source: base ? 'fichier' : 'cloudflare'
+        });
+      }
+      eventCatalog = catalog;
+      return catalog;
+    }
+
+    function renderEventsList() {
+      const wrap = $('eventsList');
+      if (!wrap) return;
+      const activeId = String(activeState.active_event || '').trim();
+      const activeLabel = activeState.enabled && activeId ? `✅ Événement en cours : ${activeId}` : '🚫 Aucun événement en cours';
+      const banner = $('activeEventState');
+      if (banner) {
+        banner.textContent = activeLabel;
+        banner.className = `event-admin-active-banner ${activeState.enabled && activeId ? '' : 'off'}`;
+      }
+      const selectedId = activeEvent?.id || '';
+      $('eventTestBtn')?.setAttribute('href', selectedId ? `/evenements/?test=${encodeURIComponent(selectedId)}` : '/evenements/');
+      wrap.innerHTML = eventCatalog.map((ev)=>{
+        const isSelected = selectedId === ev.id;
+        const isActive = activeState.enabled && activeId === ev.id;
+        return `<article class="event-admin-event-item ${isSelected ? 'is-selected' : ''} ${isActive ? 'is-active' : ''}">
+          <div>
+            <strong>${esc(ev.title || ev.id)}</strong>
+            <small style="display:block;color:var(--muted);margin-top:4px;">ID : ${esc(ev.id)}${ev.date ? ` • ${esc(ev.date)}` : ''}${ev.hasFile ? '' : ' • fichier JSON non trouvé'}</small>
+            <div class="event-admin-pill-list">
+              ${isActive ? '<span class="event-admin-pill ok">En cours</span>' : ''}
+              ${isSelected ? '<span class="event-admin-pill">Sélectionné</span>' : ''}
+              <span class="event-admin-pill">${esc(ev.source)}</span>
+            </div>
+          </div>
+          <div class="event-admin-event-actions">
+            <button class="auth-btn mini" type="button" data-load-event="${esc(ev.id)}">Ouvrir</button>
+            <button class="auth-btn mini primary" type="button" data-launch-event="${esc(ev.id)}">Lancer</button>
+            <a class="auth-btn mini" href="/evenements/?test=${encodeURIComponent(ev.id)}" target="_blank" rel="noopener">Test</a>
+          </div>
+        </article>`;
+      }).join('') || '<div class="event-admin-msg err">Aucun événement trouvé dans config.json.</div>';
+    }
+
+    async function selectEvent(id) {
+      const baseEvent = await fetchJson(`/evenements/${encodeURIComponent(id)}.json`, null, { timeoutMs: 8000 });
+      if (!baseEvent) throw new Error(`Impossible de charger /evenements/${id}.json`);
+      activeEvent = await loadSavedEvent(baseEvent);
+      fillForm(activeEvent);
+      renderCurrent();
+      renderEventsList();
+      $('eventMsg').textContent = `Événement chargé : ${id}.`;
+      $('eventMsg').className = 'event-admin-msg ok';
     }
 
     async function saveEventToSite(event, message = 'Événement sauvegardé sur le site.') {
@@ -469,12 +601,13 @@
 
     async function init() {
       if (window.__ensureEventAdminPage && !window.__ensureEventAdminPage()) return;
-      const config = await fetchJson('/evenements/config.json', { event_actif:'ete-2026' });
-      const eventId = String(config.event_actif || config.active_event || 'ete-2026').trim() || 'ete-2026';
-      const baseEvent = await fetchJson(`/evenements/${eventId}.json`, null);
-      if (!baseEvent) throw new Error('Impossible de charger le fichier événement.');
-      activeEvent = await loadSavedEvent(baseEvent);
-      fillForm(activeEvent);
+      const config = await fetchJson('/evenements/config.json', { event_actif:'ete-2026', event_files:['ete-2026'] });
+      await loadEventsState();
+      await loadEventCatalog(config);
+      renderEventsList();
+
+      const eventId = String(activeState.active_event || config.event_actif || config.active_event || eventCatalog[0]?.id || 'ete-2026').trim() || 'ete-2026';
+      await selectEvent(eventId);
       $('eventMsg').textContent = `Événement chargé : ${eventId}. Chargement de la liste des jeux…`;
       $('eventMsg').className = 'event-admin-msg ok';
       $('gamesResults').innerHTML = '<div class="event-admin-msg">Chargement des jeux…</div>';
@@ -489,36 +622,43 @@
       }
       renderCurrent();
       renderGames();
+      renderEventsList();
       $('eventMsg').textContent = `Événement chargé : ${eventId}. Sauvegarde Cloudflare active.`;
       $('eventMsg').className = 'event-admin-msg ok';
     }
 
     $('eventForm')?.addEventListener('submit', (e) => { e.preventDefault(); renderCurrent(); $('jsonMsg').textContent = 'Prévisualisation mise à jour.'; $('jsonMsg').className = 'event-admin-msg ok'; });
-    $('disableEventBtn')?.addEventListener('click', () => {
-      const ok = confirm('Mettre la page événement en mode “aucun événement en cours” ?
-
-Les visiteurs ne verront plus de jeu événement, mais tes réglages seront gardés.');
+    async function setNoEventInProgress() {
+      const ok = confirm('Mettre le site en mode “aucun événement en cours” ?\n\nLes visiteurs ne verront plus d’événement, mais tes réglages seront gardés.');
       if (!ok) return;
-      const next = formEvent();
-      next.enabled = false;
-      activeEvent = next;
-      fillForm(activeEvent);
-      renderCurrent();
-      saveEventToSite(next, 'Mode “aucun événement en cours” sauvegardé.').catch((err)=>{
+      try {
+        await saveActiveState('', false);
+        $('jsonMsg').textContent = 'Aucun événement en cours : sauvegardé.';
+        $('jsonMsg').className = 'event-admin-msg ok';
+      } catch (err) {
         $('jsonMsg').textContent = err?.message || 'Désactivation impossible.';
         $('jsonMsg').className = 'event-admin-msg err';
-      });
-    });
-    $('enableEventBtn')?.addEventListener('click', () => {
+      }
+    }
+
+    $('disableEventBtn')?.addEventListener('click', setNoEventInProgress);
+    $('globalNoEventBtn')?.addEventListener('click', setNoEventInProgress);
+
+    $('enableEventBtn')?.addEventListener('click', async () => {
       const next = formEvent();
       next.enabled = true;
       activeEvent = next;
       fillForm(activeEvent);
       renderCurrent();
-      saveEventToSite(next, 'Événement réactivé et sauvegardé.').catch((err)=>{
+      try {
+        await saveEventToSite(next, 'Événement sauvegardé.');
+        await saveActiveState(next.id, true);
+        $('jsonMsg').textContent = `Événement lancé : ${next.id}.`;
+        $('jsonMsg').className = 'event-admin-msg ok';
+      } catch (err) {
         $('jsonMsg').textContent = err?.message || 'Réactivation impossible.';
         $('jsonMsg').className = 'event-admin-msg err';
-      });
+      }
     });
     $('clearForcedBtn')?.addEventListener('click', () => {
       $('selectedId').value='';
@@ -565,6 +705,34 @@ Les visiteurs ne verront plus de jeu événement, mais tes réglages seront gard
         $('jsonMsg').className = 'event-admin-msg err';
       });
     });
+    $('eventsList')?.addEventListener('click', async (e) => {
+      const loadBtn = e.target.closest('[data-load-event]');
+      const launchBtn = e.target.closest('[data-launch-event]');
+      try {
+        if (loadBtn) {
+          await selectEvent(loadBtn.dataset.loadEvent || '');
+          $('jsonMsg').textContent = `Événement ouvert : ${loadBtn.dataset.loadEvent}.`;
+          $('jsonMsg').className = 'event-admin-msg ok';
+          return;
+        }
+        if (launchBtn) {
+          const id = launchBtn.dataset.launchEvent || '';
+          await selectEvent(id);
+          const next = formEvent();
+          next.enabled = true;
+          await saveEventToSite(next, 'Réglages de l’événement sauvegardés.');
+          await saveActiveState(id, true);
+          $('jsonMsg').textContent = `Événement lancé sur le site : ${id}.`;
+          $('jsonMsg').className = 'event-admin-msg ok';
+          window.scrollTo({ top:0, behavior:'smooth' });
+          return;
+        }
+      } catch (err) {
+        $('jsonMsg').textContent = err?.message || 'Action impossible.';
+        $('jsonMsg').className = 'event-admin-msg err';
+      }
+    });
+
     $('gameSearch')?.addEventListener('input', renderGames);
     $('gamesResults')?.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-pick-id]');

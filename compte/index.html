@@ -179,9 +179,109 @@
     .account-admin-card strong { color:var(--title,var(--fg)); }
     .account-admin-card span { color:var(--muted); font-size:13px; line-height:1.35; }
 
+
+    .account-hero {
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 14px;
+      align-items: stretch;
+      margin-bottom: 14px;
+    }
+    .account-hero-main, .account-hero-side {
+      border: 1px solid var(--border, var(--auth-border));
+      border-radius: 18px;
+      background: var(--auth-soft-bg, rgba(255,255,255,.04));
+      padding: 16px;
+    }
+    .account-hero-main h1 { margin: 0 0 8px; }
+    .account-hero-main p { margin: 0; color: var(--muted); line-height: 1.45; }
+    .account-user-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      padding: 8px 11px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.055);
+      border: 1px solid var(--border, var(--auth-border));
+      font-weight: 900;
+    }
+    .account-hero-side { display: grid; gap: 10px; align-content: start; }
+    .account-hero-side-title {
+      margin: 0;
+      font-weight: 950;
+      color: var(--title, var(--fg));
+    }
+    .account-quick-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .account-quick-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 74px;
+      padding: 12px;
+      border: 1px solid var(--border, var(--auth-border));
+      border-radius: 16px;
+      background: rgba(255,255,255,.045);
+      color: var(--text, var(--fg));
+      text-decoration: none;
+      cursor: pointer;
+      text-align: left;
+      font: inherit;
+    }
+    .account-quick-card:hover { background: rgba(80,160,255,.12); }
+    .account-quick-card strong { display:block; color: var(--title, var(--fg)); font-weight:950; }
+    .account-quick-card span { display:block; color: var(--muted); font-size:13px; line-height:1.3; margin-top:2px; }
+    .account-quick-ico { font-size: 24px; line-height:1; width: 32px; text-align:center; flex:0 0 auto; }
+    .account-mini-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .account-mini-stat {
+      padding: 10px;
+      border-radius: 14px;
+      border: 1px solid var(--border, var(--auth-border));
+      background: rgba(255,255,255,.04);
+    }
+    .account-mini-stat b { display:block; font-size:18px; color:var(--title,var(--fg)); }
+    .account-mini-stat span { display:block; margin-top:2px; font-size:12px; color:var(--muted); }
+    .account-section {
+      margin-top: 14px;
+      border: 1px solid var(--border, var(--auth-border));
+      border-radius: 18px;
+      background: var(--card, var(--auth-card-bg));
+      overflow: hidden;
+    }
+    .account-section > summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid transparent;
+      user-select: none;
+    }
+    .account-section > summary::-webkit-details-marker { display:none; }
+    .account-section[open] > summary { border-bottom-color: var(--border, var(--auth-border)); }
+    .account-section-title { display:flex; align-items:center; gap:9px; font-weight:950; color:var(--title,var(--fg)); }
+    .account-section-help { display:block; margin-top:3px; font-size:13px; color:var(--muted); font-weight:500; }
+    .account-section-arrow { color:var(--muted); transition: transform .16s ease; }
+    .account-section[open] .account-section-arrow { transform: rotate(90deg); }
+    .account-section-body { padding: 14px; }
+
     @media (max-width: 700px) {
       .account-modal { padding: 14px; }
       .account-admin-grid { grid-template-columns:1fr; }
+      .account-hero { grid-template-columns:1fr; }
+      .account-quick-grid { grid-template-columns:1fr; }
+      .account-mini-stats { grid-template-columns:1fr; }
     }
 
     /* Page Compte : on enlève le gros padding hérité du viewer, sans réduire la largeur */
@@ -224,59 +324,67 @@
     </section>
 
     <section class="auth-card auth-hidden" id="accountCard">
-      <h1 class="auth-title">👤 Compte</h1>
-      <p class="auth-subtitle">Consulte et gère les informations de ton compte.</p>
-
-      <div class="auth-box">
-        <h3>✅ Connecté</h3>
-        <p class="auth-userline">👤 <strong data-auth-name></strong> · <span data-auth-role></span></p>
-        <p>Ton accès est actif. Tu peux gérer ton compte depuis cette page ou te déconnecter.</p>
-        <div class="auth-actions">
-          <a class="auth-btn primary" href="/compte/mes-jeux.html" target="_blank" rel="noopener">🎮 Ouvrir Mes jeux</a>
-          <a class="auth-btn" href="/">Retour au site</a>
-          <button class="auth-btn primary" id="openPasswordModalBtn" type="button">🔐 Changer mon mot de passe</button>
-          <button class="auth-btn warn" id="logoutBtn" type="button">Se déconnecter</button>
+      <div class="account-hero">
+        <div class="account-hero-main">
+          <h1 class="auth-title">👤 Espace connecté</h1>
+          <p>Accès rapide à ton compte, tes jeux suivis, tes likes et tes notes.</p>
+          <div class="account-user-pill">✅ <span data-auth-name></span> · <span data-auth-role></span></div>
+          <div class="account-quick-grid">
+            <a class="account-quick-card" href="/compte/mes-jeux.html" target="_blank" rel="noopener"><span class="account-quick-ico">🎮</span><span><strong>Mes jeux</strong><span>Voir Watchlist, likes et notes.</span></span></a>
+            <button class="account-quick-card" id="openPasswordModalBtn" type="button"><span class="account-quick-ico">🔐</span><span><strong>Mot de passe</strong><span>Modifier ton accès.</span></span></button>
+            <a class="account-quick-card" href="/"><span class="account-quick-ico">🏠</span><span><strong>Retour au site</strong><span>Revenir au viewer.</span></span></a>
+            <button class="account-quick-card" id="logoutBtn" type="button"><span class="account-quick-ico">🚪</span><span><strong>Déconnexion</strong><span>Fermer ta session.</span></span></button>
+          </div>
+          <div id="logoutMsg" class="auth-msg"></div>
         </div>
-        <div id="logoutMsg" class="auth-msg"></div>
+        <div class="account-hero-side">
+          <p class="account-hero-side-title">📌 Résumé</p>
+          <div class="account-mini-stats">
+            <div class="account-mini-stat"><b id="accountWatchCount">—</b><span>Watchlist</span></div>
+            <div class="account-mini-stat"><b id="accountLikedCount">—</b><span>Likés</span></div>
+            <div class="account-mini-stat"><b id="accountRatedCount">—</b><span>Notés</span></div>
+          </div>
+          <p style="margin:0;color:var(--muted);font-size:13px;line-height:1.4;">Les listes sont rangées juste en dessous dans des blocs ouvrables/fermables.</p>
+        </div>
       </div>
 
       <div id="adminQuickMount"></div>
 
-      <div class="auth-box watchlist-box" id="watchlistBox" style="margin-top:14px;">
-        <div class="watchlist-head">
-          <div>
-            <h3><span class="watchlist-bookmark-icon" aria-hidden="true"><svg viewBox="0 0 24 24" role="img" aria-hidden="true"><path d="M7 3.5h10a1 1 0 0 1 1 1v16.2l-6-3.9-6 3.9V4.5a1 1 0 0 1 1-1z" fill="none" stroke="#ff7a00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Watchlist</h3>
-            <p class="watchlist-help">Les jeux que tu as ajoutés depuis leur fiche apparaissent ici.</p>
-          </div>
-          <button class="auth-btn" id="refreshWatchlistBtn" type="button">Actualiser</button>
+      <details class="account-section" id="watchlistBox" open>
+        <summary>
+          <span><span class="account-section-title"><span class="watchlist-bookmark-icon" aria-hidden="true"><svg viewBox="0 0 24 24" role="img" aria-hidden="true"><path d="M7 3.5h10a1 1 0 0 1 1 1v16.2l-6-3.9-6 3.9V4.5a1 1 0 0 1 1-1z" fill="none" stroke="#ff7a00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Watchlist</span><span class="account-section-help">Les jeux que tu as ajoutés depuis leur fiche.</span></span>
+          <span class="account-section-arrow">›</span>
+        </summary>
+        <div class="account-section-body">
+          <div class="watchlist-head"><button class="auth-btn" id="refreshWatchlistBtn" type="button">Actualiser</button></div>
+          <div id="watchlistMsg" class="auth-msg"></div>
+          <div id="watchlistList" class="watchlist-list"></div>
         </div>
-        <div id="watchlistMsg" class="auth-msg"></div>
-        <div id="watchlistList" class="watchlist-list"></div>
-      </div>
+      </details>
 
-      <div class="auth-box watchlist-box" id="likedGamesBox" style="margin-top:14px;">
-        <div class="watchlist-head">
-          <div>
-            <h3>❤️ Jeux likés</h3>
-            <p class="watchlist-help">Les likes faits avec ton compte connecté apparaissent ici.</p>
-          </div>
-          <button class="auth-btn" id="refreshLikedBtn" type="button">Actualiser</button>
+      <details class="account-section" id="likedGamesBox">
+        <summary>
+          <span><span class="account-section-title">❤️ Jeux likés</span><span class="account-section-help">Les likes faits avec ton compte connecté.</span></span>
+          <span class="account-section-arrow">›</span>
+        </summary>
+        <div class="account-section-body">
+          <div class="watchlist-head"><button class="auth-btn" id="refreshLikedBtn" type="button">Actualiser</button></div>
+          <div id="likedGamesMsg" class="auth-msg"></div>
+          <div id="likedGamesList" class="watchlist-list"></div>
         </div>
-        <div id="likedGamesMsg" class="auth-msg"></div>
-        <div id="likedGamesList" class="watchlist-list"></div>
-      </div>
+      </details>
 
-      <div class="auth-box watchlist-box" id="ratedGamesBox" style="margin-top:14px;">
-        <div class="watchlist-head">
-          <div>
-            <h3>⭐ Jeux notés</h3>
-            <p class="watchlist-help">Les notes envoyées avec ton compte connecté apparaissent ici.</p>
-          </div>
-          <button class="auth-btn" id="refreshRatedBtn" type="button">Actualiser</button>
+      <details class="account-section" id="ratedGamesBox">
+        <summary>
+          <span><span class="account-section-title">⭐ Jeux notés</span><span class="account-section-help">Les notes envoyées avec ton compte connecté.</span></span>
+          <span class="account-section-arrow">›</span>
+        </summary>
+        <div class="account-section-body">
+          <div class="watchlist-head"><button class="auth-btn" id="refreshRatedBtn" type="button">Actualiser</button></div>
+          <div id="ratedGamesMsg" class="auth-msg"></div>
+          <div id="ratedGamesList" class="watchlist-list"></div>
         </div>
-        <div id="ratedGamesMsg" class="auth-msg"></div>
-        <div id="ratedGamesList" class="watchlist-list"></div>
-      </div>
+      </details>
     </section>
   </main>
 
@@ -333,6 +441,9 @@
     const changePasswordMsg = document.getElementById('changePasswordMsg');
     const newPassword = document.getElementById('newPassword');
     const newPasswordConfirm = document.getElementById('newPasswordConfirm');
+    const accountWatchCount = document.getElementById('accountWatchCount');
+    const accountLikedCount = document.getElementById('accountLikedCount');
+    const accountRatedCount = document.getElementById('accountRatedCount');
 
     function setMsg(el, text, ok) {
       if (!el) return;
@@ -390,6 +501,7 @@
         const data = await resp.json();
         if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Chargement impossible.');
         const items = Array.isArray(data.items) ? data.items : [];
+        if (accountWatchCount) accountWatchCount.textContent = String(items.length);
         if (!items.length) {
           watchlistList.innerHTML = '<div class="watchlist-empty">Aucun jeu dans ta Watchlist pour le moment.</div>';
           setMsg(watchlistMsg, '', true);
@@ -414,6 +526,7 @@
         }).join('');
         setMsg(watchlistMsg, `${items.length} jeu${items.length > 1 ? 'x' : ''} dans ta Watchlist.`, true);
       } catch (err) {
+        if (accountWatchCount) accountWatchCount.textContent = '!';
         watchlistList.innerHTML = '';
         setMsg(watchlistMsg, err?.message || 'Erreur Watchlist.', false);
       }
@@ -456,6 +569,8 @@
         const data = await resp.json();
         if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Chargement impossible.');
         const items = Array.isArray(data.items) ? data.items : [];
+        const countEl = isRated ? accountRatedCount : accountLikedCount;
+        if (countEl) countEl.textContent = String(items.length);
         if (!items.length) {
           listEl.innerHTML = `<div class="watchlist-empty">Aucun jeu ${isRated ? 'noté' : 'liké'} pour le moment.</div>`;
           setMsg(msgEl, '', true);
@@ -464,6 +579,8 @@
         listEl.innerHTML = items.map((item) => renderAccountGameItem(item, kind)).join('');
         setMsg(msgEl, `${items.length} jeu${items.length > 1 ? 'x' : ''} ${isRated ? 'noté' + (items.length > 1 ? 's' : '') : 'liké' + (items.length > 1 ? 's' : '')}.`, true);
       } catch (err) {
+        const countEl = isRated ? accountRatedCount : accountLikedCount;
+        if (countEl) countEl.textContent = '!';
         listEl.innerHTML = '';
         setMsg(msgEl, err?.message || 'Erreur de chargement.', false);
       }

@@ -76,12 +76,23 @@ export async function onRequest(context) {
     );
   `).run();
 
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS counter_view_locks (
+      user_id INTEGER NOT NULL,
+      id TEXT NOT NULL,
+      last_hit_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      PRIMARY KEY (user_id, id)
+    );
+  `).run();
+
   // indexes (si déjà créés, OK)
   try {
     await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_counter_daily_day ON counter_daily(day);`).run();
     await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_counter_daily_kind_day ON counter_daily(kind, day);`).run();
     await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_counter_daily_id_kind_day ON counter_daily(id, kind, day);`).run();
     await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_user_page_views_user_last ON user_page_views(user_id, last_viewed_at DESC);`).run();
+    await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_counter_view_locks_last ON counter_view_locks(last_hit_at);`).run();
   } catch {}
 
   // ✅ Migration douce: si ancienne table sans likes, on tente et on ignore si déjà OK
@@ -148,27 +159,69 @@ export async function onRequest(context) {
   }
 
 
+  async function shouldCountGlobalView() {
+    try {
+      await ensureAuthTables(env.DB);
+      const user = await getSessionUser(env.DB, env, request);
+      if (!user?.id) return true;
+
+      // Protection globale séparée de l'historique admin :
+      // si deux scripts/API envoient une vue en même temps, une seule passe en 2 minutes.
+      const inserted = await env.DB.prepare(`
+        INSERT OR IGNORE INTO counter_view_locks (user_id, id, last_hit_at)
+        VALUES (?1, ?2, unixepoch())
+      `).bind(user.id, id).run();
+
+      if (Number(inserted?.meta?.changes || 0) > 0) return true;
+
+      const updated = await env.DB.prepare(`
+        UPDATE counter_view_locks
+        SET last_hit_at = unixepoch()
+        WHERE user_id = ?1
+          AND id = ?2
+          AND unixepoch() - last_hit_at >= 120
+      `).bind(user.id, id).run();
+
+      return Number(updated?.meta?.changes || 0) > 0;
+    } catch {
+      return true;
+    }
+  }
+
   async function recordLoggedPageView() {
     try {
       await ensureAuthTables(env.DB);
       const user = await getSessionUser(env.DB, env, request);
-      if (!user?.id) return;
+      if (!user?.id) return { hasUser: false, counted: true };
 
-      // Anti-doublon : une même page peut appeler plusieurs API au chargement.
+      // Anti-doublon renforcé : une même page peut appeler plusieurs API au chargement.
       // On ne compte qu'une vue par membre / jeu toutes les 2 minutes.
-      await env.DB.prepare(`
-        INSERT INTO user_page_views (user_id, game_key, title, view_count, first_viewed_at, last_viewed_at)
+      // Important : on ne met plus last_viewed_at à jour quand la vue est refusée,
+      // sinon deux appels proches peuvent donner l'impression d'une vue récente en double.
+      const inserted = await env.DB.prepare(`
+        INSERT OR IGNORE INTO user_page_views (user_id, game_key, title, view_count, first_viewed_at, last_viewed_at)
         VALUES (?1, ?2, ?3, 1, strftime('%Y-%m-%dT%H:%M:%fZ','now'), strftime('%Y-%m-%dT%H:%M:%fZ','now'))
-        ON CONFLICT(user_id, game_key) DO UPDATE SET
-          title = CASE WHEN excluded.title != '' THEN excluded.title ELSE user_page_views.title END,
-          view_count = CASE
-            WHEN unixepoch('now') - unixepoch(user_page_views.last_viewed_at) >= 120
-            THEN user_page_views.view_count + 1
-            ELSE user_page_views.view_count
-          END,
-          last_viewed_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
       `).bind(user.id, id, title).run();
-    } catch {}
+
+      if (Number(inserted?.meta?.changes || 0) > 0) {
+        return { hasUser: true, counted: true };
+      }
+
+      const updated = await env.DB.prepare(`
+        UPDATE user_page_views
+        SET
+          title = CASE WHEN ?3 != '' THEN ?3 ELSE title END,
+          view_count = view_count + 1,
+          last_viewed_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
+        WHERE user_id = ?1
+          AND game_key = ?2
+          AND unixepoch('now') - unixepoch(last_viewed_at) >= 120
+      `).bind(user.id, id, title).run();
+
+      return { hasUser: true, counted: Number(updated?.meta?.changes || 0) > 0 };
+    } catch {
+      return { hasUser: false, counted: true };
+    }
   }
 
   // ===================== op=get =====================
@@ -180,17 +233,21 @@ export async function onRequest(context) {
   // ===================== op=hit =====================
   if (op === "hit") {
     if (kind === "view") {
-      await env.DB.prepare(`
-        INSERT INTO counters (id, views, mega, likes, updated_at)
-        VALUES (?1, 1, 0, 0, unixepoch())
-        ON CONFLICT(id) DO UPDATE SET
-          views = views + 1,
-          updated_at = unixepoch()
-      `).bind(id).run();
-
-      await addEvent("view");
-      await dailyPlus1("view");
+      const countGlobalView = await shouldCountGlobalView();
       await recordLoggedPageView();
+
+      if (countGlobalView) {
+        await env.DB.prepare(`
+          INSERT INTO counters (id, views, mega, likes, updated_at)
+          VALUES (?1, 1, 0, 0, unixepoch())
+          ON CONFLICT(id) DO UPDATE SET
+            views = views + 1,
+            updated_at = unixepoch()
+        `).bind(id).run();
+
+        await addEvent("view");
+        await dailyPlus1("view");
+      }
 
     } else if (kind === "mega") {
       await env.DB.prepare(`

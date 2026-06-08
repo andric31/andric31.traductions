@@ -119,12 +119,23 @@ export async function onRequest(context) {
       );
     `).run();
 
+
+    await env.DB.prepare(`
+      CREATE TABLE IF NOT EXISTS counter_view_locks (
+        user_id INTEGER NOT NULL,
+        id TEXT NOT NULL,
+        last_hit_at INTEGER NOT NULL DEFAULT (unixepoch()),
+        PRIMARY KEY (user_id, id)
+      );
+    `).run();
+
     // indexes
     try {
       await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_counter_daily_day ON counter_daily(day);`).run();
       await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_counter_daily_kind_day ON counter_daily(kind, day);`).run();
       await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_counter_daily_id_kind_day ON counter_daily(id, kind, day);`).run();
       await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_user_page_views_user_last ON user_page_views(user_id, last_viewed_at DESC);`).run();
+      await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_counter_view_locks_last ON counter_view_locks(last_hit_at);`).run();
     } catch {}
 
     // si table counters existait sans likes
@@ -139,27 +150,68 @@ export async function onRequest(context) {
     } catch {}
 
 
+    async function shouldCountGlobalView() {
+      try {
+        await ensureAuthTables(env.DB);
+        const user = await getSessionUser(env.DB, env, request);
+        if (!user?.id) return true;
+
+        // Protection globale séparée de l'historique admin :
+        // si deux scripts/API envoient une vue en même temps, une seule passe en 2 minutes.
+        const inserted = await env.DB.prepare(`
+          INSERT OR IGNORE INTO counter_view_locks (user_id, id, last_hit_at)
+          VALUES (?1, ?2, unixepoch())
+        `).bind(user.id, id).run();
+
+        if (Number(inserted?.meta?.changes || 0) > 0) return true;
+
+        const updated = await env.DB.prepare(`
+          UPDATE counter_view_locks
+          SET last_hit_at = unixepoch()
+          WHERE user_id = ?1
+            AND id = ?2
+            AND unixepoch() - last_hit_at >= 120
+        `).bind(user.id, id).run();
+
+        return Number(updated?.meta?.changes || 0) > 0;
+      } catch {
+        return true;
+      }
+    }
+
     async function recordLoggedPageView() {
       try {
         await ensureAuthTables(env.DB);
         const user = await getSessionUser(env.DB, env, request);
-        if (!user?.id) return;
+        if (!user?.id) return { hasUser: false, counted: true };
 
-        // Anti-doublon : une même page peut appeler plusieurs API au chargement.
+        // Anti-doublon renforcé : une même page peut appeler plusieurs API au chargement.
         // On ne compte qu'une vue par membre / jeu toutes les 2 minutes.
-        await env.DB.prepare(`
-          INSERT INTO user_page_views (user_id, game_key, title, view_count, first_viewed_at, last_viewed_at)
+        // Important : on ne met plus last_viewed_at à jour quand la vue est refusée.
+        const inserted = await env.DB.prepare(`
+          INSERT OR IGNORE INTO user_page_views (user_id, game_key, title, view_count, first_viewed_at, last_viewed_at)
           VALUES (?1, ?2, ?3, 1, strftime('%Y-%m-%dT%H:%M:%fZ','now'), strftime('%Y-%m-%dT%H:%M:%fZ','now'))
-          ON CONFLICT(user_id, game_key) DO UPDATE SET
-            title = CASE WHEN excluded.title != '' THEN excluded.title ELSE user_page_views.title END,
-            view_count = CASE
-              WHEN unixepoch('now') - unixepoch(user_page_views.last_viewed_at) >= 120
-              THEN user_page_views.view_count + 1
-              ELSE user_page_views.view_count
-            END,
-            last_viewed_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
         `).bind(user.id, id, title).run();
-      } catch {}
+
+        if (Number(inserted?.meta?.changes || 0) > 0) {
+          return { hasUser: true, counted: true };
+        }
+
+        const updated = await env.DB.prepare(`
+          UPDATE user_page_views
+          SET
+            title = CASE WHEN ?3 != '' THEN ?3 ELSE title END,
+            view_count = view_count + 1,
+            last_viewed_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
+          WHERE user_id = ?1
+            AND game_key = ?2
+            AND unixepoch('now') - unixepoch(last_viewed_at) >= 120
+        `).bind(user.id, id, title).run();
+
+        return { hasUser: true, counted: Number(updated?.meta?.changes || 0) > 0 };
+      } catch {
+        return { hasUser: false, counted: true };
+      }
     }
 
     // ===================== op=hit / op=unhit =====================
@@ -176,10 +228,15 @@ export async function onRequest(context) {
       const day = dayNum();
 
       if (op === "hit") {
+        let countGlobalView = true;
         if (type === "view") {
-          await env.DB.prepare(`UPDATE counters SET views = views + 1, updated_at = unixepoch() WHERE id = ?1`).bind(id).run();
-          await env.DB.prepare(`INSERT INTO counter_events (id, kind, ts) VALUES (?1, 'view', unixepoch())`).bind(id).run();
+          countGlobalView = await shouldCountGlobalView();
           await recordLoggedPageView();
+
+          if (countGlobalView) {
+            await env.DB.prepare(`UPDATE counters SET views = views + 1, updated_at = unixepoch() WHERE id = ?1`).bind(id).run();
+            await env.DB.prepare(`INSERT INTO counter_events (id, kind, ts) VALUES (?1, 'view', unixepoch())`).bind(id).run();
+          }
         } else if (type === "mega") {
           await env.DB.prepare(`UPDATE counters SET mega = mega + 1, updated_at = unixepoch() WHERE id = ?1`).bind(id).run();
           await env.DB.prepare(`INSERT INTO counter_events (id, kind, ts) VALUES (?1, 'mega', unixepoch())`).bind(id).run();
@@ -188,12 +245,15 @@ export async function onRequest(context) {
           await env.DB.prepare(`INSERT INTO counter_events (id, kind, ts) VALUES (?1, 'like', unixepoch())`).bind(id).run();
         }
 
-        // ✅ daily +1 (view/mega/like) via kind/type
-        await env.DB.prepare(`
-          INSERT INTO counter_daily (id, kind, day, count)
-          VALUES (?1, ?2, ?3, 1)
-          ON CONFLICT(id, kind, day) DO UPDATE SET count = count + 1
-        `).bind(id, type, day).run();
+        // ✅ daily +1 (view/mega/like) via kind/type.
+        // Pour les vues, on vérifie que la vue n'a pas été bloquée par l'anti-doublon.
+        if (type !== "view" || countGlobalView) {
+          await env.DB.prepare(`
+            INSERT INTO counter_daily (id, kind, day, count)
+            VALUES (?1, ?2, ?3, 1)
+            ON CONFLICT(id, kind, day) DO UPDATE SET count = count + 1
+          `).bind(id, type, day).run();
+        }
 
         return json({ ok: true, op, id, type });
       }

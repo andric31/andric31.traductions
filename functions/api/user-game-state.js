@@ -109,23 +109,31 @@ async function getUserContext(context) {
 
 
 async function recordPageView(db, userId, gameKey, title = '') {
-  if (!userId || !gameKey) return;
+  if (!userId || !gameKey) return false;
   const cleanTitle = clean(title, 300);
 
-  // Anti-doublon : une même page peut appeler plusieurs API au chargement.
+  // Anti-doublon renforcé : une même page peut appeler plusieurs API au chargement.
   // On ne compte qu'une vue par membre / jeu toutes les 2 minutes.
-  await db.prepare(`
-    INSERT INTO user_page_views (user_id, game_key, title, view_count, first_viewed_at, last_viewed_at)
+  // Important : on ne met plus last_viewed_at à jour quand la vue est refusée.
+  const inserted = await db.prepare(`
+    INSERT OR IGNORE INTO user_page_views (user_id, game_key, title, view_count, first_viewed_at, last_viewed_at)
     VALUES (?1, ?2, ?3, 1, strftime('%Y-%m-%dT%H:%M:%fZ','now'), strftime('%Y-%m-%dT%H:%M:%fZ','now'))
-    ON CONFLICT(user_id, game_key) DO UPDATE SET
-      title = CASE WHEN excluded.title != '' THEN excluded.title ELSE user_page_views.title END,
-      view_count = CASE
-        WHEN unixepoch('now') - unixepoch(user_page_views.last_viewed_at) >= 120
-        THEN user_page_views.view_count + 1
-        ELSE user_page_views.view_count
-      END,
-      last_viewed_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
   `).bind(userId, gameKey, cleanTitle).run();
+
+  if (Number(inserted?.meta?.changes || 0) > 0) return true;
+
+  const updated = await db.prepare(`
+    UPDATE user_page_views
+    SET
+      title = CASE WHEN ?3 != '' THEN ?3 ELSE title END,
+      view_count = view_count + 1,
+      last_viewed_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
+    WHERE user_id = ?1
+      AND game_key = ?2
+      AND unixepoch('now') - unixepoch(last_viewed_at) >= 120
+  `).bind(userId, gameKey, cleanTitle).run();
+
+  return Number(updated?.meta?.changes || 0) > 0;
 }
 
 async function getCounterRow(db, gameKey) {

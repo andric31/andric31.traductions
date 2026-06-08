@@ -118,11 +118,49 @@
       font-weight: 900;
       color: var(--title, var(--fg));
     }
-    .account-password-grid input {
-      width: 100%;
+    .account-password-grid input { width: 100%; }
+
+    .account-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(0,0,0,.58);
+      backdrop-filter: blur(4px);
     }
+    .account-modal-backdrop.is-open { display: flex; }
+    .account-modal {
+      width: min(520px, 100%);
+      border: 1px solid var(--border, var(--auth-border));
+      border-radius: 18px;
+      background: var(--card, var(--auth-card-bg));
+      box-shadow: 0 20px 70px rgba(0,0,0,.42);
+      padding: 18px;
+    }
+    .account-modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .account-modal-head h3 { margin: 0; }
+    .account-modal-close {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      padding: 0;
+      font-size: 18px;
+      line-height: 1;
+    }
+    body.account-modal-open { overflow: hidden; }
+
     @media (max-width: 700px) {
       .account-password-grid { grid-template-columns: 1fr; }
+      .account-modal { padding: 14px; }
     }
 
     /* Page Compte : on enlève le gros padding hérité du viewer, sans réduire la largeur */
@@ -181,24 +219,11 @@
       </div>
 
       <div class="auth-box" id="passwordBox" style="margin-top:14px;">
-        <h3>🔐 Changer mon mot de passe</h3>
-        <p>Entre le nouveau mot de passe dans les deux cases pour éviter les erreurs.</p>
-        <form id="changePasswordForm" autocomplete="off">
-          <div class="account-password-grid">
-            <label>
-              <span>Nouveau mot de passe</span>
-              <input class="auth-input" id="newPassword" type="password" minlength="6" maxlength="120" autocomplete="new-password" required>
-            </label>
-            <label>
-              <span>Confirmer le mot de passe</span>
-              <input class="auth-input" id="newPasswordConfirm" type="password" minlength="6" maxlength="120" autocomplete="new-password" required>
-            </label>
-          </div>
-          <div class="auth-actions" style="margin-top:12px;">
-            <button class="auth-btn primary" id="changePasswordBtn" type="submit">Changer le mot de passe</button>
-          </div>
-          <div id="changePasswordMsg" class="auth-msg"></div>
-        </form>
+        <h3>🔐 Mot de passe</h3>
+        <p>Tu peux modifier ton mot de passe depuis une petite fenêtre de confirmation.</p>
+        <div class="auth-actions">
+          <button class="auth-btn primary" id="openPasswordModalBtn" type="button">Changer mon mot de passe</button>
+        </div>
       </div>
 
       <div id="adminQuickMount"></div>
@@ -241,6 +266,34 @@
     </section>
   </main>
 
+
+  <div class="account-modal-backdrop" id="passwordModal" aria-hidden="true">
+    <div class="account-modal" role="dialog" aria-modal="true" aria-labelledby="passwordModalTitle">
+      <div class="account-modal-head">
+        <h3 id="passwordModalTitle">🔐 Changer mon mot de passe</h3>
+        <button class="auth-btn account-modal-close" id="closePasswordModalBtn" type="button" aria-label="Fermer">×</button>
+      </div>
+      <p>Entre le nouveau mot de passe dans les deux cases pour éviter les erreurs.</p>
+      <form id="changePasswordForm" autocomplete="off">
+        <div class="account-password-grid">
+          <label>
+            <span>Nouveau mot de passe</span>
+            <input class="auth-input" id="newPassword" type="password" minlength="6" maxlength="120" autocomplete="new-password" required>
+          </label>
+          <label>
+            <span>Confirmer le mot de passe</span>
+            <input class="auth-input" id="newPasswordConfirm" type="password" minlength="6" maxlength="120" autocomplete="new-password" required>
+          </label>
+        </div>
+        <div class="auth-actions" style="margin-top:12px;">
+          <button class="auth-btn primary" id="changePasswordBtn" type="submit">Valider le changement</button>
+          <button class="auth-btn" id="cancelPasswordModalBtn" type="button">Annuler</button>
+        </div>
+        <div id="changePasswordMsg" class="auth-msg"></div>
+      </form>
+    </div>
+  </div>
+
   <script src="/auth/auth.client.js"></script>
   <script>
     const logoutBtn = document.getElementById('logoutBtn');
@@ -257,6 +310,10 @@
     const ratedGamesList = document.getElementById('ratedGamesList');
     const ratedGamesMsg = document.getElementById('ratedGamesMsg');
     const refreshRatedBtn = document.getElementById('refreshRatedBtn');
+    const openPasswordModalBtn = document.getElementById('openPasswordModalBtn');
+    const passwordModal = document.getElementById('passwordModal');
+    const closePasswordModalBtn = document.getElementById('closePasswordModalBtn');
+    const cancelPasswordModalBtn = document.getElementById('cancelPasswordModalBtn');
     const changePasswordForm = document.getElementById('changePasswordForm');
     const changePasswordBtn = document.getElementById('changePasswordBtn');
     const changePasswordMsg = document.getElementById('changePasswordMsg');
@@ -267,6 +324,25 @@
       if (!el) return;
       el.textContent = text || '';
       el.className = 'auth-msg ' + (text ? (ok ? 'ok' : 'err') : '');
+    }
+
+
+    function openPasswordModal() {
+      if (!passwordModal) return;
+      passwordModal.classList.add('is-open');
+      passwordModal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('account-modal-open');
+      setMsg(changePasswordMsg, '', true);
+      setTimeout(() => newPassword?.focus(), 50);
+    }
+
+    function closePasswordModal() {
+      if (!passwordModal) return;
+      passwordModal.classList.remove('is-open');
+      passwordModal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('account-modal-open');
+      changePasswordForm?.reset();
+      setMsg(changePasswordMsg, '', true);
     }
 
 
@@ -484,6 +560,17 @@
     window.SiteAuth.onChange(guardAccount);
     if (window.SiteAuth.loaded) guardAccount(window.SiteAuth.me);
 
+
+    openPasswordModalBtn?.addEventListener('click', openPasswordModal);
+    closePasswordModalBtn?.addEventListener('click', closePasswordModal);
+    cancelPasswordModalBtn?.addEventListener('click', closePasswordModal);
+    passwordModal?.addEventListener('click', (event) => {
+      if (event.target === passwordModal) closePasswordModal();
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && passwordModal?.classList.contains('is-open')) closePasswordModal();
+    });
+
     changePasswordForm?.addEventListener('submit', async (event) => {
       event.preventDefault();
       const password = newPassword?.value || '';
@@ -513,6 +600,7 @@
         if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Modification impossible.');
         changePasswordForm.reset();
         setMsg(changePasswordMsg, 'Mot de passe modifié ✅', true);
+        setTimeout(closePasswordModal, 900);
       } catch (err) {
         setMsg(changePasswordMsg, err?.message || 'Erreur pendant la modification.', false);
       } finally {

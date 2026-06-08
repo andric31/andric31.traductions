@@ -108,7 +108,9 @@
   .member-top-actions, .member-body { cursor:auto; }
   .member-mini-stats { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 14px; }
   .member-history { margin-top:14px; padding:12px; border-radius:14px; background:rgba(0,0,0,.13); border:1px solid rgba(255,255,255,.06); }
-  .member-history-title { margin:0 0 10px; font-size:14px; color:var(--title,var(--fg)); }
+  .member-history-title { margin:0 0 10px; font-size:14px; color:var(--title,var(--fg)); display:flex; justify-content:space-between; gap:10px; align-items:center; }
+  .member-history-count { color:var(--muted); font-size:12px; font-weight:700; }
+  .member-history-scroll { max-height:260px; overflow:auto; padding-right:4px; scrollbar-width:thin; }
   .member-history-list { display:grid; gap:8px; margin:0; padding:0; list-style:none; }
   .member-history-item { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; padding:9px 10px; border-radius:12px; background:rgba(255,255,255,.045); }
   .member-history-main { min-width:0; }
@@ -392,6 +394,7 @@
       if (type === 'watchlist') return 'Ajout Watchlist';
       if (type === 'like') return 'Jeu liké';
       if (type === 'rating') return `Jeu noté${item?.value ? ' : ' + item.value + '/4' : ''}`;
+      if (type === 'page_view') return `Page vue${item?.value ? ' : ' + item.value + ' fois' : ''}`;
       return 'Activité';
     }
 
@@ -399,7 +402,7 @@
       if (!Array.isArray(items) || !items.length) {
         return '<p class="member-history-empty">Aucune activité enregistrée pour le moment.</p>';
       }
-      return `<ul class="member-history-list">${items.map((item) => `
+      return `<div class="member-history-scroll"><ul class="member-history-list">${items.map((item) => `
         <li class="member-history-item">
           <span class="member-history-main">
             <span class="member-history-kind">${esc(activityLabel(item))}</span>
@@ -407,7 +410,7 @@
           </span>
           <span class="member-history-date">${esc(fmtDate(item?.date))}</span>
         </li>
-      `).join('')}</ul>`;
+      `).join('')}</ul></div>`;
     }
 
     function updateStats(list) {
@@ -521,6 +524,8 @@
                 <span class="admin-pill">📌 Watchlist : ${Number(u.watchlist_count || 0)}</span>
                 <span class="admin-pill">❤️ Likés : ${Number(u.liked_count || 0)}</span>
                 <span class="admin-pill">⭐ Notés : ${Number(u.rated_count || 0)}</span>
+                <span class="admin-pill">👁️ Vues totales : ${Number(u.page_views_count || 0)}</span>
+                <span class="admin-pill">🎮 Jeux différents vus : ${Number(u.unique_pages_viewed || 0)}</span>
               </div>
               <div class="member-grid">
                 <label class="auth-label">
@@ -555,8 +560,13 @@
               </div>
 
               <div class="member-history">
-                <h4 class="member-history-title">🕘 Historique récent</h4>
+                <h4 class="member-history-title">🕘 Historique récent <span class="member-history-count">${Array.isArray(u.recent_activity) ? u.recent_activity.length : 0} ligne(s)</span></h4>
                 ${renderActivity(u.recent_activity)}
+              </div>
+
+              <div class="member-history">
+                <h4 class="member-history-title">👁️ Pages de jeux vues <span class="member-history-count">${Number(u.page_views_count || 0)} vue(s)</span></h4>
+                ${renderActivity(u.recent_page_views)}
               </div>
 
               <div class="member-actions">

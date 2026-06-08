@@ -172,6 +172,18 @@
   .member-history-main { min-width:0; }
   .member-history-kind { display:block; color:var(--muted); font-size:12px; margin-bottom:3px; }
   .member-history-game { display:block; color:var(--text,#fff); font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:520px; }
+  .member-history-game.is-main-page {
+    display:inline-flex;
+    align-items:center;
+    width:max-content;
+    max-width:100%;
+    padding:3px 9px;
+    border-radius:999px;
+    border:1px solid rgba(126,224,161,.34);
+    background:rgba(126,224,161,.13);
+    color:#7ee0a1;
+    text-shadow:0 0 12px rgba(126,224,161,.18);
+  }
   .member-history-date { color:var(--muted); font-size:12px; white-space:nowrap; }
   .member-view-row { align-items:flex-start; padding:9px 10px; }
   .member-view-row .member-history-main { min-width:0; }
@@ -538,6 +550,16 @@
       return 'Activité';
     }
 
+    function isMainPageKey(key) {
+      return String(key || '').trim() === '__viewer_main__';
+    }
+
+    function displayGameTitle(item) {
+      const key = String(item?.game_key || '').trim();
+      if (isMainPageKey(key)) return 'Page Principale';
+      return String(item?.title || key || 'Jeu sans titre');
+    }
+
     function renderActivity(items, viewedGames) {
       const activityItems = Array.isArray(items) ? items.map((item) => ({ ...item, _historyKind: 'activity' })) : [];
       const viewedItems = Array.isArray(viewedGames) ? viewedGames.map((item) => ({ ...item, type: 'page_view', _historyKind: 'viewed_game' })) : [];
@@ -553,11 +575,14 @@
 
       return `<div class="member-history-scroll"><ul class="member-history-list">${allItems.map((item) => {
         const isViewedGame = item?._historyKind === 'viewed_game';
+        const gameKey = String(item?.game_key || '').trim();
+        const isMainPage = isMainPageKey(gameKey);
+        const gameTitle = displayGameTitle(item);
         return `
         <li class="member-history-item${isViewedGame ? ' member-view-row' : ''}">
           <span class="member-history-main">
             <span class="member-history-kind">${isViewedGame ? 'Jeu consulté' : esc(activityLabel(item))}</span>
-            <span class="member-history-game" data-game-key="${esc(item?.game_key || '')}">${esc(item?.title || item?.game_key || 'Jeu sans titre')}</span>
+            <span class="member-history-game${isMainPage ? ' is-main-page' : ''}" data-game-key="${esc(gameKey)}">${esc(gameTitle)}</span>
           </span>
           ${isViewedGame ? `
           <span class="member-view-meta">

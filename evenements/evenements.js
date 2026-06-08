@@ -53,6 +53,16 @@
     return id ? `/evenements/${id}.json` : '';
   }
 
+  async function loadSavedEvent(baseEvent) {
+    const id = String(baseEvent?.id || '').trim();
+    if (!id) return baseEvent;
+    const saved = await fetchJson(`/api/evenement?id=${encodeURIComponent(id)}`, null);
+    if (saved?.ok && saved.event && typeof saved.event === 'object') {
+      return { ...baseEvent, ...saved.event };
+    }
+    return baseEvent;
+  }
+
   function getListUrl(event) {
     const eventUrl = String(event?.list_url || '').trim();
     if (eventUrl) return eventUrl;
@@ -516,7 +526,8 @@
   async function init() {
     const config = await fetchJson(CONFIG_URL, { event_actif: 'ete-2026' });
     const eventUrl = getActiveEventUrl(config);
-    const event = eventUrl ? await fetchJson(eventUrl, null) : null;
+    const baseEvent = eventUrl ? await fetchJson(eventUrl, null) : null;
+    const event = baseEvent ? await loadSavedEvent(baseEvent) : null;
 
     if (!event || event.enabled === false) {
       renderActiveEvent(event, null);

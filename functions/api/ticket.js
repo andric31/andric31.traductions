@@ -42,7 +42,7 @@ function clean(value, max = 1000) {
 }
 
 function normalizeCategory(value) {
-  const allowed = new Set(['question', 'probleme', 'suggestion', 'inscription', 'autre']);
+  const allowed = new Set(['question', 'probleme', 'suggestion', 'inscription', 'compte', 'autre']);
   const v = clean(value, 40).toLowerCase();
   return allowed.has(v) ? v : 'question';
 }
@@ -127,7 +127,9 @@ export async function onRequestPost(context) {
   const name = clean(body.name, 80);
   const contact = clean(body.contact, 160);
   const title = clean(body.title, 160);
-  const message = clean(body.message, 5000);
+  let message = clean(body.message, 5000);
+  const signupPassword = String(body.password || '').trim();
+  const signupPasswordConfirm = String(body.password_confirm || '').trim();
   const category = normalizeCategory(body.category);
   const priority = normalizePriority(body.priority);
   const pageUrl = clean(body.page_url, 500);
@@ -137,6 +139,16 @@ export async function onRequestPost(context) {
 
   if (!name || !title || !message) return json({ ok: false, error: 'Nom, titre et message sont obligatoires.' }, 400);
   if (message.length < 8) return json({ ok: false, error: 'Message trop court.' }, 400);
+  if (category === 'inscription') {
+    if (!signupPassword || !signupPasswordConfirm) return json({ ok: false, error: 'Mot de passe obligatoire pour une création de compte.' }, 400);
+    if (signupPassword !== signupPasswordConfirm) return json({ ok: false, error: 'Les deux mots de passe ne sont pas identiques.' }, 400);
+    if (signupPassword.length < 6) return json({ ok: false, error: 'Le mot de passe doit contenir au moins 6 caractères.' }, 400);
+    message = `${message}
+
+--- Création de compte ---
+Pseudo souhaité : ${name}
+Mot de passe souhaité : ${signupPassword}`.slice(0, 5000);
+  }
 
   const result = await db.prepare(`
     INSERT INTO tickets_global (name, contact, category, priority, title, message, status, page_url, user_agent, ip_hash, created_at, updated_at)

@@ -150,21 +150,62 @@
     return Math.abs(h >>> 0);
   }
 
-  function nextMondayMidnight() {
-    const now = new Date();
-    const next = new Date(now);
-    next.setHours(0, 0, 0, 0);
+  const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+  const CHANGE_DAYS = {
+    sunday: 0, dimanche: 0,
+    monday: 1, lundi: 1,
+    tuesday: 2, mardi: 2,
+    wednesday: 3, mercredi: 3,
+    thursday: 4, jeudi: 4,
+    friday: 5, vendredi: 5,
+    saturday: 6, samedi: 6
+  };
 
-    const day = next.getDay();
-    let addDays = (8 - day) % 7;
-    if (addDays === 0) addDays = 7;
+  function getChangeDay(event) {
+    const raw = normalizeText(event?.change_day || 'monday').trim();
+    return Object.prototype.hasOwnProperty.call(CHANGE_DAYS, raw) ? CHANGE_DAYS[raw] : 1;
+  }
 
-    next.setDate(next.getDate() + addDays);
+  function getChangeHour(event) {
+    const hour = Number(event?.change_hour);
+    return Number.isFinite(hour) ? Math.min(23, Math.max(0, Math.floor(hour))) : 0;
+  }
+
+  function getLastChangeBoundary(date, event) {
+    const boundary = new Date(date);
+    boundary.setHours(getChangeHour(event), 0, 0, 0);
+
+    const targetDay = getChangeDay(event);
+    const diff = (boundary.getDay() - targetDay + 7) % 7;
+    boundary.setDate(boundary.getDate() - diff);
+
+    if (boundary.getTime() > date.getTime()) {
+      boundary.setDate(boundary.getDate() - 7);
+    }
+
+    return boundary;
+  }
+
+  function getNextChangeDate(event) {
+    const next = getLastChangeBoundary(new Date(), event);
+    next.setDate(next.getDate() + 7);
     return next;
   }
 
-  function formatNextGameTimer() {
-    const remaining = Math.max(0, nextMondayMidnight().getTime() - Date.now());
+  function getRotationIndex(event) {
+    const now = new Date();
+    const configuredStart = new Date(event?.start_at || '');
+    const baselineDate = !Number.isNaN(configuredStart.getTime()) && now.getTime() >= configuredStart.getTime()
+      ? configuredStart
+      : new Date(now.getFullYear(), 0, 1);
+
+    const baseline = getLastChangeBoundary(baselineDate, event);
+    const current = getLastChangeBoundary(now, event);
+    return Math.max(0, Math.floor((current.getTime() - baseline.getTime()) / WEEK_MS));
+  }
+
+  function formatNextGameTimer(event) {
+    const remaining = Math.max(0, getNextChangeDate(event).getTime() - Date.now());
     const totalSeconds = Math.floor(remaining / 1000);
     const days = Math.floor(totalSeconds / 86400);
     const hours = Math.floor((totalSeconds % 86400) / 3600);
@@ -175,12 +216,12 @@
     return `${minutes} min`;
   }
 
-  function startEventTimer() {
+  function startEventTimer(event) {
     const timerText = document.querySelector('[data-next-game-timer]');
     if (!timerText) return;
 
     const update = () => {
-      timerText.textContent = `Nouveau jeu dans ${formatNextGameTimer()}`;
+      timerText.textContent = `${event?.timer_label || 'Nouveau jeu dans'} ${formatNextGameTimer(event)}`;
     };
 
     update();
@@ -259,9 +300,11 @@
       }
     }
 
-    const candidates = games
+    const validGames = games
       .filter((g) => getGameImage(g))
-      .filter((g) => buildGameUrl(g) !== '/')
+      .filter((g) => buildGameUrl(g) !== '/');
+
+    const candidates = validGames
       .map((g) => ({ game: g, analysis: analyseSummerMatch(g, event) }))
       .filter((entry) => entry.analysis.score > 0)
       .sort((a, b) => {
@@ -269,7 +312,23 @@
         return getGameTitle(a.game).localeCompare(getGameTitle(b.game), 'fr');
       });
 
-    if (!candidates.length) {
+    let rotationPool = candidates;
+
+    if (!rotationPool.length && String(event.fallback_mode || '').trim() === 'weekly_random') {
+      rotationPool = validGames
+        .map((g) => ({
+          game: g,
+          analysis: {
+            score: 0,
+            found: [],
+            description: getGameDescription(g),
+            tags: getGameTags(g)
+          }
+        }))
+        .sort((a, b) => getGameTitle(a.game).localeCompare(getGameTitle(b.game), 'fr'));
+    }
+
+    if (!rotationPool.length) {
       return {
         game: null,
         reason: '',
@@ -279,18 +338,16 @@
       };
     }
 
-    const topScore = candidates[0].analysis.score;
-    const pool = candidates.filter((entry) => entry.analysis.score >= Math.max(8, topScore - 3));
+    // Important : on utilise toute la liste de candidats au thème, pas seulement le petit groupe de tête.
+    // Comme ça, le jeu avance vraiment à chaque changement hebdomadaire au lieu de pouvoir retomber sur le même.
+    const rotationIndex = getRotationIndex(event);
+    const eventOffset = hashText(event.id || event.title || 'event') % rotationPool.length;
+    const selected = rotationPool[(rotationIndex + eventOffset) % rotationPool.length];
 
-    const now = new Date();
-    const weekKey = `${now.getUTCFullYear()}-${Math.ceil((((now - new Date(Date.UTC(now.getUTCFullYear(), 0, 1))) / 86400000) + 1) / 7)}`;
-    const key = `${event.id || 'event'}|${weekKey}`;
-    const selected = pool[hashText(key) % pool.length];
-
-    const uniqueKeywords = [...new Set(selected.analysis.found.map((item) => item.keyword))];
+    const uniqueKeywords = [...new Set((selected.analysis.found || []).map((item) => item.keyword))];
     const reason = uniqueKeywords.length
-      ? `Sélection automatique, basée sur le thème ${uniqueKeywords.join(', ')}.`
-      : 'Choisi automatiquement pour cet événement.';
+      ? `Sélection automatique de la semaine, basée sur le thème ${uniqueKeywords.join(', ')}.`
+      : 'Sélection automatique de la semaine.';
 
     return {
       game: selected.game,
@@ -366,7 +423,7 @@
           <p class="event-text">${escapeHtml(event.text || 'Découvre cette semaine un jeu traduit mis en avant pour l’été.')}</p>
           <div class="event-next-game-timer" aria-live="polite">
             <span aria-hidden="true">⏳</span>
-            <span data-next-game-timer>${escapeHtml(event.timer_label || 'Nouveau jeu dans')} ${escapeHtml(formatNextGameTimer())}</span>
+            <span data-next-game-timer>${escapeHtml(event.timer_label || 'Nouveau jeu dans')} ${escapeHtml(formatNextGameTimer(event))}</span>
           </div>
           <div class="event-actions">
             <a class="event-main-link" href="${escapeHtml(gameUrl)}">Voir la fiche du jeu →</a>
@@ -405,7 +462,7 @@
     const games = flattenGames(raw);
     const selection = pickGame(games, event);
     renderActiveEvent(event, selection, raw ? '' : 'La base f95list.json est peut-être inaccessible.');
-    startEventTimer();
+    startEventTimer(event);
   }
 
   init().catch((err) => {

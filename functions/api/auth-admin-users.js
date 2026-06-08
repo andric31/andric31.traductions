@@ -79,7 +79,7 @@ async function getMemberStats(db, userId) {
     FROM user_page_views
     WHERE user_id = ?1
     ORDER BY last_viewed_at DESC
-    LIMIT 50
+    LIMIT 200
   `).bind(userId).all();
   return {
     watchlist_count: Number(watch?.n || 0),

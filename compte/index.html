@@ -107,7 +107,7 @@
 
     .account-password-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: 1fr;
       gap: 10px;
       margin-top: 10px;
     }
@@ -159,7 +159,6 @@
     body.account-modal-open { overflow: hidden; }
 
     @media (max-width: 700px) {
-      .account-password-grid { grid-template-columns: 1fr; }
       .account-modal { padding: 14px; }
     }
 
@@ -213,17 +212,10 @@
         <div class="auth-actions">
           <a class="auth-btn primary" href="/compte/mes-jeux.html" target="_blank" rel="noopener">🎮 Ouvrir Mes jeux</a>
           <a class="auth-btn" href="/">Retour au site</a>
+          <button class="auth-btn primary" id="openPasswordModalBtn" type="button">🔐 Changer mon mot de passe</button>
           <button class="auth-btn warn" id="logoutBtn" type="button">Se déconnecter</button>
         </div>
         <div id="logoutMsg" class="auth-msg"></div>
-      </div>
-
-      <div class="auth-box" id="passwordBox" style="margin-top:14px;">
-        <h3>🔐 Mot de passe</h3>
-        <p>Tu peux modifier ton mot de passe depuis une petite fenêtre de confirmation.</p>
-        <div class="auth-actions">
-          <button class="auth-btn primary" id="openPasswordModalBtn" type="button">Changer mon mot de passe</button>
-        </div>
       </div>
 
       <div id="adminQuickMount"></div>

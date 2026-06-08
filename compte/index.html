@@ -158,8 +158,30 @@
     }
     body.account-modal-open { overflow: hidden; }
 
+    .account-admin-grid {
+      display:grid;
+      grid-template-columns: repeat(3, minmax(150px, 1fr));
+      gap:10px;
+      margin-top:12px;
+    }
+    .account-admin-card {
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      padding:12px;
+      border:1px solid var(--border, var(--auth-border));
+      border-radius:15px;
+      background:rgba(255,255,255,.045);
+      text-decoration:none;
+      color:var(--text,#fff);
+    }
+    .account-admin-card:hover { background:rgba(80,160,255,.12); }
+    .account-admin-card strong { color:var(--title,var(--fg)); }
+    .account-admin-card span { color:var(--muted); font-size:13px; line-height:1.35; }
+
     @media (max-width: 700px) {
       .account-modal { padding: 14px; }
+      .account-admin-grid { grid-template-columns:1fr; }
     }
 
     /* Page Compte : on enlève le gros padding hérité du viewer, sans réduire la largeur */
@@ -524,11 +546,11 @@
       adminQuickMount.innerHTML = `
         <section class="auth-box" style="margin-top:14px;">
           <h2 style="margin-top:0;">🛠️ Admin</h2>
-          <p>Outils de gestion réservés aux administrateurs.</p>
-          <div class="auth-actions">
-            <a class="auth-btn" href="/compte/admin.html">Gestion des comptes</a>
-            <a class="auth-btn" href="/compte/blog-admin.html">Éditeur de blog</a>
-            <a class="auth-btn" href="/compte/ticket-admin.html">Admin tickets</a>
+          <p>Accès rapide aux outils de gestion.</p>
+          <div class="account-admin-grid">
+            <a class="account-admin-card" href="/compte/admin.html"><strong>👥 Membres</strong><span>Comptes, rôles et mots de passe.</span></a>
+            <a class="account-admin-card" href="/compte/ticket-admin.html"><strong>🎫 Tickets</strong><span>Demandes envoyées depuis le formulaire.</span></a>
+            <a class="account-admin-card" href="/compte/blog-admin.html"><strong>📝 Blog</strong><span>Création et modification des articles.</span></a>
           </div>
         </section>`;
     }

@@ -52,13 +52,47 @@
     font:inherit;
   }
   .admin-chip.active { background:rgba(80, 160, 255, .18); }
-  .admin-users { display:grid; gap:14px; }
+
+  .admin-hub {
+    display:grid;
+    grid-template-columns: repeat(4, minmax(170px, 1fr));
+    gap:10px;
+    margin-top:12px;
+  }
+  .admin-hub-card {
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    padding:13px;
+    border-radius:16px;
+    border:1px solid var(--border, var(--auth-border));
+    background:rgba(255,255,255,.045);
+    color:var(--text,#fff);
+    text-decoration:none;
+    min-height:82px;
+  }
+  .admin-hub-card:hover { background:rgba(80,160,255,.12); }
+  .admin-hub-card strong { font-size:16px; color:var(--title,var(--fg)); }
+  .admin-hub-card span { color:var(--muted); font-size:13px; line-height:1.35; }
+  .admin-panel { border:1px solid var(--border, var(--auth-border)); border-radius:16px; background:rgba(255,255,255,.03); overflow:hidden; }
+  .admin-panel > summary { cursor:pointer; list-style:none; padding:14px 16px; font-weight:900; color:var(--title,var(--fg)); display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .admin-panel > summary::-webkit-details-marker { display:none; }
+  .admin-panel > summary::after { content:'Ouvrir'; color:var(--muted); font-size:12px; font-weight:800; }
+  .admin-panel[open] > summary::after { content:'Fermer'; }
+  .admin-panel-body { padding:0 16px 16px; }
+  .admin-help-grid { display:grid; grid-template-columns:1.4fr .9fr; gap:12px; align-items:start; }
+  .admin-users { display:grid; gap:10px; }
+
   .member-card {
     border:1px solid var(--border, var(--auth-border));
     border-radius:16px;
     background:rgba(255,255,255,.03);
-    padding:16px;
+    padding:14px;
   }
+  .member-card:not(.is-open) .member-body { display:none; }
+  .member-card:not(.is-open) .member-head { margin-bottom:0; padding-bottom:0; border-bottom:0; }
+  .member-top-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+  .member-body { margin-top:14px; }
   .member-head {
     display:flex;
     justify-content:space-between;
@@ -97,6 +131,7 @@
   .meta-box { font-size:13px; color:var(--muted); line-height:1.45; }
   .meta-box strong { display:block; color:var(--text,#fff); font-size:12px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px; }
   .member-actions { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:14px; }
+  .auth-btn.mini { padding:8px 11px; font-size:13px; border-radius:11px; }
   .row-msg { flex:1 1 240px; min-height:20px; }
   .auth-card[data-auth-only][data-role-min="admin"] > .auth-actions { margin-top:12px; }
   @media (max-width: 980px) {
@@ -106,7 +141,10 @@
     .member-head { flex-direction:column; }
     .admin-toolbar { flex-direction:column; align-items:stretch; }
     .admin-tools { grid-template-columns:1fr; }
+    .admin-hub { grid-template-columns:1fr 1fr; }
+    .admin-help-grid { grid-template-columns:1fr; }
   }
+  @media (max-width: 620px) { .admin-hub { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -121,18 +159,26 @@
     </section>
 
     <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
-      <h1 class="auth-title">🛠️ Gestion des membres</h1>
-      <p class="auth-subtitle">Tu peux créer, modifier, désactiver, réinitialiser le mot de passe ou supprimer un compte.</p>
+      <h1 class="auth-title">🛠️ Centre admin</h1>
+      <p class="auth-subtitle">Accès rapide aux outils, puis gestion des comptes plus bas.</p>
       <div class="auth-actions">
-        <a class="auth-btn" href="/compte/">Retour au compte</a>
-        <a class="auth-btn" href="/">Retour au site</a>
+        <a class="auth-btn" href="/compte/">Compte</a>
+        <a class="auth-btn" href="/">Site</a>
+        <a class="auth-btn primary" href="#membres">Aller aux membres</a>
       </div>
+      <nav class="admin-hub" aria-label="Navigation admin">
+        <a class="admin-hub-card" href="/compte/ticket-admin.html"><strong>🎫 Tickets</strong><span>Voir les demandes envoyées par les visiteurs.</span></a>
+        <a class="admin-hub-card" href="/compte/blog-admin.html"><strong>📝 Blog</strong><span>Ajouter ou modifier les articles.</span></a>
+        <a class="admin-hub-card" href="/compte/admin.html#membres"><strong>👥 Membres</strong><span>Modifier les comptes, rôles et mots de passe.</span></a>
+        <a class="admin-hub-card" href="/compte/mes-jeux.html"><strong>🎮 Mes jeux</strong><span>Voir les jeux suivis, likés ou notés.</span></a>
+      </nav>
     </section>
 
     <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
-      <div class="admin-split">
-        <div class="auth-box">
-          <h3 style="margin-top:0;">➕ Créer un membre</h3>
+      <div class="admin-help-grid">
+        <details class="admin-panel">
+          <summary>➕ Créer un membre</summary>
+          <div class="admin-panel-body">
           <form id="createForm" class="auth-form" autocomplete="off">
             <label class="auth-label"><span>Token admin</span><input class="auth-input" id="adminToken" type="password" /></label>
             <label class="auth-label"><span>Nom d’utilisateur</span><input class="auth-input" id="newUsername" type="text" /></label>
@@ -150,10 +196,11 @@
             </div>
             <div id="createMsg" class="auth-msg"></div>
           </form>
-        </div>
+          </div>
+        </details>
 
         <div class="auth-box">
-          <h3 style="margin-top:0;">ℹ️ Rappel</h3>
+          <h3 style="margin-top:0;">ℹ️ Rappel rapide</h3>
           <p class="admin-note">Les mots de passe ne sont jamais visibles, par sécurité, ils sont stockés hachés côté serveur.</p>
           <ul class="auth-list">
             <li>liste de tous les comptes</li>
@@ -167,7 +214,7 @@
     </section>
 
     
-<section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
+<section class="auth-card auth-hidden" data-auth-only data-role-min="admin" id="membres">
   <div class="admin-toolbar">
     <div>
       <h2 style="margin:0;">👥 Membres</h2>
@@ -424,9 +471,13 @@
                     ${isSelf ? '<span class="admin-pill me">Ton compte</span>' : ''}
                   </div>
                 </div>
-                <label class="auth-badge"><input type="checkbox" data-field="is_active" ${u.is_active ? 'checked' : ''} /> Compte actif</label>
+                <div class="member-top-actions">
+                  <label class="auth-badge"><input type="checkbox" data-field="is_active" ${u.is_active ? 'checked' : ''} /> Actif</label>
+                  <button class="auth-btn mini" type="button" data-action="toggle">Modifier</button>
+                </div>
               </div>
 
+              <div class="member-body">
               <div class="member-grid">
                 <label class="auth-label">
                   <span>Nom d’utilisateur de connexion - Pseudo</span>
@@ -463,6 +514,7 @@
                 <button class="auth-btn primary" type="button" data-action="save">Enregistrer</button>
                 <button class="auth-btn warn" type="button" data-action="delete" ${isSelf ? 'disabled' : ''}>Supprimer</button>
                 <div class="auth-msg row-msg" data-row-msg></div>
+              </div>
               </div>
             </article>`;
       }).join('');
@@ -515,6 +567,7 @@
       setMsg(createMsg, `Création pré-remplie depuis le ticket #${data.ticket_id || ''}. Il reste à entrer le token admin puis créer le compte.`, true);
       try { sessionStorage.removeItem('andric31_account_prefill_from_ticket'); } catch {}
       setTimeout(() => {
+        createForm?.closest('details')?.setAttribute('open','');
         createForm?.closest('.auth-card')?.scrollIntoView({ behavior:'smooth', block:'start' });
         document.getElementById('adminToken')?.focus();
       }, 150);
@@ -575,6 +628,11 @@
       const tr = btn.closest('article[data-user-id]');
       if (!tr) return;
       const id = Number(tr.getAttribute('data-user-id') || 0);
+      if (btn.dataset.action === 'toggle') {
+        tr.classList.toggle('is-open');
+        btn.textContent = tr.classList.contains('is-open') ? 'Fermer' : 'Modifier';
+        return;
+      }
       const rowMsg = tr.querySelector('[data-row-msg]');
       const username = tr.querySelector('[data-field="username"]')?.value || '';
       const display_name = tr.querySelector('[data-field="display_name"]')?.value || '';

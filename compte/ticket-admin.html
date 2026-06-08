@@ -10,7 +10,35 @@
   <link rel="stylesheet" href="/auth/auth.css" />
   <script src="/theme-init.js"></script>
   <style>
-    html:not(.auth-ready) body{visibility:hidden}.ticket-admin-layout{width:min(1180px,calc(100% - 18px));margin:14px auto 28px;display:grid;gap:12px}.ticket-toolbar{display:flex;flex-wrap:wrap;gap:9px;align-items:end}.ticket-toolbar .auth-label{min-width:190px;flex:1;margin:0}.ticket-list{display:grid;gap:10px}.ticket-card-admin{border:1px solid var(--border,var(--auth-border));background:rgba(255,255,255,.045);border-radius:18px;padding:13px;display:grid;gap:10px}.ticket-card-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px}.ticket-title{font-size:17px;font-weight:900;color:var(--title)}.ticket-meta{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:7px}.ticket-pill{display:inline-flex;align-items:center;border:1px solid var(--border,var(--auth-border));background:rgba(255,255,255,.07);border-radius:999px;padding:4px 8px;font-size:12px}.ticket-message{white-space:pre-wrap;line-height:1.55;background:rgba(0,0,0,.12);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:11px}.ticket-actions-row{display:flex;flex-wrap:wrap;gap:8px}.ticket-empty{color:var(--muted);padding:14px}.ticket-card-admin.closed{opacity:.68}.ticket-card-admin.closed .ticket-title{text-decoration:line-through}.ticket-danger{background:rgba(255,90,90,.13)!important}.ticket-ok{background:rgba(90,255,150,.12)!important}.ticket-info{background:rgba(90,160,255,.12)!important}@media(max-width:720px){.ticket-toolbar .auth-label{min-width:100%}}
+    html:not(.auth-ready) body{visibility:hidden}
+    .ticket-admin-layout{width:min(1180px,calc(100% - 18px));margin:14px auto 28px;display:grid;gap:12px}
+    .ticket-admin-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+    .ticket-admin-head .auth-actions{margin-top:0}
+    .ticket-search-banner{position:sticky;top:8px;z-index:5;border:1px solid var(--border,var(--auth-border));background:color-mix(in srgb,var(--card, #111827) 90%, transparent);backdrop-filter:blur(10px);border-radius:18px;padding:12px;box-shadow:0 10px 30px rgba(0,0,0,.14)}
+    .ticket-toolbar{display:grid;grid-template-columns:minmax(220px,1.7fr) minmax(150px,.7fr) minmax(170px,.85fr) auto;gap:9px;align-items:end}
+    .ticket-toolbar .auth-label{margin:0}.ticket-toolbar .auth-btn{min-height:42px;white-space:nowrap}
+    .ticket-stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;color:var(--muted);font-size:13px}
+    .ticket-stat{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border,var(--auth-border));background:rgba(255,255,255,.055);border-radius:999px;padding:5px 9px;font-weight:800}
+    .ticket-stat strong{color:var(--title,var(--fg))}
+    .ticket-columns{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+    .ticket-section{border:1px solid var(--border,var(--auth-border));background:rgba(255,255,255,.035);border-radius:20px;overflow:hidden}
+    .ticket-section-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border,var(--auth-border));background:rgba(255,255,255,.035)}
+    .ticket-section-title{font-size:16px;font-weight:950;color:var(--title,var(--fg));display:flex;align-items:center;gap:8px}
+    .ticket-section-sub{font-size:12px;color:var(--muted);font-weight:800}
+    .ticket-scroll{display:grid;gap:10px;max-height:640px;overflow:auto;padding:12px;scrollbar-width:thin}
+    .ticket-list{display:grid;gap:10px}
+    .ticket-card-admin{border:1px solid var(--border,var(--auth-border));background:rgba(255,255,255,.045);border-radius:18px;padding:13px;display:grid;gap:10px;box-shadow:0 8px 22px rgba(0,0,0,.08)}
+    .ticket-card-admin.is-urgent{border-color:rgba(255,120,120,.55);background:rgba(255,90,90,.07)}
+    .ticket-card-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px}
+    .ticket-title{font-size:17px;font-weight:900;color:var(--title,var(--fg));line-height:1.25}.ticket-title small{font-size:12px;color:var(--muted);font-weight:800}
+    .ticket-meta{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:7px;align-items:center}.ticket-meta a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+    .ticket-pill{display:inline-flex;align-items:center;border:1px solid var(--border,var(--auth-border));background:rgba(255,255,255,.07);border-radius:999px;padding:4px 8px;font-size:12px;font-weight:850}.ticket-pill.open{background:rgba(90,255,150,.12)}.ticket-pill.closed{background:rgba(160,160,170,.12)}.ticket-pill.urgent{background:rgba(255,90,90,.15)}
+    .ticket-message{white-space:pre-wrap;line-height:1.55;background:rgba(0,0,0,.12);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:11px;max-height:210px;overflow:auto}
+    .ticket-actions-row{display:flex;flex-wrap:wrap;gap:8px}.ticket-empty{color:var(--muted);padding:14px;border:1px dashed var(--border,var(--auth-border));border-radius:16px;background:rgba(255,255,255,.025)}
+    .ticket-card-admin.closed{opacity:.75}.ticket-card-admin.closed .ticket-title{text-decoration:line-through;text-decoration-thickness:2px}.ticket-danger{background:rgba(255,90,90,.13)!important}.ticket-ok{background:rgba(90,255,150,.12)!important}.ticket-info{background:rgba(90,160,255,.12)!important}.ticket-muted-btn{background:rgba(255,255,255,.055)!important}.ticket-copy-ok{color:#7ee0a1;font-weight:900}
+    details.ticket-help{border:1px solid var(--border,var(--auth-border));border-radius:16px;background:rgba(255,255,255,.03);overflow:hidden}details.ticket-help summary{cursor:pointer;padding:12px 14px;font-weight:950;color:var(--title,var(--fg));list-style:none}details.ticket-help summary::-webkit-details-marker{display:none}.ticket-help-body{padding:0 14px 14px;color:var(--muted);line-height:1.55;font-size:14px}.ticket-help-body ul{margin:8px 0 0 18px;padding:0}.ticket-help-body li{margin:4px 0}
+    @media(max-width:900px){.ticket-toolbar{grid-template-columns:1fr 1fr}.ticket-toolbar .auth-label:first-child{grid-column:1/-1}.ticket-columns{grid-template-columns:1fr}.ticket-scroll{max-height:520px}}
+    @media(max-width:620px){.ticket-toolbar{grid-template-columns:1fr}.ticket-admin-head{display:grid}.ticket-admin-head .auth-actions{display:grid}.ticket-scroll{max-height:500px}}
   </style>
 </head>
 <body>
@@ -22,33 +50,70 @@
     </section>
 
     <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
-      <h1 class="auth-title">🎫 Admin tickets</h1>
-      <p class="auth-subtitle">Liste des demandes envoyées depuis la page Ticket.</p>
-      <div class="auth-actions"><a class="auth-btn" href="/compte/">Retour au compte</a><a class="auth-btn" href="/ticket/">Page Ticket</a><button class="auth-btn primary" id="refreshTickets" type="button">Actualiser</button></div>
+      <div class="ticket-admin-head">
+        <div>
+          <h1 class="auth-title">🎫 Admin tickets</h1>
+          <p class="auth-subtitle">Les tickets ouverts restent dans la gestion. Le bouton <strong>Clôturer</strong> les envoie dans l’historique.</p>
+        </div>
+        <div class="auth-actions"><a class="auth-btn" href="/compte/">Retour au compte</a><a class="auth-btn" href="/ticket/">Page Ticket</a><button class="auth-btn primary" id="refreshTickets" type="button">Actualiser</button></div>
+      </div>
     </section>
 
-    <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
+    <section class="auth-card auth-hidden ticket-search-banner" data-auth-only data-role-min="admin">
       <div class="ticket-toolbar">
-        <label class="auth-label"><span>Recherche</span><input class="auth-input" id="ticketSearch" type="search" placeholder="Titre, pseudo, contact, message…"></label>
-        <label class="auth-label"><span>Statut</span><select class="auth-select" id="ticketStatusFilter"><option value="all">Tous</option><option value="open">Ouverts</option><option value="closed">Fermés</option></select></label>
+        <label class="auth-label"><span>Recherche</span><input class="auth-input" id="ticketSearch" type="search" placeholder="N° ticket, titre, pseudo, contact, message…"></label>
+        <label class="auth-label"><span>Affichage</span><select class="auth-select" id="ticketStatusFilter"><option value="all">Tous</option><option value="open">Ouverts</option><option value="closed">Historique clôturé</option></select></label>
         <label class="auth-label"><span>Type</span><select class="auth-select" id="ticketCategoryFilter"><option value="all">Tous</option><option value="inscription">Création de compte</option><option value="compte">Compte / mot de passe</option><option value="question">Support</option><option value="probleme">Signalement</option><option value="suggestion">Suggestion</option><option value="autre">Autre</option></select></label>
+        <button class="auth-btn" id="clearTicketFilters" type="button">Réinitialiser</button>
       </div>
+      <div class="ticket-stats" id="ticketStats"></div>
       <div id="ticketsMsg" class="auth-msg"></div>
-      <div id="ticketsList" class="ticket-list"></div>
     </section>
+
+    <section class="auth-hidden" data-auth-only data-role-min="admin">
+      <div class="ticket-columns">
+        <section class="ticket-section" id="openSection">
+          <div class="ticket-section-head"><div><div class="ticket-section-title">📬 Tickets à traiter</div><div class="ticket-section-sub">Bouton Clôturer = envoi dans l’historique</div></div><span class="ticket-pill open" id="openCount">0</span></div>
+          <div id="openTicketsList" class="ticket-scroll"></div>
+        </section>
+        <section class="ticket-section" id="historySection">
+          <div class="ticket-section-head"><div><div class="ticket-section-title">📚 Historique des tickets</div><div class="ticket-section-sub">Zone avec scroll pour éviter une page trop longue</div></div><span class="ticket-pill closed" id="closedCount">0</span></div>
+          <div id="closedTicketsList" class="ticket-scroll"></div>
+        </section>
+      </div>
+    </section>
+
+    <details class="ticket-help auth-hidden" data-auth-only data-role-min="admin">
+      <summary>💡 Petites améliorations ajoutées</summary>
+      <div class="ticket-help-body">
+        <ul>
+          <li>Recherche rapide par numéro, pseudo, titre, contact, type, priorité ou message.</li>
+          <li>Historique séparé avec scroll : les tickets clôturés ne rallongent plus toute la page.</li>
+          <li>Bouton Copier pour garder la référence du ticket.</li>
+          <li>Les tickets urgents ressortent visuellement.</li>
+          <li>Suppression gardée, mais séparée de la clôture : à utiliser seulement pour nettoyer définitivement.</li>
+        </ul>
+      </div>
+    </details>
   </main>
 
   <script src="/auth/auth.client.js"></script>
   <script>
-    const listEl = document.getElementById('ticketsList');
+    const openListEl = document.getElementById('openTicketsList');
+    const closedListEl = document.getElementById('closedTicketsList');
     const msgEl = document.getElementById('ticketsMsg');
     const qEl = document.getElementById('ticketSearch');
     const statusEl = document.getElementById('ticketStatusFilter');
     const catEl = document.getElementById('ticketCategoryFilter');
+    const statsEl = document.getElementById('ticketStats');
+    const openCountEl = document.getElementById('openCount');
+    const closedCountEl = document.getElementById('closedCount');
     let tickets = [];
 
     const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    const dateFr = (v) => { try { return new Date(v).toLocaleString('fr-FR'); } catch { return v || ''; } };
+    const dateFr = (v) => { try { return v ? new Date(v).toLocaleString('fr-FR') : ''; } catch { return v || ''; } };
+    const categoryLabel = (v) => ({ inscription:'Création de compte', compte:'Compte', question:'Support', probleme:'Signalement', suggestion:'Suggestion', autre:'Autre' }[String(v || '')] || 'Support');
+    const priorityLabel = (v) => ({ faible:'Faible', normal:'Normal', urgent:'Urgent' }[String(v || '')] || 'Normal');
     function setMsg(text, ok){ msgEl.textContent = text || ''; msgEl.className = 'auth-msg ' + (text ? (ok ? 'ok' : 'err') : ''); }
 
     async function api(path, options = {}){
@@ -63,12 +128,14 @@
       const st = statusEl.value;
       const cat = catEl.value;
       return tickets.filter(t => {
-        if (st !== 'all' && String(t.status || 'open') !== st) return false;
+        const status = String(t.status || 'open');
+        if (st !== 'all' && status !== st) return false;
         if (cat !== 'all' && String(t.category || '') !== cat) return false;
         if (!q) return true;
-        return [t.id,t.name,t.contact,t.title,t.message,t.category,t.priority,t.status].some(v => String(v ?? '').toLowerCase().includes(q));
+        return [t.id,t.name,t.contact,t.title,t.message,t.category,t.priority,t.status,t.page_url,t.created_at,t.closed_at].some(v => String(v ?? '').toLowerCase().includes(q));
       });
     }
+
     function extractAccountPrefill(ticket){
       const message = String(ticket?.message || '');
       const pseudoMatch = message.match(/Pseudo souhaité\s*:\s*(.+)/i);
@@ -82,94 +149,108 @@
       };
     }
 
+    function renderStats(rows){
+      const total = tickets.length;
+      const open = tickets.filter(t => String(t.status || 'open') !== 'closed').length;
+      const closed = tickets.filter(t => String(t.status || 'open') === 'closed').length;
+      const urgent = tickets.filter(t => String(t.priority || '') === 'urgent' && String(t.status || 'open') !== 'closed').length;
+      statsEl.innerHTML = `<span class="ticket-stat">Total : <strong>${total}</strong></span><span class="ticket-stat">Ouverts : <strong>${open}</strong></span><span class="ticket-stat">Historique : <strong>${closed}</strong></span><span class="ticket-stat">Urgents : <strong>${urgent}</strong></span><span class="ticket-stat">Résultat filtre : <strong>${rows.length}</strong></span>`;
+    }
+
+    function ticketHtml(t){
+      const closed = String(t.status || 'open') === 'closed';
+      const urgent = String(t.priority || '') === 'urgent';
+      const url = String(t.page_url || '').trim();
+      return `<article class="ticket-card-admin ${closed ? 'closed' : ''} ${urgent ? 'is-urgent' : ''}" data-id="${esc(t.id)}">
+        <div class="ticket-card-head">
+          <div>
+            <div class="ticket-title">#${esc(t.id)} · ${esc(t.title || 'Sans titre')} ${closed && t.closed_at ? `<small> · clôturé le ${esc(dateFr(t.closed_at))}</small>` : ''}</div>
+            <div class="ticket-meta"><span>Créé le ${esc(dateFr(t.created_at))}</span><span>par ${esc(t.name || 'Anonyme')}</span>${t.contact ? `<span>contact : ${esc(t.contact)}</span>` : ''}${url ? `<a href="${esc(url)}" target="_blank" rel="noopener">page envoyée</a>` : ''}</div>
+          </div>
+          <div class="ticket-meta"><span class="ticket-pill ${closed ? 'closed' : 'open'}">${closed ? 'Clôturé' : 'Ouvert'}</span><span class="ticket-pill">${esc(categoryLabel(t.category))}</span><span class="ticket-pill ${urgent ? 'urgent' : ''}">${esc(priorityLabel(t.priority))}</span></div>
+        </div>
+        <div class="ticket-message">${esc(t.message || '')}</div>
+        <div class="ticket-actions-row">
+          ${String(t.category || '') === 'inscription' ? `<button class="auth-btn primary" data-action="prefillAccount" type="button">Pré-remplir le compte</button><button class="auth-btn ticket-info" data-action="notifyAccount" type="button">Message compte créé</button>` : ''}
+          ${String(t.category || '') === 'compte' ? `<button class="auth-btn ticket-info" data-action="notifyPassword" type="button">Message accès compte</button>` : ''}
+          <button class="auth-btn ticket-muted-btn" data-action="copy" type="button">Copier référence</button>
+          <button class="auth-btn ${closed ? 'ticket-info' : 'ticket-ok'}" data-action="toggle" type="button">${closed ? 'Rouvrir' : 'Clôturer'}</button>
+          <button class="auth-btn ticket-danger" data-action="delete" type="button">Supprimer</button>
+        </div>
+      </article>`;
+    }
 
     function render(){
       const rows = filtered();
-      if (!rows.length) { listEl.innerHTML = '<div class="ticket-empty">Aucun ticket à afficher.</div>'; return; }
-      listEl.innerHTML = rows.map(t => {
-        const closed = String(t.status || 'open') === 'closed';
-        return `<article class="ticket-card-admin ${closed ? 'closed' : ''}" data-id="${esc(t.id)}">
-          <div class="ticket-card-head">
-            <div><div class="ticket-title">#${esc(t.id)} · ${esc(t.title || 'Sans titre')}</div><div class="ticket-meta"><span>${esc(dateFr(t.created_at))}</span><span>par ${esc(t.name || 'Anonyme')}</span>${t.contact ? `<span>contact : ${esc(t.contact)}</span>` : ''}</div></div>
-            <div class="ticket-meta"><span class="ticket-pill">${esc(t.status || 'open')}</span><span class="ticket-pill">${esc(t.category || 'question')}</span><span class="ticket-pill">${esc(t.priority || 'normal')}</span></div>
-          </div>
-          <div class="ticket-message">${esc(t.message || '')}</div>
-          <div class="ticket-actions-row">
-            ${String(t.category || '') === 'inscription' ? `<button class="auth-btn primary" data-action="prefillAccount" type="button">Pré-remplir le compte</button><button class="auth-btn ticket-info" data-action="notifyAccount" type="button">Message compte créé</button>` : ''}
-            ${String(t.category || '') === 'compte' ? `<button class="auth-btn ticket-info" data-action="notifyPassword" type="button">Message accès compte</button>` : ''}
-            <button class="auth-btn ${closed ? '' : 'ticket-ok'}" data-action="toggle" type="button">${closed ? 'Rouvrir' : 'Fermer'}</button>
-            <button class="auth-btn ticket-danger" data-action="delete" type="button">Supprimer</button>
-          </div>
-        </article>`;
-      }).join('');
+      const openRows = rows.filter(t => String(t.status || 'open') !== 'closed');
+      const closedRows = rows.filter(t => String(t.status || 'open') === 'closed');
+      openCountEl.textContent = String(openRows.length);
+      closedCountEl.textContent = String(closedRows.length);
+      renderStats(rows);
+      openListEl.innerHTML = openRows.length ? openRows.map(ticketHtml).join('') : '<div class="ticket-empty">Aucun ticket ouvert à traiter.</div>';
+      closedListEl.innerHTML = closedRows.length ? closedRows.map(ticketHtml).join('') : '<div class="ticket-empty">Aucun ticket clôturé dans l’historique.</div>';
     }
 
     async function loadTickets(){
       setMsg('Chargement des tickets…', true);
-      try { const data = await api('/api/ticket?admin=1&limit=200'); tickets = data.tickets || []; render(); setMsg(`${tickets.length} ticket(s) chargé(s).`, true); }
-      catch(e){ setMsg(e.message || 'Chargement impossible.', false); }
+      try {
+        const data = await api('/api/ticket?admin=1&limit=300');
+        tickets = data.tickets || [];
+        render();
+        setMsg(`${tickets.length} ticket(s) chargé(s).`, true);
+      } catch(e){
+        setMsg(e.message || 'Chargement impossible.', false);
+      }
     }
 
-    listEl.addEventListener('click', async (event) => {
+    async function handleListClick(event){
       const btn = event.target.closest('button[data-action]'); if (!btn) return;
       const card = btn.closest('[data-id]'); const id = card?.dataset.id; if (!id) return;
       const t = tickets.find(x => String(x.id) === String(id)); if (!t) return;
       const action = btn.dataset.action;
+      if (action === 'copy') {
+        const text = `Ticket #${id} — ${t.title || 'Sans titre'} — ${t.name || 'Anonyme'}`;
+        try { await navigator.clipboard.writeText(text); btn.textContent = 'Copié ✅'; btn.classList.add('ticket-copy-ok'); setTimeout(() => { btn.textContent = 'Copier référence'; btn.classList.remove('ticket-copy-ok'); }, 1300); }
+        catch { setMsg('Copie impossible avec ce navigateur.', false); }
+      }
       if (action === 'delete') {
-        if (!confirm(`Supprimer le ticket #${id} ?`)) return;
+        if (!confirm(`Supprimer définitivement le ticket #${id} ?\n\nPour le garder en historique, utilise plutôt Clôturer.`)) return;
         try { await api('/api/ticket', { method:'DELETE', body:JSON.stringify({ id }) }); tickets = tickets.filter(x => String(x.id) !== String(id)); render(); setMsg(`Ticket #${id} supprimé.`, true); } catch(e){ setMsg(e.message, false); }
       }
       if (action === 'prefillAccount') {
         const prefill = extractAccountPrefill(t);
-        if (!prefill.username || !prefill.password) {
-          setMsg('Impossible de récupérer le pseudo ou le mot de passe dans ce ticket.', false);
-          return;
-        }
-        try {
-          sessionStorage.setItem('andric31_account_prefill_from_ticket', JSON.stringify(prefill));
-          location.href = '/compte/admin.html?prefillTicket=' + encodeURIComponent(String(id));
-        } catch(e) {
-          setMsg('Pré-remplissage impossible dans ce navigateur.', false);
-        }
+        if (!prefill.username || !prefill.password) { setMsg('Impossible de récupérer le pseudo ou le mot de passe dans ce ticket.', false); return; }
+        try { sessionStorage.setItem('andric31_account_prefill_from_ticket', JSON.stringify(prefill)); location.href = '/compte/admin.html?prefillTicket=' + encodeURIComponent(String(id)); }
+        catch(e) { setMsg('Pré-remplissage impossible dans ce navigateur.', false); }
       }
       if (action === 'notifyAccount') {
         const message = `✅ Création de compte — Ticket #${id} : ta demande a été traitée et le compte a été créé/validé.`;
         if (!confirm(`Envoyer le message de confirmation pour le ticket #${id} sur la page Messages ?`)) return;
         btn.disabled = true;
-        try {
-          await api('/api/messages', {
-            method:'POST',
-            body:JSON.stringify({ nickname:'Admin', message, room:'global' })
-          });
-          setMsg(`Message de confirmation envoyé pour le ticket #${id}.`, true);
-        } catch(e){
-          setMsg(e.message || 'Envoi du message impossible.', false);
-        } finally {
-          btn.disabled = false;
-        }
+        try { await api('/api/messages', { method:'POST', body:JSON.stringify({ nickname:'Admin', message, room:'global' }) }); setMsg(`Message de confirmation envoyé pour le ticket #${id}.`, true); }
+        catch(e){ setMsg(e.message || 'Envoi du message impossible.', false); }
+        finally { btn.disabled = false; }
       }
       if (action === 'notifyPassword') {
-        const message = `🔐 Compte / mot de passe — Ticket #${id} : ta demande a été traitée/validé.`;
+        const message = `🔐 Compte / mot de passe — Ticket #${id} : ta demande a été traitée/validée.`;
         if (!confirm(`Envoyer le message de confirmation pour le ticket #${id} sur la page Messages ?`)) return;
         btn.disabled = true;
-        try {
-          await api('/api/messages', {
-            method:'POST',
-            body:JSON.stringify({ nickname:'Admin', message, room:'global' })
-          });
-          setMsg(`Message de confirmation envoyé pour le ticket #${id}.`, true);
-        } catch(e){
-          setMsg(e.message || 'Envoi du message impossible.', false);
-        } finally {
-          btn.disabled = false;
-        }
+        try { await api('/api/messages', { method:'POST', body:JSON.stringify({ nickname:'Admin', message, room:'global' }) }); setMsg(`Message de confirmation envoyé pour le ticket #${id}.`, true); }
+        catch(e){ setMsg(e.message || 'Envoi du message impossible.', false); }
+        finally { btn.disabled = false; }
       }
       if (action === 'toggle') {
         const status = String(t.status || 'open') === 'closed' ? 'open' : 'closed';
-        try { const data = await api('/api/ticket', { method:'PATCH', body:JSON.stringify({ id, status }) }); Object.assign(t, data.ticket || {status}); render(); setMsg(`Ticket #${id} mis à jour.`, true); } catch(e){ setMsg(e.message, false); }
+        const label = status === 'closed' ? 'clôturé et envoyé dans l’historique' : 'rouvert';
+        try { const data = await api('/api/ticket', { method:'PATCH', body:JSON.stringify({ id, status }) }); Object.assign(t, data.ticket || {status}); render(); setMsg(`Ticket #${id} ${label}.`, true); }
+        catch(e){ setMsg(e.message, false); }
       }
-    });
+    }
+
+    openListEl.addEventListener('click', handleListClick);
+    closedListEl.addEventListener('click', handleListClick);
     [qEl,statusEl,catEl].forEach(el => el.addEventListener('input', render));
+    document.getElementById('clearTicketFilters')?.addEventListener('click', () => { qEl.value = ''; statusEl.value = 'all'; catEl.value = 'all'; render(); qEl.focus(); });
     document.getElementById('refreshTickets')?.addEventListener('click', loadTickets);
     window.SiteAuth.onChange((me) => { if (me?.role === 'admin') loadTickets(); });
     if (window.SiteAuth.loaded && window.SiteAuth.me?.role === 'admin') loadTickets();

@@ -111,12 +111,19 @@ async function getUserContext(context) {
 async function recordPageView(db, userId, gameKey, title = '') {
   if (!userId || !gameKey) return;
   const cleanTitle = clean(title, 300);
+
+  // Anti-doublon : une même page peut appeler plusieurs API au chargement.
+  // On ne compte qu'une vue par membre / jeu toutes les 2 minutes.
   await db.prepare(`
     INSERT INTO user_page_views (user_id, game_key, title, view_count, first_viewed_at, last_viewed_at)
     VALUES (?1, ?2, ?3, 1, strftime('%Y-%m-%dT%H:%M:%fZ','now'), strftime('%Y-%m-%dT%H:%M:%fZ','now'))
     ON CONFLICT(user_id, game_key) DO UPDATE SET
       title = CASE WHEN excluded.title != '' THEN excluded.title ELSE user_page_views.title END,
-      view_count = user_page_views.view_count + 1,
+      view_count = CASE
+        WHEN unixepoch('now') - unixepoch(user_page_views.last_viewed_at) >= 120
+        THEN user_page_views.view_count + 1
+        ELSE user_page_views.view_count
+      END,
       last_viewed_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
   `).bind(userId, gameKey, cleanTitle).run();
 }

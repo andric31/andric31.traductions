@@ -105,6 +105,26 @@
       font-size: 12px;
     }
 
+    .account-password-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .account-password-grid label {
+      display: grid;
+      gap: 6px;
+      margin: 0;
+      font-weight: 900;
+      color: var(--title, var(--fg));
+    }
+    .account-password-grid input {
+      width: 100%;
+    }
+    @media (max-width: 700px) {
+      .account-password-grid { grid-template-columns: 1fr; }
+    }
+
     /* Page Compte : on enlève le gros padding hérité du viewer, sans réduire la largeur */
     main.auth-shell {
       width: min(920px, calc(100% - 24px)) !important;
@@ -135,7 +155,7 @@
         <h3>📝 Inscription privée</h3>
         <p>Toute nouvelle inscription est privée. Merci d’ouvrir un ticket pour me communiquer ton nom d’utilisateur et ton mot de passe.</p>
         <div class="auth-actions">
-          <a class="auth-btn primary" href="/ticket/">Ouvrir un ticket</a>
+          <a class="auth-btn primary" href="/ticket/?category=inscription">Ouvrir un ticket</a>
         </div>
       </div>
       <div class="auth-actions">
@@ -158,6 +178,27 @@
           <button class="auth-btn warn" id="logoutBtn" type="button">Se déconnecter</button>
         </div>
         <div id="logoutMsg" class="auth-msg"></div>
+      </div>
+
+      <div class="auth-box" id="passwordBox" style="margin-top:14px;">
+        <h3>🔐 Changer mon mot de passe</h3>
+        <p>Entre le nouveau mot de passe dans les deux cases pour éviter les erreurs.</p>
+        <form id="changePasswordForm" autocomplete="off">
+          <div class="account-password-grid">
+            <label>
+              <span>Nouveau mot de passe</span>
+              <input class="auth-input" id="newPassword" type="password" minlength="6" maxlength="120" autocomplete="new-password" required>
+            </label>
+            <label>
+              <span>Confirmer le mot de passe</span>
+              <input class="auth-input" id="newPasswordConfirm" type="password" minlength="6" maxlength="120" autocomplete="new-password" required>
+            </label>
+          </div>
+          <div class="auth-actions" style="margin-top:12px;">
+            <button class="auth-btn primary" id="changePasswordBtn" type="submit">Changer le mot de passe</button>
+          </div>
+          <div id="changePasswordMsg" class="auth-msg"></div>
+        </form>
       </div>
 
       <div id="adminQuickMount"></div>
@@ -216,6 +257,11 @@
     const ratedGamesList = document.getElementById('ratedGamesList');
     const ratedGamesMsg = document.getElementById('ratedGamesMsg');
     const refreshRatedBtn = document.getElementById('refreshRatedBtn');
+    const changePasswordForm = document.getElementById('changePasswordForm');
+    const changePasswordBtn = document.getElementById('changePasswordBtn');
+    const changePasswordMsg = document.getElementById('changePasswordMsg');
+    const newPassword = document.getElementById('newPassword');
+    const newPasswordConfirm = document.getElementById('newPasswordConfirm');
 
     function setMsg(el, text, ok) {
       if (!el) return;
@@ -437,6 +483,42 @@
 
     window.SiteAuth.onChange(guardAccount);
     if (window.SiteAuth.loaded) guardAccount(window.SiteAuth.me);
+
+    changePasswordForm?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const password = newPassword?.value || '';
+      const confirmPassword = newPasswordConfirm?.value || '';
+      if (!password || !confirmPassword) {
+        setMsg(changePasswordMsg, 'Les deux cases mot de passe sont obligatoires.', false);
+        return;
+      }
+      if (password !== confirmPassword) {
+        setMsg(changePasswordMsg, 'Les deux mots de passe ne sont pas identiques.', false);
+        return;
+      }
+      if (password.length < 6) {
+        setMsg(changePasswordMsg, 'Le mot de passe doit contenir au moins 6 caractères.', false);
+        return;
+      }
+      changePasswordBtn.disabled = true;
+      setMsg(changePasswordMsg, 'Modification du mot de passe…', true);
+      try {
+        const resp = await fetch('/api/auth-change-password', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ password, password_confirm: confirmPassword })
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Modification impossible.');
+        changePasswordForm.reset();
+        setMsg(changePasswordMsg, 'Mot de passe modifié ✅', true);
+      } catch (err) {
+        setMsg(changePasswordMsg, err?.message || 'Erreur pendant la modification.', false);
+      } finally {
+        changePasswordBtn.disabled = false;
+      }
+    });
 
     logoutBtn?.addEventListener('click', async () => {
       setMsg(logoutMsg, 'Déconnexion…', true);

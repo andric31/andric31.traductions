@@ -494,6 +494,32 @@
       }
     }
 
+    function applyAccountPrefillFromTicket() {
+      let raw = '';
+      try { raw = sessionStorage.getItem('andric31_account_prefill_from_ticket') || ''; } catch {}
+      if (!raw) return;
+      let data = null;
+      try { data = JSON.parse(raw); } catch { data = null; }
+      if (!data) return;
+
+      const usernameEl = document.getElementById('newUsername');
+      const displayEl = document.getElementById('newDisplay');
+      const passwordEl = document.getElementById('newPassword');
+      const roleEl = document.getElementById('newRole');
+
+      if (usernameEl) usernameEl.value = data.username || '';
+      if (displayEl) displayEl.value = data.display_name || data.username || '';
+      if (passwordEl) passwordEl.value = data.password || '';
+      if (roleEl) roleEl.value = data.role || 'member';
+
+      setMsg(createMsg, `Création pré-remplie depuis le ticket #${data.ticket_id || ''}. Il reste à entrer le token admin puis créer le compte.`, true);
+      try { sessionStorage.removeItem('andric31_account_prefill_from_ticket'); } catch {}
+      setTimeout(() => {
+        createForm?.closest('.auth-card')?.scrollIntoView({ behavior:'smooth', block:'start' });
+        document.getElementById('adminToken')?.focus();
+      }, 150);
+    }
+
     createForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
       setMsg(createMsg, 'Création…', true);
@@ -583,7 +609,7 @@
     });
 
     window.SiteAuth?.onChange(() => { if (window.__adminPageAllowed) loadUsers(); });
-    document.addEventListener('DOMContentLoaded', () => { if (window.__ensureAdminPage && window.__ensureAdminPage()) setTimeout(loadUsers, 250); });
+    document.addEventListener('DOMContentLoaded', () => { if (window.__ensureAdminPage && window.__ensureAdminPage()) { setTimeout(loadUsers, 250); setTimeout(applyAccountPrefillFromTicket, 120); } });
   </script>
 </body>
 </html>

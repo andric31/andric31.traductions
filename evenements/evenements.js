@@ -727,9 +727,9 @@
       return openedDays.has(Number(dayNumber));
     }
 
-    function compactHtml(day, available, revealed) {
+    function closedHtml(day, available, revealed) {
       const title = revealed && String(day?.title || '').trim() ? String(day.title).trim() : '';
-      return `<div class="event-advent-door-inner event-advent-door-compact">
+      return `<div class="event-advent-door-inner event-advent-closed">
         <span class="event-advent-day-number">${escapeHtml(day.day)}</span>
         <span class="event-advent-day-label">${escapeHtml(!available ? 'Bientôt' : revealed ? 'Ouvert' : 'À ouvrir')}</span>
         ${title ? `<span class="event-advent-day-title">${escapeHtml(title)}</span>` : ''}
@@ -737,19 +737,18 @@
       </div>`;
     }
 
-    function expandedHtml(day) {
+    function openedHtml(day) {
       const image = getAdventImage(day);
       const dayF95 = String(day?.f95 || day?.f95_url || '').trim();
       const dayMega = String(day?.mega || day?.mega_url || '').trim();
-      const fallbackText = day?.locked === true
-        ? 'Cette case est prête, mais son contenu n’a pas encore été ajouté.'
-        : 'Surprise débloquée.';
-      return `<div class="event-advent-door-expanded">
-        <div class="event-advent-door-cover">${image ? `<img src="${escapeHtml(image)}" alt="" loading="lazy">` : '<div class="event-game-placeholder">🎁</div>'}</div>
-        <div class="event-advent-door-content">
+      return `<div class="event-advent-door-inner event-advent-opened-inline">
+        <div class="event-advent-inline-cover">
+          ${image ? `<img src="${escapeHtml(image)}" alt="" loading="lazy">` : '<div class="event-game-placeholder">🎁</div>'}
+        </div>
+        <div class="event-advent-inline-info">
           <span class="event-advent-opened-badge">🎁 Jour ${escapeHtml(day.day)}</span>
           <h3 class="event-advent-opened-title">${escapeHtml(day?.title || `Surprise du jour ${day.day}`)}</h3>
-          <p class="event-advent-opened-text">${escapeHtml(day?.text || fallbackText)}</p>
+          ${day?.text ? `<p class="event-advent-opened-text">${escapeHtml(day.text)}</p>` : ''}
           <div class="event-advent-links">
             ${dayF95 ? `<a class="event-main-link" href="${escapeHtml(dayF95)}" target="_blank" rel="noopener">F95Zone</a>` : ''}
             ${dayMega ? `<a class="event-secondary-link" href="${escapeHtml(dayMega)}" target="_blank" rel="noopener">Mega</a>` : ''}
@@ -763,9 +762,9 @@
       const revealed = isRevealed(day.day);
       const selected = selectedDayNumber === Number(day.day);
       const today = Number(day.day) === openUntil && available;
-      const expanded = selected && revealed;
-      return `<article class="event-advent-door ${available ? 'is-available' : 'is-locked'} ${revealed ? 'is-revealed' : ''} ${today ? 'is-today' : ''} ${selected ? 'is-selected' : ''} ${expanded ? 'is-expanded' : ''}" data-advent-day="${escapeHtml(day.day)}" ${available ? 'tabindex="0" role="button"' : 'aria-disabled="true"'}>
-        ${expanded ? expandedHtml(day) : compactHtml(day, available, revealed)}
+      const showContent = selected && revealed;
+      return `<article class="event-advent-door ${available ? 'is-available' : 'is-locked'} ${revealed ? 'is-revealed' : ''} ${today ? 'is-today' : ''} ${selected ? 'is-selected' : ''} ${showContent ? 'is-showing-content' : ''}" data-advent-day="${escapeHtml(day.day)}" ${available ? 'tabindex="0" role="button"' : 'aria-disabled="true"'}>
+        ${showContent ? openedHtml(day) : closedHtml(day, available, revealed)}
       </article>`;
     }
 
@@ -820,7 +819,7 @@
             </div>
             <h2 class="event-title">${escapeHtml(event.title || 'Calendrier de l’avent')}</h2>
             <p class="event-text">${escapeHtml(event.text || 'Ouvre une case par jour et découvre les surprises de décembre.')}</p>
-            <div class="event-advent-hint">🎁 Le contenu s’affiche directement dans la case ouverte.</div>
+            <div class="event-advent-hint">🎁 Clique sur une case disponible : elle s’ouvre au même endroit, sans casser la grille.</div>
           </div>
           <div class="event-advent-grid" aria-label="Calendrier de l’avent" data-advent-grid></div>
         </div>

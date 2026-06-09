@@ -8,13 +8,10 @@
   <link rel="icon" href="/favicon.png" />
   <link rel="stylesheet" href="/viewer.css" />
   <link rel="stylesheet" href="/themes.css" />
-  <link rel="stylesheet" href="/evenements/evenements.css?v=11" />
-  <style>
-    body.events-booting #activeEvent { display: none !important; }
-  </style>
+  <link rel="stylesheet" href="/evenements/evenements.css?v=12" />
   <script src="/theme-init.js"></script>
 </head>
-<body class="events-booting">
+<body>
   <main class="events-shell">
     <section class="events-hero" aria-label="Événements">
       <div class="events-kicker">📅 Événements</div>
@@ -22,9 +19,9 @@
       <p>Les événements et mises en avant du moment.</p>
     </section>
 
-    <section id="activeEvent" class="active-event is-loading" aria-label="Événement actif"></section>
+    <section id="activeEvent" class="active-event" aria-label="Événement actif"><div class="event-loading">Chargement de l’événement…</div></section>
   </main>
 
-  <script src="/evenements/evenements.js?v=11"></script>
+  <script src="/evenements/evenements.js?v=12"></script>
 </body>
 </html>

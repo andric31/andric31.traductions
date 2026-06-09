@@ -78,12 +78,13 @@
     .event-admin-linked-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap; }
     .event-admin-linked-title { margin:0; font-size:20px; line-height:1.25; }
     .event-admin-linked-subtitle { margin:5px 0 0; color:var(--muted); font-size:13px; line-height:1.45; }
-    .event-admin-linked-grid { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:10px; }
+    .event-admin-linked-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; }
     .event-admin-linked-box { border:1px solid var(--border, var(--auth-border)); border-radius:15px; background:rgba(0,0,0,.10); padding:11px; min-width:0; }
     .event-admin-linked-box strong { display:block; margin-bottom:5px; }
     .event-admin-linked-box small { display:block; color:var(--muted); line-height:1.45; }
     .event-admin-week-preview { display:grid; gap:8px; }
     .event-admin-week-item { display:grid; grid-template-columns:150px auto 1fr auto; gap:10px; align-items:center; padding:8px 10px; border-radius:13px; border:1px solid var(--border, var(--auth-border)); background:rgba(255,255,255,.035); }
+    .event-admin-week-item.is-selected-week { border-color:rgba(255,184,77,.58); background:rgba(255,184,77,.10); }
     .event-admin-week-thumb { width:150px; height:72px; border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.055); display:grid; place-items:center; }
     .event-admin-week-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
     .event-admin-week-thumb span { font-size:26px; }
@@ -191,7 +192,7 @@
     <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
       <div class="event-admin-card">
         <h2>🔎 Changer le jeu affiché <span class="event-admin-help" tabindex="0" data-tip="Cette partie sert à changer le jeu affiché pour la semaine sélectionnée.">?</span></h2>
-        <p class="event-admin-note" style="margin-top:0;">Recherche un jeu puis clique sur <strong>Changer</strong>. Il sera sauvegardé directement sur le site.</p>
+        <p class="event-admin-note" style="margin-top:0;">Clique d’abord sur <strong>Changer</strong> dans une semaine du calendrier, puis cherche le jeu ici et clique sur <strong>Changer</strong>. Le changement sera sauvegardé pour cette semaine.</p>
         <label class="auth-label"><span>Recherche <span class="event-admin-help" tabindex="0" data-tip="Tu peux chercher par titre, tag, ID ou UID. Le bouton Changer force ce jeu sur la page événement.">?</span></span><input class="auth-input" id="gameSearch" placeholder="Titre, tag, ID…" /></label>
         <div class="event-admin-pill-list" id="gamesSummary"></div>
         <div class="event-admin-results" id="gamesResults"><div class="event-admin-msg">Chargement des jeux…</div></div>
@@ -231,6 +232,7 @@
     let eventCatalog = [];
     let allGames = [];
     let currentSelection = null;
+    let selectedWeekKey = ''; // semaine ciblée quand on clique sur Changer dans le calendrier
 
     const $ = (id) => document.getElementById(id);
     const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -416,7 +418,18 @@
       return String(title || '').replace(/\[[^\]]*\]/g, ' ').replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim() || String(title || '').trim() || 'Jeu traduit';
     }
     function getTitle(g){ return cleanTitle(g?.gameData?.title || g?.cleanTitle || g?.title || ''); }
-    function getImage(g){ return String(g?.gameData?.imageUrl || g?.imageUrl || g?.image || '').trim(); }
+    function normalizeImageUrl(url){
+      const raw = String(url || '').trim();
+      if (!raw) return '';
+      if (raw.startsWith('//')) return `https:${raw}`;
+      return raw;
+    }
+    function getImage(g){
+      return normalizeImageUrl(
+        g?.gameData?.imageUrl || g?.gameData?.imageURL || g?.gameData?.image_url ||
+        g?.imageUrl || g?.imageURL || g?.image_url || g?.cover || g?.thumbnail || g?.image || ''
+      );
+    }
     function getDesc(g){ return String(g?.gameData?.description || g?.description || '').replace(/<br\s*\/?>(\s*)/gi,'\n').replace(/<[^>]*>/g,'').trim(); }
     function getTags(g){ const raw = g?.gameData?.tags || g?.tags || []; return Array.isArray(raw) ? raw.map(String).filter(Boolean) : String(raw || '').split(',').map(s=>s.trim()).filter(Boolean); }
     function buildUrl(g){ const coll=String(g?.collection||'').trim(); const id=String(g?.id||'').trim(); const uid=String(g?.uid??'').trim(); if(coll) return `/game/?id=${encodeURIComponent(coll)}${uid ? `&uid=${encodeURIComponent(uid)}` : ''}`; if(id) return `/game/?id=${encodeURIComponent(id)}`; if(uid) return `/game/?uid=${encodeURIComponent(uid)}`; return '/'; }
@@ -460,9 +473,11 @@
       return { score, found, description:getDesc(g), tags:getTags(g) };
     }
     function pickGame(games,event){
+      const weeklyForced = findGameByRef(games, getWeeklyOverride(event, weekKeyFromDate(getLastChangeBoundary(new Date(), event))));
+      if (weeklyForced) return { game:weeklyForced, reason:'Jeu choisi manuellement pour cette semaine.', matchedKeywords:[], score:null };
       const wantedId=String(event?.selected_game_id||'').trim(); const wantedUid=String(event?.selected_game_uid||'').trim();
       if(wantedId || wantedUid){
-        const forced=games.find((g)=>(!wantedId || String(g.id||'').trim()===wantedId || String(g.collection||'').trim()===wantedId) && (!wantedUid || String(g.uid??'').trim()===wantedUid));
+        const forced=findGameByRef(games, { id:wantedId, uid:wantedUid });
         if(forced) return { game:forced, reason:'Jeu forcé manuellement.', matchedKeywords:[], score:null };
       }
       const valid = games.filter((g)=>getImage(g)).filter((g)=>buildUrl(g) !== '/');
@@ -509,6 +524,28 @@
       return new Date(parts[0], parts[1] - 1, parts[2]);
     }
 
+    function weekKeyFromDate(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function getWeeklyOverride(event, weekKey) {
+      const overrides = event?.weekly_overrides;
+      if (!overrides || typeof overrides !== 'object' || !weekKey) return null;
+      const item = overrides[weekKey];
+      if (!item || typeof item !== 'object') return null;
+      return item;
+    }
+
+    function findGameByRef(games, ref) {
+      const wantedId = String(ref?.id || ref?.selected_game_id || '').trim();
+      const wantedUid = String(ref?.uid || ref?.selected_game_uid || '').trim();
+      if (!wantedId && !wantedUid) return null;
+      return games.find((g)=>(!wantedId || String(g.id||'').trim()===wantedId || String(g.collection||'').trim()===wantedId) && (!wantedUid || String(g.uid??'').trim()===wantedUid)) || null;
+    }
+
     function buildEventCalendarPreview(pool, event) {
       if (!pool.length) return [];
       const eventId = String(event?.id || '').trim();
@@ -520,8 +557,11 @@
       const rotationIndex = getRotationIndex(event);
       const rows = [];
       for (let i = 0, d = new Date(first); d.getTime() <= end.getTime() && i < 20; i++, d.setDate(d.getDate() + 7)) {
-        const entry = pool[(rotationIndex + seed + i) % pool.length];
-        rows.push({ date:new Date(d), entry, current:false });
+        const weekKey = weekKeyFromDate(d);
+        const autoEntry = pool[(rotationIndex + seed + i) % pool.length];
+        const overrideGame = findGameByRef(allGames, getWeeklyOverride(event, weekKey));
+        const entry = overrideGame ? { game: overrideGame, analysis: { score:null, found:['choix manuel'] }, manual:true } : autoEntry;
+        rows.push({ date:new Date(d), weekKey, entry, current:false, manual: !!overrideGame });
       }
       return rows;
     }
@@ -573,7 +613,6 @@
       }
 
       const forced = String(event.selected_game_id || event.selected_game_uid || '').trim();
-      const blockedCount = Array.isArray(event.blocked_game_keys) ? event.blocked_game_keys.length : 0;
       const currentGame = currentSelection?.game || pickGame(allGames, event).game;
       const autoEvent = { ...event, selected_game_id:'', selected_game_uid:'' };
       const pool = getAutoPoolForPreview(allGames, autoEvent);
@@ -586,12 +625,14 @@
         : (currentSelection?.reason || 'Le jeu est choisi automatiquement selon les mots-clés.');
       const weekRows = previews.map((item)=>{
         const img = getImage(item.entry.game);
+        const isSelectedWeek = selectedWeekKey && selectedWeekKey === item.weekKey;
+        const label = item.manual ? 'Jeu choisi manuellement pour cette semaine' : (item.entry.analysis.found?.length ? `Mots-clés : ${esc(item.entry.analysis.found.join(', '))}` : 'Choix automatique hebdomadaire');
         return `
-            <div class="event-admin-week-item">
-              <span class="event-admin-week-thumb">${img ? `<img src="${esc(img)}" alt="">` : '<span>🎮</span>'}</span>
+            <div class="event-admin-week-item ${isSelectedWeek ? 'is-selected-week' : ''}">
+              <span class="event-admin-week-thumb">${img ? `<img src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.closest('.event-admin-week-thumb').innerHTML='<span>🎮</span>'">` : '<span>🎮</span>'}</span>
               <span class="event-admin-week-date">Semaine du ${esc(formatDateLong(item.date))}</span>
-              <span class="event-admin-week-game"><strong>${esc(getTitle(item.entry.game))}</strong><small>${item.entry.analysis.found?.length ? `Mots-clés : ${esc(item.entry.analysis.found.join(', '))}` : 'Choix au hasard hebdomadaire'}</small></span>
-              <button class="auth-btn mini" type="button" data-preview-pick-id="${esc(String(item.entry.game.collection || item.entry.game.id || '').trim())}" data-preview-pick-uid="${esc(String(item.entry.game.uid ?? '').trim())}">Changer</button>
+              <span class="event-admin-week-game"><strong>${esc(getTitle(item.entry.game))}</strong><small>${label}</small></span>
+              <button class="auth-btn mini" type="button" data-week-change="${esc(item.weekKey)}">Changer</button>
             </div>`;
       }).join('') || '<div class="event-admin-msg err">Aucun choix automatique disponible avec ces réglages.</div>';
 
@@ -602,14 +643,12 @@
             <p class="event-admin-linked-subtitle">Ici, on voit le jeu affiché maintenant, mais aussi le calendrier automatique qui reste toujours visible pour suivre les choix semaine par semaine.</p>
           </div>
           <div class="event-admin-choice-actions">
-            <button class="auth-btn mini primary" type="button" id="scrollGamePickerBtn">🎮 Changer le jeu affiché</button>
             <a class="auth-btn mini" href="/evenements/?test=${encodeURIComponent(event.id || '')}" target="_blank" rel="noopener">Tester</a>
           </div>
         </div>
         <div class="event-admin-linked-grid">
           <div class="event-admin-linked-box"><strong>🎯 Jeu affiché</strong><small>${esc(currentTitle)}<br>${esc(currentDetail)}</small></div>
           <div class="event-admin-linked-box"><strong>🔁 Règle actuelle</strong><small>${esc(choiceLabel)}<br>Changement : ${esc(event.change_day || 'monday')} à ${esc(String(event.change_hour ?? 0))}h</small></div>
-          <div class="event-admin-linked-box"><strong>🧱 Anti-répétition</strong><small>${blockedCount} jeu(x) bloqué(s)<br>${esc(event.fallback_mode === 'weekly_random' ? 'Si aucun mot-clé ne correspond : hasard hebdomadaire' : 'Si aucun mot-clé ne correspond : rien affiché')}</small></div>
         </div>
         <div>
           <strong>📆 Calendrier automatique de l’événement</strong>
@@ -661,7 +700,7 @@
       const tags = getTags(game).slice(0,8);
       $('currentGame').innerHTML = `
         <div class="event-admin-current">
-          <div class="event-admin-cover">${image ? `<img src="${esc(image)}" alt="">` : '<span>🎮</span>'}</div>
+          <div class="event-admin-cover">${image ? `<img src="${esc(image)}" alt="" referrerpolicy="no-referrer" onerror="this.parentElement.innerHTML='<span>🎮</span>'">` : '<span>🎮</span>'}</div>
           <div>
             <h3 style="margin:0 0 6px;">${esc(getTitle(game))}</h3>
             <p class="event-admin-note" style="margin:0 0 8px;">${esc(currentSelection.reason || '')}</p>
@@ -694,11 +733,29 @@
         const id = String(g.collection || g.id || '').trim();
         const uid = String(g.uid ?? '').trim();
         return `<article class="event-admin-game">
-          ${image ? `<img src="${esc(image)}" alt="">` : '<div class="placeholder">🎮</div>'}
+          ${image ? `<img src="${esc(image)}" alt="" referrerpolicy="no-referrer" onerror="this.parentElement.innerHTML='<span>🎮</span>'">` : '<div class="placeholder">🎮</div>'}
           <div><strong>${esc(getTitle(g))}</strong><small>ID : ${esc(id || '—')} ${uid ? `• UID : ${esc(uid)}` : ''}</small></div>
-          <button class="auth-btn mini" type="button" data-pick-id="${esc(id)}" data-pick-uid="${esc(uid)}" title="Change le jeu affiché pour l’événement et sauvegarde automatiquement.">Changer</button>
+          <button class="auth-btn mini" type="button" data-pick-id="${esc(id)}" data-pick-uid="${esc(uid)}" title="Change le jeu de la semaine sélectionnée, ou le jeu affiché maintenant si aucune semaine n’est sélectionnée.">Changer</button>
         </article>`;
       }).join('') || '<div class="event-admin-msg">Aucun résultat.</div>';
+    }
+
+    async function applyGameChange(id, uid) {
+      const event = formEvent();
+      const game = findGameByRef(allGames, { id, uid });
+      const pickedName = game ? getTitle(game) : 'jeu choisi';
+      if (selectedWeekKey) {
+        event.weekly_overrides = (event.weekly_overrides && typeof event.weekly_overrides === 'object') ? { ...event.weekly_overrides } : {};
+        event.weekly_overrides[selectedWeekKey] = { id, uid, title: pickedName };
+        activeEvent = { ...(activeEvent || {}), weekly_overrides: event.weekly_overrides };
+        renderCurrent();
+        await saveEventToSite(event, `Semaine du ${selectedWeekKey} changée et sauvegardée : ${pickedName}.`);
+        return;
+      }
+      $('selectedId').value = id || '';
+      $('selectedUid').value = uid || '';
+      renderCurrent();
+      await saveEventToSite(formEvent(), `Jeu affiché maintenant changé et sauvegardé : ${pickedName}.`);
     }
 
     async function init() {
@@ -754,17 +811,16 @@
         setTimeout(()=>search?.focus(), 350);
         return;
       }
-      const previewPick = e.target.closest('[data-preview-pick-id]');
-      if (previewPick) {
-        $('selectedId').value = previewPick.dataset.previewPickId || '';
-        $('selectedUid').value = previewPick.dataset.previewPickUid || '';
+      const weekChange = e.target.closest('[data-week-change]');
+      if (weekChange) {
+        selectedWeekKey = weekChange.dataset.weekChange || '';
         renderCurrent();
-        const pickedName = currentSelection?.game ? getTitle(currentSelection.game) : 'jeu choisi';
-        saveEventToSite(formEvent(), `Jeu changé pour cet événement et sauvegardé : ${pickedName}.`).catch((err)=>{
-          $('jsonMsg').textContent = err?.message || 'Sauvegarde impossible.';
-          $('jsonMsg').className = 'event-admin-msg err';
-        });
-        window.scrollTo({ top:0, behavior:'smooth' });
+        const search = $('gameSearch');
+        if (search) search.placeholder = `Chercher le nouveau jeu pour la semaine du ${selectedWeekKey}`;
+        $('jsonMsg').textContent = `Semaine sélectionnée : ${selectedWeekKey}. Cherche un jeu en bas puis clique sur Changer.`;
+        $('jsonMsg').className = 'event-admin-msg ok';
+        search?.scrollIntoView({ behavior:'smooth', block:'center' });
+        setTimeout(()=>search?.focus(), 350);
         return;
       }
     });
@@ -805,15 +861,10 @@
     $('gamesResults')?.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-pick-id]');
       if (!btn) return;
-      $('selectedId').value = btn.dataset.pickId || '';
-      $('selectedUid').value = btn.dataset.pickUid || '';
-      renderCurrent();
-      const pickedName = currentSelection?.game ? getTitle(currentSelection.game) : 'jeu choisi';
-      saveEventToSite(formEvent(), `Jeu changé et sauvegardé : ${pickedName}.`).catch((err)=>{
+      applyGameChange(btn.dataset.pickId || '', btn.dataset.pickUid || '').catch((err)=>{
         $('jsonMsg').textContent = err?.message || 'Sauvegarde impossible.';
         $('jsonMsg').className = 'event-admin-msg err';
       });
-      window.scrollTo({ top:0, behavior:'smooth' });
     });
 
     let eventAdminInitStarted = false;

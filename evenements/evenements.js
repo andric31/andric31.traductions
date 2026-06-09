@@ -297,6 +297,12 @@
     return Math.max(0, Math.floor((current.getTime() - first.getTime()) / WEEK_MS));
   }
 
+  function isWeeklyCalendarEvent(event) {
+    const id = String(event?.id || '').trim();
+    const mode = String(event?.selection_mode || event?.selection || event?.change_frequency || '').toLowerCase();
+    return id === 'ete-2026' || mode.includes('weekly') || mode.includes('semaine');
+  }
+
   function getWeeklyOverride(event, weekKey) {
     const overrides = event?.weekly_overrides;
     if (!overrides || typeof overrides !== 'object' || !weekKey) return null;
@@ -423,6 +429,7 @@
     // Priorité au changement manuel de la semaine en cours.
     // Comme ça, si tu changes uniquement la semaine du 08/15/22...,
     // la page publique affiche le même jeu que l'admin pour cette semaine.
+    const weeklyMode = isWeeklyCalendarEvent(event);
     const currentWeekKey = weekKeyFromDate(getLastChangeBoundary(new Date(), event));
     const weeklyForced = findGameByRef(games, getWeeklyOverride(event, currentWeekKey));
     if (weeklyForced) {
@@ -435,18 +442,22 @@
       };
     }
 
-    const wantedId = String(event.selected_game_id || '').trim();
-    const wantedUid = String(event.selected_game_uid || '').trim();
-    if (wantedId || wantedUid) {
-      const forced = findGameByRef(games, { id: wantedId, uid: wantedUid });
-      if (forced) {
-        return {
-          game: forced,
-          reason: '',
-          summary: getGameDescription(forced),
-          tags: getGameTags(forced),
-          matchedKeywords: []
-        };
+    // Pour un événement à calendrier hebdomadaire, on ignore l'ancien jeu global forcé.
+    // Sinon l'admin, le calendrier et la page publique peuvent afficher trois jeux différents.
+    if (!weeklyMode) {
+      const wantedId = String(event.selected_game_id || '').trim();
+      const wantedUid = String(event.selected_game_uid || '').trim();
+      if (wantedId || wantedUid) {
+        const forced = findGameByRef(games, { id: wantedId, uid: wantedUid });
+        if (forced) {
+          return {
+            game: forced,
+            reason: '',
+            summary: getGameDescription(forced),
+            tags: getGameTags(forced),
+            matchedKeywords: []
+          };
+        }
       }
     }
 

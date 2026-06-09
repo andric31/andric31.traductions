@@ -46,12 +46,13 @@
 
     .event-admin-help { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; margin-left:6px; border-radius:999px; border:1px solid var(--border, var(--auth-border)); background:rgba(255,255,255,.08); color:var(--muted); font-size:12px; font-weight:900; cursor:help; position:relative; vertical-align:middle; }
     .event-admin-help:hover::after, .event-admin-help:focus::after { content:attr(data-tip); position:absolute; z-index:50; top:calc(100% + 8px); right:0; width:min(320px, 78vw); padding:10px 12px; border-radius:12px; border:1px solid var(--border, var(--auth-border)); background:var(--card-bg, #151927); color:var(--text,#fff); box-shadow:0 14px 34px rgba(0,0,0,.34); font-size:12px; line-height:1.45; font-weight:600; text-align:left; white-space:normal; }
-    .event-admin-main-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
+    .event-admin-main-actions { display:grid; grid-template-columns:1fr; gap:10px; margin-top:12px; }
     .event-admin-action-box { display:grid; gap:5px; padding:10px; border:1px solid var(--border, var(--auth-border)); border-radius:14px; background:rgba(255,255,255,.025); }
     .event-admin-action-box .auth-btn { width:100%; }
+    .event-admin-stop-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:stretch; }
     .event-admin-action-desc { color:var(--muted); font-size:12px; line-height:1.45; margin:0; }
     .event-admin-stop-box { border-color:rgba(255,90,90,.48); background:rgba(255,90,90,.075); }
-    .event-admin-stop-box .auth-btn { min-height:54px; font-size:16px; font-weight:900; }
+    .event-admin-stop-box .auth-btn { min-height:54px; font-size:16px; font-weight:900; justify-content:center; }
     .event-admin-test-box { border-color:rgba(92,164,255,.42); background:rgba(92,164,255,.07); }
     .event-admin-test-box .auth-btn { min-height:54px; font-size:16px; font-weight:900; justify-content:center; }
     .event-admin-disabled-card { border:1px solid rgba(255,184,77,.35); background:rgba(255,184,77,.09); border-radius:16px; padding:16px; }
@@ -66,7 +67,7 @@
     .event-admin-active-banner { margin-top:10px; padding:10px 12px; border-radius:14px; border:1px solid rgba(126,224,161,.35); background:rgba(126,224,161,.09); color:#7ee0a1; font-weight:800; }
     .event-admin-active-banner.off { border-color:rgba(255,184,77,.35); background:rgba(255,184,77,.09); color:#ffbf5f; }
     .event-admin-no-event-main { margin-top:0; }
-    @media (max-width:850px){ .event-admin-main-actions, .event-admin-grid, .event-admin-row, .event-admin-current { grid-template-columns:1fr; } .event-admin-cover { width:150px; } .event-admin-game { grid-template-columns:50px 1fr; } .event-admin-game .auth-btn { grid-column:1 / -1; } }
+    @media (max-width:850px){ .event-admin-main-actions, .event-admin-stop-actions, .event-admin-grid, .event-admin-row, .event-admin-current { grid-template-columns:1fr; } .event-admin-cover { width:150px; } .event-admin-game { grid-template-columns:50px 1fr; } .event-admin-game .auth-btn { grid-column:1 / -1; } }
   </style>
 </head>
 <body>
@@ -102,12 +103,11 @@
         <div id="activeEventState" class="event-admin-active-banner off">Chargement de l’état actuel…</div>
         <div class="event-admin-main-actions">
           <div class="event-admin-action-box event-admin-stop-box event-admin-no-event-main">
-            <button class="auth-btn danger" id="globalNoEventBtn" type="button" title="Applique le mode sans événement public. Les visiteurs verront qu’il n’y a aucun événement en cours.">🚫 Appliquer aucun événement en cours <span class="event-admin-help" tabindex="0" data-tip="À utiliser quand tu ne veux plus afficher d’événement sur la page publique. Ça sauvegarde l’état dans Cloudflare, sans supprimer tes fichiers événement.">?</span></button>
-            <p class="event-admin-action-desc">Masque tous les événements sur la page publique et affiche “Aucun événement actif pour le moment”.</p>
-          </div>
-          <div class="event-admin-action-box event-admin-test-box">
-            <a class="auth-btn primary" id="eventTestNoEventBtn" href="/evenements/?test=none" target="_blank" rel="noopener" title="Ouvre la page publique en mode test sans événement actif.">🧪 Tester aucun événement en cours <span class="event-admin-help" tabindex="0" data-tip="Ouvre /evenements/?test=none pour vérifier l’affichage quand aucun événement n’est actif, sans modifier Cloudflare.">?</span></a>
-            <p class="event-admin-action-desc">Prévisualise la page publique comme si aucun événement n’était en cours, sans sauvegarder.</p>
+            <div class="event-admin-stop-actions">
+              <button class="auth-btn danger" id="globalNoEventBtn" type="button" title="Applique le mode sans événement public. Les visiteurs verront qu’il n’y a aucun événement en cours.">🚫 Appliquer aucun événement en cours <span class="event-admin-help" tabindex="0" data-tip="À utiliser quand tu ne veux plus afficher d’événement sur la page publique. Ça sauvegarde l’état dans Cloudflare, sans supprimer tes fichiers événement.">?</span></button>
+              <a class="auth-btn primary" id="eventTestNoEventBtn" href="/evenements/?test=none" target="_blank" rel="noopener" title="Ouvre la page publique en mode test sans événement actif.">🧪 Tester aucun événement en cours <span class="event-admin-help" tabindex="0" data-tip="Ouvre /evenements/?test=none pour vérifier l’affichage quand aucun événement n’est actif, sans modifier Cloudflare.">?</span></a>
+            </div>
+            <p class="event-admin-action-desc">Appliquer sauvegarde l’état dans Cloudflare. Tester ouvre la page publique comme si aucun événement n’était actif, sans rien modifier.</p>
           </div>
         </div>
         <div id="eventsList" class="event-admin-event-list"><div class="event-admin-msg">Chargement de la liste…</div></div>

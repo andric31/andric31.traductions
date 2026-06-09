@@ -6,10 +6,10 @@
   "icon": "🌙",
   "status_label": "Pause événement",
   "title": "Aucun événement en cours",
-  "text": "Il n’y a pas d’événement spécial actif pour le moment. Les traductions restent disponibles normalement sur le site.",
+  "text": "Il n’y a pas d’événement spécial actif pour le moment.",
   "details": [
-    "Cette page sert d’affichage propre quand aucun événement saisonnier n’est lancé.",
-    "Tu peux revenir plus tard : les prochains événements apparaîtront ici dès qu’ils seront activés."
+    "Les traductions restent disponibles normalement sur le site.",
+    "Les prochains événements apparaîtront ici dès qu’ils seront activés."
   ],
   "actions": [
     {

@@ -74,7 +74,13 @@
     if (!id) return baseEvent;
     const saved = await fetchJson(`/api/evenement?id=${encodeURIComponent(id)}`, null);
     if (saved?.ok && saved.event && typeof saved.event === 'object') {
-      return { ...baseEvent, ...saved.event };
+      const merged = { ...baseEvent, ...saved.event };
+      // On garde les informations structurelles du fichier local.
+      // Sinon une ancienne sauvegarde Cloudflare peut casser le mode "aucun événement".
+      if (baseEvent.id) merged.id = baseEvent.id;
+      if (baseEvent.type) merged.type = baseEvent.type;
+      if (baseEvent.css) merged.css = baseEvent.css;
+      return merged;
     }
     return baseEvent;
   }
@@ -480,6 +486,46 @@
     if (!link.href.includes(href)) link.href = versionedHref;
   }
 
+  function renderEmptyEvent(message = 'Aucun événement actif pour le moment.') {
+    if (!els.active) return;
+    els.active.innerHTML = `<div class="event-empty">${escapeHtml(message)}</div>`;
+  }
+
+
+  function isNoEventMode(event) {
+    const type = normalizeText(event?.type || event?.mode || '');
+    const id = normalizeText(event?.id || '');
+    return type === 'no_event' || type === 'aucun_evenement' || type === 'aucun-evenement' || id === 'aucun-evenement';
+  }
+
+  function renderNoEventCard(event) {
+    const period = dateRange(event || {});
+    const details = Array.isArray(event?.details) ? event.details.filter(Boolean) : [];
+    const actions = Array.isArray(event?.actions) ? event.actions.filter((action) => action && action.href && action.label) : [];
+
+    els.active.innerHTML = `
+      <article class="active-card ${escapeHtml(getEventThemeClass(event))} no-event-card">
+        <div class="active-content">
+          <div class="event-icon" aria-hidden="true">${escapeHtml(event?.icon || '🌙')}</div>
+          <div class="event-state-row">
+            <span class="event-pill is-live">${escapeHtml(event?.status_label || 'Pause événement')}</span>
+            ${period ? `<span class="event-pill">📆 ${escapeHtml(period)}</span>` : ''}
+          </div>
+          <h2 class="event-title">${escapeHtml(event?.title || 'Aucun événement en cours')}</h2>
+          <p class="event-text">${escapeHtml(event?.text || 'Il n’y a pas d’événement spécial actif pour le moment.')}</p>
+
+          ${details.length ? `<div class="event-no-event-panel">
+            ${details.map((line) => `<div class="event-info-line"><span>✨</span><p>${escapeHtml(line)}</p></div>`).join('')}
+          </div>` : ''}
+
+          ${actions.length ? `<div class="event-actions">
+            ${actions.map((action, index) => `<a class="${index === 0 ? 'event-main-link' : 'event-secondary-link'}" href="${escapeHtml(action.href)}">${escapeHtml(action.label)}</a>`).join('')}
+          </div>` : ''}
+        </div>
+      </article>
+    `;
+  }
+
   function renderNoGame(event, gameError = '') {
     const period = dateRange(event || {});
     els.active.innerHTML = `
@@ -491,7 +537,6 @@
             ${period ? `<span class="event-pill">📆 ${escapeHtml(period)}</span>` : ''}
           </div>
           <h2 class="event-title">${escapeHtml(event?.title || 'Événement')}</h2>
-          <p class="event-text">Aucun jeu de la base ne correspond actuellement au thème de cet événement.</p>
           ${gameError ? `<p class="event-help">${escapeHtml(gameError)}</p>` : ''}
         </div>
       </article>
@@ -516,7 +561,7 @@
 
   function renderActiveEvent(event, selection, gameError = '') {
     if (!event || event.enabled === false) {
-      els.active.innerHTML = '<div class="event-empty">Aucun événement actif pour le moment.</div>';
+      renderEmptyEvent('Aucun événement actif pour le moment.');
       return;
     }
 
@@ -572,26 +617,36 @@
   async function init() {
     const params = new URLSearchParams(window.location.search);
     const testId = String(params.get('test') || '').trim();
+    const testNoEvent = ['none', 'no-event', 'aucun', 'off'].includes(testId.toLowerCase());
+    const normalizedTestId = testNoEvent ? 'aucun-evenement' : testId;
+
     const config = await fetchJson(CONFIG_URL, { event_actif: 'ete-2026', event_files: ['ete-2026'] });
-    const activeState = testId ? { activeId: testId, enabled: true, source: 'test' } : await loadActiveState(config);
+    const activeState = normalizedTestId ? { activeId: normalizedTestId, enabled: true, source: 'test' } : await loadActiveState(config);
 
     if (!activeState.enabled || !activeState.activeId) {
-      renderActiveEvent(null, null);
+      renderEmptyEvent('Aucun événement actif pour le moment.');
       return;
     }
 
     const eventUrl = getActiveEventUrl(config, activeState.activeId);
     const baseEvent = eventUrl ? await fetchJson(eventUrl, null) : null;
-    let event = baseEvent ? await loadSavedEvent(baseEvent) : null;
+    // En mode test, on affiche le fichier de l’événement tel qu’il est déployé,
+    // sans le mélanger avec une ancienne sauvegarde Cloudflare.
+    let event = baseEvent ? (normalizedTestId ? baseEvent : await loadSavedEvent(baseEvent)) : null;
 
-    if (testId && event) {
-      event = { ...event, enabled: true, status_label: 'Mode test admin' };
+    if (normalizedTestId && event) {
+      event = { ...event, enabled: true, status_label: isNoEventMode(event) ? (event.status_label || 'Pause événement') : 'Mode test admin' };
     }
 
     if (event) loadEventCss(event);
 
     if (!event || event.enabled === false) {
       renderActiveEvent(event, null);
+      return;
+    }
+
+    if (isNoEventMode(event)) {
+      renderNoEventCard(event);
       return;
     }
 
@@ -605,6 +660,6 @@
 
   init().catch((err) => {
     console.warn('[events]', err);
-    els.active.innerHTML = '<div class="event-empty">Impossible de charger l’événement.</div>';
+    renderEmptyEvent('Impossible de charger l’événement.');
   });
 })();

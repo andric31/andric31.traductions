@@ -375,7 +375,7 @@
       if (forced) {
         return {
           game: forced,
-          reason: 'Jeu sélectionné manuellement pour cet événement.',
+          reason: '',
           summary: getGameDescription(forced),
           tags: getGameTags(forced),
           matchedKeywords: []
@@ -604,9 +604,8 @@
             ${image ? `<img src="${escapeHtml(image)}" alt="" loading="lazy">` : '<div class="event-game-placeholder">🎮</div>'}
           </div>
           <div class="event-game-info">
-            <span class="event-game-label">${escapeHtml(event.status || 'Sélection d’été')}</span>
+            <span class="event-game-label">Cette semaine</span>
             <h3>${escapeHtml(title)}</h3>
-            <p class="event-game-why">${escapeHtml(selection.reason || 'Choisi pour l’événement d’été.')}</p>
           </div>
         </aside>
       </article>

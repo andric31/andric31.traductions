@@ -608,10 +608,6 @@ body {
   color: var(--muted);
 }
 
-.event-game-why {
-  color: var(--fg) !important;
-  margin-top: 10px !important;
-}
 
 @media (max-width: 720px) {
   .event-details {
@@ -644,10 +640,6 @@ body {
   text-shadow: 0 2px 8px rgba(0,0,0,.35) !important;
 }
 
-.event-game-info p,
-.event-game-why {
-  color: #dfe8f6 !important;
-}
 
 .event-game-label {
   color: #8ec6ff !important;

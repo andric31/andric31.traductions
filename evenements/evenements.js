@@ -299,6 +299,12 @@
     }) || null;
   }
 
+  function getCalendarSeedOffset(event, poolLength) {
+    if (!poolLength) return 0;
+    const seedValue = String(event?.calendar_seed || event?.rotation_seed || event?.id || event?.title || 'event').trim();
+    return hashText(seedValue) % poolLength;
+  }
+
   function getNextChangeDate(event) {
     const next = getLastChangeBoundary(new Date(), event);
     next.setDate(next.getDate() + 7);
@@ -478,7 +484,7 @@
     // Important : on utilise toute la liste de candidats au thème, pas seulement le petit groupe de tête.
     // Comme ça, le jeu avance vraiment à chaque changement hebdomadaire au lieu de pouvoir retomber sur le même.
     const rotationIndex = getRotationIndex(event);
-    const eventOffset = hashText(event.id || event.title || 'event') % rotationPool.length;
+    const eventOffset = getCalendarSeedOffset(event, rotationPool.length);
     const selected = rotationPool[(rotationIndex + eventOffset) % rotationPool.length];
 
     const uniqueKeywords = [...new Set((selected.analysis.found || []).map((item) => item.keyword))];

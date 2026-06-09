@@ -1,0 +1,37 @@
+/* Thème calendrier de l’avent / Noël */
+.active-card.event-theme-calendrier-avent-2025 {
+  background:
+    radial-gradient(circle at 12% 15%, rgba(255,255,255,.72), transparent 24%),
+    linear-gradient(135deg, #123526 0%, #246247 45%, #9b1c2f 100%) !important;
+  border: 1px solid rgba(255,255,255,.42) !important;
+  box-shadow: 0 22px 52px rgba(15, 35, 28, .32) !important;
+}
+
+.active-card.event-theme-calendrier-avent-2025 .event-title,
+.active-card.event-theme-calendrier-avent-2025 .event-text {
+  color: #fff8f0 !important;
+  text-shadow: 0 3px 12px rgba(0,0,0,.36) !important;
+}
+
+.active-card.event-theme-calendrier-avent-2025 .event-pill,
+.active-card.event-theme-calendrier-avent-2025 .event-next-game-timer {
+  background: rgba(255,255,255,.16) !important;
+  border-color: rgba(255,255,255,.38) !important;
+  color: #fff8f0 !important;
+}
+
+.active-card.event-theme-calendrier-avent-2025 .event-main-link,
+.active-card.event-theme-calendrier-avent-2025 .event-secondary-link {
+  background: linear-gradient(135deg, #fff4d8, #e7c568) !important;
+  color: #2c1600 !important;
+  border-color: rgba(255,255,255,.45) !important;
+}
+
+.active-card.event-theme-calendrier-avent-2025 .event-game-card {
+  background: rgba(22, 20, 28, .88) !important;
+  border-color: rgba(255,255,255,.34) !important;
+}
+
+.active-card.event-theme-calendrier-avent-2025 .event-game-cover {
+  background: linear-gradient(135deg, #fff7e4, #b3263d 48%, #1e6047) !important;
+}

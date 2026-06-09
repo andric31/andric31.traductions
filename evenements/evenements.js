@@ -450,10 +450,40 @@
     };
   }
 
+
+  function cssIdFromEvent(event) {
+    return String(event?.css || event?.style || event?.theme || event?.id || '')
+      .trim()
+      .replace(/^\/evenements\//, '')
+      .replace(/\.css$/i, '')
+      .replace(/[^a-z0-9_-]/gi, '');
+  }
+
+  function getEventThemeClass(event) {
+    const id = cssIdFromEvent(event);
+    return id ? `event-theme-${id}` : 'event-theme-default';
+  }
+
+  function loadEventCss(event) {
+    const id = cssIdFromEvent(event);
+    if (!id) return;
+    const href = `/evenements/${id}.css`;
+    const versionedHref = `${href}?v=${Math.floor(Date.now() / 60000)}`;
+    const domId = 'event-specific-css';
+    let link = document.getElementById(domId);
+    if (!link) {
+      link = document.createElement('link');
+      link.id = domId;
+      link.rel = 'stylesheet';
+      document.head.appendChild(link);
+    }
+    if (!link.href.includes(href)) link.href = versionedHref;
+  }
+
   function renderNoGame(event, gameError = '') {
     const period = dateRange(event || {});
     els.active.innerHTML = `
-      <article class="active-card summer-card no-game">
+      <article class="active-card ${escapeHtml(getEventThemeClass(event))} no-game">
         <div class="active-content">
           <div class="event-icon" aria-hidden="true">${escapeHtml(event?.icon || '📅')}</div>
           <div class="event-state-row">
@@ -504,7 +534,7 @@
     const f95 = String(game.url || game.threadUrl || '').trim();
 
     els.active.innerHTML = `
-      <article class="active-card summer-card">
+      <article class="active-card ${escapeHtml(getEventThemeClass(event))}">
         <div class="active-content">
           <div class="event-icon" aria-hidden="true">${escapeHtml(event.icon || '☀️')}</div>
           <div class="event-state-row">
@@ -524,14 +554,14 @@
           </div>
         </div>
 
-        <aside class="summer-game-card" aria-label="Jeu mis en avant">
-          <div class="summer-game-cover">
-            ${image ? `<img src="${escapeHtml(image)}" alt="" loading="lazy">` : '<div class="summer-game-placeholder">🎮</div>'}
+        <aside class="event-game-card" aria-label="Jeu mis en avant">
+          <div class="event-game-cover">
+            ${image ? `<img src="${escapeHtml(image)}" alt="" loading="lazy">` : '<div class="event-game-placeholder">🎮</div>'}
           </div>
-          <div class="summer-game-info">
-            <span class="summer-game-label">${escapeHtml(event.status || 'Sélection d’été')}</span>
+          <div class="event-game-info">
+            <span class="event-game-label">${escapeHtml(event.status || 'Sélection d’été')}</span>
             <h3>${escapeHtml(title)}</h3>
-            <p class="summer-game-why">${escapeHtml(selection.reason || 'Choisi pour l’événement d’été.')}</p>
+            <p class="event-game-why">${escapeHtml(selection.reason || 'Choisi pour l’événement d’été.')}</p>
           </div>
         </aside>
       </article>
@@ -557,6 +587,8 @@
     if (testId && event) {
       event = { ...event, enabled: true, status_label: 'Mode test admin' };
     }
+
+    if (event) loadEventCss(event);
 
     if (!event || event.enabled === false) {
       renderActiveEvent(event, null);

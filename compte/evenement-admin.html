@@ -66,8 +66,11 @@
     .event-admin-event-actions { display:flex; flex-wrap:wrap; gap:7px; justify-content:flex-end; }
     .event-admin-active-banner { margin-top:10px; padding:10px 12px; border-radius:14px; border:1px solid rgba(126,224,161,.35); background:rgba(126,224,161,.09); color:#7ee0a1; font-weight:800; }
     .event-admin-active-banner.off { border-color:rgba(255,184,77,.35); background:rgba(255,184,77,.09); color:#ffbf5f; }
+    .event-admin-no-event-item { border-color:rgba(255,90,90,.48); background:rgba(255,90,90,.075); }
+    .event-admin-no-event-item.is-selected { border-color:rgba(255,184,77,.55); background:rgba(255,184,77,.10); }
+    .event-admin-no-event-item.is-active { box-shadow:0 0 0 1px rgba(255,184,77,.34) inset; }
     .event-admin-no-event-main { margin-top:0; }
-    @media (max-width:850px){ .event-admin-main-actions, .event-admin-stop-actions, .event-admin-grid, .event-admin-row, .event-admin-current { grid-template-columns:1fr; } .event-admin-cover { width:150px; } .event-admin-game { grid-template-columns:50px 1fr; } .event-admin-game .auth-btn { grid-column:1 / -1; } }
+    @media (max-width:850px){ .event-admin-main-actions, .event-admin-stop-actions, .event-admin-grid, .event-admin-row, .event-admin-current, .event-admin-event-item { grid-template-columns:1fr; } .event-admin-cover { width:150px; } .event-admin-game { grid-template-columns:50px 1fr; } .event-admin-game .auth-btn { grid-column:1 / -1; } .event-admin-event-actions { justify-content:stretch; } }
   </style>
 </head>
 <body>
@@ -101,15 +104,6 @@
         <h2>📋 Liste des événements</h2>
         <p class="event-admin-note" style="margin-top:0;">La liste vient de <strong>/evenements/config.json</strong>. Quand tu déploies un nouvel événement, ajoute juste son ID dans <code>event_files</code> et il apparaîtra ici.</p>
         <div id="activeEventState" class="event-admin-active-banner off">Chargement de l’état actuel…</div>
-        <div class="event-admin-main-actions">
-          <div class="event-admin-action-box event-admin-stop-box event-admin-no-event-main">
-            <div class="event-admin-stop-actions">
-              <button class="auth-btn danger" id="globalNoEventBtn" type="button" title="Applique le mode sans événement public. Les visiteurs verront qu’il n’y a aucun événement en cours.">🚫 Appliquer aucun événement en cours <span class="event-admin-help" tabindex="0" data-tip="À utiliser quand tu ne veux plus afficher d’événement sur la page publique. Ça sauvegarde l’état dans Cloudflare, sans supprimer tes fichiers événement.">?</span></button>
-              <a class="auth-btn primary" id="eventTestNoEventBtn" href="/evenements/?test=aucun-evenement" target="_blank" rel="noopener" title="Ouvre la page publique en mode test sans événement actif.">🧪 Tester la page aucun événement <span class="event-admin-help" tabindex="0" data-tip="Ouvre /evenements/?test=aucun-evenement pour vérifier la jolie page “aucun événement en cours”, sans modifier Cloudflare.">?</span></a>
-            </div>
-            <p class="event-admin-action-desc">Appliquer met officiellement la page “aucun événement en cours”. Tester ouvre cette même page sans rien modifier.</p>
-          </div>
-        </div>
         <div id="eventsList" class="event-admin-event-list"><div class="event-admin-msg">Chargement de la liste…</div></div>
 
         <form id="eventForm" class="event-admin-card" autocomplete="off">
@@ -345,6 +339,25 @@
       wrap.innerHTML = eventCatalog.map((ev)=>{
         const isSelected = selectedId === ev.id;
         const isActive = activeState.enabled && activeId === ev.id;
+        const isNoEvent = ev.id === 'aucun-evenement';
+        if (isNoEvent) {
+          return `<article class="event-admin-event-item event-admin-no-event-item ${isSelected ? 'is-selected' : ''} ${isActive ? 'is-active' : ''}">
+            <div>
+              <strong>🚫 ${esc(ev.title || 'Aucun événement en cours')}</strong>
+              <small style="display:block;color:var(--muted);margin-top:4px;">ID : ${esc(ev.id)}${ev.date ? ` • ${esc(ev.date)}` : ''}${ev.hasFile ? '' : ' • fichier JSON non trouvé'}</small>
+              <p class="event-admin-action-desc" style="margin-top:8px;">Appliquer met officiellement la jolie page “aucun événement en cours”. Tester l’ouvre sans rien modifier.</p>
+              <div class="event-admin-pill-list">
+                ${isActive ? '<span class="event-admin-pill ok">En cours</span>' : ''}
+                ${isSelected ? '<span class="event-admin-pill">Sélectionné</span>' : ''}
+                <span class="event-admin-pill">${esc(ev.source)}</span>
+              </div>
+            </div>
+            <div class="event-admin-event-actions">
+              <button class="auth-btn mini danger" type="button" data-no-event-apply="1">Appliquer aucun événement</button>
+              <a class="auth-btn mini primary" href="/evenements/?test=aucun-evenement" target="_blank" rel="noopener">Test</a>
+            </div>
+          </article>`;
+        }
         return `<article class="event-admin-event-item ${isSelected ? 'is-selected' : ''} ${isActive ? 'is-active' : ''}">
           <div>
             <strong>${esc(ev.title || ev.id)}</strong>
@@ -660,7 +673,6 @@
       }
     }
 
-    $('globalNoEventBtn')?.addEventListener('click', setNoEventInProgress);
 
     $('enableEventBtn')?.addEventListener('click', async () => {
       const next = formEvent();
@@ -724,9 +736,14 @@
       });
     });
     $('eventsList')?.addEventListener('click', async (e) => {
+      const noEventApplyBtn = e.target.closest('[data-no-event-apply]');
       const loadBtn = e.target.closest('[data-load-event]');
       const launchBtn = e.target.closest('[data-launch-event]');
       try {
+        if (noEventApplyBtn) {
+          await setNoEventInProgress();
+          return;
+        }
         if (loadBtn) {
           await selectEvent(loadBtn.dataset.loadEvent || '');
           $('jsonMsg').textContent = `Événement ouvert : ${loadBtn.dataset.loadEvent}.`;

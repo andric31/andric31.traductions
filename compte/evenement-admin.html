@@ -131,7 +131,6 @@
 
         <form id="eventForm" class="event-admin-card" autocomplete="off">
           <h2 id="eventActionTitle">☀️ Gestion de cet événement</h2>
-          <p class="event-admin-note" id="selectedEventActionNote" style="margin-top:0;">Ouvre un événement dans la liste au-dessus pour voir ses réglages et ses choix de jeux.</p>
 
           <div class="event-admin-linked-panel" id="eventLinkedPanel">
             <div class="event-admin-msg">Chargement de l’événement sélectionné…</div>
@@ -180,7 +179,7 @@
     <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
       <div class="event-admin-grid">
         <div class="event-admin-card">
-          <h2>🎯 Jeu affiché actuellement</h2>
+          <h2>🎯 Jeu affiché cette semaine</h2>
           <div id="eventMsg" class="event-admin-msg">Chargement…</div>
           <div id="currentGame" style="margin-top:12px;"></div>
         </div>
@@ -342,8 +341,6 @@
         banner.className = `event-admin-active-banner ${activeState.enabled && activeId && !isNoEventActive ? '' : 'off'}`;
       }
       const selectedId = activeEvent?.id || '';
-      const note = $('selectedEventActionNote');
-      if (note) note.textContent = selectedId ? `Ces boutons concernent uniquement : ${selectedId}.` : 'Ouvre un événement dans la liste pour utiliser ses actions.';
       wrap.innerHTML = eventCatalog.map((ev)=>{
         const isSelected = selectedId === ev.id;
         const isActive = activeState.enabled && activeId === ev.id;
@@ -592,12 +589,6 @@
       const title = $('eventActionTitle');
       if (title) title.textContent = `${event.icon || event.emoji || '📅'} Gestion : ${event.title || event.id || 'événement'}`;
 
-      const note = $('selectedEventActionNote');
-      if (note) {
-        note.textContent = event.id === 'aucun-evenement'
-          ? 'Cette entrée sert uniquement à afficher la page de pause quand aucun événement n’est actif.'
-          : `Tout ce bloc concerne uniquement l’événement : ${event.id || 'événement sélectionné'}.`;
-      }
 
       const isNoEvent = String(event.type || event.mode || '').toLowerCase().replace('_','-') === 'no-event' || String(event.id || '') === 'aucun-evenement';
       if (event.enabled === false || isNoEvent) {
@@ -647,7 +638,7 @@
           </div>
         </div>
         <div class="event-admin-linked-grid">
-          <div class="event-admin-linked-box"><strong>🎯 Jeu affiché</strong><small>${esc(currentTitle)}<br>${esc(currentDetail)}</small></div>
+          <div class="event-admin-linked-box"><strong>🎯 Cette semaine</strong><small>${esc(currentTitle)}<br>${esc(currentDetail)}</small></div>
           <div class="event-admin-linked-box"><strong>🔁 Règle actuelle</strong><small>${esc(choiceLabel)}<br>Changement : ${esc(event.change_day || 'monday')} à ${esc(String(event.change_hour ?? 0))}h</small></div>
         </div>
         <div>

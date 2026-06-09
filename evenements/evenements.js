@@ -816,7 +816,6 @@
     els.active.innerHTML = `
       <article class="active-card ${escapeHtml(getEventThemeClass(event))} xmas-calendar-card">
         <header class="xmas-hero">
-          <div class="xmas-icon">${escapeHtml(event.icon || '🎄')}</div>
           <div class="xmas-pills">
             <span>${escapeHtml(event.status_label || 'Calendrier de l’avent')}</span>
             ${period ? `<span>📆 ${escapeHtml(period)}</span>` : ''}

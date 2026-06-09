@@ -546,7 +546,7 @@
     function buildEventCalendarPreview(pool, event) {
       if (!pool.length) return [];
       const eventId = String(event?.id || '').trim();
-      const start = eventId === 'ete-2026' ? new Date(2026, 5, 15) : (parseDateOnly(event.start_at) || getNextChangeBoundary(new Date(), event));
+      const start = eventId === 'ete-2026' ? new Date(2026, 5, 8) : (parseDateOnly(event.start_at) || getNextChangeBoundary(new Date(), event));
       const end = eventId === 'ete-2026' ? new Date(2026, 7, 31) : (parseDateOnly(event.end_at) || (()=>{ const d = new Date(start); d.setDate(d.getDate() + 35); return d; })());
       const first = getLastChangeBoundary(start, event);
       if (first.getTime() < start.getTime()) first.setDate(first.getDate() + 7);

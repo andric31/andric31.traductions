@@ -6,19 +6,14 @@
   "icon": "🌙",
   "status_label": "Pause événement",
   "title": "Aucun événement en cours",
-  "text": "Il n’y a pas d’événement spécial actif pour le moment.",
+  "text": "Il n’y a pas d’événement pour le moment.",
   "details": [
-    "Les traductions restent disponibles normalement sur le site.",
     "Les prochains événements apparaîtront ici dès qu’ils seront activés."
   ],
   "actions": [
     {
       "label": "Retour au site",
       "href": "/"
-    },
-    {
-      "label": "Mon compte",
-      "href": "/compte/"
     }
   ],
   "date_label": "Hors événement"

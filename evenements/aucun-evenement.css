@@ -85,3 +85,8 @@
     font-size: clamp(32px, 11vw, 46px);
   }
 }
+
+
+.no-event-card .event-text {
+  margin-bottom: 12px;
+}

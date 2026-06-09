@@ -141,10 +141,6 @@
               <button class="auth-btn" id="saveEventBtn" type="button" title="Sauvegarde uniquement les changements faits dans les réglages avancés : titre, texte, jour, heure et mots-clés.">💾 Enregistrer le titre / texte <span class="event-admin-help" tabindex="0" data-tip="À utiliser seulement après avoir modifié les réglages avancés : titre, texte affiché, jour de changement, heure ou mots-clés.">?</span></button>
               <p class="event-admin-action-desc">Sauvegarde les textes et règles si tu les as modifiés plus bas.</p>
             </div>
-            <div class="event-admin-action-box">
-              <button class="auth-btn" id="regenerateCalendarBtn" type="button" title="Supprime les jeux changés manuellement semaine par semaine et recrée une rotation automatique différente.">🔄 Refaire le calendrier automatiquement <span class="event-admin-help" tabindex="0" data-tip="Remet toutes les semaines en automatique et génère un nouvel ordre de rotation. À utiliser si le calendrier ne te plaît pas.">?</span></button>
-              <p class="event-admin-action-desc">Recrée les choix automatiques de toutes les semaines.</p>
-            </div>
           </div>
 
           <div id="jsonMsg" class="event-admin-msg"></div>
@@ -640,6 +636,7 @@
             <p class="event-admin-linked-subtitle">Ici, on voit le jeu affiché maintenant, mais aussi le calendrier automatique qui reste toujours visible pour suivre les choix semaine par semaine.</p>
           </div>
           <div class="event-admin-choice-actions">
+            <button class="auth-btn mini" id="regenerateCalendarBtn" type="button" title="Supprime les jeux changés manuellement semaine par semaine et recrée une rotation automatique différente.">🔄 Refaire le calendrier automatiquement <span class="event-admin-help" tabindex="0" data-tip="Remet toutes les semaines en automatique et génère un nouvel ordre de rotation. À utiliser si le calendrier ne te plaît pas.">?</span></button>
             <a class="auth-btn mini" href="/evenements/?test=${encodeURIComponent(event.id || '')}" target="_blank" rel="noopener">Tester</a>
           </div>
         </div>
@@ -816,8 +813,12 @@
 
 
     $('saveEventBtn')?.addEventListener('click', () => { renderCurrent(); saveEventToSite(formEvent()).catch((err)=>{ $('jsonMsg').textContent = err?.message || 'Sauvegarde impossible.'; $('jsonMsg').className = 'event-admin-msg err'; }); });
-    $('regenerateCalendarBtn')?.addEventListener('click', () => { regenerateAutomaticCalendar().catch((err)=>{ $('jsonMsg').textContent = err?.message || 'Calendrier impossible à refaire.'; $('jsonMsg').className = 'event-admin-msg err'; }); });
     document.addEventListener('click', (e) => {
+      const regenerateCalendar = e.target.closest('#regenerateCalendarBtn');
+      if (regenerateCalendar) {
+        regenerateAutomaticCalendar().catch((err)=>{ $('jsonMsg').textContent = err?.message || 'Calendrier impossible à refaire.'; $('jsonMsg').className = 'event-admin-msg err'; });
+        return;
+      }
       const scrollPicker = e.target.closest('#scrollGamePickerBtn');
       if (scrollPicker) {
         const search = $('gameSearch');

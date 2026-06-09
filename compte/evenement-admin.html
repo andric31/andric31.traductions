@@ -461,13 +461,22 @@
       return { score, found, description:getDesc(g), tags:getTags(g) };
     }
     function pickGame(games,event){
-      const weeklyForced = findGameByRef(games, getWeeklyOverride(event, weekKeyFromDate(getLastChangeBoundary(new Date(), event))));
-      if (weeklyForced) return { game:weeklyForced, reason:'Jeu choisi manuellement pour cette semaine.', matchedKeywords:[], score:null };
-      const wantedId=String(event?.selected_game_id||'').trim(); const wantedUid=String(event?.selected_game_uid||'').trim();
-      if(wantedId || wantedUid){
-        const forced=findGameByRef(games, { id:wantedId, uid:wantedUid });
-        if(forced) return { game:forced, reason:'Jeu forcé manuellement.', matchedKeywords:[], score:null };
+      const weeklyMode = isWeeklyCalendarEvent(event);
+      const currentWeekKey = weekKeyFromDate(getLastChangeBoundary(new Date(), event));
+      const weeklyForced = findGameByRef(games, getWeeklyOverride(event, currentWeekKey));
+      if (weeklyForced) return { game:weeklyForced, reason:'', matchedKeywords:[], score:null };
+
+      // Pour les événements à calendrier hebdomadaire, la source de vérité est le calendrier :
+      // 1) changement manuel de la semaine, 2) rotation automatique.
+      // L'ancien "selected_game_id" global est ignoré pour éviter d'avoir 3 jeux différents.
+      if (!weeklyMode) {
+        const wantedId=String(event?.selected_game_id||'').trim(); const wantedUid=String(event?.selected_game_uid||'').trim();
+        if(wantedId || wantedUid){
+          const forced=findGameByRef(games, { id:wantedId, uid:wantedUid });
+          if(forced) return { game:forced, reason:'', matchedKeywords:[], score:null };
+        }
       }
+
       const valid = games.filter((g)=>getImage(g)).filter((g)=>buildUrl(g) !== '/');
       let pool = valid.map((g)=>({game:g, analysis:analyse(g,event)})).filter(e=>e.analysis.score>0).sort((a,b)=>b.analysis.score-a.analysis.score || getTitle(a.game).localeCompare(getTitle(b.game),'fr'));
       let blockedApplied = false;
@@ -475,7 +484,9 @@
       pool = applyBlocked(pool);
       if((!pool.length || pool.every((entry)=>isBlockedGame(entry.game,event))) && String(event?.fallback_mode||'').trim()==='weekly_random') pool = applyBlocked(valid.map((g)=>({game:g, analysis:{score:0, found:[]}})).sort((a,b)=>getTitle(a.game).localeCompare(getTitle(b.game),'fr')));
       if(!pool.length) return { game:null, reason:'Aucun jeu trouvé.', matchedKeywords:[], score:null };
-      const selected = pool[(getRotationIndex(event) + (hashText(event?.id || event?.title || 'event') % pool.length)) % pool.length];
+
+      const baseIndex = weeklyMode ? getCalendarWeekIndex(event) : getRotationIndex(event);
+      const selected = pool[(baseIndex + getCalendarSeedOffset(event, pool.length)) % pool.length];
       const reasonBase = selected.analysis.found?.length ? `Auto : ${selected.analysis.found.join(', ')}` : 'Auto : rotation hebdomadaire';
       return { game:selected.game, reason: blockedApplied ? `${reasonBase} — jeux déjà utilisés ignorés` : reasonBase, matchedKeywords:selected.analysis.found || [], score:selected.analysis.score };
     }
@@ -519,6 +530,25 @@
       return `${y}-${m}-${d}`;
     }
 
+    function isWeeklyCalendarEvent(event) {
+      const id = String(event?.id || '').trim();
+      const mode = String(event?.selection_mode || event?.selection || event?.change_frequency || '').toLowerCase();
+      return id === 'ete-2026' || mode.includes('weekly') || mode.includes('semaine');
+    }
+
+    function getCalendarFirstWeek(event) {
+      const eventId = String(event?.id || '').trim();
+      if (eventId === 'ete-2026') return new Date(2026, 5, 8);
+      const configuredStart = parseDateOnly(event?.start_at);
+      return getLastChangeBoundary(configuredStart || new Date(new Date().getFullYear(), 0, 1), event);
+    }
+
+    function getCalendarWeekIndex(event, date = new Date()) {
+      const first = getLastChangeBoundary(getCalendarFirstWeek(event), event);
+      const current = getLastChangeBoundary(date, event);
+      return Math.max(0, Math.floor((current.getTime() - first.getTime()) / (7 * 24 * 60 * 60 * 1000)));
+    }
+
     function getWeeklyOverride(event, weekKey) {
       const overrides = event?.weekly_overrides;
       if (!overrides || typeof overrides !== 'object' || !weekKey) return null;
@@ -548,11 +578,11 @@
       const first = getLastChangeBoundary(start, event);
       if (first.getTime() < start.getTime()) first.setDate(first.getDate() + 7);
       const seed = getCalendarSeedOffset(event, pool.length);
-      const rotationIndex = getRotationIndex(event);
       const rows = [];
       for (let i = 0, d = new Date(first); d.getTime() <= end.getTime() && i < 20; i++, d.setDate(d.getDate() + 7)) {
         const weekKey = weekKeyFromDate(d);
-        const autoEntry = pool[(rotationIndex + seed + i) % pool.length];
+        const weekIndex = getCalendarWeekIndex(event, d);
+        const autoEntry = pool[(weekIndex + seed) % pool.length];
         const overrideGame = findGameByRef(allGames, getWeeklyOverride(event, weekKey));
         const entry = overrideGame ? { game: overrideGame, analysis: { score:null, found:['choix manuel'] }, manual:true } : autoEntry;
         rows.push({ date:new Date(d), weekKey, entry, current:false, manual: !!overrideGame });

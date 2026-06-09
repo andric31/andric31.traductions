@@ -1,0 +1,74 @@
+/* Thème propre pour l'état "aucun événement en cours" */
+.event-theme-aucun-evenement {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(137, 180, 255, .18), transparent 34%),
+    radial-gradient(circle at 82% 12%, rgba(191, 160, 255, .15), transparent 32%),
+    linear-gradient(135deg, rgba(25, 31, 52, .96), rgba(12, 16, 28, .98));
+  border-color: rgba(154, 180, 255, .26);
+}
+
+.event-theme-aucun-evenement::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background:
+    radial-gradient(circle, rgba(255,255,255,.38) 0 1px, transparent 2px) 0 0 / 80px 80px,
+    radial-gradient(circle, rgba(255,255,255,.20) 0 1px, transparent 2px) 38px 46px / 110px 110px;
+  opacity: .28;
+  pointer-events: none;
+}
+
+.event-theme-aucun-evenement .event-icon {
+  background: rgba(137, 180, 255, .12);
+  border-color: rgba(137, 180, 255, .28);
+  box-shadow: 0 0 34px rgba(137, 180, 255, .18);
+}
+
+.event-theme-aucun-evenement .event-pill {
+  background: rgba(137, 180, 255, .11);
+  border-color: rgba(137, 180, 255, .24);
+  color: #d9e4ff;
+}
+
+.event-theme-aucun-evenement .event-pill.is-live {
+  background: rgba(191, 160, 255, .14);
+  border-color: rgba(191, 160, 255, .34);
+  color: #efe8ff;
+}
+
+.event-theme-aucun-evenement .event-main-link {
+  background: linear-gradient(135deg, rgba(137, 180, 255, .95), rgba(191, 160, 255, .95));
+  color: #101421;
+}
+
+.event-theme-aucun-evenement .event-secondary-link {
+  background: rgba(255,255,255,.07);
+  border-color: rgba(255,255,255,.14);
+}
+
+.no-event-card .event-no-event-panel {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.045);
+}
+
+.no-event-card .event-info-line {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  color: var(--muted, #b8c0d8);
+  line-height: 1.55;
+}
+
+.no-event-card .event-info-line span {
+  flex: 0 0 auto;
+}
+
+.no-event-card .event-info-line p { margin: 0; }

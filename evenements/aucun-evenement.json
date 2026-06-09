@@ -1,0 +1,25 @@
+{
+  "id": "aucun-evenement",
+  "css": "aucun-evenement",
+  "type": "no_event",
+  "enabled": true,
+  "icon": "🌙",
+  "status_label": "Pause événement",
+  "title": "Aucun événement en cours",
+  "text": "Il n’y a pas d’événement spécial actif pour le moment. Les traductions restent disponibles normalement sur le site.",
+  "details": [
+    "Cette page sert d’affichage propre quand aucun événement saisonnier n’est lancé.",
+    "Tu peux revenir plus tard : les prochains événements apparaîtront ici dès qu’ils seront activés."
+  ],
+  "actions": [
+    {
+      "label": "Retour au site",
+      "href": "/"
+    },
+    {
+      "label": "Mon compte",
+      "href": "/compte/"
+    }
+  ],
+  "date_label": "Hors événement"
+}

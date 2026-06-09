@@ -826,10 +826,26 @@
         </header>
 
         <section class="xmas-calendar-grid" data-xmas-grid aria-label="Calendrier de l’avent"></section>
+
+        <div class="xmas-reset-zone">
+          <button class="xmas-reset-btn" type="button" data-xmas-reset>🔄 Réinitialiser les cases ouvertes</button>
+        </div>
       </article>
     `;
 
     renderGrid();
+
+    const resetBtn = els.active.querySelector('[data-xmas-reset]');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        try {
+          localStorage.removeItem(getAdventStorageKey(event));
+        } catch {}
+        openedDays.clear();
+        selectedDayNumber = null;
+        renderGrid();
+      });
+    }
   }
   function renderActiveEvent(event, selection, gameError = '') {
     if (!event || event.enabled === false) {

@@ -1,23 +1,17 @@
-/* Calendrier de l’avent — version grande grille propre */
-#activeEvent {
-  width: 100%;
-}
-
+/* Calendrier de l’avent — méthode stable, sans débordement */
 #activeEvent .active-card.event-theme-calendrier-avent-2025.advent-pro-card {
   position: relative;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(94vw, 1680px);
-  max-width: none !important;
+  width: 100%;
+  max-width: 1180px !important;
   margin: 0 auto !important;
   overflow: hidden;
-  padding: clamp(26px, 3vw, 46px) !important;
+  padding: clamp(22px, 3vw, 38px) !important;
   border: 1px solid rgba(255,255,255,.34) !important;
   border-radius: 30px !important;
   background:
-    radial-gradient(circle at 10% 12%, rgba(255,255,255,.54), transparent 22%),
-    radial-gradient(circle at 90% 15%, rgba(255,224,143,.18), transparent 18%),
-    radial-gradient(circle at 90% 84%, rgba(142,26,44,.36), transparent 30%),
+    radial-gradient(circle at 12% 12%, rgba(255,255,255,.54), transparent 22%),
+    radial-gradient(circle at 88% 16%, rgba(255,224,143,.18), transparent 18%),
+    radial-gradient(circle at 88% 84%, rgba(142,26,44,.36), transparent 30%),
     linear-gradient(135deg, #143b2b 0%, #17613f 48%, #7e2631 100%) !important;
   box-shadow: 0 26px 70px rgba(0,0,0,.34) !important;
 }
@@ -41,20 +35,20 @@
 }
 
 .advent-pro-head {
-  max-width: 1120px;
-  margin-bottom: clamp(24px, 3vw, 38px);
+  max-width: 860px;
+  margin-bottom: 28px;
 }
 
 .advent-pro-icon {
-  width: 64px;
-  height: 64px;
+  width: 58px;
+  height: 58px;
   display: grid;
   place-items: center;
   border-radius: 18px;
   background: rgba(255,255,255,.16);
   border: 1px solid rgba(255,255,255,.28);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 16px 28px rgba(0,0,0,.20);
-  font-size: 38px;
+  font-size: 35px;
 }
 
 .advent-pro-meta {
@@ -79,41 +73,40 @@
 }
 
 .advent-pro-head h2 {
-  margin: 22px 0 0;
+  margin: 20px 0 0;
   color: #fff8f0;
-  font-size: clamp(46px, 5.4vw, 84px);
-  line-height: .95;
+  font-size: clamp(40px, 5vw, 70px);
+  line-height: .96;
   letter-spacing: -.055em;
   text-shadow: 0 5px 18px rgba(0,0,0,.32);
 }
 
 .advent-pro-head p {
-  max-width: 780px;
-  margin: 18px 0 0;
+  max-width: 720px;
+  margin: 16px 0 0;
   color: rgba(255,248,240,.94);
-  font-size: clamp(16px, 1.35vw, 21px);
+  font-size: clamp(16px, 1.25vw, 19px);
   line-height: 1.55;
   text-shadow: 0 3px 12px rgba(0,0,0,.26);
 }
 
-/* On retire le gros bloc d’aide qui prenait de la place et créait du focus inutile. */
 .advent-pro-note {
   display: none !important;
 }
 
+/* Grille stable : 4 colonnes sur desktop = cases larges et lisibles */
 .advent-pro-grid {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(6, minmax(190px, 1fr));
-  gap: clamp(16px, 1.5vw, 24px);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(14px, 1.6vw, 22px);
   align-items: stretch;
 }
 
-/* Case régulière : même taille fermée ou ouverte */
 .advent-door {
   position: relative;
-  aspect-ratio: 1 / 1.18;
-  min-height: 270px;
+  min-height: 245px;
+  aspect-ratio: 1 / 1.05;
   border: 1px solid rgba(255,255,255,.26);
   border-radius: 24px;
   overflow: hidden;
@@ -160,7 +153,7 @@
   place-items: center;
   align-content: center;
   gap: 10px;
-  padding: 20px;
+  padding: 18px;
   text-align: center;
 }
 
@@ -198,7 +191,7 @@
   position: relative;
   z-index: 1;
   color: #fff8f0;
-  font-size: clamp(52px, 4vw, 78px);
+  font-size: clamp(48px, 4vw, 72px);
   font-weight: 1000;
   line-height: .9;
   letter-spacing: -.06em;
@@ -209,7 +202,7 @@
   position: relative;
   z-index: 1;
   color: #fff8f0;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 1000;
   text-shadow: 0 2px 8px rgba(0,0,0,.34);
 }
@@ -251,6 +244,7 @@
   animation: adventOpen .72s cubic-bezier(.2,.86,.22,1);
 }
 
+/* Ouvert : même case, même taille, contenu dedans */
 .advent-door-opened {
   height: 100%;
   display: grid;
@@ -338,25 +332,23 @@
   100% { transform: perspective(900px) rotateY(0deg) scale(1); }
 }
 
-@media (max-width: 1450px) {
+@media (max-width: 920px) {
   .advent-pro-grid {
-    grid-template-columns: repeat(4, minmax(210px, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .advent-door {
+    min-height: 220px;
   }
 }
 
-@media (max-width: 980px) {
-  .advent-pro-grid {
-    grid-template-columns: repeat(3, minmax(190px, 1fr));
-  }
-}
-
-@media (max-width: 690px) {
+@media (max-width: 660px) {
   .advent-pro-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .advent-door {
-    min-height: 240px;
+    min-height: 210px;
   }
 }
 

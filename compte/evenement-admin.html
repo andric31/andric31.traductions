@@ -74,7 +74,23 @@
     .event-admin-no-event-item.is-selected { border-color:rgba(255,184,77,.55); background:rgba(255,184,77,.10); }
     .event-admin-no-event-item.is-active { box-shadow:0 0 0 1px rgba(255,184,77,.34) inset; }
     .event-admin-no-event-main { margin-top:0; }
-    @media (max-width:850px){ .event-admin-main-actions, .event-admin-stop-actions, .event-admin-grid, .event-admin-row, .event-admin-current, .event-admin-event-item { grid-template-columns:1fr; } .event-admin-cover { width:150px; } .event-admin-game { grid-template-columns:50px 1fr; } .event-admin-game .auth-btn { grid-column:1 / -1; } .event-admin-event-actions { justify-content:stretch; } }
+
+    .event-admin-linked-panel { display:grid; gap:12px; margin:12px 0 14px; padding:14px; border-radius:18px; border:1px solid rgba(92,164,255,.36); background:linear-gradient(135deg, rgba(92,164,255,.10), rgba(255,255,255,.025)); }
+    .event-admin-linked-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap; }
+    .event-admin-linked-title { margin:0; font-size:20px; line-height:1.25; }
+    .event-admin-linked-subtitle { margin:5px 0 0; color:var(--muted); font-size:13px; line-height:1.45; }
+    .event-admin-linked-grid { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:10px; }
+    .event-admin-linked-box { border:1px solid var(--border, var(--auth-border)); border-radius:15px; background:rgba(0,0,0,.10); padding:11px; min-width:0; }
+    .event-admin-linked-box strong { display:block; margin-bottom:5px; }
+    .event-admin-linked-box small { display:block; color:var(--muted); line-height:1.45; }
+    .event-admin-week-preview { display:grid; gap:8px; }
+    .event-admin-week-item { display:grid; grid-template-columns:auto 1fr auto; gap:9px; align-items:center; padding:8px 10px; border-radius:13px; border:1px solid var(--border, var(--auth-border)); background:rgba(255,255,255,.035); }
+    .event-admin-week-date { color:var(--muted); font-size:12px; white-space:nowrap; }
+    .event-admin-week-game { min-width:0; }
+    .event-admin-week-game strong { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .event-admin-week-game small { display:block; color:var(--muted); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .event-admin-choice-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    @media (max-width:850px){ .event-admin-main-actions, .event-admin-stop-actions, .event-admin-grid, .event-admin-row, .event-admin-current, .event-admin-event-item { grid-template-columns:1fr; } .event-admin-cover { width:150px; } .event-admin-linked-grid, .event-admin-game { grid-template-columns:1fr; } .event-admin-game .auth-btn { grid-column:1 / -1; } .event-admin-event-actions { justify-content:stretch; } }
   </style>
 </head>
 <body>
@@ -111,8 +127,12 @@
         <div id="eventsList" class="event-admin-event-list"><div class="event-admin-msg">Chargement de la liste…</div></div>
 
         <form id="eventForm" class="event-admin-card" autocomplete="off">
-          <h2>✅ Actions de l’événement sélectionné</h2>
-          <p class="event-admin-note" id="selectedEventActionNote" style="margin-top:0;">Ces boutons agissent uniquement sur l’événement ouvert dans la liste au-dessus.</p>
+          <h2 id="eventActionTitle">☀️ Gestion de cet événement</h2>
+          <p class="event-admin-note" id="selectedEventActionNote" style="margin-top:0;">Ouvre un événement dans la liste au-dessus pour voir ses réglages et ses choix de jeux.</p>
+
+          <div class="event-admin-linked-panel" id="eventLinkedPanel">
+            <div class="event-admin-msg">Chargement de l’événement sélectionné…</div>
+          </div>
 
           <div class="event-admin-simple-actions">
             <div class="event-admin-action-box">
@@ -120,11 +140,11 @@
               <p class="event-admin-action-desc">Remet l’événement en ligne quand tu veux le relancer.</p>
             </div>
             <div class="event-admin-action-box">
-              <button class="auth-btn primary" id="autoChangeGameBtn" type="button" title="Choisit tout de suite un autre jeu, bloque l’actuel pour éviter qu’il revienne, puis sauvegarde automatiquement dans Cloudflare.">🔄 Changer le jeu maintenant <span class="event-admin-help" tabindex="0" data-tip="Choisit tout de suite un autre jeu compatible avec les mots-clés. Le jeu actuel est ajouté aux blocages pour éviter qu’il soit répété.">?</span></button>
-              <p class="event-admin-action-desc">Change immédiatement le jeu affiché et sauvegarde le choix sur le site.</p>
+              <button class="auth-btn primary" id="autoChangeGameBtn" type="button" title="Choisit tout de suite un autre jeu, bloque l’actuel pour éviter qu’il revienne, puis sauvegarde automatiquement dans Cloudflare.">🔄 Choisir un autre jeu cette semaine <span class="event-admin-help" tabindex="0" data-tip="Choisit tout de suite un autre jeu compatible avec les mots-clés. Le jeu actuel est ajouté aux blocages pour éviter qu’il soit répété.">?</span></button>
+              <p class="event-admin-action-desc">Change le jeu affiché pour la semaine actuelle et sauvegarde le choix sur le site.</p>
             </div>
             <div class="event-admin-action-box">
-              <button class="auth-btn" id="clearForcedBtn" type="button" title="Supprime le jeu forcé manuellement. Le site reprend alors la rotation automatique de l’événement.">🎲 Revenir au choix automatique <span class="event-admin-help" tabindex="0" data-tip="Annule le jeu choisi à la main. Le site choisira ensuite automatiquement selon les mots-clés, le jour de rotation et les jeux déjà bloqués.">?</span></button>
+              <button class="auth-btn" id="clearForcedBtn" type="button" title="Supprime le jeu forcé manuellement. Le site reprend alors la rotation automatique de l’événement.">🎲 Remettre la rotation automatique <span class="event-admin-help" tabindex="0" data-tip="Annule le jeu choisi à la main. Le site choisira ensuite automatiquement selon les mots-clés, le jour de rotation et les jeux déjà bloqués.">?</span></button>
               <p class="event-admin-action-desc">Annule le choix manuel et laisse l’événement choisir seul le jeu.</p>
             </div>
             <div class="event-admin-action-box">
@@ -550,6 +570,110 @@
       $('fileNameHint').textContent = event.id || 'ete-2026';
     }
 
+    function formatDateShort(date) {
+      try { return new Intl.DateTimeFormat('fr-FR', { weekday:'short', day:'2-digit', month:'short' }).format(date); }
+      catch { return date.toLocaleDateString(); }
+    }
+
+    function getNextChangeBoundary(date, event) {
+      const next = getLastChangeBoundary(date, event);
+      if (next.getTime() <= date.getTime()) next.setDate(next.getDate() + 7);
+      return next;
+    }
+
+    function getAutoPoolForPreview(games, event) {
+      const valid = games.filter((g)=>getImage(g)).filter((g)=>buildUrl(g) !== '/');
+      let pool = valid
+        .map((g)=>({ game:g, analysis:analyse(g,event) }))
+        .filter((entry)=>entry.analysis.score > 0)
+        .sort((a,b)=>b.analysis.score-a.analysis.score || getTitle(a.game).localeCompare(getTitle(b.game),'fr'));
+      pool = dedupePool(pool).filter((entry)=>!isBlockedGame(entry.game,event));
+      if (!pool.length && String(event?.fallback_mode || '').trim() === 'weekly_random') {
+        pool = dedupePool(valid.map((g)=>({ game:g, analysis:{ score:0, found:[] } })).sort((a,b)=>getTitle(a.game).localeCompare(getTitle(b.game),'fr')))
+          .filter((entry)=>!isBlockedGame(entry.game,event));
+      }
+      return pool;
+    }
+
+    function renderEventLinkedPanel(event) {
+      const panel = $('eventLinkedPanel');
+      if (!panel) return;
+      const title = $('eventActionTitle');
+      if (title) title.textContent = `${event.icon || event.emoji || '📅'} Gestion : ${event.title || event.id || 'événement'}`;
+
+      const note = $('selectedEventActionNote');
+      if (note) {
+        note.textContent = event.id === 'aucun-evenement'
+          ? 'Cette entrée sert uniquement à afficher la page de pause quand aucun événement n’est actif.'
+          : `Tout ce bloc concerne uniquement l’événement : ${event.id || 'événement sélectionné'}.`;
+      }
+
+      const isNoEvent = String(event.type || event.mode || '').toLowerCase().replace('_','-') === 'no-event' || String(event.id || '') === 'aucun-evenement';
+      if (event.enabled === false || isNoEvent) {
+        panel.innerHTML = `
+          <div class="event-admin-linked-head">
+            <div>
+              <h3 class="event-admin-linked-title">🌙 Aucun événement en cours</h3>
+              <p class="event-admin-linked-subtitle">Cette carte reste volontairement simple : elle affiche juste une page propre de pause.</p>
+            </div>
+            <a class="auth-btn mini" href="/evenements/?test=aucun-evenement" target="_blank" rel="noopener">Tester</a>
+          </div>`;
+        return;
+      }
+
+      const forced = String(event.selected_game_id || event.selected_game_uid || '').trim();
+      const blockedCount = Array.isArray(event.blocked_game_keys) ? event.blocked_game_keys.length : 0;
+      const now = new Date();
+      const nextChange = getNextChangeBoundary(now, event);
+      const currentGame = currentSelection?.game || pickGame(allGames, event).game;
+      const pool = getAutoPoolForPreview(allGames, event);
+      const rotationIndex = getRotationIndex(event);
+      const previews = [];
+      if (!forced && pool.length) {
+        for (let i = 0; i < Math.min(4, pool.length); i++) {
+          const entry = pool[(rotationIndex + i + (hashText(event?.id || event?.title || 'event') % pool.length)) % pool.length];
+          const d = new Date(nextChange);
+          d.setDate(d.getDate() + i * 7);
+          previews.push({ date:d, entry, current:i===0 });
+        }
+      }
+
+      const choiceLabel = forced ? 'Jeu choisi manuellement' : 'Rotation automatique';
+      const currentTitle = currentGame ? getTitle(currentGame) : 'Aucun jeu trouvé';
+      const currentDetail = forced
+        ? 'La rotation automatique est en pause tant que ce jeu est forcé.'
+        : (currentSelection?.reason || 'Le jeu est choisi automatiquement selon les mots-clés.');
+      const weekRows = forced
+        ? '<div class="event-admin-msg">Un jeu est forcé. Clique sur “Remettre la rotation automatique” pour revoir les choix semaine par semaine.</div>'
+        : (previews.map((item)=>`
+            <div class="event-admin-week-item">
+              <span class="event-admin-week-date">${item.current ? 'Cette semaine' : esc(formatDateShort(item.date))}</span>
+              <span class="event-admin-week-game"><strong>${esc(getTitle(item.entry.game))}</strong><small>${item.entry.analysis.found?.length ? `Mots-clés : ${esc(item.entry.analysis.found.join(', '))}` : 'Choix au hasard hebdomadaire'}</small></span>
+              <button class="auth-btn mini" type="button" data-preview-pick-id="${esc(String(item.entry.game.collection || item.entry.game.id || '').trim())}" data-preview-pick-uid="${esc(String(item.entry.game.uid ?? '').trim())}">${item.current ? 'Forcer' : 'Choisir'}</button>
+            </div>`).join('') || '<div class="event-admin-msg err">Aucun choix automatique disponible avec ces réglages.</div>');
+
+      panel.innerHTML = `
+        <div class="event-admin-linked-head">
+          <div>
+            <h3 class="event-admin-linked-title">${esc(event.icon || event.emoji || '📅')} ${esc(event.title || event.id || 'Événement')}</h3>
+            <p class="event-admin-linked-subtitle">Ici, on voit directement ce que cet événement va faire : le jeu affiché, la règle de changement et les prochains choix possibles.</p>
+          </div>
+          <div class="event-admin-choice-actions">
+            <button class="auth-btn mini primary" type="button" id="scrollGamePickerBtn">🎮 Choisir un jeu précis</button>
+            <a class="auth-btn mini" href="/evenements/?test=${encodeURIComponent(event.id || '')}" target="_blank" rel="noopener">Tester</a>
+          </div>
+        </div>
+        <div class="event-admin-linked-grid">
+          <div class="event-admin-linked-box"><strong>🎯 Jeu affiché</strong><small>${esc(currentTitle)}<br>${esc(currentDetail)}</small></div>
+          <div class="event-admin-linked-box"><strong>🔁 Règle actuelle</strong><small>${esc(choiceLabel)}<br>Changement : ${esc(event.change_day || 'monday')} à ${esc(String(event.change_hour ?? 0))}h</small></div>
+          <div class="event-admin-linked-box"><strong>🧱 Anti-répétition</strong><small>${blockedCount} jeu(x) bloqué(s)<br>${esc(event.fallback_mode === 'weekly_random' ? 'Si aucun mot-clé ne correspond : hasard hebdomadaire' : 'Si aucun mot-clé ne correspond : rien affiché')}</small></div>
+        </div>
+        <div>
+          <strong>📆 Choix prévus par semaine</strong>
+          <div class="event-admin-week-preview" style="margin-top:8px;">${weekRows}</div>
+        </div>`;
+    }
+
     function formEvent() {
       const next = { ...(activeEvent || {}) };
       next.id = $('eventId').value.trim() || next.id || 'ete-2026';
@@ -573,6 +697,7 @@
       const isNoEvent = String(event.type || event.mode || '').toLowerCase().replace('_','-') === 'no-event' || String(event.id || '') === 'aucun-evenement';
       if (event.enabled === false || isNoEvent) {
         currentSelection = { game: null, reason: 'Page aucun événement.', score: 0 };
+        renderEventLinkedPanel(event);
         $('currentGame').innerHTML = `
           <div class="event-admin-disabled-card">
             <h3>🌙 Aucun événement en cours</h3>
@@ -583,6 +708,7 @@
       }
 
       currentSelection = pickGame(allGames, event);
+      renderEventLinkedPanel(event);
       const game = currentSelection.game;
       if (!game) {
         $('currentGame').innerHTML = '<div class="event-admin-msg err">Aucun jeu sélectionné avec ces réglages.</div>';
@@ -717,6 +843,26 @@
     $('autoChangeGameBtn')?.addEventListener('click', () => changeGameAutomatically().catch((err)=>{ $('jsonMsg').textContent = err?.message || 'Erreur.'; $('jsonMsg').className = 'event-admin-msg err'; }));
     $('saveEventBtn')?.addEventListener('click', () => { renderCurrent(); saveEventToSite(formEvent()).catch((err)=>{ $('jsonMsg').textContent = err?.message || 'Sauvegarde impossible.'; $('jsonMsg').className = 'event-admin-msg err'; }); });
     document.addEventListener('click', (e) => {
+      const scrollPicker = e.target.closest('#scrollGamePickerBtn');
+      if (scrollPicker) {
+        const search = $('gameSearch');
+        search?.scrollIntoView({ behavior:'smooth', block:'center' });
+        setTimeout(()=>search?.focus(), 350);
+        return;
+      }
+      const previewPick = e.target.closest('[data-preview-pick-id]');
+      if (previewPick) {
+        $('selectedId').value = previewPick.dataset.previewPickId || '';
+        $('selectedUid').value = previewPick.dataset.previewPickUid || '';
+        renderCurrent();
+        const pickedName = currentSelection?.game ? getTitle(currentSelection.game) : 'jeu choisi';
+        saveEventToSite(formEvent(), `Jeu forcé pour cet événement et sauvegardé : ${pickedName}.`).catch((err)=>{
+          $('jsonMsg').textContent = err?.message || 'Sauvegarde impossible.';
+          $('jsonMsg').className = 'event-admin-msg err';
+        });
+        window.scrollTo({ top:0, behavior:'smooth' });
+        return;
+      }
       if (e.target.closest('#reactivateCurrentEventBtn')) {
         const next = formEvent();
         next.enabled = true;

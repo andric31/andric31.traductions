@@ -278,6 +278,25 @@
     return `${y}-${m}-${d}`;
   }
 
+  function parseDateOnly(value) {
+    const parts = String(value || '').slice(0, 10).split('-').map((part) => parseInt(part, 10));
+    if (parts.length !== 3 || parts.some((part) => !Number.isFinite(part))) return null;
+    return new Date(parts[0], parts[1] - 1, parts[2]);
+  }
+
+  function getCalendarFirstWeek(event) {
+    const eventId = String(event?.id || '').trim();
+    if (eventId === 'ete-2026') return new Date(2026, 5, 8);
+    const configuredStart = parseDateOnly(event?.start_at);
+    return getLastChangeBoundary(configuredStart || new Date(new Date().getFullYear(), 0, 1), event);
+  }
+
+  function getCalendarWeekIndex(event, date = new Date()) {
+    const first = getLastChangeBoundary(getCalendarFirstWeek(event), event);
+    const current = getLastChangeBoundary(date, event);
+    return Math.max(0, Math.floor((current.getTime() - first.getTime()) / WEEK_MS));
+  }
+
   function getWeeklyOverride(event, weekKey) {
     const overrides = event?.weekly_overrides;
     if (!overrides || typeof overrides !== 'object' || !weekKey) return null;
@@ -483,7 +502,7 @@
 
     // Important : on utilise toute la liste de candidats au thème, pas seulement le petit groupe de tête.
     // Comme ça, le jeu avance vraiment à chaque changement hebdomadaire au lieu de pouvoir retomber sur le même.
-    const rotationIndex = getRotationIndex(event);
+    const rotationIndex = getCalendarWeekIndex(event);
     const eventOffset = getCalendarSeedOffset(event, rotationPool.length);
     const selected = rotationPool[(rotationIndex + eventOffset) % rotationPool.length];
 
@@ -679,7 +698,7 @@
     const baseEvent = eventUrl ? await fetchJson(eventUrl, null) : null;
     // En mode test, on affiche le fichier de l’événement tel qu’il est déployé,
     // sans le mélanger avec une ancienne sauvegarde Cloudflare.
-    let event = baseEvent ? (normalizedTestId ? baseEvent : await loadSavedEvent(baseEvent)) : null;
+    let event = baseEvent ? await loadSavedEvent(baseEvent) : null;
 
     if (normalizedTestId && event) {
       event = { ...event, enabled: true, status_label: isNoEventMode(event) ? (event.status_label || 'Pause événement') : 'Mode test admin' };

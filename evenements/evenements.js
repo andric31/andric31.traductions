@@ -269,6 +269,36 @@
     return boundary;
   }
 
+
+
+  function weekKeyFromDate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  function getWeeklyOverride(event, weekKey) {
+    const overrides = event?.weekly_overrides;
+    if (!overrides || typeof overrides !== 'object' || !weekKey) return null;
+    const item = overrides[weekKey];
+    return item && typeof item === 'object' ? item : null;
+  }
+
+  function findGameByRef(games, ref) {
+    const wantedId = String(ref?.id || ref?.selected_game_id || '').trim();
+    const wantedUid = String(ref?.uid || ref?.selected_game_uid || '').trim();
+    if (!wantedId && !wantedUid) return null;
+    return games.find((g) => {
+      const gameId = String(g.id || '').trim();
+      const collection = String(g.collection || '').trim();
+      const uid = String(g.uid ?? '').trim();
+      const idOk = !wantedId || gameId === wantedId || collection === wantedId;
+      const uidOk = !wantedUid || uid === wantedUid;
+      return idOk && uidOk;
+    }) || null;
+  }
+
   function getNextChangeDate(event) {
     const next = getLastChangeBoundary(new Date(), event);
     next.setDate(next.getDate() + 7);
@@ -365,13 +395,25 @@
   function pickGame(games, event) {
     if (!games.length) return { game: null, reason: '', summary: '', tags: [] };
 
+    // Priorité au changement manuel de la semaine en cours.
+    // Comme ça, si tu changes uniquement la semaine du 08/15/22...,
+    // la page publique affiche le même jeu que l'admin pour cette semaine.
+    const currentWeekKey = weekKeyFromDate(getLastChangeBoundary(new Date(), event));
+    const weeklyForced = findGameByRef(games, getWeeklyOverride(event, currentWeekKey));
+    if (weeklyForced) {
+      return {
+        game: weeklyForced,
+        reason: '',
+        summary: getGameDescription(weeklyForced),
+        tags: getGameTags(weeklyForced),
+        matchedKeywords: []
+      };
+    }
+
     const wantedId = String(event.selected_game_id || '').trim();
     const wantedUid = String(event.selected_game_uid || '').trim();
     if (wantedId || wantedUid) {
-      const forced = games.find((g) =>
-        (!wantedId || String(g.id || '').trim() === wantedId || String(g.collection || '').trim() === wantedId) &&
-        (!wantedUid || String(g.uid ?? '').trim() === wantedUid)
-      );
+      const forced = findGameByRef(games, { id: wantedId, uid: wantedUid });
       if (forced) {
         return {
           game: forced,

@@ -39,7 +39,6 @@
     .event-admin-game img, .event-admin-game .placeholder { width:58px; height:76px; object-fit:cover; border-radius:10px; background:rgba(255,255,255,.06); display:grid; place-items:center; }
     .event-admin-game strong { display:block; line-height:1.25; }
     .event-admin-game small { color:var(--muted); display:block; margin-top:4px; }
-    .event-admin-json { min-height:260px; font-family:ui-monospace, SFMono-Regular, Consolas, monospace; font-size:12px; line-height:1.45; white-space:pre; }
     .event-admin-msg { margin-top:10px; color:var(--muted); font-size:13px; }
     .event-admin-msg.ok { color:#7ee0a1; }
     .event-admin-msg.err { color:#ff8a8a; }
@@ -154,10 +153,6 @@
             <div class="event-admin-action-box">
               <button class="auth-btn" id="saveEventBtn" type="button" title="Sauvegarde uniquement les changements faits dans les réglages avancés : titre, texte, jour, heure et mots-clés.">💾 Enregistrer le titre / texte <span class="event-admin-help" tabindex="0" data-tip="À utiliser seulement après avoir modifié les réglages avancés : titre, texte affiché, jour de changement, heure ou mots-clés.">?</span></button>
               <p class="event-admin-action-desc">Sauvegarde les textes et règles si tu les as modifiés plus bas.</p>
-            </div>
-            <div class="event-admin-action-box">
-              <a class="auth-btn primary" href="/evenements/" target="_blank" rel="noopener" title="Ouvre la page événement visible par les visiteurs pour vérifier le résultat.">👀 Voir la page publique <span class="event-admin-help" tabindex="0" data-tip="Ouvre la vraie page événement dans un nouvel onglet pour vérifier ce que les visiteurs voient.">?</span></a>
-              <p class="event-admin-action-desc">Permet de vérifier le résultat après une modification.</p>
             </div>
           </div>
 
@@ -626,12 +621,13 @@
       const now = new Date();
       const nextChange = getNextChangeBoundary(now, event);
       const currentGame = currentSelection?.game || pickGame(allGames, event).game;
-      const pool = getAutoPoolForPreview(allGames, event);
-      const rotationIndex = getRotationIndex(event);
+      const autoEvent = { ...event, selected_game_id:'', selected_game_uid:'' };
+      const pool = getAutoPoolForPreview(allGames, autoEvent);
+      const rotationIndex = getRotationIndex(autoEvent);
       const previews = [];
-      if (!forced && pool.length) {
-        for (let i = 0; i < Math.min(4, pool.length); i++) {
-          const entry = pool[(rotationIndex + i + (hashText(event?.id || event?.title || 'event') % pool.length)) % pool.length];
+      if (pool.length) {
+        for (let i = 0; i < Math.min(6, pool.length); i++) {
+          const entry = pool[(rotationIndex + i + (hashText(autoEvent?.id || autoEvent?.title || 'event') % pool.length)) % pool.length];
           const d = new Date(nextChange);
           d.setDate(d.getDate() + i * 7);
           previews.push({ date:d, entry, current:i===0 });
@@ -641,22 +637,20 @@
       const choiceLabel = forced ? 'Jeu choisi manuellement' : 'Rotation automatique';
       const currentTitle = currentGame ? getTitle(currentGame) : 'Aucun jeu trouvé';
       const currentDetail = forced
-        ? 'La rotation automatique est en pause tant que ce jeu est forcé.'
+        ? 'Jeu forcé manuellement. Le calendrier automatique reste affiché dessous pour suivre la rotation prévue.'
         : (currentSelection?.reason || 'Le jeu est choisi automatiquement selon les mots-clés.');
-      const weekRows = forced
-        ? '<div class="event-admin-msg">Un jeu est forcé. Clique sur “Remettre la rotation automatique” pour revoir les choix semaine par semaine.</div>'
-        : (previews.map((item)=>`
+      const weekRows = previews.map((item)=>`
             <div class="event-admin-week-item">
               <span class="event-admin-week-date">${item.current ? 'Cette semaine' : esc(formatDateShort(item.date))}</span>
               <span class="event-admin-week-game"><strong>${esc(getTitle(item.entry.game))}</strong><small>${item.entry.analysis.found?.length ? `Mots-clés : ${esc(item.entry.analysis.found.join(', '))}` : 'Choix au hasard hebdomadaire'}</small></span>
-              <button class="auth-btn mini" type="button" data-preview-pick-id="${esc(String(item.entry.game.collection || item.entry.game.id || '').trim())}" data-preview-pick-uid="${esc(String(item.entry.game.uid ?? '').trim())}">${item.current ? 'Forcer' : 'Choisir'}</button>
-            </div>`).join('') || '<div class="event-admin-msg err">Aucun choix automatique disponible avec ces réglages.</div>');
+              <button class="auth-btn mini" type="button" data-preview-pick-id="${esc(String(item.entry.game.collection || item.entry.game.id || '').trim())}" data-preview-pick-uid="${esc(String(item.entry.game.uid ?? '').trim())}">${item.current ? 'Afficher ce jeu' : 'Choisir'}</button>
+            </div>`).join('') || '<div class="event-admin-msg err">Aucun choix automatique disponible avec ces réglages.</div>';
 
       panel.innerHTML = `
         <div class="event-admin-linked-head">
           <div>
             <h3 class="event-admin-linked-title">${esc(event.icon || event.emoji || '📅')} ${esc(event.title || event.id || 'Événement')}</h3>
-            <p class="event-admin-linked-subtitle">Ici, on voit directement ce que cet événement va faire : le jeu affiché, la règle de changement et les prochains choix possibles.</p>
+            <p class="event-admin-linked-subtitle">Ici, on voit le jeu affiché maintenant, mais aussi le calendrier automatique qui reste toujours visible pour suivre les choix semaine par semaine.</p>
           </div>
           <div class="event-admin-choice-actions">
             <button class="auth-btn mini primary" type="button" id="scrollGamePickerBtn">🎮 Choisir un jeu précis</button>
@@ -669,7 +663,7 @@
           <div class="event-admin-linked-box"><strong>🧱 Anti-répétition</strong><small>${blockedCount} jeu(x) bloqué(s)<br>${esc(event.fallback_mode === 'weekly_random' ? 'Si aucun mot-clé ne correspond : hasard hebdomadaire' : 'Si aucun mot-clé ne correspond : rien affiché')}</small></div>
         </div>
         <div>
-          <strong>📆 Choix prévus par semaine</strong>
+          <strong>📆 Calendrier automatique de l’événement</strong>
           <div class="event-admin-week-preview" style="margin-top:8px;">${weekRows}</div>
         </div>`;
     }
@@ -930,22 +924,6 @@
         $('jsonMsg').className = 'event-admin-msg err';
       });
       window.scrollTo({ top:0, behavior:'smooth' });
-    });
-    $('copyJsonBtn')?.addEventListener('click', async () => {
-      renderCurrent();
-      try { await navigator.clipboard.writeText($('jsonOutput').value); $('jsonMsg').textContent='JSON copié.'; $('jsonMsg').className='event-admin-msg ok'; }
-      catch { $('jsonOutput').select(); document.execCommand('copy'); $('jsonMsg').textContent='JSON copié.'; $('jsonMsg').className='event-admin-msg ok'; }
-    });
-    $('downloadJsonBtn')?.addEventListener('click', () => {
-      renderCurrent();
-      const name = `${($('eventId').value.trim() || 'evenement')}.json`;
-      const blob = new Blob([$('jsonOutput').value], { type:'application/json;charset=utf-8' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = name;
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
-      $('jsonMsg').textContent=`Fichier ${name} téléchargé.`; $('jsonMsg').className='event-admin-msg ok';
     });
 
     let eventAdminInitStarted = false;

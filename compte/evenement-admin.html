@@ -141,6 +141,10 @@
               <button class="auth-btn" id="saveEventBtn" type="button" title="Sauvegarde uniquement les changements faits dans les réglages avancés : titre, texte, jour, heure et mots-clés.">💾 Enregistrer le titre / texte <span class="event-admin-help" tabindex="0" data-tip="À utiliser seulement après avoir modifié les réglages avancés : titre, texte affiché, jour de changement, heure ou mots-clés.">?</span></button>
               <p class="event-admin-action-desc">Sauvegarde les textes et règles si tu les as modifiés plus bas.</p>
             </div>
+            <div class="event-admin-action-box">
+              <button class="auth-btn" id="regenerateCalendarBtn" type="button" title="Supprime les jeux changés manuellement semaine par semaine et recrée une rotation automatique différente.">🔄 Refaire le calendrier automatiquement <span class="event-admin-help" tabindex="0" data-tip="Remet toutes les semaines en automatique et génère un nouvel ordre de rotation. À utiliser si le calendrier ne te plaît pas.">?</span></button>
+              <p class="event-admin-action-desc">Recrée les choix automatiques de toutes les semaines.</p>
+            </div>
           </div>
 
           <div id="jsonMsg" class="event-admin-msg"></div>
@@ -543,6 +547,12 @@
       return games.find((g)=>(!wantedId || String(g.id||'').trim()===wantedId || String(g.collection||'').trim()===wantedId) && (!wantedUid || String(g.uid??'').trim()===wantedUid)) || null;
     }
 
+    function getCalendarSeedOffset(event, poolLength) {
+      if (!poolLength) return 0;
+      const seedValue = String(event?.calendar_seed || event?.rotation_seed || event?.id || event?.title || 'event').trim();
+      return hashText(seedValue) % poolLength;
+    }
+
     function buildEventCalendarPreview(pool, event) {
       if (!pool.length) return [];
       const eventId = String(event?.id || '').trim();
@@ -550,7 +560,7 @@
       const end = eventId === 'ete-2026' ? new Date(2026, 7, 31) : (parseDateOnly(event.end_at) || (()=>{ const d = new Date(start); d.setDate(d.getDate() + 35); return d; })());
       const first = getLastChangeBoundary(start, event);
       if (first.getTime() < start.getTime()) first.setDate(first.getDate() + 7);
-      const seed = hashText(event?.id || event?.title || 'event') % pool.length;
+      const seed = getCalendarSeedOffset(event, pool.length);
       const rotationIndex = getRotationIndex(event);
       const rows = [];
       for (let i = 0, d = new Date(first); d.getTime() <= end.getTime() && i < 20; i++, d.setDate(d.getDate() + 7)) {
@@ -745,6 +755,22 @@
       await saveEventToSite(formEvent(), `Jeu affiché maintenant changé et sauvegardé : ${pickedName}.`);
     }
 
+    async function regenerateAutomaticCalendar() {
+      const ok = confirm('Refaire automatiquement tout le calendrier ?\n\nLes jeux changés manuellement semaine par semaine seront supprimés pour cet événement, puis un nouvel ordre automatique sera généré.');
+      if (!ok) return;
+      const event = formEvent();
+      event.selected_game_id = '';
+      event.selected_game_uid = '';
+      event.weekly_overrides = {};
+      event.calendar_seed = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      selectedWeekKey = '';
+      $('selectedId').value = '';
+      $('selectedUid').value = '';
+      activeEvent = { ...(activeEvent || {}), ...event };
+      renderCurrent();
+      await saveEventToSite(event, 'Calendrier automatique refait et sauvegardé.');
+    }
+
     async function init() {
       if (window.__ensureEventAdminPage && !window.__ensureEventAdminPage()) return;
       const config = await fetchJson('/evenements/config.json', { event_actif:'ete-2026', event_files:['ete-2026'] });
@@ -790,6 +816,7 @@
 
 
     $('saveEventBtn')?.addEventListener('click', () => { renderCurrent(); saveEventToSite(formEvent()).catch((err)=>{ $('jsonMsg').textContent = err?.message || 'Sauvegarde impossible.'; $('jsonMsg').className = 'event-admin-msg err'; }); });
+    $('regenerateCalendarBtn')?.addEventListener('click', () => { regenerateAutomaticCalendar().catch((err)=>{ $('jsonMsg').textContent = err?.message || 'Calendrier impossible à refaire.'; $('jsonMsg').className = 'event-admin-msg err'; }); });
     document.addEventListener('click', (e) => {
       const scrollPicker = e.target.closest('#scrollGamePickerBtn');
       if (scrollPicker) {

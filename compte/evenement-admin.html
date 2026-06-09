@@ -105,9 +105,9 @@
           <div class="event-admin-action-box event-admin-stop-box event-admin-no-event-main">
             <div class="event-admin-stop-actions">
               <button class="auth-btn danger" id="globalNoEventBtn" type="button" title="Applique le mode sans événement public. Les visiteurs verront qu’il n’y a aucun événement en cours.">🚫 Appliquer aucun événement en cours <span class="event-admin-help" tabindex="0" data-tip="À utiliser quand tu ne veux plus afficher d’événement sur la page publique. Ça sauvegarde l’état dans Cloudflare, sans supprimer tes fichiers événement.">?</span></button>
-              <a class="auth-btn primary" id="eventTestNoEventBtn" href="/evenements/?test=none" target="_blank" rel="noopener" title="Ouvre la page publique en mode test sans événement actif.">🧪 Tester aucun événement en cours <span class="event-admin-help" tabindex="0" data-tip="Ouvre /evenements/?test=none pour vérifier l’affichage quand aucun événement n’est actif, sans modifier Cloudflare.">?</span></a>
+              <a class="auth-btn primary" id="eventTestNoEventBtn" href="/evenements/?test=aucun-evenement" target="_blank" rel="noopener" title="Ouvre la page publique en mode test sans événement actif.">🧪 Tester la page aucun événement <span class="event-admin-help" tabindex="0" data-tip="Ouvre /evenements/?test=aucun-evenement pour vérifier la jolie page “aucun événement en cours”, sans modifier Cloudflare.">?</span></a>
             </div>
-            <p class="event-admin-action-desc">Appliquer sauvegarde l’état dans Cloudflare. Tester ouvre la page publique comme si aucun événement n’était actif, sans rien modifier.</p>
+            <p class="event-admin-action-desc">Appliquer met officiellement la page “aucun événement en cours”. Tester ouvre cette même page sans rien modifier.</p>
           </div>
         </div>
         <div id="eventsList" class="event-admin-event-list"><div class="event-admin-msg">Chargement de la liste…</div></div>
@@ -328,13 +328,16 @@
       const savedActiveId = String(activeState.active_event || '').trim();
       const defaultActiveId = String(configDefaultEventId || '').trim();
       const activeId = activeState.enabled === false ? '' : (savedActiveId || defaultActiveId);
-      const activeLabel = activeState.enabled && activeId
-        ? `✅ Événement en cours : ${activeId}${savedActiveId ? ' (sauvegardé)' : ' (depuis config.json)'}`
-        : '🚫 Aucun événement en cours';
+      const isNoEventActive = activeState.enabled && activeId === 'aucun-evenement';
+      const activeLabel = isNoEventActive
+        ? '🌙 Page aucun événement en cours appliquée'
+        : (activeState.enabled && activeId
+          ? `✅ Événement en cours : ${activeId}${savedActiveId ? ' (sauvegardé)' : ' (depuis config.json)'}`
+          : '🚫 Aucun événement en cours');
       const banner = $('activeEventState');
       if (banner) {
         banner.textContent = activeLabel;
-        banner.className = `event-admin-active-banner ${activeState.enabled && activeId ? '' : 'off'}`;
+        banner.className = `event-admin-active-banner ${activeState.enabled && activeId && !isNoEventActive ? '' : 'off'}`;
       }
       const selectedId = activeEvent?.id || '';
       const note = $('selectedEventActionNote');
@@ -551,13 +554,14 @@
       $('fileNameHint').textContent = event.id || 'ete-2026';
       $('jsonOutput').value = JSON.stringify(event, null, 2);
 
-      if (event.enabled === false) {
-        currentSelection = { game: null, reason: 'Événement désactivé.', score: 0 };
+      const isNoEvent = String(event.type || event.mode || '').toLowerCase().replace('_','-') === 'no-event' || String(event.id || '') === 'aucun-evenement';
+      if (event.enabled === false || isNoEvent) {
+        currentSelection = { game: null, reason: 'Page aucun événement.', score: 0 };
         $('currentGame').innerHTML = `
           <div class="event-admin-disabled-card">
-            <h3>🚫 Aucun événement en cours</h3>
-            <p class="event-admin-note" style="margin:0 0 12px;">La page publique affichera : <strong>Aucun événement actif pour le moment.</strong></p>
-            <button class="auth-btn primary" id="reactivateCurrentEventBtn" type="button">✅ Réactiver l’événement</button>
+            <h3>🌙 Aucun événement en cours</h3>
+            <p class="event-admin-note" style="margin:0 0 12px;">Cette entrée affiche une page propre quand aucun événement saisonnier n’est actif.</p>
+            <a class="auth-btn primary" href="/evenements/?test=aucun-evenement" target="_blank" rel="noopener">🧪 Tester cette page</a>
           </div>`;
         return;
       }
@@ -621,7 +625,7 @@
       await loadEventCatalog(config);
       renderEventsList();
 
-      const eventId = String((activeState.enabled === false ? '' : activeState.active_event) || configDefaultEventId || eventCatalog[0]?.id || 'ete-2026').trim() || 'ete-2026';
+      const eventId = String((activeState.enabled === false ? 'aucun-evenement' : activeState.active_event) || configDefaultEventId || eventCatalog[0]?.id || 'ete-2026').trim() || 'ete-2026';
       await selectEvent(eventId);
       $('eventMsg').textContent = `Événement chargé : ${eventId}. Chargement de la liste des jeux…`;
       $('eventMsg').className = 'event-admin-msg ok';
@@ -644,11 +648,11 @@
 
     $('eventForm')?.addEventListener('submit', (e) => { e.preventDefault(); renderCurrent(); $('jsonMsg').textContent = 'Prévisualisation mise à jour.'; $('jsonMsg').className = 'event-admin-msg ok'; });
     async function setNoEventInProgress() {
-      const ok = confirm('Mettre le site en mode “aucun événement en cours” ?\n\nLes visiteurs ne verront plus d’événement, mais tes réglages seront gardés.');
+      const ok = confirm('Appliquer la page “aucun événement en cours” ?\n\nLes visiteurs verront une jolie page de pause, sans événement saisonnier actif.');
       if (!ok) return;
       try {
-        await saveActiveState('', false);
-        $('jsonMsg').textContent = 'Aucun événement en cours : sauvegardé.';
+        await saveActiveState('aucun-evenement', true);
+        $('jsonMsg').textContent = 'Page “aucun événement en cours” appliquée et sauvegardée.';
         $('jsonMsg').className = 'event-admin-msg ok';
       } catch (err) {
         $('jsonMsg').textContent = err?.message || 'Désactivation impossible.';

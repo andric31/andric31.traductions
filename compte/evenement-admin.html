@@ -93,6 +93,17 @@
     .event-admin-week-game strong { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .event-admin-week-game small { display:block; color:var(--muted); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .event-admin-choice-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    @media (max-width:850px){ .event-admin-advent-grid { grid-template-columns:repeat(3, minmax(0, 1fr)); } .event-admin-advent-fields { grid-template-columns:1fr; } }
+
+    .event-admin-advent-grid { display:grid; grid-template-columns:repeat(6, minmax(0, 1fr)); gap:10px; margin-top:10px; }
+    .event-admin-advent-day { border:1px solid var(--border, var(--auth-border)); background:rgba(255,255,255,.035); border-radius:14px; min-height:86px; padding:9px; display:grid; gap:5px; align-content:start; }
+    .event-admin-advent-day.is-filled { border-color:rgba(126,224,161,.42); background:rgba(126,224,161,.08); }
+    .event-admin-advent-day.is-empty { opacity:.76; }
+    .event-admin-advent-day strong { font-size:18px; }
+    .event-admin-advent-day small { color:var(--muted); line-height:1.3; }
+    .event-admin-advent-editor { display:grid; gap:10px; margin-top:12px; padding:12px; border-radius:16px; border:1px solid rgba(255,184,77,.35); background:rgba(255,184,77,.07); }
+    .event-admin-advent-editor h4 { margin:0; }
+    .event-admin-advent-fields { display:grid; grid-template-columns:80px 1fr 1fr; gap:10px; }
     @media (max-width:850px){ .event-admin-main-actions, .event-admin-stop-actions, .event-admin-grid, .event-admin-row, .event-admin-current, .event-admin-event-item, .event-admin-week-item { grid-template-columns:1fr; } .event-admin-cover { width:150px; } .event-admin-week-thumb { width:100%; height:120px; } .event-admin-linked-grid, .event-admin-game { grid-template-columns:1fr; } .event-admin-game .auth-btn { grid-column:1 / -1; } .event-admin-event-actions { justify-content:stretch; } }
   </style>
 </head>
@@ -223,6 +234,7 @@
     let allGames = [];
     let currentSelection = null;
     let selectedWeekKey = ''; // semaine ciblée quand on clique sur Changer dans le calendrier
+    let selectedAdventDay = 1; // case ciblée pour le calendrier de l’avent
 
     const $ = (id) => document.getElementById(id);
     const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -241,12 +253,33 @@
       finally { clearTimeout(timer); }
     }
 
+
+    function looksLikeAdventEventRaw(event) {
+      const type = norm(event?.type || event?.mode || '');
+      const id = String(event?.id || '').toLowerCase();
+      return type.includes('advent') || id.includes('avent');
+    }
+    function isRealAdventDay(item) {
+      if (!item || typeof item !== 'object') return false;
+      const title = String(item.title || '').trim();
+      return item.locked === false || !!String(item.imageUrl || item.image || item.f95 || item.f95_url || item.mega || item.mega_url || '').trim() || (title && !title.startsWith('Surprise du jour'));
+    }
+    function mergeAdventDays(baseEvent, savedEvent) {
+      if (!looksLikeAdventEventRaw(baseEvent)) return { ...baseEvent, ...savedEvent };
+      const baseDays = Array.isArray(baseEvent.days) ? baseEvent.days : [];
+      const savedDays = Array.isArray(savedEvent.days) ? savedEvent.days : [];
+      const byDay = new Map();
+      baseDays.forEach((item) => { const day = parseInt(item?.day, 10); if (day) byDay.set(day, item); });
+      savedDays.forEach((item) => { const day = parseInt(item?.day, 10); if (day && isRealAdventDay(item)) byDay.set(day, item); });
+      return { ...baseEvent, ...savedEvent, id: baseEvent.id || savedEvent.id, type: baseEvent.type || savedEvent.type, css: baseEvent.css || savedEvent.css, days: Array.from({ length: 24 }, (_, i) => byDay.get(i + 1) || { day: i + 1, title: `Surprise du jour ${i + 1}`, text: 'À remplir plus tard.', locked: true }) };
+    }
+
     async function loadSavedEvent(baseEvent) {
       const id = String(baseEvent?.id || '').trim();
       if (!id) return baseEvent;
       const saved = await fetchJson(`/api/evenement?id=${encodeURIComponent(id)}`, null);
       if (saved?.ok && saved.event && typeof saved.event === 'object') {
-        return { ...baseEvent, ...saved.event };
+        return mergeAdventDays(baseEvent, saved.event);
       }
       return baseEvent;
     }
@@ -610,6 +643,74 @@
       return pool;
     }
 
+
+    function isAdventEvent(event) {
+      const type = norm(event?.type || event?.mode || '');
+      const id = String(event?.id || '').trim();
+      return type.includes('advent') || id.includes('avent');
+    }
+
+    function normalizeAdventDays(event) {
+      const raw = Array.isArray(event?.days) ? event.days : [];
+      const byDay = new Map();
+      raw.forEach((item) => {
+        const day = Math.min(24, Math.max(1, parseInt(item?.day, 10) || 0));
+        if (day) byDay.set(day, { ...item, day });
+      });
+      return Array.from({ length: 24 }, (_, i) => byDay.get(i + 1) || { day: i + 1, title: `Surprise du jour ${i + 1}`, text: 'À remplir plus tard.', locked: true });
+    }
+
+    function getAdventDay(event, day) {
+      return normalizeAdventDays(event).find((item) => Number(item.day) === Number(day)) || null;
+    }
+
+    function setAdventDay(event, day, patch) {
+      const days = normalizeAdventDays(event).map((item) => Number(item.day) === Number(day) ? { ...item, ...patch, day } : item);
+      return { ...event, days };
+    }
+
+    function renderAdventPanel(event) {
+      const panel = $('eventLinkedPanel');
+      if (!panel) return;
+      const days = normalizeAdventDays(event);
+      const selected = getAdventDay(event, selectedAdventDay) || days[0];
+      const boxes = days.map((d) => {
+        const filled = String(d.title || '').trim() && !String(d.title || '').startsWith('Surprise du jour') && d.locked !== true;
+        return `<button class="event-admin-advent-day ${filled ? 'is-filled' : 'is-empty'} ${Number(d.day) === Number(selectedAdventDay) ? 'is-selected-week' : ''}" type="button" data-advent-select="${esc(d.day)}">
+          <strong>${esc(d.day)}</strong>
+          <small>${esc(filled ? (d.title || 'Case remplie') : 'À remplir')}</small>
+        </button>`;
+      }).join('');
+      panel.innerHTML = `
+        <div class="event-admin-linked-head">
+          <div>
+            <h3 class="event-admin-linked-title">${esc(event.icon || '🗓️')} ${esc(event.title || 'Calendrier de l’avent')}</h3>
+            <p class="event-admin-linked-subtitle">Calendrier de l’avent séparé de l’été : 24 cases, une par jour. Les anciennes cases restent accessibles côté public.</p>
+          </div>
+        </div>
+        <div>
+          <strong>🎁 Les 24 cases</strong>
+          <div class="event-admin-advent-grid">${boxes}</div>
+        </div>
+        <div class="event-admin-advent-editor">
+          <h4>✏️ Case ${esc(selectedAdventDay)}</h4>
+          <div class="event-admin-advent-fields">
+            <label class="auth-label"><span>Jour</span><input class="auth-input" id="adventDayInput" type="number" min="1" max="24" value="${esc(selected.day)}"></label>
+            <label class="auth-label"><span>Titre</span><input class="auth-input" id="adventTitleInput" value="${esc(selected.title || '')}" placeholder="Titre du jeu"></label>
+            <label class="auth-label"><span>Image</span><input class="auth-input" id="adventImageInput" value="${esc(selected.imageUrl || selected.image || '')}" placeholder="https://..."></label>
+          </div>
+          <div class="event-admin-advent-fields">
+            <label class="auth-label"><span>F95Zone</span><input class="auth-input" id="adventF95Input" value="${esc(selected.f95 || selected.f95_url || '')}" placeholder="https://f95zone.to/..."></label>
+            <label class="auth-label"><span>Mega</span><input class="auth-input" id="adventMegaInput" value="${esc(selected.mega || selected.mega_url || '')}" placeholder="https://mega.nz/..."></label>
+            <label class="auth-label"><span>Texte</span><input class="auth-input" id="adventTextInput" value="${esc(selected.text || '')}" placeholder="Texte court"></label>
+          </div>
+          <div class="event-admin-choice-actions">
+            <button class="auth-btn mini" id="saveAdventDayBtn" type="button">💾 Enregistrer cette case</button>
+            <a class="auth-btn mini" href="/evenements/?test=${encodeURIComponent(event.id || 'calendrier-avent-2025')}" target="_blank" rel="noopener">Tester</a>
+          </div>
+        </div>`;
+    }
+
     function renderEventLinkedPanel(event) {
       const panel = $('eventLinkedPanel');
       if (!panel) return;
@@ -627,6 +728,11 @@
             </div>
             <a class="auth-btn mini" href="/evenements/?test=aucun-evenement" target="_blank" rel="noopener">Tester</a>
           </div>`;
+        return;
+      }
+
+      if (isAdventEvent(event)) {
+        renderAdventPanel(event);
         return;
       }
 
@@ -682,6 +788,7 @@
       next.selection_keywords = $('keywords').value.split(',').map((s)=>s.trim()).filter(Boolean);
       next.fallback_mode = $('fallbackMode').value;
       next.blocked_game_keys = $('blockedGameKeys').value.split(/[\n,]+/).map((s)=>s.trim()).filter(Boolean);
+      if (isAdventEvent(next)) next.days = normalizeAdventDays(next);
       return next;
     }
 
@@ -700,6 +807,13 @@
             <p class="event-admin-note" style="margin:0 0 12px;">Cette entrée affiche une page propre quand aucun événement saisonnier n’est actif.</p>
             <a class="auth-btn primary" href="/evenements/?test=aucun-evenement" target="_blank" rel="noopener">🧪 Tester cette page</a>
           </div>`;
+        return;
+      }
+
+      if (isAdventEvent(event)) {
+        currentSelection = { game: null, reason: 'Calendrier de l’avent.', score: 0 };
+        renderEventLinkedPanel(event);
+        $('currentGame').innerHTML = '';
         return;
       }
 
@@ -776,6 +890,7 @@
       const ok = confirm('Refaire automatiquement tout le calendrier ?\n\nLes jeux changés manuellement semaine par semaine seront supprimés pour cet événement, puis un nouvel ordre automatique sera généré.');
       if (!ok) return;
       const event = formEvent();
+      if (isAdventEvent(event)) { $('jsonMsg').textContent = 'Ce bouton sert au calendrier hebdomadaire de l’été, pas au calendrier de l’avent.'; $('jsonMsg').className = 'event-admin-msg err'; return; }
       event.selected_game_id = '';
       event.selected_game_uid = '';
       event.weekly_overrides = {};
@@ -834,6 +949,33 @@
 
     $('saveEventBtn')?.addEventListener('click', () => { renderCurrent(); saveEventToSite(formEvent()).catch((err)=>{ $('jsonMsg').textContent = err?.message || 'Sauvegarde impossible.'; $('jsonMsg').className = 'event-admin-msg err'; }); });
     document.addEventListener('click', (e) => {
+      const adventSelect = e.target.closest('[data-advent-select]');
+      if (adventSelect) {
+        selectedAdventDay = Math.min(24, Math.max(1, parseInt(adventSelect.dataset.adventSelect || '1', 10) || 1));
+        renderCurrent();
+        return;
+      }
+      const saveAdventDay = e.target.closest('#saveAdventDayBtn');
+      if (saveAdventDay) {
+        const current = formEvent();
+        const day = Math.min(24, Math.max(1, parseInt($('adventDayInput')?.value || selectedAdventDay || '1', 10) || 1));
+        selectedAdventDay = day;
+        const next = setAdventDay(current, day, {
+          title: $('adventTitleInput')?.value.trim() || `Surprise du jour ${day}`,
+          text: $('adventTextInput')?.value.trim() || '',
+          imageUrl: $('adventImageInput')?.value.trim() || '',
+          f95: $('adventF95Input')?.value.trim() || '',
+          f95_url: $('adventF95Input')?.value.trim() || '',
+          mega: $('adventMegaInput')?.value.trim() || '',
+          mega_url: $('adventMegaInput')?.value.trim() || '',
+          locked: false
+        });
+        activeEvent = next;
+        fillForm(activeEvent);
+        renderCurrent();
+        saveEventToSite(next, `Case ${day} enregistrée.`).catch((err)=>{ $('jsonMsg').textContent = err?.message || 'Sauvegarde impossible.'; $('jsonMsg').className = 'event-admin-msg err'; });
+        return;
+      }
       const regenerateCalendar = e.target.closest('#regenerateCalendarBtn');
       if (regenerateCalendar) {
         regenerateAutomaticCalendar().catch((err)=>{ $('jsonMsg').textContent = err?.message || 'Calendrier impossible à refaire.'; $('jsonMsg').className = 'event-admin-msg err'; });

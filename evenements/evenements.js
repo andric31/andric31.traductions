@@ -691,43 +691,99 @@
     return String(day?.imageUrl || day?.imageURL || day?.image_url || day?.image || day?.cover || '').trim();
   }
 
+  function getAdventStorageKey(event) {
+    return `event_advent_opened_${String(event?.id || 'calendrier-avent').trim()}`;
+  }
+
+  function readAdventOpenedDays(event) {
+    try {
+      const raw = localStorage.getItem(getAdventStorageKey(event));
+      const list = JSON.parse(raw || '[]');
+      if (!Array.isArray(list)) return new Set();
+      return new Set(list.map((value) => Number(value)).filter((value) => Number.isFinite(value) && value >= 1 && value <= 24));
+    } catch {
+      return new Set();
+    }
+  }
+
+  function writeAdventOpenedDays(event, openedDays) {
+    try {
+      localStorage.setItem(getAdventStorageKey(event), JSON.stringify(Array.from(openedDays).sort((a, b) => a - b)));
+    } catch {}
+  }
+
   function renderAdventEvent(event) {
     const period = dateRange(event);
     const days = normalizeAdventDays(event);
     const openUntil = getAdventOpenDay(event);
-    const selected = days.slice(0, Math.max(openUntil, 1)).reverse().find((d) => d && d.locked !== true && String(d.title || '').trim()) || days[0];
-    const image = getAdventImage(selected);
+    const openedDays = readAdventOpenedDays(event);
+
+    function isAvailable(dayNumber) {
+      return Number(dayNumber) <= openUntil;
+    }
+
+    function isRevealed(dayNumber) {
+      return openedDays.has(Number(dayNumber));
+    }
+
+    function getDoorLabel(day) {
+      if (!isAvailable(day.day)) return 'Bientôt';
+      if (isRevealed(day.day)) return 'Ouvert';
+      return 'À ouvrir';
+    }
+
     function openedHtml(day) {
       const dayImage = getAdventImage(day);
       const dayF95 = String(day?.f95 || day?.f95_url || '').trim();
       const dayMega = String(day?.mega || day?.mega_url || '').trim();
-      return `<div class="event-advent-opened-cover">${dayImage ? `<img src="${escapeHtml(dayImage)}" alt="" loading="lazy">` : '<div class="event-game-placeholder">🎁</div>'}</div>
-          <div>
-            <h3 class="event-advent-opened-title">${escapeHtml(day?.title || 'Surprise du jour')}</h3>
-            ${day?.text ? `<p class="event-advent-intro">${escapeHtml(day.text)}</p>` : ''}
+      const fallbackText = day?.locked === true ? 'Cette case est prête, mais son contenu n’a pas encore été ajouté.' : 'Surprise débloquée.';
+      return `<div class="event-advent-opened">
+          <div class="event-advent-opened-cover">${dayImage ? `<img src="${escapeHtml(dayImage)}" alt="" loading="lazy">` : `<div class="event-game-placeholder">🎁</div>`}</div>
+          <div class="event-advent-opened-info">
+            <span class="event-advent-opened-badge">🎁 Jour ${escapeHtml(day?.day || '?')}</span>
+            <h3 class="event-advent-opened-title">${escapeHtml(day?.title || `Surprise du jour ${day?.day || ''}`)}</h3>
+            <p class="event-advent-opened-text">${escapeHtml(day?.text || fallbackText)}</p>
             <div class="event-advent-links">
               ${dayF95 ? `<a class="event-main-link" href="${escapeHtml(dayF95)}" target="_blank" rel="noopener">F95Zone</a>` : ''}
               ${dayMega ? `<a class="event-secondary-link" href="${escapeHtml(dayMega)}" target="_blank" rel="noopener">Mega</a>` : ''}
             </div>
-          </div>`;
+          </div>
+        </div>`;
     }
-    const f95 = String(selected?.f95 || selected?.f95_url || '').trim();
-    const mega = String(selected?.mega || selected?.mega_url || '').trim();
-    const selectedHtml = openedHtml(selected);
+
+    let preview = null;
+    function renderPreview(day = null) {
+      if (!preview) return;
+      if (!day) {
+        preview.classList.add('is-empty');
+        preview.innerHTML = `<div class="event-advent-empty">
+            <div class="event-advent-empty-emoji">🎁</div>
+            <h3>Choisis une case</h3>
+            <p>Rien n’est affiché tant qu’une case disponible n’a pas été ouverte. Les jours précédents restent accessibles si tu les as manqués.</p>
+          </div>`;
+        return;
+      }
+      preview.classList.remove('is-empty');
+      preview.innerHTML = openedHtml(day);
+    }
+
     const doors = days.map((day) => {
-      const isOpen = Number(day.day) <= openUntil;
-      const isToday = Number(day.day) === openUntil;
-      const title = isOpen && day.locked !== true ? (day.title || `Jour ${day.day}`) : 'Surprise';
-      return `<button class="event-advent-door ${isOpen ? 'is-open' : 'is-locked'} ${isToday ? 'is-today' : ''}" type="button" data-advent-day="${escapeHtml(day.day)}" ${isOpen ? '' : 'disabled'} title="Jour ${escapeHtml(day.day)}">
-        <span>${escapeHtml(day.day)}</span>
-        <small>${escapeHtml(isOpen ? title : 'Bientôt')}</small>
+      const available = isAvailable(day.day);
+      const revealed = isRevealed(day.day);
+      const today = Number(day.day) === openUntil && available;
+      return `<button class="event-advent-door ${available ? 'is-available' : 'is-locked'} ${revealed ? 'is-revealed' : ''} ${today ? 'is-today' : ''}" type="button" data-advent-day="${escapeHtml(day.day)}" ${available ? '' : 'disabled'} title="Jour ${escapeHtml(day.day)}">
+        <span class="event-advent-door-inner">
+          <span class="event-advent-day-number">${escapeHtml(day.day)}</span>
+          <span class="event-advent-day-label">${escapeHtml(getDoorLabel(day))}</span>
+          <span class="event-advent-day-icon" aria-hidden="true">${revealed ? '✨' : available ? '🎀' : '🔒'}</span>
+        </span>
       </button>`;
     }).join('');
 
     els.active.innerHTML = `
       <article class="active-card ${escapeHtml(getEventThemeClass(event))} event-advent-card">
-        <div class="event-main">
-          <div>
+        <div class="event-advent-layout">
+          <div class="event-advent-side">
             <div class="event-icon" aria-hidden="true">${escapeHtml(event.icon || '🎄')}</div>
             <div class="event-state-row">
               <span class="event-pill is-live">${escapeHtml(event.status_label || 'Calendrier de l’avent')}</span>
@@ -735,30 +791,45 @@
             </div>
             <h2 class="event-title">${escapeHtml(event.title || 'Calendrier de l’avent')}</h2>
             <p class="event-text">${escapeHtml(event.text || 'Ouvre une case par jour et découvre les surprises de décembre.')}</p>
+            <div class="event-advent-hint">🎁 Clique sur une case disponible pour la révéler.</div>
+            <div class="event-advent-grid" aria-label="Calendrier de l’avent">${doors}</div>
           </div>
-          <aside class="event-game-card" aria-label="Case ouverte">
-            <div class="event-game-cover">
-              ${image ? `<img src="${escapeHtml(image)}" alt="" loading="lazy">` : '<div class="event-game-placeholder">🎁</div>'}
-            </div>
-            <div class="event-game-info">
-              <span class="event-game-label">Jour ${escapeHtml(selected?.day || 1)}</span>
-              <h3>${escapeHtml(selected?.title || 'Surprise du jour')}</h3>
-            </div>
-          </aside>
+          <aside class="event-advent-preview is-empty" aria-label="Contenu de la case sélectionnée" data-advent-opened></aside>
         </div>
-        <div class="event-advent-opened" data-advent-opened>${selectedHtml}</div>
-        <div class="event-advent-grid" aria-label="Calendrier de l’avent">${doors}</div>
       </article>`;
 
-    const opened = els.active.querySelector('[data-advent-opened]');
+    preview = els.active.querySelector('[data-advent-opened]');
+    renderPreview();
+
     els.active.querySelectorAll('[data-advent-day]').forEach((btn) => {
       btn.addEventListener('click', () => {
-        const day = days.find((item) => Number(item.day) === Number(btn.dataset.adventDay));
-        if (day && opened) opened.innerHTML = openedHtml(day);
+        const dayNumber = Number(btn.dataset.adventDay);
+        const day = days.find((item) => Number(item.day) === dayNumber);
+        if (!day || !isAvailable(dayNumber)) return;
+
+        els.active.querySelectorAll('[data-advent-day]').forEach((other) => other.classList.remove('is-selected'));
+        btn.classList.add('is-selected');
+
+        if (!openedDays.has(dayNumber)) {
+          btn.classList.add('is-opening');
+          window.setTimeout(() => {
+            openedDays.add(dayNumber);
+            writeAdventOpenedDays(event, openedDays);
+            btn.classList.remove('is-opening');
+            btn.classList.add('is-revealed');
+            const label = btn.querySelector('.event-advent-day-label');
+            const icon = btn.querySelector('.event-advent-day-icon');
+            if (label) label.textContent = 'Ouvert';
+            if (icon) icon.textContent = '✨';
+            renderPreview(day);
+          }, 650);
+          return;
+        }
+
+        renderPreview(day);
       });
     });
   }
-
   function renderActiveEvent(event, selection, gameError = '') {
     if (!event || event.enabled === false) {
       renderEmptyEvent('Aucun événement actif pour le moment.');

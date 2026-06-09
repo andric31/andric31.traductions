@@ -135,18 +135,6 @@
 
           <div class="event-admin-simple-actions">
             <div class="event-admin-action-box">
-              <button class="auth-btn primary" id="enableEventBtn" type="button" title="Réactive l’événement public avec les réglages actuels.">✅ Réactiver l’événement <span class="event-admin-help" tabindex="0" data-tip="Réaffiche l’événement sur la page publique avec le jeu et les réglages actuels.">?</span></button>
-              <p class="event-admin-action-desc">Remet l’événement en ligne quand tu veux le relancer.</p>
-            </div>
-            <div class="event-admin-action-box">
-              <button class="auth-btn primary" id="autoChangeGameBtn" type="button" title="Choisit tout de suite un autre jeu, bloque l’actuel pour éviter qu’il revienne, puis sauvegarde automatiquement dans Cloudflare.">🔄 Choisir un autre jeu cette semaine <span class="event-admin-help" tabindex="0" data-tip="Choisit tout de suite un autre jeu compatible avec les mots-clés. Le jeu actuel est ajouté aux blocages pour éviter qu’il soit répété.">?</span></button>
-              <p class="event-admin-action-desc">Change le jeu affiché pour la semaine actuelle et sauvegarde le choix sur le site.</p>
-            </div>
-            <div class="event-admin-action-box">
-              <button class="auth-btn" id="clearForcedBtn" type="button" title="Supprime le jeu forcé manuellement. Le site reprend alors la rotation automatique de l’événement.">🎲 Remettre la rotation automatique <span class="event-admin-help" tabindex="0" data-tip="Annule le jeu choisi à la main. Le site choisira ensuite automatiquement selon les mots-clés, le jour de rotation et les jeux déjà bloqués.">?</span></button>
-              <p class="event-admin-action-desc">Annule le choix manuel et laisse l’événement choisir seul le jeu.</p>
-            </div>
-            <div class="event-admin-action-box">
               <button class="auth-btn danger" id="resetEventBtn" type="button" title="Remet l’événement à zéro : enlève le jeu forcé et vide la liste anti-répétition.">🧹 Réinitialiser cet événement <span class="event-admin-help" tabindex="0" data-tip="À utiliser quand tu changes d’événement, par exemple après l’été. Ça vide les jeux déjà bloqués et enlève le jeu forcé, sans modifier le titre ni les mots-clés.">?</span></button>
               <p class="event-admin-action-desc">Vide l’historique anti-répétition pour repartir proprement sur un nouvel événement.</p>
             </div>
@@ -491,66 +479,6 @@
     }
 
 
-    function getAutoChangePool(games, event, currentGame) {
-      const valid = games.filter((g)=>getImage(g)).filter((g)=>buildUrl(g) !== '/');
-      const currentKey = currentGame ? getGameKey(currentGame) : '';
-      const withoutCurrent = (entries) => dedupePool(entries).filter((entry)=>getGameKey(entry.game) !== currentKey && !isBlockedGame(entry.game, event));
-
-      let pool = valid
-        .map((g)=>({ game:g, analysis:analyse(g,event) }))
-        .filter((entry)=>entry.analysis.score > 0)
-        .sort((a,b)=>b.analysis.score-a.analysis.score || getTitle(a.game).localeCompare(getTitle(b.game),'fr'));
-
-      pool = withoutCurrent(pool);
-      if (!pool.length && String(event?.fallback_mode || '').trim() === 'weekly_random') {
-        pool = withoutCurrent(valid.map((g)=>({ game:g, analysis:{ score:0, found:[] } })).sort((a,b)=>getTitle(a.game).localeCompare(getTitle(b.game),'fr')));
-      }
-      return pool;
-    }
-
-    function addBlockedGameKey(game) {
-      if (!game) return false;
-      const key = getGameKey(game);
-      const existing = $('blockedGameKeys').value.split(/\n|,/).map((s)=>s.trim()).filter(Boolean);
-      if (existing.includes(key)) return false;
-      $('blockedGameKeys').value = [...existing, key].join('\n');
-      return true;
-    }
-
-    function forceGame(game) {
-      if (!game) return;
-      $('selectedId').value = String(game.collection || game.id || '').trim();
-      $('selectedUid').value = String(game.uid ?? '').trim();
-    }
-
-    async function changeGameAutomatically() {
-      const previousGame = currentSelection?.game || null;
-      addBlockedGameKey(previousGame);
-      $('selectedId').value = '';
-      $('selectedUid').value = '';
-
-      const event = formEvent();
-      const pool = getAutoChangePool(allGames, event, previousGame);
-      if (!pool.length) {
-        renderCurrent();
-        $('jsonMsg').textContent = 'Impossible de changer automatiquement : aucun autre jeu disponible avec ces réglages.';
-        $('jsonMsg').className = 'event-admin-msg err';
-        return;
-      }
-
-      const index = (getRotationIndex(event) + hashText(`${event.id || event.title || 'event'}|${Date.now()}|${pool.length}`)) % pool.length;
-      const nextGame = pool[index].game;
-      forceGame(nextGame);
-      renderCurrent();
-      try {
-        await saveEventToSite(formEvent(), `Nouveau jeu choisi automatiquement et sauvegardé : ${getTitle(nextGame)}.`);
-      } catch (err) {
-        $('jsonMsg').textContent = `${err?.message || 'Sauvegarde impossible.'} Le JSON reste disponible en secours.`;
-        $('jsonMsg').className = 'event-admin-msg err';
-      }
-      window.scrollTo({ top:0, behavior:'smooth' });
-    }
-
     function fillForm(event) {
       $('eventId').value = event.id || 'ete-2026';
       $('eventTitle').value = event.title || '';
@@ -568,6 +496,35 @@
     function formatDateShort(date) {
       try { return new Intl.DateTimeFormat('fr-FR', { weekday:'short', day:'2-digit', month:'short' }).format(date); }
       catch { return date.toLocaleDateString(); }
+    }
+
+    function formatDateLong(date) {
+      try { return new Intl.DateTimeFormat('fr-FR', { day:'2-digit', month:'long', year:'numeric' }).format(date); }
+      catch { return date.toLocaleDateString(); }
+    }
+
+    function parseDateOnly(value) {
+      if (!value) return null;
+      const parts = String(value).split('-').map((n)=>Number(n));
+      if (parts.length !== 3 || parts.some((n)=>!Number.isFinite(n))) return null;
+      return new Date(parts[0], parts[1] - 1, parts[2]);
+    }
+
+    function buildEventCalendarPreview(pool, event) {
+      if (!pool.length) return [];
+      const eventId = String(event?.id || '').trim();
+      const start = eventId === 'ete-2026' ? new Date(2026, 5, 15) : (parseDateOnly(event.start_at) || getNextChangeBoundary(new Date(), event));
+      const end = eventId === 'ete-2026' ? new Date(2026, 7, 31) : (parseDateOnly(event.end_at) || (()=>{ const d = new Date(start); d.setDate(d.getDate() + 35); return d; })());
+      const first = getLastChangeBoundary(start, event);
+      if (first.getTime() < start.getTime()) first.setDate(first.getDate() + 7);
+      const seed = hashText(event?.id || event?.title || 'event') % pool.length;
+      const rotationIndex = getRotationIndex(event);
+      const rows = [];
+      for (let i = 0, d = new Date(first); d.getTime() <= end.getTime() && i < 20; i++, d.setDate(d.getDate() + 7)) {
+        const entry = pool[(rotationIndex + seed + i) % pool.length];
+        rows.push({ date:new Date(d), entry, current:false });
+      }
+      return rows;
     }
 
     function getNextChangeBoundary(date, event) {
@@ -618,21 +575,10 @@
 
       const forced = String(event.selected_game_id || event.selected_game_uid || '').trim();
       const blockedCount = Array.isArray(event.blocked_game_keys) ? event.blocked_game_keys.length : 0;
-      const now = new Date();
-      const nextChange = getNextChangeBoundary(now, event);
       const currentGame = currentSelection?.game || pickGame(allGames, event).game;
       const autoEvent = { ...event, selected_game_id:'', selected_game_uid:'' };
       const pool = getAutoPoolForPreview(allGames, autoEvent);
-      const rotationIndex = getRotationIndex(autoEvent);
-      const previews = [];
-      if (pool.length) {
-        for (let i = 0; i < Math.min(6, pool.length); i++) {
-          const entry = pool[(rotationIndex + i + (hashText(autoEvent?.id || autoEvent?.title || 'event') % pool.length)) % pool.length];
-          const d = new Date(nextChange);
-          d.setDate(d.getDate() + i * 7);
-          previews.push({ date:d, entry, current:i===0 });
-        }
-      }
+      const previews = buildEventCalendarPreview(pool, autoEvent);
 
       const choiceLabel = forced ? 'Jeu choisi manuellement' : 'Rotation automatique';
       const currentTitle = currentGame ? getTitle(currentGame) : 'Aucun jeu trouvé';
@@ -641,7 +587,7 @@
         : (currentSelection?.reason || 'Le jeu est choisi automatiquement selon les mots-clés.');
       const weekRows = previews.map((item)=>`
             <div class="event-admin-week-item">
-              <span class="event-admin-week-date">${item.current ? 'Cette semaine' : esc(formatDateShort(item.date))}</span>
+              <span class="event-admin-week-date">Semaine du ${esc(formatDateLong(item.date))}</span>
               <span class="event-admin-week-game"><strong>${esc(getTitle(item.entry.game))}</strong><small>${item.entry.analysis.found?.length ? `Mots-clés : ${esc(item.entry.analysis.found.join(', '))}` : 'Choix au hasard hebdomadaire'}</small></span>
               <button class="auth-btn mini" type="button" data-preview-pick-id="${esc(String(item.entry.game.collection || item.entry.game.id || '').trim())}" data-preview-pick-uid="${esc(String(item.entry.game.uid ?? '').trim())}">${item.current ? 'Afficher ce jeu' : 'Choisir'}</button>
             </div>`).join('') || '<div class="event-admin-msg err">Aucun choix automatique disponible avec ces réglages.</div>';
@@ -727,7 +673,6 @@
               <a class="auth-btn mini" href="${esc(buildUrl(game))}" target="_blank" rel="noopener">Fiche</a>
               ${game.url ? `<a class="auth-btn mini" href="${esc(game.url)}" target="_blank" rel="noopener">F95Zone</a>` : ''}
               ${game.discordlink ? `<a class="auth-btn mini" href="${esc(game.discordlink)}" target="_blank" rel="noopener">Discord</a>` : ''}
-              <button class="auth-btn mini" id="blockCurrentGameBtn" type="button" title="Ajoute ce jeu à la liste anti-répétition, puis choisit un autre jeu automatiquement.">Bloquer ce jeu</button>
             </div>
           </div>
         </div>`;
@@ -797,31 +742,6 @@
     }
 
 
-    $('enableEventBtn')?.addEventListener('click', async () => {
-      const next = formEvent();
-      next.enabled = true;
-      activeEvent = next;
-      fillForm(activeEvent);
-      renderCurrent();
-      try {
-        await saveEventToSite(next, 'Événement sauvegardé.');
-        await saveActiveState(next.id, true);
-        $('jsonMsg').textContent = `Événement lancé : ${next.id}.`;
-        $('jsonMsg').className = 'event-admin-msg ok';
-      } catch (err) {
-        $('jsonMsg').textContent = err?.message || 'Réactivation impossible.';
-        $('jsonMsg').className = 'event-admin-msg err';
-      }
-    });
-    $('clearForcedBtn')?.addEventListener('click', () => {
-      $('selectedId').value='';
-      $('selectedUid').value='';
-      renderCurrent();
-      saveEventToSite(formEvent(), 'Retour au choix automatique sauvegardé.').catch((err)=>{
-        $('jsonMsg').textContent = err?.message || 'Sauvegarde impossible.';
-        $('jsonMsg').className = 'event-admin-msg err';
-      });
-    });
     $('resetEventBtn')?.addEventListener('click', () => {
       const ok = confirm('Réinitialiser cet événement ?\n\nCela va vider la liste des jeux déjà bloqués et enlever le jeu forcé. Le titre, le texte et les mots-clés seront gardés.');
       if (!ok) return;
@@ -834,7 +754,6 @@
         $('jsonMsg').className = 'event-admin-msg err';
       });
     });
-    $('autoChangeGameBtn')?.addEventListener('click', () => changeGameAutomatically().catch((err)=>{ $('jsonMsg').textContent = err?.message || 'Erreur.'; $('jsonMsg').className = 'event-admin-msg err'; }));
     $('saveEventBtn')?.addEventListener('click', () => { renderCurrent(); saveEventToSite(formEvent()).catch((err)=>{ $('jsonMsg').textContent = err?.message || 'Sauvegarde impossible.'; $('jsonMsg').className = 'event-admin-msg err'; }); });
     document.addEventListener('click', (e) => {
       const scrollPicker = e.target.closest('#scrollGamePickerBtn');
@@ -857,26 +776,6 @@
         window.scrollTo({ top:0, behavior:'smooth' });
         return;
       }
-      if (e.target.closest('#reactivateCurrentEventBtn')) {
-        const next = formEvent();
-        next.enabled = true;
-        activeEvent = next;
-        fillForm(activeEvent);
-        renderCurrent();
-        saveEventToSite(next, 'Événement réactivé et sauvegardé.').catch((err)=>{
-          $('jsonMsg').textContent = err?.message || 'Réactivation impossible.';
-          $('jsonMsg').className = 'event-admin-msg err';
-        });
-        return;
-      }
-      if (!e.target.closest('#blockCurrentGameBtn') || !currentSelection?.game) return;
-      addBlockedGameKey(currentSelection.game);
-      $('selectedId').value=''; $('selectedUid').value='';
-      renderCurrent();
-      saveEventToSite(formEvent(), 'Jeu ajouté aux blocages et sauvegardé sur le site.').catch((err)=>{
-        $('jsonMsg').textContent = `${err?.message || 'Sauvegarde impossible.'} Le JSON reste disponible en secours.`;
-        $('jsonMsg').className = 'event-admin-msg err';
-      });
     });
     $('eventsList')?.addEventListener('click', async (e) => {
       const noEventApplyBtn = e.target.closest('[data-no-event-apply]');

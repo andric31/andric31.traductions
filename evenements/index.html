@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="/evenements/evenements.css" />
   <script src="/theme-init.js"></script>
 </head>
-<body>
+<body class="events-booting">
   <main class="events-shell">
     <section class="events-hero" aria-label="Événements">
       <div class="events-kicker">📅 Événements</div>
@@ -19,9 +19,7 @@
       <p>Les événements et mises en avant du moment.</p>
     </section>
 
-    <section id="activeEvent" class="active-event" aria-label="Événement actif">
-      <div class="event-loading">Chargement de l’événement…</div>
-    </section>
+    <section id="activeEvent" class="active-event is-loading" aria-label="Événement actif"></section>
   </main>
 
   <script src="/evenements/evenements.js"></script>

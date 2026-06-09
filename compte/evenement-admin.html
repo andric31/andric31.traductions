@@ -62,6 +62,7 @@
     .event-admin-event-actions { display:flex; flex-wrap:wrap; gap:7px; justify-content:flex-end; }
     .event-admin-active-banner { margin-top:10px; padding:10px 12px; border-radius:14px; border:1px solid rgba(126,224,161,.35); background:rgba(126,224,161,.09); color:#7ee0a1; font-weight:800; }
     .event-admin-active-banner.off { border-color:rgba(255,184,77,.35); background:rgba(255,184,77,.09); color:#ffbf5f; }
+    .event-admin-no-event-main { margin-top:12px; }
     @media (max-width:850px){ .event-admin-grid, .event-admin-row, .event-admin-current { grid-template-columns:1fr; } .event-admin-cover { width:150px; } .event-admin-game { grid-template-columns:50px 1fr; } .event-admin-game .auth-btn { grid-column:1 / -1; } }
   </style>
 </head>
@@ -96,31 +97,20 @@
         <h2>📋 Liste des événements</h2>
         <p class="event-admin-note" style="margin-top:0;">La liste vient de <strong>/evenements/config.json</strong>. Quand tu déploies un nouvel événement, ajoute juste son ID dans <code>event_files</code> et il apparaîtra ici.</p>
         <div id="activeEventState" class="event-admin-active-banner off">Chargement de l’état actuel…</div>
+        <div class="event-admin-action-box event-admin-stop-box event-admin-no-event-main">
+          <button class="auth-btn danger" id="globalNoEventBtn" type="button" title="Désactive l’événement public. Les visiteurs verront qu’il n’y a aucun événement en cours.">🚫 Aucun événement en cours <span class="event-admin-help" tabindex="0" data-tip="À utiliser quand tu ne veux plus afficher d’événement sur la page publique. Ça sauvegarde l’état dans Cloudflare, sans supprimer tes fichiers événement.">?</span></button>
+          <p class="event-admin-action-desc">Masque tous les événements sur la page publique et affiche “Aucun événement actif pour le moment”.</p>
+        </div>
         <div class="event-admin-actions">
-          <button class="auth-btn danger" id="globalNoEventBtn" type="button">🚫 Aucun événement en cours</button>
           <a class="auth-btn primary" id="eventTestBtn" href="/evenements/" target="_blank" rel="noopener">🧪 Ouvrir evenement.test</a>
         </div>
         <div id="eventsList" class="event-admin-event-list"><div class="event-admin-msg">Chargement de la liste…</div></div>
-      </div>
-    </section>
-
-    <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
-      <div class="event-admin-grid">
-        <div class="event-admin-card">
-          <h2>🎯 Jeu affiché actuellement</h2>
-          <div id="eventMsg" class="event-admin-msg">Chargement…</div>
-          <div id="currentGame" style="margin-top:12px;"></div>
-        </div>
 
         <form id="eventForm" class="event-admin-card" autocomplete="off">
-          <h2>✅ Actions simples</h2>
-          <p class="event-admin-note" style="margin-top:0;">Tu n’as plus de JSON à copier ou à créer. Clique, ça sauvegarde directement dans Cloudflare.</p>
+          <h2>✅ Actions de l’événement sélectionné</h2>
+          <p class="event-admin-note" id="selectedEventActionNote" style="margin-top:0;">Ces boutons agissent uniquement sur l’événement ouvert dans la liste au-dessus.</p>
 
           <div class="event-admin-simple-actions">
-            <div class="event-admin-action-box event-admin-stop-box">
-              <button class="auth-btn danger" id="disableEventBtn" type="button" title="Désactive l’événement public. Les visiteurs verront qu’il n’y a aucun événement en cours.">🚫 Aucun événement en cours <span class="event-admin-help" tabindex="0" data-tip="À utiliser quand tu ne veux plus afficher d’événement sur la page publique. Ça sauvegarde l’événement comme désactivé dans Cloudflare, sans supprimer tes réglages.">?</span></button>
-              <p class="event-admin-action-desc">Masque l’événement sur la page publique et affiche “Aucun événement actif pour le moment”.</p>
-            </div>
             <div class="event-admin-action-box">
               <button class="auth-btn primary" id="enableEventBtn" type="button" title="Réactive l’événement public avec les réglages actuels.">✅ Réactiver l’événement <span class="event-admin-help" tabindex="0" data-tip="Réaffiche l’événement sur la page publique avec le jeu et les réglages actuels.">?</span></button>
               <p class="event-admin-action-desc">Remet l’événement en ligne quand tu veux le relancer.</p>
@@ -177,6 +167,18 @@
           <textarea class="event-admin-hidden" id="jsonOutput"></textarea>
           <span class="event-admin-hidden" id="fileNameHint">ete-2026</span>
         </form>
+      </div>
+    </section>
+
+    <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
+      <div class="event-admin-grid">
+        <div class="event-admin-card">
+          <h2>🎯 Jeu affiché actuellement</h2>
+          <div id="eventMsg" class="event-admin-msg">Chargement…</div>
+          <div id="currentGame" style="margin-top:12px;"></div>
+        </div>
+
+
       </div>
     </section>
 
@@ -330,6 +332,8 @@
       }
       const selectedId = activeEvent?.id || '';
       $('eventTestBtn')?.setAttribute('href', selectedId ? `/evenements/?test=${encodeURIComponent(selectedId)}` : '/evenements/');
+      const note = $('selectedEventActionNote');
+      if (note) note.textContent = selectedId ? `Ces boutons concernent uniquement : ${selectedId}.` : 'Ouvre un événement dans la liste pour utiliser ses actions.';
       wrap.innerHTML = eventCatalog.map((ev)=>{
         const isSelected = selectedId === ev.id;
         const isActive = activeState.enabled && activeId === ev.id;
@@ -647,7 +651,6 @@
       }
     }
 
-    $('disableEventBtn')?.addEventListener('click', setNoEventInProgress);
     $('globalNoEventBtn')?.addEventListener('click', setNoEventInProgress);
 
     $('enableEventBtn')?.addEventListener('click', async () => {

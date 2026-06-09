@@ -106,8 +106,8 @@
             <p class="event-admin-action-desc">Masque tous les événements sur la page publique et affiche “Aucun événement actif pour le moment”.</p>
           </div>
           <div class="event-admin-action-box event-admin-test-box">
-            <a class="auth-btn primary" id="eventTestBtn" href="/evenements/" target="_blank" rel="noopener" title="Ouvre la page publique en mode test pour l’événement sélectionné, sans le lancer officiellement.">🧪 Tester l’événement sélectionné <span class="event-admin-help" tabindex="0" data-tip="Ouvre /evenements/?test=ID pour vérifier l’affichage, le CSS et le jeu choisi sans appliquer l’événement en public.">?</span></a>
-            <p class="event-admin-action-desc">Prévisualise l’événement ouvert dans la liste, sans changer l’événement actif.</p>
+            <a class="auth-btn primary" id="eventTestNoEventBtn" href="/evenements/?test=none" target="_blank" rel="noopener" title="Ouvre la page publique en mode test sans événement actif.">🧪 Tester aucun événement en cours <span class="event-admin-help" tabindex="0" data-tip="Ouvre /evenements/?test=none pour vérifier l’affichage quand aucun événement n’est actif, sans modifier Cloudflare.">?</span></a>
+            <p class="event-admin-action-desc">Prévisualise la page publique comme si aucun événement n’était en cours, sans sauvegarder.</p>
           </div>
         </div>
         <div id="eventsList" class="event-admin-event-list"><div class="event-admin-msg">Chargement de la liste…</div></div>
@@ -337,7 +337,6 @@
         banner.className = `event-admin-active-banner ${activeState.enabled && activeId ? '' : 'off'}`;
       }
       const selectedId = activeEvent?.id || '';
-      $('eventTestBtn')?.setAttribute('href', selectedId ? `/evenements/?test=${encodeURIComponent(selectedId)}` : '/evenements/');
       const note = $('selectedEventActionNote');
       if (note) note.textContent = selectedId ? `Ces boutons concernent uniquement : ${selectedId}.` : 'Ouvre un événement dans la liste pour utiliser ses actions.';
       wrap.innerHTML = eventCatalog.map((ev)=>{

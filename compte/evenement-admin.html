@@ -609,11 +609,7 @@
       const pool = getAutoPoolForPreview(allGames, autoEvent);
       const previews = buildEventCalendarPreview(pool, autoEvent);
 
-      const choiceLabel = forced ? 'Jeu choisi manuellement' : 'Rotation automatique';
       const currentTitle = currentGame ? getTitle(currentGame) : 'Aucun jeu trouvé';
-      const currentDetail = forced
-        ? 'Jeu forcé manuellement. Le calendrier automatique reste affiché dessous pour suivre la rotation prévue.'
-        : (currentSelection?.reason || 'Le jeu est choisi automatiquement selon les mots-clés.');
       const weekRows = previews.map((item)=>{
         const img = getImage(item.entry.game);
         const isSelectedWeek = selectedWeekKey && selectedWeekKey === item.weekKey;
@@ -638,8 +634,8 @@
           </div>
         </div>
         <div class="event-admin-linked-grid">
-          <div class="event-admin-linked-box"><strong>🎯 Cette semaine</strong><small>${esc(currentTitle)}<br>${esc(currentDetail)}</small></div>
-          <div class="event-admin-linked-box"><strong>🔁 Règle actuelle</strong><small>${esc(choiceLabel)}<br>Changement : ${esc(event.change_day || 'monday')} à ${esc(String(event.change_hour ?? 0))}h</small></div>
+          <div class="event-admin-linked-box"><strong>🎯 Cette semaine</strong><small>${esc(currentTitle)}</small></div>
+          <div class="event-admin-linked-box"><strong>🔁 Règle actuelle</strong><small>Changement : ${esc(event.change_day || 'monday')} à ${esc(String(event.change_hour ?? 0))}h</small></div>
         </div>
         <div>
           <strong>📆 Calendrier automatique de l’événement</strong>

@@ -69,12 +69,33 @@
     };
   }
 
+
+  function looksLikeAdventEventRaw(event) {
+    const type = normalizeText(event?.type || event?.mode || '');
+    const id = String(event?.id || '').toLowerCase();
+    return type.includes('advent') || id.includes('avent');
+  }
+  function isRealAdventDay(item) {
+    if (!item || typeof item !== 'object') return false;
+    const title = String(item.title || '').trim();
+    return item.locked === false || !!String(item.imageUrl || item.image || item.f95 || item.f95_url || item.mega || item.mega_url || '').trim() || (title && !title.startsWith('Surprise du jour'));
+  }
+  function mergeAdventDays(baseEvent, savedEvent) {
+    if (!looksLikeAdventEventRaw(baseEvent)) return { ...baseEvent, ...savedEvent };
+    const baseDays = Array.isArray(baseEvent.days) ? baseEvent.days : [];
+    const savedDays = Array.isArray(savedEvent.days) ? savedEvent.days : [];
+    const byDay = new Map();
+    baseDays.forEach((item) => { const day = parseInt(item?.day, 10); if (day) byDay.set(day, item); });
+    savedDays.forEach((item) => { const day = parseInt(item?.day, 10); if (day && isRealAdventDay(item)) byDay.set(day, item); });
+    return { ...baseEvent, ...savedEvent, id: baseEvent.id || savedEvent.id, type: baseEvent.type || savedEvent.type, css: baseEvent.css || savedEvent.css, days: Array.from({ length: 24 }, (_, i) => byDay.get(i + 1) || { day: i + 1, title: `Surprise du jour ${i + 1}`, text: 'À remplir plus tard.', locked: true }) };
+  }
+
   async function loadSavedEvent(baseEvent) {
     const id = String(baseEvent?.id || '').trim();
     if (!id) return baseEvent;
     const saved = await fetchJson(`/api/evenement?id=${encodeURIComponent(id)}`, null);
     if (saved?.ok && saved.event && typeof saved.event === 'object') {
-      const merged = { ...baseEvent, ...saved.event };
+      const merged = mergeAdventDays(baseEvent, saved.event);
       // On garde les informations structurelles du fichier local.
       // Sinon une ancienne sauvegarde Cloudflare peut casser le mode "aucun événement".
       if (baseEvent.id) merged.id = baseEvent.id;
@@ -637,6 +658,107 @@
     `;
   }
 
+
+  function isAdventEvent(event) {
+    const type = normalizeText(event?.type || event?.mode || '');
+    const id = String(event?.id || '').toLowerCase();
+    return type.includes('advent') || id.includes('avent');
+  }
+
+  function normalizeAdventDays(event) {
+    const raw = Array.isArray(event?.days) ? event.days : [];
+    const byDay = new Map();
+    raw.forEach((item) => {
+      const day = Math.min(24, Math.max(1, parseInt(item?.day, 10) || 0));
+      if (day) byDay.set(day, { ...item, day });
+    });
+    return Array.from({ length: 24 }, (_, i) => byDay.get(i + 1) || { day: i + 1, title: `Surprise du jour ${i + 1}`, locked: true });
+  }
+
+  function getAdventOpenDay(event) {
+    const now = new Date();
+    const start = parseDateOnly(event?.start_at) || new Date(now.getFullYear(), 11, 1);
+    const end = parseDateOnly(event?.end_at) || new Date(start.getFullYear(), 11, 24);
+    if (now.getTime() < start.getTime()) return 0;
+    if (now.getTime() > new Date(end.getFullYear(), end.getMonth(), end.getDate(), 23, 59, 59).getTime()) return 24;
+    if (now.getFullYear() === start.getFullYear() && now.getMonth() === start.getMonth()) {
+      return Math.min(24, Math.max(1, now.getDate() - start.getDate() + 1));
+    }
+    return Math.min(24, Math.max(1, Math.floor((now.getTime() - start.getTime()) / 86400000) + 1));
+  }
+
+  function getAdventImage(day) {
+    return String(day?.imageUrl || day?.imageURL || day?.image_url || day?.image || day?.cover || '').trim();
+  }
+
+  function renderAdventEvent(event) {
+    const period = dateRange(event);
+    const days = normalizeAdventDays(event);
+    const openUntil = getAdventOpenDay(event);
+    const selected = days.slice(0, Math.max(openUntil, 1)).reverse().find((d) => d && d.locked !== true && String(d.title || '').trim()) || days[0];
+    const image = getAdventImage(selected);
+    function openedHtml(day) {
+      const dayImage = getAdventImage(day);
+      const dayF95 = String(day?.f95 || day?.f95_url || '').trim();
+      const dayMega = String(day?.mega || day?.mega_url || '').trim();
+      return `<div class="event-advent-opened-cover">${dayImage ? `<img src="${escapeHtml(dayImage)}" alt="" loading="lazy">` : '<div class="event-game-placeholder">🎁</div>'}</div>
+          <div>
+            <h3 class="event-advent-opened-title">${escapeHtml(day?.title || 'Surprise du jour')}</h3>
+            ${day?.text ? `<p class="event-advent-intro">${escapeHtml(day.text)}</p>` : ''}
+            <div class="event-advent-links">
+              ${dayF95 ? `<a class="event-main-link" href="${escapeHtml(dayF95)}" target="_blank" rel="noopener">F95Zone</a>` : ''}
+              ${dayMega ? `<a class="event-secondary-link" href="${escapeHtml(dayMega)}" target="_blank" rel="noopener">Mega</a>` : ''}
+            </div>
+          </div>`;
+    }
+    const f95 = String(selected?.f95 || selected?.f95_url || '').trim();
+    const mega = String(selected?.mega || selected?.mega_url || '').trim();
+    const selectedHtml = openedHtml(selected);
+    const doors = days.map((day) => {
+      const isOpen = Number(day.day) <= openUntil;
+      const isToday = Number(day.day) === openUntil;
+      const title = isOpen && day.locked !== true ? (day.title || `Jour ${day.day}`) : 'Surprise';
+      return `<button class="event-advent-door ${isOpen ? 'is-open' : 'is-locked'} ${isToday ? 'is-today' : ''}" type="button" data-advent-day="${escapeHtml(day.day)}" ${isOpen ? '' : 'disabled'} title="Jour ${escapeHtml(day.day)}">
+        <span>${escapeHtml(day.day)}</span>
+        <small>${escapeHtml(isOpen ? title : 'Bientôt')}</small>
+      </button>`;
+    }).join('');
+
+    els.active.innerHTML = `
+      <article class="active-card ${escapeHtml(getEventThemeClass(event))} event-advent-card">
+        <div class="event-main">
+          <div>
+            <div class="event-icon" aria-hidden="true">${escapeHtml(event.icon || '🎄')}</div>
+            <div class="event-state-row">
+              <span class="event-pill is-live">${escapeHtml(event.status_label || 'Calendrier de l’avent')}</span>
+              ${period ? `<span class="event-pill">📆 ${escapeHtml(period)}</span>` : ''}
+            </div>
+            <h2 class="event-title">${escapeHtml(event.title || 'Calendrier de l’avent')}</h2>
+            <p class="event-text">${escapeHtml(event.text || 'Ouvre une case par jour et découvre les surprises de décembre.')}</p>
+          </div>
+          <aside class="event-game-card" aria-label="Case ouverte">
+            <div class="event-game-cover">
+              ${image ? `<img src="${escapeHtml(image)}" alt="" loading="lazy">` : '<div class="event-game-placeholder">🎁</div>'}
+            </div>
+            <div class="event-game-info">
+              <span class="event-game-label">Jour ${escapeHtml(selected?.day || 1)}</span>
+              <h3>${escapeHtml(selected?.title || 'Surprise du jour')}</h3>
+            </div>
+          </aside>
+        </div>
+        <div class="event-advent-opened" data-advent-opened>${selectedHtml}</div>
+        <div class="event-advent-grid" aria-label="Calendrier de l’avent">${doors}</div>
+      </article>`;
+
+    const opened = els.active.querySelector('[data-advent-opened]');
+    els.active.querySelectorAll('[data-advent-day]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const day = days.find((item) => Number(item.day) === Number(btn.dataset.adventDay));
+        if (day && opened) opened.innerHTML = openedHtml(day);
+      });
+    });
+  }
+
   function renderActiveEvent(event, selection, gameError = '') {
     if (!event || event.enabled === false) {
       renderEmptyEvent('Aucun événement actif pour le moment.');
@@ -724,6 +846,11 @@
 
     if (isNoEventMode(event)) {
       renderNoEventCard(event);
+      return;
+    }
+
+    if (isAdventEvent(event)) {
+      renderAdventEvent(event);
       return;
     }
 

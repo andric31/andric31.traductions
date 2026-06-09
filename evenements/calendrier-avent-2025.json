@@ -1,21 +1,166 @@
 {
   "id": "calendrier-avent-2025",
+  "type": "advent_calendar",
   "title": "Calendrier de l’avent 2025",
+  "icon": "🗓️",
+  "status_label": "Calendrier de l’avent",
+  "period": "1 déc. 2025 → 24 déc. 2025",
+  "date": "1 déc. 2025 → 24 déc. 2025",
+  "date_label": "1 déc. 2025 → 24 déc. 2025",
+  "start_at": "2025-12-01",
+  "end_at": "2025-12-24",
+  "text": "Ouvre une case par jour et découvre les surprises de décembre.",
+  "description": "Calendrier de l’avent avec 24 cases.",
+  "css": "calendrier-avent-2025",
   "days": [
     {
       "day": 1,
-      "title": "Surprise du jour 1",
-      "text": "À remplir plus tard.",
-      "locked": true
+      "title": "LeafFlow",
+      "f95": "https://f95zone.to/threads/285586/",
+      "f95_url": "https://f95zone.to/threads/285586/",
+      "mega": "https://mega.nz/",
+      "mega_url": "https://mega.nz/",
+      "imageUrl": "https://attachments.f95zone.to/2026/01/5695823_hinakorytarz.png",
+      "text": "Jeu du jour 1.",
+      "locked": false
     },
     {
       "day": 2,
       "title": "Surprise du jour 2",
       "text": "À remplir plus tard.",
       "locked": true
+    },
+    {
+      "day": 3,
+      "title": "Surprise du jour 3",
+      "text": "À remplir plus tard.",
+      "locked": true
+    },
+    {
+      "day": 4,
+      "title": "Surprise du jour 4",
+      "text": "À remplir plus tard.",
+      "locked": true
+    },
+    {
+      "day": 5,
+      "title": "Surprise du jour 5",
+      "text": "À remplir plus tard.",
+      "locked": true
+    },
+    {
+      "day": 6,
+      "title": "Surprise du jour 6",
+      "text": "À remplir plus tard.",
+      "locked": true
+    },
+    {
+      "day": 7,
+      "title": "Surprise du jour 7",
+      "text": "À remplir plus tard.",
+      "locked": true
+    },
+    {
+      "day": 8,
+      "title": "Surprise du jour 8",
+      "text": "À remplir plus tard.",
+      "locked": true
+    },
+    {
+      "day": 9,
+      "title": "Surprise du jour 9",
+      "text": "À remplir plus tard.",
+      "locked": true
+    },
+    {
+      "day": 10,
+      "title": "Surprise du jour 10",
+      "text": "À remplir plus tard.",
+      "locked": true
+    },
+    {
+      "day": 11,
+      "title": "Surprise du jour 11",
+      "text": "À remplir plus tard.",
+      "locked": true
+    },
+    {
+      "day": 12,
+      "title": "Surprise du jour 12",
+      "text": "À remplir plus tard.",
+      "locked": true
+    },
+    {
+      "day": 13,
+      "title": "Surprise du jour 13",
+      "text": "À remplir plus tard.",
+      "locked": true
+    },
+    {
+      "day": 14,
+      "title": "Surprise du jour 14",
+      "text": "À remplir plus tard.",
+      "locked": true
+    },
+    {
+      "day": 15,
+      "title": "Surprise du jour 15",
+      "text": "À remplir plus tard.",
+      "locked": true
+    },
+    {
+      "day": 16,
+      "title": "Surprise du jour 16",
+      "text": "À remplir plus tard.",
+      "locked": true
+    },
+    {
+      "day": 17,
+      "title": "Surprise du jour 17",
+      "text": "À remplir plus tard.",
+      "locked": true
+    },
+    {
+      "day": 18,
+      "title": "Surprise du jour 18",
+      "text": "À remplir plus tard.",
+      "locked": true
+    },
+    {
+      "day": 19,
+      "title": "Surprise du jour 19",
+      "text": "À remplir plus tard.",
+      "locked": true
+    },
+    {
+      "day": 20,
+      "title": "Surprise du jour 20",
+      "text": "À remplir plus tard.",
+      "locked": true
+    },
+    {
+      "day": 21,
+      "title": "Surprise du jour 21",
+      "text": "À remplir plus tard.",
+      "locked": true
+    },
+    {
+      "day": 22,
+      "title": "Surprise du jour 22",
+      "text": "À remplir plus tard.",
+      "locked": true
+    },
+    {
+      "day": 23,
+      "title": "Surprise du jour 23",
+      "text": "À remplir plus tard.",
+      "locked": true
+    },
+    {
+      "day": 24,
+      "title": "Surprise du jour 24",
+      "text": "À remplir plus tard.",
+      "locked": true
     }
-  ],
-  "period": "1 déc. 2025 → 24 déc. 2025",
-  "date": "1 déc. 2025 → 24 déc. 2025",
-  "description": "Exemple d’ancien événement."
+  ]
 }

@@ -178,6 +178,25 @@
     .account-admin-card:hover { background:rgba(80,160,255,.12); }
     .account-admin-card strong { color:var(--title,var(--fg)); }
     .account-admin-card span { color:var(--muted); font-size:13px; line-height:1.35; }
+    .account-admin-separator {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin:18px 0 4px;
+      color:var(--muted);
+      font-size:13px;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+    .account-admin-separator::before,
+    .account-admin-separator::after {
+      content:"";
+      flex:1;
+      height:1px;
+      background:var(--border, var(--auth-border));
+      opacity:.85;
+    }
 
 
     .account-hero {
@@ -661,6 +680,10 @@
             <a class="account-admin-card" href="/compte/blog-admin.html"><strong>📝 Blog</strong><span>Création et modification des articles.</span></a>
             <a class="account-admin-card" href="/compte/evenement-admin.html"><strong>📅 Événements</strong><span>Gestion des événements.</span></a>
             <a class="account-admin-card" href="/stats/"><strong>📊 Stats</strong><span>Statistiques et suivi du site.</span></a>
+          </div>
+          <div class="account-admin-separator"><span>Liens externes</span></div>
+          <div class="account-admin-grid">
+            <a class="account-admin-card" href="https://f95zone.to/" target="_blank" rel="noopener"><strong>🌐 F95Zone</strong><span>Accès direct au site F95Zone.</span></a>
             <a class="account-admin-card" href="/f95fr/"><strong>🇫🇷 F95 France</strong><span>Liste perso des jeux F95 France issue du Google Sheet.</span></a>
             <a class="account-admin-card" href="https://f95france.site/" target="_blank" rel="noopener"><strong>🌐 Site F95 France</strong><span>Nouveau site F95 France.</span></a>
           </div>

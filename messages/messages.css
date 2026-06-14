@@ -591,7 +591,7 @@ button { border: 0; }
   resize: none;
   min-height: 50px;
   max-height: 92px;
-  padding: 11px 126px 10px 11px;
+  padding: 11px 140px 10px 11px;
   line-height: 1.38;
 }
 .msg-field input::placeholder,
@@ -618,7 +618,7 @@ button { border: 0; }
 
 .msg-compose-actions {
   position: absolute;
-  right: 84px;
+  right: 96px;
   bottom: 8px;
   display: flex;
   align-items: center;

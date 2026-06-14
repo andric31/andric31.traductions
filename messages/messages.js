@@ -153,7 +153,7 @@
     els.nickname.removeAttribute('aria-readonly');
     els.nickname.title = '';
     if (!els.nickname.value) els.nickname.value = localStorage.getItem(NICK_KEY) || '';
-    if (els.authInfo) els.authInfo.textContent = 'Non connecté : pseudo mémorisé dans ce navigateur, accès au salon public.';
+    if (els.authInfo) els.authInfo.textContent = 'Non connecté : pseudo mémorisé ici, accès au salon public.';
     return false;
   }
 
@@ -217,8 +217,8 @@
     const isPublic = String(roomValue || 'global') === 'global';
     if (els.publicPrivacyBanner) els.publicPrivacyBanner.classList.toggle('hidden', !isPublic);
     if (els.globalNoticeBanner) els.globalNoticeBanner.textContent = isPublic
-      ? 'Merci de ne pas flooder ni interférer dans les aides en cours.'
-      : 'Merci de ne pas flooder ni interférer dans les aides en cours.';
+      ? 'Merci de garder la discussion claire et de ne pas flooder.'
+      : 'Merci de garder la discussion claire et de ne pas flooder.';
   }
 
   function roomTitle(roomValue) {

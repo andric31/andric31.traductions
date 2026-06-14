@@ -14,19 +14,19 @@
     <aside class="msg-sidebar">
       <div class="msg-brand">
         <div>
-          <h1>Messages</h1>
+          <h1>Centre messages</h1>
         </div>
         <span id="roomStatus" class="msg-status">Connexion…</span>
       </div>
 
       <section class="msg-card msg-section">
-        <div class="msg-section-label">Accès rapide</div>
+        <div class="msg-section-label">Navigation</div>
         <nav class="msg-room-list">
           <a class="msg-room-link" href="/">
             <span class="msg-room-icon">🏠</span>
             <span class="msg-room-copy">
               <strong>Retour au viewer</strong>
-              <small>f95list_andric31_viewer</small>
+              <small>Revenir au site</small>
             </span>
           </a>
           <div class="msg-room-link msg-room-refresh-wrap">
@@ -34,7 +34,7 @@
               <span class="msg-room-icon">↻</span>
               <span class="msg-room-copy">
                 <strong>Actualiser</strong>
-                <small>Messages</small>
+                <small>Recharger la discussion</small>
               </span>
             </button>
             <label class="msg-refresh-inline" for="refreshDelaySelect">
@@ -58,14 +58,11 @@
       </section>
 
       <section class="msg-card msg-section msg-side-notes">
-        <div class="msg-section-label">Repères rapides</div>
+        <div class="msg-section-label">Aide rapide</div>
         <ul>
-          <li>Reste poli, évite le flood et ne partage jamais d’infos privées.</li>
-          <li>Choisis ton salon dans la colonne <strong>Salons</strong> à gauche.</li>
-          <li>Clique sur un message pour afficher <strong>Répondre</strong> et les réactions emoji.</li>
-          <li>Utilise <strong>↩ Répondre</strong> pour citer rapidement le message auquel tu réponds.</li>
-          <li>Le bouton <strong>☺</strong> ajoute un emoji dans ton texte avant l’envoi.</li>
-          <li><strong>Bas de page</strong> te ramène instantanément sur les derniers messages.</li>
+          <li>Clique sur un message pour répondre ou réagir.</li>
+          <li>Évite le flood et les infos privées dans le salon public.</li>
+          <li><strong>Bas de page</strong> affiche les derniers messages.</li>
         </ul>
       </section>
     </aside>
@@ -75,7 +72,7 @@
         <div>
           <div id="roomKicker" class="msg-topbar-kicker">Salon public</div>
           <h2 id="roomTitle">Discussion générale</h2>
-          <p id="roomSubtitle">Un affichage plus pratique, inspiré d’un vrai centre de messages.</p>
+          <p id="roomSubtitle">Une interface plus compacte, lisible et pensée pour aller directement à l’essentiel.</p>
         </div>
         <div class="msg-topbar-actions">
           <button id="scrollBottomBtn" class="msg-topbar-btn" type="button">Bas de page</button>
@@ -84,8 +81,8 @@
 
       <section class="msg-thread msg-card">
         <div class="msg-banner-list">
-          <div id="globalNoticeBanner" class="msg-banner msg-banner-danger">Merci de ne pas flooder ni interférer dans les aides en cours.</div>
-          <div id="publicPrivacyBanner" class="msg-banner msg-banner-warn">Salon public : visible par tous. Évite les infos privées.</div>
+          <div id="globalNoticeBanner" class="msg-banner msg-banner-danger">Merci de garder la discussion claire et de ne pas flooder.</div>
+          <div id="publicPrivacyBanner" class="msg-banner msg-banner-warn">Salon public : visible par tous. Ne partage pas d’informations privées.</div>
         </div>
 
         <div id="messagesEmpty" class="msg-empty hidden">Aucun message pour le moment.</div>
@@ -104,7 +101,7 @@
             <label class="msg-field msg-field-small msg-field-nick">
               <input id="nickname" type="text" maxlength="40" placeholder="Ton pseudo" autocomplete="nickname" />
             </label>
-            <div id="authChatInfo" class="msg-form-info msg-form-info-inline">Non connecté : pseudo mémorisé dans ce navigateur, accès au salon public.</div>
+            <div id="authChatInfo" class="msg-form-info msg-form-info-inline">Non connecté : pseudo mémorisé ici, accès au salon public.</div>
           </div>
 
           <div class="msg-compose-row">
@@ -119,7 +116,7 @@
           </div>
 
           <div class="msg-compose-footer">
-            <div id="formInfo" class="msg-form-info">500 caractères max. hors réponse épinglée.</div>
+            <div id="formInfo" class="msg-form-info">500 caractères max.</div>
           </div>
         </form>
       </section>

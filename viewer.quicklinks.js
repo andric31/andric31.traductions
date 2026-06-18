@@ -16,6 +16,7 @@
     seenTicketOpenCount: "andric31_seen_ticket_open_count",
     firstVisitShown: "andric31_first_visit_notification_shown",
     hiddenNotificationId: "andric31_hidden_notification_id",
+    showNotificationDots: "andric31_show_notification_dots",
   };
 
   const MESSAGES_API_URL = "/api/messages?limit=1&scope=allowed";
@@ -103,6 +104,10 @@
     return btn;
   }
 
+  function areNotificationDotsEnabled() {
+    return localStorage.getItem(STORAGE.showNotificationDots) !== "0";
+  }
+
   function getDot(el) {
     return el ? el.querySelector(".header-icon-dot") : null;
   }
@@ -110,7 +115,7 @@
   function setDotVisible(el, visible) {
     const dot = getDot(el);
     if (!dot) return;
-    dot.classList.toggle("hidden", !visible);
+    dot.classList.toggle("hidden", !(visible && areNotificationDotsEnabled()));
   }
 
   function formatRelativeTime(iso) {

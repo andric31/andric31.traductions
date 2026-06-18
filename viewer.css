@@ -1751,3 +1751,43 @@ html.viewer-rating-hidden .card-meta .card-stat,
   .list-switcher-btn h1,
   .list-switcher-btn .viewer-list-title-text{ font-size:16px; }
 }
+
+/* Icônes personnelles dans le viewer : Watchlist / Like / Note */
+.viewer-personal-icons{
+  position:absolute;
+  top:8px;
+  right:8px;
+  z-index:5;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  pointer-events:none;
+}
+.viewer-personal-icon{
+  width:24px;
+  height:24px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.64);
+  border:1px solid rgba(255,255,255,.18);
+  color:#fff;
+  font-size:14px;
+  line-height:1;
+  font-weight:900;
+  box-shadow:0 6px 18px rgba(0,0,0,.24);
+  backdrop-filter:blur(8px);
+}
+.viewer-personal-watch-icon,
+.viewer-personal-watch-icon svg{
+  width:15px;
+  height:15px;
+  display:block;
+  overflow:visible;
+}
+.grid[data-cols="1"] .viewer-personal-icons{
+  top:8px;
+  right:auto;
+  left:8px;
+}

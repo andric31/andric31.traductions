@@ -70,6 +70,9 @@
     currentListUrl: DEFAULT_URL,
     currentListProfile: { key: "andric31", name: "andric31", listUrl: DEFAULT_URL, openBase: "https://andric31-traductions.pages.dev/game/" },
     manifestEntries: [],
+    personalIconsMap: new Map(),
+    personalIconsLoaded: false,
+    personalIconsLoading: false,
   };
 
   // =========================
@@ -355,7 +358,12 @@
       if (connected === lastConnected) return;
       lastConnected = connected;
       syncRatingVisibilityForAuth();
+      if (!connected) {
+        state.personalIconsMap.clear();
+        state.personalIconsLoaded = false;
+      }
       renderGrid();
+      loadViewerPersonalIconsState({ force: true });
     };
 
     const attach = () => {
@@ -378,6 +386,95 @@
       }
     }, 100);
   }
+
+  const VIEWER_PERSONAL_ICONS_STORAGE_KEY = "andric31_show_viewer_personal_icons";
+
+  function areViewerPersonalIconsEnabled() {
+    try { return localStorage.getItem(VIEWER_PERSONAL_ICONS_STORAGE_KEY) !== "0"; }
+    catch { return true; }
+  }
+
+  function getViewerGameKey(g) {
+    return String(g?.ckey || counterKeyOfEntry(g?.__raw || g) || "").trim();
+  }
+
+  function accountWatchlistIconHtml() {
+    return '<span class="viewer-personal-watch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" role="img" aria-hidden="true"><path d="M7 3.5h10a1 1 0 0 1 1 1v16.2l-6-3.9-6 3.9V4.5a1 1 0 0 1 1-1z" fill="none" stroke="#ff7a00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+  }
+
+  function mergeViewerPersonalItem(map, item, extra = {}) {
+    const key = String(item?.game_key || "").trim();
+    if (!key) return;
+    const old = map.get(key) || { watchlist: false, liked: false, rating: 0 };
+    map.set(key, {
+      ...old,
+      ...extra,
+      liked: extra.liked ?? old.liked,
+      rating: extra.rating ?? old.rating,
+    });
+  }
+
+  async function fetchJsonSafe(url) {
+    const resp = await fetch(url, { credentials: "same-origin", cache: "no-store" });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok || !data?.ok) throw new Error(data?.error || "Chargement impossible.");
+    return data;
+  }
+
+  async function loadViewerPersonalIconsState({ force = false } = {}) {
+    if (!isViewerAccountConnected()) return;
+    if (!areViewerPersonalIconsEnabled()) return;
+    if (state.personalIconsLoading) return;
+    if (state.personalIconsLoaded && !force) return;
+
+    state.personalIconsLoading = true;
+    try {
+      const map = new Map();
+      const [watchRes, stateRes] = await Promise.allSettled([
+        fetchJsonSafe("/api/watchlist?limit=500"),
+        fetchJsonSafe("/api/user-game-state?limit=500"),
+      ]);
+
+      if (watchRes.status === "fulfilled") {
+        (watchRes.value?.items || []).forEach((item) => mergeViewerPersonalItem(map, item, { watchlist: true }));
+      }
+      if (stateRes.status === "fulfilled") {
+        (stateRes.value?.items || []).forEach((item) => mergeViewerPersonalItem(map, item, {
+          liked: !!item.liked,
+          rating: Number(item.rating || 0),
+        }));
+      }
+
+      state.personalIconsMap = map;
+      state.personalIconsLoaded = true;
+      renderGrid();
+    } catch {
+      state.personalIconsLoaded = true;
+    } finally {
+      state.personalIconsLoading = false;
+    }
+  }
+
+  function viewerPersonalIconsHtml(g) {
+    if (!isViewerAccountConnected() || !areViewerPersonalIconsEnabled()) return "";
+    const item = state.personalIconsMap.get(getViewerGameKey(g));
+    if (!item) return "";
+
+    const icons = [];
+    if (item.watchlist) icons.push(`<span class="viewer-personal-icon" title="Dans ta Watchlist">${accountWatchlistIconHtml()}</span>`);
+    if (item.liked) icons.push('<span class="viewer-personal-icon" title="Jeu liké">❤️</span>');
+    const rating = Number(item.rating || 0);
+    if (rating > 0) icons.push(`<span class="viewer-personal-icon" title="Jeu noté : ${rating}/4">⭐</span>`);
+
+    if (!icons.length) return "";
+    return `<div class="viewer-personal-icons" aria-label="Icônes personnelles du compte">${icons.join("")}</div>`;
+  }
+
+  window.addEventListener("storage", (event) => {
+    if (event.key !== VIEWER_PERSONAL_ICONS_STORAGE_KEY) return;
+    if (areViewerPersonalIconsEnabled()) loadViewerPersonalIconsState({ force: true });
+    else renderGrid();
+  });
 
   // =========================
   // ☰ MENU
@@ -2130,6 +2227,7 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
       const translationText = formatRelativeTranslationTime(g.lastTranslationTs);
       const translationTitle = formatAbsoluteDateTime(g.lastTranslationTs);
       const updateRibbon = updateKindRibbonHtml(g.__raw || g);
+      const personalIconsHtml = viewerPersonalIconsHtml(g);
       const listDescriptionHtml = cardListDescriptionHtml(g);
       const listTagsHtml = cardListTagsHtml(g);
 
@@ -2144,6 +2242,7 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
              loading="lazy"
              onerror="this.onerror=null;this.src='/favicon.png';this.classList.add('is-fallback');">
         ${updateRibbon}
+        ${personalIconsHtml}
         <div class="body">
           <h3 class="name clamp-2">${escapeHtml(getDisplayTitle(g.__raw || g))}</h3>
           <div class="badges-line one-line">${badgesLineHtml(g)} ${listTagsHtml}</div>
@@ -2180,6 +2279,8 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
     }
 
     grid.appendChild(frag);
+
+    loadViewerPersonalIconsState();
 
     if (limit < total && state.pageSize !== "all") {
       const rest = total - limit;

@@ -2,6 +2,7 @@
   'use strict';
 
   const WATCHLIST_ICON = '<span class="account-watchlist-icon" aria-hidden="true"><svg viewBox="0 0 24 24" role="img" aria-hidden="true"><path d="M7 3.5h10a1 1 0 0 1 1 1v16.2l-6-3.9-6 3.9V4.5a1 1 0 0 1 1-1z" fill="none" stroke="#ff7a00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+  const DEFAULT_LIST_URL = 'https://raw.githubusercontent.com/andric31/f95list/main/f95list.json';
 
   const $ = (sel) => document.querySelector(sel);
   const els = {
@@ -24,7 +25,7 @@
     me: null,
     currentTab: new URLSearchParams(location.search).get('tab') || (location.hash || '#all').replace('#','') || 'all',
     q: '',
-    sort: 'recent',
+    sort: 'translationDate',
     items: [],
     loading: false,
   };
@@ -60,6 +61,166 @@
     return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 
+  function parseIsoDateTime(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return 0;
+    const d = new Date(raw);
+    return Number.isFinite(d.getTime()) ? d.getTime() : 0;
+  }
+
+  function parseFrenchDate(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return 0;
+    const m = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?$/);
+    if (!m) return parseIsoDateTime(raw);
+    const day = Number(m[1]);
+    const month = Number(m[2]) - 1;
+    const year = Number(m[3]);
+    const hour = Number(m[4] || 0);
+    const minute = Number(m[5] || 0);
+    const d = new Date(year, month, day, hour, minute, 0, 0);
+    return Number.isFinite(d.getTime()) ? d.getTime() : 0;
+  }
+
+  function cleanTitleKey(value) {
+    return String(value || '')
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/\[[^\]]*\]/g, ' ')
+      .replace(/\([^)]*\)/g, ' ')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim()
+      .replace(/\s+/g, ' ');
+  }
+
+  function getUrlKeys(value) {
+    const keys = [];
+    const raw = String(value || '').trim();
+    if (!raw) return keys;
+    keys.push(raw);
+    try {
+      const u = new URL(raw, location.origin);
+      keys.push(u.pathname + u.search + u.hash);
+      keys.push(u.href);
+      const id = u.searchParams.get('id');
+      const uid = u.searchParams.get('uid');
+      if (id) keys.push(id);
+      if (uid) keys.push(uid);
+      if (id && uid) keys.push(`${id}::${uid}`);
+    } catch {}
+    return keys.filter(Boolean);
+  }
+
+  function addCatalogKey(map, key, info) {
+    const k = String(key || '').trim();
+    if (!k) return;
+    if (!map.has(k)) map.set(k, info);
+    const t = cleanTitleKey(k);
+    if (t && !map.has(`title:${t}`)) map.set(`title:${t}`, info);
+  }
+
+  function translationDateOfGame(game) {
+    return (
+      parseIsoDateTime(game.updatedAtLocal) ||
+      parseIsoDateTime(game.createdAtLocal) ||
+      parseFrenchDate(game.updatedAt) ||
+      parseIsoDateTime(game.updatedAtDateTime) ||
+      parseIsoDateTime(game.createdAtDateTime) ||
+      0
+    );
+  }
+
+  function buildCatalogIndex(list) {
+    const map = new Map();
+    (Array.isArray(list) ? list : []).forEach((game) => {
+      if (!game || typeof game !== 'object') return;
+      const title = game.gameData?.title || game.cleanTitle || game.title || '';
+      const info = {
+        translationDateTs: translationDateOfGame(game),
+        translationDateRaw: game.updatedAtLocal || game.createdAtLocal || game.updatedAt || '',
+        title,
+        image_url: game.gameData?.imageUrl || game.imageUrl || '',
+        f95_url: game.url || game.threadUrl || '',
+        discord_url: game.discordlink || game.discord_url || '',
+      };
+
+      [
+        game.uid,
+        game.id,
+        game.collection,
+        game.game_key,
+        title,
+        game.title,
+        game.cleanTitle,
+        game.url,
+        game.threadUrl,
+        game.discordlink,
+      ].forEach((key) => addCatalogKey(map, key, info));
+
+      getUrlKeys(game.url).forEach((key) => addCatalogKey(map, key, info));
+      getUrlKeys(game.threadUrl).forEach((key) => addCatalogKey(map, key, info));
+
+      const coll = String(game.collection || '').trim();
+      const uid = String(game.uid || '').trim();
+      if (coll && uid) addCatalogKey(map, `${coll}::${uid}`, info);
+    });
+    return map;
+  }
+
+  async function loadTranslationCatalog() {
+    try {
+      const resp = await fetch(DEFAULT_LIST_URL, { cache: 'no-store' });
+      if (!resp.ok) return new Map();
+      const data = await resp.json().catch(() => []);
+      return buildCatalogIndex(Array.isArray(data) ? data : []);
+    } catch {
+      return new Map();
+    }
+  }
+
+  function findCatalogInfo(index, item) {
+    if (!index || !index.size || !item) return null;
+    const keys = [
+      item.game_key,
+      item.key,
+      item.title,
+      item.game_url,
+      item.f95_url,
+      item.discord_url,
+    ];
+    getUrlKeys(item.game_url).forEach((key) => keys.push(key));
+    getUrlKeys(item.f95_url).forEach((key) => keys.push(key));
+    getUrlKeys(item.discord_url).forEach((key) => keys.push(key));
+    for (const key of keys) {
+      const raw = String(key || '').trim();
+      if (!raw) continue;
+      const direct = index.get(raw);
+      if (direct) return direct;
+      const title = cleanTitleKey(raw);
+      if (title) {
+        const byTitle = index.get(`title:${title}`);
+        if (byTitle) return byTitle;
+      }
+    }
+    return null;
+  }
+
+  function enrichWithTranslationDates(items, catalogIndex) {
+    if (!catalogIndex || !catalogIndex.size) return items;
+    return items.map((item) => {
+      const info = findCatalogInfo(catalogIndex, item);
+      if (!info) return item;
+      return {
+        ...item,
+        translationDateTs: info.translationDateTs || item.translationDateTs || 0,
+        translationDateRaw: info.translationDateRaw || item.translationDateRaw || '',
+        image_url: item.image_url || info.image_url || '',
+        f95_url: item.f95_url || info.f95_url || '',
+        discord_url: item.discord_url || info.discord_url || '',
+      };
+    });
+  }
+
   async function fetchJson(url, options = {}) {
     const resp = await fetch(url, { credentials: 'same-origin', cache: 'no-store', ...options });
     const data = await resp.json().catch(() => ({}));
@@ -75,7 +236,7 @@
       game_key: raw.game_key || key,
       title: '', game_url: '', image_url: '', f95_url: '', discord_url: '',
       watchlist: false, liked: false, rating: 0,
-      watchDate: '', likedDate: '', ratedDate: '', updatedDate: '',
+      watchDate: '', likedDate: '', ratedDate: '', updatedDate: '', translationDateTs: 0, translationDateRaw: '',
     };
 
     old.title = old.title || raw.title || 'Jeu sans titre';
@@ -104,14 +265,15 @@
     state.loading = true;
     setStatus('Chargement de tes jeux…');
     try {
-      const [watchData, stateData] = await Promise.all([
+      const [watchData, stateData, catalogIndex] = await Promise.all([
         fetchJson('/api/watchlist?limit=500'),
         fetchJson('/api/user-game-state?limit=500'),
+        loadTranslationCatalog(),
       ]);
       const map = new Map();
       (watchData.items || []).forEach((item) => mergeItem(map, item, 'watchlist'));
       (stateData.items || []).forEach((item) => mergeItem(map, item, 'state'));
-      state.items = Array.from(map.values());
+      state.items = enrichWithTranslationDates(Array.from(map.values()), catalogIndex);
       render();
     } catch (err) {
       state.items = [];
@@ -136,6 +298,12 @@
     list.sort((a, b) => {
       if (state.sort === 'title') return String(a.title || '').localeCompare(String(b.title || ''), 'fr', { sensitivity: 'base' });
       if (state.sort === 'rating') return (Number(b.rating || 0) - Number(a.rating || 0)) || String(a.title || '').localeCompare(String(b.title || ''), 'fr');
+      if (state.sort === 'translationDate') {
+        const ta = Number(a.translationDateTs || 0);
+        const tb = Number(b.translationDateTs || 0);
+        if (ta !== tb) return tb - ta;
+        return String(a.title || '').localeCompare(String(b.title || ''), 'fr', { sensitivity: 'base' });
+      }
       const da = Date.parse(a.updatedDate || a.ratedDate || a.likedDate || a.watchDate || '') || 0;
       const db = Date.parse(b.updatedDate || b.ratedDate || b.likedDate || b.watchDate || '') || 0;
       return db - da;
@@ -171,6 +339,7 @@
 
   function metaLines(item) {
     const lines = [];
+    if (item.translationDateTs) lines.push(`🗓️ Traduction${formatDate(item.translationDateTs) ? ' le ' + escapeHtml(formatDate(item.translationDateTs)) : ''}`);
     if (item.watchlist) lines.push(`${WATCHLIST_ICON} Ajouté à la Watchlist${formatDate(item.watchDate) ? ' le ' + escapeHtml(formatDate(item.watchDate)) : ''}`);
     if (item.liked) lines.push(`❤️ Liké${formatDate(item.likedDate) ? ' le ' + escapeHtml(formatDate(item.likedDate)) : ''}`);
     if (Number(item.rating || 0) > 0) lines.push(`<span class="account-game-rating">⭐ Note : ${Number(item.rating)}/4${formatDate(item.ratedDate) ? ' · ' + escapeHtml(formatDate(item.ratedDate)) : ''}</span>`);
@@ -262,7 +431,7 @@
       });
     });
     els.search?.addEventListener('input', () => { state.q = els.search.value || ''; render(); });
-    els.sort?.addEventListener('change', () => { state.sort = els.sort.value || 'recent'; render(); });
+    els.sort?.addEventListener('change', () => { state.sort = els.sort.value || 'translationDate'; render(); });
     els.refresh?.addEventListener('click', loadAll);
     els.grid?.addEventListener('click', handleAction);
   }

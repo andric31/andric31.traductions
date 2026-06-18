@@ -297,7 +297,6 @@
 
     list.sort((a, b) => {
       if (state.sort === 'title') return String(a.title || '').localeCompare(String(b.title || ''), 'fr', { sensitivity: 'base' });
-      if (state.sort === 'rating') return (Number(b.rating || 0) - Number(a.rating || 0)) || String(a.title || '').localeCompare(String(b.title || ''), 'fr');
       if (state.sort === 'translationDate') {
         const ta = Number(a.translationDateTs || 0);
         const tb = Number(b.translationDateTs || 0);

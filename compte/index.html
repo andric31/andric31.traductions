@@ -286,6 +286,17 @@
       font-size: 17px;
       line-height: 1;
     }
+    .account-notif-setting-ico svg {
+      width: 20px;
+      height: 20px;
+      display: block;
+      overflow: visible;
+    }
+    .account-notif-watch-ico {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
     .account-notif-switch {
       position: relative;
       display: inline-flex;
@@ -422,8 +433,8 @@
             <button class="account-notif-switch" id="blueDotsToggle" type="button" role="switch" aria-checked="true" aria-label="Afficher les points bleus de notification"></button>
           </div>
           <div class="account-notif-setting">
-            <span class="account-notif-setting-text"><span class="account-notif-setting-ico">👁️</span><span>Icônes personnelles dans le viewer</span></span>
-            <button class="account-notif-switch" id="viewerIconsToggle" type="button" role="switch" aria-checked="true" aria-label="Afficher les icônes personnelles dans le viewer"></button>
+            <span class="account-notif-setting-text"><span class="account-notif-setting-ico account-notif-watch-ico" aria-hidden="true"><svg viewBox="0 0 24 24" role="img" aria-hidden="true"><path d="M7 3.5h10a1 1 0 0 1 1 1v16.2l-6-3.9-6 3.9V4.5a1 1 0 0 1 1-1z" fill="none" stroke="#ff7a00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Icônes personnelles mes jeux dans le viewer</span></span>
+            <button class="account-notif-switch" id="viewerIconsToggle" type="button" role="switch" aria-checked="true" aria-label="Afficher les icônes personnelles mes jeux dans le viewer"></button>
           </div>
           <div id="logoutMsg" class="auth-msg"></div>
         </div>

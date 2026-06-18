@@ -1760,12 +1760,12 @@ html.viewer-rating-hidden .card-meta .card-stat,
   z-index:5;
   display:flex;
   align-items:center;
-  gap:5px;
+  gap:6px;
   pointer-events:none;
 }
 .viewer-personal-icon{
-  width:24px;
-  height:24px;
+  width:28px;
+  height:28px;
   border-radius:999px;
   display:inline-flex;
   align-items:center;
@@ -1773,7 +1773,7 @@ html.viewer-rating-hidden .card-meta .card-stat,
   background:rgba(0,0,0,.64);
   border:1px solid rgba(255,255,255,.18);
   color:#fff;
-  font-size:14px;
+  font-size:16px;
   line-height:1;
   font-weight:900;
   box-shadow:0 6px 18px rgba(0,0,0,.24);
@@ -1781,8 +1781,8 @@ html.viewer-rating-hidden .card-meta .card-stat,
 }
 .viewer-personal-watch-icon,
 .viewer-personal-watch-icon svg{
-  width:15px;
-  height:15px;
+  width:18px;
+  height:18px;
   display:block;
   overflow:visible;
 }

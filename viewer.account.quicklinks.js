@@ -96,6 +96,8 @@
     const link = document.createElement("a");
     link.id = IDS.accountBtn;
     link.href = "/compte/";
+    link.target = "_blank";
+    link.rel = "noopener";
     link.className = `${refClass} header-icon-link header-icon-link--quick account-profile-btn`;
     link.setAttribute("aria-label", `Mon compte - ${name}`);
     link.setAttribute("title", `Mon compte - ${name}`);

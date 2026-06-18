@@ -5,6 +5,7 @@
   const STATE = window[GLOBAL_KEY];
 
   const IDS = {
+    accountBtn: "quickAccountProfileBtn",
     btn: "quickAccountGamesBtn",
     popover: "quickAccountGamesPopover",
   };
@@ -33,6 +34,13 @@
       <path d="M9 12h3.5"/>
     </svg>`;
   }
+  function iconCompte() {
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M20 21a8 8 0 0 0-16 0"/>
+      <circle cx="12" cy="8" r="4"/>
+    </svg>`;
+  }
+
 
   function iconWatchlist() {
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
@@ -77,6 +85,22 @@
       fetchCount("/api/user-game-state?list=rated&limit=500"),
     ]);
     return { watchlist, likes, notes };
+  }
+
+  function getAccountName(me) {
+    return me?.display_name || me?.pseudo || me?.username || me?.email || "Mon compte";
+  }
+
+  function makeAccountButton(refClass, me) {
+    const name = getAccountName(me);
+    const link = document.createElement("a");
+    link.id = IDS.accountBtn;
+    link.href = "/compte/";
+    link.className = `${refClass} header-icon-link header-icon-link--quick account-profile-btn`;
+    link.setAttribute("aria-label", `Mon compte - ${name}`);
+    link.setAttribute("title", `Mon compte - ${name}`);
+    link.innerHTML = `<span class="header-icon-svg">${iconCompte()}</span><span class="account-profile-name">${escapeHtml(name)}</span>`;
+    return link;
   }
 
   function makeButton(refClass) {
@@ -165,6 +189,9 @@
     const style = document.createElement("style");
     style.id = "accountQuickLinksStyles";
     style.textContent = `
+      .account-profile-btn{width:auto;max-width:min(190px,34vw);gap:7px;padding-inline:10px;}
+      .account-profile-btn .header-icon-svg{flex:0 0 auto;}
+      .account-profile-name{display:block;min-width:0;max-width:135px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:800;line-height:1;color:var(--title);}
       .account-quick-popover{position:absolute;z-index:10060;width:min(320px,calc(100vw - 24px));border-radius:18px;border:1px solid var(--border);background:color-mix(in srgb,var(--card) 92%, transparent);box-shadow:0 18px 48px rgba(0,0,0,.28);backdrop-filter:blur(14px);overflow:hidden;}
       .account-quick-loading{padding:14px 16px;color:var(--muted);}
       .account-quick-head{padding:14px 16px 10px;display:flex;flex-direction:column;gap:3px;color:var(--title);}
@@ -190,8 +217,10 @@
 
   async function insertButton() {
     const existingButtons = Array.from(document.querySelectorAll(`#${IDS.btn}`));
-    if (existingButtons.length) {
+    const existingAccountButtons = Array.from(document.querySelectorAll(`#${IDS.accountBtn}`));
+    if (existingButtons.length && existingAccountButtons.length) {
       existingButtons.slice(1).forEach((el) => el.remove());
+      existingAccountButtons.slice(1).forEach((el) => el.remove());
       return;
     }
     if (STATE.inserting) return;
@@ -202,8 +231,10 @@
       if (!me) return;
 
       const existingAfterAuth = Array.from(document.querySelectorAll(`#${IDS.btn}`));
-      if (existingAfterAuth.length) {
+      const existingAccountAfterAuth = Array.from(document.querySelectorAll(`#${IDS.accountBtn}`));
+      if (existingAfterAuth.length && existingAccountAfterAuth.length) {
         existingAfterAuth.slice(1).forEach((el) => el.remove());
+        existingAccountAfterAuth.slice(1).forEach((el) => el.remove());
         return;
       }
 
@@ -214,8 +245,10 @@
       if (!afterEl) return;
 
       const refClass = afterEl.className || "hamburger-btn";
+      const accountBtn = makeAccountButton(refClass, me);
       const btn = makeButton(refClass);
-      afterEl.insertAdjacentElement("afterend", btn);
+      afterEl.insertAdjacentElement("afterend", accountBtn);
+      accountBtn.insertAdjacentElement("afterend", btn);
 
     btn.addEventListener("click", async (event) => {
       event.preventDefault();
@@ -248,7 +281,7 @@
     insertButton();
 
     const obs = new MutationObserver(() => {
-      if (!document.getElementById(IDS.btn)) insertButton();
+      if (!document.getElementById(IDS.btn) || !document.getElementById(IDS.accountBtn)) insertButton();
     });
     obs.observe(document.documentElement, { childList: true, subtree: true });
     window.setTimeout(() => obs.disconnect(), 15000);

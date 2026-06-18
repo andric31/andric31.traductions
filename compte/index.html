@@ -421,6 +421,10 @@
             <span class="account-notif-setting-text"><span class="account-notif-setting-ico">🔵</span><span>Points bleus de notification</span></span>
             <button class="account-notif-switch" id="blueDotsToggle" type="button" role="switch" aria-checked="true" aria-label="Afficher les points bleus de notification"></button>
           </div>
+          <div class="account-notif-setting">
+            <span class="account-notif-setting-text"><span class="account-notif-setting-ico">👁️</span><span>Icônes personnelles dans le viewer</span></span>
+            <button class="account-notif-switch" id="viewerIconsToggle" type="button" role="switch" aria-checked="true" aria-label="Afficher les icônes personnelles dans le viewer"></button>
+          </div>
           <div id="logoutMsg" class="auth-msg"></div>
         </div>
       </div>
@@ -517,7 +521,9 @@
     const changePasswordBtn = document.getElementById('changePasswordBtn');
     const changePasswordMsg = document.getElementById('changePasswordMsg');
     const blueDotsToggle = document.getElementById('blueDotsToggle');
+    const viewerIconsToggle = document.getElementById('viewerIconsToggle');
     const BLUE_DOTS_STORAGE_KEY = 'andric31_show_notification_dots';
+    const VIEWER_ICONS_STORAGE_KEY = 'andric31_show_viewer_personal_icons';
     const newPassword = document.getElementById('newPassword');
     const newPasswordConfirm = document.getElementById('newPasswordConfirm');
     const accountWatchCount = document.getElementById('accountWatchCount');
@@ -545,6 +551,23 @@
     function setBlueDotsEnabled(enabled) {
       localStorage.setItem(BLUE_DOTS_STORAGE_KEY, enabled ? '1' : '0');
       refreshBlueDotsToggle();
+    }
+
+    function areViewerIconsEnabled() {
+      return localStorage.getItem(VIEWER_ICONS_STORAGE_KEY) !== '0';
+    }
+
+    function refreshViewerIconsToggle() {
+      if (!viewerIconsToggle) return;
+      const enabled = areViewerIconsEnabled();
+      viewerIconsToggle.classList.toggle('is-on', enabled);
+      viewerIconsToggle.setAttribute('aria-checked', enabled ? 'true' : 'false');
+      viewerIconsToggle.title = enabled ? 'Icônes viewer activées' : 'Icônes viewer désactivées';
+    }
+
+    function setViewerIconsEnabled(enabled) {
+      localStorage.setItem(VIEWER_ICONS_STORAGE_KEY, enabled ? '1' : '0');
+      refreshViewerIconsToggle();
     }
 
 
@@ -796,8 +819,12 @@
     if (window.SiteAuth.loaded) guardAccount(window.SiteAuth.me);
 
     refreshBlueDotsToggle();
+    refreshViewerIconsToggle();
     blueDotsToggle?.addEventListener('click', () => {
       setBlueDotsEnabled(!areBlueDotsEnabled());
+    });
+    viewerIconsToggle?.addEventListener('click', () => {
+      setViewerIconsEnabled(!areViewerIconsEnabled());
     });
 
 

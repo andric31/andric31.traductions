@@ -3,6 +3,8 @@
 
   const WATCHLIST_ICON = '<span class="account-watchlist-icon" aria-hidden="true"><svg viewBox="0 0 24 24" role="img" aria-hidden="true"><path d="M7 3.5h10a1 1 0 0 1 1 1v16.2l-6-3.9-6 3.9V4.5a1 1 0 0 1 1-1z" fill="none" stroke="#ff7a00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
   const DEFAULT_LIST_URL = 'https://raw.githubusercontent.com/andric31/f95list/main/f95list.json';
+  const DEFAULT_BACKUP_URL = '/api/f95list';
+  const DEFAULT_STATIC_BACKUP_URL = '/data/f95list.json';
 
   const $ = (sel) => document.querySelector(sel);
   const els = {
@@ -167,11 +169,32 @@
     return map;
   }
 
-  async function loadTranslationCatalog() {
+  async function fetchDefaultListWithBackup() {
     try {
       const resp = await fetch(DEFAULT_LIST_URL, { cache: 'no-store' });
-      if (!resp.ok) return new Map();
-      const data = await resp.json().catch(() => []);
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      console.log('✅ f95list chargée depuis GitHub');
+      return await resp.json();
+    } catch (err) {
+      console.warn('⚠️ GitHub bloqué ou indisponible, chargement via Cloudflare…', err);
+      try {
+        const backup = await fetch(DEFAULT_BACKUP_URL, { cache: 'no-store' });
+        if (!backup.ok) throw new Error('Cloudflare fallback HTTP ' + backup.status);
+        console.log('✅ f95list chargée via Cloudflare API');
+        return await backup.json();
+      } catch (apiErr) {
+        console.warn('⚠️ API Cloudflare indisponible, chargement de /data/f95list.json…', apiErr);
+        const staticBackup = await fetch(DEFAULT_STATIC_BACKUP_URL, { cache: 'no-store' });
+        if (!staticBackup.ok) throw new Error('Cloudflare data fallback HTTP ' + staticBackup.status);
+        console.log('✅ f95list chargée depuis /data/f95list.json');
+        return await staticBackup.json();
+      }
+    }
+  }
+
+  async function loadTranslationCatalog() {
+    try {
+      const data = await fetchDefaultListWithBackup();
       return buildCatalogIndex(Array.isArray(data) ? data : []);
     } catch {
       return new Map();

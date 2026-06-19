@@ -227,6 +227,8 @@
   </script>
   <script>
     const DEFAULT_LIST_URL = 'https://raw.githubusercontent.com/andric31/f95list/main/f95list.json';
+    const DEFAULT_BACKUP_URL = '/api/f95list';
+    const DEFAULT_STATIC_BACKUP_URL = '/data/f95list.json';
     let activeEvent = null;
     let activeState = { active_event:'', enabled:true };
     let configDefaultEventId = '';
@@ -251,6 +253,19 @@
         return await res.json();
       } catch { return fallback; }
       finally { clearTimeout(timer); }
+    }
+
+
+    async function fetchDefaultListWithBackup(url, fallback, options = {}) {
+      const primaryUrl = String(url || DEFAULT_LIST_URL).trim() || DEFAULT_LIST_URL;
+      const data = await fetchJson(primaryUrl, null, options);
+      if (data !== null) return data;
+      if (primaryUrl !== DEFAULT_LIST_URL) return fallback;
+      console.warn('⚠️ GitHub bloqué ou indisponible, chargement via Cloudflare…');
+      const apiData = await fetchJson(DEFAULT_BACKUP_URL, null, options);
+      if (apiData !== null) return apiData;
+      console.warn('⚠️ API Cloudflare indisponible, chargement de /data/f95list.json…');
+      return await fetchJson(DEFAULT_STATIC_BACKUP_URL, fallback, options);
     }
 
 
@@ -917,7 +932,7 @@
       $('eventMsg').className = 'event-admin-msg ok';
       $('gamesResults').innerHTML = '<div class="event-admin-msg">Chargement des jeux…</div>';
 
-      const rawGames = await fetchJson(activeEvent.list_url || DEFAULT_LIST_URL, [], { timeoutMs: 10000 });
+      const rawGames = await fetchDefaultListWithBackup(activeEvent.list_url || DEFAULT_LIST_URL, [], { timeoutMs: 10000 });
       allGames = flattenGames(rawGames);
       if (!allGames.length) {
         $('currentGame').innerHTML = '<div class="event-admin-msg err">Liste des jeux introuvable ou trop lente à charger. Vérifie list_url dans le JSON.</div>';

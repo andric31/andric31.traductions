@@ -480,6 +480,8 @@
     let f95GameTitleMapPromise = null;
 
     const F95LIST_DEFAULT_URL = 'https://raw.githubusercontent.com/andric31/f95list/main/f95list.json';
+    const F95LIST_BACKUP_URL = '/api/f95list';
+    const F95LIST_STATIC_BACKUP_URL = '/data/f95list.json';
 
     function getF95ListUrl() {
       try {
@@ -512,9 +514,26 @@
         f95GameTitleMapPromise = (async () => {
           const map = new Map();
           try {
-            const r = await fetch(getF95ListUrl(), { cache: 'no-store' });
-            if (!r.ok) return map;
-            const raw = await r.json();
+            const url = getF95ListUrl();
+            let raw;
+            try {
+              const r = await fetch(url, { cache: 'no-store' });
+              if (!r.ok) throw new Error('HTTP ' + r.status);
+              raw = await r.json();
+            } catch (err) {
+              if (url !== F95LIST_DEFAULT_URL) return map;
+              console.warn('⚠️ GitHub bloqué ou indisponible, chargement via Cloudflare…', err);
+              try {
+                const backup = await fetch(F95LIST_BACKUP_URL, { cache: 'no-store' });
+                if (!backup.ok) throw new Error('Cloudflare fallback HTTP ' + backup.status);
+                raw = await backup.json();
+              } catch (apiErr) {
+                console.warn('⚠️ API Cloudflare indisponible, chargement de /data/f95list.json…', apiErr);
+                const staticBackup = await fetch(F95LIST_STATIC_BACKUP_URL, { cache: 'no-store' });
+                if (!staticBackup.ok) return map;
+                raw = await staticBackup.json();
+              }
+            }
             for (const g of extractF95Games(raw)) {
               const key = gameKeyOfF95Entry(g);
               const title = String(g?.cleanTitle || g?.title || '').trim();

@@ -253,6 +253,16 @@
     return data;
   }
 
+
+  function isValidPersonalView(raw, catalogIndex, existingMap) {
+    const key = String(raw?.game_key || raw?.id || raw?.game_url || raw?.title || '').trim();
+    if (!key || key.startsWith('__')) return false;
+    const title = String(raw?.title || '').trim();
+    if (!title || title.toLowerCase() === 'jeu sans titre') return false;
+    if (existingMap?.has(key)) return true;
+    return !!findCatalogInfo(catalogIndex, raw);
+  }
+
   function mergeItem(map, raw, source) {
     const key = String(raw.game_key || raw.id || raw.game_url || raw.title || '').trim();
     if (!key) return;
@@ -304,8 +314,11 @@
       const map = new Map();
       (watchData.items || []).forEach((item) => mergeItem(map, item, 'watchlist'));
       (stateData.items || []).forEach((item) => mergeItem(map, item, 'state'));
-      (viewsData.items || []).forEach((item) => mergeItem(map, item, 'views'));
-      state.items = enrichWithTranslationDates(Array.from(map.values()), catalogIndex);
+      (viewsData.items || [])
+        .filter((item) => isValidPersonalView(item, catalogIndex, map))
+        .forEach((item) => mergeItem(map, item, 'views'));
+      state.items = enrichWithTranslationDates(Array.from(map.values()), catalogIndex)
+        .filter((item) => item.watchlist || item.liked || Number(item.rating || 0) > 0 || isValidPersonalView(item, catalogIndex, map));
       render();
     } catch (err) {
       state.items = [];

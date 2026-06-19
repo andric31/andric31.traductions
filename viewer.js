@@ -4,6 +4,8 @@
 // ✅ UID ONLY pour stats (aligné sur game.js)
 (() => {
   const DEFAULT_URL = "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json";
+  const DEFAULT_BACKUP_URL = "/api/f95list";
+  const DEFAULT_STATIC_BACKUP_URL = "/data/f95list.json";
   const TRANSLATORS_MANIFEST_URL = "https://raw.githubusercontent.com/andric31/traductions/refs/heads/main/traducteurs_manifest.json";
   const TRANSLATORS_RAW_BASE = "https://raw.githubusercontent.com/andric31/traductions/refs/heads/main/";
   const GLOBAL_LIST_ENTRY = {
@@ -1366,11 +1368,34 @@
     } catch {}
   }
 
+  async function fetchJsonWithDefaultBackup(url) {
+    const primaryUrl = String(url || DEFAULT_URL).trim() || DEFAULT_URL;
+    try {
+      const r = await fetch(primaryUrl, { cache: "no-store" });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      console.log("✅ f95list chargée depuis GitHub");
+      return await r.json();
+    } catch (err) {
+      if (primaryUrl !== DEFAULT_URL) throw err;
+      console.warn("⚠️ GitHub bloqué ou indisponible, chargement via Cloudflare…", err);
+      try {
+        const backup = await fetch(DEFAULT_BACKUP_URL, { cache: "no-store" });
+        if (!backup.ok) throw new Error("Cloudflare fallback HTTP " + backup.status);
+        console.log("✅ f95list chargée via Cloudflare API");
+        return await backup.json();
+      } catch (apiErr) {
+        console.warn("⚠️ API Cloudflare indisponible, chargement de /data/f95list.json…", apiErr);
+        const staticBackup = await fetch(DEFAULT_STATIC_BACKUP_URL, { cache: "no-store" });
+        if (!staticBackup.ok) throw new Error("Cloudflare data fallback HTTP " + staticBackup.status);
+        console.log("✅ f95list chargée depuis /data/f95list.json");
+        return await staticBackup.json();
+      }
+    }
+  }
+
   async function loadList() {
     const url = await getListUrl();
-    const r = await fetch(url, { cache: "no-store" });
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    return r.json();
+    return await fetchJsonWithDefaultBackup(url);
   }
 
   // =========================

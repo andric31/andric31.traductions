@@ -128,3 +128,100 @@ body.account-games-page .account-games-shell{
   font-size:12px;
   padding:7px 9px;
 }
+
+
+/* Top personnel Mes jeux */
+.account-games-top-list{
+  margin-top:16px;
+  border:1px solid var(--border);
+  background:color-mix(in srgb,var(--card) 78%, transparent);
+  border-radius:18px;
+  padding:14px;
+}
+.account-games-top-list-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:11px;
+}
+.account-games-top-list h2{
+  margin:0;
+  color:var(--title);
+  font-size:20px;
+  line-height:1.15;
+}
+.account-games-top-list p{
+  margin:5px 0 0;
+  color:var(--muted);
+  font-size:13px;
+}
+.account-games-top-list-items{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:9px;
+}
+.account-games-top-item{
+  min-width:0;
+  border:1px solid var(--border);
+  background:color-mix(in srgb,var(--card) 88%, transparent);
+  border-radius:15px;
+  padding:9px;
+  display:grid;
+  grid-template-columns:auto 46px minmax(0,1fr);
+  gap:9px;
+  align-items:center;
+  color:var(--fg);
+  text-decoration:none;
+}
+.account-games-top-item:hover{
+  border-color:color-mix(in srgb,var(--primary) 42%, var(--border));
+  text-decoration:none;
+}
+.account-games-top-rank{
+  font-weight:950;
+  color:var(--title);
+  min-width:28px;
+  text-align:center;
+}
+.account-games-top-cover{
+  width:46px;
+  height:46px;
+  border-radius:11px;
+  object-fit:cover;
+  background:var(--card);
+}
+.account-games-top-info{
+  min-width:0;
+  display:block;
+}
+.account-games-top-info strong{
+  display:block;
+  color:var(--title);
+  font-size:13px;
+  line-height:1.2;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.account-games-top-info small{
+  display:block;
+  margin-top:4px;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.2;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.account-games-top-empty{
+  grid-column:1/-1;
+  border:1px dashed var(--border);
+  border-radius:14px;
+  padding:13px;
+  color:var(--muted);
+  text-align:center;
+  font-weight:800;
+}
+@media (max-width:1100px){.account-games-top-list-items{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media (max-width:620px){.account-games-top-list-items{grid-template-columns:1fr}.account-games-top-item{grid-template-columns:auto 54px minmax(0,1fr)}.account-games-top-cover{width:54px;height:54px}}

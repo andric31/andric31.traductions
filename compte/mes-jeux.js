@@ -12,6 +12,8 @@
     app: $('#accountGamesApp'),
     user: $('#accountGamesUser'),
     grid: $('#accountGamesGrid'),
+    topSection: $('#accountGamesTopSection'),
+    topList: $('#accountGamesTopList'),
     status: $('#accountGamesStatus'),
     search: $('#accountGamesSearch'),
     sort: $('#accountGamesSort'),
@@ -258,8 +260,8 @@
       key,
       game_key: raw.game_key || key,
       title: '', game_url: '', image_url: '', f95_url: '', discord_url: '',
-      watchlist: false, liked: false, rating: 0,
-      watchDate: '', likedDate: '', ratedDate: '', updatedDate: '', translationDateTs: 0, translationDateRaw: '',
+      watchlist: false, liked: false, rating: 0, view_count: 0,
+      watchDate: '', likedDate: '', ratedDate: '', viewDate: '', updatedDate: '', translationDateTs: 0, translationDateRaw: '',
     };
 
     old.title = old.title || raw.title || 'Jeu sans titre';
@@ -279,7 +281,12 @@
       old.likedDate = raw.liked_at || old.likedDate;
       old.ratedDate = raw.rated_at || old.ratedDate;
     }
-    old.updatedDate = [old.watchDate, old.likedDate, old.ratedDate, raw.updated_at].filter(Boolean).sort().pop() || '';
+    if (source === 'views') {
+      old.view_count = Math.max(Number(old.view_count || 0), Number(raw.view_count || 0));
+      old.viewDate = raw.last_viewed_at || old.viewDate;
+      old.title = old.title || raw.title || old.title;
+    }
+    old.updatedDate = [old.watchDate, old.likedDate, old.ratedDate, old.viewDate, raw.updated_at].filter(Boolean).sort().pop() || '';
     map.set(key, old);
   }
 
@@ -288,14 +295,16 @@
     state.loading = true;
     setStatus('Chargement de tes jeux…');
     try {
-      const [watchData, stateData, catalogIndex] = await Promise.all([
+      const [watchData, stateData, viewsData, catalogIndex] = await Promise.all([
         fetchJson('/api/watchlist?limit=500'),
         fetchJson('/api/user-game-state?limit=500'),
+        fetchJson('/api/user-game-top?limit=500').catch(() => ({ ok: true, items: [] })),
         loadTranslationCatalog(),
       ]);
       const map = new Map();
       (watchData.items || []).forEach((item) => mergeItem(map, item, 'watchlist'));
       (stateData.items || []).forEach((item) => mergeItem(map, item, 'state'));
+      (viewsData.items || []).forEach((item) => mergeItem(map, item, 'views'));
       state.items = enrichWithTranslationDates(Array.from(map.values()), catalogIndex);
       render();
     } catch (err) {
@@ -365,6 +374,7 @@
     if (item.watchlist) lines.push(`${WATCHLIST_ICON} Ajouté à la Watchlist${formatDate(item.watchDate) ? ' le ' + escapeHtml(formatDate(item.watchDate)) : ''}`);
     if (item.liked) lines.push(`❤️ Liké${formatDate(item.likedDate) ? ' le ' + escapeHtml(formatDate(item.likedDate)) : ''}`);
     if (Number(item.rating || 0) > 0) lines.push(`<span class="account-game-rating">⭐ Note : ${Number(item.rating)}/4${formatDate(item.ratedDate) ? ' · ' + escapeHtml(formatDate(item.ratedDate)) : ''}</span>`);
+    if (Number(item.view_count || 0) > 0) lines.push(`👁️ ${Number(item.view_count || 0)} vue${Number(item.view_count || 0) > 1 ? 's' : ''}${formatDate(item.viewDate) ? ' · dernière le ' + escapeHtml(formatDate(item.viewDate)) : ''}`);
     return lines.map((line) => `<div>${line}</div>`).join('');
   }
 
@@ -398,8 +408,63 @@
       </article>`;
   }
 
+  function topScore(item) {
+    const rating = Number(item.rating || 0);
+    const views = Number(item.view_count || 0);
+    let score = 0;
+    score += rating * 100;
+    if (item.liked) score += 80;
+    if (item.watchlist) score += 45;
+    score += Math.min(views, 50) * 4;
+    const recent = Date.parse(item.updatedDate || item.viewDate || item.ratedDate || item.likedDate || item.watchDate || '') || 0;
+    if (recent) score += Math.max(0, 30 - Math.floor((Date.now() - recent) / 86400000));
+    return score;
+  }
+
+  function renderTopList() {
+    if (!els.topList || !els.topSection) return;
+    const list = state.items
+      .filter((item) => item.watchlist || item.liked || Number(item.rating || 0) > 0 || Number(item.view_count || 0) > 0)
+      .map((item) => ({ ...item, _score: topScore(item) }))
+      .filter((item) => item._score > 0)
+      .sort((a, b) => {
+        if (b._score !== a._score) return b._score - a._score;
+        return String(a.title || '').localeCompare(String(b.title || ''), 'fr', { sensitivity: 'base' });
+      })
+      .slice(0, 5);
+
+    if (!list.length) {
+      els.topSection.classList.add('is-empty');
+      els.topList.innerHTML = '<div class="account-games-top-empty">Ton top apparaîtra ici après quelques likes, notes, vues ou ajouts en Watchlist.</div>';
+      return;
+    }
+
+    els.topSection.classList.remove('is-empty');
+    els.topList.innerHTML = list.map((item, index) => {
+      const rank = ['🥇', '🥈', '🥉'][index] || `${index + 1}.`;
+      const details = [];
+      if (Number(item.rating || 0) > 0) details.push(`⭐ ${Number(item.rating)}/4`);
+      if (item.liked) details.push('❤️ liké');
+      if (item.watchlist) details.push(`${WATCHLIST_ICON} watchlist`);
+      if (Number(item.view_count || 0) > 0) details.push(`👁️ ${Number(item.view_count || 0)} vue${Number(item.view_count || 0) > 1 ? 's' : ''}`);
+      const title = escapeHtml(item.title || 'Jeu sans titre');
+      const gameUrl = escapeHtml(normalizeGameUrl(item.game_url));
+      const img = escapeHtml(item.image_url || '/favicon.png');
+      return `
+        <a class="account-games-top-item" href="${gameUrl}" target="_blank" rel="noopener">
+          <span class="account-games-top-rank">${rank}</span>
+          <img class="account-games-top-cover" src="${img}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='/favicon.png'">
+          <span class="account-games-top-info">
+            <strong>${title}</strong>
+            <small>${details.join(' · ')}</small>
+          </span>
+        </a>`;
+    }).join('');
+  }
+
   function render() {
     updateStats();
+    renderTopList();
     const list = filteredItems();
     const label = state.currentTab === 'all' ? 'jeu' : state.currentTab === 'watchlist' ? 'jeu en Watchlist' : state.currentTab === 'likes' ? 'jeu liké' : 'jeu noté';
     if (!list.length) {

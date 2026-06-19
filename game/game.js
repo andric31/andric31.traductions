@@ -1,6 +1,8 @@
 "use strict";
 
 const DEFAULT_URL = "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json";
+const DEFAULT_BACKUP_URL = "/api/f95list";
+const DEFAULT_STATIC_BACKUP_URL = "/data/f95list.json";
 
 // ====== Helpers URL / JSON ======
 
@@ -492,9 +494,25 @@ function renderSeriesBlocks(seriesList, games, currentCanonicalKey) {
 }
 
 async function fetchJson(url) {
-  const r = await fetch(url, { cache: "no-store" });
-  if (!r.ok) throw new Error(`HTTP ${r.status} sur ${url}`);
-  return await r.json();
+  const primaryUrl = String(url || DEFAULT_URL).trim() || DEFAULT_URL;
+  try {
+    const r = await fetch(primaryUrl, { cache: "no-store" });
+    if (!r.ok) throw new Error(`HTTP ${r.status} sur ${primaryUrl}`);
+    return await r.json();
+  } catch (err) {
+    if (primaryUrl !== DEFAULT_URL) throw err;
+    console.warn("⚠️ GitHub bloqué ou indisponible, chargement via Cloudflare…", err);
+    try {
+      const backup = await fetch(DEFAULT_BACKUP_URL, { cache: "no-store" });
+      if (!backup.ok) throw new Error(`Cloudflare fallback HTTP ${backup.status}`);
+      return await backup.json();
+    } catch (apiErr) {
+      console.warn("⚠️ API Cloudflare indisponible, chargement de /data/f95list.json…", apiErr);
+      const staticBackup = await fetch(DEFAULT_STATIC_BACKUP_URL, { cache: "no-store" });
+      if (!staticBackup.ok) throw new Error(`Cloudflare data fallback HTTP ${staticBackup.status}`);
+      return await staticBackup.json();
+    }
+  }
 }
 
 // ====== UI helpers ======

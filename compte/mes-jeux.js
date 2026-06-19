@@ -254,16 +254,14 @@
   }
 
 
-  function isValidPersonalView(raw, catalogIndex, existingMap) {
-    const key = String(raw?.game_key || raw?.id || raw?.game_url || raw?.title || '').trim();
-    if (!key || key.startsWith('__')) return false;
-    const title = String(raw?.title || '').trim();
-    if (!title || title.toLowerCase() === 'jeu sans titre') return false;
-    if (existingMap?.has(key)) return true;
-    return !!findCatalogInfo(catalogIndex, raw);
+  function isHiddenAccountGame(raw, source = '') {
+    const key = String(raw?.game_key || raw?.key || raw?.id || '').trim();
+    if (source === 'views' && (key === '__viewer_main__' || key.startsWith('__viewer_'))) return true;
+    return false;
   }
 
   function mergeItem(map, raw, source) {
+    if (isHiddenAccountGame(raw, source)) return;
     const key = String(raw.game_key || raw.id || raw.game_url || raw.title || '').trim();
     if (!key) return;
     const old = map.get(key) || {
@@ -314,11 +312,8 @@
       const map = new Map();
       (watchData.items || []).forEach((item) => mergeItem(map, item, 'watchlist'));
       (stateData.items || []).forEach((item) => mergeItem(map, item, 'state'));
-      (viewsData.items || [])
-        .filter((item) => isValidPersonalView(item, catalogIndex, map))
-        .forEach((item) => mergeItem(map, item, 'views'));
-      state.items = enrichWithTranslationDates(Array.from(map.values()), catalogIndex)
-        .filter((item) => item.watchlist || item.liked || Number(item.rating || 0) > 0 || isValidPersonalView(item, catalogIndex, map));
+      (viewsData.items || []).forEach((item) => mergeItem(map, item, 'views'));
+      state.items = enrichWithTranslationDates(Array.from(map.values()), catalogIndex);
       render();
     } catch (err) {
       state.items = [];
@@ -437,6 +432,7 @@
   function renderTopList() {
     if (!els.topList || !els.topSection) return;
     const list = state.items
+      .filter((item) => !isHiddenAccountGame(item, 'views'))
       .filter((item) => item.watchlist || item.liked || Number(item.rating || 0) > 0 || Number(item.view_count || 0) > 0)
       .map((item) => ({ ...item, _score: topScore(item) }))
       .filter((item) => item._score > 0)

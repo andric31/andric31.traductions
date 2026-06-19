@@ -254,14 +254,44 @@
   }
 
 
-  function isHiddenAccountGame(raw, source = '') {
+  function isPlaceholderTitle(value) {
+    const title = cleanTitleKey(value || '');
+    return !title || title === 'jeu sans titre' || title === 'sans titre' || title === 'untitled' || title === 'untitled game';
+  }
+
+  function hasUsableUrl(value) {
+    const raw = String(value || '').trim();
+    if (!raw || raw === '#') return false;
+    try {
+      const u = new URL(raw, location.origin);
+      const path = (u.pathname || '').replace(/\/+$/, '') || '/';
+      if (path === '/compte/mes-jeux' || path === '/compte/mes-jeux/') return false;
+      if (path === '/' && !u.search && !u.hash) return false;
+      return true;
+    } catch {
+      return raw !== '#';
+    }
+  }
+
+  function isHiddenAccountGame(raw) {
     const key = String(raw?.game_key || raw?.key || raw?.id || '').trim();
-    if (source === 'views' && (key === '__viewer_main__' || key.startsWith('__viewer_'))) return true;
+    if (key === '__viewer_main__' || key.startsWith('__viewer_')) return true;
+
+    const title = raw?.title || '';
+    const hasAction = !!raw?.watchlist || !!raw?.liked || Number(raw?.rating || 0) > 0;
+    const hasLink = hasUsableUrl(raw?.game_url) || hasUsableUrl(raw?.f95_url) || hasUsableUrl(raw?.discord_url);
+
+    // Cache les entrées de stats seules créées sans vraie fiche de jeu.
+    // Elles restent en base, elles ne sont juste pas affichées dans Mes jeux.
+    if (!hasAction && !hasLink && isPlaceholderTitle(title)) return true;
     return false;
   }
 
+  function visibleAccountItems() {
+    return state.items.filter((item) => !isHiddenAccountGame(item));
+  }
+
   function mergeItem(map, raw, source) {
-    if (isHiddenAccountGame(raw, source)) return;
     const key = String(raw.game_key || raw.id || raw.game_url || raw.title || '').trim();
     if (!key) return;
     const old = map.get(key) || {
@@ -325,7 +355,7 @@
   }
 
   function filteredItems() {
-    let list = state.items.slice();
+    let list = visibleAccountItems();
     if (state.currentTab === 'watchlist') list = list.filter((x) => x.watchlist);
     if (state.currentTab === 'likes') list = list.filter((x) => x.liked);
     if (state.currentTab === 'notes') list = list.filter((x) => Number(x.rating || 0) > 0);
@@ -351,10 +381,11 @@
   }
 
   function updateStats() {
-    const watch = state.items.filter((x) => x.watchlist).length;
-    const likes = state.items.filter((x) => x.liked).length;
-    const notes = state.items.filter((x) => Number(x.rating || 0) > 0).length;
-    const total = new Set(state.items.map((x) => x.key)).size;
+    const visible = visibleAccountItems();
+    const watch = visible.filter((x) => x.watchlist).length;
+    const likes = visible.filter((x) => x.liked).length;
+    const notes = visible.filter((x) => Number(x.rating || 0) > 0).length;
+    const total = new Set(visible.map((x) => x.key)).size;
     if (els.total) els.total.textContent = total;
     if (els.watch) els.watch.textContent = watch;
     if (els.likes) els.likes.textContent = likes;
@@ -431,8 +462,7 @@
 
   function renderTopList() {
     if (!els.topList || !els.topSection) return;
-    const list = state.items
-      .filter((item) => !isHiddenAccountGame(item, 'views'))
+    const list = visibleAccountItems()
       .filter((item) => item.watchlist || item.liked || Number(item.rating || 0) > 0 || Number(item.view_count || 0) > 0)
       .map((item) => ({ ...item, _score: topScore(item) }))
       .filter((item) => item._score > 0)

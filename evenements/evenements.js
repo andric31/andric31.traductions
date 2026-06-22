@@ -218,6 +218,62 @@
     return [id, uid, title].filter(Boolean).join('|') || title || 'jeu';
   }
 
+  function buildPrivateLinksKey(game) {
+    const g = game && typeof game === 'object' ? game : {};
+    const id = String(g.id || '').trim();
+    if (id) return id;
+
+    const collection = String(g.collection || '').trim();
+    const uid = String(g.uid ?? '').trim();
+    if (collection && uid) return `${collection}__${uid}`;
+    if (uid) return `uid__${uid}`;
+
+    const title = String(g.cleanTitle || g.title || g.gameData?.title || '').trim();
+    return title ? `title__${title}` : '';
+  }
+
+  async function fetchPrivateGameData(game) {
+    const key = buildPrivateLinksKey(game);
+    if (!key) return null;
+    try {
+      const res = await fetch(`/api/f95list_links?key=${encodeURIComponent(key)}`, { cache: 'no-store' });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data || data.ok === false || !data.found) return null;
+      return data;
+    } catch (err) {
+      console.warn('[events] Infos privées indisponibles', err);
+      return null;
+    }
+  }
+
+  function mergePrivateGameData(game, privateData) {
+    if (!privateData || typeof privateData !== 'object') return game;
+    const out = { ...(game || {}) };
+    ['discordlink', 'translationType', 'description', 'notes', 'translationsArchive'].forEach((field) => {
+      if (Object.prototype.hasOwnProperty.call(privateData, field) && String(privateData[field] || '').trim()) {
+        out[field] = privateData[field];
+      }
+    });
+    if (Array.isArray(privateData.translationsExtra) && privateData.translationsExtra.length) out.translationsExtra = privateData.translationsExtra;
+    ['hasDiscord', 'hasTranslation', 'hasTranslationsExtra', 'hasTranslationsArchive', 'hasDescription', 'hasNotes'].forEach((field) => {
+      if (Object.prototype.hasOwnProperty.call(privateData, field)) out[field] = !!privateData[field];
+    });
+    return out;
+  }
+
+  async function enrichSelectionWithPrivateData(selection) {
+    if (!selection?.game) return selection;
+    const privateData = await fetchPrivateGameData(selection.game);
+    if (!privateData) return selection;
+    const game = mergePrivateGameData(selection.game, privateData);
+    return {
+      ...selection,
+      game,
+      summary: selection.summary || getGameDescription(game),
+      tags: Array.isArray(selection.tags) && selection.tags.length ? selection.tags : getGameTags(game),
+    };
+  }
+
   function getBlockedGameKeys(event) {
     const values = [];
     ['blocked_game_keys', 'used_game_keys', 'previous_game_keys'].forEach((field) => {
@@ -949,7 +1005,7 @@
     const listUrl = getListUrl(event);
     const raw = await fetchJson(listUrl, null);
     const games = flattenGames(raw);
-    const selection = pickGame(games, event);
+    const selection = await enrichSelectionWithPrivateData(pickGame(games, event));
     renderActiveEvent(event, selection, raw ? '' : 'La base f95list.json est peut-être inaccessible.');
     startEventTimer(event);
   }

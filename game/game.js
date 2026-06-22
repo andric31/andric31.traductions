@@ -2119,7 +2119,14 @@ function renderVideoBlock({ id, videoUrl }) {
               if (name.toLowerCase() === "patch") {
                 a.textContent = "📥 Télécharger · Patch";
               } else {
-                const labelName = String(x.host || name || "Lien").trim() || "Lien";
+                // Les liens privés passent par /api/link, donc le host devient masqué.
+                // Pour les traductions supplémentaires, on garde en priorité le nom défini dans le JSON
+                // ex: "v0.31 Patreon", puis on retombe sur le host seulement si aucun nom utile n'existe.
+                const rawName = String(name || "").trim();
+                const labelName = (rawName && rawName.toLowerCase() !== "lien")
+                  ? rawName
+                  : (String(x.host || rawName || "Lien").trim() || "Lien");
+
                 if (hostCls === "btn-f95" && /f95\s*zone/i.test(labelName)) {
                   a.innerHTML = `📥 Télécharger la traduction · <span class="f95-logo"><span class="f95-white">F95</span><span class="f95-red">Zone</span></span>`;
                 } else {

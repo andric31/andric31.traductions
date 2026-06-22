@@ -5,6 +5,7 @@
     blog: "quickBlogBtn",
     ticket: "quickTicketBtn",
     messages: "quickMessagesBtn",
+    events: "quickEventsBtn",
     notifications: "quickNotificationsBtn",
     notificationsPopover: "quickNotificationsPopover",
   };
@@ -13,6 +14,7 @@
     seenMessageId: "andric31_seen_message_id",
     seenBlogSignature: "andric31_seen_blog_signature",
     seenNotificationId: "andric31_seen_notification_id",
+    seenEventSignature: "andric31_seen_event_signature",
     seenTicketOpenCount: "andric31_seen_ticket_open_count",
     firstVisitShown: "andric31_first_visit_notification_shown",
     hiddenNotificationId: "andric31_hidden_notification_id",
@@ -23,6 +25,8 @@
   const BLOG_INDEX_URL = "/blog/";
   const TICKETS_ADMIN_URL = "/compte/ticket-admin.html";
   const TICKETS_PUBLIC_URL = "/ticket/";
+  const EVENTS_URL = "/evenements/";
+  const EVENTS_CONFIG_URL = "/evenements/config.json";
   const NOTIFICATIONS_JSON_URL = "/notifications/notifications.json";
   const NOTIFICATION_URL = "https://andric31-traductions.pages.dev/notifications/";
 
@@ -68,6 +72,21 @@
       <path d="M6.25 6.25h11.5A2.25 2.25 0 0 1 20 8.5v6a2.25 2.25 0 0 1-2.25 2.25H11l-4.75 3v-3H6.25A2.25 2.25 0 0 1 4 14.5v-6a2.25 2.25 0 0 1 2.25-2.25Z"/>
       <path d="M8 10.5h8"/>
       <path d="M8 13.5h5.5"/>
+    </svg>`;
+  }
+
+
+  function iconEvents() {
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <rect x="4" y="5" width="16" height="15" rx="2"/>
+      <path d="M8 3v4"/>
+      <path d="M16 3v4"/>
+      <path d="M4 10h16"/>
+      <path d="M8 14h.01"/>
+      <path d="M12 14h.01"/>
+      <path d="M16 14h.01"/>
+      <path d="M8 17h.01"/>
+      <path d="M12 17h.01"/>
     </svg>`;
   }
 
@@ -279,7 +298,7 @@
 
   function insertButtons(afterEl) {
     if (!afterEl) return;
-    if (document.getElementById(IDS.wiki) || document.getElementById(IDS.labo) || document.getElementById(IDS.blog) || document.getElementById(IDS.ticket) || document.getElementById(IDS.messages) || document.getElementById(IDS.notifications)) return;
+    if (document.getElementById(IDS.wiki) || document.getElementById(IDS.labo) || document.getElementById(IDS.blog) || document.getElementById(IDS.ticket) || document.getElementById(IDS.messages) || document.getElementById(IDS.events) || document.getElementById(IDS.notifications)) return;
 
     const refClass = afterEl.className || "hamburger-btn";
     const wiki = makeLink(IDS.wiki, "/wiki/", "Wiki", iconWiki(), refClass);
@@ -287,6 +306,7 @@
     const blog = makeLink(IDS.blog, "/blog/", "Blog", iconBlog(), refClass);
     const ticket = makeLink(IDS.ticket, TICKETS_PUBLIC_URL, "Ticket", iconTicket(), refClass);
     const notifications = makeButton(IDS.notifications, "Notifications", iconNotifications(), refClass);
+    const events = makeLink(IDS.events, EVENTS_URL, "Événements", iconEvents(), refClass);
     const messages = makeLink(IDS.messages, "/messages/", "Messages", iconMessages(), refClass);
 
     notifications.addEventListener("click", (event) => {
@@ -310,6 +330,11 @@
       setDotVisible(messages, false);
     });
 
+    events.addEventListener("click", () => {
+      localStorage.setItem(STORAGE.seenEventSignature, String(events.dataset.latestEventSignature || ""));
+      setDotVisible(events, false);
+    });
+
     document.addEventListener("click", (event) => {
       const pop = document.getElementById(IDS.notificationsPopover);
       if (!pop || pop.classList.contains("hidden")) return;
@@ -322,13 +347,14 @@
     });
 
     afterEl.insertAdjacentElement("afterend", notifications);
+    afterEl.insertAdjacentElement("afterend", events);
     afterEl.insertAdjacentElement("afterend", messages);
     afterEl.insertAdjacentElement("afterend", ticket);
     afterEl.insertAdjacentElement("afterend", blog);
     afterEl.insertAdjacentElement("afterend", labo);
     afterEl.insertAdjacentElement("afterend", wiki);
 
-    initIndicators(blog, ticket, messages, notifications);
+    initIndicators(blog, ticket, messages, events, notifications);
   }
 
   function escapeHtml(value) {
@@ -341,12 +367,13 @@
     }[char]));
   }
 
-  async function initIndicators(blogEl, ticketEl, messagesEl, notificationsEl) {
+  async function initIndicators(blogEl, ticketEl, messagesEl, eventsEl, notificationsEl) {
     await initBlogIndicator(blogEl);
     await initTicketIndicator(ticketEl);
-    await initNotificationIndicator(notificationsEl);
     await initMessageIndicator(messagesEl);
-    startIndicatorRefresh(blogEl, ticketEl, messagesEl, notificationsEl);
+    await initEventIndicator(eventsEl);
+    await initNotificationIndicator(notificationsEl);
+    startIndicatorRefresh(blogEl, ticketEl, messagesEl, eventsEl, notificationsEl);
   }
 
   async function loadLatestBlogSignature() {
@@ -424,6 +451,142 @@
     }
   }
 
+
+  function eventNormalizeText(value) {
+    return String(value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+  }
+
+  async function fetchEventJson(url, fallback = null) {
+    try {
+      const glue = url.includes("?") ? "&" : "?";
+      const res = await fetch(`${url}${glue}v=${Math.floor(Date.now() / 60000)}`, { cache: "no-store" });
+      if (!res.ok) return fallback;
+      return await res.json();
+    } catch {
+      return fallback;
+    }
+  }
+
+  async function loadActiveEventForIndicator() {
+    const config = await fetchEventJson(EVENTS_CONFIG_URL, null);
+    let activeId = String(config?.event_actif || config?.active_event || "").trim();
+    let enabled = true;
+
+    const savedState = await fetchEventJson("/api/evenements", null);
+    if (savedState?.ok) {
+      activeId = String(savedState.active_event || activeId || "").trim();
+      enabled = savedState.enabled !== false;
+    }
+
+    if (!enabled || !activeId) return null;
+
+    const localEvent = await fetchEventJson(`/evenements/${encodeURIComponent(activeId)}.json`, null);
+    let event = localEvent && typeof localEvent === "object" ? { ...localEvent } : { id: activeId };
+
+    const savedEvent = await fetchEventJson(`/api/evenement?id=${encodeURIComponent(activeId)}`, null);
+    if (savedEvent?.ok && savedEvent.event && typeof savedEvent.event === "object") {
+      event = { ...event, ...savedEvent.event };
+      if (localEvent?.id) event.id = localEvent.id;
+      if (localEvent?.type) event.type = localEvent.type;
+      if (localEvent?.start_at) event.start_at = localEvent.start_at;
+      if (localEvent?.end_at) event.end_at = localEvent.end_at;
+      if (localEvent?.date_label) event.date_label = localEvent.date_label;
+      if (localEvent?.date) event.date = localEvent.date;
+    }
+
+    event.id = String(event.id || activeId).trim();
+    if (event.enabled === false) return null;
+    return event;
+  }
+
+  function isEventInPeriod(event) {
+    const now = new Date();
+    const start = new Date(event?.start_at || "");
+    const end = new Date(event?.end_at || "");
+    if (!Number.isNaN(start.getTime()) && now < start) return false;
+    if (!Number.isNaN(end.getTime())) {
+      const endInclusive = new Date(end);
+      endInclusive.setHours(23, 59, 59, 999);
+      if (now > endInclusive) return false;
+    }
+    return true;
+  }
+
+  function isAdventEvent(event) {
+    const type = eventNormalizeText(event?.type || event?.mode || event?.title || "");
+    const id = eventNormalizeText(event?.id || "");
+    return id.includes("avent") || id.includes("advent") || type.includes("avent") || type.includes("advent") || type.includes("calendrier");
+  }
+
+  function getChangeDayIndex(event) {
+    const days = {
+      sunday: 0, dimanche: 0,
+      monday: 1, lundi: 1,
+      tuesday: 2, mardi: 2,
+      wednesday: 3, mercredi: 3,
+      thursday: 4, jeudi: 4,
+      friday: 5, vendredi: 5,
+      saturday: 6, samedi: 6
+    };
+    const raw = eventNormalizeText(event?.change_day || "monday").trim();
+    return Object.prototype.hasOwnProperty.call(days, raw) ? days[raw] : 1;
+  }
+
+  function getWeeklyBoundaryKey(event) {
+    const now = new Date();
+    const boundary = new Date(now);
+    const wantedDay = getChangeDayIndex(event);
+    const wantedHour = Number.isFinite(Number(event?.change_hour)) ? Number(event.change_hour) : 0;
+    boundary.setHours(wantedHour, 0, 0, 0);
+    const diff = (boundary.getDay() - wantedDay + 7) % 7;
+    boundary.setDate(boundary.getDate() - diff);
+    if (now < boundary) boundary.setDate(boundary.getDate() - 7);
+    return boundary.toISOString().slice(0, 10);
+  }
+
+  function getLocalDateKey() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    const d = String(now.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+
+  function getEventSignature(event) {
+    const id = String(event?.id || "evenement").trim();
+    const frequency = eventNormalizeText(event?.change_frequency || event?.selection || "weekly");
+    const title = String(event?.title || "").trim();
+
+    if (isAdventEvent(event) || frequency.includes("daily") || frequency.includes("jour")) {
+      return `${id}|daily|${getLocalDateKey()}|${title}`;
+    }
+
+    return `${id}|weekly|${getWeeklyBoundaryKey(event)}|${title}`;
+  }
+
+  async function initEventIndicator(eventsEl) {
+    if (!eventsEl) return;
+    try {
+      const event = await loadActiveEventForIndicator();
+      if (!event || !isEventInPeriod(event)) {
+        eventsEl.dataset.latestEventSignature = "";
+        setDotVisible(eventsEl, false);
+        return;
+      }
+
+      const signature = getEventSignature(event);
+      eventsEl.dataset.latestEventSignature = signature;
+      const seenSignature = localStorage.getItem(STORAGE.seenEventSignature) || "";
+      setDotVisible(eventsEl, !!signature && signature !== seenSignature);
+    } catch {
+      eventsEl.dataset.latestEventSignature = "";
+      setDotVisible(eventsEl, false);
+    }
+  }
+
   async function initNotificationIndicator(notificationsEl) {
     const items = await loadNotificationsList();
     const latest = toNotificationPreview(items[0] || null);
@@ -444,11 +607,12 @@
     }
   }
 
-  function startIndicatorRefresh(blogEl, ticketEl, messagesEl, notificationsEl) {
+  function startIndicatorRefresh(blogEl, ticketEl, messagesEl, eventsEl, notificationsEl) {
     window.setInterval(() => {
       if (blogEl) initBlogIndicator(blogEl);
       if (ticketEl) initTicketIndicator(ticketEl);
       if (messagesEl) initMessageIndicator(messagesEl);
+      if (eventsEl) initEventIndicator(eventsEl);
       if (notificationsEl) initNotificationIndicator(notificationsEl);
     }, 10000);
   }

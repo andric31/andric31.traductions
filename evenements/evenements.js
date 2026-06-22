@@ -96,11 +96,16 @@
     const saved = await fetchJson(`/api/evenement?id=${encodeURIComponent(id)}`, null);
     if (saved?.ok && saved.event && typeof saved.event === 'object') {
       const merged = mergeAdventDays(baseEvent, saved.event);
-      // On garde les informations structurelles du fichier local.
-      // Sinon une ancienne sauvegarde Cloudflare peut casser le mode "aucun événement".
+      // On garde les informations structurelles et les dates du fichier local.
+      // Sinon une ancienne sauvegarde Cloudflare peut continuer à afficher
+      // les anciennes dates même après modification du JSON local.
       if (baseEvent.id) merged.id = baseEvent.id;
       if (baseEvent.type) merged.type = baseEvent.type;
       if (baseEvent.css) merged.css = baseEvent.css;
+      if (baseEvent.start_at) merged.start_at = baseEvent.start_at;
+      if (baseEvent.end_at) merged.end_at = baseEvent.end_at;
+      if (baseEvent.date_label) merged.date_label = baseEvent.date_label;
+      if (baseEvent.date) merged.date = baseEvent.date;
       return merged;
     }
     return baseEvent;

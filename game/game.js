@@ -43,6 +43,73 @@ function extractGames(raw) {
   return [];
 }
 
+function buildPrivateLinksKey(game) {
+  const g = game && typeof game === "object" ? game : {};
+  const id = String(g.id || "").trim();
+  if (id) return id;
+
+  const collection = String(g.collection || "").trim();
+  const uid = String(g.uid || "").trim();
+  if (collection && uid) return `${collection}__${uid}`;
+  if (uid) return `uid__${uid}`;
+
+  const title = String(g.cleanTitle || g.title || "").trim();
+  return title ? `title__${title}` : "";
+}
+
+async function fetchPrivateGameData(privateKey) {
+  const key = String(privateKey || "").trim();
+  if (!key) return null;
+
+  try {
+    const r = await fetch(`/api/f95list_links?key=${encodeURIComponent(key)}`, { cache: "no-store" });
+    const j = await r.json().catch(() => null);
+    if (!r.ok || !j || j.ok === false || !j.found) {
+      console.warn("Infos privées indisponibles", j || r.status);
+      return null;
+    }
+    return j;
+  } catch (e) {
+    console.warn("Impossible de charger les infos privées", e);
+    return null;
+  }
+}
+
+function mergePrivateGameData(entry, privateData) {
+  if (!privateData || typeof privateData !== "object") return entry;
+  const out = { ...(entry || {}) };
+
+  for (const k of [
+    "discordlink",
+    "translation",
+    "translationType",
+    "translationsArchive",
+    "description",
+    "notes"
+  ]) {
+    if (Object.prototype.hasOwnProperty.call(privateData, k) && String(privateData[k] || "").trim()) {
+      out[k] = privateData[k];
+    }
+  }
+
+  if (Array.isArray(privateData.translationsExtra) && privateData.translationsExtra.length) {
+    out.translationsExtra = privateData.translationsExtra;
+  }
+
+  for (const k of [
+    "hasDiscord",
+    "hasTranslation",
+    "hasTranslationsExtra",
+    "hasTranslationsArchive",
+    "hasDescription",
+    "hasNotes"
+  ]) {
+    if (Object.prototype.hasOwnProperty.call(privateData, k)) out[k] = !!privateData[k];
+  }
+
+  return out;
+}
+
 function escapeHtml(s) {
   return String(s ?? "")
     .replace(/&/g, "&amp;")
@@ -1732,7 +1799,12 @@ function renderVideoBlock({ id, videoUrl }) {
       return;
     }
 
-    const entry = page.entry;
+    let entry = page.entry;
+    const privateLinksKey = buildPrivateLinksKey(entry);
+    const privateGameData = await fetchPrivateGameData(privateLinksKey);
+    entry = mergePrivateGameData(entry, privateGameData);
+    if (page && typeof page === "object") page.entry = entry;
+
     const display = entry?.gameData ? entry.gameData : entry;
 
     const counterKey = buildCounterKeyFromEntry(entry);
@@ -1869,6 +1941,7 @@ function renderVideoBlock({ id, videoUrl }) {
       if (u.includes("f95zone")) return "btn-f95";
       if (u.includes("drive.google")) return "btn-host-drive";
       if (u.includes("gofile")) return "btn-host-gofile";
+      if (u.includes("/api/link") && (u.includes("type=translation") || u.includes("type=translationsextra") || u.includes("type=translationsarchive"))) return "btnMega";
       return "btn-host-default";
     }
 
@@ -1937,7 +2010,8 @@ function renderVideoBlock({ id, videoUrl }) {
         if (typeof x !== "object") return null;
         const name = String(x.name || "Lien").trim();
         const link = String(x.link || x.url || "").trim();
-        return link ? { name, link } : null;
+        const host = String(x.host || "").trim();
+        return link ? { name, link, host } : null;
       })
       .filter(Boolean);
 
@@ -2045,10 +2119,11 @@ function renderVideoBlock({ id, videoUrl }) {
               if (name.toLowerCase() === "patch") {
                 a.textContent = "📥 Télécharger · Patch";
               } else {
-                if (hostCls === "btn-f95" && /f95\s*zone/i.test(name)) {
+                const labelName = String(x.host || name || "Lien").trim() || "Lien";
+                if (hostCls === "btn-f95" && /f95\s*zone/i.test(labelName)) {
                   a.innerHTML = `📥 Télécharger la traduction · <span class="f95-logo"><span class="f95-white">F95</span><span class="f95-red">Zone</span></span>`;
                 } else {
-                  a.textContent = `📥 Télécharger la traduction · ${name}`;
+                  a.textContent = `📥 Télécharger la traduction · ${labelName}`;
                 }
               }
 

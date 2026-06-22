@@ -25,6 +25,13 @@ function json(data, status = 200, extraHeaders = {}) {
   });
 }
 
+function decodeBase64Utf8(encoded) {
+  const binary = atob(String(encoded || '').replace(/\s/g, ''));
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+  return new TextDecoder('utf-8').decode(bytes);
+}
+
 function getEnv(context, name, fallback = '') {
   return String(context.env?.[name] || fallback || '').trim();
 }
@@ -64,7 +71,7 @@ async function fetchPrivateLinksDoc(context) {
   const encoded = String(data?.content || '').replace(/\s/g, '');
   if (!encoded) throw new Error('Fichier privé vide ou illisible');
 
-  const text = atob(encoded);
+  const text = decodeBase64Utf8(encoded);
   return JSON.parse(text);
 }
 

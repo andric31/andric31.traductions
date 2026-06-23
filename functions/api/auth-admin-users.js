@@ -1,6 +1,9 @@
 import { ensureAuthTables, json, requireUser, isRoleAllowed } from './_auth.js';
 
 async function ensureAdminMemberInfoTables(db) {
+  try {
+    await db.prepare(`ALTER TABLE auth_users ADD COLUMN last_seen_at TEXT DEFAULT ''`).run();
+  } catch {}
   await db.prepare(`
     CREATE TABLE IF NOT EXISTS user_watchlist (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -116,7 +119,7 @@ export async function onRequest(context) {
   if (!isRoleAllowed(auth.user.role, ['admin'])) return json({ ok: false, error: 'Accès refusé.' }, 403);
 
   const { results } = await env.DB.prepare(`
-    SELECT id, username, display_name, role, is_active, created_at, updated_at, last_login_at
+    SELECT id, username, display_name, role, is_active, created_at, updated_at, last_login_at, last_seen_at
     FROM auth_users
     ORDER BY lower(username) ASC
   `).all();
@@ -133,6 +136,7 @@ export async function onRequest(context) {
       created_at: u.created_at || '',
       updated_at: u.updated_at || '',
       last_login_at: u.last_login_at || '',
+      last_seen_at: u.last_seen_at || '',
       ...extra
     };
   }));

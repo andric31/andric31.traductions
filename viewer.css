@@ -1791,3 +1791,36 @@ html.viewer-rating-hidden .card-meta .card-stat,
   right:auto;
   left:8px;
 }
+
+/* === Patch mobile : ligne haute du viewer scrollable comme la barre recherche/filtres === */
+.top-title-row.top-title-flex{
+  flex-wrap:nowrap;
+  min-width:0;
+  overflow-x:auto;
+  overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+
+.top-title-row.top-title-flex::-webkit-scrollbar{
+  display:none;
+}
+
+.top-title-row.top-title-flex > *{
+  flex:0 0 auto;
+}
+
+.top-title-row.top-title-flex .top-title-tools{
+  flex:0 0 auto;
+  min-width:max-content;
+}
+
+/* Même finition sur la barre recherche/filtres : scroll tactile, sans barre visible au départ */
+.top-actions{
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+
+.top-actions::-webkit-scrollbar{
+  display:none;
+}

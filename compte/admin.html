@@ -380,6 +380,7 @@
         <option value="username_asc">Pseudo A → Z</option>
         <option value="created_desc">Création récente</option>
         <option value="login_desc">Dernier login</option>
+        <option value="seen_desc">Dernière visite</option>
         <option value="role_asc">Rôle</option>
       </select>
     </label>
@@ -736,8 +737,11 @@
         const bc = new Date(b?.created_at || 0).getTime() || 0;
         const al = new Date(a?.last_login_at || 0).getTime() || 0;
         const bl = new Date(b?.last_login_at || 0).getTime() || 0;
+        const as = new Date(a?.last_seen_at || 0).getTime() || 0;
+        const bs = new Date(b?.last_seen_at || 0).getTime() || 0;
         if (mode === 'created_desc') return bc - ac || au.localeCompare(bu, 'fr');
         if (mode === 'login_desc') return bl - al || au.localeCompare(bu, 'fr');
+        if (mode === 'seen_desc') return bs - as || au.localeCompare(bu, 'fr');
         if (mode === 'role_asc') return ar.localeCompare(br, 'fr') || au.localeCompare(bu, 'fr');
         return au.localeCompare(bu, 'fr');
       });
@@ -786,6 +790,7 @@
                     <span class="admin-pill">Rôle : ${esc(u.role)}</span>
                     <span class="admin-pill ${u.is_active ? 'ok' : 'off'}">${u.is_active ? 'Actif' : 'Désactivé'}</span>
                     <span class="admin-pill">Dernier login : ${esc(fmtDate(u.last_login_at))}</span>
+                    <span class="admin-pill">Dernière visite : ${esc(fmtDate(u.last_seen_at))}</span>
                     ${isSelf ? '<span class="admin-pill me">Ton compte</span>' : ''}
                   </div>
                 </div>
@@ -826,6 +831,7 @@
                 <div class="meta-box"><strong>Créé</strong>${esc(fmtDate(u.created_at))}</div>
                 <div class="meta-box"><strong>Mis à jour</strong>${esc(fmtDate(u.updated_at))}</div>
                 <div class="meta-box"><strong>Dernier login</strong>${esc(fmtDate(u.last_login_at))}</div>
+                <div class="meta-box"><strong>Dernière visite</strong>${esc(fmtDate(u.last_seen_at))}</div>
               </div>
 
               ${renderMemberStatsFilter(u)}

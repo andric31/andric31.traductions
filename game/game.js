@@ -92,6 +92,10 @@ function mergePrivateGameData(entry, privateData) {
     }
   }
 
+  if (privateData.f95Info && typeof privateData.f95Info === "object") {
+    out.f95Info = privateData.f95Info;
+  }
+
   if (Array.isArray(privateData.translationsExtra) && privateData.translationsExtra.length) {
     out.translationsExtra = privateData.translationsExtra;
   }
@@ -102,7 +106,8 @@ function mergePrivateGameData(entry, privateData) {
     "hasTranslationsExtra",
     "hasTranslationsArchive",
     "hasDescription",
-    "hasNotes"
+    "hasNotes",
+    "hasF95Info"
   ]) {
     if (Object.prototype.hasOwnProperty.call(privateData, k)) out[k] = !!privateData[k];
   }
@@ -615,6 +620,186 @@ function setHref(id, href) {
     el.style.display = "";
     el.href = href;
   }
+}
+
+
+function hostLabelFromUrl(rawUrl, fallback = "Lien") {
+  try {
+    const host = new URL(String(rawUrl || "")).hostname.toLowerCase().replace(/^www\./, "");
+    if (host.includes("mega.nz")) return "MEGA";
+    if (host.includes("workupload")) return "WORKUPLOAD";
+    if (host.includes("gofile")) return "GOFILE";
+    if (host.includes("pixeldrain")) return "PIXELDRAIN";
+    if (host.includes("drive.google")) return "Google Drive";
+    if (host.includes("mediafire")) return "MediaFire";
+    if (host.includes("f95zone")) return "F95Zone";
+    if (host.includes("patreon")) return "Patreon";
+    if (host.includes("discord")) return "Discord";
+    return host || fallback;
+  } catch { return fallback; }
+}
+
+function normalizeF95LinkList(list) {
+  if (!Array.isArray(list)) return [];
+  const out = [];
+  const seen = new Set();
+  for (const x of list) {
+    const link = typeof x === "string" ? x : String(x?.link || x?.url || "").trim();
+    if (!/^https?:\/\//i.test(link)) continue;
+
+    const name = typeof x === "string" ? "" : String(x?.name || x?.host || "").trim();
+    const host = typeof x === "string" ? hostLabelFromUrl(link) : String(x?.host || "").trim();
+    const version = typeof x === "string" ? "" : String(x?.version || "").trim();
+    const platform = typeof x === "string" ? "" : String(x?.platform || "").trim();
+    const section = typeof x === "string" ? "" : String(x?.section || "").trim();
+    const mainSection = typeof x === "string" ? "" : String(x?.mainSection || x?.group || "").trim();
+    const sourceLine = typeof x === "string" ? "" : String(x?.sourceLine || x?.context || "").trim();
+
+    // Même URL autorisée si elle appartient à une autre version/plateforme/section.
+    const key = [link, version, platform, section, mainSection].join("\n");
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    out.push({
+      name: name || host || hostLabelFromUrl(link),
+      host: host || name || hostLabelFromUrl(link),
+      link,
+      version,
+      platform,
+      section,
+      mainSection,
+      sourceLine,
+    });
+  }
+  return out;
+}
+
+function normalizeF95ExtraInfos(list) {
+  if (!Array.isArray(list)) return [];
+  return list.map((x) => {
+    if (typeof x === "string") {
+      const raw = x.trim();
+      if (!raw) return null;
+      const parts = raw.split(/\s*:\s*/);
+      return parts.length > 1 ? { name: parts.shift().trim(), value: parts.join(": ").trim() } : { name: "Info", value: raw };
+    }
+    const name = String(x?.name || x?.label || "").trim();
+    const value = String(x?.value || x?.text || "").trim();
+    if (!name && !value) return null;
+    return { name: name || "Info", value };
+  }).filter(Boolean);
+}
+
+function renderF95InfoLinks(threadLinks) {
+  if (!threadLinks.length) return "";
+  const parts = [];
+  let currentMain = "__INIT__";
+  let currentSection = "__INIT__";
+  let openGroup = false;
+
+  const closeGroup = () => {
+    if (openGroup) {
+      parts.push(`</div>`);
+      openGroup = false;
+    }
+  };
+
+  for (const l of threadLinks) {
+    const main = String(l.mainSection || "").trim();
+    const section = String(l.section || "").trim();
+
+    if (main !== currentMain) {
+      closeGroup();
+      if (main) parts.push(`<div class="f95MainSection">📂 ${escapeHtml(main)}</div>`);
+      currentMain = main;
+      currentSection = "__RESET__";
+    }
+
+    if (section !== currentSection) {
+      closeGroup();
+      if (section) parts.push(`<div class="f95SubSection">📁 ${escapeHtml(section)}</div>`);
+      parts.push(`<div class="f95LinkGroup">`);
+      openGroup = true;
+      currentSection = section;
+    }
+
+    if (!openGroup) {
+      parts.push(`<div class="f95LinkGroup">`);
+      openGroup = true;
+    }
+
+    const meta = [l.version, l.platform].map((v) => String(v || "").trim()).filter(Boolean).join(" · ");
+    const metaHtml = meta ? `<span class="f95LinkMeta">${escapeHtml(meta)}</span>` : "";
+    const label = String(l.name || l.host || "Lien").trim();
+    const source = String(l.sourceLine || "").trim();
+    const title = source ? ` title="${escapeHtml(source)}"` : "";
+    parts.push(`
+      <a class="f95DownloadLink" href="${escapeHtml(l.link)}" target="_blank" rel="noopener noreferrer"${title}>
+        ${metaHtml}<strong>${escapeHtml(label)}</strong>
+      </a>
+    `);
+  }
+  closeGroup();
+  return parts.join("");
+}
+
+function renderF95InfoBlock(f95Info) {
+  const box = $("f95InfoBox");
+  const grid = $("f95InfoGrid");
+  const linksBox = $("f95LinksBox");
+  const linksRow = $("f95LinksRow");
+  if (!box || !grid) return;
+
+  const info = f95Info && typeof f95Info === "object" ? f95Info : null;
+  const developerLinks = normalizeF95LinkList(info?.developerLinks);
+  const threadLinks = normalizeF95LinkList(info?.threadLinks || info?.links || info?.downloadLinks);
+  const extraInfos = normalizeF95ExtraInfos(info?.extraInfos);
+
+  const developerText = String(info?.developer || "").trim();
+  const developerHtml = developerLinks.length
+    ? `${escapeHtml(developerText || "Développeur")} ${developerLinks.map((l) => `<a href="${escapeHtml(l.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(l.name)}</a>`).join(" · ")}`
+    : escapeHtml(developerText);
+
+  const rows = [
+    ["Thread Updated", info?.threadUpdated || info?.updatedAt || ""],
+    ["Release Date", info?.releaseDate || ""],
+    ["Developer", developerHtml, true],
+    ["Status", info?.status || ""],
+    ["Engine", info?.engine || ""],
+    ["Version", info?.version || ""],
+    ["Censored", info?.censored || ""],
+    ["OS", info?.os || ""],
+  ].filter((r) => String(r[1] || "").trim());
+
+  if (!rows.length && !threadLinks.length && !extraInfos.length) {
+    box.style.display = "none";
+    return;
+  }
+
+  grid.innerHTML = rows.map(([label, value, isHtml]) => `
+    <div class="f95InfoItem">
+      <span>${escapeHtml(label)}</span>
+      <strong>${isHtml ? value : escapeHtml(value)}</strong>
+    </div>
+  `).join("") + (extraInfos.length ? `
+    <div class="f95ExtraInfos">
+      <div class="f95LinksTitle">Infos supplémentaires</div>
+      ${extraInfos.map((x) => `
+        <div class="f95ExtraInfoItem">
+          <span>${escapeHtml(x.name)}</span>
+          <strong>${escapeHtml(x.value)}</strong>
+        </div>
+      `).join("")}
+    </div>
+  ` : "");
+
+  if (linksBox && linksRow) {
+    linksRow.innerHTML = renderF95InfoLinks(threadLinks);
+    linksBox.style.display = threadLinks.length ? "" : "none";
+  }
+
+  box.style.display = "";
+  try { window.SiteAuth?.applyAuthDom?.(); } catch {}
 }
 
 function setCover(url) {
@@ -1876,8 +2061,10 @@ function renderVideoBlock({ id, videoUrl }) {
         descInnerBox.style.display = hasDesc ? "" : "none";
       }
 
-      mainInfoBox.style.display = (hasTags || hasDesc) ? "" : "none";
+      mainInfoBox.style.display = (hasTags || hasDesc || !!entry.f95Info) ? "" : "none";
     }
+
+    renderF95InfoBlock(entry.f95Info || null);
 
     const videoAnchor =
       (relatedOut && relatedOut.innerHTML.trim())

@@ -1815,13 +1815,13 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
 }
 
 
-/* Last edited F95 en bas à droite de la tuile rouge */
+/* v104 : Last edited hors tuile rouge, en bas à droite de la carte F95 */
 .f95LastEdited{
-  margin-top:10px;
-  padding-top:6px;
-  text-align:right;
-  color:rgba(255,255,255,.56);
-  font-size:11px;
-  font-weight:400;
-  line-height:1.2;
+  margin-top:8px !important;
+  padding-top:0 !important;
+  text-align:right !important;
+  color:rgba(255,255,255,.48) !important;
+  font-size:11px !important;
+  font-weight:400 !important;
+  line-height:1.2 !important;
 }

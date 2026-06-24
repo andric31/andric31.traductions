@@ -690,10 +690,8 @@ function normalizeF95ExtraInfos(list) {
   }).filter(Boolean);
 }
 
-function renderF95InfoLinks(threadLinks, lastEditedText = "") {
-  const safeLastEdited = String(lastEditedText || "").trim();
-
-  if (!threadLinks.length && !safeLastEdited) return "";
+function renderF95InfoLinks(threadLinks) {
+  if (!threadLinks.length) return "";
 
   const normalizeVersionForDisplay = (v) => {
     const raw = String(v || "").trim();
@@ -758,6 +756,8 @@ function renderF95InfoLinks(threadLinks, lastEditedText = "") {
     g.links.push(l);
   }
 
+  if (!groups.length) return "";
+
   const parts = [`<div class="f95StyleLinksBlock">`];
   let currentMain = "__INIT__";
   let currentSection = "__INIT__";
@@ -787,14 +787,9 @@ function renderF95InfoLinks(threadLinks, lastEditedText = "") {
     parts.push(`</div>`);
   }
 
-  if (safeLastEdited) {
-    parts.push(`<div class="f95LastEdited">Last edited: ${escapeHtml(safeLastEdited)}</div>`);
-  }
-
   parts.push(`</div>`);
   return parts.join("");
 }
-
 
 function renderF95InfoBlock(f95Info) {
   const box = $("f95InfoBox");
@@ -807,16 +802,6 @@ function renderF95InfoBlock(f95Info) {
   const developerLinks = normalizeF95LinkList(info?.developerLinks);
   const threadLinks = normalizeF95LinkList(info?.threadLinks || info?.links || info?.downloadLinks);
   const extraInfos = normalizeF95ExtraInfos(info?.extraInfos);
-  const lastEdited = String(
-    info?.lastEdited ||
-    info?.lastEditedAt ||
-    info?.lastEdit ||
-    info?.last_edit ||
-    info?.lastEditedText ||
-    info?.postLastEdited ||
-    info?.editedAt ||
-    ""
-  ).trim();
 
   const developerText = String(info?.developer || "").trim();
   const developerTextKey = developerText.toLowerCase();
@@ -837,7 +822,7 @@ function renderF95InfoBlock(f95Info) {
     ["OS", info?.os || ""],
   ].filter((r) => String(r[1] || "").trim());
 
-  if (!rows.length && !threadLinks.length && !extraInfos.length && !lastEdited) {
+  if (!rows.length && !threadLinks.length && !extraInfos.length) {
     box.style.display = "none";
     return;
   }
@@ -860,8 +845,34 @@ function renderF95InfoBlock(f95Info) {
   ` : "");
 
   if (linksBox && linksRow) {
-    linksRow.innerHTML = renderF95InfoLinks(threadLinks, lastEdited);
-    linksBox.style.display = (threadLinks.length || lastEdited) ? "" : "none";
+    linksRow.innerHTML = renderF95InfoLinks(threadLinks);
+    linksBox.style.display = threadLinks.length ? "" : "none";
+  }
+
+  // Last edited F95Zone : affichage discret en bas de la tuile principale,
+  // hors du cadre rouge des liens.
+  const lastEditedValue = String(
+    info?.lastEdited ||
+    info?.lastEditedAt ||
+    info?.lastEdit ||
+    info?.editedAt ||
+    info?.last_edited ||
+    ""
+  ).trim();
+
+  let lastEditedBox = box.querySelector(".f95LastEdited");
+  if (!lastEditedBox) {
+    lastEditedBox = document.createElement("div");
+    lastEditedBox.className = "f95LastEdited";
+    box.appendChild(lastEditedBox);
+  }
+
+  if (lastEditedValue) {
+    lastEditedBox.innerHTML = `Last edited: ${escapeHtml(lastEditedValue)}`;
+    lastEditedBox.style.display = "";
+  } else {
+    lastEditedBox.innerHTML = "";
+    lastEditedBox.style.display = "none";
   }
 
   box.style.display = "";

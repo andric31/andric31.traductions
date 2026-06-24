@@ -1695,3 +1695,42 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
   color:#ff7777 !important;
   text-decoration:underline !important;
 }
+
+
+/* v96 : titre + badge alpha discret + liens sans sous-titre */
+.f95InfoHeader{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:8px !important;
+  flex-wrap:wrap !important;
+}
+.f95InfoHeader h3{
+  margin:0 !important;
+}
+.f95InfoHeader .f95InfoAlphaNote{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  margin:0 !important;
+  padding:3px 8px !important;
+  border:1px solid rgba(190, 55, 55, .45) !important;
+  border-radius:999px !important;
+  background:rgba(120, 35, 35, .12) !important;
+  color:#e27a7a !important;
+  font-size:11px !important;
+  font-weight:800 !important;
+  line-height:1.1 !important;
+  box-shadow:none !important;
+}
+.f95LinksTitle{
+  display:none !important;
+}
+.f95LinksBox{
+  margin-top:10px !important;
+  padding-top:12px !important;
+  border-top:1px dotted rgba(255,255,255,.18) !important;
+}
+.f95StyleLinksBlock{
+  margin-top:0 !important;
+}

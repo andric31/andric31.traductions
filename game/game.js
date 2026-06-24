@@ -810,13 +810,20 @@ function renderF95InfoBlock(f95Info) {
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
   const developerKey = normalizeDevName(developerText);
+  const matchingDeveloperLink = developerLinks.find((l) => {
+    const nameKey = normalizeDevName(l?.name);
+    return developerKey && nameKey && nameKey === developerKey && l?.link;
+  });
   const filteredDeveloperLinks = developerLinks.filter((l) => {
     const nameKey = normalizeDevName(l?.name);
     return !developerKey || !nameKey || nameKey !== developerKey;
   });
+  const developerNameHtml = matchingDeveloperLink
+    ? `<a href="${escapeHtml(matchingDeveloperLink.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(developerText || matchingDeveloperLink.name || "Développeur")}</a>`
+    : escapeHtml(developerText || "Développeur");
   const developerHtml = filteredDeveloperLinks.length
-    ? `${escapeHtml(developerText || "Développeur")} · ${filteredDeveloperLinks.map((l) => `<a href="${escapeHtml(l.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(l.name)}</a>`).join(" · ")}`
-    : escapeHtml(developerText);
+    ? `${developerNameHtml} · ${filteredDeveloperLinks.map((l) => `<a href="${escapeHtml(l.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(l.name)}</a>`).join(" · ")}`
+    : developerNameHtml;
 
   const rows = [
     ["Thread Updated", info?.threadUpdated || info?.updatedAt || ""],

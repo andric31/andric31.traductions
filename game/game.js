@@ -59,7 +59,7 @@ function buildPrivateLinksKey(game) {
 
 async function fetchPrivateGameData(privateKey) {
   const key = String(privateKey || "").trim();
-  if (!key) return null;
+  if (!key || !isConnectedUser()) return null;
 
   try {
     const r = await fetch(`/api/f95list_links?key=${encodeURIComponent(key)}`, { cache: "no-store" });
@@ -690,6 +690,26 @@ function normalizeF95ExtraInfos(list) {
   }).filter(Boolean);
 }
 
+function hasRenderableF95Info(f95Info) {
+  if (!f95Info || typeof f95Info !== "object") return false;
+  const info = f95Info;
+  const hasSimpleInfo = [
+    info.threadUpdated || info.updatedAt,
+    info.releaseDate,
+    info.developer,
+    info.status,
+    info.engine,
+    info.version,
+    info.censored,
+    info.os,
+  ].some((v) => String(v || "").trim());
+
+  const hasLinks = normalizeF95LinkList(info.threadLinks || info.links || info.downloadLinks).length > 0;
+  const hasDeveloperLinks = normalizeF95LinkList(info.developerLinks).length > 0;
+  const hasExtras = normalizeF95ExtraInfos(info.extraInfos).length > 0;
+  return hasSimpleInfo || hasLinks || hasDeveloperLinks || hasExtras;
+}
+
 function renderF95InfoLinks(threadLinks) {
   if (!threadLinks.length) return "";
 
@@ -798,6 +818,14 @@ function renderF95InfoBlock(f95Info) {
   const linksRow = $("f95LinksRow");
   if (!box || !grid) return;
 
+  if (!isConnectedUser() || !hasRenderableF95Info(f95Info)) {
+    box.style.display = "none";
+    if (grid) grid.innerHTML = "";
+    if (linksBox) linksBox.style.display = "none";
+    if (linksRow) linksRow.innerHTML = "";
+    return;
+  }
+
   const info = f95Info && typeof f95Info === "object" ? f95Info : null;
   const developerLinks = normalizeF95LinkList(info?.developerLinks);
   const threadLinks = normalizeF95LinkList(info?.threadLinks || info?.links || info?.downloadLinks);
@@ -820,10 +848,11 @@ function renderF95InfoBlock(f95Info) {
   });
   const developerNameHtml = matchingDeveloperLink
     ? `<a href="${escapeHtml(matchingDeveloperLink.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(developerText || matchingDeveloperLink.name || "Développeur")}</a>`
-    : escapeHtml(developerText || "Développeur");
-  const developerHtml = filteredDeveloperLinks.length
-    ? `${developerNameHtml} · ${filteredDeveloperLinks.map((l) => `<a href="${escapeHtml(l.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(l.name)}</a>`).join(" · ")}`
-    : developerNameHtml;
+    : (developerText ? escapeHtml(developerText) : "");
+  const developerLinksHtml = filteredDeveloperLinks
+    .map((l) => `<a href="${escapeHtml(l.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(l.name)}</a>`)
+    .join(" · ");
+  const developerHtml = [developerNameHtml, developerLinksHtml].filter(Boolean).join(" · ");
 
   const rows = [
     ["Thread Updated", info?.threadUpdated || info?.updatedAt || ""],
@@ -2049,6 +2078,8 @@ function renderVideoBlock({ id, videoUrl }) {
       return;
     }
 
+    await waitForAuthReady();
+
     let entry = page.entry;
     const privateLinksKey = buildPrivateLinksKey(entry);
     const privateGameData = await fetchPrivateGameData(privateLinksKey);
@@ -2126,7 +2157,8 @@ function renderVideoBlock({ id, videoUrl }) {
         descInnerBox.style.display = hasDesc ? "" : "none";
       }
 
-      mainInfoBox.style.display = (hasTags || hasDesc || !!entry.f95Info) ? "" : "none";
+      const hasPrivateF95Info = isConnectedUser() && hasRenderableF95Info(entry.f95Info);
+      mainInfoBox.style.display = (hasTags || hasDesc || hasPrivateF95Info) ? "" : "none";
     }
 
     renderF95InfoBlock(entry.f95Info || null);

@@ -804,8 +804,11 @@ function renderF95InfoBlock(f95Info) {
   const extraInfos = normalizeF95ExtraInfos(info?.extraInfos);
 
   const developerText = String(info?.developer || "").trim();
+  const developerTextKey = developerText.toLowerCase();
+  const hasDeveloperLink = developerTextKey && developerLinks.some((l) => String(l.name || "").trim().toLowerCase() === developerTextKey);
+  const developerLinksHtml = developerLinks.map((l) => `<a href="${escapeHtml(l.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(l.name)}</a>`).join(" · ");
   const developerHtml = developerLinks.length
-    ? `${escapeHtml(developerText || "Développeur")} · ${developerLinks.map((l) => `<a href="${escapeHtml(l.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(l.name)}</a>`).join(" · ")}`
+    ? (hasDeveloperLink ? developerLinksHtml : `${escapeHtml(developerText || "Développeur")} · ${developerLinksHtml}`)
     : escapeHtml(developerText);
 
   const rows = [

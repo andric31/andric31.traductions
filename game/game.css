@@ -1815,39 +1815,13 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
 }
 
 
-/* v100 : Last edited F95 en bas à droite de la tuile */
+/* v100 depuis game36 : Last edited affiché dans la tuile rouge F95 */
 .f95LastEdited{
-  margin-top:8px;
+  margin-top:10px;
+  padding-top:7px;
   text-align:right;
-  color:color-mix(in srgb, var(--muted, #9ca3af) 88%, #ffffff);
+  color:#9ca3af;
   font-size:11px;
-  font-weight:400;
-  line-height:1.2;
-}
-
-
-/* v101 : Last edited vraiment visible, en bas à droite de la tuile F95 */
-.f95InfoBox > .f95LastEdited{
-  display:block;
-  margin-top:8px;
-  padding-right:2px;
-  text-align:right;
-  color:#8f98aa;
-  font-size:11px;
-  font-weight:400;
-  line-height:1.2;
-}
-
-
-/* v102 : Last edited placé directement dans la tuile rouge des liens F95 */
-.f95LinksRow .f95LastEdited{
-  display:block !important;
-  width:100% !important;
-  margin-top:9px !important;
-  padding-top:5px !important;
-  text-align:right !important;
-  color:#8f98aa !important;
-  font-size:11px !important;
-  font-weight:400 !important;
-  line-height:1.2 !important;
+  font-style:normal;
+  opacity:.9;
 }

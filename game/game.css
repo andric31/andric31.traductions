@@ -1734,3 +1734,38 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
 .f95StyleLinksBlock{
   margin-top:0 !important;
 }
+
+
+/* v97 : badge alpha avant le titre + sans séparateur avant liens F95 */
+.f95InfoHeader{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:8px !important;
+  flex-wrap:wrap !important;
+}
+.f95InfoHeader .f95InfoAlphaNote{
+  order:0 !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  margin:0 !important;
+  padding:3px 8px !important;
+  border:1px solid rgba(190, 55, 55, .34) !important;
+  border-radius:999px !important;
+  background:rgba(120, 35, 35, .08) !important;
+  color:#cf7777 !important;
+  font-size:11px !important;
+  font-weight:800 !important;
+  line-height:1.1 !important;
+  box-shadow:none !important;
+}
+.f95InfoHeader h3{
+  order:1 !important;
+  margin:0 !important;
+}
+.f95LinksBox{
+  margin-top:10px !important;
+  padding-top:0 !important;
+  border-top:0 !important;
+}

@@ -805,7 +805,7 @@ function renderF95InfoBlock(f95Info) {
 
   const developerText = String(info?.developer || "").trim();
   const developerHtml = developerLinks.length
-    ? `${escapeHtml(developerText || "Développeur")} ${developerLinks.map((l) => `<a href="${escapeHtml(l.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(l.name)}</a>`).join(" · ")}`
+    ? `${escapeHtml(developerText || "Développeur")} · ${developerLinks.map((l) => `<a href="${escapeHtml(l.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(l.name)}</a>`).join(" · ")}`
     : escapeHtml(developerText);
 
   const rows = [

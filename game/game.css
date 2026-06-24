@@ -1813,3 +1813,14 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
 .f95StyleLinksBlock{
   padding:13px 12px !important;
 }
+
+
+/* v100 : Last edited F95 en bas à droite de la tuile */
+.f95LastEdited{
+  margin-top:8px;
+  text-align:right;
+  color:color-mix(in srgb, var(--muted, #9ca3af) 88%, #ffffff);
+  font-size:11px;
+  font-weight:400;
+  line-height:1.2;
+}

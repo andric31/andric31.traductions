@@ -1568,3 +1568,89 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
 .f95LinkMeta{
   display:none;
 }
+
+/* v94 site : titre F95 + badge alpha court + lignes façon F95Zone */
+.f95InfoHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin:0 0 10px;
+}
+.f95InfoHeader h3{
+  margin:0;
+}
+.f95InfoHeader .f95InfoAlphaNote,
+.f95InfoAlphaNote{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:auto;
+  flex:0 0 auto;
+  margin:0;
+  padding:6px 10px;
+  border:1px solid rgba(190, 35, 35, .75);
+  border-radius:10px;
+  background:linear-gradient(180deg, rgba(120, 18, 18, .50), rgba(75, 12, 12, .38));
+  color:#ff6b6b;
+  font-size:12px;
+  font-weight:900;
+  line-height:1;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);
+}
+.f95LinksTitle{
+  margin:0 0 8px;
+  color:#d9d9d9;
+  font-size:13px;
+  font-weight:900;
+}
+.f95LinksRow{
+  display:block;
+}
+.f95StyleLinksBlock{
+  margin:8px 0 0;
+  padding:12px 10px;
+  border:1px solid rgba(120, 45, 45, .62);
+  border-radius:12px;
+  background:linear-gradient(180deg, rgba(20,20,24,.50), rgba(10,10,14,.36));
+  text-align:center;
+}
+.f95PlatformLine{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:6px;
+  margin:5px 0;
+  color:#d8d8d8;
+  font-size:13px;
+  line-height:1.4;
+}
+.f95PlatformLabel{
+  color:#ffffff;
+  font-weight:900;
+}
+.f95Dash{
+  color:#aaa;
+  opacity:.9;
+  font-weight:700;
+}
+.f95PlatformLine .f95DownloadLink,
+.f95LinksRow .f95PlatformLine a{
+  display:inline;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  color:#ff4b4b;
+  text-decoration:none;
+  font-size:13px;
+  font-weight:800;
+}
+.f95PlatformLine .f95DownloadLink:hover{
+  color:#ff7777;
+  text-decoration:underline;
+}
+@media (max-width:640px){
+  .f95InfoHeader{ align-items:flex-start; flex-direction:column; gap:8px; }
+}

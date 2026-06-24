@@ -692,54 +692,102 @@ function normalizeF95ExtraInfos(list) {
 
 function renderF95InfoLinks(threadLinks) {
   if (!threadLinks.length) return "";
-  const parts = [];
-  let currentMain = "__INIT__";
-  let currentSection = "__INIT__";
-  let openGroup = false;
 
-  const closeGroup = () => {
-    if (openGroup) {
-      parts.push(`</div>`);
-      openGroup = false;
-    }
+  const normalizeVersionForDisplay = (v) => {
+    const raw = String(v || "").trim();
+    if (!raw) return "";
+    // v0.1 est souvent une valeur par défaut d'ancienne extension : on ne l'affiche pas.
+    if (/^v?0\.1$/i.test(raw)) return "";
+    return raw.replace(/^v(\d)/i, "v$1");
   };
 
-  for (const l of threadLinks) {
-    const main = String(l.mainSection || "").trim();
-    const section = String(l.section || "").trim();
+  const cleanPlatform = (p) => {
+    const raw = String(p || "").trim();
+    if (!raw || raw === "—" || raw === "-" || raw.toLowerCase() === "undefined") return "";
+    return raw;
+  };
 
-    if (main !== currentMain) {
-      closeGroup();
-      if (main) parts.push(`<div class="f95MainSection">📂 ${escapeHtml(main)}</div>`);
-      currentMain = main;
+  const cleanSection = (v) => {
+    const raw = String(v || "").trim();
+    if (!raw || raw === "—" || raw === "-" || raw.toLowerCase() === "undefined") return "";
+    return raw;
+  };
+
+  const getLineLabel = (l) => {
+    const platform = cleanPlatform(l.platform);
+    const section = cleanSection(l.section);
+    const version = normalizeVersionForDisplay(l.version);
+
+    // Les extras F95 doivent s'afficher comme sur F95Zone : Extras: lien - lien
+    if (/^extras?$/i.test(section) && !platform) return "Extras";
+    if (/^others?$/i.test(platform)) return "Others";
+    if (!platform && section) return section;
+    if (!platform) return "Autres";
+
+    if (version && !platform.toLowerCase().includes(version.toLowerCase())) {
+      return `${platform} (${version})`;
+    }
+    return platform;
+  };
+
+  const normalizeName = (l) => {
+    const raw = String(l.name || l.host || "Lien").trim();
+    return raw || "Lien";
+  };
+
+  const groups = [];
+  const map = new Map();
+
+  for (const l of threadLinks) {
+    if (!l || !String(l.link || "").trim()) continue;
+
+    const main = cleanSection(l.mainSection);
+    const section = cleanSection(l.section);
+    const lineLabel = getLineLabel(l);
+    const sectionForHeader = (/^extras?$/i.test(section) && lineLabel === "Extras") ? "" : section;
+    const key = [main, sectionForHeader, lineLabel].join("\n");
+
+    let g = map.get(key);
+    if (!g) {
+      g = { main, section: sectionForHeader, lineLabel, links: [] };
+      map.set(key, g);
+      groups.push(g);
+    }
+    g.links.push(l);
+  }
+
+  if (!groups.length) return "";
+
+  const parts = [`<div class="f95StyleLinksBlock">`];
+  let currentMain = "__INIT__";
+  let currentSection = "__INIT__";
+
+  for (const g of groups) {
+    if (g.main !== currentMain) {
+      if (g.main) parts.push(`<div class="f95MainSection">${escapeHtml(g.main)}</div>`);
+      currentMain = g.main;
       currentSection = "__RESET__";
     }
 
-    if (section !== currentSection) {
-      closeGroup();
-      if (section) parts.push(`<div class="f95SubSection">📁 ${escapeHtml(section)}</div>`);
-      parts.push(`<div class="f95LinkGroup">`);
-      openGroup = true;
-      currentSection = section;
+    if (g.section !== currentSection) {
+      if (g.section) parts.push(`<div class="f95SubSection">${escapeHtml(g.section)}</div>`);
+      currentSection = g.section;
     }
 
-    if (!openGroup) {
-      parts.push(`<div class="f95LinkGroup">`);
-      openGroup = true;
-    }
+    parts.push(`<div class="f95PlatformLine"><span class="f95PlatformLabel">${escapeHtml(g.lineLabel)}:</span>`);
 
-    const meta = [l.version, l.platform].map((v) => String(v || "").trim()).filter(Boolean).join(" · ");
-    const metaHtml = meta ? `<span class="f95LinkMeta">${escapeHtml(meta)}</span>` : "";
-    const label = String(l.name || l.host || "Lien").trim();
-    const source = String(l.sourceLine || "").trim();
-    const title = source ? ` title="${escapeHtml(source)}"` : "";
-    parts.push(`
-      <a class="f95DownloadLink" href="${escapeHtml(l.link)}" target="_blank" rel="noopener noreferrer"${title}>
-        ${metaHtml}<strong>${escapeHtml(label)}</strong>
-      </a>
-    `);
+    g.links.forEach((l, idx) => {
+      const label = normalizeName(l);
+      const source = String(l.sourceLine || "").trim();
+      const title = source ? ` title="${escapeHtml(source)}"` : "";
+      if (idx > 0) parts.push(`<span class="f95Dash">-</span>`);
+      parts.push(`<a class="f95DownloadLink" href="${escapeHtml(l.link)}" target="_blank" rel="noopener noreferrer"${title}>${escapeHtml(label)}</a>`);
+    });
+
+    parts.push(`</div>`);
   }
-  closeGroup();
+
+  parts.push(`</div>`);
   return parts.join("");
 }
 

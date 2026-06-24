@@ -157,6 +157,7 @@ function cleanF95Info(info) {
   if (!info || typeof info !== 'object' || Array.isArray(info)) return null;
   const out = {
     threadUpdated: String(info.threadUpdated || info.updatedAt || '').trim(),
+    lastEdited: String(info.lastEdited || info.lastEditedAt || info.lastEdit || info.editedAt || info.last_edited || '').trim(),
     releaseDate: String(info.releaseDate || '').trim(),
     developer: String(info.developer || '').trim(),
     developerLinks: cleanPublicLinkList(info.developerLinks),
@@ -168,7 +169,7 @@ function cleanF95Info(info) {
     extraInfos: cleanF95ExtraInfos(info.extraInfos),
     threadLinks: cleanPublicLinkList(info.threadLinks || info.links || info.downloadLinks),
   };
-  const hasText = ['threadUpdated', 'releaseDate', 'developer', 'status', 'engine', 'version', 'censored', 'os']
+  const hasText = ['threadUpdated', 'lastEdited', 'releaseDate', 'developer', 'status', 'engine', 'version', 'censored', 'os']
     .some((k) => String(out[k] || '').trim());
   const hasLinks = out.developerLinks.length > 0 || out.threadLinks.length > 0;
   const hasExtra = out.extraInfos.length > 0;

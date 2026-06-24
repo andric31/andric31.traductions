@@ -804,8 +804,18 @@ function renderF95InfoBlock(f95Info) {
   const extraInfos = normalizeF95ExtraInfos(info?.extraInfos);
 
   const developerText = String(info?.developer || "").trim();
-  const developerHtml = developerLinks.length
-    ? `${escapeHtml(developerText || "Développeur")} · ${developerLinks.map((l) => `<a href="${escapeHtml(l.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(l.name)}</a>`).join(" · ")}`
+  const normalizeDevName = (v) => String(v || "")
+    .toLowerCase()
+    .replace(/&amp;/g, "&")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+  const developerKey = normalizeDevName(developerText);
+  const filteredDeveloperLinks = developerLinks.filter((l) => {
+    const nameKey = normalizeDevName(l?.name);
+    return !developerKey || !nameKey || nameKey !== developerKey;
+  });
+  const developerHtml = filteredDeveloperLinks.length
+    ? `${escapeHtml(developerText || "Développeur")} · ${filteredDeveloperLinks.map((l) => `<a href="${escapeHtml(l.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(l.name)}</a>`).join(" · ")}`
     : escapeHtml(developerText);
 
   const rows = [

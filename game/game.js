@@ -690,9 +690,8 @@ function normalizeF95ExtraInfos(list) {
   }).filter(Boolean);
 }
 
-function renderF95InfoLinks(threadLinks, lastEdited = "") {
-  const lastEditedText = String(lastEdited || "").trim();
-  if (!threadLinks.length && !lastEditedText) return "";
+function renderF95InfoLinks(threadLinks) {
+  if (!threadLinks.length) return "";
 
   const normalizeVersionForDisplay = (v) => {
     const raw = String(v || "").trim();
@@ -757,7 +756,7 @@ function renderF95InfoLinks(threadLinks, lastEdited = "") {
     g.links.push(l);
   }
 
-  if (!groups.length && !lastEditedText) return "";
+  if (!groups.length) return "";
 
   const parts = [`<div class="f95StyleLinksBlock">`];
   let currentMain = "__INIT__";
@@ -788,10 +787,6 @@ function renderF95InfoLinks(threadLinks, lastEdited = "") {
     parts.push(`</div>`);
   }
 
-  if (lastEditedText) {
-    parts.push(`<div class="f95LastEdited">Last edited: ${escapeHtml(lastEditedText)}</div>`);
-  }
-
   parts.push(`</div>`);
   return parts.join("");
 }
@@ -807,7 +802,6 @@ function renderF95InfoBlock(f95Info) {
   const developerLinks = normalizeF95LinkList(info?.developerLinks);
   const threadLinks = normalizeF95LinkList(info?.threadLinks || info?.links || info?.downloadLinks);
   const extraInfos = normalizeF95ExtraInfos(info?.extraInfos);
-  const lastEdited = String(info?.lastEdited || info?.lastEditedAt || info?.editedAt || "").trim();
 
   const developerText = String(info?.developer || "").trim();
   const developerTextKey = developerText.toLowerCase();
@@ -828,7 +822,7 @@ function renderF95InfoBlock(f95Info) {
     ["OS", info?.os || ""],
   ].filter((r) => String(r[1] || "").trim());
 
-  if (!rows.length && !threadLinks.length && !extraInfos.length && !lastEdited) {
+  if (!rows.length && !threadLinks.length && !extraInfos.length) {
     box.style.display = "none";
     return;
   }
@@ -851,8 +845,8 @@ function renderF95InfoBlock(f95Info) {
   ` : "");
 
   if (linksBox && linksRow) {
-    linksRow.innerHTML = renderF95InfoLinks(threadLinks, lastEdited);
-    linksBox.style.display = (threadLinks.length || lastEdited) ? "" : "none";
+    linksRow.innerHTML = renderF95InfoLinks(threadLinks);
+    linksBox.style.display = threadLinks.length ? "" : "none";
   }
 
   box.style.display = "";

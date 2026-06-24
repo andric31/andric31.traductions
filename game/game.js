@@ -2050,10 +2050,18 @@ function renderVideoBlock({ id, videoUrl }) {
     }
 
     let entry = page.entry;
-    const privateLinksKey = buildPrivateLinksKey(entry);
-    const privateGameData = await fetchPrivateGameData(privateLinksKey);
-    entry = mergePrivateGameData(entry, privateGameData);
-    if (page && typeof page === "object") page.entry = entry;
+
+    // Les infos privées F95ZONE / liens protégés ne doivent jamais être chargés
+    // ni fusionnés pour un visiteur non connecté. Sinon une partie du bloc
+    // "Informations et liens de F95ZONE" peut apparaître publiquement.
+    await waitForAuthReady();
+    const canLoadPrivateGameData = isConnectedUser();
+    if (canLoadPrivateGameData) {
+      const privateLinksKey = buildPrivateLinksKey(entry);
+      const privateGameData = await fetchPrivateGameData(privateLinksKey);
+      entry = mergePrivateGameData(entry, privateGameData);
+      if (page && typeof page === "object") page.entry = entry;
+    }
 
     const display = entry?.gameData ? entry.gameData : entry;
 
@@ -2126,10 +2134,10 @@ function renderVideoBlock({ id, videoUrl }) {
         descInnerBox.style.display = hasDesc ? "" : "none";
       }
 
-      mainInfoBox.style.display = (hasTags || hasDesc || !!entry.f95Info) ? "" : "none";
+      mainInfoBox.style.display = (hasTags || hasDesc || (canLoadPrivateGameData && !!entry.f95Info)) ? "" : "none";
     }
 
-    renderF95InfoBlock(entry.f95Info || null);
+    renderF95InfoBlock(canLoadPrivateGameData ? (entry.f95Info || null) : null);
 
     const videoAnchor =
       (relatedOut && relatedOut.innerHTML.trim())

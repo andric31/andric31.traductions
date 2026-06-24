@@ -1483,3 +1483,88 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
 @media (max-width:640px){
   .f95InfoItem{ grid-template-columns:1fr; gap:2px; }
 }
+
+/* v93 site : affichage des liens F95 façon lignes F95Zone */
+.f95InfoAlphaNote{
+  display:block;
+  margin:0 0 12px;
+  padding:10px 12px;
+  border:1px solid rgba(190, 70, 70, .55);
+  border-radius:12px;
+  background:linear-gradient(180deg, rgba(120,35,35,.18), rgba(90,25,25,.10));
+  color:color-mix(in srgb, var(--text, #fff) 82%, #f0b2b2);
+  font-size:12px;
+  line-height:1.35;
+}
+.f95InfoAlphaNote strong{
+  color:#ff6b6b;
+  font-weight:900;
+}
+.f95LinksRow{
+  display:block;
+}
+.f95StyleLinksBlock{
+  margin:8px 0 12px;
+  padding:12px 10px;
+  border:1px solid color-mix(in srgb, #8b2d2d 45%, var(--border));
+  border-radius:12px;
+  background:linear-gradient(180deg, rgba(20,20,24,.48), rgba(10,10,14,.34));
+  text-align:center;
+}
+.f95MainSection{
+  margin:12px 0 8px;
+  padding:9px 10px;
+  border:1px solid rgba(120, 45, 45, .7);
+  border-radius:12px;
+  background:rgba(75, 18, 18, .18);
+  color:#f1f1f1;
+  text-align:center;
+  font-size:14px;
+  font-weight:900;
+}
+.f95SubSection{
+  margin:10px 0 6px;
+  color:#f1f1f1;
+  text-align:center;
+  font-size:13px;
+  font-weight:900;
+}
+.f95PlatformLine{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:6px;
+  margin:5px 0;
+  color:#d8d8d8;
+  font-size:13px;
+  line-height:1.4;
+}
+.f95PlatformLabel{
+  color:#ffffff;
+  font-weight:900;
+}
+.f95Dash{
+  color:#aaa;
+  opacity:.9;
+  font-weight:700;
+}
+.f95PlatformLine .f95DownloadLink,
+.f95LinksRow .f95PlatformLine a{
+  display:inline;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  color:#ff4b4b;
+  text-decoration:none;
+  font-size:13px;
+  font-weight:800;
+}
+.f95PlatformLine .f95DownloadLink:hover{
+  color:#ff7777;
+  text-decoration:underline;
+}
+.f95LinkMeta{
+  display:none;
+}

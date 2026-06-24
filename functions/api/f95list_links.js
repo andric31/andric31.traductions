@@ -94,6 +94,87 @@ function proxyUrl(key, type, index = null) {
   return `/api/link?${qs.toString()}`;
 }
 
+
+async function isLoggedIn(context) {
+  try {
+    const authUrl = new URL('/api/auth-me', context.request.url);
+    const resp = await fetch(authUrl.toString(), {
+      headers: { cookie: context.request.headers.get('cookie') || '' },
+      cf: { cacheTtl: 0, cacheEverything: false },
+    });
+    const data = await resp.json().catch(() => null);
+    return !!(resp.ok && data && data.logged_in);
+  } catch {
+    return false;
+  }
+}
+
+function cleanPublicLinkList(list) {
+  if (!Array.isArray(list)) return [];
+  return list.map((x) => {
+    const name = typeof x === 'string' ? '' : String(x?.name || x?.host || 'Lien').trim();
+    const link = typeof x === 'string' ? String(x || '').trim() : String(x?.link || x?.url || '').trim();
+    const host = typeof x === 'string' ? hostLabel(x, name || 'Lien') : String(x?.host || hostLabel(link, name || 'Lien')).trim();
+    if (!link) return null;
+
+    const out = { name: name || host || 'Lien', host: host || name || 'Lien', link };
+    if (x && typeof x === 'object') {
+      const version = String(x.version || '').trim();
+      const platform = String(x.platform || '').trim();
+      const section = String(x.section || '').trim();
+      const mainSection = String(x.mainSection || x.group || '').trim();
+      const sourceLine = String(x.sourceLine || x.context || '').trim();
+      if (version) out.version = version;
+      if (platform) out.platform = platform;
+      if (section) out.section = section;
+      if (mainSection) out.mainSection = mainSection;
+      if (sourceLine) out.sourceLine = sourceLine;
+    }
+    return out;
+  }).filter(Boolean);
+}
+
+function cleanF95ExtraInfos(list) {
+  if (!Array.isArray(list)) return [];
+  return list.map((x) => {
+    if (typeof x === 'string') {
+      const raw = x.trim();
+      if (!raw) return null;
+      const parts = raw.split(/\s*:\s*/);
+      return parts.length > 1
+        ? { name: parts.shift().trim() || 'Info', value: parts.join(': ').trim() }
+        : { name: 'Info', value: raw };
+    }
+    if (!x || typeof x !== 'object') return null;
+    const name = String(x.name || x.label || 'Info').trim() || 'Info';
+    const value = String(x.value || x.text || '').trim();
+    if (!value && !name) return null;
+    return { name, value };
+  }).filter(Boolean);
+}
+
+function cleanF95Info(info) {
+  if (!info || typeof info !== 'object' || Array.isArray(info)) return null;
+  const out = {
+    threadUpdated: String(info.threadUpdated || info.updatedAt || '').trim(),
+    releaseDate: String(info.releaseDate || '').trim(),
+    developer: String(info.developer || '').trim(),
+    developerLinks: cleanPublicLinkList(info.developerLinks),
+    status: String(info.status || '').trim(),
+    engine: String(info.engine || '').trim(),
+    version: String(info.version || '').trim(),
+    censored: String(info.censored || '').trim(),
+    os: String(info.os || '').trim(),
+    extraInfos: cleanF95ExtraInfos(info.extraInfos),
+    threadLinks: cleanPublicLinkList(info.threadLinks || info.links || info.downloadLinks),
+  };
+  const hasText = ['threadUpdated', 'releaseDate', 'developer', 'status', 'engine', 'version', 'censored', 'os']
+    .some((k) => String(out[k] || '').trim());
+  const hasLinks = out.developerLinks.length > 0 || out.threadLinks.length > 0;
+  const hasExtra = out.extraInfos.length > 0;
+  return (hasText || hasLinks || hasExtra) ? out : null;
+}
+
 export async function onRequest(context) {
   const { request } = context;
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS_HEADERS });
@@ -107,6 +188,9 @@ export async function onRequest(context) {
     const doc = await fetchPrivateLinksDoc(context);
     const item = getItem(doc, key);
     if (!item) return json({ ok: false, found: false, key });
+
+    const loggedIn = await isLoggedIn(context);
+    const f95Info = loggedIn ? cleanF95Info(item.f95Info) : null;
 
     const extrasRaw = Array.isArray(item.translationsExtra) ? item.translationsExtra : [];
     const translationsExtra = extrasRaw.map((x, index) => {
@@ -132,6 +216,8 @@ export async function onRequest(context) {
       translationType: String(item.translationType || '').trim(),
       description: String(item.description || '').trim(),
       notes: String(item.notes || '').trim(),
+      f95Info,
+      f95InfoRequiresLogin: !loggedIn && hasValue(item.f95Info),
       discordlink: hasValue(item.discordlink) ? proxyUrl(key, 'discordlink') : '',
       translation: hasValue(item.translation) ? proxyUrl(key, 'translation') : '',
       translationsArchive: hasValue(item.translationsArchive) ? proxyUrl(key, 'translationsArchive') : '',
@@ -142,6 +228,7 @@ export async function onRequest(context) {
       hasTranslationsExtra: translationsExtra.length > 0,
       hasDescription: hasValue(item.description),
       hasNotes: hasValue(item.notes),
+      hasF95Info: hasValue(item.f95Info),
     });
   } catch (err) {
     return json({ ok: false, error: 'Impossible de récupérer les infos privées', detail: String(err?.message || err) }, 502);

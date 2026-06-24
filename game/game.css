@@ -1654,3 +1654,44 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
 @media (max-width:640px){
   .f95InfoHeader{ align-items:flex-start; flex-direction:column; gap:8px; }
 }
+
+
+/* v95 : ajustements demandés */
+.f95InfoHeader{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:8px !important;
+  flex-wrap:wrap !important;
+}
+.f95InfoHeader h3{
+  margin:0 !important;
+}
+.f95InfoHeader .f95InfoAlphaNote{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  margin:0 !important;
+  padding:4px 8px !important;
+  border:1px solid rgba(225, 45, 45, .85) !important;
+  border-radius:999px !important;
+  background:linear-gradient(180deg, rgba(135, 15, 15, .82), rgba(80, 8, 8, .72)) !important;
+  color:#ff8b8b !important;
+  font-size:11px !important;
+  font-weight:900 !important;
+  line-height:1 !important;
+  box-shadow:0 0 0 1px rgba(255,255,255,.04), 0 0 10px rgba(190,35,35,.18) !important;
+}
+.f95InfoItem a,
+.f95InfoGrid a,
+.f95ExtraInfos a{
+  color:#ff4b4b !important;
+  text-decoration:none !important;
+  font-weight:800 !important;
+}
+.f95InfoItem a:hover,
+.f95InfoGrid a:hover,
+.f95ExtraInfos a:hover{
+  color:#ff7777 !important;
+  text-decoration:underline !important;
+}

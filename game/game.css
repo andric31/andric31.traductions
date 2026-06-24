@@ -1792,3 +1792,24 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
 .f95Dash{
   font-weight:400 !important;
 }
+
+/* v99 : liens F95 un peu plus gros */
+.f95PlatformLine{
+  font-size:14px !important;
+  line-height:1.5 !important;
+}
+.f95PlatformLabel{
+  font-size:14px !important;
+}
+.f95PlatformLine .f95DownloadLink,
+.f95LinksRow .f95PlatformLine a{
+  font-size:14px !important;
+  font-weight:400 !important;
+}
+.f95Dash{
+  font-size:14px !important;
+  font-weight:400 !important;
+}
+.f95StyleLinksBlock{
+  padding:13px 12px !important;
+}

@@ -802,6 +802,16 @@ function renderF95InfoBlock(f95Info) {
   const developerLinks = normalizeF95LinkList(info?.developerLinks);
   const threadLinks = normalizeF95LinkList(info?.threadLinks || info?.links || info?.downloadLinks);
   const extraInfos = normalizeF95ExtraInfos(info?.extraInfos);
+  const lastEdited = String(
+    info?.lastEdited ||
+    info?.lastEditedAt ||
+    info?.lastEdit ||
+    info?.last_edit ||
+    info?.lastEditedText ||
+    info?.postLastEdited ||
+    info?.editedAt ||
+    ""
+  ).trim();
 
   const developerText = String(info?.developer || "").trim();
   const developerTextKey = developerText.toLowerCase();
@@ -822,7 +832,7 @@ function renderF95InfoBlock(f95Info) {
     ["OS", info?.os || ""],
   ].filter((r) => String(r[1] || "").trim());
 
-  if (!rows.length && !threadLinks.length && !extraInfos.length) {
+  if (!rows.length && !threadLinks.length && !extraInfos.length && !lastEdited) {
     box.style.display = "none";
     return;
   }
@@ -845,34 +855,11 @@ function renderF95InfoBlock(f95Info) {
   ` : "");
 
   if (linksBox && linksRow) {
-    linksRow.innerHTML = renderF95InfoLinks(threadLinks);
-    linksBox.style.display = threadLinks.length ? "" : "none";
-  }
-
-  // Last edited F95Zone : affichage discret en bas de la tuile principale,
-  // hors du cadre rouge des liens.
-  const lastEditedValue = String(
-    info?.lastEdited ||
-    info?.lastEditedAt ||
-    info?.lastEdit ||
-    info?.editedAt ||
-    info?.last_edited ||
-    ""
-  ).trim();
-
-  let lastEditedBox = box.querySelector(".f95LastEdited");
-  if (!lastEditedBox) {
-    lastEditedBox = document.createElement("div");
-    lastEditedBox.className = "f95LastEdited";
-    box.appendChild(lastEditedBox);
-  }
-
-  if (lastEditedValue) {
-    lastEditedBox.innerHTML = `Last edited: ${escapeHtml(lastEditedValue)}`;
-    lastEditedBox.style.display = "";
-  } else {
-    lastEditedBox.innerHTML = "";
-    lastEditedBox.style.display = "none";
+    const lastEditedHtml = lastEdited
+      ? `<div class="f95LastEdited">Last edited: ${escapeHtml(lastEdited)}</div>`
+      : "";
+    linksRow.innerHTML = renderF95InfoLinks(threadLinks) + lastEditedHtml;
+    linksBox.style.display = (threadLinks.length || lastEdited) ? "" : "none";
   }
 
   box.style.display = "";

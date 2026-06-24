@@ -1837,3 +1837,17 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
   font-weight:400;
   line-height:1.2;
 }
+
+
+/* v102 : Last edited placé directement dans la tuile rouge des liens F95 */
+.f95LinksRow .f95LastEdited{
+  display:block !important;
+  width:100% !important;
+  margin-top:9px !important;
+  padding-top:5px !important;
+  text-align:right !important;
+  color:#8f98aa !important;
+  font-size:11px !important;
+  font-weight:400 !important;
+  line-height:1.2 !important;
+}

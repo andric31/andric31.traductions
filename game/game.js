@@ -866,22 +866,17 @@ function renderF95InfoBlock(f95Info) {
   ` : "");
 
   if (linksBox && linksRow) {
-    linksRow.innerHTML = renderF95InfoLinks(threadLinks);
+    const linksHtml = renderF95InfoLinks(threadLinks);
+    const lastEditedHtml = lastEdited
+      ? `<div class="f95LastEdited">Last edited: ${escapeHtml(lastEdited)}</div>`
+      : "";
+    linksRow.innerHTML = linksHtml + lastEditedHtml;
     linksBox.style.display = (threadLinks.length || lastEdited) ? "" : "none";
   }
 
-  let lastEditedNode = box.querySelector(".f95LastEdited");
-  if (lastEdited) {
-    if (!lastEditedNode) {
-      lastEditedNode = document.createElement("div");
-      lastEditedNode.className = "f95LastEdited";
-      box.appendChild(lastEditedNode);
-    }
-    lastEditedNode.textContent = `Last edited: ${lastEdited}`;
-    lastEditedNode.style.display = "";
-  } else if (lastEditedNode) {
-    lastEditedNode.remove();
-  }
+  // Sécurité : on supprime une ancienne version du bloc si elle avait été créée hors de la tuile des liens.
+  const oldLastEditedNode = box.querySelector(":scope > .f95LastEdited");
+  if (oldLastEditedNode) oldLastEditedNode.remove();
 
   box.style.display = "";
   try { window.SiteAuth?.applyAuthDom?.(); } catch {}

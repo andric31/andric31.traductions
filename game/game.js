@@ -791,6 +791,26 @@ function renderF95InfoLinks(threadLinks) {
   return parts.join("");
 }
 
+function getF95LastEditedValue(info) {
+  if (!info || typeof info !== "object") return "";
+  const directKeys = [
+    "lastEdited", "lastEditedAt", "lastEdit", "last_edit",
+    "lastEditedText", "postLastEdited", "editedAt", "lastEditedDate"
+  ];
+  for (const k of directKeys) {
+    const v = info[k];
+    if (v !== undefined && v !== null && String(v).trim()) return String(v).trim();
+  }
+  const meta = info.meta || info.post || info.thread || info.f95 || info.raw;
+  if (meta && typeof meta === "object") {
+    for (const k of directKeys) {
+      const v = meta[k];
+      if (v !== undefined && v !== null && String(v).trim()) return String(v).trim();
+    }
+  }
+  return "";
+}
+
 function renderF95InfoBlock(f95Info) {
   const box = $("f95InfoBox");
   const grid = $("f95InfoGrid");
@@ -802,16 +822,7 @@ function renderF95InfoBlock(f95Info) {
   const developerLinks = normalizeF95LinkList(info?.developerLinks);
   const threadLinks = normalizeF95LinkList(info?.threadLinks || info?.links || info?.downloadLinks);
   const extraInfos = normalizeF95ExtraInfos(info?.extraInfos);
-  const lastEdited = String(
-    info?.lastEdited ||
-    info?.lastEditedAt ||
-    info?.lastEdit ||
-    info?.last_edit ||
-    info?.lastEditedText ||
-    info?.postLastEdited ||
-    info?.editedAt ||
-    ""
-  ).trim();
+  const lastEdited = getF95LastEditedValue(info);
 
   const developerText = String(info?.developer || "").trim();
   const developerTextKey = developerText.toLowerCase();
@@ -855,11 +866,21 @@ function renderF95InfoBlock(f95Info) {
   ` : "");
 
   if (linksBox && linksRow) {
-    const lastEditedHtml = lastEdited
-      ? `<div class="f95LastEdited">Last edited: ${escapeHtml(lastEdited)}</div>`
-      : "";
-    linksRow.innerHTML = renderF95InfoLinks(threadLinks) + lastEditedHtml;
+    linksRow.innerHTML = renderF95InfoLinks(threadLinks);
     linksBox.style.display = (threadLinks.length || lastEdited) ? "" : "none";
+  }
+
+  let lastEditedNode = box.querySelector(".f95LastEdited");
+  if (lastEdited) {
+    if (!lastEditedNode) {
+      lastEditedNode = document.createElement("div");
+      lastEditedNode.className = "f95LastEdited";
+      box.appendChild(lastEditedNode);
+    }
+    lastEditedNode.textContent = `Last edited: ${lastEdited}`;
+    lastEditedNode.style.display = "";
+  } else if (lastEditedNode) {
+    lastEditedNode.remove();
   }
 
   box.style.display = "";

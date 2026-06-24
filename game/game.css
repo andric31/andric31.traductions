@@ -1769,3 +1769,26 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
   padding-top:0 !important;
   border-top:0 !important;
 }
+
+/* v98 : liens F95Zone couleur exacte et poids normal */
+.f95InfoItem a,
+.f95InfoGrid a,
+.f95ExtraInfos a,
+.f95PlatformLine .f95DownloadLink,
+.f95LinksRow .f95PlatformLine a{
+  color:#EC5555 !important;
+  font-weight:400 !important;
+  text-decoration:none !important;
+}
+.f95InfoItem a:hover,
+.f95InfoGrid a:hover,
+.f95ExtraInfos a:hover,
+.f95PlatformLine .f95DownloadLink:hover,
+.f95LinksRow .f95PlatformLine a:hover{
+  color:#ff7777 !important;
+  font-weight:400 !important;
+  text-decoration:underline !important;
+}
+.f95Dash{
+  font-weight:400 !important;
+}

@@ -690,8 +690,10 @@ function normalizeF95ExtraInfos(list) {
   }).filter(Boolean);
 }
 
-function renderF95InfoLinks(threadLinks) {
-  if (!threadLinks.length) return "";
+function renderF95InfoLinks(threadLinks, lastEditedText = "") {
+  const safeLastEdited = String(lastEditedText || "").trim();
+
+  if (!threadLinks.length && !safeLastEdited) return "";
 
   const normalizeVersionForDisplay = (v) => {
     const raw = String(v || "").trim();
@@ -756,8 +758,6 @@ function renderF95InfoLinks(threadLinks) {
     g.links.push(l);
   }
 
-  if (!groups.length) return "";
-
   const parts = [`<div class="f95StyleLinksBlock">`];
   let currentMain = "__INIT__";
   let currentSection = "__INIT__";
@@ -787,9 +787,14 @@ function renderF95InfoLinks(threadLinks) {
     parts.push(`</div>`);
   }
 
+  if (safeLastEdited) {
+    parts.push(`<div class="f95LastEdited">Last edited: ${escapeHtml(safeLastEdited)}</div>`);
+  }
+
   parts.push(`</div>`);
   return parts.join("");
 }
+
 
 function renderF95InfoBlock(f95Info) {
   const box = $("f95InfoBox");
@@ -855,10 +860,7 @@ function renderF95InfoBlock(f95Info) {
   ` : "");
 
   if (linksBox && linksRow) {
-    const lastEditedHtml = lastEdited
-      ? `<div class="f95LastEdited">Last edited: ${escapeHtml(lastEdited)}</div>`
-      : "";
-    linksRow.innerHTML = renderF95InfoLinks(threadLinks) + lastEditedHtml;
+    linksRow.innerHTML = renderF95InfoLinks(threadLinks, lastEdited);
     linksBox.style.display = (threadLinks.length || lastEdited) ? "" : "none";
   }
 

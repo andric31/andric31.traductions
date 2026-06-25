@@ -1824,3 +1824,23 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
   font-weight:400;
   line-height:1.2;
 }
+
+
+/* v105 : regroupement principal F95 en sous-tuile + pas de doublon Patches */
+.f95MainGroup{
+  margin:12px 0 10px !important;
+  padding:10px 10px 12px !important;
+  border:1px solid rgba(120, 45, 45, .55) !important;
+  border-radius:12px !important;
+  background:linear-gradient(180deg, rgba(75,18,18,.16), rgba(15,15,20,.16)) !important;
+}
+.f95MainGroup .f95MainSection{
+  margin:0 0 8px !important;
+  padding:6px 10px !important;
+  border:1px solid rgba(120, 45, 45, .62) !important;
+  border-radius:10px !important;
+  background:rgba(75, 18, 18, .14) !important;
+}
+.f95MainGroup .f95SubSection{
+  margin:9px 0 5px !important;
+}

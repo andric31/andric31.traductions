@@ -744,7 +744,12 @@ function renderF95InfoLinks(threadLinks) {
     const main = cleanSection(l.mainSection);
     const section = cleanSection(l.section);
     const lineLabel = getLineLabel(l);
-    const sectionForHeader = (/^extras?$/i.test(section) && lineLabel === "Extras") ? "" : section;
+    // Si la section sert déjà de libellé de ligne (ex: Patches: Incest),
+    // on ne l'affiche pas une deuxième fois comme titre au-dessus.
+    const sectionForHeader = (
+      (/^extras?$/i.test(section) && lineLabel === "Extras") ||
+      (section && section.toLowerCase() === String(lineLabel || "").trim().toLowerCase())
+    ) ? "" : section;
     const key = [main, sectionForHeader, lineLabel].join("\n");
 
     let g = map.get(key);
@@ -761,10 +766,18 @@ function renderF95InfoLinks(threadLinks) {
   const parts = [`<div class="f95StyleLinksBlock">`];
   let currentMain = "__INIT__";
   let currentSection = "__INIT__";
+  let mainGroupOpen = false;
 
   for (const g of groups) {
     if (g.main !== currentMain) {
-      if (g.main) parts.push(`<div class="f95MainSection">${escapeHtml(g.main)}</div>`);
+      if (mainGroupOpen) {
+        parts.push(`</div>`);
+        mainGroupOpen = false;
+      }
+      if (g.main) {
+        parts.push(`<div class="f95MainGroup"><div class="f95MainSection">${escapeHtml(g.main)}</div>`);
+        mainGroupOpen = true;
+      }
       currentMain = g.main;
       currentSection = "__RESET__";
     }
@@ -787,6 +800,7 @@ function renderF95InfoLinks(threadLinks) {
     parts.push(`</div>`);
   }
 
+  if (mainGroupOpen) parts.push(`</div>`);
   parts.push(`</div>`);
   return parts.join("");
 }

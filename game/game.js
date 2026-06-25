@@ -791,10 +791,9 @@ function renderF95InfoLinks(threadLinks) {
 
     g.links.forEach((l, idx) => {
       const label = normalizeName(l);
-      const source = String(l.sourceLine || "").trim();
-      const title = source ? ` title="${escapeHtml(source)}"` : "";
+      // Pas de title sur les liens F95 : évite les infos-bulles natives du navigateur au survol.
       if (idx > 0) parts.push(`<span class="f95Dash">-</span>`);
-      parts.push(`<a class="f95DownloadLink" href="${escapeHtml(l.link)}" target="_blank" rel="noopener noreferrer"${title}>${escapeHtml(label)}</a>`);
+      parts.push(`<a class="f95DownloadLink" href="${escapeHtml(l.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`);
     });
 
     parts.push(`</div>`);

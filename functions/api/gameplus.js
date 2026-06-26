@@ -123,6 +123,7 @@ function labelForLink(key, value) {
   if (k === 'discord') return 'Discord';
   if (k === 'official') return 'Site officiel';
   if (k === 'download') return 'Téléchargement';
+  if (k === 'traduction' || k === 'translation' || k === 'trad' || k === 'patch_fr') return 'Traduction';
   return hostLabel(value, key || 'Lien');
 }
 

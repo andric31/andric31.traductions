@@ -15,6 +15,30 @@
     return String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
+  function linkifyText(v) {
+    const text = String(v ?? '');
+    const re = /https?:\/\/[^\s<>"']+/g;
+    let out = '';
+    let last = 0;
+    let match;
+    while ((match = re.exec(text))) {
+      let url = match[0];
+      let end = re.lastIndex;
+      const trailing = url.match(/[),.;:!?]+$/)?.[0] || '';
+      if (trailing) {
+        url = url.slice(0, -trailing.length);
+        end -= trailing.length;
+      }
+      out += esc(text.slice(last, match.index));
+      out += `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(url)}</a>`;
+      last = end;
+      re.lastIndex = end;
+    }
+    out += esc(text.slice(last));
+    return out.replace(/
+/g, '<br>');
+  }
+
   function setState(text, type = '') {
     stateBox.textContent = text || '';
     stateBox.className = `gp-state ${type ? `is-${type}` : ''}`;
@@ -151,7 +175,7 @@
           </div>
         </div>
         <div class="gp-card-details" hidden>
-          ${g.information ? `<div class="gp-info"><strong>Informations</strong><span>${esc(g.information)}</span></div>` : ''}
+          ${g.information ? `<div class="gp-info"><strong>Informations</strong><span>${linkifyText(g.information)}</span></div>` : ''}
           ${tags ? `<div class="gp-tags">${tags}</div>` : ''}
           ${renderLinks(g)}
         </div>

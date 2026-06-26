@@ -41,7 +41,7 @@
     let arr = state.items.filter((g) => {
       if (state.engine !== 'all' && String(g.engine || '') !== state.engine) return false;
       if (!q) return true;
-      const hay = [g.id, g.title, g.developer, g.engine, g.status, g.version, g.description, ...(g.tags || [])].join(' ').toLowerCase();
+      const hay = [g.id, g.title, g.developer, g.engine, g.status, g.version, g.description, g.information, ...(g.tags || [])].join(' ').toLowerCase();
       return hay.includes(q);
     });
 
@@ -54,9 +54,12 @@
   }
 
   function linkKind(link) {
+    const section = String(link.section || link.category || '').toLowerCase();
     const key = String(link.key || '').toLowerCase();
-    if (['traduction', 'translation', 'trad', 'patch_fr'].includes(key)) return 'trad';
-    if (['win_linux', 'winlinux', 'windows_linux', 'windows', 'win', 'linux', 'macos', 'mac', 'osx', 'android', 'download'].includes(key)) return 'download';
+    const value = section || key;
+    if (['traduction', 'translation', 'trad', 'patch_fr', 'fr'].includes(value)) return 'trad';
+    if (['win_linux', 'winlinux', 'windows_linux', 'windows', 'win', 'linux', 'macos', 'mac', 'osx', 'android', 'download', 'jeu', 'game'].includes(value)) return 'download';
+    if (['source', 'patreon', 'official', 'discord', 'site', 'itch', 'steam'].includes(value)) return 'source';
     return 'external';
   }
 
@@ -71,10 +74,8 @@
   }
 
   function renderLink(link, kind) {
-    let label = link.label || link.key || 'Lien';
-    if (kind === 'trad') label = 'Télécharger la traduction';
-    else if (kind === 'download') label = linkPlatformLabel(link);
-    else if (String(label).trim().toLowerCase() === 'download') label = 'Lien';
+    let label = String(link.label || '').trim();
+    if (!label) label = kind === 'trad' ? 'Télécharger la traduction' : kind === 'download' ? linkPlatformLabel(link) : (link.host || link.key || 'Lien');
     return `<a class="gp-link ${kind === 'trad' ? 'is-trad' : ''}" href="${esc(link.url)}" target="_blank" rel="noopener">${esc(label)}</a>`;
   }
 
@@ -84,6 +85,7 @@
     const groups = {
       trad: links.filter((l) => linkKind(l) === 'trad'),
       download: links.filter((l) => linkKind(l) === 'download'),
+      source: links.filter((l) => linkKind(l) === 'source'),
       external: links.filter((l) => linkKind(l) === 'external'),
     };
     const parts = [];
@@ -93,8 +95,11 @@
     if (groups.download.length) {
       parts.push(`<section class="gp-link-group"><div class="gp-link-title">⬇️ Téléchargement du jeu</div><div class="gp-link-list">${groups.download.map((l) => renderLink(l, 'download')).join('')}</div></section>`);
     }
+    if (groups.source.length) {
+      parts.push(`<section class="gp-link-group"><div class="gp-link-title">🔗 Liens / source</div><div class="gp-link-list">${groups.source.map((l) => renderLink(l, 'source')).join('')}</div></section>`);
+    }
     if (groups.external.length) {
-      parts.push(`<section class="gp-link-group"><div class="gp-link-title">🔗 Liens / source</div><div class="gp-link-list">${groups.external.map((l) => renderLink(l, 'external')).join('')}</div></section>`);
+      parts.push(`<section class="gp-link-group"><div class="gp-link-title">➕ Autres liens</div><div class="gp-link-list">${groups.external.map((l) => renderLink(l, 'external')).join('')}</div></section>`);
     }
     return `<div class="gp-links-box">${parts.join('')}</div>`;
   }
@@ -130,6 +135,7 @@
 
           <div>
             ${g.description ? `<p class="gp-desc">${esc(g.description)}</p>` : ''}
+            ${g.information ? `<div class="gp-info"><strong>Informations</strong><span>${esc(g.information)}</span></div>` : ''}
             ${tags ? `<div class="gp-tags">${tags}</div>` : ''}
           </div>
 

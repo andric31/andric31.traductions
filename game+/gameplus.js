@@ -21,15 +21,24 @@
   }
 
   function dateValue(g) {
-    const d = Date.parse(g.date || g.updatedAt || '');
+    const d = Date.parse(g.translationUpdatedAt || g.translationUpdateDate || g.tradUpdatedAt || g.updatedAt || g.date || '');
     return Number.isFinite(d) ? d : 0;
   }
 
-  function formatDate(g) {
-    const value = dateValue(g);
-    if (!value) return '';
-    try { return new Date(value).toLocaleDateString('fr-FR'); } catch { return ''; }
+  function parseDateValue(value) {
+    const d = Date.parse(value || '');
+    return Number.isFinite(d) ? d : 0;
   }
+
+  function formatRawDate(value) {
+    const d = parseDateValue(value);
+    if (!d) return '';
+    try { return new Date(d).toLocaleDateString('fr-FR'); } catch { return ''; }
+  }
+
+  function formatGameDate(g) { return formatRawDate(g.date); }
+  function formatTranslationUpdatedDate(g) { return formatRawDate(g.translationUpdatedAt || g.translationUpdateDate || g.tradUpdatedAt || g.updatedAt); }
+  function formatTranslationCreatedDate(g) { return formatRawDate(g.translationCreatedAt || g.translationCreationDate || g.tradCreatedAt); }
 
   function fillEngines() {
     const engines = [...new Set(state.items.map((g) => String(g.engine || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr'));
@@ -118,8 +127,10 @@
 
   function renderGame(g) {
     const img = g.image || g.cover || g.banner || '';
-    const date = formatDate(g);
-    const meta = [g.developer, g.engine, g.version, date].filter(Boolean);
+    const gameDate = formatGameDate(g);
+    const tradCreated = formatTranslationCreatedDate(g);
+    const tradUpdated = formatTranslationUpdatedDate(g);
+    const meta = [g.developer, g.engine, g.version, gameDate, tradUpdated ? `Trad MAJ ${tradUpdated}` : '', tradCreated ? `Trad créée ${tradCreated}` : ''].filter(Boolean);
     const tags = (g.tags || []).slice(0, 10).map((t) => `<span class="gp-tag">${esc(t)}</span>`).join('');
     return `
       <article class="gp-game">

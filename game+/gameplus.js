@@ -35,8 +35,7 @@
       re.lastIndex = end;
     }
     out += esc(text.slice(last));
-    return out.replace(/
-/g, '<br>');
+    return out.replace(/\n/g, '<br>');
   }
 
   function setState(text, type = '') {

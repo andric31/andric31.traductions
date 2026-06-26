@@ -71,16 +71,11 @@
   }
 
   function renderLink(link, kind) {
-    const label = kind === 'download' ? linkPlatformLabel(link) : (link.label || link.key || 'Lien');
-    const sub = kind === 'download'
-      ? 'Télécharger le jeu'
-      : kind === 'trad'
-        ? 'Patch / traduction française'
-        : (link.host || 'Lien externe');
-    return `<a class="gp-link ${kind === 'trad' ? 'is-trad' : ''}" href="${esc(link.url)}" target="_blank" rel="noopener">
-      <span>${esc(label)}</span>
-      <small>${esc(sub)}</small>
-    </a>`;
+    let label = link.label || link.key || 'Lien';
+    if (kind === 'trad') label = 'Télécharger la traduction';
+    else if (kind === 'download') label = linkPlatformLabel(link);
+    else if (String(label).trim().toLowerCase() === 'download') label = 'Lien';
+    return `<a class="gp-link ${kind === 'trad' ? 'is-trad' : ''}" href="${esc(link.url)}" target="_blank" rel="noopener">${esc(label)}</a>`;
   }
 
   function renderLinks(g) {
@@ -93,7 +88,7 @@
     };
     const parts = [];
     if (groups.trad.length) {
-      parts.push(`<section class="gp-link-group"><div class="gp-link-title">🇫🇷 Traduction française</div><div class="gp-link-list">${groups.trad.map((l) => renderLink(l, 'trad')).join('')}</div></section>`);
+      parts.push(`<section class="gp-link-group"><div class="gp-link-title"><img src="/assets/flags/fr.svg" alt="">Traduction</div><div class="gp-link-list">${groups.trad.map((l) => renderLink(l, 'trad')).join('')}</div></section>`);
     }
     if (groups.download.length) {
       parts.push(`<section class="gp-link-group"><div class="gp-link-title">⬇️ Téléchargement du jeu</div><div class="gp-link-list">${groups.download.map((l) => renderLink(l, 'download')).join('')}</div></section>`);
@@ -129,10 +124,7 @@
         </div>
         <div class="gp-content">
           <div>
-            <div class="gp-title-row">
-              <h2 class="gp-title">${esc(g.title)}</h2>
-              <span class="gp-id">${esc(g.id)}</span>
-            </div>
+            <h2 class="gp-title">${esc(g.title)}</h2>
             ${meta.length ? `<div class="gp-meta">${meta.map((m) => `<span class="gp-pill">${esc(m)}</span>`).join('')}</div>` : ''}
           </div>
 

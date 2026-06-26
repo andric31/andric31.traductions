@@ -1,1 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Game+</title>
+  <script src="/theme-init.js"></script>
+  <link rel="icon" href="/favicon.png" />
+  <link rel="stylesheet" href="/viewer.css" />
+  <link rel="stylesheet" href="/themes.css" />
+  <link rel="stylesheet" href="/game+/gameplus.css" />
+</head>
+<body class="mode-gameplus">
+  <div class="gp-wrap">
+    <header class="gp-hero">
+      <div>
+        <div class="gp-kicker">⭐ Game+</div>
+        <h1>Jeux exclusifs</h1>
+        <p>Sélection privée disponible uniquement pour les comptes connectés.</p>
+      </div>
+      <div class="gp-actions">
+        <a href="/" class="gp-btn gp-btn-ghost">← Viewer</a>
+        <a href="/connexion/" class="gp-btn" id="loginBtn" style="display:none;">Se connecter</a>
+      </div>
+    </header>
 
+    <section class="gp-toolbar" id="toolbar" style="display:none;">
+      <input id="searchInput" class="gp-search" type="search" placeholder="Rechercher un jeu, auteur, tag…" autocomplete="off">
+      <select id="engineSelect" class="gp-select" aria-label="Filtrer par moteur">
+        <option value="all">Tous les moteurs</option>
+      </select>
+      <select id="sortSelect" class="gp-select" aria-label="Tri">
+        <option value="title">Titre A-Z</option>
+        <option value="date-desc">Date récente</option>
+        <option value="date-asc">Date ancienne</option>
+      </select>
+    </section>
+
+    <div class="gp-state" id="stateBox">Chargement de Game+…</div>
+    <main class="gp-grid" id="grid" aria-live="polite"></main>
+  </div>
+
+  <script src="/game+/gameplus.js"></script>
+</body>
+</html>

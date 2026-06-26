@@ -112,14 +112,14 @@
   }
 
   function renderGame(g) {
-    const img = g.cover || g.banner || g.image || '';
+    const img = g.image || g.cover || g.banner || '';
     const date = formatDate(g);
     const meta = [g.developer, g.engine, g.version, date].filter(Boolean);
     const tags = (g.tags || []).slice(0, 10).map((t) => `<span class="gp-tag">${esc(t)}</span>`).join('');
     return `
       <article class="gp-game">
         <div class="gp-media">
-          ${img ? `<img src="${esc(img)}" alt="" referrerpolicy="no-referrer" loading="lazy">` : '<div class="gp-placeholder"><div class="gp-placeholder-box"><span class="gp-stars">✨✨</span><span>Game+</span></div></div>'}
+          ${img ? `<a class="gp-image-link" href="${esc(img)}" target="_blank" rel="noopener" title="Voir l’image"><img src="${esc(img)}" alt="" referrerpolicy="no-referrer" loading="lazy"></a>` : '<div class="gp-placeholder"><div class="gp-placeholder-box"><span class="gp-stars">✨✨</span><span>Game+</span></div></div>'}
           <span class="gp-ribbon">✨✨ Game+</span>
         </div>
         <div class="gp-content">

@@ -27,6 +27,13 @@ html { background: var(--bg); }
   margin-bottom: 12px;
 }
 
+.gp-top-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .gp-back,
 .gp-login {
   display: inline-flex;
@@ -89,9 +96,11 @@ html { background: var(--bg); }
 
 .gp-kicker {
   display: inline-flex;
+  align-items: center;
   width: fit-content;
-  margin-bottom: 9px;
-  padding: 6px 11px;
+  margin-bottom: 0;
+  min-height: 38px;
+  padding: 0 12px;
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, #ffd45f 42%, var(--border));
   background: color-mix(in srgb, #ffd45f 12%, transparent);
@@ -410,6 +419,8 @@ html { background: var(--bg); }
 
 @media (max-width: 620px) {
   .gp-page { width: min(100% - 18px, 1260px); padding-top: 10px; }
+  .gp-topbar { align-items: flex-start; }
+  .gp-top-left { gap: 8px; }
   .gp-hero { padding: 18px; border-radius: 18px; }
   .gp-hero-card { grid-template-columns: 1fr; width: 100%; }
   .gp-content { padding: 16px; }

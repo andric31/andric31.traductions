@@ -60,6 +60,29 @@ function asItems(doc) {
 }
 function getItem(doc, id) { return asItems(doc).find((x) => String(x?.id || x?.uid || x?.key || '').trim() === id) || null; }
 function isAllowedUrl(url) { try { const u = new URL(url); return u.protocol === 'https:' || u.protocol === 'http:'; } catch { return false; } }
+function resolveLink(item, type) {
+  const links = item?.links;
+  if (!links) return '';
+  if (Array.isArray(links)) {
+    for (let i = 0; i < links.length; i += 1) {
+      const link = links[i];
+      if (!link) continue;
+      if (typeof link === 'string') {
+        if (type === String(i) || type === `link_${i}`) return link;
+        continue;
+      }
+      const key = String(link.key || `link_${i}`).trim();
+      if (type === key || type === String(i) || type === `link_${i}`) return String(link.url || link.href || link.link || '').trim();
+    }
+    return '';
+  }
+  if (typeof links === 'object') {
+    const value = links[type];
+    if (value && typeof value === 'object') return String(value.url || value.href || value.link || '').trim();
+    return String(value || '').trim();
+  }
+  return '';
+}
 
 export async function onRequest(context) {
   const { request } = context;
@@ -74,7 +97,7 @@ export async function onRequest(context) {
     const doc = await fetchDoc(context);
     const item = getItem(doc, id);
     if (!item) return json({ ok: false, error: 'Jeu Game+ introuvable' }, 404);
-    const target = String(item?.links?.[type] || '').trim();
+    const target = resolveLink(item, type);
     if (!target) return json({ ok: false, error: 'Lien Game+ introuvable' }, 404);
     if (!isAllowedUrl(target)) return json({ ok: false, error: 'Lien invalide' }, 400);
     return Response.redirect(target, 302);

@@ -114,7 +114,7 @@ function hostLabel(rawUrl, fallback = 'Lien') {
 
 function labelForLink(key, value) {
   const k = cleanText(key).toLowerCase();
-  if (k === 'win_linux' || k === 'winlinux' || k === 'windows_linux') return 'Win & Linux';
+  if (k === 'win_linux' || k === 'winlinux' || k === 'windows_linux') return 'Windows / Linux';
   if (k === 'windows' || k === 'win') return 'Windows';
   if (k === 'linux') return 'Linux';
   if (k === 'macos' || k === 'mac' || k === 'osx') return 'MacOS';
@@ -123,21 +123,52 @@ function labelForLink(key, value) {
   if (k === 'discord') return 'Discord';
   if (k === 'official') return 'Site officiel';
   if (k === 'download') return 'Téléchargement';
-  if (k === 'traduction' || k === 'translation' || k === 'trad' || k === 'patch_fr') return 'Traduction';
-  return hostLabel(value, key || 'Lien');
+  if (k === 'traduction' || k === 'translation' || k === 'trad' || k === 'patch_fr') return 'Télécharger la traduction';
+  return cleanText(key) || hostLabel(value, 'Lien');
+}
+
+function sectionForLink(link, key = '') {
+  const raw = cleanText(link?.section || link?.category || link?.kind || link?.type || '').toLowerCase();
+  const k = cleanText(key || link?.key || '').toLowerCase();
+  const v = raw || k;
+  if (['traduction', 'trad', 'translation', 'patch_fr', 'fr'].includes(v)) return 'traduction';
+  if (['win_linux', 'winlinux', 'windows_linux', 'windows', 'win', 'linux', 'macos', 'mac', 'osx', 'android', 'download', 'jeu', 'game'].includes(v)) return 'download';
+  if (['patreon', 'discord', 'official', 'source', 'site', 'itch', 'steam'].includes(v)) return 'source';
+  return 'other';
+}
+
+function cleanOneLink(id, link, index, key = '') {
+  let raw = link;
+  if (typeof raw === 'string') raw = { url: raw };
+  if (!raw || typeof raw !== 'object') return null;
+  const url = cleanText(raw.url || raw.href || raw.link);
+  if (!url) return null;
+  const linkKey = cleanText(raw.key || key || `link_${index}`);
+  const label = cleanText(raw.label || raw.name || raw.title || labelForLink(linkKey, url));
+  const section = sectionForLink(raw, linkKey);
+  return {
+    key: linkKey || `link_${index}`,
+    section,
+    label: label || hostLabel(url, 'Lien'),
+    host: hostLabel(url, linkKey),
+    url: `/api/gameplus-link?id=${encodeURIComponent(id)}&type=${encodeURIComponent(linkKey || `link_${index}`)}`,
+  };
 }
 
 function cleanLinks(id, links) {
   const out = [];
-  if (!links || typeof links !== 'object') return out;
-  for (const [key, value] of Object.entries(links)) {
-    const url = cleanText(value);
-    if (!url) continue;
-    out.push({
-      key: cleanText(key),
-      label: labelForLink(key, url),
-      host: hostLabel(url, key),
-      url: `/api/gameplus-link?id=${encodeURIComponent(id)}&type=${encodeURIComponent(key)}`,
+  if (!links) return out;
+  if (Array.isArray(links)) {
+    links.forEach((link, index) => {
+      const item = cleanOneLink(id, link, index);
+      if (item) out.push(item);
+    });
+    return out;
+  }
+  if (typeof links === 'object') {
+    Object.entries(links).forEach(([key, value], index) => {
+      const item = cleanOneLink(id, value && typeof value === 'object' ? value : { url: value }, index, key);
+      if (item) out.push(item);
     });
   }
   return out;
@@ -168,6 +199,7 @@ function cleanGame(raw) {
     banner,
     image: cover || banner,
     description: cleanText(raw.description || raw.desc),
+    information: cleanText(raw.information || raw.informations || raw.info || raw.notes),
     tags: cleanTags(raw.tags),
     source: raw.source && typeof raw.source === 'object' ? {
       type: cleanText(raw.source.type),

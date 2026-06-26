@@ -9,7 +9,7 @@
   const sortSelect = $('#sortSelect');
   const miniStats = $('#miniStats');
 
-  const state = { items: [], filtered: [], q: '', engine: 'all', sort: 'title' };
+  const state = { items: [], filtered: [], q: '', engine: 'all', sort: 'date-desc' };
 
   function esc(v) {
     return String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

@@ -7,6 +7,7 @@
   const searchInput = $('#searchInput');
   const engineSelect = $('#engineSelect');
   const sortSelect = $('#sortSelect');
+  const miniStats = $('#miniStats');
 
   const state = { items: [], filtered: [], q: '', engine: 'all', sort: 'title' };
 
@@ -52,6 +53,18 @@
     return `<div class="gp-links">${links.map((l) => `<a class="gp-link" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label || l.key || 'Lien')}</a>`).join('')}</div>`;
   }
 
+  function renderStats() {
+    if (!miniStats) return;
+    const engines = [...new Set(state.items.map((g) => String(g.engine || '').trim()).filter(Boolean))];
+    const latest = state.items.map(dateValue).filter(Boolean).sort((a, b) => b - a)[0];
+    const latestText = latest ? new Date(latest).toLocaleDateString('fr-FR') : '—';
+    miniStats.style.display = '';
+    miniStats.innerHTML = `
+      <span class="gp-mini-stat"><strong>${state.items.length}</strong> jeu${state.items.length > 1 ? 'x' : ''}</span>
+      <span class="gp-mini-stat"><strong>${engines.length || '—'}</strong> moteur${engines.length > 1 ? 's' : ''}</span>
+      <span class="gp-mini-stat">MAJ <strong>${esc(latestText)}</strong></span>`;
+  }
+
   function renderCard(g) {
     const img = g.cover || g.banner || g.image || '';
     const meta = [g.developer, g.engine, g.version].filter(Boolean).join(' · ');
@@ -59,8 +72,8 @@
     return `
       <article class="gp-card">
         <div class="gp-cover">
-          ${img ? `<img src="${esc(img)}" alt="" referrerpolicy="no-referrer" loading="lazy">` : '<div class="gp-cover-placeholder">⭐</div>'}
-          <span class="gp-badge">⭐ Game+</span>
+          ${img ? `<img src="${esc(img)}" alt="" referrerpolicy="no-referrer" loading="lazy">` : '<div class="gp-cover-placeholder"><div class="gp-cover-placeholder-inner"><span class="gp-card-mark">✦✦✦</span><small>Game+</small></div></div>'}
+          <span class="gp-badge"><span class="gp-logo-mark">✦✦✦</span> Game+</span>
         </div>
         <div class="gp-body">
           <h2 class="gp-title">${esc(g.title)}</h2>
@@ -98,6 +111,7 @@
       state.items = Array.isArray(data.items) ? data.items : [];
       toolbar.style.display = '';
       fillEngines();
+      renderStats();
       applyFilters();
     } catch (err) {
       setState(err?.message || 'Impossible de charger Game+.', 'error');

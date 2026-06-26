@@ -72,8 +72,8 @@
     return `
       <article class="gp-card">
         <div class="gp-cover">
-          ${img ? `<img src="${esc(img)}" alt="" referrerpolicy="no-referrer" loading="lazy">` : '<div class="gp-cover-placeholder"><div class="gp-cover-placeholder-inner"><span class="gp-card-mark">✦✦✦</span><small>Game+</small></div></div>'}
-          <span class="gp-badge"><span class="gp-logo-mark">✦✦✦</span> Game+</span>
+          ${img ? `<img src="${esc(img)}" alt="" referrerpolicy="no-referrer" loading="lazy">` : '<div class="gp-cover-placeholder"><div class="gp-cover-placeholder-inner"><span class="gp-card-mark">✨</span><small>Game+</small></div></div>'}
+          <span class="gp-badge"><span class="gp-logo-mark">✨</span> Game+</span>
         </div>
         <div class="gp-body">
           <h2 class="gp-title">${esc(g.title)}</h2>

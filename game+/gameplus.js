@@ -12,7 +12,7 @@
   const state = { items: [], filtered: [], q: '', engine: 'all', sort: 'title' };
 
   function esc(v) {
-    return String(v ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    return String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
   function setState(text, type = '') {
@@ -25,6 +25,12 @@
     return Number.isFinite(d) ? d : 0;
   }
 
+  function formatDate(g) {
+    const value = dateValue(g);
+    if (!value) return '';
+    try { return new Date(value).toLocaleDateString('fr-FR'); } catch { return ''; }
+  }
+
   function fillEngines() {
     const engines = [...new Set(state.items.map((g) => String(g.engine || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr'));
     engineSelect.innerHTML = '<option value="all">Tous les moteurs</option>' + engines.map((e) => `<option value="${esc(e)}">${esc(e)}</option>`).join('');
@@ -35,7 +41,7 @@
     let arr = state.items.filter((g) => {
       if (state.engine !== 'all' && String(g.engine || '') !== state.engine) return false;
       if (!q) return true;
-      const hay = [g.title, g.developer, g.engine, g.status, g.version, g.description, ...(g.tags || [])].join(' ').toLowerCase();
+      const hay = [g.id, g.title, g.developer, g.engine, g.status, g.version, g.description, ...(g.tags || [])].join(' ').toLowerCase();
       return hay.includes(q);
     });
 
@@ -47,10 +53,55 @@
     render();
   }
 
+  function linkKind(link) {
+    const key = String(link.key || '').toLowerCase();
+    if (['traduction', 'translation', 'trad', 'patch_fr'].includes(key)) return 'trad';
+    if (['win_linux', 'winlinux', 'windows_linux', 'windows', 'win', 'linux', 'macos', 'mac', 'osx', 'android', 'download'].includes(key)) return 'download';
+    return 'external';
+  }
+
+  function linkPlatformLabel(link) {
+    const key = String(link.key || '').toLowerCase();
+    const label = link.label || link.key || 'Lien';
+    if (key === 'win_linux' || key === 'winlinux' || key === 'windows_linux') return 'Windows / Linux';
+    if (key === 'macos' || key === 'mac' || key === 'osx') return 'MacOS';
+    if (key === 'android') return 'Android';
+    if (key === 'download') return 'Téléchargement';
+    return label;
+  }
+
+  function renderLink(link, kind) {
+    const label = kind === 'download' ? linkPlatformLabel(link) : (link.label || link.key || 'Lien');
+    const sub = kind === 'download'
+      ? 'Télécharger le jeu'
+      : kind === 'trad'
+        ? 'Patch / traduction française'
+        : (link.host || 'Lien externe');
+    return `<a class="gp-link ${kind === 'trad' ? 'is-trad' : ''}" href="${esc(link.url)}" target="_blank" rel="noopener">
+      <span>${esc(label)}</span>
+      <small>${esc(sub)}</small>
+    </a>`;
+  }
+
   function renderLinks(g) {
     const links = Array.isArray(g.links) ? g.links : [];
     if (!links.length) return '';
-    return `<div class="gp-links">${links.map((l) => `<a class="gp-link" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label || l.key || 'Lien')}</a>`).join('')}</div>`;
+    const groups = {
+      trad: links.filter((l) => linkKind(l) === 'trad'),
+      download: links.filter((l) => linkKind(l) === 'download'),
+      external: links.filter((l) => linkKind(l) === 'external'),
+    };
+    const parts = [];
+    if (groups.trad.length) {
+      parts.push(`<section class="gp-link-group"><div class="gp-link-title">🇫🇷 Traduction française</div><div class="gp-link-list">${groups.trad.map((l) => renderLink(l, 'trad')).join('')}</div></section>`);
+    }
+    if (groups.download.length) {
+      parts.push(`<section class="gp-link-group"><div class="gp-link-title">⬇️ Téléchargement du jeu</div><div class="gp-link-list">${groups.download.map((l) => renderLink(l, 'download')).join('')}</div></section>`);
+    }
+    if (groups.external.length) {
+      parts.push(`<section class="gp-link-group"><div class="gp-link-title">🔗 Liens / source</div><div class="gp-link-list">${groups.external.map((l) => renderLink(l, 'external')).join('')}</div></section>`);
+    }
+    return `<div class="gp-links-box">${parts.join('')}</div>`;
   }
 
   function renderStats() {
@@ -60,26 +111,36 @@
     const latestText = latest ? new Date(latest).toLocaleDateString('fr-FR') : '—';
     miniStats.style.display = '';
     miniStats.innerHTML = `
-      <span class="gp-mini-stat"><strong>${state.items.length}</strong> jeu${state.items.length > 1 ? 'x' : ''}</span>
-      <span class="gp-mini-stat"><strong>${engines.length || '—'}</strong> moteur${engines.length > 1 ? 's' : ''}</span>
-      <span class="gp-mini-stat">MAJ <strong>${esc(latestText)}</strong></span>`;
+      <div class="gp-stat"><strong>${state.items.length}</strong> jeu${state.items.length > 1 ? 'x' : ''}</div>
+      <div class="gp-stat"><strong>${engines.length || '—'}</strong> moteur${engines.length > 1 ? 's' : ''}</div>
+      <div class="gp-stat"><strong>${esc(latestText)}</strong> MAJ</div>`;
   }
 
-  function renderCard(g) {
+  function renderGame(g) {
     const img = g.cover || g.banner || g.image || '';
-    const meta = [g.developer, g.engine, g.version].filter(Boolean).join(' · ');
-    const tags = (g.tags || []).slice(0, 8).map((t) => `<span class="gp-tag">${esc(t)}</span>`).join('');
+    const date = formatDate(g);
+    const meta = [g.developer, g.engine, g.version, date].filter(Boolean);
+    const tags = (g.tags || []).slice(0, 10).map((t) => `<span class="gp-tag">${esc(t)}</span>`).join('');
     return `
-      <article class="gp-card">
-        <div class="gp-cover">
-          ${img ? `<img src="${esc(img)}" alt="" referrerpolicy="no-referrer" loading="lazy">` : '<div class="gp-cover-placeholder"><div class="gp-cover-placeholder-inner"><span class="gp-card-mark">✨</span><small>Game+</small></div></div>'}
-          <span class="gp-badge"><span class="gp-logo-mark">✨</span> Game+</span>
+      <article class="gp-game">
+        <div class="gp-media">
+          ${img ? `<img src="${esc(img)}" alt="" referrerpolicy="no-referrer" loading="lazy">` : '<div class="gp-placeholder"><div class="gp-placeholder-box"><span class="gp-stars">✨✨</span><span>Game+</span></div></div>'}
+          <span class="gp-ribbon">✨✨ Game+</span>
         </div>
-        <div class="gp-body">
-          <h2 class="gp-title">${esc(g.title)}</h2>
-          ${meta ? `<div class="gp-meta">${esc(meta)}</div>` : ''}
-          ${g.description ? `<p class="gp-desc">${esc(g.description)}</p>` : ''}
-          ${tags ? `<div class="gp-tags">${tags}</div>` : ''}
+        <div class="gp-content">
+          <div>
+            <div class="gp-title-row">
+              <h2 class="gp-title">${esc(g.title)}</h2>
+              <span class="gp-id">${esc(g.id)}</span>
+            </div>
+            ${meta.length ? `<div class="gp-meta">${meta.map((m) => `<span class="gp-pill">${esc(m)}</span>`).join('')}</div>` : ''}
+          </div>
+
+          <div>
+            ${g.description ? `<p class="gp-desc">${esc(g.description)}</p>` : ''}
+            ${tags ? `<div class="gp-tags">${tags}</div>` : ''}
+          </div>
+
           ${renderLinks(g)}
         </div>
       </article>`;
@@ -92,7 +153,7 @@
       return;
     }
     setState('', 'ok');
-    grid.innerHTML = state.filtered.map(renderCard).join('');
+    grid.innerHTML = state.filtered.map(renderGame).join('');
   }
 
   async function load() {

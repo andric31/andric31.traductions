@@ -7,26 +7,26 @@
   <title>Game+</title>
   <script src="/theme-init.js"></script>
   <link rel="icon" href="/favicon.png" />
-  <link rel="stylesheet" href="/viewer.css" />
   <link rel="stylesheet" href="/themes.css" />
   <link rel="stylesheet" href="/game+/gameplus.css" />
 </head>
 <body class="mode-gameplus">
-  <div class="gp-wrap">
-    <header class="gp-hero">
-      <div class="gp-hero-main">
-        <div class="gp-kicker"><span class="gp-logo-mark">✨</span> Game+</div>
-        <h1>Game+ exclusif</h1>
-        <p>Une sélection privée de jeux ajoutés au viewer, visible uniquement avec un compte connecté.</p>
-        <div class="gp-mini-stats" id="miniStats" style="display:none;"></div>
-      </div>
-      <div class="gp-actions">
-        <a href="/" class="gp-btn gp-btn-ghost">← Viewer</a>
-        <a href="/connexion/" class="gp-btn" id="loginBtn" style="display:none;">Se connecter</a>
-      </div>
+  <div class="gp-page">
+    <header class="gp-topbar">
+      <a class="gp-back" href="/">← Viewer</a>
+      <div class="gp-brand" aria-label="Game+"><span>✨✨</span> Game+</div>
     </header>
 
-    <section class="gp-toolbar" id="toolbar" style="display:none;">
+    <section class="gp-hero">
+      <div>
+        <div class="gp-kicker">✨✨ Section privée</div>
+        <h1>Game+</h1>
+        <p>Jeux exclusifs ajoutés au viewer, disponibles uniquement pour les comptes connectés.</p>
+      </div>
+      <div class="gp-hero-card" id="miniStats" style="display:none;"></div>
+    </section>
+
+    <section class="gp-panel" id="toolbar" style="display:none;">
       <input id="searchInput" class="gp-search" type="search" placeholder="Rechercher un jeu, auteur, tag…" autocomplete="off">
       <select id="engineSelect" class="gp-select" aria-label="Filtrer par moteur">
         <option value="all">Tous les moteurs</option>
@@ -39,7 +39,9 @@
     </section>
 
     <div class="gp-state" id="stateBox">Chargement de Game+…</div>
-    <main class="gp-grid" id="grid" aria-live="polite"></main>
+    <main class="gp-list" id="grid" aria-live="polite"></main>
+
+    <a href="/connexion/" class="gp-login" id="loginBtn" style="display:none;">Se connecter</a>
   </div>
 
   <script src="/game+/gameplus.js"></script>

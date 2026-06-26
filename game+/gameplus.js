@@ -9,7 +9,7 @@
   const sortSelect = $('#sortSelect');
   const miniStats = $('#miniStats');
 
-  const state = { items: [], filtered: [], q: '', engine: 'all', sort: 'date-desc' };
+  const state = { items: [], filtered: [], q: '', engine: 'all', sort: 'date-desc' }; // tri par défaut : Trad MAJ récente
 
   function esc(v) {
     return String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -146,7 +146,7 @@
               ${meta.length ? `<div class="gp-meta">${meta.map((m) => `<span class="gp-pill">${esc(m)}</span>`).join('')}</div>` : ''}
             </div>
             ${g.description ? `<p class="gp-desc">${esc(g.description)}</p>` : ''}
-            <div class="gp-open-hint"><span>Ouvrir les infos, téléchargements et sources</span><strong>+</strong></div>
+            <div class="gp-open-hint"><span>Cliquer pour afficher les infos, téléchargements et sources</span></div>
           </div>
         </div>
         <div class="gp-card-details" hidden>
@@ -182,6 +182,7 @@
       if (!resp.ok || !data?.ok) throw new Error(data?.detail || data?.error || 'Chargement impossible.');
       state.items = Array.isArray(data.items) ? data.items : [];
       toolbar.style.display = '';
+      if (sortSelect) sortSelect.value = state.sort;
       fillEngines();
       renderStats();
       applyFilters();

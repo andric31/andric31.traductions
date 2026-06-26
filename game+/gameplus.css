@@ -725,3 +725,55 @@ html { background: var(--bg); }
     padding: 0 14px 14px;
   }
 }
+
+
+/* v6 : tri par défaut MAJ récente, hover plus visible, suppression du + / - */
+.gp-card-main {
+  transition: background .16s ease, transform .16s ease, box-shadow .16s ease;
+}
+
+.gp-game {
+  transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+}
+
+.gp-game:hover {
+  border-color: color-mix(in srgb, var(--accent) 66%, #ffd45f 22%, var(--border));
+  box-shadow: 0 16px 42px rgba(0,0,0,.24), 0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent);
+  transform: translateY(-1px);
+}
+
+.gp-card-main:hover {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, #ffd45f 10%, transparent), color-mix(in srgb, var(--accent) 13%, transparent)),
+    color-mix(in srgb, var(--hover-bg) 42%, transparent);
+}
+
+.gp-summary {
+  padding-right: 18px;
+}
+
+.gp-summary::after,
+.gp-game.is-open .gp-summary::after {
+  content: none;
+  display: none;
+}
+
+.gp-open-hint {
+  width: fit-content;
+  padding: 5px 9px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+  background: color-mix(in srgb, var(--btn) 45%, transparent);
+}
+
+.gp-game:hover .gp-open-hint {
+  color: var(--fg);
+  border-color: color-mix(in srgb, #ffd45f 45%, var(--border));
+  background: color-mix(in srgb, #ffd45f 10%, var(--btn));
+}
+
+@media (max-width: 620px) {
+  .gp-summary {
+    padding-right: 14px;
+  }
+}

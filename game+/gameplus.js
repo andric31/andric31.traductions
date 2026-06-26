@@ -127,6 +127,7 @@
 
   function renderGame(g) {
     const img = g.image || g.cover || g.banner || '';
+    const hasImage = Boolean(img);
     const gameDate = formatGameDate(g);
     const tradCreated = formatTranslationCreatedDate(g);
     const tradUpdated = formatTranslationUpdatedDate(g);
@@ -134,10 +135,10 @@
     const tags = (g.tags || []).slice(0, 10).map((t) => `<span class="gp-tag">${esc(t)}</span>`).join('');
     const hasDetails = Boolean(g.information || tags || (Array.isArray(g.links) && g.links.length));
     return `
-      <article class="gp-game${hasDetails ? ' has-details' : ''}">
+      <article class="gp-game${hasDetails ? ' has-details' : ''}${hasImage ? '' : ' is-no-image'}">
         <div class="gp-card-main" role="button" tabindex="0" aria-expanded="false" title="Ouvrir les informations">
           <div class="gp-media">
-            ${img ? `<img src="${esc(img)}" alt="" referrerpolicy="no-referrer" loading="lazy">` : '<div class="gp-placeholder"><div class="gp-placeholder-box"><span class="gp-stars">✨✨</span><span>Game+</span></div></div>'}
+            ${hasImage ? `<img src="${esc(img)}" alt="" referrerpolicy="no-referrer" loading="lazy">` : '<div class="gp-placeholder"><div class="gp-placeholder-box"><span class="gp-stars">✨✨</span><span>Game+</span></div></div>'}
             <span class="gp-ribbon">✨✨ Game+</span>
           </div>
           <div class="gp-summary">

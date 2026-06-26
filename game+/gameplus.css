@@ -633,7 +633,7 @@ html { background: var(--bg); }
 
 .gp-summary {
   display: grid;
-  align-content: center;
+  align-content: start;
   gap: 10px;
   padding: 16px 54px 16px 18px;
   position: relative;
@@ -775,5 +775,40 @@ html { background: var(--bg); }
 @media (max-width: 620px) {
   .gp-summary {
     padding-right: 14px;
+  }
+}
+
+
+/* v7 : cartes sans image moins centrées et plus propres */
+.gp-game.is-no-image .gp-placeholder {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 16px;
+}
+
+.gp-game.is-no-image .gp-placeholder-box {
+  width: auto;
+  min-width: 120px;
+  max-width: 170px;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 18px;
+}
+
+.gp-game.is-no-image .gp-stars {
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+}
+
+.gp-game.is-no-image .gp-placeholder-box span:last-child {
+  font-size: .95rem;
+  letter-spacing: .12em;
+}
+
+@media (max-width: 620px) {
+  .gp-game.is-no-image .gp-placeholder {
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
   }
 }

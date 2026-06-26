@@ -622,6 +622,74 @@ function setHref(id, href) {
   }
 }
 
+// Remplace les emojis drapeaux (🇷🇺, 🇺🇸, etc.) par des SVG locaux.
+// Il suffit d'ajouter le fichier correspondant dans /assets/flags/ : ru.svg, us.svg, es.svg...
+const FLAG_EMOJI_RE = /[\u{1F1E6}-\u{1F1FF}]{2}/gu;
+
+function flagEmojiToCode(flag) {
+  const points = Array.from(flag);
+  if (points.length !== 2) return "";
+  return points.map((ch) => {
+    const n = ch.codePointAt(0) - 0x1F1E6;
+    return n >= 0 && n <= 25 ? String.fromCharCode(97 + n) : "";
+  }).join("");
+}
+
+function shouldSkipFlagReplace(node) {
+  const parent = node?.parentElement;
+  if (!parent) return true;
+  return !!parent.closest("script, style, textarea, input, select, option, code, pre, .no-flag-replace");
+}
+
+function replaceFlagEmojis(root = document.body) {
+  if (!root) return;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      if (shouldSkipFlagReplace(node)) return NodeFilter.FILTER_REJECT;
+      FLAG_EMOJI_RE.lastIndex = 0;
+      return FLAG_EMOJI_RE.test(node.nodeValue || "") ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+    }
+  });
+
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+
+  nodes.forEach((node) => {
+    const text = node.nodeValue || "";
+    FLAG_EMOJI_RE.lastIndex = 0;
+    const frag = document.createDocumentFragment();
+    let last = 0;
+    let match;
+
+    while ((match = FLAG_EMOJI_RE.exec(text))) {
+      const flag = match[0];
+      const code = flagEmojiToCode(flag);
+      if (match.index > last) frag.appendChild(document.createTextNode(text.slice(last, match.index)));
+
+      if (code && code.length === 2) {
+        const img = document.createElement("img");
+        img.className = "flag-icon";
+        img.src = `/assets/flags/${code}.svg`;
+        img.alt = flag;
+        img.title = code.toUpperCase();
+        img.loading = "lazy";
+        img.decoding = "async";
+        img.onerror = () => img.replaceWith(document.createTextNode(flag));
+        frag.appendChild(img);
+      } else {
+        frag.appendChild(document.createTextNode(flag));
+      }
+
+      last = match.index + flag.length;
+    }
+
+    if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+    node.replaceWith(frag);
+  });
+}
+
+window.replaceFlagEmojis = replaceFlagEmojis;
+
 
 function hostLabelFromUrl(rawUrl, fallback = "Lien") {
   try {
@@ -2462,6 +2530,8 @@ function renderVideoBlock({ id, videoUrl }) {
     } catch (e) {
       console.warn("GameRelated.render failed", e);
     }
+
+    replaceFlagEmojis(document.body);
 
   } catch (e) {
     showError(`Erreur: ${e?.message || e}`);

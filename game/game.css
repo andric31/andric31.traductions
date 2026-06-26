@@ -1844,3 +1844,16 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
 .f95MainGroup .f95SubSection{
   margin:9px 0 5px !important;
 }
+
+
+/* Drapeaux locaux : remplace les emojis drapeaux par /assets/flags/*.svg */
+.flag-icon{
+  display:inline-block;
+  width:18px;
+  height:12px;
+  margin-left:4px;
+  vertical-align:-1px;
+  object-fit:cover;
+  border-radius:2px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.24);
+}

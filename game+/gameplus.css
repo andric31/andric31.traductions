@@ -590,3 +590,138 @@ html { background: var(--bg); }
 
 /* Game+ flexible links / informations */
 .gp-info{display:grid;gap:4px;margin-top:9px;padding:9px 10px;border:1px solid var(--border);border-radius:13px;background:color-mix(in srgb,var(--btn) 38%,transparent);color:var(--muted);font-size:.86rem;line-height:1.35}.gp-info strong{color:var(--fg);font-size:.78rem;text-transform:uppercase;letter-spacing:.05em}.gp-links-box{grid-template-columns:repeat(2,minmax(0,1fr))}.gp-link-group:first-child{grid-column:1/-1}.gp-link-group:only-child{grid-column:1/-1}.gp-link-group:nth-child(2):last-child{grid-column:1/-1}.gp-link-group:nth-child(2) .gp-link-list,.gp-link-group:nth-child(3) .gp-link-list{grid-template-columns:repeat(auto-fit,minmax(126px,1fr))}@media(max-width:980px){.gp-links-box{grid-template-columns:1fr}.gp-link-group:first-child,.gp-link-group:nth-child(2):last-child{grid-column:auto}}
+
+/* v5 accordéon : la tuile reste courte, les infos s'ouvrent au clic */
+.gp-list {
+  gap: 10px;
+}
+
+.gp-game {
+  display: block;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 20px;
+}
+
+.gp-card-main {
+  display: grid;
+  grid-template-columns: minmax(190px, 25%) minmax(0, 1fr);
+  min-height: 156px;
+  cursor: pointer;
+  outline: none;
+}
+
+.gp-card-main:hover {
+  background: color-mix(in srgb, var(--hover-bg) 34%, transparent);
+}
+
+.gp-card-main:focus-visible {
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 72%, var(--border));
+}
+
+.gp-card-main .gp-media,
+.gp-card-main .gp-media img,
+.gp-card-main .gp-placeholder {
+  min-height: 156px;
+  height: 156px;
+}
+
+.gp-card-main .gp-media img {
+  object-fit: cover;
+  object-position: center top;
+}
+
+.gp-summary {
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  padding: 16px 54px 16px 18px;
+  position: relative;
+}
+
+.gp-summary::after {
+  content: "+";
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  width: 32px;
+  height: 32px;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, #ffd45f 42%, var(--border));
+  background: color-mix(in srgb, var(--btn) 74%, transparent);
+  color: var(--fg);
+  font-weight: 1000;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.gp-game.is-open .gp-summary::after {
+  content: "−";
+}
+
+.gp-summary .gp-desc {
+  display: -webkit-box;
+  max-width: 900px;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.gp-open-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: .78rem;
+  font-weight: 900;
+}
+
+.gp-open-hint strong {
+  display: none;
+}
+
+.gp-card-details {
+  padding: 0 18px 16px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+  background: color-mix(in srgb, var(--bg) 14%, transparent);
+}
+
+.gp-card-details .gp-info {
+  margin-top: 14px;
+}
+
+.gp-card-details .gp-links-box {
+  margin-top: 12px;
+  padding-top: 0;
+  border-top: 0;
+}
+
+@media (max-width: 980px) {
+  .gp-card-main {
+    grid-template-columns: minmax(150px, 32%) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 620px) {
+  .gp-card-main {
+    grid-template-columns: 1fr;
+  }
+
+  .gp-card-main .gp-media,
+  .gp-card-main .gp-media img,
+  .gp-card-main .gp-placeholder {
+    min-height: 160px;
+    height: 160px;
+  }
+
+  .gp-summary {
+    padding: 14px 52px 14px 14px;
+  }
+
+  .gp-card-details {
+    padding: 0 14px 14px;
+  }
+}

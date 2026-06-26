@@ -132,24 +132,26 @@
     const tradUpdated = formatTranslationUpdatedDate(g);
     const meta = [g.developer, g.engine, g.version, gameDate, tradUpdated ? `Trad MAJ ${tradUpdated}` : '', tradCreated ? `Trad créée ${tradCreated}` : ''].filter(Boolean);
     const tags = (g.tags || []).slice(0, 10).map((t) => `<span class="gp-tag">${esc(t)}</span>`).join('');
+    const hasDetails = Boolean(g.information || tags || (Array.isArray(g.links) && g.links.length));
     return `
-      <article class="gp-game">
-        <div class="gp-media">
-          ${img ? `<a class="gp-image-link" href="${esc(img)}" target="_blank" rel="noopener" title="Voir l’image"><img src="${esc(img)}" alt="" referrerpolicy="no-referrer" loading="lazy"></a>` : '<div class="gp-placeholder"><div class="gp-placeholder-box"><span class="gp-stars">✨✨</span><span>Game+</span></div></div>'}
-          <span class="gp-ribbon">✨✨ Game+</span>
-        </div>
-        <div class="gp-content">
-          <div>
-            <h2 class="gp-title">${esc(g.title)}</h2>
-            ${meta.length ? `<div class="gp-meta">${meta.map((m) => `<span class="gp-pill">${esc(m)}</span>`).join('')}</div>` : ''}
+      <article class="gp-game${hasDetails ? ' has-details' : ''}">
+        <div class="gp-card-main" role="button" tabindex="0" aria-expanded="false" title="Ouvrir les informations">
+          <div class="gp-media">
+            ${img ? `<img src="${esc(img)}" alt="" referrerpolicy="no-referrer" loading="lazy">` : '<div class="gp-placeholder"><div class="gp-placeholder-box"><span class="gp-stars">✨✨</span><span>Game+</span></div></div>'}
+            <span class="gp-ribbon">✨✨ Game+</span>
           </div>
-
-          <div>
+          <div class="gp-summary">
+            <div>
+              <h2 class="gp-title">${esc(g.title)}</h2>
+              ${meta.length ? `<div class="gp-meta">${meta.map((m) => `<span class="gp-pill">${esc(m)}</span>`).join('')}</div>` : ''}
+            </div>
             ${g.description ? `<p class="gp-desc">${esc(g.description)}</p>` : ''}
-            ${g.information ? `<div class="gp-info"><strong>Informations</strong><span>${esc(g.information)}</span></div>` : ''}
-            ${tags ? `<div class="gp-tags">${tags}</div>` : ''}
+            <div class="gp-open-hint"><span>Ouvrir les infos, téléchargements et sources</span><strong>+</strong></div>
           </div>
-
+        </div>
+        <div class="gp-card-details" hidden>
+          ${g.information ? `<div class="gp-info"><strong>Informations</strong><span>${esc(g.information)}</span></div>` : ''}
+          ${tags ? `<div class="gp-tags">${tags}</div>` : ''}
           ${renderLinks(g)}
         </div>
       </article>`;
@@ -191,6 +193,30 @@
   searchInput?.addEventListener('input', () => { state.q = searchInput.value.trim(); applyFilters(); });
   engineSelect?.addEventListener('change', () => { state.engine = engineSelect.value || 'all'; applyFilters(); });
   sortSelect?.addEventListener('change', () => { state.sort = sortSelect.value || 'title'; applyFilters(); });
+
+  function toggleGame(card, force) {
+    if (!card) return;
+    const main = card.querySelector('.gp-card-main');
+    const details = card.querySelector('.gp-card-details');
+    const open = typeof force === 'boolean' ? force : !card.classList.contains('is-open');
+    card.classList.toggle('is-open', open);
+    if (main) main.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (details) details.hidden = !open;
+  }
+
+  grid?.addEventListener('click', (ev) => {
+    const main = ev.target.closest('.gp-card-main');
+    if (!main || !grid.contains(main)) return;
+    toggleGame(main.closest('.gp-game'));
+  });
+
+  grid?.addEventListener('keydown', (ev) => {
+    if (ev.key !== 'Enter' && ev.key !== ' ') return;
+    const main = ev.target.closest('.gp-card-main');
+    if (!main || !grid.contains(main)) return;
+    ev.preventDefault();
+    toggleGame(main.closest('.gp-game'));
+  });
 
   load();
 })();

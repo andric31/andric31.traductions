@@ -856,13 +856,14 @@ html { background: var(--bg); }
 
 /* v10 : liens cliquables dans les informations */
 .gp-info a {
-  color: color-mix(in srgb, #ffd45f 82%, #ffffff);
+  color: color-mix(in srgb, #c99a2e 88%, #ffffff);
   font-weight: 900;
   text-decoration: underline;
   text-underline-offset: 3px;
   overflow-wrap: anywhere;
+  transition: color .15s ease;
 }
 
 .gp-info a:hover {
-  color: color-mix(in srgb, #ffcf66 88%, #ffffff);
+  color: color-mix(in srgb, #ffd45f 84%, #ffffff);
 }

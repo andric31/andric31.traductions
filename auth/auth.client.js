@@ -167,6 +167,9 @@
           window.ViewerMenu.addItem('🎮 Mes jeux', () => { window.open('/compte/mes-jeux.html', '_blank', 'noopener'); });
           const itemsMesJeux = window.ViewerMenu.__getItems?.();
           if (itemsMesJeux?.[itemsMesJeux.length - 1]) itemsMesJeux[itemsMesJeux.length - 1].__authManaged = true;
+          window.ViewerMenu.addItem('⭐ Game+', () => { window.open('/game+/', '_blank', 'noopener'); });
+          const itemsGamePlus = window.ViewerMenu.__getItems?.();
+          if (itemsGamePlus?.[itemsGamePlus.length - 1]) itemsGamePlus[itemsGamePlus.length - 1].__authManaged = true;
           window.ViewerMenu.addItem(logoutLabel, async () => {
             try { await logout(); } catch (e) { alert(e.message || 'Erreur.'); }
           });

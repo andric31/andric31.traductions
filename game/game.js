@@ -4,6 +4,28 @@ const DEFAULT_URL = "https://raw.githubusercontent.com/andric31/f95list/main/f95
 const DEFAULT_BACKUP_URL = "/api/f95list";
 const DEFAULT_STATIC_BACKUP_URL = "/data/f95list.json";
 
+const ADMIN_VIEWER_STORAGE_KEY = "andric31AdminViewerMode";
+
+function isAdminCounterMode() {
+  try { return localStorage.getItem(ADMIN_VIEWER_STORAGE_KEY) === "1"; }
+  catch { return false; }
+}
+
+function adminCounterUrl(url) {
+  if (!isAdminCounterMode()) return url;
+  try {
+    const u = new URL(url, location.origin);
+    const op = String(u.searchParams.get("op") || "").toLowerCase();
+    const kind = String(u.searchParams.get("kind") || "").toLowerCase();
+    if (op === "hit" && (kind === "view" || kind === "mega")) {
+      u.searchParams.set("adminView", "1");
+    }
+    return u.pathname + u.search + u.hash;
+  } catch {
+    return url;
+  }
+}
+
 // ====== Helpers URL / JSON ======
 
 function getListUrl() {
@@ -1431,8 +1453,7 @@ async function counterGet(id) {
 // ✅ plus fiable (quand on quitte la page vite) : keepalive
 async function counterHit(id, kind) {
   const rawUrl = `/api/counter?op=hit&kind=${encodeURIComponent(kind)}&id=${encodeURIComponent(id)}`;
-  const url = window.AdminViewerMode?.counterUrl?.(rawUrl) || rawUrl;
-  const r = await fetch(url, { cache: "no-store", keepalive: true });
+  const r = await fetch(adminCounterUrl(rawUrl), { cache: "no-store", keepalive: true });
   if (!r.ok) throw new Error("counter hit HTTP " + r.status);
   return await r.json();
 }
@@ -1541,11 +1562,6 @@ function cooldownKey(kind, gameId) {
   return `cooldown_${kind}_${gameId}`;
 }
 
-function isAdminCounterMode() {
-  try { return !!window.AdminViewerMode?.isActive?.(); }
-  catch { return false; }
-}
-
 function inCooldown(kind, gameId, ms) {
   try {
     const k = cooldownKey(kind, gameId);
@@ -1596,8 +1612,9 @@ async function initCounters(gameId, megaHref, archiveHref) {
     }
   }
 
-  // 1) Vue (anti-refresh abusif)
-  const skipViewHit = !isAdminCounterMode() && inCooldown("view", gameId, VIEW_COOLDOWN_MS);
+  // 1) Vue (anti-refresh abusif + vue admin sans compteurs)
+  const adminCounterMode = isAdminCounterMode();
+  const skipViewHit = adminCounterMode || inCooldown("view", gameId, VIEW_COOLDOWN_MS);
 
   try {
     const j = skipViewHit ? await counterGet(gameId) : await counterHit(gameId, "view");

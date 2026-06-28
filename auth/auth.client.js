@@ -33,7 +33,7 @@
   }
 
   function roleLevel(role) {
-    return ({ member: 1, translator: 2, admin: 3 }[String(role || 'member')] || 0);
+    return ({ member: 1, moderator: 1, translator: 2, admin: 3 }[String(role || 'member')] || 0);
   }
 
   function applyAuthDom() {

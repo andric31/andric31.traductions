@@ -203,6 +203,19 @@ export async function onRequest(context) {
       }
     }
 
+
+    async function isAdminViewBypassAllowed() {
+      const requested = url.searchParams.get("adminView") === "1";
+      if (!requested) return false;
+      try {
+        await ensureAuthTables(env.DB);
+        const user = await getSessionUser(env.DB, env, request);
+        return String(user?.role || "").toLowerCase() === "admin";
+      } catch {
+        return false;
+      }
+    }
+
     async function recordLoggedPageView() {
       try {
         await ensureAuthTables(env.DB);
@@ -270,6 +283,10 @@ export async function onRequest(context) {
       const day = dayNum();
 
       if (op === "hit") {
+        if ((type === "view" || type === "mega") && await isAdminViewBypassAllowed()) {
+          return json({ ok: true, op, id, type, adminView: true, counted: false });
+        }
+
         let countGlobalView = true;
         if (type === "view") {
           countGlobalView = await shouldCountGlobalView();

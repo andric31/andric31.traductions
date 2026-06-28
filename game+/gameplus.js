@@ -10,6 +10,26 @@
   const miniStats = $('#miniStats');
 
   const state = { items: [], filtered: [], q: '', engine: 'all', sort: 'date-desc' }; // tri par défaut : Trad MAJ récente
+  const GAMEPLUS_SEEN_KEY = 'andric31.gameplus.seenSignature.v1';
+
+  function cleanSignatureValue(v) { return String(v ?? '').trim(); }
+
+  function gamePlusSignature(items) {
+    if (!Array.isArray(items) || !items.length) return 'empty';
+    return items.map((g) => {
+      const id = cleanSignatureValue(g.id || g.uid || g.key);
+      const title = cleanSignatureValue(g.title || g.cleanTitle || g.name);
+      const date = cleanSignatureValue(g.date || g.translationUpdatedAt || g.updatedAt || g.updateDate || g.lastUpdate || g.last_update);
+      const tradDate = cleanSignatureValue(g.translationUpdatedAt || g.translationUpdateDate || g.tradUpdatedAt || g.updatedAt || g.updateDate || g.lastUpdate || g.last_update);
+      const created = cleanSignatureValue(g.translationCreatedAt || g.translationCreationDate || g.tradCreatedAt || g.createdAt);
+      const version = cleanSignatureValue(g.version);
+      return [id, title, date, tradDate, created, version].join('~');
+    }).sort().join('||');
+  }
+
+  function markGamePlusSeen(items) {
+    try { localStorage.setItem(GAMEPLUS_SEEN_KEY, gamePlusSignature(items)); } catch {}
+  }
 
   function esc(v) {
     return String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -205,6 +225,7 @@
       }
       if (!resp.ok || !data?.ok) throw new Error(data?.detail || data?.error || 'Chargement impossible.');
       state.items = Array.isArray(data.items) ? data.items : [];
+      markGamePlusSeen(state.items);
       toolbar.style.display = '';
       if (sortSelect) sortSelect.value = state.sort;
       fillEngines();

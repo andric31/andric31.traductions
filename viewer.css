@@ -195,6 +195,31 @@ a.card.card-link:focus-visible{
   color: var(--fg);
   cursor:pointer;
   font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.menu-item-label{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.menu-item-badge{
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:2px 7px;
+  border-radius:999px;
+  font-size:10px;
+  line-height:1.25;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  color:#fff;
+  background:linear-gradient(135deg,#ff3b5f,#ff9f1c);
+  box-shadow:0 0 0 1px rgba(255,255,255,.18), 0 0 14px rgba(255,87,34,.35);
 }
 .menu-item:hover{
   background: var(--hover-bg);

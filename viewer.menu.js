@@ -40,7 +40,8 @@
         return `<div class="menu-divider" aria-hidden="true"></div>`;
       }
       const label = escapeHtml(it.label || "");
-      return `<button type="button" class="menu-item" data-menu-idx="${i}">${label}</button>`;
+      const badge = it.badge ? `<span class="menu-item-badge">${escapeHtml(it.badge)}</span>` : "";
+      return `<button type="button" class="menu-item" data-menu-idx="${i}"><span class="menu-item-label">${label}</span>${badge}</button>`;
     }).join("");
 
     pop.querySelectorAll("[data-menu-idx]").forEach(btn => {
@@ -55,6 +56,7 @@
 
 function addItem(label, onClick, options) {
     const item = { label: String(label || ""), onClick };
+    if (options && options.badge) item.badge = String(options.badge || "");
     if (options && options.prepend) ITEMS.unshift(item);
     else ITEMS.push(item);
     renderMenuItems();

@@ -84,6 +84,28 @@
   const MAIN_PAGE_ID = "__viewer_main__";
   let MAIN_VIEW_HIT_DONE = false;
 
+  const ADMIN_VIEWER_STORAGE_KEY = "andric31AdminViewerMode";
+
+  function isAdminCounterMode() {
+    try { return localStorage.getItem(ADMIN_VIEWER_STORAGE_KEY) === "1"; }
+    catch { return false; }
+  }
+
+  function adminCounterUrl(url) {
+    if (!isAdminCounterMode()) return url;
+    try {
+      const u = new URL(url, location.origin);
+      const op = String(u.searchParams.get("op") || "").toLowerCase();
+      const kind = String(u.searchParams.get("kind") || "").toLowerCase();
+      if (op === "hit" && (kind === "view" || kind === "mega")) {
+        u.searchParams.set("adminView", "1");
+      }
+      return u.pathname + u.search + u.hash;
+    } catch {
+      return url;
+    }
+  }
+
   function formatInt(n) {
     const x = Number(n);
     if (!Number.isFinite(x)) return "0";
@@ -209,11 +231,9 @@
     if (!el) return;
 
     try {
-      const op = MAIN_VIEW_HIT_DONE ? "get" : "hit";
-      const counterUrl = window.AdminViewerMode?.counterUrl?.(
-        `/api/counter?op=${op}&kind=view&id=${encodeURIComponent(MAIN_PAGE_ID)}`
-      ) || `/api/counter?op=${op}&kind=view&id=${encodeURIComponent(MAIN_PAGE_ID)}`;
-      const r = await fetch(counterUrl, { cache: "no-store" });
+      const op = (MAIN_VIEW_HIT_DONE || isAdminCounterMode()) ? "get" : "hit";
+      const rawUrl = `/api/counter?op=${op}&kind=view&id=${encodeURIComponent(MAIN_PAGE_ID)}`;
+      const r = await fetch(adminCounterUrl(rawUrl), { cache: "no-store" });
       if (!r.ok) return;
 
       const j = await r.json();

@@ -828,11 +828,23 @@
     function renderAdminCard(me) {
       if (!adminQuickMount) return;
       const role = String(me?.role || '').toLowerCase();
-      if (role !== 'admin') {
-        adminQuickMount.innerHTML = '';
-        return;
+      const isAdmin = role === 'admin';
+      const isModerator = role === 'moderator';
+      const blocks = [];
+
+      if (isModerator || isAdmin) {
+        blocks.push(`
+        <section class="auth-box" style="margin-top:14px;">
+          <h2 style="margin-top:0;">🛡️ Modérateur</h2>
+          <p>Accès rapide aux outils de modération.</p>
+          <div class="account-admin-grid">
+            <a class="account-admin-card" href="/messages/"><strong>💬 Messages</strong><span>Gestion des salons accessibles et suppression des messages.</span></a>
+          </div>
+        </section>`);
       }
-      adminQuickMount.innerHTML = `
+
+      if (isAdmin) {
+        blocks.push(`
         <section class="auth-box" style="margin-top:14px;">
           <h2 style="margin-top:0;">🛠️ Admin</h2>
           <p>Accès rapide aux outils de gestion.</p>
@@ -857,7 +869,10 @@
             <a class="account-admin-card" href="https://f95france.site/" target="_blank" rel="noopener"><strong>🌐 F95 France</strong><span>Site des traductions de F95 France.</span></a>
             <a class="account-admin-card" href="https://traductions.pages.dev/f95fr/" target="_blank" rel="noopener"><strong>F95 France Google Sheet Custom </strong><span>Traductions de F95 France.</span></a>
           </div>
-        </section>`;
+        </section>`);
+      }
+
+      adminQuickMount.innerHTML = blocks.join('');
       refreshAdminViewerModeToggle();
     }
 

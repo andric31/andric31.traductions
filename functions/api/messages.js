@@ -113,11 +113,17 @@ function canAccessTranslatorRoom(user) {
   return role === 'admin' || role === 'translator' || role === 'moderator';
 }
 
+function canAccessModeratorRoom(user) {
+  const role = normalizeRole(user?.role);
+  return role === 'admin' || role === 'moderator';
+}
+
 function getAllowedRooms(user) {
   const rooms = ['global'];
   if (!user) return rooms;
   rooms.push('private:members');
   if (canAccessTranslatorRoom(user)) rooms.push('private:translators');
+  if (canAccessModeratorRoom(user)) rooms.push('private:moderators');
   if (normalizeRole(user.role) === 'admin') rooms.push('private:admins');
   return rooms;
 }
@@ -136,6 +142,14 @@ function parseRoom(rawRoom, user) {
   if (room === 'private:translators') {
     if (!user) return { ok: false, error: 'Connexion requise pour ce salon privé.', status: 401 };
     if (!canAccessTranslatorRoom(user)) {
+      return { ok: false, error: 'Accès refusé à ce salon privé.', status: 403 };
+    }
+    return { ok: true, roomType: 'private', roomKey: room, ownerUserId: null };
+  }
+
+  if (room === 'private:moderators') {
+    if (!user) return { ok: false, error: 'Connexion requise pour ce salon privé.', status: 401 };
+    if (!canAccessModeratorRoom(user)) {
       return { ok: false, error: 'Accès refusé à ce salon privé.', status: 403 };
     }
     return { ok: true, roomType: 'private', roomKey: room, ownerUserId: null };

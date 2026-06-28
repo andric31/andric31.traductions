@@ -312,6 +312,7 @@
               <select class="auth-select" id="newRole">
                 <option value="member">member</option>
                 <option value="translator">translator</option>
+                <option value="moderator">moderator</option>
                 <option value="admin">admin</option>
               </select>
             </label>
@@ -361,6 +362,7 @@
         <option value="">Tous</option>
         <option value="admin">admin</option>
         <option value="translator">translator</option>
+        <option value="moderator">moderator</option>
         <option value="member">member</option>
       </select>
     </label>
@@ -394,6 +396,7 @@
     <button class="admin-chip active" type="button" data-quick-role="">Tous</button>
     <button class="admin-chip" type="button" data-quick-role="admin">Admins</button>
     <button class="admin-chip" type="button" data-quick-role="translator">Traducteurs</button>
+    <button class="admin-chip" type="button" data-quick-role="moderator">Modérateurs</button>
     <button class="admin-chip" type="button" data-quick-role="member">Membres</button>
   </div>
 
@@ -401,6 +404,7 @@
     <span class="admin-pill">Total : 0</span>
     <span class="admin-pill">admin : 0</span>
     <span class="admin-pill">translator : 0</span>
+    <span class="admin-pill">moderator : 0</span>
     <span class="admin-pill">member : 0</span>
   </div>
 
@@ -691,7 +695,7 @@
     }
 
     function updateStats(list) {
-      const stats = { total: list.length, active: 0, inactive: 0, admin: 0, translator: 0, member: 0 };
+      const stats = { total: list.length, active: 0, inactive: 0, admin: 0, translator: 0, moderator: 0, member: 0 };
       for (const u of list) {
         const role = String(u?.role || '').toLowerCase();
         if (role in stats) stats[role] += 1;
@@ -705,6 +709,7 @@
           <span class="admin-pill off">Désactivés : ${stats.inactive}</span>
           <span class="admin-pill">admin : ${stats.admin}</span>
           <span class="admin-pill">translator : ${stats.translator}</span>
+          <span class="admin-pill">moderator : ${stats.moderator}</span>
           <span class="admin-pill">member : ${stats.member}</span>
         `;
       }
@@ -817,6 +822,7 @@
                   <select class="auth-select" data-field="role">
                     <option value="member" ${u.role === 'member' ? 'selected' : ''}>member</option>
                     <option value="translator" ${u.role === 'translator' ? 'selected' : ''}>translator</option>
+                    <option value="moderator" ${u.role === 'moderator' ? 'selected' : ''}>moderator</option>
                     <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>admin</option>
                   </select>
                 </label>

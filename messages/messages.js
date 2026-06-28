@@ -180,9 +180,9 @@
     const rooms = [{ value: 'global', label: 'Discussion générale', subtitle: 'Salon public', access: 'public' }];
     if (me?.id) {
       rooms.push({ value: 'private:members', label: 'Salon membres', subtitle: 'Réservé aux comptes connectés', access: 'members' });
-      if (canAccessTranslatorRoom(me.role)) rooms.push({ value: 'private:translators', label: 'Salon traducteurs', subtitle: 'Réservé aux traducteurs et modérateurs', access: 'translators' });
-      if (canAccessModeratorRoom(me.role)) rooms.push({ value: 'private:moderators', label: 'Salon modérateurs', subtitle: 'Réservé aux modérateurs et admins', access: 'moderators' });
-      if (normalizeRole(me.role) === 'admin') rooms.push({ value: 'private:admins', label: 'Salon admins', subtitle: 'Réservé aux admins', access: 'admins' });
+      if (canAccessTranslatorRoom(me.role)) rooms.push({ value: 'private:translators', label: 'Salon traducteurs', subtitle: 'Réservé traducteurs et modérateurs', access: 'translators' });
+      if (canAccessModeratorRoom(me.role)) rooms.push({ value: 'private:moderators', label: 'Salon modérateurs', subtitle: 'Réservé modérateurs et admins', access: 'moderators' });
+      if (normalizeRole(me.role) === 'admin') rooms.push({ value: 'private:admins', label: 'Salon admins', subtitle: 'Réservé admins', access: 'admins' });
     }
     return rooms;
   }

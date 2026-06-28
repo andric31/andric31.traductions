@@ -535,6 +535,7 @@
     const viewerIconsToggle = document.getElementById('viewerIconsToggle');
     const BLUE_DOTS_STORAGE_KEY = 'andric31_show_notification_dots';
     const VIEWER_ICONS_STORAGE_KEY = 'andric31_show_viewer_personal_icons';
+    const ADMIN_VIEWER_STORAGE_KEY = 'andric31AdminViewerMode';
     const newPassword = document.getElementById('newPassword');
     const newPasswordConfirm = document.getElementById('newPasswordConfirm');
     const accountWatchCount = document.getElementById('accountWatchCount');
@@ -579,6 +580,29 @@
     function setViewerIconsEnabled(enabled) {
       localStorage.setItem(VIEWER_ICONS_STORAGE_KEY, enabled ? '1' : '0');
       refreshViewerIconsToggle();
+    }
+
+    function isAdminViewerModeEnabled() {
+      return localStorage.getItem(ADMIN_VIEWER_STORAGE_KEY) === '1';
+    }
+
+    function refreshAdminViewerModeToggle() {
+      const toggle = document.getElementById('adminViewerModeAccountToggle');
+      const stateText = document.getElementById('adminViewerModeAccountState');
+      if (!toggle) return;
+      const enabled = isAdminViewerModeEnabled();
+      toggle.classList.toggle('is-on', enabled);
+      toggle.setAttribute('aria-checked', enabled ? 'true' : 'false');
+      toggle.title = enabled
+        ? 'Vue admin activée : les vues et téléchargements ne seront pas comptés'
+        : 'Vue admin désactivée : navigation normale avec compteurs';
+      if (stateText) stateText.textContent = enabled ? 'Activée' : 'Désactivée';
+    }
+
+    function setAdminViewerModeEnabled(enabled) {
+      localStorage.setItem(ADMIN_VIEWER_STORAGE_KEY, enabled ? '1' : '0');
+      refreshAdminViewerModeToggle();
+      try { window.dispatchEvent(new CustomEvent('admin-viewer-mode-change', { detail: { enabled: !!enabled } })); } catch {}
     }
 
 
@@ -795,6 +819,11 @@
           <h2 style="margin-top:0;">🛠️ Admin</h2>
           <p>Accès rapide aux outils de gestion.</p>
           <div class="account-admin-grid">
+            <div class="account-admin-card" style="cursor:default;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+              <span><strong>👁️ Vue admin sans compteurs</strong><span>Viewer et fiches jeux sans incrémenter les vues ni téléchargements.</span></span>
+              <button class="account-notif-switch" id="adminViewerModeAccountToggle" type="button" role="switch" aria-checked="false" aria-label="Activer la vue admin sans compteurs"></button>
+            </div>
+            <div id="adminViewerModeAccountState" style="display:none;">Désactivée</div>
             <a class="account-admin-card" href="/compte/admin.html"><strong>👥 Membres</strong><span>Comptes, rôles et mots de passe.</span></a>
             <a class="account-admin-card" href="/compte/ticket-admin.html"><strong>🎫 Tickets</strong><span>Demandes envoyées depuis le formulaire.</span></a>
             <a class="account-admin-card" href="/compte/blog-admin.html"><strong>📝 Blog</strong><span>Création et modification des articles.</span></a>
@@ -808,6 +837,7 @@
             <a class="account-admin-card" href="https://traductions.pages.dev/f95fr/" target="_blank" rel="noopener"><strong>F95 France Google Sheet Custom </strong><span>Traductions de F95 France.</span></a>
           </div>
         </section>`;
+      refreshAdminViewerModeToggle();
     }
 
     function guardAccount(me) {
@@ -836,6 +866,12 @@
     });
     viewerIconsToggle?.addEventListener('click', () => {
       setViewerIconsEnabled(!areViewerIconsEnabled());
+    });
+
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('#adminViewerModeAccountToggle');
+      if (!btn) return;
+      setAdminViewerModeEnabled(!isAdminViewerModeEnabled());
     });
 
 

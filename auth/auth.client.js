@@ -140,6 +140,60 @@
     pop.style.boxSizing = 'border-box';
   }
 
+
+  const GAMEPLUS_SEEN_KEY = 'andric31.gameplus.seenSignature.v1';
+  const gamePlusMenuStatus = { loading: false, lastCheck: 0, signature: '', hasNew: false };
+
+  function cleanGamePlusValue(v) {
+    return String(v ?? '').trim();
+  }
+
+  function gamePlusSignature(items) {
+    if (!Array.isArray(items) || !items.length) return 'empty';
+    return items.map((g) => {
+      const id = cleanGamePlusValue(g.id || g.uid || g.key);
+      const title = cleanGamePlusValue(g.title || g.cleanTitle || g.name);
+      const date = cleanGamePlusValue(g.date || g.translationUpdatedAt || g.updatedAt || g.updateDate || g.lastUpdate || g.last_update);
+      const tradDate = cleanGamePlusValue(g.translationUpdatedAt || g.translationUpdateDate || g.tradUpdatedAt || g.updatedAt || g.updateDate || g.lastUpdate || g.last_update);
+      const created = cleanGamePlusValue(g.translationCreatedAt || g.translationCreationDate || g.tradCreatedAt || g.createdAt);
+      const version = cleanGamePlusValue(g.version);
+      return [id, title, date, tradDate, created, version].join('~');
+    }).sort().join('||');
+  }
+
+  function markGamePlusSeen(signature) {
+    const sig = cleanGamePlusValue(signature || gamePlusMenuStatus.signature);
+    if (!sig) return;
+    try { localStorage.setItem(GAMEPLUS_SEEN_KEY, sig); } catch {}
+    gamePlusMenuStatus.hasNew = false;
+  }
+
+  async function refreshGamePlusNewBadge(me, redraw) {
+    if (!me || gamePlusMenuStatus.loading) return;
+    const now = Date.now();
+    if (now - gamePlusMenuStatus.lastCheck < 60000) return;
+    gamePlusMenuStatus.loading = true;
+    gamePlusMenuStatus.lastCheck = now;
+    try {
+      const resp = await fetch('/api/gameplus', { cache: 'no-store', credentials: 'same-origin' });
+      const data = await resp.json().catch(() => null);
+      if (!resp.ok || !data?.ok) return;
+      const signature = gamePlusSignature(data.items || []);
+      const oldHasNew = gamePlusMenuStatus.hasNew;
+      const oldSignature = gamePlusMenuStatus.signature;
+      gamePlusMenuStatus.signature = signature;
+      let seen = '';
+      try { seen = localStorage.getItem(GAMEPLUS_SEEN_KEY) || ''; } catch {}
+      if (!seen) {
+        markGamePlusSeen(signature);
+      } else {
+        gamePlusMenuStatus.hasNew = seen !== signature;
+      }
+      if ((oldHasNew !== gamePlusMenuStatus.hasNew || oldSignature !== gamePlusMenuStatus.signature) && typeof redraw === 'function') redraw(me);
+    } catch {}
+    gamePlusMenuStatus.loading = false;
+  }
+
   function bindMenuIntegration() {
     if (!window.ViewerMenu?.addItem) return;
     if (window.__authMenuAdded) return;
@@ -159,7 +213,7 @@
         window.ViewerMenu.clearItems();
         for (const it of preserved) {
           if (it?.type === 'divider') window.ViewerMenu.addDivider();
-          else window.ViewerMenu.addItem(it.label, it.onClick);
+          else window.ViewerMenu.addItem(it.label, it.onClick, it.badge ? { badge: it.badge } : undefined);
         }
         window.ViewerMenu.addDivider();
         const divItems = window.ViewerMenu.__getItems?.();
@@ -176,7 +230,11 @@
           window.ViewerMenu.addItem('🎮 Mes jeux', () => { window.open('/compte/mes-jeux.html', '_blank', 'noopener'); });
           const itemsMesJeux = window.ViewerMenu.__getItems?.();
           if (itemsMesJeux?.[itemsMesJeux.length - 1]) itemsMesJeux[itemsMesJeux.length - 1].__authManaged = true;
-          window.ViewerMenu.addItem('✨ Game+', () => { window.open('/game+/', '_blank', 'noopener'); });
+          window.ViewerMenu.addItem('✨ Game+', () => {
+            markGamePlusSeen();
+            window.open('/game+/', '_blank', 'noopener');
+            redraw(me);
+          }, gamePlusMenuStatus.hasNew ? { badge: 'NEW' } : undefined);
           const itemsGamePlus = window.ViewerMenu.__getItems?.();
           if (itemsGamePlus?.[itemsGamePlus.length - 1]) itemsGamePlus[itemsGamePlus.length - 1].__authManaged = true;
           window.ViewerMenu.addItem(logoutLabel, async () => {
@@ -200,6 +258,7 @@
           if (itemsPrivacy?.[itemsPrivacy.length - 1]) itemsPrivacy[itemsPrivacy.length - 1].__authManaged = true;
         }
         keepMenuCompact();
+        refreshGamePlusNewBadge(me, redraw);
       } catch {}
       window.__viewerMenuAuthRedrawLock = false;
     };

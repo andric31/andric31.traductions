@@ -1541,6 +1541,11 @@ function cooldownKey(kind, gameId) {
   return `cooldown_${kind}_${gameId}`;
 }
 
+function isAdminCounterMode() {
+  try { return !!window.AdminViewerMode?.isActive?.(); }
+  catch { return false; }
+}
+
 function inCooldown(kind, gameId, ms) {
   try {
     const k = cooldownKey(kind, gameId);
@@ -1563,7 +1568,7 @@ function bindDownloadClick(el, gameId, MEGA_COOLDOWN_MS) {
   el.addEventListener(
     "click",
     async () => {
-      if (inCooldown("megaClick", gameId, MEGA_COOLDOWN_MS)) return;
+      if (!isAdminCounterMode() && inCooldown("megaClick", gameId, MEGA_COOLDOWN_MS)) return;
       try {
         const j = await counterHit(gameId, "mega");
         if (j?.ok) {
@@ -1592,7 +1597,7 @@ async function initCounters(gameId, megaHref, archiveHref) {
   }
 
   // 1) Vue (anti-refresh abusif)
-  const skipViewHit = inCooldown("view", gameId, VIEW_COOLDOWN_MS);
+  const skipViewHit = !isAdminCounterMode() && inCooldown("view", gameId, VIEW_COOLDOWN_MS);
 
   try {
     const j = skipViewHit ? await counterGet(gameId) : await counterHit(gameId, "view");

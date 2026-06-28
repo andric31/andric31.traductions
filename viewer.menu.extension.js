@@ -37,10 +37,9 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
 
   async function fetchCounter(op) {
     try {
-      const r = await fetch(
-        `/api/counter?op=${op}&kind=mega&id=${EXT_DL_ID}`,
-        { cache: "no-store" }
-      );
+      const rawUrl = `/api/counter?op=${op}&kind=mega&id=${EXT_DL_ID}`;
+      const counterUrl = window.AdminViewerMode?.counterUrl?.(rawUrl) || rawUrl;
+      const r = await fetch(counterUrl, { cache: "no-store" });
       if (!r.ok) return null;
       const j = await r.json();
       return Number(j.megaClicks ?? j.downloads ?? j.count ?? j.value ?? j.mega ?? 0);

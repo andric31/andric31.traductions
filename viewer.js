@@ -210,10 +210,10 @@
 
     try {
       const op = MAIN_VIEW_HIT_DONE ? "get" : "hit";
-      const r = await fetch(
-        `/api/counter?op=${op}&kind=view&id=${encodeURIComponent(MAIN_PAGE_ID)}`,
-        { cache: "no-store" }
-      );
+      const counterUrl = window.AdminViewerMode?.counterUrl?.(
+        `/api/counter?op=${op}&kind=view&id=${encodeURIComponent(MAIN_PAGE_ID)}`
+      ) || `/api/counter?op=${op}&kind=view&id=${encodeURIComponent(MAIN_PAGE_ID)}`;
+      const r = await fetch(counterUrl, { cache: "no-store" });
       if (!r.ok) return;
 
       const j = await r.json();

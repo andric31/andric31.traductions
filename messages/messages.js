@@ -57,9 +57,22 @@
 
   const LINK_RE = /\b((?:https?:\/\/|www\.)[^\s<>()]+|[a-z0-9][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+\/[^^\s<>()]*)/ig;
 
+  function normalizeRole(role) {
+    return String(role || 'member').trim().toLowerCase();
+  }
+
+  function canModerateMessages() {
+    const role = normalizeRole(getAuthUser()?.role);
+    return role === 'admin' || role === 'moderator';
+  }
+
+  function canAccessTranslatorRoom(role) {
+    const r = normalizeRole(role);
+    return r === 'admin' || r === 'translator' || r === 'moderator';
+  }
+
   function isAdminUser() {
-    const me = getAuthUser();
-    return roleLevel(me?.role) >= roleLevel('admin');
+    return normalizeRole(getAuthUser()?.role) === 'admin';
   }
 
   function hasLink(value) {
@@ -128,7 +141,7 @@
   }
 
   function roleLevel(role) {
-    return ({ member: 1, translator: 2, admin: 3 }[String(role || 'member')] || 0);
+    return ({ member: 1, translator: 2, moderator: 2, admin: 3 }[normalizeRole(role)] || 0);
   }
 
   function isSelfMessage(item) {
@@ -162,8 +175,8 @@
     const rooms = [{ value: 'global', label: 'Discussion générale', subtitle: 'Salon public', access: 'public' }];
     if (me?.id) {
       rooms.push({ value: 'private:members', label: 'Salon membres', subtitle: 'Réservé aux comptes connectés', access: 'members' });
-      if (roleLevel(me.role) >= roleLevel('translator')) rooms.push({ value: 'private:translators', label: 'Salon traducteurs', subtitle: 'Réservé aux traducteurs', access: 'translators' });
-      if (roleLevel(me.role) >= roleLevel('admin')) rooms.push({ value: 'private:admins', label: 'Salon admins', subtitle: 'Réservé aux admins', access: 'admins' });
+      if (canAccessTranslatorRoom(me.role)) rooms.push({ value: 'private:translators', label: 'Salon traducteurs', subtitle: 'Réservé aux traducteurs et modérateurs', access: 'translators' });
+      if (normalizeRole(me.role) === 'admin') rooms.push({ value: 'private:admins', label: 'Salon admins', subtitle: 'Réservé aux admins', access: 'admins' });
     }
     return rooms;
   }
@@ -411,7 +424,7 @@
     els.list.innerHTML = '';
     els.empty.classList.toggle('hidden', messages.length > 0);
 
-    const isAdmin = isAdminUser();
+    const isAdmin = canModerateMessages();
 
     for (const item of messages) {
       const parsed = parseMessage(item.message);
@@ -573,7 +586,7 @@
 
   async function deleteMessage(id) {
     const me = getAuthUser();
-    if (roleLevel(me?.role) < roleLevel('admin')) return;
+    if (!canModerateMessages()) return;
     if (!confirm('Supprimer ce message ?')) return;
     try {
       const res = await fetch(`${API_URL}?id=${encodeURIComponent(id)}`, { method: 'DELETE', credentials: 'same-origin' });

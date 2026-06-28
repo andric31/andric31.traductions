@@ -95,16 +95,30 @@ async function checkRateLimit(db, ipHash) {
 }
 
 
+function normalizeRole(role) {
+  return String(role || 'member').trim().toLowerCase();
+}
+
 function roleLevel(role) {
-  return ({ member: 1, translator: 2, admin: 3 }[String(role || 'member')] || 0);
+  return ({ member: 1, translator: 2, moderator: 2, admin: 3 }[normalizeRole(role)] || 0);
+}
+
+function canModerateMessages(user) {
+  const role = normalizeRole(user?.role);
+  return role === 'admin' || role === 'moderator';
+}
+
+function canAccessTranslatorRoom(user) {
+  const role = normalizeRole(user?.role);
+  return role === 'admin' || role === 'translator' || role === 'moderator';
 }
 
 function getAllowedRooms(user) {
   const rooms = ['global'];
   if (!user) return rooms;
-  if (roleLevel(user.role) >= roleLevel('member')) rooms.push('private:members');
-  if (roleLevel(user.role) >= roleLevel('translator')) rooms.push('private:translators');
-  if (roleLevel(user.role) >= roleLevel('admin')) rooms.push('private:admins');
+  rooms.push('private:members');
+  if (canAccessTranslatorRoom(user)) rooms.push('private:translators');
+  if (normalizeRole(user.role) === 'admin') rooms.push('private:admins');
   return rooms;
 }
 
@@ -114,16 +128,22 @@ function parseRoom(rawRoom, user) {
     return { ok: true, roomType: 'global', roomKey: 'global', ownerUserId: null };
   }
 
-  const sharedRooms = {
-    'private:members': { minRole: 'member' },
-    'private:translators': { minRole: 'translator' },
-    'private:admins': { minRole: 'admin' },
-  };
-
-  const shared = sharedRooms[room];
-  if (shared) {
+  if (room === 'private:members') {
     if (!user) return { ok: false, error: 'Connexion requise pour ce salon privé.', status: 401 };
-    if (roleLevel(user.role) < roleLevel(shared.minRole)) {
+    return { ok: true, roomType: 'private', roomKey: room, ownerUserId: null };
+  }
+
+  if (room === 'private:translators') {
+    if (!user) return { ok: false, error: 'Connexion requise pour ce salon privé.', status: 401 };
+    if (!canAccessTranslatorRoom(user)) {
+      return { ok: false, error: 'Accès refusé à ce salon privé.', status: 403 };
+    }
+    return { ok: true, roomType: 'private', roomKey: room, ownerUserId: null };
+  }
+
+  if (room === 'private:admins') {
+    if (!user) return { ok: false, error: 'Connexion requise pour ce salon privé.', status: 401 };
+    if (normalizeRole(user.role) !== 'admin') {
       return { ok: false, error: 'Accès refusé à ce salon privé.', status: 403 };
     }
     return { ok: true, roomType: 'private', roomKey: room, ownerUserId: null };
@@ -242,8 +262,8 @@ export async function onRequest(context) {
     if (!sessionUser) {
       return json({ ok: false, error: 'Connexion requise.' }, 401);
     }
-    if (roleLevel(sessionUser.role) < roleLevel('admin')) {
-      return json({ ok: false, error: 'Accès admin requis.' }, 403);
+    if (!canModerateMessages(sessionUser)) {
+      return json({ ok: false, error: 'Accès modérateur requis.' }, 403);
     }
     if (!Number.isInteger(id) || id <= 0) {
       return json({ ok: false, error: 'ID invalide.' }, 400);

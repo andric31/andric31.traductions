@@ -54,7 +54,7 @@ export function cleanDisplayName(value) {
 
 export function cleanRole(value) {
   const role = String(value ?? '').trim().toLowerCase();
-  return ['member', 'translator', 'admin'].includes(role) ? role : 'member';
+  return ['member', 'translator', 'moderator', 'admin'].includes(role) ? role : 'member';
 }
 
 export function validatePassword(password) {
@@ -297,7 +297,7 @@ export async function requireUser(db, env, request) {
 }
 
 export function isRoleAllowed(role, allowed = []) {
-  const order = { member: 1, translator: 2, admin: 3 };
+  const order = { member: 1, moderator: 1, translator: 2, admin: 3 };
   const current = order[String(role || 'member')] || 0;
   return allowed.some((r) => current >= (order[String(r)] || 0));
 }

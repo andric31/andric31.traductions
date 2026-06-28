@@ -75,6 +75,11 @@
     return normalizeRole(getAuthUser()?.role) === 'admin';
   }
 
+  function canAccessModeratorRoom(role) {
+    const r = normalizeRole(role);
+    return r === 'admin' || r === 'moderator';
+  }
+
   function hasLink(value) {
     LINK_RE.lastIndex = 0;
     return LINK_RE.test(String(value || ''));
@@ -176,6 +181,7 @@
     if (me?.id) {
       rooms.push({ value: 'private:members', label: 'Salon membres', subtitle: 'Réservé aux comptes connectés', access: 'members' });
       if (canAccessTranslatorRoom(me.role)) rooms.push({ value: 'private:translators', label: 'Salon traducteurs', subtitle: 'Réservé aux traducteurs et modérateurs', access: 'translators' });
+      if (canAccessModeratorRoom(me.role)) rooms.push({ value: 'private:moderators', label: 'Salon modérateurs', subtitle: 'Réservé aux modérateurs et admins', access: 'moderators' });
       if (normalizeRole(me.role) === 'admin') rooms.push({ value: 'private:admins', label: 'Salon admins', subtitle: 'Réservé aux admins', access: 'admins' });
     }
     return rooms;
@@ -222,6 +228,7 @@
       global: 'Salon public',
       'private:members': 'Salon privé membres',
       'private:translators': 'Salon privé traducteurs',
+      'private:moderators': 'Salon privé modérateurs',
       'private:admins': 'Salon privé admins',
     }[String(roomValue || 'global')] || 'Salon');
   }
@@ -239,6 +246,7 @@
       global: 'Discussion générale',
       'private:members': 'Discussion membres',
       'private:translators': 'Discussion traducteurs',
+      'private:moderators': 'Discussion modérateurs',
       'private:admins': 'Discussion admins',
     }[String(roomValue || 'global')] || 'Discussion');
   }

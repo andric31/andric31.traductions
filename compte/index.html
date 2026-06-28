@@ -270,6 +270,24 @@
       border-radius: 14px;
       background: rgba(255,255,255,.04);
     }
+
+    .account-admin-mode-line {
+      display: flex;
+      width: 100%;
+      margin: 12px 0 0;
+      padding: 10px 12px;
+    }
+    .account-admin-mode-line .account-notif-setting-text {
+      flex: 1 1 auto;
+      justify-content: flex-start;
+    }
+    .account-admin-mode-line .account-admin-mode-desc {
+      margin-left: 6px;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 12px;
+    }
+
     .account-notif-setting-text {
       display: flex;
       align-items: center;
@@ -818,12 +836,15 @@
         <section class="auth-box" style="margin-top:14px;">
           <h2 style="margin-top:0;">🛠️ Admin</h2>
           <p>Accès rapide aux outils de gestion.</p>
+          <div class="account-notif-setting account-admin-mode-line">
+            <span class="account-notif-setting-text">
+              <span class="account-notif-setting-ico">👁️</span>
+              <span>Vue admin sans compteurs <span class="account-admin-mode-desc">Viewer et fiches jeux sans incrémenter les vues ni téléchargements.</span></span>
+            </span>
+            <button class="account-notif-switch" id="adminViewerModeAccountToggle" type="button" role="switch" aria-checked="false" aria-label="Activer la vue admin sans compteurs"></button>
+          </div>
+          <div id="adminViewerModeAccountState" style="display:none;">Désactivée</div>
           <div class="account-admin-grid">
-            <div class="account-admin-card" style="cursor:default;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-              <span><strong>👁️ Vue admin sans compteurs</strong><span>Viewer et fiches jeux sans incrémenter les vues ni téléchargements.</span></span>
-              <button class="account-notif-switch" id="adminViewerModeAccountToggle" type="button" role="switch" aria-checked="false" aria-label="Activer la vue admin sans compteurs"></button>
-            </div>
-            <div id="adminViewerModeAccountState" style="display:none;">Désactivée</div>
             <a class="account-admin-card" href="/compte/admin.html"><strong>👥 Membres</strong><span>Comptes, rôles et mots de passe.</span></a>
             <a class="account-admin-card" href="/compte/ticket-admin.html"><strong>🎫 Tickets</strong><span>Demandes envoyées depuis le formulaire.</span></a>
             <a class="account-admin-card" href="/compte/blog-admin.html"><strong>📝 Blog</strong><span>Création et modification des articles.</span></a>

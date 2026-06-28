@@ -1430,7 +1430,8 @@ async function counterGet(id) {
 
 // ✅ plus fiable (quand on quitte la page vite) : keepalive
 async function counterHit(id, kind) {
-  const url = `/api/counter?op=hit&kind=${encodeURIComponent(kind)}&id=${encodeURIComponent(id)}`;
+  const rawUrl = `/api/counter?op=hit&kind=${encodeURIComponent(kind)}&id=${encodeURIComponent(id)}`;
+  const url = window.AdminViewerMode?.counterUrl?.(rawUrl) || rawUrl;
   const r = await fetch(url, { cache: "no-store", keepalive: true });
   if (!r.ok) throw new Error("counter hit HTTP " + r.status);
   return await r.json();

@@ -203,6 +203,41 @@
 
     .blog-admin-note strong { color:var(--fg); }
 
+    .blog-admin-cheatsheet {
+      margin-top:12px;
+      padding:12px;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:14px;
+      background:rgba(255,255,255,.035);
+    }
+    .blog-admin-cheatsheet-title {
+      margin:0 0 8px;
+      font-size:15px;
+      font-weight:800;
+    }
+    .blog-admin-cheatsheet-grid {
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+      gap:8px;
+    }
+    .blog-admin-cheatsheet code {
+      display:block;
+      padding:7px 8px;
+      border-radius:10px;
+      background:rgba(0,0,0,.22);
+      color:var(--fg);
+      font-size:12px;
+      white-space:nowrap;
+    }
+    .blog-admin-cheatsheet span {
+      display:block;
+      margin-top:3px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.35;
+    }
+
+
     @media (max-width:1120px) {
       .blog-admin-layout,
       .blog-admin-editor,
@@ -211,6 +246,7 @@
       .blog-admin-row-3 { grid-template-columns:1fr; }
       #bodyText { min-height:320px; }
       .blog-admin-preview-box, .blog-admin-preview-box iframe { min-height:520px; }
+      .blog-admin-cheatsheet-grid { grid-template-columns:1fr; }
     }
   </style>
 </head>
@@ -304,13 +340,28 @@
 
               <div class="blog-admin-toolbar">
                 <button class="auth-btn" type="button" data-insert="## Titre de section">+ Titre</button>
+                <button class="auth-btn" type="button" data-insert="### Petit titre">+ Petit titre</button>
                 <button class="auth-btn" type="button" data-insert="- élément de liste">+ Liste</button>
+                <button class="auth-btn" type="button" data-insert="---">+ Séparateur</button>
+                <button class="auth-btn" type="button" data-insert="> Note encadrée">+ Note</button>
                 <button class="auth-btn" type="button" data-insert="**texte important**">+ Gras</button>
                 <button class="auth-btn" type="button" id="demoBtn">Exemple</button>
               </div>
 
+              <div class="blog-admin-cheatsheet">
+                <p class="blog-admin-cheatsheet-title">📌 Aide-mémoire des codes</p>
+                <div class="blog-admin-cheatsheet-grid">
+                  <div><code>## Grand titre</code><span>Gros titre de section.</span></div>
+                  <div><code>### Petit titre</code><span>Sous-titre plus discret.</span></div>
+                  <div><code>- ligne de liste</code><span>Ajoute une puce dans une liste.</span></div>
+                  <div><code>---</code><span>Ajoute une barre de séparation.</span></div>
+                  <div><code>&gt; Texte important</code><span>Ajoute une note encadrée.</span></div>
+                  <div><code>**mot en gras**</code><span>Met un mot ou une phrase en gras.</span></div>
+                </div>
+              </div>
+
               <label class="blog-admin-label">Texte de l’article
-                <small>Astuce : <strong>## Mon titre</strong> devient un titre. <strong>- ligne</strong> devient une liste. <strong>**mot**</strong> met en gras.</small>
+                <small>Tu peux écrire normalement. Utilise l’aide-mémoire au-dessus seulement quand tu veux mettre en forme.</small>
                 <textarea class="auth-textarea" id="bodyText" spellcheck="true" placeholder="Écris ton article ici..."></textarea>
               </label>
 
@@ -458,6 +509,8 @@
       div.innerHTML = content || '';
       div.querySelectorAll('h2').forEach((n)=>n.replaceWith(document.createTextNode(`\n## ${n.textContent.trim()}\n`)));
       div.querySelectorAll('h3').forEach((n)=>n.replaceWith(document.createTextNode(`\n### ${n.textContent.trim()}\n`)));
+      div.querySelectorAll('.blog-divider').forEach((n)=>n.replaceWith(document.createTextNode('\n---\n')));
+      div.querySelectorAll('p.blog-footer-note').forEach((n)=>n.replaceWith(document.createTextNode(`> ${n.textContent.trim()}\n\n`)));
       div.querySelectorAll('li').forEach((n)=>n.replaceWith(document.createTextNode(`- ${n.textContent.trim()}\n`)));
       div.querySelectorAll('p').forEach((n)=>n.replaceWith(document.createTextNode(`${n.textContent.trim()}\n\n`)));
       return div.textContent.replace(/\n{3,}/g, '\n\n').trim();
@@ -601,7 +654,9 @@
       el.body.value = `## Ce qui change
 Le blog devient plus simple à gérer depuis l’espace admin. Le but est de pouvoir écrire sans toucher directement au HTML.
 
-## Ce qui est prévu
+---
+
+### Ce qui est prévu
 - une édition plus claire
 - un aperçu direct
 - moins de blocs techniques visibles

@@ -270,9 +270,14 @@
             <p class="blog-admin-help">Tu peux écrire normalement. Les lignes vides créent des paragraphes. Pour un titre de section, commence une ligne par <strong>##</strong>.</p>
 
             <form class="blog-admin-form" onsubmit="return false;">
-              <label class="blog-admin-label">Titre
-                <input class="auth-input" id="articleTitle" type="text" placeholder="Ex. News de juillet" />
-              </label>
+              <div class="blog-admin-row">
+                <label class="blog-admin-label">Titre de la page article
+                  <input class="auth-input" id="articleTitle" type="text" placeholder="Ex. News de juillet" />
+                </label>
+                <label class="blog-admin-label">Titre court sur le blog
+                  <input class="auth-input" id="cardTitle" type="text" placeholder="Optionnel : titre de la carte" />
+                </label>
+              </div>
 
               <div class="blog-admin-row-3">
                 <label class="blog-admin-label">Date
@@ -294,7 +299,7 @@
               </div>
 
               <label class="blog-admin-label">Résumé visible sur la page blog
-                <textarea class="auth-textarea" id="articleExcerpt" rows="3" placeholder="Petit résumé affiché sur la carte du blog."></textarea>
+                <textarea class="auth-textarea" id="articleExcerpt" rows="3" placeholder="Petit résumé affiché seulement sur la carte du blog."></textarea>
               </label>
 
               <div class="blog-admin-toolbar">
@@ -390,7 +395,7 @@
     const state = { tab:'article', loadedHref:'', cards:[] };
 
     const el = {
-      list:$('articleList'), title:$('articleTitle'), date:$('articleDate'), category:$('articleCategory'), author:$('articleAuthor'),
+      list:$('articleList'), title:$('articleTitle'), cardTitle:$('cardTitle'), date:$('articleDate'), category:$('articleCategory'), author:$('articleAuthor'),
       slug:$('articleSlug'), pinned:$('articlePinned'), excerpt:$('articleExcerpt'), body:$('bodyText'), msg:$('editorMsg'),
       preview:$('previewFrame'), articleOut:$('articleHtmlOut'), cardOut:$('cardHtmlOut'), output:$('outputZone'), fileLabel:$('fileNameLabel')
     };
@@ -435,6 +440,8 @@
       lines.forEach((raw) => {
         const line = raw.trim();
         if (!line) { flushParagraph(); flushList(); return; }
+        if (line === '---') { flushParagraph(); flushList(); out.push('<div class="blog-divider"></div>'); return; }
+        if (line.startsWith('> ')) { flushParagraph(); flushList(); out.push(`<p class="blog-footer-note">${inlineFormat(line.slice(2).trim())}</p>`); return; }
         if (line.startsWith('## ')) { flushParagraph(); flushList(); out.push(`<h2>${inlineFormat(line.slice(3).trim())}</h2>`); return; }
         if (line.startsWith('### ')) { flushParagraph(); flushList(); out.push(`<h3>${inlineFormat(line.slice(4).trim())}</h3>`); return; }
         if (line.startsWith('- ')) { flushParagraph(); list.push(line.slice(2).trim()); return; }
@@ -458,6 +465,7 @@
 
     function getData(){
       const title = el.title.value.trim();
+      const cardTitle = el.cardTitle.value.trim() || title;
       const slug = slugify(el.slug.value.trim() || title);
       if (!title) throw new Error('Ajoute au moins un titre.');
       if (!slug) throw new Error('Le lien/fichier est vide.');
@@ -467,6 +475,7 @@
       if (!content) throw new Error('Ajoute le texte de l’article.');
       return {
         title,
+        cardTitle,
         slug,
         href:`${slug}.html`,
         date:el.date.value.trim() || new Date().toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' }),
@@ -488,12 +497,12 @@
     <div class="blog-meta">
       ${meta}
     </div>
-    <h2>${esc(data.title)}</h2>
+    <h2>${esc(data.cardTitle || data.title)}</h2>
     <p>${esc(data.excerpt)}</p>
   </div>
   <div class="blog-card-side">
     <div class="blog-author"><span class="blog-avatar">${esc(data.avatar)}</span> ${esc(data.author)}</div>
-    <span class="blog-link">Lire l’article →</span>
+    <span class="blog-link">${data.pinned ? 'Lire →' : 'Lire l’article →'}</span>
   </div>
 </a>`;
     }
@@ -552,7 +561,10 @@
       if (state.tab === 'card') {
         writePreview(`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><base href="/blog/"><script src="/theme-init.js"><\/script><link rel="stylesheet" href="/themes.css"><link rel="stylesheet" href="/blog/blog.css"></head><body><main class="blog-shell"><section class="blog-list" style="padding-top:24px;">${card}</section></main></body></html>`);
       } else {
-        writePreview(article.replace('href="blog.css"', 'href="/blog/blog.css"'));
+        writePreview(article
+          .replace('<head>', '<head><base href="/blog/">')
+          .replace('href="blog.css"', 'href="/blog/blog.css"'));
+
       }
       if (showOk) setMsg('Aperçu mis à jour.', true);
       return { data, article, card };
@@ -561,6 +573,7 @@
     function blank(){
       const now = new Date();
       el.title.value = '';
+      el.cardTitle.value = '';
       el.date.value = now.toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
       el.category.value = 'Actualité';
       el.author.value = 'andric31';
@@ -578,6 +591,7 @@
 
     function fillDemo(){
       el.title.value = 'Capsule #2 — Nouvelles du site';
+      el.cardTitle.value = 'Capsule #2';
       el.date.value = '30 juin 2026';
       el.category.value = 'Actualité';
       el.author.value = 'andric31';
@@ -650,6 +664,7 @@ Le système reste compatible avec les pages actuelles du blog.`;
         const author = (meta.find((x)=>x.startsWith('Par ')) || 'Par andric31').replace(/^Par\s+/, '');
         const content = doc.querySelector('.blog-article-content')?.innerHTML || '';
         el.title.value = h1;
+        el.cardTitle.value = card.title || h1;
         el.date.value = date;
         el.category.value = category;
         el.author.value = author;
@@ -713,7 +728,7 @@ Le système reste compatible avec les pages actuelles du blog.`;
       try { refreshPreview(false); await copy(el.cardOut.value); setMsg('Carte blog copiée.', true); } catch(e) { setMsg('Copie impossible.', false); }
     });
 
-    ['articleTitle','articleDate','articleCategory','articleAuthor','articleSlug','articleExcerpt','bodyText','articlePinned'].forEach((id)=>{
+    ['articleTitle','cardTitle','articleDate','articleCategory','articleAuthor','articleSlug','articleExcerpt','bodyText','articlePinned'].forEach((id)=>{
       $(id).addEventListener('input', () => {
         if (id === 'articleTitle' && !el.slug.dataset.manual) el.slug.value = slugify(el.title.value);
         try { refreshPreview(false); } catch {}

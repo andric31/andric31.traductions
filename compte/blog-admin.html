@@ -14,7 +14,7 @@
     html.auth-denied body { visibility: visible; }
 
     .blog-admin-shell {
-      width:min(1240px, calc(100% - 18px));
+      width:min(1560px, calc(100% - 18px));
       margin:12px auto 22px !important;
       display:grid;
       gap:12px;
@@ -61,7 +61,7 @@
 
     .blog-admin-layout {
       display:grid;
-      grid-template-columns:360px minmax(0, 1fr);
+      grid-template-columns:310px minmax(0, 1fr);
       gap:12px;
       align-items:start;
     }
@@ -102,8 +102,12 @@
 
     .blog-admin-editor {
       display:grid;
-      grid-template-columns:minmax(0, .92fr) minmax(0, 1.08fr);
+      grid-template-columns:1fr;
       gap:12px;
+    }
+
+    .blog-admin-preview-panel {
+      max-width:100%;
     }
 
     .blog-admin-form {
@@ -111,8 +115,8 @@
       gap:10px;
     }
 
-    .blog-admin-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-    .blog-admin-row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+    .blog-admin-row { display:grid; grid-template-columns:1fr 220px; gap:10px; }
+    .blog-admin-row-3 { display:grid; grid-template-columns:220px 220px 220px; gap:10px; }
 
     .blog-admin-label { display:grid; gap:6px; font-size:13px; font-weight:700; }
     .blog-admin-label small { display:block; color:var(--muted); font-weight:400; line-height:1.35; }
@@ -122,7 +126,7 @@
     .blog-admin-form .auth-textarea { min-height:44px; }
 
     .blog-admin-form .auth-textarea { resize:vertical; line-height:1.6; }
-    #bodyText { min-height:430px; font:15px/1.6 Consolas, ui-monospace, monospace; }
+    #bodyText { min-height:520px; font:15px/1.6 Consolas, ui-monospace, monospace; }
 
     .blog-admin-check {
       display:flex;
@@ -161,7 +165,7 @@
     }
 
     .blog-admin-preview-box {
-      min-height:610px;
+      min-height:760px;
       border:1px solid var(--border, var(--auth-border));
       border-radius:18px;
       background:rgba(255,255,255,.02);
@@ -170,7 +174,7 @@
 
     .blog-admin-preview-box iframe {
       width:100%;
-      min-height:610px;
+      min-height:760px;
       border:0;
       background:transparent;
       display:block;
@@ -206,7 +210,7 @@
       .blog-admin-row,
       .blog-admin-row-3 { grid-template-columns:1fr; }
       #bodyText { min-height:320px; }
-      .blog-admin-preview-box, .blog-admin-preview-box iframe { min-height:480px; }
+      .blog-admin-preview-box, .blog-admin-preview-box iframe { min-height:520px; }
     }
   </style>
 </head>
@@ -314,7 +318,7 @@
             </form>
           </div>
 
-          <div class="blog-admin-panel">
+          <div class="blog-admin-panel blog-admin-preview-panel">
             <div class="blog-admin-tabs">
               <button class="blog-admin-tab active" type="button" data-tab="article">Aperçu article</button>
               <button class="blog-admin-tab" type="button" data-tab="card">Aperçu carte</button>
@@ -547,9 +551,9 @@
       el.cardOut.value = card;
       el.fileLabel.textContent = `/blog/${data.href}`;
       if (state.tab === 'card') {
-        writePreview(`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><script src="/theme-init.js"><\/script><link rel="stylesheet" href="/themes.css"><link rel="stylesheet" href="/blog/blog.css"></head><body><main class="blog-shell"><section class="blog-list" style="padding-top:24px;">${card}</section></main></body></html>`);
+        writePreview(`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><base href="/blog/"><script src="/theme-init.js"><\/script><link rel="stylesheet" href="/themes.css"><link rel="stylesheet" href="/blog/blog.css"></head><body><main class="blog-shell"><section class="blog-list" style="padding-top:24px;">${card}</section></main></body></html>`);
       } else {
-        writePreview(article);
+        writePreview(article.replace('href="blog.css"', 'href="/blog/blog.css"'));
       }
       if (showOk) setMsg('Aperçu mis à jour.', true);
       return { data, article, card };

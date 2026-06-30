@@ -11,240 +11,209 @@
   <script src="/theme-init.js"></script>
   <style>
     html:not(.auth-ready) body { visibility: hidden; }
-
     html.auth-denied body { visibility: visible; }
 
     .blog-admin-shell {
+      width:min(1240px, calc(100% - 18px));
+      margin:12px auto 22px !important;
       display:grid;
-      gap:10px;
-      width:min(1180px, calc(100% - 18px));
-      margin:12px auto 18px !important;
-      padding-top:0 !important;
+      gap:12px;
     }
 
     body .auth-shell.blog-admin-shell { margin-top:12px !important; }
-    body .auth-card { scroll-margin-top: 8px; }
+    .blog-admin-card { padding:16px; }
 
-    .blog-admin-top.auth-card,
-    .blog-admin-main.auth-card,
-    .blog-admin-out.auth-card {
-      padding: 16px;
+    .blog-admin-head {
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
     }
 
-    .blog-admin-top .auth-title {
-      margin: 0 0 6px;
+    .blog-admin-title { margin:0 0 6px; font-size:clamp(24px, 3vw, 38px); }
+    .blog-admin-subtitle { margin:0; color:var(--muted); line-height:1.55; }
+
+    .blog-admin-actions,
+    .blog-admin-toolbar,
+    .blog-admin-mini-actions {
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
     }
 
-    .blog-admin-top .auth-subtitle {
-      margin: 0 0 10px;
+    .blog-admin-steps {
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:10px;
     }
 
-    .blog-admin-top .auth-actions {
-      gap: 8px;
+    .blog-admin-step {
+      border:1px solid var(--border, var(--auth-border));
+      border-radius:16px;
+      background:rgba(255,255,255,.035);
+      padding:12px 13px;
     }
 
-    .blog-admin-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-      align-items: start;
+    .blog-admin-step strong { display:block; margin-bottom:4px; }
+    .blog-admin-step span { color:var(--muted); font-size:13px; line-height:1.45; }
+
+    .blog-admin-layout {
+      display:grid;
+      grid-template-columns:360px minmax(0, 1fr);
+      gap:12px;
+      align-items:start;
     }
 
-    .blog-admin-card {
-      border: 1px solid var(--border, var(--auth-border));
-      border-radius: 18px;
-      background: rgba(255,255,255,.03);
-      padding: 14px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.18);
+    .blog-admin-panel {
+      border:1px solid var(--border, var(--auth-border));
+      border-radius:18px;
+      background:rgba(255,255,255,.03);
+      padding:14px;
+      min-width:0;
     }
 
-    .blog-admin-title {
-      margin: 0 0 8px;
-      font-size: clamp(22px, 2.2vw, 34px);
+    .blog-admin-section-title { margin:0 0 10px; font-size:20px; }
+    .blog-admin-help { margin:0 0 12px; color:var(--muted); line-height:1.55; font-size:13px; }
+
+    .blog-admin-list {
+      display:grid;
+      gap:8px;
+      max-height:410px;
+      overflow:auto;
+      padding-right:2px;
     }
 
-    .blog-admin-section-title {
-      margin: 0 0 10px;
-      font-size: 20px;
+    .blog-admin-article-btn {
+      width:100%;
+      text-align:left;
+      color:inherit;
+      border:1px solid var(--border, var(--auth-border));
+      background:rgba(255,255,255,.04);
+      border-radius:14px;
+      padding:10px 11px;
+      cursor:pointer;
     }
 
-    .blog-admin-subtitle {
-      margin: 0 0 12px;
-      color: var(--muted);
-      line-height: 1.55;
-      font-size: 14px;
+    .blog-admin-article-btn:hover { border-color:var(--accent, #6ce0b0); }
+    .blog-admin-article-btn strong { display:block; margin-bottom:4px; }
+    .blog-admin-article-btn span { color:var(--muted); font-size:12px; }
+
+    .blog-admin-editor {
+      display:grid;
+      grid-template-columns:minmax(0, .92fr) minmax(0, 1.08fr);
+      gap:12px;
     }
 
-    .blog-admin-divider {
-      height: 1px;
-      background: rgba(255,255,255,.07);
-      margin: 12px 0;
+    .blog-admin-form {
+      display:grid;
+      gap:10px;
     }
 
-    .blog-admin-row,
-    .blog-admin-row-3 {
-      display: grid;
-      gap: 10px;
-    }
+    .blog-admin-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .blog-admin-row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
 
-    .blog-admin-row { grid-template-columns: 1fr 1fr; }
-    .blog-admin-row-3 { grid-template-columns: 1fr 1fr 1fr; }
-
-    .blog-admin-form .auth-label {
-      gap: 6px;
-    }
-
-    .blog-admin-form .auth-label > span {
-      font-size: 13px;
-      opacity: .95;
-      font-weight: 700;
-    }
-
-    .blog-admin-label-help {
-      display:block;
-      margin-top:4px;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.45;
-      font-weight: 400;
-    }
+    .blog-admin-label { display:grid; gap:6px; font-size:13px; font-weight:700; }
+    .blog-admin-label small { display:block; color:var(--muted); font-weight:400; line-height:1.35; }
 
     .blog-admin-form .auth-input,
     .blog-admin-form .auth-select,
-    .blog-admin-form .auth-textarea {
-      min-height: 46px;
+    .blog-admin-form .auth-textarea { min-height:44px; }
+
+    .blog-admin-form .auth-textarea { resize:vertical; line-height:1.6; }
+    #bodyText { min-height:430px; font:15px/1.6 Consolas, ui-monospace, monospace; }
+
+    .blog-admin-check {
+      display:flex;
+      align-items:center;
+      gap:9px;
+      border:1px solid var(--border, var(--auth-border));
+      border-radius:14px;
+      padding:10px 11px;
+      background:rgba(255,255,255,.03);
+      font-weight:700;
+      cursor:pointer;
     }
 
-    .blog-admin-form .auth-textarea {
-      resize: vertical;
-      line-height: 1.55;
+    .blog-admin-check input { width:18px; height:18px; }
+
+    .blog-admin-tabs {
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-bottom:10px;
     }
 
-    #content.blog-admin-editor-full {
-      min-height: 58vh;
-      font: 15px/1.6 Consolas, monospace;
+    .blog-admin-tab {
+      border:1px solid var(--border, var(--auth-border));
+      background:rgba(255,255,255,.04);
+      color:inherit;
+      border-radius:999px;
+      padding:9px 13px;
+      cursor:pointer;
+      font-weight:800;
     }
 
-    .blog-admin-guide {
-      margin: 0 0 14px;
-      padding: 12px 14px;
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 16px;
-      background: rgba(80,160,255,.08);
+    .blog-admin-tab.active {
+      border-color:var(--accent, #6ce0b0);
+      background:color-mix(in srgb, var(--accent, #6ce0b0) 18%, transparent);
     }
 
-    .blog-admin-guide-title {
-      margin: 0 0 6px;
-      font-size: 14px;
-      font-weight: 700;
+    .blog-admin-preview-box {
+      min-height:610px;
+      border:1px solid var(--border, var(--auth-border));
+      border-radius:18px;
+      background:rgba(255,255,255,.02);
+      overflow:hidden;
     }
 
-    .blog-admin-guide p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.55;
+    .blog-admin-preview-box iframe {
+      width:100%;
+      min-height:610px;
+      border:0;
+      background:transparent;
+      display:block;
     }
 
-    .blog-admin-actions,
-    .blog-admin-toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .blog-admin-actions {
-      margin-top: 12px;
-    }
-
-    .blog-admin-preview-wrap {
-      display: grid;
-      gap: 10px;
-    }
-
-    .blog-admin-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 7px 11px;
-      border-radius: 999px;
-      border: 1px solid var(--border, var(--auth-border));
-      background: rgba(80,160,255,.10);
-      font-size: 12px;
-      white-space: nowrap;
-    }
-
-    .blog-admin-preview-note {
-      margin: 0;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .blog-admin-preview iframe {
-      width: 100%;
-      min-height: 760px;
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 16px;
-      background: #ffffff;
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,.03);
-    }
-
-    .blog-admin-out-grid {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr 1fr;
-      gap: 12px;
-      align-items: start;
-    }
-
-    .blog-admin-help {
-      color: var(--muted);
-      line-height: 1.55;
-      font-size: 13px;
-      margin: 0 0 10px;
-    }
+    .blog-admin-output { display:none; margin-top:12px; }
+    .blog-admin-output.show { display:grid; gap:10px; }
 
     .blog-admin-code {
-      width: 100%;
-      min-height: 220px;
-      resize: vertical;
-      font: 13px/1.55 Consolas, monospace;
-      border-radius: 14px;
+      width:100%;
+      min-height:210px;
+      resize:vertical;
+      font:13px/1.55 Consolas, ui-monospace, monospace;
+      border-radius:14px;
     }
 
-    .blog-admin-code.big {
-      min-height: 520px;
+    .blog-admin-note {
+      border:1px solid rgba(255,255,255,.09);
+      background:rgba(80,160,255,.08);
+      border-radius:16px;
+      padding:12px 13px;
+      color:var(--muted);
+      line-height:1.55;
+      font-size:13px;
     }
 
-    .blog-admin-mini {
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.5;
-      margin-top: 8px;
-    }
+    .blog-admin-note strong { color:var(--fg); }
 
-    @media (max-width: 1120px) {
-      .blog-admin-grid,
-      .blog-admin-out-grid,
+    @media (max-width:1120px) {
+      .blog-admin-layout,
+      .blog-admin-editor,
+      .blog-admin-steps,
       .blog-admin-row,
-      .blog-admin-row-3 {
-        grid-template-columns: 1fr;
-      }
-
-      .blog-admin-preview iframe {
-        min-height: 560px;
-      }
-
-      .blog-admin-code.big {
-        min-height: 320px;
-      }
+      .blog-admin-row-3 { grid-template-columns:1fr; }
+      #bodyText { min-height:320px; }
+      .blog-admin-preview-box, .blog-admin-preview-box iframe { min-height:480px; }
     }
   </style>
 </head>
 <body>
   <main class="blog-admin-shell">
-    <section class="auth-card auth-hidden" data-guest-only>
-      <h1 class="auth-title">📝 Éditeur blog</h1>
+    <section class="auth-card auth-hidden blog-admin-card" data-guest-only>
+      <h1 class="auth-title">📝 Blog admin</h1>
       <p class="auth-subtitle">Tu dois être connecté avec un compte admin pour utiliser cet outil.</p>
       <div class="auth-actions">
         <a class="auth-btn primary" href="/connexion/">Se connecter</a>
@@ -252,144 +221,123 @@
       </div>
     </section>
 
-    <section class="auth-card auth-hidden blog-admin-top" data-auth-only data-role-min="admin">
-      <h1 class="auth-title">📝 Éditeur blog admin</h1>
-      <p class="auth-subtitle">Remplir les champs de haut en bas, puis vérifier l’aperçu plus bas.</p>
-      <div class="auth-actions">
-        <a class="auth-btn" href="/compte/">Retour au compte</a>
-        <a class="auth-btn" href="/">Retour au site</a>
-        <a class="auth-btn" href="/blog/">Voir blog</a>
+    <section class="auth-card auth-hidden blog-admin-card" data-auth-only data-role-min="admin">
+      <div class="blog-admin-head">
+        <div>
+          <h1 class="blog-admin-title">📝 Blog admin simplifié</h1>
+          <p class="blog-admin-subtitle">Un écran plus clair : tu choisis un article, tu modifies le texte, tu regardes l’aperçu, puis tu exportes.</p>
+        </div>
+        <div class="blog-admin-actions">
+          <a class="auth-btn" href="/compte/">Retour au compte</a>
+          <a class="auth-btn" href="/blog/">Voir blog</a>
+          <a class="auth-btn" href="/">Retour au site</a>
+        </div>
       </div>
     </section>
 
-    <section class="auth-card auth-hidden blog-admin-main" data-auth-only data-role-min="admin">
-      <div class="blog-admin-grid">
-        <div class="blog-admin-card blog-admin-form">
-          <h2 class="blog-admin-section-title">Création d’article</h2>
-          <p class="blog-admin-subtitle">Commence par le titre, le résumé et le contenu. Le slug peut se remplir automatiquement.</p>
+    <section class="auth-card auth-hidden blog-admin-card" data-auth-only data-role-min="admin">
+      <div class="blog-admin-steps">
+        <div class="blog-admin-step"><strong>1. Écrire</strong><span>Remplis seulement les champs utiles : titre, date, catégorie, résumé et texte.</span></div>
+        <div class="blog-admin-step"><strong>2. Aperçu direct</strong><span>L’aperçu se met à jour sans manipuler du HTML compliqué.</span></div>
+        <div class="blog-admin-step"><strong>3. Exporter</strong><span>Télécharge l’article ou copie les blocs seulement quand tu en as besoin.</span></div>
+      </div>
+    </section>
 
-          <div class="blog-admin-guide">
-            <div class="blog-admin-guide-title">Repère rapide</div>
-            <p><strong>Titre</strong> = nom de l’article visible sur le blog. <strong>Slug</strong> = nom du fichier et du lien web. <strong>Date affichée</strong> = texte vu par les visiteurs. <strong>Date ISO</strong> = format technique pour trier proprement. <strong>Catégorie</strong> = petit label visible sur la carte et dans l’article.</p>
+    <section class="auth-card auth-hidden blog-admin-card" data-auth-only data-role-min="admin">
+      <div class="blog-admin-layout">
+        <aside class="blog-admin-panel">
+          <h2 class="blog-admin-section-title">Articles existants</h2>
+          <p class="blog-admin-help">Clique sur un article pour le charger et le modifier. Tu peux aussi repartir de zéro.</p>
+          <div class="blog-admin-mini-actions" style="margin-bottom:10px;">
+            <button class="auth-btn primary" type="button" id="newBtn">Nouvel article</button>
+            <button class="auth-btn" type="button" id="reloadBtn">Recharger</button>
+          </div>
+          <div id="articleList" class="blog-admin-list">
+            <div class="blog-admin-note">Chargement des articles du blog…</div>
+          </div>
+          <div class="blog-admin-note" style="margin-top:12px;">
+            <strong>Important :</strong> cette page prépare les fichiers. Pour une vraie publication en un clic, il faudra ajouter une API Cloudflare dédiée au blog.
+          </div>
+        </aside>
+
+        <div class="blog-admin-editor">
+          <div class="blog-admin-panel">
+            <h2 class="blog-admin-section-title">Édition simple</h2>
+            <p class="blog-admin-help">Tu peux écrire normalement. Les lignes vides créent des paragraphes. Pour un titre de section, commence une ligne par <strong>##</strong>.</p>
+
+            <form class="blog-admin-form" onsubmit="return false;">
+              <label class="blog-admin-label">Titre
+                <input class="auth-input" id="articleTitle" type="text" placeholder="Ex. News de juillet" />
+              </label>
+
+              <div class="blog-admin-row-3">
+                <label class="blog-admin-label">Date
+                  <input class="auth-input" id="articleDate" type="text" placeholder="30 juin 2026" />
+                </label>
+                <label class="blog-admin-label">Catégorie
+                  <input class="auth-input" id="articleCategory" type="text" placeholder="Actualité" />
+                </label>
+                <label class="blog-admin-label">Auteur
+                  <input class="auth-input" id="articleAuthor" type="text" value="andric31" />
+                </label>
+              </div>
+
+              <div class="blog-admin-row">
+                <label class="blog-admin-label">Lien / fichier
+                  <input class="auth-input" id="articleSlug" type="text" placeholder="news-de-juillet" />
+                </label>
+                <label class="blog-admin-check"><input id="articlePinned" type="checkbox" /> Article épinglé</label>
+              </div>
+
+              <label class="blog-admin-label">Résumé visible sur la page blog
+                <textarea class="auth-textarea" id="articleExcerpt" rows="3" placeholder="Petit résumé affiché sur la carte du blog."></textarea>
+              </label>
+
+              <div class="blog-admin-toolbar">
+                <button class="auth-btn" type="button" data-insert="## Titre de section">+ Titre</button>
+                <button class="auth-btn" type="button" data-insert="- élément de liste">+ Liste</button>
+                <button class="auth-btn" type="button" data-insert="**texte important**">+ Gras</button>
+                <button class="auth-btn" type="button" id="demoBtn">Exemple</button>
+              </div>
+
+              <label class="blog-admin-label">Texte de l’article
+                <small>Astuce : <strong>## Mon titre</strong> devient un titre. <strong>- ligne</strong> devient une liste. <strong>**mot**</strong> met en gras.</small>
+                <textarea class="auth-textarea" id="bodyText" spellcheck="true" placeholder="Écris ton article ici..."></textarea>
+              </label>
+
+              <div class="blog-admin-actions">
+                <button class="auth-btn primary" type="button" id="previewBtn">Mettre à jour l’aperçu</button>
+                <button class="auth-btn" type="button" id="toggleOutputBtn">Voir les fichiers générés</button>
+                <button class="auth-btn" type="button" id="clearBtn">Vider</button>
+              </div>
+              <div id="editorMsg" class="auth-msg"></div>
+            </form>
           </div>
 
-          <div class="blog-admin-row">
-            <label class="auth-label">
-              <span>Titre<span class="blog-admin-label-help">Nom affiché sur la carte blog et en haut de l’article.</span></span>
-              <input class="auth-input" id="title" type="text" placeholder="Ex. Capsule #2 — Nouvelles du projet" />
-            </label>
-            <label class="auth-label">
-              <span>Slug<span class="blog-admin-label-help">Nom du fichier HTML et morceau du lien. Exemple : mon-article.html</span></span>
-              <input class="auth-input" id="slug" type="text" placeholder="capsule-02-nouvelles-du-projet" />
-            </label>
-          </div>
-
-          <div class="blog-admin-row-3">
-            <label class="auth-label">
-              <span>Date affichée<span class="blog-admin-label-help">Texte visible pour les visiteurs. Exemple : 15 mars 2026</span></span>
-              <input class="auth-input" id="displayDate" type="text" value="15 mars 2026" />
-            </label>
-            <label class="auth-label">
-              <span>Date ISO<span class="blog-admin-label-help">Date technique au format AAAA-MM-JJ pour garder un ordre propre.</span></span>
-              <input class="auth-input" id="isoDate" type="date" value="2026-03-15" />
-            </label>
-            <label class="auth-label">
-              <span>Catégorie<span class="blog-admin-label-help">Label court affiché sur l’article. Exemple : Actualité, Devlog, Correction</span></span>
-              <input class="auth-input" id="category" type="text" value="Actualité" />
-            </label>
-          </div>
-
-          <div class="blog-admin-row">
-            <label class="auth-label">
-              <span>Auteur<span class="blog-admin-label-help">Nom affiché sur la carte à droite.</span></span>
-              <input class="auth-input" id="author" type="text" value="andric31" />
-            </label>
-            <label class="auth-label">
-              <span>Avatar lettre<span class="blog-admin-label-help">Une ou deux lettres affichées dans le rond avatar.</span></span>
-              <input class="auth-input" id="avatar" type="text" value="A" maxlength="2" />
-            </label>
-          </div>
-
-          <div class="blog-admin-row">
-            <label class="auth-label">
-              <span>Type de carte<span class="blog-admin-label-help">Article normal ou article mis en avant avec le badge épinglé.</span></span>
-              <select class="auth-select" id="cardType">
-                <option value="regular">Article normal</option>
-                <option value="pinned">Article épinglé</option>
-              </select>
-            </label>
-            <label class="auth-label">
-              <span>Résumé court<span class="blog-admin-label-help">Petit texte affiché sur la carte blog. Il doit donner envie de cliquer.</span></span>
-              <input class="auth-input" id="excerpt" type="text" placeholder="Petit récap de l’article..." />
-            </label>
-          </div>
-
-          <div class="blog-admin-divider"></div>
-
-          <label class="auth-label">
-            <span>Chapô / intro<span class="blog-admin-label-help">Texte visible sous le grand titre dans l’article. Peut reprendre le résumé ou le développer un peu.</span></span>
-            <textarea class="auth-textarea" id="intro" rows="4" placeholder="Introduction affichée dans l’article."></textarea>
-          </label>
-
-          <label class="auth-label">
-            <span>Contenu HTML de l’article<span class="blog-admin-label-help">Corps complet de l’article. Utiliser par exemple &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt; et &lt;strong&gt;.</span></span>
-            <textarea class="auth-textarea blog-admin-editor-full" id="content" rows="22" placeholder="<h2>Section</h2>&#10;<p>Ton texte...</p>"></textarea>
-          </label>
-
-          <div class="blog-admin-actions">
-            <button class="auth-btn primary" type="button" id="generateBtn">Générer</button>
-            <button class="auth-btn" type="button" id="previewBtn">Aperçu</button>
-            <button class="auth-btn" type="button" id="fillDemoBtn">Exemple</button>
-            <button class="auth-btn" type="button" id="resetBtn">Vider</button>
-          </div>
-          <div id="editorMsg" class="auth-msg"></div>
-        </div>
-
-        <div class="blog-admin-card blog-admin-preview">
-          <div class="blog-admin-preview-wrap">
-            <div class="blog-admin-toolbar">
-              <h2 class="blog-admin-section-title" style="margin:0;">Aperçu</h2>
-              <span class="blog-admin-pill" id="currentFileLabel">Fichier : —</span>
+          <div class="blog-admin-panel">
+            <div class="blog-admin-tabs">
+              <button class="blog-admin-tab active" type="button" data-tab="article">Aperçu article</button>
+              <button class="blog-admin-tab" type="button" data-tab="card">Aperçu carte</button>
             </div>
-            <p class="blog-admin-preview-note">L’aperçu est placé sous l’éditeur pour laisser plus de place à l’écriture. Le fond blanc est forcé pour rester lisible pendant l’édition.</p>
-            <iframe id="previewFrame" title="Aperçu article blog"></iframe>
+            <div class="blog-admin-preview-box"><iframe id="previewFrame" title="Aperçu blog"></iframe></div>
+
+            <div id="outputZone" class="blog-admin-output">
+              <div class="blog-admin-note"><strong>Fichier à remplacer :</strong> <span id="fileNameLabel">—</span></div>
+              <div class="blog-admin-actions">
+                <button class="auth-btn primary" type="button" id="downloadArticleBtn">Télécharger l’article</button>
+                <button class="auth-btn" type="button" id="copyArticleBtn">Copier article HTML</button>
+                <button class="auth-btn" type="button" id="copyCardBtn">Copier carte blog</button>
+              </div>
+              <label class="blog-admin-label">Article HTML généré
+                <textarea class="auth-textarea blog-admin-code" id="articleHtmlOut" spellcheck="false"></textarea>
+              </label>
+              <label class="blog-admin-label">Carte blog générée
+                <textarea class="auth-textarea blog-admin-code" id="cardHtmlOut" spellcheck="false"></textarea>
+              </label>
+            </div>
           </div>
         </div>
       </div>
-    </section>
-
-    <section class="auth-card auth-hidden blog-admin-out" data-auth-only data-role-min="admin">
-      <div class="blog-admin-out-grid">
-        <div class="blog-admin-card">
-          <h3 class="blog-admin-section-title">Fichier article HTML</h3>
-          <p class="blog-admin-help">Permet de récupérer directement le fichier à placer dans <code>/blog/</code>.</p>
-          <div class="blog-admin-actions">
-            <button class="auth-btn primary" type="button" id="downloadArticleBtn">Télécharger l’article</button>
-            <button class="auth-btn" type="button" id="copyArticleBtn">Copier</button>
-          </div>
-          <textarea id="articleHtmlOut" class="blog-admin-code big" spellcheck="false"></textarea>
-        </div>
-
-        <div class="blog-admin-card">
-          <h3 class="blog-admin-section-title">Bloc carte</h3>
-          <p class="blog-admin-help">Bloc à coller dans la section épinglée ou dans la liste des articles.</p>
-          <div class="blog-admin-actions">
-            <button class="auth-btn" type="button" id="copyCardBtn">Copier le bloc</button>
-          </div>
-          <textarea id="cardHtmlOut" class="blog-admin-code" spellcheck="false"></textarea>
-        </div>
-
-        <div class="blog-admin-card">
-          <h3 class="blog-admin-section-title">Entrée JSON</h3>
-          <p class="blog-admin-help">Prévu pour plus tard en cas de passage vers une vraie API ou un <code>articles.json</code>.</p>
-          <div class="blog-admin-actions">
-            <button class="auth-btn" type="button" id="copyJsonBtn">Copier le JSON</button>
-          </div>
-          <textarea id="jsonOut" class="blog-admin-code" spellcheck="false"></textarea>
-        </div>
-      </div>
-
-      <div class="blog-admin-mini">Note : dans cette version, il n’y a pas encore d’API d’écriture blog dans le zip. L’outil prépare les fichiers proprement, mais n’enregistre pas encore directement sur le serveur.</div>
     </section>
   </main>
 
@@ -412,10 +360,7 @@
         if (!window.SiteAuth?.loaded) return false;
         const me = window.SiteAuth.me;
         const ok = !!(me && String(me.role || '').toLowerCase() === 'admin');
-        if (ok) {
-          document.documentElement.classList.add('auth-ready');
-          return true;
-        }
+        if (ok) { document.documentElement.classList.add('auth-ready'); return true; }
         showDenied();
         return false;
       }
@@ -429,11 +374,7 @@
       if (window.SiteAuth?.onChange) {
         window.SiteAuth.onChange(function(me){
           const ok = !!(window.SiteAuth?.loaded && me && String(me.role || '').toLowerCase() === 'admin');
-          if (ok) {
-            window.__blogAdminAllowed = true;
-            document.documentElement.classList.add('auth-ready');
-            return;
-          }
+          if (ok) { window.__blogAdminAllowed = true; document.documentElement.classList.add('auth-ready'); return; }
           window.__blogAdminAllowed = false;
           showDenied();
         });
@@ -442,98 +383,102 @@
   </script>
   <script>
     const $ = (id) => document.getElementById(id);
+    const state = { tab:'article', loadedHref:'', cards:[] };
+
     const el = {
-      title: $('title'), slug: $('slug'), displayDate: $('displayDate'), isoDate: $('isoDate'), category: $('category'),
-      author: $('author'), avatar: $('avatar'), cardType: $('cardType'), excerpt: $('excerpt'), intro: $('intro'), content: $('content'),
-      generateBtn: $('generateBtn'), previewBtn: $('previewBtn'), fillDemoBtn: $('fillDemoBtn'), resetBtn: $('resetBtn'), editorMsg: $('editorMsg'),
-      articleHtmlOut: $('articleHtmlOut'), cardHtmlOut: $('cardHtmlOut'), jsonOut: $('jsonOut'), previewFrame: $('previewFrame'),
-      currentFileLabel: $('currentFileLabel'), downloadArticleBtn: $('downloadArticleBtn'), copyArticleBtn: $('copyArticleBtn'),
-      copyCardBtn: $('copyCardBtn'), copyJsonBtn: $('copyJsonBtn')
+      list:$('articleList'), title:$('articleTitle'), date:$('articleDate'), category:$('articleCategory'), author:$('articleAuthor'),
+      slug:$('articleSlug'), pinned:$('articlePinned'), excerpt:$('articleExcerpt'), body:$('bodyText'), msg:$('editorMsg'),
+      preview:$('previewFrame'), articleOut:$('articleHtmlOut'), cardOut:$('cardHtmlOut'), output:$('outputZone'), fileLabel:$('fileNameLabel')
     };
 
-    function setMsg(text, ok) {
-      el.editorMsg.textContent = text || '';
-      el.editorMsg.className = 'auth-msg ' + (text ? (ok ? 'ok' : 'err') : '');
+    function setMsg(text, ok=true){
+      el.msg.textContent = text || '';
+      el.msg.className = 'auth-msg ' + (text ? (ok ? 'ok' : 'err') : '');
     }
 
-    function esc(v) {
-      return String(v ?? '').replace(/[&<>"']/g, (m) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+    function esc(v){
+      return String(v ?? '').replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
     }
 
-    function slugify(input) {
-      return String(input || '')
+    function slugify(v){
+      return String(v || '')
         .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '')
-        .replace(/-{2,}/g, '-');
+        .toLowerCase().replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '').replace(/-{2,}/g, '-');
     }
 
-    function buildData() {
+    function inlineFormat(text){
+      return esc(text).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    }
+
+    function textToHtml(text){
+      const lines = String(text || '').replace(/\r\n/g, '\n').split('\n');
+      const out = [];
+      let paragraph = [];
+      let list = [];
+
+      function flushParagraph(){
+        if (!paragraph.length) return;
+        out.push(`<p>${inlineFormat(paragraph.join(' '))}</p>`);
+        paragraph = [];
+      }
+      function flushList(){
+        if (!list.length) return;
+        out.push(`<ul>\n${list.map((x)=>`          <li>${inlineFormat(x)}</li>`).join('\n')}\n        </ul>`);
+        list = [];
+      }
+
+      lines.forEach((raw) => {
+        const line = raw.trim();
+        if (!line) { flushParagraph(); flushList(); return; }
+        if (line.startsWith('## ')) { flushParagraph(); flushList(); out.push(`<h2>${inlineFormat(line.slice(3).trim())}</h2>`); return; }
+        if (line.startsWith('### ')) { flushParagraph(); flushList(); out.push(`<h3>${inlineFormat(line.slice(4).trim())}</h3>`); return; }
+        if (line.startsWith('- ')) { flushParagraph(); list.push(line.slice(2).trim()); return; }
+        flushList();
+        paragraph.push(line);
+      });
+      flushParagraph();
+      flushList();
+      return out.join('\n        ');
+    }
+
+    function htmlToText(content){
+      const div = document.createElement('div');
+      div.innerHTML = content || '';
+      div.querySelectorAll('h2').forEach((n)=>n.replaceWith(document.createTextNode(`\n## ${n.textContent.trim()}\n`)));
+      div.querySelectorAll('h3').forEach((n)=>n.replaceWith(document.createTextNode(`\n### ${n.textContent.trim()}\n`)));
+      div.querySelectorAll('li').forEach((n)=>n.replaceWith(document.createTextNode(`- ${n.textContent.trim()}\n`)));
+      div.querySelectorAll('p').forEach((n)=>n.replaceWith(document.createTextNode(`${n.textContent.trim()}\n\n`)));
+      return div.textContent.replace(/\n{3,}/g, '\n\n').trim();
+    }
+
+    function getData(){
       const title = el.title.value.trim();
       const slug = slugify(el.slug.value.trim() || title);
-      const data = {
+      if (!title) throw new Error('Ajoute au moins un titre.');
+      if (!slug) throw new Error('Le lien/fichier est vide.');
+      const excerpt = el.excerpt.value.trim();
+      if (!excerpt) throw new Error('Ajoute un résumé court pour la carte blog.');
+      const content = textToHtml(el.body.value.trim());
+      if (!content) throw new Error('Ajoute le texte de l’article.');
+      return {
         title,
         slug,
-        href: `${slug}.html`,
-        display_date: el.displayDate.value.trim(),
-        iso_date: el.isoDate.value.trim(),
-        category: el.category.value.trim() || 'Actualité',
-        author: el.author.value.trim() || 'andric31',
-        avatar: (el.avatar.value.trim() || 'A').slice(0, 2),
-        excerpt: el.excerpt.value.trim(),
-        intro: el.intro.value.trim(),
-        content_html: el.content.value.trim(),
-        pinned: el.cardType.value === 'pinned',
+        href:`${slug}.html`,
+        date:el.date.value.trim() || new Date().toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' }),
+        category:el.category.value.trim() || 'Actualité',
+        author:el.author.value.trim() || 'andric31',
+        avatar:(el.author.value.trim() || 'A').slice(0,1).toUpperCase(),
+        pinned:el.pinned.checked,
+        excerpt,
+        content
       };
-      if (!data.title) throw new Error('Le titre est obligatoire.');
-      if (!data.slug) throw new Error('Le slug est vide.');
-      if (!data.excerpt) throw new Error('Le résumé court est obligatoire.');
-      if (!data.content_html) throw new Error('Le contenu HTML est obligatoire.');
-      return data;
     }
 
-    function buildArticleHtml(data) {
-      return `<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>${esc(data.title)} — Blog andric31</title>
-  <link rel="icon" href="/favicon.png" />
-  <script src="/theme-init.js"><\/script>
-  <link rel="stylesheet" href="/themes.css" />
-  <link rel="stylesheet" href="blog.css" />
-</head>
-<body>
-  <main class="blog-shell blog-article">
-    <a class="blog-back" href="/blog/">← Retour au blog</a>
-
-    <article class="blog-article-box">
-      <header class="blog-article-head">
-        <div class="blog-meta">
-          <span>${esc(data.display_date)}</span>
-          <span>•</span>
-          <span>${esc(data.category)}</span>
-        </div>
-        <h1>${esc(data.title)}</h1>
-        <p>${esc(data.intro || data.excerpt)}</p>
-      </header>
-
-      <div class="blog-article-content">
-${data.content_html}
-      </div>
-    </article>
-  </main>
-</body>
-</html>`;
-    }
-
-    function buildCardHtml(data) {
+    function buildCard(data){
       const meta = data.pinned
-        ? `<span class="blog-chip">📌 Épinglé</span>\n            <span>${esc(data.display_date)}</span>`
-        : `<span>${esc(data.display_date)}</span>\n            <span>•</span>\n            <span>${esc(data.category)}</span>`;
-      const linkText = data.pinned ? 'Lire →' : 'Lire l’article →';
+        ? `<span class="blog-chip">📌 Épinglé</span>\n            <span>${esc(data.date)}</span>`
+        : `<span>${esc(data.date)}</span>\n            <span>•</span>\n            <span>${esc(data.category)}</span>`;
       return `<a class="blog-card" href="${esc(data.href)}">
   <div class="blog-card-main">
     <div class="blog-meta">
@@ -544,56 +489,181 @@ ${data.content_html}
   </div>
   <div class="blog-card-side">
     <div class="blog-author"><span class="blog-avatar">${esc(data.avatar)}</span> ${esc(data.author)}</div>
-    <span class="blog-link">${linkText}</span>
+    <span class="blog-link">Lire l’article →</span>
   </div>
 </a>`;
     }
 
-    function buildJson(data) {
-      return JSON.stringify({
-        title: data.title,
-        slug: data.slug,
-        href: `/blog/${data.href}`,
-        display_date: data.display_date,
-        iso_date: data.iso_date,
-        category: data.category,
-        author: data.author,
-        avatar: data.avatar,
-        excerpt: data.excerpt,
-        pinned: data.pinned,
-      }, null, 2);
+    function buildArticle(data){
+      return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${esc(data.title)} — andric31</title>
+  <link rel="icon" href="/favicon.png" />
+  <script src="/theme-init.js"><\/script>
+  <link rel="stylesheet" href="/themes.css" />
+  <link rel="stylesheet" href="blog.css" />
+</head>
+<body>
+  <main class="blog-shell blog-article">
+    <a class="blog-back" href="./">← Retour au blog</a>
+
+    <article class="blog-article-box">
+      <header class="blog-article-head">
+        <div class="blog-meta">
+          <span class="blog-chip">${data.pinned ? '📌 Épinglé' : esc(data.category)}</span>
+          <span>${esc(data.date)}</span>
+          <span>•</span>
+          <span>Par ${esc(data.author)}</span>
+        </div>
+        <h1>${esc(data.title)}</h1>
+        <p>${esc(data.excerpt)}</p>
+      </header>
+
+      <div class="blog-article-content">
+        ${data.content}
+      </div>
+    </article>
+  </main>
+</body>
+</html>`;
     }
 
-    function renderPreview(html) {
-      const doc = el.previewFrame.contentWindow?.document;
+    function writePreview(html){
+      const doc = el.preview.contentWindow?.document;
       if (!doc) return;
       doc.open();
-      doc.write(`<!DOCTYPE html><html><head><style>
-        html,body{margin:0;padding:0;background:#ffffff;color:#111827;font-family:Arial,Helvetica,sans-serif}
-        body{padding:0}
-        h1,h2,h3,h4,h5,h6,p,span,div,li,a,strong,em,small{color:inherit}
-        a{color:#1d4ed8}
-      </style></head><body>${html}</body></html>`);
+      doc.write(html);
       doc.close();
     }
 
-    function generateAll(showMsg = true) {
-      const data = buildData();
-      el.slug.value = data.slug;
-      const articleHtml = buildArticleHtml(data);
-      const cardHtml = buildCardHtml(data);
-      const json = buildJson(data);
-      el.articleHtmlOut.value = articleHtml;
-      el.cardHtmlOut.value = cardHtml;
-      el.jsonOut.value = json;
-      el.currentFileLabel.textContent = `Fichier : ${data.href}`;
-      renderPreview(articleHtml);
-      if (showMsg) setMsg('Article généré.', true);
-      return { data, articleHtml, cardHtml, json };
+    function refreshPreview(showOk=false){
+      const data = getData();
+      const article = buildArticle(data);
+      const card = buildCard(data);
+      el.articleOut.value = article;
+      el.cardOut.value = card;
+      el.fileLabel.textContent = `/blog/${data.href}`;
+      if (state.tab === 'card') {
+        writePreview(`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><script src="/theme-init.js"><\/script><link rel="stylesheet" href="/themes.css"><link rel="stylesheet" href="/blog/blog.css"></head><body><main class="blog-shell"><section class="blog-list" style="padding-top:24px;">${card}</section></main></body></html>`);
+      } else {
+        writePreview(article);
+      }
+      if (showOk) setMsg('Aperçu mis à jour.', true);
+      return { data, article, card };
     }
 
-    function download(name, text, type = 'text/plain;charset=utf-8') {
-      const blob = new Blob([text], { type });
+    function blank(){
+      const now = new Date();
+      el.title.value = '';
+      el.date.value = now.toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
+      el.category.value = 'Actualité';
+      el.author.value = 'andric31';
+      el.slug.value = '';
+      el.pinned.checked = false;
+      el.excerpt.value = '';
+      el.body.value = '';
+      state.loadedHref = '';
+      el.articleOut.value = '';
+      el.cardOut.value = '';
+      el.fileLabel.textContent = '—';
+      writePreview('<!DOCTYPE html><html><body style="font-family:Arial;padding:24px;"><h2>Aperçu vide</h2><p>Remplis les champs à gauche pour voir le rendu.</p></body></html>');
+      setMsg('', true);
+    }
+
+    function fillDemo(){
+      el.title.value = 'Capsule #2 — Nouvelles du site';
+      el.date.value = '30 juin 2026';
+      el.category.value = 'Actualité';
+      el.author.value = 'andric31';
+      el.slug.value = '';
+      el.pinned.checked = false;
+      el.excerpt.value = 'Petit point rapide sur les nouveautés du site, les corrections récentes et les prochaines améliorations prévues.';
+      el.body.value = `## Ce qui change
+Le blog devient plus simple à gérer depuis l’espace admin. Le but est de pouvoir écrire sans toucher directement au HTML.
+
+## Ce qui est prévu
+- une édition plus claire
+- un aperçu direct
+- moins de blocs techniques visibles
+- une préparation plus propre des fichiers à publier
+
+Le système reste compatible avec les pages actuelles du blog.`;
+      refreshPreview(true);
+    }
+
+    function insertText(text){
+      const start = el.body.selectionStart || 0;
+      const end = el.body.selectionEnd || 0;
+      const before = el.body.value.slice(0, start);
+      const after = el.body.value.slice(end);
+      const prefix = before && !before.endsWith('\n') ? '\n' : '';
+      const value = `${prefix}${text}`;
+      el.body.value = before + value + after;
+      const pos = before.length + value.length;
+      el.body.focus();
+      el.body.setSelectionRange(pos, pos);
+      try { refreshPreview(false); } catch {}
+    }
+
+    async function loadArticleList(){
+      el.list.innerHTML = '<div class="blog-admin-note">Chargement des articles du blog…</div>';
+      try {
+        const res = await fetch('/blog/index.html?v=' + Date.now(), { cache:'no-store' });
+        if (!res.ok) throw new Error('index introuvable');
+        const html = await res.text();
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const cards = [...doc.querySelectorAll('.blog-card[href]')].map((a) => ({
+          href:a.getAttribute('href'),
+          title:a.querySelector('h2')?.textContent.trim() || a.getAttribute('href'),
+          excerpt:a.querySelector('p')?.textContent.trim() || '',
+          pinned:!!a.querySelector('.blog-chip')?.textContent.includes('Épinglé'),
+          meta:[...a.querySelectorAll('.blog-meta span')].map((s)=>s.textContent.trim()).filter(Boolean).join(' ')
+        })).filter((x)=>x.href && !x.href.startsWith('#'));
+        state.cards = cards;
+        if (!cards.length) {
+          el.list.innerHTML = '<div class="blog-admin-note">Aucun article trouvé dans /blog/index.html.</div>';
+          return;
+        }
+        el.list.innerHTML = cards.map((card, i) => `<button class="blog-admin-article-btn" type="button" data-load="${i}"><strong>${esc(card.title)}</strong><span>${esc(card.meta || card.href)}</span></button>`).join('');
+      } catch(e) {
+        el.list.innerHTML = '<div class="blog-admin-note">Impossible de charger la liste. Tu peux quand même créer un nouvel article.</div>';
+      }
+    }
+
+    async function loadArticle(card){
+      try {
+        const href = card.href.replace(/^\.\//, '');
+        const res = await fetch('/blog/' + href + '?v=' + Date.now(), { cache:'no-store' });
+        if (!res.ok) throw new Error('article introuvable');
+        const html = await res.text();
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const h1 = doc.querySelector('.blog-article-head h1')?.textContent.trim() || card.title;
+        const meta = [...doc.querySelectorAll('.blog-article-head .blog-meta span')].map((x)=>x.textContent.trim()).filter(Boolean);
+        const category = meta.find((x)=>!x.includes('Par') && !x.includes('Épinglé') && x !== '•' && !/\d{4}/.test(x)) || 'Actualité';
+        const date = meta.find((x)=>/\d{4}/.test(x)) || '';
+        const author = (meta.find((x)=>x.startsWith('Par ')) || 'Par andric31').replace(/^Par\s+/, '');
+        const content = doc.querySelector('.blog-article-content')?.innerHTML || '';
+        el.title.value = h1;
+        el.date.value = date;
+        el.category.value = category;
+        el.author.value = author;
+        el.slug.value = href.replace(/\.html?$/i, '');
+        el.pinned.checked = !!card.pinned || meta.some((x)=>x.includes('Épinglé'));
+        el.excerpt.value = card.excerpt || doc.querySelector('.blog-article-head p')?.textContent.trim() || '';
+        el.body.value = htmlToText(content);
+        state.loadedHref = href;
+        refreshPreview(true);
+        setMsg(`Article chargé : ${href}`, true);
+      } catch(e) {
+        setMsg('Impossible de charger cet article.', false);
+      }
+    }
+
+    function downloadFile(name, text){
+      const blob = new Blob([text], { type:'text/html;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -601,75 +671,65 @@ ${data.content_html}
       document.body.appendChild(a);
       a.click();
       a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1500);
+      setTimeout(()=>URL.revokeObjectURL(url), 1200);
     }
 
-    async function copyText(text) {
+    async function copy(text){
       await navigator.clipboard.writeText(text || '');
     }
 
-    function fillDemo() {
-      el.title.value = 'Capsule #2 — Nouvelles du projet';
-      el.slug.value = '';
-      el.displayDate.value = '15 mars 2026';
-      el.isoDate.value = '2026-03-15';
-      el.category.value = 'Actualité';
-      el.author.value = 'andric31';
-      el.avatar.value = 'A';
-      el.cardType.value = 'regular';
-      el.excerpt.value = 'Petit point rapide sur les nouveautés du site, les prochaines améliorations et les tests en cours.';
-      el.intro.value = 'Voici un nouveau point rapide sur le site, les outils et la suite des améliorations prévues.';
-      el.content.value = `<h2>Ce qui avance</h2>\n<p>Le site continue d’évoluer avec de nouvelles améliorations sur les notifications, le blog et les outils de gestion.</p>\n\n<h2>La suite</h2>\n<p>La prochaine étape consiste à rendre la création d’articles plus simple depuis un espace admin connecté, sans devoir tout éditer à la main.</p>`;
-      generateAll(true);
-    }
+    document.addEventListener('click', async (e) => {
+      const load = e.target.closest('[data-load]');
+      if (load) { loadArticle(state.cards[Number(load.dataset.load)]); return; }
+      const insert = e.target.closest('[data-insert]');
+      if (insert) { insertText(insert.dataset.insert); return; }
+      const tab = e.target.closest('[data-tab]');
+      if (tab) {
+        state.tab = tab.dataset.tab;
+        document.querySelectorAll('.blog-admin-tab').forEach((x)=>x.classList.toggle('active', x === tab));
+        try { refreshPreview(false); } catch(e) {}
+      }
+    });
 
-    function resetForm() {
-      ['title','slug','excerpt','intro','content'].forEach((k) => el[k].value = '');
-      el.cardType.value = 'regular';
-      el.currentFileLabel.textContent = 'Fichier : —';
-      el.articleHtmlOut.value = '';
-      el.cardHtmlOut.value = '';
-      el.jsonOut.value = '';
-      renderPreview('<div style="padding:24px;"><h2 style="margin-top:0;">Aperçu vide</h2><p>Remplir les champs puis cliquer sur Générer ou Aperçu.</p></div>');
-      setMsg('', true);
-    }
+    $('newBtn').addEventListener('click', blank);
+    $('reloadBtn').addEventListener('click', loadArticleList);
+    $('demoBtn').addEventListener('click', fillDemo);
+    $('clearBtn').addEventListener('click', blank);
+    $('previewBtn').addEventListener('click', () => { try { refreshPreview(true); } catch(e) { setMsg(e.message || 'Erreur.', false); } });
+    $('toggleOutputBtn').addEventListener('click', () => {
+      try { refreshPreview(false); } catch(e) { setMsg(e.message || 'Erreur.', false); return; }
+      el.output.classList.toggle('show');
+    });
+    $('downloadArticleBtn').addEventListener('click', () => {
+      try { const { data, article } = refreshPreview(false); downloadFile(data.href, article); setMsg(`Téléchargé : ${data.href}`, true); } catch(e) { setMsg(e.message || 'Erreur.', false); }
+    });
+    $('copyArticleBtn').addEventListener('click', async () => {
+      try { refreshPreview(false); await copy(el.articleOut.value); setMsg('Article HTML copié.', true); } catch(e) { setMsg('Copie impossible.', false); }
+    });
+    $('copyCardBtn').addEventListener('click', async () => {
+      try { refreshPreview(false); await copy(el.cardOut.value); setMsg('Carte blog copiée.', true); } catch(e) { setMsg('Copie impossible.', false); }
+    });
 
-    el.title.addEventListener('input', () => {
-      if (!el.slug.dataset.manual || !el.slug.value.trim()) el.slug.value = slugify(el.title.value);
+    ['articleTitle','articleDate','articleCategory','articleAuthor','articleSlug','articleExcerpt','bodyText','articlePinned'].forEach((id)=>{
+      $(id).addEventListener('input', () => {
+        if (id === 'articleTitle' && !el.slug.dataset.manual) el.slug.value = slugify(el.title.value);
+        try { refreshPreview(false); } catch {}
+      });
+      $(id).addEventListener('change', () => { try { refreshPreview(false); } catch {} });
     });
     el.slug.addEventListener('input', () => { el.slug.dataset.manual = '1'; });
-
-    el.generateBtn.addEventListener('click', () => { try { generateAll(true); } catch (e) { setMsg(e.message || 'Erreur.', false); } });
-    el.previewBtn.addEventListener('click', () => { try { generateAll(false); setMsg('Aperçu mis à jour.', true); } catch (e) { setMsg(e.message || 'Erreur.', false); } });
-    el.fillDemoBtn.addEventListener('click', fillDemo);
-    el.resetBtn.addEventListener('click', resetForm);
-
-    el.downloadArticleBtn.addEventListener('click', () => {
-      try {
-        const { data, articleHtml } = generateAll(false);
-        download(data.href, articleHtml, 'text/html;charset=utf-8');
-        setMsg(`Article téléchargé : ${data.href}`, true);
-      } catch (e) { setMsg(e.message || 'Erreur.', false); }
-    });
-
-    el.copyArticleBtn.addEventListener('click', async () => {
-      try { await copyText(el.articleHtmlOut.value); setMsg('HTML de l’article copié.', true); } catch { setMsg('Copie impossible.', false); }
-    });
-    el.copyCardBtn.addEventListener('click', async () => {
-      try { await copyText(el.cardHtmlOut.value); setMsg('Bloc carte copié.', true); } catch { setMsg('Copie impossible.', false); }
-    });
-    el.copyJsonBtn.addEventListener('click', async () => {
-      try { await copyText(el.jsonOut.value); setMsg('JSON copié.', true); } catch { setMsg('Copie impossible.', false); }
-    });
 
     window.SiteAuth.onChange((me) => {
       if (!window.SiteAuth?.loaded) return;
       if (!me || String(me.role || '').toLowerCase() !== 'admin') return;
       document.documentElement.classList.add('auth-ready');
+      blank();
+      loadArticleList();
     });
 
     if (window.__ensureBlogAdminPage && window.__ensureBlogAdminPage()) {
-      resetForm();
+      blank();
+      loadArticleList();
     }
   </script>
 </body>

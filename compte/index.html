@@ -257,14 +257,42 @@
     .account-quick-card > span:not(.account-quick-ico) { display:block; min-width:0; color: var(--muted); line-height:1.3; }
     .account-quick-card > span:not(.account-quick-ico) > span { display:block; color: var(--muted); font-size:13px; line-height:1.3; margin-top:2px; }
     .account-quick-card .account-quick-ico { display:inline-flex !important; align-items:center; justify-content:center; color:inherit; font-size:18px !important; line-height:1; width:24px; min-width:24px; text-align:center; flex:0 0 24px; margin-top:0 !important; }
+    .account-quick-card.is-danger {
+      border-color: color-mix(in srgb, #ff6b6b 42%, var(--border, var(--auth-border)));
+      background: color-mix(in srgb, #ff6b6b 10%, rgba(255,255,255,.045));
+    }
+    .account-quick-card.is-danger:hover { background: color-mix(in srgb, #ff6b6b 18%, rgba(255,255,255,.045)); }
+    .account-control-panel {
+      margin-top: 14px;
+      padding: 12px;
+      border: 1px solid var(--border, var(--auth-border));
+      border-radius: 16px;
+      background: rgba(255,255,255,.035);
+    }
+    .account-control-title {
+      margin: 0 0 10px;
+      color: var(--title, var(--fg));
+      font-size: 14px;
+      font-weight: 950;
+    }
+    .account-control-help {
+      margin: -5px 0 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+    .account-setting-list {
+      display: grid;
+      gap: 10px;
+    }
 
     .account-notif-setting {
       display: inline-flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      width: min(420px, 100%);
-      margin-top: 12px;
+      width: 100%;
+      margin-top: 0;
       padding: 9px 10px;
       border: 1px solid var(--border, var(--auth-border));
       border-radius: 14px;
@@ -440,21 +468,41 @@
           <h1 class="auth-title">👤 Espace connecté</h1>
           <p>Accès rapide à ton compte, tes jeux suivis, tes likes et tes notes.</p>
           <div class="account-user-pill">✅ <span data-auth-name></span> · <span data-auth-role></span></div>
-          <div class="account-quick-grid">
-            <a class="account-quick-card" href="/compte/mes-jeux.html" target="_blank" rel="noopener"><span class="account-quick-ico">🎮</span><span><strong>Mes jeux</strong><span>Voir Watchlist, likes et notes.</span></span></a>
-            <button class="account-quick-card" id="resetTopGamesBtn" type="button"><span class="account-quick-ico">🏆</span><span><strong>Reset mon top jeux</strong><span>Efface seulement tes vues personnelles, sans toucher aux statistiques générales du site.</span></span></button>
-            <button class="account-quick-card" id="openPasswordModalBtn" type="button"><span class="account-quick-ico">🔐</span><span><strong>Changer mon mot de passe</strong><span>Modifie ton mot de passe de connexion.</span></span></button>
-            <a class="account-quick-card" href="/"><span class="account-quick-ico">🏠</span><span><strong>Retour au site</strong><span>Revenir au viewer.</span></span></a>
-            <button class="account-quick-card" id="logoutBtn" type="button"><span class="account-quick-ico">🚪</span><span><strong>Déconnexion</strong><span>Fermer ta session.</span></span></button>
+          <div class="account-control-panel">
+            <h2 class="account-control-title">🎮 Mes espaces</h2>
+            <p class="account-control-help">Retrouve tes listes personnelles et reviens rapidement au viewer.</p>
+            <div class="account-quick-grid">
+              <a class="account-quick-card" href="/compte/mes-jeux.html" target="_blank" rel="noopener"><span class="account-quick-ico">🎮</span><span><strong>Mes jeux</strong><span>Voir Watchlist, likes et notes.</span></span></a>
+              <a class="account-quick-card" href="/"><span class="account-quick-ico">🏠</span><span><strong>Retour au site</strong><span>Revenir au viewer.</span></span></a>
+            </div>
           </div>
-          <div class="account-notif-setting">
-            <span class="account-notif-setting-text"><span class="account-notif-setting-ico">🔵</span><span>Points bleus de notification</span></span>
-            <button class="account-notif-switch" id="blueDotsToggle" type="button" role="switch" aria-checked="true" aria-label="Afficher les points bleus de notification"></button>
+
+          <div class="account-control-panel">
+            <h2 class="account-control-title">⚙️ Paramètres du compte</h2>
+            <p class="account-control-help">Gère ton mot de passe, l'affichage et les notifications.</p>
+            <div class="account-quick-grid">
+              <button class="account-quick-card" id="openPasswordModalBtn" type="button"><span class="account-quick-ico">🔐</span><span><strong>Changer mon mot de passe</strong><span>Modifie ton mot de passe de connexion.</span></span></button>
+              <button class="account-quick-card is-danger" id="resetTopGamesBtn" type="button"><span class="account-quick-ico">🏆</span><span><strong>Réinitialiser mon top jeux</strong><span>Remet à zéro ton classement personnel. Les statistiques générales restent inchangées.</span></span></button>
+            </div>
+            <div class="account-setting-list">
+              <div class="account-notif-setting">
+                <span class="account-notif-setting-text"><span class="account-notif-setting-ico">🔵</span><span>Points bleus de notification</span></span>
+                <button class="account-notif-switch" id="blueDotsToggle" type="button" role="switch" aria-checked="true" aria-label="Afficher les points bleus de notification"></button>
+              </div>
+              <div class="account-notif-setting">
+                <span class="account-notif-setting-text"><span class="account-notif-setting-ico account-notif-watch-ico" aria-hidden="true"><svg viewBox="0 0 24 24" role="img" aria-hidden="true"><path d="M7 3.5h10a1 1 0 0 1 1 1v16.2l-6-3.9-6 3.9V4.5a1 1 0 0 1 1-1z" fill="none" stroke="#ff7a00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Icônes personnelles mes jeux dans le viewer</span></span>
+                <button class="account-notif-switch" id="viewerIconsToggle" type="button" role="switch" aria-checked="true" aria-label="Afficher les icônes personnelles mes jeux dans le viewer"></button>
+              </div>
+            </div>
           </div>
-          <div class="account-notif-setting">
-            <span class="account-notif-setting-text"><span class="account-notif-setting-ico account-notif-watch-ico" aria-hidden="true"><svg viewBox="0 0 24 24" role="img" aria-hidden="true"><path d="M7 3.5h10a1 1 0 0 1 1 1v16.2l-6-3.9-6 3.9V4.5a1 1 0 0 1 1-1z" fill="none" stroke="#ff7a00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Icônes personnelles mes jeux dans le viewer</span></span>
-            <button class="account-notif-switch" id="viewerIconsToggle" type="button" role="switch" aria-checked="true" aria-label="Afficher les icônes personnelles mes jeux dans le viewer"></button>
+
+          <div class="account-control-panel">
+            <h2 class="account-control-title">🚪 Session</h2>
+            <div class="account-quick-grid">
+              <button class="account-quick-card" id="logoutBtn" type="button"><span class="account-quick-ico">🚪</span><span><strong>Déconnexion</strong><span>Fermer ta session.</span></span></button>
+            </div>
           </div>
+
           <div id="logoutMsg" class="auth-msg"></div>
           <div id="resetTopGamesMsg" class="auth-msg"></div>
         </div>
@@ -798,7 +846,7 @@
 
     async function resetTopGames() {
       if (!window.SiteAuth?.me || !resetTopGamesBtn) return;
-      const ok = confirm('Réinitialiser ton top jeux ? Cela efface seulement tes vues personnelles. Tes likes, notes et Watchlist restent en place.');
+      const ok = confirm('Réinitialiser ton top jeux ? Ton classement personnel sera remis à zéro, sans toucher aux statistiques générales du site. Tes likes, notes et Watchlist restent en place.');
       if (!ok) return;
       resetTopGamesBtn.disabled = true;
       setMsg(resetTopGamesMsg, 'Réinitialisation du top jeux…', true);
@@ -810,7 +858,7 @@
         });
         const data = await resp.json().catch(() => ({}));
         if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Réinitialisation impossible.');
-        setMsg(resetTopGamesMsg, 'Top jeux réinitialisé. Les likes, notes et Watchlist sont conservés.', true);
+        setMsg(resetTopGamesMsg, 'Top jeux réinitialisé. Les statistiques générales, likes, notes et Watchlist sont conservés.', true);
         try { window.dispatchEvent(new CustomEvent('account-game-top-reset')); } catch {}
       } catch (err) {
         setMsg(resetTopGamesMsg, err?.message || 'Réinitialisation impossible.', false);

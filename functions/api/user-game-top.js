@@ -64,7 +64,21 @@ export async function onRequestGet(context) {
   return json({ ok: true, items: (result.results || []).map(compactRow) });
 }
 
+
+export async function onRequestDelete(context) {
+  const { db, user, error } = await getUserContext(context);
+  if (error) return error;
+
+  const result = await db.prepare(`
+    DELETE FROM user_page_views
+    WHERE user_id = ?1
+  `).bind(user.id).run();
+
+  return json({ ok: true, deleted: Number(result?.meta?.changes || 0) });
+}
+
 export async function onRequest(context) {
   if (context.request.method === 'GET') return onRequestGet(context);
+  if (context.request.method === 'DELETE') return onRequestDelete(context);
   return json({ ok: false, error: 'Méthode non autorisée.' }, 405);
 }

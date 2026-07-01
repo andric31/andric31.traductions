@@ -442,6 +442,7 @@
           <div class="account-user-pill">✅ <span data-auth-name></span> · <span data-auth-role></span></div>
           <div class="account-quick-grid">
             <a class="account-quick-card" href="/compte/mes-jeux.html" target="_blank" rel="noopener"><span class="account-quick-ico">🎮</span><span><strong>Mes jeux</strong><span>Voir Watchlist, likes et notes.</span></span></a>
+            <button class="account-quick-card" id="resetTopGamesBtn" type="button"><span class="account-quick-ico">🏆</span><span><strong>Reset mon top jeux</strong><span>Efface seulement tes vues personnelles.</span></span></button>
             <button class="account-quick-card" id="openPasswordModalBtn" type="button"><span class="account-quick-ico">🔐</span><span><strong>Changer mon mot de passe</strong><span>Modifier ton accès.</span></span></button>
             <a class="account-quick-card" href="/"><span class="account-quick-ico">🏠</span><span><strong>Retour au site</strong><span>Revenir au viewer.</span></span></a>
             <button class="account-quick-card" id="logoutBtn" type="button"><span class="account-quick-ico">🚪</span><span><strong>Déconnexion</strong><span>Fermer ta session.</span></span></button>
@@ -455,6 +456,7 @@
             <button class="account-notif-switch" id="viewerIconsToggle" type="button" role="switch" aria-checked="true" aria-label="Afficher les icônes personnelles mes jeux dans le viewer"></button>
           </div>
           <div id="logoutMsg" class="auth-msg"></div>
+          <div id="resetTopGamesMsg" class="auth-msg"></div>
         </div>
       </div>
 
@@ -542,6 +544,8 @@
     const ratedGamesList = document.getElementById('ratedGamesList');
     const ratedGamesMsg = document.getElementById('ratedGamesMsg');
     const refreshRatedBtn = document.getElementById('refreshRatedBtn');
+    const resetTopGamesBtn = document.getElementById('resetTopGamesBtn');
+    const resetTopGamesMsg = document.getElementById('resetTopGamesMsg');
     const openPasswordModalBtn = document.getElementById('openPasswordModalBtn');
     const passwordModal = document.getElementById('passwordModal');
     const closePasswordModalBtn = document.getElementById('closePasswordModalBtn');
@@ -792,9 +796,33 @@
       }
     });
 
+    async function resetTopGames() {
+      if (!window.SiteAuth?.me || !resetTopGamesBtn) return;
+      const ok = confirm('Réinitialiser ton top jeux ? Cela efface seulement tes vues personnelles. Tes likes, notes et Watchlist restent en place.');
+      if (!ok) return;
+      resetTopGamesBtn.disabled = true;
+      setMsg(resetTopGamesMsg, 'Réinitialisation du top jeux…', true);
+      try {
+        const resp = await fetch('/api/user-game-top', {
+          method: 'DELETE',
+          credentials: 'same-origin',
+          cache: 'no-store'
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Réinitialisation impossible.');
+        setMsg(resetTopGamesMsg, 'Top jeux réinitialisé. Les likes, notes et Watchlist sont conservés.', true);
+        try { window.dispatchEvent(new CustomEvent('account-game-top-reset')); } catch {}
+      } catch (err) {
+        setMsg(resetTopGamesMsg, err?.message || 'Réinitialisation impossible.', false);
+      } finally {
+        resetTopGamesBtn.disabled = false;
+      }
+    }
+
     refreshWatchlistBtn?.addEventListener('click', loadWatchlist);
     refreshLikedBtn?.addEventListener('click', () => loadUserGameList('liked'));
     refreshRatedBtn?.addEventListener('click', () => loadUserGameList('rated'));
+    resetTopGamesBtn?.addEventListener('click', resetTopGames);
 
     likedGamesList?.addEventListener('click', async (e) => {
       const btn = e.target.closest('[data-remove-like]');

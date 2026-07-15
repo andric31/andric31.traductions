@@ -15,7 +15,6 @@
     topSection: $('#accountGamesTopSection'),
     topList: $('#accountGamesTopList'),
     publishTop: $('#accountGamesPublishTop'),
-    topMessage: $('#accountGamesTopMessage'),
     status: $('#accountGamesStatus'),
     search: $('#accountGamesSearch'),
     sort: $('#accountGamesSort'),
@@ -515,11 +514,17 @@
     }).join('');
   }
 
-  function setTopMessage(text, isError = false) {
-    if (!els.topMessage) return;
-    els.topMessage.textContent = text || '';
-    els.topMessage.classList.toggle('err', !!isError);
-    els.topMessage.classList.toggle('ok', !!text && !isError);
+  let publishFeedbackTimer = null;
+
+  function setPublishButtonFeedback(text, restoreText, delay = 1800) {
+    if (!els.publishTop) return;
+    clearTimeout(publishFeedbackTimer);
+    els.publishTop.textContent = text;
+    publishFeedbackTimer = setTimeout(() => {
+      if (!els.publishTop) return;
+      els.publishTop.textContent = restoreText;
+      els.publishTop.disabled = !state.currentTop.length;
+    }, delay);
   }
 
   async function loadPublishedTopState() {
@@ -534,14 +539,18 @@
   }
 
   async function publishTop() {
-    if (!els.publishTop || !state.currentTop.length) {
-      setTopMessage('Ton top est vide : ajoute des likes, notes, vues ou jeux à ta Watchlist.', true);
+    if (!els.publishTop) return;
+
+    if (!state.currentTop.length) {
+      setPublishButtonFeedback('⚠️ Top vide', '🌍 Publier sur le site');
       return;
     }
-    const original = els.publishTop.textContent;
+
+    const original = state.topPublished ? '🔄 Republier mon top' : '🌍 Publier sur le site';
+    clearTimeout(publishFeedbackTimer);
     els.publishTop.disabled = true;
     els.publishTop.textContent = 'Publication…';
-    setTopMessage('');
+
     try {
       await fetchJson('/api/community-tops', {
         method: 'POST',
@@ -549,13 +558,9 @@
         body: JSON.stringify({ items: state.currentTop })
       });
       state.topPublished = true;
-      els.publishTop.textContent = '🔄 Republier mon top';
-      setTopMessage('✅ Ton top est maintenant visible sur la page publique Top jeux.');
+      setPublishButtonFeedback('✅ Top publié', '🔄 Republier mon top');
     } catch (err) {
-      els.publishTop.textContent = original;
-      setTopMessage(err?.message || 'Impossible de publier ton top.', true);
-    } finally {
-      els.publishTop.disabled = !state.currentTop.length;
+      setPublishButtonFeedback('❌ Publication impossible', original, 2200);
     }
   }
 

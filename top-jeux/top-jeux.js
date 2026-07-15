@@ -2,8 +2,6 @@
   'use strict';
   const grid = document.getElementById('topGrid');
   const status = document.getElementById('topStatus');
-  const memberCount = document.getElementById('topMemberCount');
-  const gameCount = document.getElementById('topGameCount');
 
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const ranks = ['🥇','🥈','🥉'];
@@ -32,7 +30,7 @@
         ${games.map((game,index)=>`<a class="community-top-game" href="${esc(gameUrl(game.game_url))}" target="_blank" rel="noopener">
           <span class="community-top-rank">${ranks[index] || `${index+1}.`}</span>
           <img class="community-top-cover" src="${esc(game.image_url || '/favicon.png')}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='/favicon.png'">
-          <span><strong>${esc(game.title || 'Jeu sans titre')}</strong><small>Choix n°${index+1}</small></span>
+          <span><strong>${esc(game.title || 'Jeu sans titre')}</strong></span>
         </a>`).join('')}
       </div>
     </article>`;
@@ -44,8 +42,6 @@
       const data = await res.json().catch(()=>null);
       if (!res.ok || !data?.ok) throw new Error(data?.error || 'Chargement impossible.');
       const tops = Array.isArray(data.items) ? data.items.filter((x)=>Array.isArray(x.games)&&x.games.length) : [];
-      memberCount.textContent = String(tops.length);
-      gameCount.textContent = String(tops.reduce((n,x)=>n+x.games.length,0));
       if (!tops.length) {
         status.textContent = '';
         grid.innerHTML = '<div class="community-top-empty">Aucun membre n’a encore publié son Top jeux.<br>Le premier classement apparaîtra ici dès sa publication.</div>';

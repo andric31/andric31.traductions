@@ -584,3 +584,8 @@
   if (window.SiteAuth?.onChange) window.SiteAuth.onChange(initAuth);
   if (window.SiteAuth?.loaded) initAuth(window.SiteAuth.me);
 })();
+
+
+  document.getElementById('publishMyTopBtn')?.addEventListener('click', () => {
+    alert('Publication de ton top jeux : fonctionnalité en préparation.');
+  });

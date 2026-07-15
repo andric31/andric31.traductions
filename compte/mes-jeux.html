@@ -49,7 +49,12 @@
             <h2>🏆 Mon top jeux</h2>
             <p>Classement automatique basé sur tes notes, tes likes, ta Watchlist et tes vues personnelles.</p>
           </div>
+          <div class="account-games-top-actions" aria-label="Partager mon top jeux">
+            <button class="account-games-btn primary" id="accountGamesPublishTop" type="button">🌍 Publier sur le site</button>
+            <button class="account-games-btn account-games-btn-disabled" id="accountGamesDiscordTop" type="button" disabled title="Disponible prochainement">💬 Partager sur Discord</button>
+          </div>
         </div>
+        <div class="account-games-top-message" id="accountGamesTopMessage" role="status" aria-live="polite"></div>
         <div class="account-games-top-list-items" id="accountGamesTopList"></div>
       </section>
 

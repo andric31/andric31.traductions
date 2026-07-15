@@ -14,6 +14,8 @@
     grid: $('#accountGamesGrid'),
     topSection: $('#accountGamesTopSection'),
     topList: $('#accountGamesTopList'),
+    publishTop: $('#accountGamesPublishTop'),
+    topMessage: $('#accountGamesTopMessage'),
     status: $('#accountGamesStatus'),
     search: $('#accountGamesSearch'),
     sort: $('#accountGamesSort'),
@@ -32,6 +34,8 @@
     sort: 'translationDate',
     items: [],
     loading: false,
+    currentTop: [],
+    topPublished: false,
   };
 
   function escapeHtml(s) {
@@ -472,6 +476,16 @@
       })
       .slice(0, 5);
 
+    state.currentTop = list.map((item, index) => ({
+      rank: index + 1,
+      game_key: String(item.game_key || ''),
+      title: String(item.title || 'Jeu sans titre'),
+      image_url: String(item.image_url || ''),
+      game_url: String(item.game_url || ''),
+      score: Number(item._score || 0)
+    }));
+    if (els.publishTop) els.publishTop.disabled = !state.currentTop.length;
+
     if (!list.length) {
       els.topSection.classList.add('is-empty');
       els.topList.innerHTML = '<div class="account-games-top-empty">Ton top apparaîtra ici après quelques likes, notes, vues ou ajouts en Watchlist.</div>';
@@ -499,6 +513,50 @@
           </span>
         </a>`;
     }).join('');
+  }
+
+  function setTopMessage(text, isError = false) {
+    if (!els.topMessage) return;
+    els.topMessage.textContent = text || '';
+    els.topMessage.classList.toggle('err', !!isError);
+    els.topMessage.classList.toggle('ok', !!text && !isError);
+  }
+
+  async function loadPublishedTopState() {
+    if (!els.publishTop) return;
+    try {
+      const data = await fetchJson('/api/community-tops?mine=1', { cache: 'no-store' });
+      state.topPublished = !!data?.published;
+      els.publishTop.textContent = state.topPublished ? '🔄 Republier mon top' : '🌍 Publier sur le site';
+    } catch {
+      state.topPublished = false;
+    }
+  }
+
+  async function publishTop() {
+    if (!els.publishTop || !state.currentTop.length) {
+      setTopMessage('Ton top est vide : ajoute des likes, notes, vues ou jeux à ta Watchlist.', true);
+      return;
+    }
+    const original = els.publishTop.textContent;
+    els.publishTop.disabled = true;
+    els.publishTop.textContent = 'Publication…';
+    setTopMessage('');
+    try {
+      await fetchJson('/api/community-tops', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ items: state.currentTop })
+      });
+      state.topPublished = true;
+      els.publishTop.textContent = '🔄 Republier mon top';
+      setTopMessage('✅ Ton top est maintenant visible sur la page publique Top jeux.');
+    } catch (err) {
+      els.publishTop.textContent = original;
+      setTopMessage(err?.message || 'Impossible de publier ton top.', true);
+    } finally {
+      els.publishTop.disabled = !state.currentTop.length;
+    }
   }
 
   function render() {
@@ -559,6 +617,7 @@
     els.search?.addEventListener('input', () => { state.q = els.search.value || ''; render(); });
     els.sort?.addEventListener('change', () => { state.sort = els.sort.value || 'translationDate'; render(); });
     els.refresh?.addEventListener('click', loadAll);
+    els.publishTop?.addEventListener('click', publishTop);
     els.grid?.addEventListener('click', handleAction);
   }
 
@@ -571,7 +630,7 @@
     els.guest?.classList.add('auth-hidden');
     els.app?.classList.remove('auth-hidden');
     if (els.user) els.user.textContent = me?.display_name || me?.username || 'compte connecté';
-    loadAll();
+    Promise.all([loadAll(), loadPublishedTopState()]);
   }
 
   function initAuth(me) {
@@ -584,8 +643,3 @@
   if (window.SiteAuth?.onChange) window.SiteAuth.onChange(initAuth);
   if (window.SiteAuth?.loaded) initAuth(window.SiteAuth.me);
 })();
-
-
-  document.getElementById('publishMyTopBtn')?.addEventListener('click', () => {
-    alert('Publication de ton top jeux : fonctionnalité en préparation.');
-  });

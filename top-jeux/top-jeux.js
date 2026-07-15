@@ -9,7 +9,7 @@
   function dateLabel(value) {
     const d = new Date(value || '');
     if (!Number.isFinite(d.getTime())) return 'Publication récente';
-    return `Mis à jour le ${d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'})}`;
+    return `Le ${d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'})}`;
   }
 
   function gameUrl(value) {

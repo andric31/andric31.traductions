@@ -1592,6 +1592,20 @@ function bindDownloadClick(el, gameId, MEGA_COOLDOWN_MS) {
           showStatsBox();
         }
       } catch {}
+
+      if (isConnectedUser()) {
+        try {
+          const payload = buildUserGamePayload();
+          await fetch('/api/user-game-top', {
+            method: 'POST',
+            credentials: 'same-origin',
+            cache: 'no-store',
+            keepalive: true,
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ game_key: payload.game_key || gameId, title: payload.title || '' }),
+          });
+        } catch {}
+      }
     },
     { passive: true }
   );

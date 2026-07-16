@@ -7,11 +7,21 @@
   <link rel="icon" href="/favicon.png">
   <link rel="stylesheet" href="/viewer.css">
   <link rel="stylesheet" href="/themes.css">
+  <link rel="stylesheet" href="/auth/auth.css">
   <link rel="stylesheet" href="/top-jeux/top-jeux.css">
   <script src="/theme-init.js"></script>
 </head>
 <body class="community-top-page">
-  <main class="community-top-shell">
+  <section class="auth-card auth-hidden" id="topGamesGuest">
+    <h1 class="auth-title">🔒 Top jeux</h1>
+    <p class="auth-subtitle">Tu dois être connecté pour consulter les tops jeux partagés par les membres.</p>
+    <div class="auth-actions">
+      <a class="auth-btn primary" href="/connexion/">Se connecter</a>
+      <a class="auth-btn" href="/">Retour au site</a>
+    </div>
+  </section>
+
+  <main class="community-top-shell auth-hidden" id="topGamesApp">
     <header class="community-top-hero">
       <div>
         <span class="community-top-kicker">CLASSEMENTS DES MEMBRES</span>
@@ -28,6 +38,7 @@
     <div class="community-top-status" id="topStatus">Chargement des tops…</div>
     <section class="community-top-grid" id="topGrid" aria-live="polite"></section>
   </main>
+  <script src="/auth/auth.client.js"></script>
   <script src="/top-jeux/top-jeux.js"></script>
 </body>
 </html>

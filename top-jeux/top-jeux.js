@@ -1,7 +1,10 @@
 (() => {
   'use strict';
+  const guest = document.getElementById('topGamesGuest');
+  const app = document.getElementById('topGamesApp');
   const grid = document.getElementById('topGrid');
   const status = document.getElementById('topStatus');
+  let loaded = false;
 
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const ranks = ['🥇','🥈','🥉'];
@@ -55,5 +58,20 @@
       grid.innerHTML = '<div class="community-top-empty">Impossible de charger les tops pour le moment.</div>';
     }
   }
-  load();
+  function initAuth(me) {
+    if (!me) {
+      guest?.classList.remove('auth-hidden');
+      app?.classList.add('auth-hidden');
+      return;
+    }
+    guest?.classList.add('auth-hidden');
+    app?.classList.remove('auth-hidden');
+    if (!loaded) {
+      loaded = true;
+      load();
+    }
+  }
+
+  if (window.SiteAuth?.onChange) window.SiteAuth.onChange(initAuth);
+  if (window.SiteAuth?.loaded) initAuth(window.SiteAuth.me);
 })();

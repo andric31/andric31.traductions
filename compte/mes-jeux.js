@@ -418,6 +418,7 @@
     if (item.watchlist) lines.push(`${WATCHLIST_ICON} Ajouté à la Watchlist${formatDate(item.watchDate) ? ' le ' + escapeHtml(formatDate(item.watchDate)) : ''}`);
     if (item.liked) lines.push(`❤️ Liké${formatDate(item.likedDate) ? ' le ' + escapeHtml(formatDate(item.likedDate)) : ''}`);
     if (Number(item.rating || 0) > 0) lines.push(`<span class="account-game-rating">⭐ Note : ${Number(item.rating)}/4${formatDate(item.ratedDate) ? ' · ' + escapeHtml(formatDate(item.ratedDate)) : ''}</span>`);
+    if (Number(item.download_count || 0) > 0) lines.push(`⬇️ ${Number(item.download_count || 0)} téléchargement${Number(item.download_count || 0) > 1 ? 's' : ''}${formatDate(item.downloadDate) ? ' · dernier le ' + escapeHtml(formatDate(item.downloadDate)) : ''}`);
     if (Number(item.view_count || 0) > 0) lines.push(`👁️ ${Number(item.view_count || 0)} vue${Number(item.view_count || 0) > 1 ? 's' : ''}${formatDate(item.viewDate) ? ' · dernière le ' + escapeHtml(formatDate(item.viewDate)) : ''}`);
     return lines.map((line) => `<div>${line}</div>`).join('');
   }
@@ -452,19 +453,37 @@
       </article>`;
   }
 
-  function topScore(item) {
+  function topScoreData(item) {
     const rating = Number(item.rating || 0);
     const views = Number(item.view_count || 0);
     const downloads = Number(item.download_count || 0);
-    let score = 0;
-    score += rating * 100;
-    if (item.liked) score += 80;
-    if (item.watchlist) score += 45;
-    score += Math.min(downloads, 20) * 35;
-    score += Math.min(views, 50) * 2;
-    const recent = Date.parse(item.updatedDate || item.viewDate || item.ratedDate || item.likedDate || item.watchDate || '') || 0;
-    if (recent) score += Math.max(0, 30 - Math.floor((Date.now() - recent) / 86400000));
-    return score;
+    const ratingPoints = rating * 100;
+    const likePoints = item.liked ? 80 : 0;
+    const watchlistPoints = item.watchlist ? 45 : 0;
+    const downloadPoints = Math.min(downloads, 20) * 35;
+    const viewPoints = Math.min(views, 50) * 2;
+    const recent = Date.parse(item.updatedDate || item.downloadDate || item.viewDate || item.ratedDate || item.likedDate || item.watchDate || '') || 0;
+    const recentPoints = recent ? Math.max(0, 30 - Math.floor((Date.now() - recent) / 86400000)) : 0;
+    const score = ratingPoints + likePoints + watchlistPoints + downloadPoints + viewPoints + recentPoints;
+    return { rating, views, downloads, ratingPoints, likePoints, watchlistPoints, downloadPoints, viewPoints, recentPoints, score };
+  }
+
+  function topScore(item) {
+    return topScoreData(item).score;
+  }
+
+  function topTooltip(item) {
+    const data = topScoreData(item);
+    const lines = [
+      `Score total : ${data.score} pts`,
+      `Note : ${data.rating}/4 → +${data.ratingPoints} pts`,
+      `Like : ${item.liked ? 'oui' : 'non'} → +${data.likePoints} pts`,
+      `Watchlist : ${item.watchlist ? 'oui' : 'non'} → +${data.watchlistPoints} pts`,
+      `Téléchargements : ${data.downloads} → +${data.downloadPoints} pts`,
+      `Vues : ${data.views} → +${data.viewPoints} pts`,
+      `Bonus récent : +${data.recentPoints} pts`,
+    ];
+    return ['Calcul du classement', ...lines].join('\n');
   }
 
   function renderTopList() {
@@ -498,22 +517,16 @@
     els.topSection.classList.remove('is-empty');
     els.topList.innerHTML = list.map((item, index) => {
       const rank = ['🥇', '🥈', '🥉'][index] || `${index + 1}.`;
-      const details = [];
-      if (Number(item.rating || 0) > 0) details.push(`⭐ ${Number(item.rating)}/4`);
-      if (item.liked) details.push('❤️ liké');
-      if (item.watchlist) details.push(`${WATCHLIST_ICON} watchlist`);
-      if (Number(item.download_count || 0) > 0) details.push(`⬇️ ${Number(item.download_count || 0)} téléchargement${Number(item.download_count || 0) > 1 ? 's' : ''}`);
-      if (Number(item.view_count || 0) > 0) details.push(`👁️ ${Number(item.view_count || 0)} vue${Number(item.view_count || 0) > 1 ? 's' : ''}`);
       const title = escapeHtml(item.title || 'Jeu sans titre');
       const gameUrl = escapeHtml(normalizeGameUrl(item.game_url));
       const img = escapeHtml(item.image_url || '/favicon.png');
+      const tooltip = escapeHtml(topTooltip(item));
       return `
-        <a class="account-games-top-item" href="${gameUrl}" target="_blank" rel="noopener">
+        <a class="account-games-top-item" href="${gameUrl}" target="_blank" rel="noopener" title="${tooltip}" aria-label="${title} — ${tooltip}">
           <span class="account-games-top-rank">${rank}</span>
           <img class="account-games-top-cover" src="${img}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='/favicon.png'">
           <span class="account-games-top-info">
             <strong>${title}</strong>
-            <small>${details.join(' · ')}</small>
           </span>
         </a>`;
     }).join('');

@@ -472,18 +472,33 @@
     return topScoreData(item).score;
   }
 
-  function topTooltip(item) {
+  function topTooltipHtml(item) {
     const data = topScoreData(item);
-    const lines = [
-      `Score total : ${data.score} pts`,
-      `Note : ${data.rating}/4 → +${data.ratingPoints} pts`,
-      `Like : ${item.liked ? 'oui' : 'non'} → +${data.likePoints} pts`,
-      `Watchlist : ${item.watchlist ? 'oui' : 'non'} → +${data.watchlistPoints} pts`,
-      `Téléchargements : ${data.downloads} → +${data.downloadPoints} pts`,
-      `Vues : ${data.views} → +${data.viewPoints} pts`,
-      `Bonus récent : +${data.recentPoints} pts`,
+    const rows = [
+      { label: 'Note', value: `${data.rating}/4`, points: data.ratingPoints },
+      { label: 'Like', value: item.liked ? 'Oui' : 'Non', points: data.likePoints },
+      { label: 'Watchlist', value: item.watchlist ? 'Oui' : 'Non', points: data.watchlistPoints },
+      { label: 'Téléchargements', value: `${data.downloads}`, points: data.downloadPoints },
+      { label: 'Vues', value: `${data.views}`, points: data.viewPoints },
+      { label: 'Bonus récent', value: '', points: data.recentPoints },
     ];
-    return ['Calcul du classement', ...lines].join('\n');
+
+    return `
+      <span class="account-games-top-tooltip" role="tooltip">
+        <span class="account-games-top-tooltip-title">Calcul du classement</span>
+        <span class="account-games-top-tooltip-total">
+          <span>Score total</span>
+          <b>${data.score} pts</b>
+        </span>
+        <span class="account-games-top-tooltip-rows">
+          ${rows.map((row) => `
+            <span class="account-games-top-tooltip-row">
+              <span class="account-games-top-tooltip-label">${escapeHtml(row.label)}${row.value ? ` : ${escapeHtml(row.value)}` : ''}</span>
+              <span class="account-games-top-tooltip-points">+${Number(row.points || 0)} pts</span>
+            </span>
+          `).join('')}
+        </span>
+      </span>`;
   }
 
   function renderTopList() {
@@ -520,14 +535,14 @@
       const title = escapeHtml(item.title || 'Jeu sans titre');
       const gameUrl = escapeHtml(normalizeGameUrl(item.game_url));
       const img = escapeHtml(item.image_url || '/favicon.png');
-      const tooltip = escapeHtml(topTooltip(item));
       return `
-        <a class="account-games-top-item" href="${gameUrl}" target="_blank" rel="noopener" title="${tooltip}" aria-label="${title} — ${tooltip}">
+        <a class="account-games-top-item" href="${gameUrl}" target="_blank" rel="noopener" aria-label="${title}">
           <span class="account-games-top-rank">${rank}</span>
           <img class="account-games-top-cover" src="${img}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='/favicon.png'">
           <span class="account-games-top-info">
             <strong>${title}</strong>
           </span>
+          ${topTooltipHtml(item)}
         </a>`;
     }).join('');
   }

@@ -162,6 +162,7 @@ body.account-games-page .account-games-shell{
   gap:9px;
 }
 .account-games-top-item{
+  position:relative;
   min-width:0;
   border:1px solid var(--border);
   background:color-mix(in srgb,var(--card) 88%, transparent);
@@ -173,8 +174,11 @@ body.account-games-page .account-games-shell{
   align-items:center;
   color:var(--fg);
   text-decoration:none;
+  overflow:visible;
 }
-.account-games-top-item:hover{
+.account-games-top-item:hover,
+.account-games-top-item:focus-visible{
+  z-index:25;
   border-color:color-mix(in srgb,var(--primary) 42%, var(--border));
   text-decoration:none;
 }
@@ -214,6 +218,88 @@ body.account-games-page .account-games-shell{
   overflow:hidden;
   text-overflow:ellipsis;
 }
+
+.account-games-top-tooltip{
+  position:absolute;
+  left:50%;
+  bottom:calc(100% + 10px);
+  transform:translate(-50%, 8px);
+  width:max-content;
+  min-width:260px;
+  max-width:min(330px, calc(100vw - 32px));
+  padding:12px;
+  display:block;
+  border:1px solid color-mix(in srgb,var(--primary) 36%, var(--border));
+  border-radius:15px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--card) 98%, transparent),color-mix(in srgb,var(--card) 90%, var(--primary) 10%));
+  box-shadow:0 18px 42px rgba(0,0,0,.34);
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity .18s ease, transform .18s ease, visibility .18s ease;
+}
+.account-games-top-tooltip::after{
+  content:'';
+  position:absolute;
+  left:50%;
+  top:100%;
+  transform:translateX(-50%);
+  border:8px solid transparent;
+  border-top-color:color-mix(in srgb,var(--card) 92%, var(--primary) 8%);
+}
+.account-games-top-item:hover .account-games-top-tooltip,
+.account-games-top-item:focus-visible .account-games-top-tooltip,
+.account-games-top-item:focus-within .account-games-top-tooltip{
+  opacity:1;
+  visibility:visible;
+  transform:translate(-50%, 0);
+}
+.account-games-top-tooltip-title{
+  display:block;
+  margin-bottom:9px;
+  color:var(--title);
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.03em;
+  text-transform:uppercase;
+}
+.account-games-top-tooltip-total{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:10px;
+  padding:8px 10px;
+  border-radius:11px;
+  background:color-mix(in srgb,var(--primary) 12%, transparent);
+  color:var(--fg);
+  font-size:13px;
+}
+.account-games-top-tooltip-total b{
+  color:var(--title);
+  font-size:15px;
+}
+.account-games-top-tooltip-rows{
+  display:grid;
+  gap:6px;
+}
+.account-games-top-tooltip-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  font-size:12px;
+  line-height:1.3;
+}
+.account-games-top-tooltip-label{
+  min-width:0;
+  color:var(--muted);
+}
+.account-games-top-tooltip-points{
+  white-space:nowrap;
+  color:var(--title);
+  font-weight:800;
+}
 .account-games-top-empty{
   grid-column:1/-1;
   border:1px dashed var(--border);
@@ -224,7 +310,7 @@ body.account-games-page .account-games-shell{
   font-weight:800;
 }
 @media (max-width:1100px){.account-games-top-list-items{grid-template-columns:repeat(2,minmax(0,1fr));}}
-@media (max-width:620px){.account-games-top-list-items{grid-template-columns:1fr}.account-games-top-item{grid-template-columns:auto 54px minmax(0,1fr)}.account-games-top-cover{width:54px;height:54px}}
+@media (max-width:620px){.account-games-top-list-items{grid-template-columns:1fr}.account-games-top-item{grid-template-columns:auto 54px minmax(0,1fr)}.account-games-top-cover{width:54px;height:54px}.account-games-top-tooltip{left:10px;right:10px;bottom:calc(100% + 8px);transform:translate(0,8px);min-width:0;max-width:none;width:auto}.account-games-top-tooltip::after{left:34px;transform:none}.account-games-top-item:hover .account-games-top-tooltip,.account-games-top-item:focus-visible .account-games-top-tooltip,.account-games-top-item:focus-within .account-games-top-tooltip{transform:translate(0,0)}}
 
 
 /* Actions de publication du Top jeux */

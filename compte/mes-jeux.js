@@ -301,8 +301,8 @@
       key,
       game_key: raw.game_key || key,
       title: '', game_url: '', image_url: '', f95_url: '', discord_url: '',
-      watchlist: false, liked: false, rating: 0, view_count: 0,
-      watchDate: '', likedDate: '', ratedDate: '', viewDate: '', updatedDate: '', translationDateTs: 0, translationDateRaw: '',
+      watchlist: false, liked: false, rating: 0, view_count: 0, download_count: 0,
+      watchDate: '', likedDate: '', ratedDate: '', viewDate: '', downloadDate: '', updatedDate: '', translationDateTs: 0, translationDateRaw: '',
     };
 
     old.title = old.title || raw.title || 'Jeu sans titre';
@@ -324,10 +324,12 @@
     }
     if (source === 'views') {
       old.view_count = Math.max(Number(old.view_count || 0), Number(raw.view_count || 0));
+      old.download_count = Math.max(Number(old.download_count || 0), Number(raw.download_count || 0));
       old.viewDate = raw.last_viewed_at || old.viewDate;
+      old.downloadDate = raw.last_downloaded_at || old.downloadDate;
       old.title = old.title || raw.title || old.title;
     }
-    old.updatedDate = [old.watchDate, old.likedDate, old.ratedDate, old.viewDate, raw.updated_at].filter(Boolean).sort().pop() || '';
+    old.updatedDate = [old.watchDate, old.likedDate, old.ratedDate, old.viewDate, old.downloadDate, raw.updated_at].filter(Boolean).sort().pop() || '';
     map.set(key, old);
   }
 
@@ -453,11 +455,13 @@
   function topScore(item) {
     const rating = Number(item.rating || 0);
     const views = Number(item.view_count || 0);
+    const downloads = Number(item.download_count || 0);
     let score = 0;
     score += rating * 100;
     if (item.liked) score += 80;
     if (item.watchlist) score += 45;
-    score += Math.min(views, 50) * 4;
+    score += Math.min(downloads, 20) * 35;
+    score += Math.min(views, 50) * 2;
     const recent = Date.parse(item.updatedDate || item.viewDate || item.ratedDate || item.likedDate || item.watchDate || '') || 0;
     if (recent) score += Math.max(0, 30 - Math.floor((Date.now() - recent) / 86400000));
     return score;
@@ -466,7 +470,7 @@
   function renderTopList() {
     if (!els.topList || !els.topSection) return;
     const list = visibleAccountItems()
-      .filter((item) => item.watchlist || item.liked || Number(item.rating || 0) > 0 || Number(item.view_count || 0) > 0)
+      .filter((item) => item.watchlist || item.liked || Number(item.rating || 0) > 0 || Number(item.view_count || 0) > 0 || Number(item.download_count || 0) > 0)
       .map((item) => ({ ...item, _score: topScore(item) }))
       .filter((item) => item._score > 0)
       .sort((a, b) => {
@@ -487,7 +491,7 @@
 
     if (!list.length) {
       els.topSection.classList.add('is-empty');
-      els.topList.innerHTML = '<div class="account-games-top-empty">Ton top apparaîtra ici après quelques likes, notes, vues ou ajouts en Watchlist.</div>';
+      els.topList.innerHTML = '<div class="account-games-top-empty">Ton top apparaîtra ici après quelques téléchargements, likes, notes, vues ou ajouts en Watchlist.</div>';
       return;
     }
 
@@ -498,6 +502,7 @@
       if (Number(item.rating || 0) > 0) details.push(`⭐ ${Number(item.rating)}/4`);
       if (item.liked) details.push('❤️ liké');
       if (item.watchlist) details.push(`${WATCHLIST_ICON} watchlist`);
+      if (Number(item.download_count || 0) > 0) details.push(`⬇️ ${Number(item.download_count || 0)} téléchargement${Number(item.download_count || 0) > 1 ? 's' : ''}`);
       if (Number(item.view_count || 0) > 0) details.push(`👁️ ${Number(item.view_count || 0)} vue${Number(item.view_count || 0) > 1 ? 's' : ''}`);
       const title = escapeHtml(item.title || 'Jeu sans titre');
       const gameUrl = escapeHtml(normalizeGameUrl(item.game_url));

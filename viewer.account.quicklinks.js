@@ -7,6 +7,7 @@
   const IDS = {
     accountBtn: "quickAccountProfileBtn",
     btn: "quickAccountGamesBtn",
+    topGamesBtn: "quickTopGamesBtn",
     popover: "quickAccountGamesPopover",
   };
 
@@ -15,6 +16,7 @@
     watchlist: "/compte/mes-jeux.html#watchlist",
     likes: "/compte/mes-jeux.html#likes",
     notes: "/compte/mes-jeux.html#notes",
+    topGames: "/top-jeux/",
   };
 
   function escapeHtml(value) {
@@ -32,6 +34,15 @@
       <path d="M7 3.5h10a1 1 0 0 1 1 1v16.2l-6-3.9-6 3.9V4.5a1 1 0 0 1 1-1z"/>
       <path d="M9 8.5h6"/>
       <path d="M9 12h3.5"/>
+    </svg>`;
+  }
+
+  function iconTopGames() {
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M8 4h8v3a4 4 0 0 1-8 0V4z"/>
+      <path d="M8 5H5v1a4 4 0 0 0 4 4"/>
+      <path d="M16 5h3v1a4 4 0 0 1-4 4"/>
+      <path d="M12 11v5"/><path d="M9 20h6"/><path d="M10 16h4"/>
     </svg>`;
   }
   function iconCompte() {
@@ -102,6 +113,19 @@
     link.setAttribute("aria-label", `Mon compte - ${name}`);
     link.setAttribute("title", `Mon compte - ${name}`);
     link.innerHTML = `<span class="header-icon-svg">${iconCompte()}</span><span class="account-profile-name">${escapeHtml(name)}</span>`;
+    return link;
+  }
+
+  function makeTopGamesLink(refClass) {
+    const link = document.createElement("a");
+    link.id = IDS.topGamesBtn;
+    link.href = URLS.topGames;
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.className = `${refClass} header-icon-link header-icon-link--quick`;
+    link.setAttribute("aria-label", "Top jeux");
+    link.setAttribute("title", "Top jeux");
+    link.innerHTML = `<span class="header-icon-svg">${iconTopGames()}</span>`;
     return link;
   }
 
@@ -220,9 +244,11 @@
   async function insertButton() {
     const existingButtons = Array.from(document.querySelectorAll(`#${IDS.btn}`));
     const existingAccountButtons = Array.from(document.querySelectorAll(`#${IDS.accountBtn}`));
-    if (existingButtons.length && existingAccountButtons.length) {
+    const existingTopGamesButtons = Array.from(document.querySelectorAll(`#${IDS.topGamesBtn}`));
+    if (existingButtons.length && existingAccountButtons.length && existingTopGamesButtons.length) {
       existingButtons.slice(1).forEach((el) => el.remove());
       existingAccountButtons.slice(1).forEach((el) => el.remove());
+      existingTopGamesButtons.slice(1).forEach((el) => el.remove());
       return;
     }
     if (STATE.inserting) return;
@@ -234,9 +260,11 @@
 
       const existingAfterAuth = Array.from(document.querySelectorAll(`#${IDS.btn}`));
       const existingAccountAfterAuth = Array.from(document.querySelectorAll(`#${IDS.accountBtn}`));
-      if (existingAfterAuth.length && existingAccountAfterAuth.length) {
+      const existingTopGamesAfterAuth = Array.from(document.querySelectorAll(`#${IDS.topGamesBtn}`));
+      if (existingAfterAuth.length && existingAccountAfterAuth.length && existingTopGamesAfterAuth.length) {
         existingAfterAuth.slice(1).forEach((el) => el.remove());
         existingAccountAfterAuth.slice(1).forEach((el) => el.remove());
+        existingTopGamesAfterAuth.slice(1).forEach((el) => el.remove());
         return;
       }
 
@@ -249,8 +277,10 @@
       const refClass = afterEl.className || "hamburger-btn";
       const accountBtn = makeAccountButton(refClass, me);
       const btn = makeButton(refClass);
+      const topGamesBtn = makeTopGamesLink(refClass);
       afterEl.insertAdjacentElement("afterend", accountBtn);
       accountBtn.insertAdjacentElement("afterend", btn);
+      btn.insertAdjacentElement("afterend", topGamesBtn);
 
     btn.addEventListener("click", async (event) => {
       event.preventDefault();
@@ -283,7 +313,7 @@
     insertButton();
 
     const obs = new MutationObserver(() => {
-      if (!document.getElementById(IDS.btn) || !document.getElementById(IDS.accountBtn)) insertButton();
+      if (!document.getElementById(IDS.btn) || !document.getElementById(IDS.accountBtn) || !document.getElementById(IDS.topGamesBtn)) insertButton();
     });
     obs.observe(document.documentElement, { childList: true, subtree: true });
     window.setTimeout(() => obs.disconnect(), 15000);

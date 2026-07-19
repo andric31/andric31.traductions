@@ -55,6 +55,22 @@
     return (g.gameData?.title || g.cleanTitle || g.title || "").toString().trim() || "Sans titre";
   }
 
+  function isF95FranceOnlyRequested() {
+    try {
+      const params = new URLSearchParams(location.search);
+      const value = String(
+        params.get("f95France") || params.get("f95FranceTranslation") || ""
+      ).trim().toLowerCase();
+      return ["1", "oui", "true", "yes"].includes(value);
+    } catch {
+      return false;
+    }
+  }
+
+  function normalizeF95FranceTranslation(value) {
+    return String(value || "").trim().toLowerCase() === "oui" ? "oui" : "non défini";
+  }
+
   const state = {
     all: [],
     filtered: [],
@@ -65,6 +81,7 @@
     filterEngine: "all",
     filterStatus: "all",
     filterTags: [],
+    filterF95FranceOnly: isF95FranceOnlyRequested(),
     cols: "auto",
     pageSize: "auto",
     visibleCount: 0,
@@ -1677,6 +1694,9 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
       updatedAtDateTime: updatedAtDateTimeRaw,
       updatedAtDateTimeTs,
       lastTranslationTs,
+      f95FranceTranslation: normalizeF95FranceTranslation(
+        game.f95FranceTranslation ?? game.gameData?.f95FranceTranslation
+      ),
       __raw: game,
     };
   }
@@ -1888,13 +1908,16 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
 
       const ms = fs === "all" || g.status === fs;
 
+      const mf95France =
+        !state.filterF95FranceOnly || g.f95FranceTranslation === "oui";
+
       let mt = true;
       if (ft && ft.length) {
         const tags = Array.isArray(g.tags) ? g.tags : [];
         mt = ft.every((t) => tags.includes(t));
       }
 
-      return mq && mtt && mc && me && ms && mt;
+      return mq && mtt && mc && me && ms && mt && mf95France;
     });
 
     sortNow();
@@ -2487,6 +2510,27 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
 
   bindInfiniteScroll();
 
+  function renderF95FranceOnlyMode() {
+    if (!state.filterF95FranceOnly) return;
+
+    document.body.classList.add("f95france-only-mode");
+    document.title = `F95France uniquement — ${document.title}`;
+
+    const search = $("#search");
+    if (search) search.placeholder = "Rechercher parmi les jeux présents sur F95France.";
+
+    const wrap = document.querySelector(".search-wrap");
+    if (!wrap || document.getElementById("f95FranceOnlyBadge")) return;
+
+    const badge = document.createElement("a");
+    badge.id = "f95FranceOnlyBadge";
+    badge.className = "f95france-filter-chip";
+    badge.href = "/";
+    badge.title = "Retirer le filtre F95France et afficher tous les jeux";
+    badge.textContent = "🇫🇷 F95France uniquement ×";
+    wrap.insertBefore(badge, wrap.querySelector(".total-inline"));
+  }
+
   // =========================
   // Init
   // =========================
@@ -2498,6 +2542,7 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
 
     try {
       initHeaderMenuAndDisplayTools();
+      renderF95FranceOnlyMode();
       syncTopbarHeight();
       syncRatingVisibilityForAuth();
       bindRatingAuthRefresh();
@@ -2514,7 +2559,10 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
       renderListSwitcher(state.manifestEntries);
       state.all = Array.isArray(raw) ? raw.map(normalizeGame) : [];
 
-      if (!state.filterTags || !state.filterTags.length) {
+      if (state.filterF95FranceOnly) {
+        // La vue dédiée doit démarrer sans ancien filtre de tags mémorisé.
+        state.filterTags = [];
+      } else if (!state.filterTags || !state.filterTags.length) {
         state.filterTags = getSavedTags();
       }
       updateTagsCountBadge();

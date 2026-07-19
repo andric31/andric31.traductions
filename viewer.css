@@ -1851,7 +1851,7 @@ html.viewer-rating-hidden .card-meta .card-stat,
 }
 
 
-/* Vue admin : uniquement les jeux marqués comme présents sur F95France */
+/* Vue admin : andric31 présents sur F95 France */
 .f95france-filter-chip{
   display:inline-flex;
   align-items:center;

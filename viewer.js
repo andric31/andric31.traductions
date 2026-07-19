@@ -2526,8 +2526,8 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
     badge.id = "f95FranceOnlyBadge";
     badge.className = "f95france-filter-chip";
     badge.href = "/";
-    badge.title = "Retirer le filtre F95France et afficher tous les jeux";
-    badge.textContent = "🇫🇷 F95France uniquement ×";
+    badge.title = "Retirer le filtre F95 France et afficher tous les jeux";
+    badge.textContent = "🇫🇷 andric31 F95 France ×";
     wrap.insertBefore(badge, wrap.querySelector(".total-inline"));
   }
 

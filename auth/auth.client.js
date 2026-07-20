@@ -120,10 +120,9 @@
     return data;
   }
 
-  async function createUserAdmin(payload, token) {
+  async function createUserAdmin(payload) {
     const resp = await api('/api/auth-admin-create-user', {
       method: 'POST',
-      headers: { 'x-admin-token': token || '' },
       body: JSON.stringify(payload || {}),
     });
     const data = await resp.json();

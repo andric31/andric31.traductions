@@ -1,3 +1,5 @@
+import { hashPassword, validatePassword } from './_auth.js';
+
 const json = (data, status = 200) => new Response(JSON.stringify(data, null, 2), {
   status,
   headers: {
@@ -32,11 +34,17 @@ async function ensureSchema(db) {
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       closed_at TEXT DEFAULT '',
-      admin_comment TEXT DEFAULT ''
+      admin_comment TEXT DEFAULT '',
+      signup_password_hash TEXT DEFAULT '',
+      account_created_at TEXT DEFAULT '',
+      account_username TEXT DEFAULT ''
     )
   `).run();
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_tickets_global_status_created ON tickets_global(status, created_at)`).run();
   try { await db.prepare(`ALTER TABLE tickets_global ADD COLUMN admin_comment TEXT DEFAULT ''`).run(); } catch {}
+  try { await db.prepare(`ALTER TABLE tickets_global ADD COLUMN signup_password_hash TEXT DEFAULT ''`).run(); } catch {}
+  try { await db.prepare(`ALTER TABLE tickets_global ADD COLUMN account_created_at TEXT DEFAULT ''`).run(); } catch {}
+  try { await db.prepare(`ALTER TABLE tickets_global ADD COLUMN account_username TEXT DEFAULT ''`).run(); } catch {}
 }
 
 function clean(value, max = 1000) {
@@ -107,7 +115,7 @@ export async function onRequestGet(context) {
 
   const limit = Math.min(Math.max(Number(url.searchParams.get('limit') || 100), 1), 300);
   const status = url.searchParams.get('status');
-  let query = `SELECT id, name, contact, category, priority, title, message, status, page_url, created_at, updated_at, closed_at, admin_comment FROM tickets_global`;
+  let query = `SELECT id, name, contact, category, priority, title, message, status, page_url, created_at, updated_at, closed_at, admin_comment, account_created_at, account_username FROM tickets_global`;
   const binds = [];
   if (status && ['open', 'closed'].includes(status)) {
     query += ` WHERE status = ?`;
@@ -141,21 +149,28 @@ export async function onRequestPost(context) {
 
   if (!name || !title || !message) return json({ ok: false, error: 'Nom, titre et message sont obligatoires.' }, 400);
   if (message.length < 8) return json({ ok: false, error: 'Message trop court.' }, 400);
+  let signupPasswordHash = '';
   if (category === 'inscription') {
     if (!signupPassword || !signupPasswordConfirm) return json({ ok: false, error: 'Mot de passe obligatoire pour une création de compte.' }, 400);
     if (signupPassword !== signupPasswordConfirm) return json({ ok: false, error: 'Les deux mots de passe ne sont pas identiques.' }, 400);
-    if (signupPassword.length < 6) return json({ ok: false, error: 'Le mot de passe doit contenir au moins 6 caractères.' }, 400);
+    const pwError = validatePassword(signupPassword);
+    if (pwError) return json({ ok: false, error: pwError }, 400);
+    try {
+      signupPasswordHash = await hashPassword(signupPassword);
+    } catch (e) {
+      return json({ ok: false, error: 'Impossible de sécuriser le mot de passe.', detail: String(e?.message || e || 'unknown') }, 500);
+    }
     message = `${message}
 
 --- Création de compte ---
 Pseudo souhaité : ${name}
-Mot de passe souhaité : ${signupPassword}`.slice(0, 5000);
+Mot de passe : enregistré de manière sécurisée (non visible par l’administrateur)`.slice(0, 5000);
   }
 
   const result = await db.prepare(`
-    INSERT INTO tickets_global (name, contact, category, priority, title, message, status, page_url, user_agent, ip_hash, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, 'open', ?, ?, ?, datetime('now'), datetime('now'))
-  `).bind(name, contact, category, priority, title, message, pageUrl, userAgent, ipHash).run();
+    INSERT INTO tickets_global (name, contact, category, priority, title, message, status, page_url, user_agent, ip_hash, signup_password_hash, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, 'open', ?, ?, ?, ?, datetime('now'), datetime('now'))
+  `).bind(name, contact, category, priority, title, message, pageUrl, userAgent, ipHash, signupPasswordHash).run();
 
   const id = result.meta?.last_row_id || result.lastRowId || null;
   return json({ ok: true, id, ticket: { id, name, contact, category, priority, title, status: 'open', admin_comment: '' } }, 201);
@@ -186,7 +201,7 @@ export async function onRequestPatch(context) {
     await db.prepare(`UPDATE tickets_global SET status = ?, updated_at = datetime('now'), closed_at = CASE WHEN ? = 'closed' THEN COALESCE(NULLIF(closed_at, ''), datetime('now')) ELSE '' END WHERE id = ?`)
       .bind(status, status, id).run();
   }
-  const row = await db.prepare(`SELECT id, name, contact, category, priority, title, message, status, page_url, created_at, updated_at, closed_at, admin_comment FROM tickets_global WHERE id = ?`).bind(id).first();
+  const row = await db.prepare(`SELECT id, name, contact, category, priority, title, message, status, page_url, created_at, updated_at, closed_at, admin_comment, account_created_at, account_username FROM tickets_global WHERE id = ?`).bind(id).first();
   if (!row) return json({ ok: false, error: 'Ticket introuvable.' }, 404);
   return json({ ok: true, ticket: row });
 }

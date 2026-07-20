@@ -7,6 +7,8 @@ import {
   hashPassword,
   json,
   validatePassword,
+  requireUser,
+  isRoleAllowed,
 } from './_auth.js';
 
 
@@ -28,12 +30,10 @@ export async function onRequest(context) {
     }
     if (!env?.DB) return json({ ok: false, error: 'DB non liée.' }, 500);
 
-    const expectedToken = String(env?.AUTH_ADMIN_TOKEN || '').trim();
-    const gotToken = String(request.headers.get('x-admin-token') || '').trim();
-    if (!expectedToken) return json({ ok: false, error: 'AUTH_ADMIN_TOKEN non configuré.' }, 500);
-    if (!gotToken || gotToken !== expectedToken) return json({ ok: false, error: 'Token admin invalide.' }, 403);
-
     await ensureAuthTables(env.DB);
+    const auth = await requireUser(env.DB, env, request);
+    if (!auth.ok) return auth.response;
+    if (!isRoleAllowed(auth.user.role, ['admin'])) return json({ ok: false, error: 'Accès refusé.' }, 403);
 
     let body;
     try {

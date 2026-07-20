@@ -304,10 +304,9 @@
           <summary>➕ Créer un membre</summary>
           <div class="admin-panel-body">
           <form id="createForm" class="auth-form" autocomplete="off">
-            <label class="auth-label"><span>Token admin</span><input class="auth-input" id="adminToken" type="password" /></label>
             <label class="auth-label"><span>Nom d’utilisateur</span><input class="auth-input" id="newUsername" type="text" /></label>
             <label class="auth-label"><span>Nom affiché</span><input class="auth-input" id="newDisplay" type="text" /></label>
-            <label class="auth-label"><span>Mot de passe</span><input class="auth-input" id="newPassword" type="password" /></label>
+            <label class="auth-label"><span>Mot de passe</span><input class="auth-input" id="newPassword" type="password" minlength="8" maxlength="120" placeholder="8 caractères minimum" required /></label>
             <label class="auth-label"><span>Rôle</span>
               <select class="auth-select" id="newRole">
                 <option value="member">member</option>
@@ -829,7 +828,7 @@
 
                 <label class="auth-label">
                   <span>Nouveau mot de passe</span>
-                  <input class="auth-input" data-field="password" type="password" placeholder="laisser vide pour ne pas changer" />
+                  <input class="auth-input" data-field="password" type="password" minlength="8" maxlength="120" placeholder="laisser vide pour ne pas changer (8 min.)" />
                 </label>
               </div>
 
@@ -900,12 +899,12 @@
       if (passwordEl) passwordEl.value = data.password || '';
       if (roleEl) roleEl.value = data.role || 'member';
 
-      setMsg(createMsg, `Création pré-remplie depuis le ticket #${data.ticket_id || ''}. Il reste à entrer le token admin puis créer le compte.`, true);
+      setMsg(createMsg, `Création pré-remplie depuis le ticket #${data.ticket_id || ''}. Vérifie les informations puis crée le compte.`, true);
       try { sessionStorage.removeItem('andric31_account_prefill_from_ticket'); } catch {}
       setTimeout(() => {
         createForm?.closest('details')?.setAttribute('open','');
         createForm?.closest('.auth-card')?.scrollIntoView({ behavior:'smooth', block:'start' });
-        document.getElementById('adminToken')?.focus();
+        document.getElementById('newUsername')?.focus();
       }, 150);
     }
 
@@ -919,8 +918,7 @@
           password: document.getElementById('newPassword')?.value || '',
           role: document.getElementById('newRole')?.value || 'member',
         };
-        const token = document.getElementById('adminToken')?.value || '';
-        const res = await window.SiteAuth.createUserAdmin(payload, token);
+        const res = await window.SiteAuth.createUserAdmin(payload);
         setMsg(createMsg, `Compte créé : ${res?.created?.username || ''}`, true);
         createForm.reset();
         loadUsers();

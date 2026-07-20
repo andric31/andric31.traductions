@@ -452,7 +452,7 @@
       <p class="auth-subtitle">Tu dois être connecté pour accéder à cette page.</p>
       <div class="auth-box" style="margin-top:14px;">
         <h3>📝 Inscription privée</h3>
-        <p>Toute nouvelle inscription est privée. Merci d’ouvrir un ticket pour me communiquer ton nom d’utilisateur et ton mot de passe.</p>
+        <p>Toute nouvelle inscription est privée. Ouvre un ticket pour choisir ton nom d’utilisateur et ton mot de passe. Le mot de passe est sécurisé et n’est jamais affiché à l’administrateur.</p>
         <div class="auth-actions">
           <a class="auth-btn primary" href="/ticket/?category=inscription">Ouvrir un ticket</a>
         </div>
@@ -562,11 +562,11 @@
         <div class="account-password-grid">
           <label>
             <span>Nouveau mot de passe</span>
-            <input class="auth-input" id="newPassword" type="password" minlength="6" maxlength="120" autocomplete="new-password" required>
+            <input class="auth-input" id="newPassword" type="password" minlength="8" maxlength="120" autocomplete="new-password" required>
           </label>
           <label>
             <span>Confirmer le mot de passe</span>
-            <input class="auth-input" id="newPasswordConfirm" type="password" minlength="6" maxlength="120" autocomplete="new-password" required>
+            <input class="auth-input" id="newPasswordConfirm" type="password" minlength="8" maxlength="120" autocomplete="new-password" required>
           </label>
         </div>
         <div class="auth-actions" style="margin-top:12px;">
@@ -1013,8 +1013,8 @@
         setMsg(changePasswordMsg, 'Les deux mots de passe ne sont pas identiques.', false);
         return;
       }
-      if (password.length < 6) {
-        setMsg(changePasswordMsg, 'Le mot de passe doit contenir au moins 6 caractères.', false);
+      if (password.length < 8) {
+        setMsg(changePasswordMsg, 'Le mot de passe doit contenir au moins 8 caractères.', false);
         return;
       }
       changePasswordBtn.disabled = true;

@@ -130,19 +130,6 @@
       });
     }
 
-    function extractAccountPrefill(ticket){
-      const message = String(ticket?.message || '');
-      const pseudoMatch = message.match(/Pseudo souhaité\s*:\s*(.+)/i);
-      const passwordMatch = message.match(/Mot de passe souhaité\s*:\s*(.+)/i);
-      return {
-        ticket_id: ticket?.id || '',
-        username: String(pseudoMatch?.[1] || ticket?.name || '').trim(),
-        display_name: String(pseudoMatch?.[1] || ticket?.name || '').trim(),
-        password: String(passwordMatch?.[1] || '').trim(),
-        role: 'member'
-      };
-    }
-
     function renderStats(rows){
       const total = tickets.length;
       const open = tickets.filter(t => String(t.status || 'open') !== 'closed').length;
@@ -159,7 +146,7 @@
         <div class="ticket-card-head">
           <div>
             <div class="ticket-title">#${esc(t.id)} · ${esc(t.title || 'Sans titre')} ${closed && t.closed_at ? `<small> · clôturé le ${esc(dateFr(t.closed_at))}</small>` : ''}</div>
-            <div class="ticket-meta"><span>Créé le ${esc(dateFr(t.created_at))}</span><span>par ${esc(t.name || 'Anonyme')}</span>${t.contact ? `<span>contact : ${esc(t.contact)}</span>` : ''}${url ? `<a href="${esc(url)}" target="_blank" rel="noopener">page envoyée</a>` : ''}</div>
+            <div class="ticket-meta"><span>Créé le ${esc(dateFr(t.created_at))}</span><span>par ${esc(t.name || 'Anonyme')}</span>${t.contact ? `<span>contact : ${esc(t.contact)}</span>` : ''}${t.account_username ? `<span>compte créé : ${esc(t.account_username)}</span>` : ''}${url ? `<a href="${esc(url)}" target="_blank" rel="noopener">page envoyée</a>` : ''}</div>
           </div>
           <div class="ticket-meta"><span class="ticket-pill ${closed ? 'closed' : 'open'}">${closed ? 'Clôturé' : 'Ouvert'}</span><span class="ticket-pill">${esc(categoryLabel(t.category))}</span><span class="ticket-pill ${urgent ? 'urgent' : ''}">${esc(priorityLabel(t.priority))}</span></div>
         </div>
@@ -170,10 +157,9 @@
             <button class="auth-btn ticket-info" data-action="toggle" type="button">Rouvrir</button>
             <button class="auth-btn ticket-danger" data-action="delete" type="button">Supprimer</button>
           ` : `
-            ${String(t.category || '') === 'inscription' ? `<button class="auth-btn primary" data-action="prefillAccount" type="button">➕ Création du compte</button>` : ''}
+            ${String(t.category || '') === 'inscription' ? `<button class="auth-btn primary" data-action="createAccount" type="button">✅ Créer le compte</button>` : ''}
             <button class="auth-btn ticket-info" data-action="comment" type="button">Ajouter un commentaire</button>
             <button class="auth-btn ticket-muted-btn" data-action="copy" type="button">Copier référence</button>
-            ${String(t.category || '') === 'inscription' ? `<button class="auth-btn ticket-info" data-action="notifyAccount" type="button">📩 Envoyer message compte créé</button>` : ''}
             ${String(t.category || '') === 'compte' ? `<button class="auth-btn ticket-info" data-action="notifyPassword" type="button">Message accès compte</button>` : ''}
             <button class="auth-btn ticket-ok" data-action="toggle" type="button">Clôturer</button>
           `}
@@ -232,19 +218,27 @@
         if (!confirm(`Supprimer définitivement le ticket #${id} ?`)) return;
         try { await api('/api/ticket', { method:'DELETE', body:JSON.stringify({ id }) }); tickets = tickets.filter(x => String(x.id) !== String(id)); render(); setMsg(`Ticket #${id} supprimé.`, true); } catch(e){ setMsg(e.message, false); }
       }
-      if (action === 'prefillAccount') {
-        const prefill = extractAccountPrefill(t);
-        if (!prefill.username || !prefill.password) { setMsg('Impossible de récupérer le pseudo ou le mot de passe dans ce ticket.', false); return; }
-        try { sessionStorage.setItem('andric31_account_prefill_from_ticket', JSON.stringify(prefill)); location.href = '/compte/admin.html?prefillTicket=' + encodeURIComponent(String(id)); }
-        catch(e) { setMsg('Pré-remplissage impossible dans ce navigateur.', false); }
-      }
-      if (action === 'notifyAccount') {
-        const message = `✅ Création de compte — Ticket #${id} : ta demande a été traitée et le compte a été créé/validé.`;
-        if (!confirm(`Envoyer le message de confirmation pour le ticket #${id} sur la page Messages ?`)) return;
+      if (action === 'createAccount') {
+        const username = String(t.name || '').trim();
+        if (!confirm(`Créer maintenant le compte « ${username} » depuis le ticket #${id} ?`)) return;
         btn.disabled = true;
-        try { await api('/api/messages', { method:'POST', body:JSON.stringify({ nickname:'Admin', message, room:'global' }) }); setMsg(`Message de confirmation envoyé pour le ticket #${id}.`, true); }
-        catch(e){ setMsg(e.message || 'Envoi du message impossible.', false); }
-        finally { btn.disabled = false; }
+        try {
+          const data = await api('/api/ticket-create-account', { method:'POST', body:JSON.stringify({ id }) });
+          Object.assign(t, data.ticket || { status:'closed', account_username: data.created?.username || username });
+          let notificationSent = false;
+          try {
+            const message = `✅ Création de compte — Ticket #${id} : le compte a été créé. Tu peux maintenant te connecter avec le pseudo et le mot de passe choisis dans ta demande.`;
+            await api('/api/messages', { method:'POST', body:JSON.stringify({ nickname:'Admin', message, room:'global' }) });
+            notificationSent = true;
+          } catch {}
+          render();
+          const legacyNote = data.legacy_password ? ' Ancien ticket accepté exceptionnellement.' : '';
+          setMsg(`Compte ${data.created?.username || username} créé.${legacyNote}${notificationSent ? ' Message de confirmation envoyé.' : ' Le message de confirmation n’a pas pu être envoyé.'}`, true);
+        } catch(e) {
+          setMsg(e.message || 'Création du compte impossible.', false);
+        } finally {
+          btn.disabled = false;
+        }
       }
       if (action === 'notifyPassword') {
         const message = `🔐 Compte / mot de passe — Ticket #${id} : ta demande a été traitée/validée.`;

@@ -108,18 +108,18 @@
 
         <div id="privateSignupNote" class="ticket-note ticket-hidden" role="note">
           <strong>Création de compte</strong>
-          <span>Le pseudo et le mot de passe sont obligatoires.</span>
+          <span>Le pseudo et le mot de passe sont obligatoires. Le mot de passe doit contenir au moins 8 caractères.</span>
           <span>Après l’envoi, pense à noter le numéro du ticket : un message sera envoyé sur la page Messages avec ce numéro pour confirmer la validation par un administrateur.</span>
         </div>
 
         <div id="ticketSignupPasswordWrap" class="ticket-grid two ticket-password-grid ticket-hidden">
           <label>
             <span>Mot de passe</span>
-            <input id="ticketPassword" name="password" type="password" maxlength="120" placeholder="Mot de passe du compte" autocomplete="new-password" />
+            <input id="ticketPassword" name="password" type="password" minlength="8" maxlength="120" placeholder="8 caractères minimum" autocomplete="new-password" />
           </label>
           <label>
             <span>Confirmer le mot de passe</span>
-            <input id="ticketPasswordConfirm" name="password_confirm" type="password" maxlength="120" placeholder="Répète le mot de passe" autocomplete="new-password" />
+            <input id="ticketPasswordConfirm" name="password_confirm" type="password" minlength="8" maxlength="120" placeholder="Répète le mot de passe" autocomplete="new-password" />
           </label>
         </div>
 

@@ -32,8 +32,8 @@
         setStatus('Les deux mots de passe ne sont pas identiques.', 'err');
         return;
       }
-      if (payload.password.length < 6) {
-        setStatus('Le mot de passe doit contenir au moins 6 caractères.', 'err');
+      if (payload.password.length < 8) {
+        setStatus('Le mot de passe doit contenir au moins 8 caractères.', 'err');
         return;
       }
     }

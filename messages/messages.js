@@ -9,6 +9,7 @@
   const REACT_KEY = 'andric31_messages_reactions';
   const EMOJIS = ['😀','😁','😂','🤣','😊','😍','🥰','😘','😎','🤔','😅','😢','😭','😡','👍','👎','👏','🙏','🔥','✅','❌','🎉','💬','❤️'];
   const QUICK_REACTIONS = ['👍','❤️','😂','🔥','👏','🎉','😮','🤔','😢','😡'];
+  const VALID_ROOMS = new Set(['global', 'private:members', 'private:translators', 'private:moderators', 'private:admins']);
 
   const els = {
     list: document.getElementById('messagesList'),
@@ -141,6 +142,26 @@
     return window.SiteAuth?.me || null;
   }
 
+  function getRequestedRoomFromUrl() {
+    try {
+      const room = new URLSearchParams(window.location.search).get('room') || '';
+      return VALID_ROOMS.has(room) ? room : '';
+    } catch {
+      return '';
+    }
+  }
+
+  function updateRoomInUrl(room) {
+    try {
+      const url = new URL(window.location.href);
+      if (room && room !== 'global') url.searchParams.set('room', room);
+      else url.searchParams.delete('room');
+      window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+    } catch {
+      // Navigation toujours fonctionnelle même si l'URL ne peut pas être modifiée.
+    }
+  }
+
   function getSelectedRoom() {
     return localStorage.getItem(ROOM_KEY) || 'global';
   }
@@ -189,10 +210,18 @@
 
   function syncRoomOptions() {
     const rooms = getAvailableRooms();
-    const wanted = localStorage.getItem(ROOM_KEY) || 'global';
+    const requested = getRequestedRoomFromUrl();
+    const stored = localStorage.getItem(ROOM_KEY) || 'global';
+    const wanted = requested || stored;
     const allowed = new Set(rooms.map((x) => x.value));
-    const selected = allowed.has(wanted) ? wanted : 'global';
+    const selected = allowed.has(wanted) ? wanted : (allowed.has(stored) ? stored : 'global');
     localStorage.setItem(ROOM_KEY, selected);
+
+    // Tant que l'authentification n'est pas chargée, on conserve le salon privé
+    // demandé dans l'URL. Il sera appliqué dès que le compte sera reconnu.
+    if (!requested || allowed.has(requested) || window.SiteAuth?.loaded) {
+      updateRoomInUrl(selected);
+    }
   }
 
   function renderSidebarRooms() {
@@ -218,6 +247,7 @@
         const value = btn.getAttribute('data-room') || 'global';
         if (value === getSelectedRoom()) return;
         localStorage.setItem(ROOM_KEY, value);
+        updateRoomInUrl(value);
         fetchMessages();
       });
     });

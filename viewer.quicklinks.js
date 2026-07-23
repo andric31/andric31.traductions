@@ -22,6 +22,7 @@
   };
 
   const MESSAGES_API_URL = "/api/messages?limit=1&scope=allowed";
+  const MESSAGES_BASE_URL = "/messages/";
   const BLOG_INDEX_URL = "/blog/";
   const TICKETS_ADMIN_URL = "/compte/ticket-admin.html";
   const TICKETS_PUBLIC_URL = "/ticket/";
@@ -135,6 +136,11 @@
     const dot = getDot(el);
     if (!dot) return;
     dot.classList.toggle("hidden", !(visible && areNotificationDotsEnabled()));
+  }
+
+  function buildMessagesUrl(room) {
+    const value = String(room || "").trim();
+    return value ? `${MESSAGES_BASE_URL}?room=${encodeURIComponent(value)}` : MESSAGES_BASE_URL;
   }
 
   function formatRelativeTime(iso) {
@@ -307,7 +313,7 @@
     const ticket = makeLink(IDS.ticket, TICKETS_PUBLIC_URL, "Ticket", iconTicket(), refClass);
     const notifications = makeButton(IDS.notifications, "Notifications", iconNotifications(), refClass);
     const events = makeLink(IDS.events, EVENTS_URL, "Événements", iconEvents(), refClass);
-    const messages = makeLink(IDS.messages, "/messages/", "Messages", iconMessages(), refClass);
+    const messages = makeLink(IDS.messages, MESSAGES_BASE_URL, "Messages", iconMessages(), refClass);
 
     notifications.addEventListener("click", (event) => {
       event.preventDefault();
@@ -627,7 +633,11 @@
       if (!res.ok || !data?.ok || !Array.isArray(data.messages)) return;
       const latest = data.messages[data.messages.length - 1] || null;
       const latestId = Number(latest?.id || 0);
+      const latestRoom = String(latest?.room_key || latest?.room || "").trim();
       messagesEl.dataset.latestMessageId = String(latestId || 0);
+      messagesEl.dataset.latestMessageRoom = latestRoom;
+      messagesEl.href = buildMessagesUrl(latestRoom);
+      messagesEl.title = latestRoom ? `Messages · ${latestRoom === "global" ? "salon public" : "salon concerné"}` : "Messages";
       const seenMessageId = Number(localStorage.getItem(STORAGE.seenMessageId) || 0);
       setDotVisible(messagesEl, latestId > seenMessageId);
     } catch {

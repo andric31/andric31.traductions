@@ -55,7 +55,7 @@ async function fetchPrivateLinksDoc(context) {
 
   const resp = await fetch(apiUrl, {
     headers: {
-      'accept': 'application/vnd.github+json',
+      'accept': 'application/vnd.github.raw+json',
       'authorization': `Bearer ${token}`,
       'user-agent': 'andric31-traductions-pages',
       'x-github-api-version': '2022-11-28',
@@ -67,11 +67,8 @@ async function fetchPrivateLinksDoc(context) {
     throw new Error(`GitHub privé HTTP ${resp.status}`);
   }
 
-  const data = await resp.json();
-  const encoded = String(data?.content || '').replace(/\s/g, '');
-  if (!encoded) throw new Error('Fichier privé vide ou illisible');
-
-  const text = decodeBase64Utf8(encoded);
+  const text = await resp.text();
+  if (!String(text || '').trim()) throw new Error('Fichier privé vide ou illisible');
   return JSON.parse(text);
 }
 

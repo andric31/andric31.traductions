@@ -104,6 +104,7 @@ function mergePrivateGameData(entry, privateData) {
   for (const k of [
     "discordlink",
     "translation",
+    "translationTitle",
     "translationType",
     "translationsArchive",
     "description",
@@ -120,6 +121,10 @@ function mergePrivateGameData(entry, privateData) {
 
   if (Array.isArray(privateData.translationsExtra) && privateData.translationsExtra.length) {
     out.translationsExtra = privateData.translationsExtra;
+  }
+
+  if (Array.isArray(privateData.mainTranslations) && privateData.mainTranslations.length) {
+    out.mainTranslations = privateData.mainTranslations;
   }
 
   for (const k of [
@@ -2271,9 +2276,60 @@ function renderVideoBlock({ id, videoUrl }) {
       $("btnF95").classList.add("btn-f95");
     }
 
-    const megaHref = (entry.translation || "").trim();
     const archiveHref = (entry.translationsArchive || "").trim();
     const translationType = String(entry.translationType || "").trim().toLowerCase();
+
+    function normalizeMainTranslationsForDisplay(source) {
+      if (!source || typeof source !== "object") return [];
+
+      const fromApi = Array.isArray(source.mainTranslations)
+        ? source.mainTranslations
+            .map((item, position) => {
+              if (!item || typeof item !== "object") return null;
+              const link = String(item.link || item.url || "").trim();
+              if (!link) return null;
+              const index = Number(item.index) || (position + 1);
+              return {
+                index,
+                title: String(item.title || item.name || "").trim(),
+                host: String(item.host || "").trim(),
+                link,
+              };
+            })
+            .filter(Boolean)
+        : [];
+
+      const list = fromApi.length ? fromApi : Object.entries(source)
+        .map(([field, rawValue]) => {
+          const match = String(field).match(/^translation(\d*)$/);
+          if (!match) return null;
+          const index = match[1] ? Number(match[1]) : 1;
+          if (!Number.isFinite(index) || index < 1) return null;
+          const link = String(rawValue || "").trim();
+          if (!link) return null;
+          const titleKey = index === 1 ? "translationTitle" : `translation${index}Title`;
+          const nameKey = index === 1 ? "translationName" : `translation${index}Name`;
+          const legacyTitleKey = `translationTitle${index}`;
+          return {
+            index,
+            title: String(source[titleKey] || source[nameKey] || source[legacyTitleKey] || "").trim(),
+            host: "",
+            link,
+          };
+        })
+        .filter(Boolean);
+
+      list.sort((a, b) => a.index - b.index);
+      const multiple = list.length > 1;
+      return list.map((item, position) => ({
+        ...item,
+        title: item.title || (multiple ? `Traduction ${position + 1}` : ""),
+      }));
+    }
+
+    const mainTranslations = normalizeMainTranslationsForDisplay(entry);
+    const primaryMainTranslation = mainTranslations[0] || null;
+    const megaHref = primaryMainTranslation ? primaryMainTranslation.link : "";
 
     function getTranslationTypeMeta(typeValue) {
       const t = String(typeValue || "").trim().toLowerCase();
@@ -2301,10 +2357,23 @@ function renderVideoBlock({ id, videoUrl }) {
     const mainTranslationTypeMeta = getTranslationTypeMeta(translationType);
     const isMainQuickAuto = !!mainTranslationTypeMeta;
 
-    setHref("btnMega", megaHref);
-    if ($("btnMega")) $("btnMega").textContent = "📥 Télécharger la traduction · MEGA";
+    function normalizeHostHint(hostHint) {
+      const h = String(hostHint || "").trim().toLowerCase();
+      if (!h) return "";
+      if (h.includes("mega")) return "MEGA";
+      if (h.includes("gofile")) return "Gofile";
+      if (h.includes("drive") || h.includes("google")) return "Google Drive";
+      if (h.includes("f95")) return "F95Zone";
+      return String(hostHint || "").trim();
+    }
 
-    function getHostClass(url){
+    function getHostClass(url, hostHint = ""){
+      const hint = normalizeHostHint(hostHint).toLowerCase();
+      if (hint === "mega") return "btnMega";
+      if (hint === "f95zone") return "btn-f95";
+      if (hint === "google drive") return "btn-host-drive";
+      if (hint === "gofile") return "btn-host-gofile";
+
       const u = (url || "").toLowerCase();
       if (u.includes("mega.nz")) return "btnMega";
       if (u.includes("f95zone")) return "btn-f95";
@@ -2314,13 +2383,80 @@ function renderVideoBlock({ id, videoUrl }) {
       return "btn-host-default";
     }
 
-    function getHostLabel(url, fallbackName = "Lien") {
+    function getHostLabel(url, fallbackName = "Lien", hostHint = "") {
+      const normalizedHint = normalizeHostHint(hostHint);
+      if (normalizedHint) return normalizedHint;
       const hostCls = getHostClass(url);
       if (hostCls === "btnMega") return "MEGA";
       if (hostCls === "btn-host-gofile") return "Gofile";
       if (hostCls === "btn-host-drive") return "Google Drive";
       if (hostCls === "btn-f95") return "F95Zone";
       return String(fallbackName || "Lien").trim() || "Lien";
+    }
+
+    function setTranslationButtonContent(button, item) {
+      if (!button || !item) return;
+      const link = String(item.link || "").trim();
+      const titleText = String(item.title || "").trim();
+      const hostLabel = getHostLabel(link, "Lien", item.host);
+      const hostCls = getHostClass(link, item.host);
+
+      button.classList.add("translationMainLinkBtn");
+      if (button.id !== "btnMega") button.classList.add(hostCls);
+      button.target = "_blank";
+      button.rel = "noopener";
+      button.href = link;
+      button.style.display = "";
+      button.textContent = "";
+
+      const mainLine = document.createElement("span");
+      mainLine.className = "translationDownloadLine";
+      mainLine.appendChild(document.createTextNode("📥 Télécharger la traduction · "));
+
+      if (hostCls === "btn-f95" && /f95\s*zone/i.test(hostLabel)) {
+        const logo = document.createElement("span");
+        logo.className = "f95-logo";
+        const white = document.createElement("span");
+        white.className = "f95-white";
+        white.textContent = "F95";
+        const red = document.createElement("span");
+        red.className = "f95-red";
+        red.textContent = "Zone";
+        logo.appendChild(white);
+        logo.appendChild(red);
+        mainLine.appendChild(logo);
+      } else {
+        mainLine.appendChild(document.createTextNode(hostLabel));
+      }
+
+      button.appendChild(mainLine);
+
+      if (titleText) {
+        const title = document.createElement("span");
+        title.className = "translationLinkTitle";
+        title.textContent = titleText;
+        button.appendChild(title);
+      }
+    }
+
+    function createMainTranslationButton(item) {
+      const a = document.createElement("a");
+      a.className = "btnLike extraLinkBtn mainTranslationExtraBtn";
+      a.style.width = "auto";
+      a.style.margin = "0 auto";
+      a.style.justifyContent = "center";
+      setTranslationButtonContent(a, item);
+      a.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        return false;
+      });
+      return a;
+    }
+
+    setHref("btnMega", megaHref);
+    const megaBtn = document.getElementById("btnMega");
+    if (megaBtn && primaryMainTranslation) {
+      setTranslationButtonContent(megaBtn, primaryMainTranslation);
     }
 
     function createQuickAutoTile(link, fallbackName, extraClassName = "extraLinkBtn") {
@@ -2385,32 +2521,40 @@ function renderVideoBlock({ id, videoUrl }) {
       .filter(Boolean);
 
     const hasQuickAutoExtra = extraValid.some(x => String(x.name || "").trim().toLowerCase() === "traduction auto rapide");
-
     const megaRow = document.querySelector(".btnMainRow");
-    const megaBtn = document.getElementById("btnMega");
 
     if (hasQuickAutoExtra && megaBtn) {
       megaBtn.removeAttribute("href");
       megaBtn.style.display = "none";
     }
 
-    const megaHrefNow = (megaBtn && megaBtn.getAttribute("href")) ? megaBtn.getAttribute("href").trim() : "";
-    const hasMega  = !!megaHrefNow;
+    const visibleMainTranslations = hasQuickAutoExtra ? [] : mainTranslations;
+    const hasMain = visibleMainTranslations.length > 0;
     const hasExtra = extraValid.length > 0;
 
     if (megaRow) {
+      const oldMainCol = megaRow.querySelector(".mainTranslationsCol");
+      if (oldMainCol && megaBtn && oldMainCol.contains(megaBtn)) {
+        megaRow.insertBefore(megaBtn, oldMainCol);
+      }
+      if (oldMainCol) oldMainCol.remove();
+
+      const oldMainQuickAutoTile = megaRow.querySelector(".mainQuickAutoTile");
+      if (oldMainQuickAutoTile && megaBtn && oldMainQuickAutoTile.contains(megaBtn)) {
+        megaRow.insertBefore(megaBtn, oldMainQuickAutoTile);
+      }
+      if (oldMainQuickAutoTile) oldMainQuickAutoTile.remove();
+
       [...megaRow.querySelectorAll(".extraLinkBtn")].forEach(el => el.remove());
       const oldWrap = megaRow.querySelector(".extraLinksCol");
       if (oldWrap) oldWrap.remove();
-      const oldMainQuickAutoTile = megaRow.querySelector(".mainQuickAutoTile");
-      if (oldMainQuickAutoTile) oldMainQuickAutoTile.remove();
 
-      if (!hasMega && !hasExtra) {
+      if (!hasMain && !hasExtra) {
         megaRow.style.display = "none";
       } else {
         megaRow.style.display = "flex";
 
-        const needsColumnLayout = hasExtra || (hasMega && isMainQuickAuto);
+        const needsColumnLayout = hasExtra || visibleMainTranslations.length > 1 || (hasMain && isMainQuickAuto);
 
         if (!needsColumnLayout) {
           megaRow.style.flexDirection = "row";
@@ -2419,38 +2563,54 @@ function renderVideoBlock({ id, videoUrl }) {
           megaRow.style.alignItems = "center";
           megaRow.style.justifyContent = "center";
 
-          if (megaBtn) {
+          if (megaBtn && hasMain) {
+            megaBtn.style.display = "";
             megaBtn.style.width = "auto";
             megaBtn.style.margin = "0 auto";
+            setTranslationButtonContent(megaBtn, visibleMainTranslations[0]);
           }
         } else {
           megaRow.style.flexDirection = "column";
           megaRow.style.flexWrap = "nowrap";
           megaRow.style.gap = "10px";
-          megaRow.style.alignItems = "center";
+          megaRow.style.alignItems = "stretch";
           megaRow.style.justifyContent = "flex-start";
 
-          if (megaBtn) {
-            megaBtn.style.width = "auto";
-            megaBtn.style.margin = "0 auto";
-          }
+          if (hasMain) {
+            const mainCol = document.createElement("div");
+            mainCol.className = "mainTranslationsCol";
 
-          if (hasMega && isMainQuickAuto && megaBtn && megaBtn.style.display !== "none") {
-            const mainTile = document.createElement("div");
-            mainTile.className = "mainQuickAutoTile quickAutoTile";
+            if (megaBtn) {
+              megaBtn.style.display = "";
+              megaBtn.style.width = "100%";
+              megaBtn.style.margin = "0";
+              setTranslationButtonContent(megaBtn, visibleMainTranslations[0]);
+              mainCol.appendChild(megaBtn);
+            }
 
-            const title = document.createElement("div");
-            title.className = "quickAutoTitleRow";
-            title.textContent = mainTranslationTypeMeta.title;
+            visibleMainTranslations.slice(1).forEach((item) => {
+              mainCol.appendChild(createMainTranslationButton(item));
+            });
 
-            const note = document.createElement("div");
-            note.className = "quickAutoSub";
-            note.textContent = mainTranslationTypeMeta.note;
+            if (isMainQuickAuto) {
+              const mainTile = document.createElement("div");
+              mainTile.className = "mainQuickAutoTile quickAutoTile";
 
-            mainTile.appendChild(title);
-            mainTile.appendChild(megaBtn);
-            mainTile.appendChild(note);
-            megaRow.appendChild(mainTile);
+              const title = document.createElement("div");
+              title.className = "quickAutoTitleRow";
+              title.textContent = mainTranslationTypeMeta.title;
+
+              const note = document.createElement("div");
+              note.className = "quickAutoSub";
+              note.textContent = mainTranslationTypeMeta.note;
+
+              mainTile.appendChild(title);
+              mainTile.appendChild(mainCol);
+              mainTile.appendChild(note);
+              megaRow.appendChild(mainTile);
+            } else {
+              megaRow.appendChild(mainCol);
+            }
           }
 
           if (hasExtra) {
@@ -2467,7 +2627,7 @@ function renderVideoBlock({ id, videoUrl }) {
             extraValid.forEach((x) => {
               const name = String(x.name || "Lien").trim();
               const link = String(x.link || "").trim();
-              const hostCls = getHostClass(link);
+              const hostCls = getHostClass(link, x.host);
               const isQuickAuto = name.toLowerCase() === "traduction auto rapide";
 
               if (isQuickAuto) {
@@ -2489,8 +2649,7 @@ function renderVideoBlock({ id, videoUrl }) {
                 a.textContent = "📥 Télécharger · Patch";
               } else {
                 // Les liens privés passent par /api/link, donc le host devient masqué.
-                // Pour les traductions supplémentaires, on garde en priorité le nom défini dans le JSON
-                // ex: "v0.31 Patreon", puis on retombe sur le host seulement si aucun nom utile n'existe.
+                // Pour les traductions supplémentaires, on garde en priorité le nom défini dans le JSON.
                 const rawName = String(name || "").trim();
                 const labelName = (rawName && rawName.toLowerCase() !== "lien")
                   ? rawName

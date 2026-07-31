@@ -1857,3 +1857,52 @@ html[data-theme="light"] .infoBlock .infoTextMuted{
   border-radius:2px;
   box-shadow:0 0 0 1px rgba(255,255,255,.24);
 }
+
+/* ===== Traductions principales multiples (translation, translation2, ...) ===== */
+.mainTranslationsCol{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:10px;
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+}
+
+.btnMainRowSide .mainTranslationsCol .btnLike{
+  width:100% !important;
+  max-width:none !important;
+  margin:0 !important;
+  box-sizing:border-box;
+}
+
+.translationMainLinkBtn{
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  text-align:center;
+  white-space:normal;
+  line-height:1.15;
+}
+
+.translationDownloadLine{
+  display:block;
+  width:100%;
+  text-align:center;
+}
+
+.translationLinkTitle{
+  display:block;
+  width:100%;
+  text-align:center;
+  font-size:11.5px;
+  font-weight:600;
+  line-height:1.2;
+  letter-spacing:.01em;
+  opacity:.88;
+}
+
+.quickAutoTile .mainTranslationsCol{
+  width:100%;
+}

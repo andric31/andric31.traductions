@@ -313,7 +313,7 @@
     els.nickname.removeAttribute('aria-readonly');
     els.nickname.title = '';
     if (!els.nickname.value) els.nickname.value = localStorage.getItem(NICK_KEY) || '';
-    if (els.authInfo) els.authInfo.textContent = 'Non connecté : pseudo mémorisé ici, accès au salon public.';
+    if (els.authInfo) els.authInfo.textContent = 'Non connecté : ton pseudo sera réservé à ce navigateur dans le salon public.';
     return false;
   }
 
@@ -775,7 +775,7 @@
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ nickname, message: buildStoredMessage(message), room }),
+        body: JSON.stringify({ nickname, message: buildStoredMessage(message), room, visitor_id: getReactionVisitorId() }),
       });
       const data = await res.json();
       if (!res.ok || !data?.ok) throw new Error(data?.error || 'Envoi impossible');

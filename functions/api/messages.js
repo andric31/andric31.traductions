@@ -1,5 +1,10 @@
 import { ensureAuthTables, getSessionUser } from './_auth.js';
 
+const ALLOWED_REACTION_EMOJIS = new Set([
+  '😀','😁','😂','🤣','😊','😍','🥰','😘','😎','🤔','😅','😢','😭','😡',
+  '👋','👍','👎','👏','🙏','🔥','✅','❌','🎉','💬','❤️','😮',
+]);
+
 function buildHeaders() {
   return {
     'content-type': 'application/json; charset=utf-8',
@@ -68,6 +73,23 @@ async function ensureTable(db) {
   await db.prepare(`
     CREATE INDEX IF NOT EXISTS idx_messages_global_room_created
     ON messages_global(room_key, created_at DESC)
+  `).run();
+
+  await db.prepare(`
+    CREATE TABLE IF NOT EXISTS message_reactions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      message_id INTEGER NOT NULL,
+      emoji TEXT NOT NULL,
+      actor_key TEXT NOT NULL,
+      nickname TEXT NOT NULL DEFAULT 'Visiteur',
+      created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+      UNIQUE(message_id, emoji, actor_key)
+    )
+  `).run();
+
+  await db.prepare(`
+    CREATE INDEX IF NOT EXISTS idx_message_reactions_message
+    ON message_reactions(message_id, id)
   `).run();
 }
 
@@ -173,6 +195,122 @@ async function sha256Hex(input) {
   return bytes.map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
+function normalizeVisitorId(value) {
+  const visitorId = String(value || '').trim();
+  return /^[a-zA-Z0-9_-]{16,80}$/.test(visitorId) ? visitorId : '';
+}
+
+async function getReactionActorKey(sessionUser, request, visitorId = '') {
+  if (sessionUser?.id) return `user:${sessionUser.id}`;
+
+  const normalizedVisitorId = normalizeVisitorId(visitorId);
+  if (normalizedVisitorId) return `guest:${normalizedVisitorId}`;
+
+  const ip = request.headers.get('cf-connecting-ip') || '';
+  const userAgent = cleanString(request.headers.get('user-agent') || '').slice(0, 180);
+  const language = cleanString(request.headers.get('accept-language') || '').slice(0, 80);
+  const fallback = await sha256Hex(`reaction:${ip}:${userAgent}:${language}`);
+  return `guest:${fallback}`;
+}
+
+async function attachReactions(db, messages, actorKey) {
+  const list = Array.isArray(messages) ? messages : [];
+  const ids = list
+    .map((item) => Number(item?.id || 0))
+    .filter((id) => Number.isSafeInteger(id) && id > 0);
+
+  for (const item of list) {
+    item.reactions = {};
+    item.my_reactions = [];
+  }
+  if (!ids.length) return list;
+
+  const placeholders = ids.map((_, idx) => `?${idx + 2}`).join(', ');
+  const rows = await db.prepare(`
+    SELECT
+      message_id,
+      emoji,
+      COUNT(*) AS reaction_count,
+      MAX(CASE WHEN actor_key = ?1 THEN 1 ELSE 0 END) AS reacted_by_me,
+      MIN(id) AS first_reaction_id
+    FROM message_reactions
+    WHERE message_id IN (${placeholders})
+    GROUP BY message_id, emoji
+    ORDER BY first_reaction_id ASC
+  `).bind(actorKey, ...ids).all();
+
+  const byId = new Map(list.map((item) => [Number(item.id), item]));
+  for (const row of rows?.results || []) {
+    const item = byId.get(Number(row.message_id));
+    if (!item) continue;
+    const emoji = String(row.emoji || '');
+    const count = Math.max(0, Number(row.reaction_count || 0));
+    if (!emoji || !count) continue;
+    item.reactions[emoji] = count;
+    if (Number(row.reacted_by_me || 0) > 0) item.my_reactions.push(emoji);
+  }
+
+  return list;
+}
+
+async function toggleMessageReaction(db, request, sessionUser, body) {
+  const messageId = Number(body?.message_id || 0);
+  const emoji = String(body?.emoji || '').trim();
+  if (!Number.isSafeInteger(messageId) || messageId <= 0) {
+    return { response: json({ ok: false, error: 'Message invalide.' }, 400) };
+  }
+  if (!ALLOWED_REACTION_EMOJIS.has(emoji)) {
+    return { response: json({ ok: false, error: 'Emoji non autorisé.' }, 400) };
+  }
+
+  const message = await db.prepare(`
+    SELECT id, room_key
+    FROM messages_global
+    WHERE id = ?1
+    LIMIT 1
+  `).bind(messageId).first();
+  if (!message?.id) {
+    return { response: json({ ok: false, error: 'Message introuvable.' }, 404) };
+  }
+
+  const roomInfo = parseRoom(message.room_key || 'global', sessionUser);
+  if (!roomInfo.ok) {
+    return { response: json({ ok: false, error: roomInfo.error }, roomInfo.status || 403) };
+  }
+
+  const actorKey = await getReactionActorKey(sessionUser, request, body?.visitor_id);
+  const nickname = sessionUser
+    ? cleanString(sessionUser.display_name || sessionUser.username || 'Membre').slice(0, 40)
+    : (cleanString(body?.nickname || 'Visiteur').slice(0, 40) || 'Visiteur');
+
+  const existing = await db.prepare(`
+    SELECT id
+    FROM message_reactions
+    WHERE message_id = ?1 AND emoji = ?2 AND actor_key = ?3
+    LIMIT 1
+  `).bind(messageId, emoji, actorKey).first();
+
+  if (existing?.id) {
+    await db.prepare(`DELETE FROM message_reactions WHERE id = ?1`).bind(existing.id).run();
+  } else {
+    await db.prepare(`
+      INSERT OR IGNORE INTO message_reactions (message_id, emoji, actor_key, nickname)
+      VALUES (?1, ?2, ?3, ?4)
+    `).bind(messageId, emoji, actorKey, nickname).run();
+  }
+
+  const summary = [{ id: messageId }];
+  await attachReactions(db, summary, actorKey);
+  return {
+    data: {
+      ok: true,
+      message_id: messageId,
+      reactions: summary[0].reactions,
+      my_reactions: summary[0].my_reactions,
+    },
+  };
+}
+
 export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
@@ -220,6 +358,8 @@ export async function onRequest(context) {
     `).bind(roomInfo.roomKey, limit).all();
 
     const messages = (rows?.results || []).slice().reverse();
+    const actorKey = await getReactionActorKey(sessionUser, request, url.searchParams.get('visitor_id'));
+    await attachReactions(env.DB, messages, actorKey);
     return json({ ok: true, messages });
   }
 
@@ -229,6 +369,12 @@ export async function onRequest(context) {
       body = await request.json();
     } catch {
       return json({ ok: false, error: 'JSON invalide.' }, 400);
+    }
+
+    if (body?.action === 'toggle_reaction') {
+      const result = await toggleMessageReaction(env.DB, request, sessionUser, body);
+      if (result.response) return result.response;
+      return json(result.data);
     }
 
     const nickname = cleanString(body?.nickname);
@@ -283,6 +429,7 @@ export async function onRequest(context) {
       return json({ ok: false, error: 'ID invalide.' }, 400);
     }
 
+    await env.DB.prepare(`DELETE FROM message_reactions WHERE message_id = ?1`).bind(id).run();
     await env.DB.prepare(`DELETE FROM messages_global WHERE id = ?1`).bind(id).run();
     return json({ ok: true });
   }

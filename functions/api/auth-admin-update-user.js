@@ -3,6 +3,7 @@ import {
   cleanRole,
   cleanUsername,
   ensureAuthTables,
+  findAuthPseudoConflict,
   hashPassword,
   json,
   requireUser,
@@ -47,8 +48,10 @@ export async function onRequest(context) {
     if (!username || username.length < 3) return json({ ok: false, error: 'Nom d’utilisateur invalide.' }, 400);
     if (!displayName) return json({ ok: false, error: 'Nom affiché invalide.' }, 400);
 
-    const taken = await env.DB.prepare(`SELECT id FROM auth_users WHERE lower(username) = lower(?1) AND id <> ?2 LIMIT 1`).bind(username, userId).first();
-    if (taken) return json({ ok: false, error: 'Ce nom d’utilisateur est déjà pris.' }, 409);
+    const conflict = await findAuthPseudoConflict(env.DB, [username, displayName], userId);
+    if (conflict) {
+      return json({ ok: false, error: 'Ce pseudo ou ce nom affiché est déjà utilisé par un autre compte.' }, 409);
+    }
 
     if (existing.id === auth.user.id && role !== 'admin') {
       return json({ ok: false, error: 'Tu ne peux pas retirer ton propre rôle admin.' }, 400);

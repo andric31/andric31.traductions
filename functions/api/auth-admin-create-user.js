@@ -4,6 +4,7 @@ import {
   cleanRole,
   cleanUsername,
   ensureAuthTables,
+  findAuthPseudoConflict,
   hashPassword,
   json,
   validatePassword,
@@ -51,8 +52,11 @@ export async function onRequest(context) {
     const pwError = validatePassword(password);
     if (pwError) return json({ ok: false, error: pwError }, 400);
 
-    const exists = await env.DB.prepare(`SELECT id FROM auth_users WHERE lower(username) = lower(?1) LIMIT 1`).bind(username).first();
-    if (exists) return json({ ok: false, error: 'Cet utilisateur existe déjà.' }, 409);
+    const finalDisplay = displayName || username;
+    const conflict = await findAuthPseudoConflict(env.DB, [username, finalDisplay]);
+    if (conflict) {
+      return json({ ok: false, error: 'Ce pseudo ou ce nom affiché est déjà utilisé par un autre compte.' }, 409);
+    }
 
     let passwordHash = '';
     try {
@@ -60,8 +64,6 @@ export async function onRequest(context) {
     } catch (e) {
       return json({ ok: false, error: 'Erreur pendant le hash du mot de passe.', detail: String(e?.message || e || 'unknown') }, 500);
     }
-
-    const finalDisplay = displayName || username;
 
     await env.DB.prepare(`
       INSERT INTO auth_users (username, display_name, password_hash, role, is_active)

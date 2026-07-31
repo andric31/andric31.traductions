@@ -1,6 +1,7 @@
 import {
   assertSameOrigin,
   ensureAuthTables,
+  findAuthPseudoConflict,
   hashPassword,
   isRoleAllowed,
   json,
@@ -87,8 +88,8 @@ export async function onRequest(context) {
     const username = cleanUsernameKeepCase(ticket.name);
     if (!username || username.length < 3) return json({ ok: false, error: 'Le pseudo demandé est invalide.' }, 400);
 
-    const exists = await env.DB.prepare(`SELECT id FROM auth_users WHERE lower(username) = lower(?1) LIMIT 1`).bind(username).first();
-    if (exists) return json({ ok: false, error: 'Un compte utilise déjà ce nom d’utilisateur.' }, 409);
+    const conflict = await findAuthPseudoConflict(env.DB, [username]);
+    if (conflict) return json({ ok: false, error: 'Un compte utilise déjà ce pseudo ou ce nom affiché.' }, 409);
 
     let passwordHash = String(ticket.signup_password_hash || '').trim();
     let legacyPasswordUsed = false;

@@ -1,4 +1,4 @@
-import { hashPassword, validatePassword } from './_auth.js';
+import { ensureAuthTables, findAuthPseudoConflict, hashPassword, normalizePseudoKey, validatePassword } from './_auth.js';
 
 const json = (data, status = 200) => new Response(JSON.stringify(data, null, 2), {
   status,
@@ -151,6 +151,31 @@ export async function onRequestPost(context) {
   if (message.length < 8) return json({ ok: false, error: 'Message trop court.' }, 400);
   let signupPasswordHash = '';
   if (category === 'inscription') {
+    const requestedPseudoKey = normalizePseudoKey(name);
+    if (!requestedPseudoKey || name.length < 3) {
+      return json({ ok: false, error: 'Le pseudo demandé est invalide.' }, 400);
+    }
+
+    if (context.env?.DB) {
+      await ensureAuthTables(context.env.DB);
+      const accountConflict = await findAuthPseudoConflict(context.env.DB, [name]);
+      if (accountConflict) {
+        return json({ ok: false, error: 'Ce pseudo est déjà utilisé par un compte.' }, 409);
+      }
+    }
+
+    const pendingRows = await db.prepare(`
+      SELECT id, name
+      FROM tickets_global
+      WHERE category = 'inscription' AND status = 'open'
+      ORDER BY id DESC
+      LIMIT 1000
+    `).all();
+    const pendingConflict = (pendingRows?.results || []).find((row) => normalizePseudoKey(row?.name) === requestedPseudoKey);
+    if (pendingConflict) {
+      return json({ ok: false, error: 'Une demande de création de compte utilise déjà ce pseudo.' }, 409);
+    }
+
     if (!signupPassword || !signupPasswordConfirm) return json({ ok: false, error: 'Mot de passe obligatoire pour une création de compte.' }, 400);
     if (signupPassword !== signupPasswordConfirm) return json({ ok: false, error: 'Les deux mots de passe ne sont pas identiques.' }, 400);
     const pwError = validatePassword(signupPassword);

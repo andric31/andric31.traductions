@@ -1,4 +1,4 @@
-import { ensureAuthTables, getSessionUser } from './_auth.js';
+import { assertSameOrigin, ensureAuthTables, getSessionUser, normalizePseudoKey } from './_auth.js';
 
 const ALLOWED_REACTION_EMOJIS = new Set([
   '😀','😁','😂','🤣','😊','😍','🥰','😘','😎','🤔','😅','😢','😭','😡',
@@ -90,6 +90,21 @@ async function ensureTable(db) {
   await db.prepare(`
     CREATE INDEX IF NOT EXISTS idx_message_reactions_message
     ON message_reactions(message_id, id)
+  `).run();
+
+  await db.prepare(`
+    CREATE TABLE IF NOT EXISTS message_nickname_claims (
+      nickname_key TEXT PRIMARY KEY,
+      nickname TEXT NOT NULL,
+      actor_key TEXT NOT NULL,
+      claimed_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+      last_used_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+    )
+  `).run();
+
+  await db.prepare(`
+    CREATE INDEX IF NOT EXISTS idx_message_nickname_claims_actor
+    ON message_nickname_claims(actor_key)
   `).run();
 }
 
@@ -211,6 +226,75 @@ async function getReactionActorKey(sessionUser, request, visitorId = '') {
   const language = cleanString(request.headers.get('accept-language') || '').slice(0, 80);
   const fallback = await sha256Hex(`reaction:${ip}:${userAgent}:${language}`);
   return `guest:${fallback}`;
+}
+
+async function getNicknameActorKey(env, visitorId = '') {
+  const normalizedVisitorId = normalizeVisitorId(visitorId);
+  if (!normalizedVisitorId) return '';
+  const secret = String(env?.AUTH_SECRET || 'andric31-nickname-claim').trim();
+  return `guest:${await sha256Hex(`nickname:${secret}:${normalizedVisitorId}`)}`;
+}
+
+async function claimGuestNickname(db, env, nickname, visitorId) {
+  const nicknameKey = normalizePseudoKey(nickname);
+  if (!nicknameKey) return { ok: false, error: 'Pseudo invalide.', status: 400 };
+
+  const users = await db.prepare(`
+    SELECT username, display_name
+    FROM auth_users
+    WHERE is_active = 1
+  `).all();
+  for (const user of users?.results || []) {
+    if (normalizePseudoKey(user?.username) === nicknameKey || normalizePseudoKey(user?.display_name) === nicknameKey) {
+      return {
+        ok: false,
+        error: 'Ce pseudo appartient à un compte. Connecte-toi avec ce compte ou choisis un autre pseudo.',
+        status: 409,
+      };
+    }
+  }
+
+  const actorKey = await getNicknameActorKey(env, visitorId);
+  if (!actorKey) {
+    return { ok: false, error: 'Impossible de réserver ce pseudo. Actualise la page puis réessaie.', status: 400 };
+  }
+
+  const existing = await db.prepare(`
+    SELECT actor_key
+    FROM message_nickname_claims
+    WHERE nickname_key = ?1
+    LIMIT 1
+  `).bind(nicknameKey).first();
+
+  if (existing?.actor_key && existing.actor_key !== actorKey) {
+    return { ok: false, error: 'Ce pseudo est déjà utilisé. Choisis-en un autre.', status: 409 };
+  }
+
+  if (existing?.actor_key === actorKey) {
+    await db.prepare(`
+      UPDATE message_nickname_claims
+      SET nickname = ?1, last_used_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
+      WHERE nickname_key = ?2
+    `).bind(nickname, nicknameKey).run();
+    return { ok: true };
+  }
+
+  try {
+    await db.prepare(`
+      INSERT INTO message_nickname_claims (nickname_key, nickname, actor_key)
+      VALUES (?1, ?2, ?3)
+    `).bind(nicknameKey, nickname, actorKey).run();
+    return { ok: true };
+  } catch {
+    const raced = await db.prepare(`
+      SELECT actor_key
+      FROM message_nickname_claims
+      WHERE nickname_key = ?1
+      LIMIT 1
+    `).bind(nicknameKey).first();
+    if (raced?.actor_key === actorKey) return { ok: true };
+    return { ok: false, error: 'Ce pseudo vient d’être réservé par une autre personne.', status: 409 };
+  }
 }
 
 async function attachReactions(db, messages, actorKey) {
@@ -364,6 +448,10 @@ export async function onRequest(context) {
   }
 
   if (request.method === 'POST') {
+    if (!assertSameOrigin(request)) {
+      return json({ ok: false, error: 'Origine invalide.' }, 403);
+    }
+
     let body = null;
     try {
       body = await request.json();
@@ -407,6 +495,11 @@ export async function onRequest(context) {
     }
 
     const finalNickname = sessionUser ? cleanString(sessionUser.display_name || sessionUser.username) : nickname;
+
+    if (!sessionUser) {
+      const claim = await claimGuestNickname(env.DB, env, finalNickname, body?.visitor_id);
+      if (!claim.ok) return json({ ok: false, error: claim.error }, claim.status || 409);
+    }
 
     await env.DB.prepare(`
       INSERT INTO messages_global (nickname, message, created_at, ip_hash, user_agent, room_type, room_key, owner_user_id, links_allowed)

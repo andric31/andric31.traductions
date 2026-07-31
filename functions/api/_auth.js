@@ -52,6 +52,38 @@ export function cleanDisplayName(value) {
     .slice(0, 50);
 }
 
+// Clé commune utilisée pour comparer les pseudos sans tenir compte
+// des majuscules, des espaces ou des variantes Unicode simples.
+export function normalizePseudoKey(value) {
+  return String(value ?? '')
+    .normalize('NFKC')
+    .trim()
+    .toLocaleLowerCase('fr-FR')
+    .replace(/\s+/g, '')
+    .slice(0, 80);
+}
+
+export async function findAuthPseudoConflict(db, values, excludeUserId = 0) {
+  const wanted = new Set(
+    (Array.isArray(values) ? values : [values])
+      .map(normalizePseudoKey)
+      .filter(Boolean)
+  );
+  if (!wanted.size) return null;
+
+  const excluded = Number(excludeUserId || 0);
+  const rows = excluded > 0
+    ? await db.prepare(`SELECT id, username, display_name FROM auth_users WHERE id <> ?1`).bind(excluded).all()
+    : await db.prepare(`SELECT id, username, display_name FROM auth_users`).all();
+
+  for (const row of rows?.results || []) {
+    const usernameKey = normalizePseudoKey(row?.username);
+    const displayKey = normalizePseudoKey(row?.display_name);
+    if (wanted.has(usernameKey) || wanted.has(displayKey)) return row;
+  }
+  return null;
+}
+
 export function cleanRole(value) {
   const role = String(value ?? '').trim().toLowerCase();
   return ['member', 'translator', 'moderator', 'admin'].includes(role) ? role : 'member';
@@ -180,6 +212,9 @@ export async function ensureAuthTables(db) {
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_auth_sessions_user ON auth_sessions(user_id)`).run();
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_auth_sessions_exp ON auth_sessions(expires_at)`).run();
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_auth_users_name ON auth_users(username)`).run();
+  // Renforce aussi la contrainte historique UNIQUE, qui est sensible à la casse.
+  // Le try/catch évite de bloquer le site si une ancienne base contient déjà un doublon.
+  try { await db.prepare(`CREATE UNIQUE INDEX IF NOT EXISTS idx_auth_users_username_ci ON auth_users(lower(username))`).run(); } catch {}
   await db.prepare(`DELETE FROM auth_sessions WHERE expires_at <= strftime('%Y-%m-%dT%H:%M:%fZ','now')`).run();
 }
 

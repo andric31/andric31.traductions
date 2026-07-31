@@ -9,8 +9,8 @@
   const REPLY_PREFIX = '[[reply:';
   const MESSAGE_MAX_LENGTH = 500;
   const REACTION_VISITOR_KEY = 'andric31_messages_reaction_visitor';
-  const EMOJIS = ['😀','😁','😂','🤣','😊','😍','🥰','😘','😎','🤔','😅','😢','😭','😡','👋','👍','👎','👏','🙏','🔥','✅','❌','🎉','💬','❤️'];
-  const QUICK_REACTIONS = ['👋','👍','❤️','😂','🔥','👏','🎉','😮','🤔','😢','😡'];
+  const EMOJIS = ['😀','😁','🤣','😂','😊','😍','🥰','😘','😎','🤔','😅','😢','😭','😡','👋','👍','👎','👏','🙏','🔥','✅','❌','🎉','💬','❤️'];
+  const QUICK_REACTIONS = ['👋','👍','❤️','🤣','🔥','👏','🎉','😮','🤔','😢','😡'];
   const VALID_ROOMS = new Set(['global', 'private:members', 'private:translators', 'private:moderators', 'private:admins']);
 
   const els = {

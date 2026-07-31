@@ -10,7 +10,8 @@
   const MESSAGE_MAX_LENGTH = 500;
   const REACTION_VISITOR_KEY = 'andric31_messages_reaction_visitor';
   const EMOJIS = ['😀','😁','😂','🤣','😊','😍','🥰','😘','😎','🤔','😅','😢','😭','😡','👋','👍','👎','👏','🙏','🔥','✅','❌','🎉','💬','❤️'];
-  const QUICK_REACTIONS = ['👋','👍','❤️','🤣','🔥','👏','🎉','😮','🤔','😢','😡'];
+  const QUICK_REACTIONS = ['👋','👍','❤️','😂','🔥','👏','🎉','😮','🤔','😢','😡'];
+  const LOCAL_EMOJI_ASSETS = new Map([['🥰', 'emoji/1f970.svg']]);
   const VALID_ROOMS = new Set(['global', 'private:members', 'private:translators', 'private:moderators', 'private:admins']);
 
   const els = {
@@ -56,6 +57,13 @@
       .replaceAll('>', '&gt;')
       .replaceAll('"', '&quot;')
       .replaceAll("'", '&#039;');
+  }
+
+  function emojiGraphicHtml(value) {
+    const emoji = String(value || '');
+    const asset = LOCAL_EMOJI_ASSETS.get(emoji);
+    if (!asset) return escapeHtml(emoji);
+    return `<img class="msg-emoji-image" src="${asset}" alt="${escapeHtml(emoji)}" draggable="false" loading="eager">`;
   }
 
 
@@ -390,16 +398,6 @@
     els.emojiToggle.setAttribute('aria-expanded', String(shouldOpen));
   }
 
-  function renderEmojiGraphics(root) {
-    if (!root || !window.twemoji?.parse) return;
-    try {
-      window.twemoji.parse(root, { folder: 'svg', ext: '.svg', className: 'emoji' });
-    } catch {
-      // Si le CDN est indisponible, le navigateur conserve l'emoji natif.
-    }
-  }
-
-
   function getReactionVisitorId() {
     let value = localStorage.getItem(REACTION_VISITOR_KEY) || '';
     if (/^[a-zA-Z0-9_-]{16,80}$/.test(value)) return value;
@@ -465,8 +463,7 @@
   }
 
   function renderEmojiPicker() {
-    els.emojiPicker.innerHTML = EMOJIS.map((emoji) => `<button class="msg-emoji-item" type="button" data-emoji="${emoji}" aria-label="Ajouter ${emoji}">${emoji}</button>`).join('');
-    renderEmojiGraphics(els.emojiPicker);
+    els.emojiPicker.innerHTML = EMOJIS.map((emoji) => `<button class="msg-emoji-item" type="button" data-emoji="${emoji}" aria-label="Ajouter ${emoji}">${emojiGraphicHtml(emoji)}</button>`).join('');
     els.emojiPicker.querySelectorAll('[data-emoji]').forEach((btn) => {
       btn.addEventListener('click', () => insertAtCursor(els.message, `${btn.getAttribute('data-emoji')} `));
     });
@@ -504,7 +501,7 @@
       const isOpen = String(item.id) === String(openMessageId);
       const reactions = getMessageReactions(item);
       const reactionHtml = Object.entries(reactions).map(([emoji, count]) => `
-        <button class="msg-reaction-chip${hasUserReaction(item.id, emoji) ? ' is-active' : ''}" type="button" data-react-chip="${escapeHtml(String(item.id))}" data-emoji="${escapeHtml(emoji)}" aria-label="${escapeHtml(String(count))} réaction(s) ${escapeHtml(emoji)}">${escapeHtml(emoji)} <span>${Number(count) || 0}</span></button>
+        <button class="msg-reaction-chip${hasUserReaction(item.id, emoji) ? ' is-active' : ''}" type="button" data-react-chip="${escapeHtml(String(item.id))}" data-emoji="${escapeHtml(emoji)}" aria-label="${escapeHtml(String(count))} réaction(s) ${escapeHtml(emoji)}">${emojiGraphicHtml(emoji)} <span>${Number(count) || 0}</span></button>
       `).join('');
       article.className = `msg-item${isSelfMessage(item) ? ' is-self' : ''}${isOpen ? ' is-open' : ''}`;
       article.innerHTML = `
@@ -525,7 +522,7 @@
                 </div>
                 <div class="msg-tools-right">
                   <div class="msg-react-toolbar">
-                    ${QUICK_REACTIONS.map((emoji) => `<button class="msg-react-btn${hasUserReaction(item.id, emoji) ? ' is-active' : ''}" type="button" data-react-id="${escapeHtml(String(item.id))}" data-emoji="${emoji}" aria-label="Réagir avec ${emoji}">${emoji}</button>`).join('')}
+                    ${QUICK_REACTIONS.map((emoji) => `<button class="msg-react-btn${hasUserReaction(item.id, emoji) ? ' is-active' : ''}" type="button" data-react-id="${escapeHtml(String(item.id))}" data-emoji="${emoji}" aria-label="Réagir avec ${emoji}">${emojiGraphicHtml(emoji)}</button>`).join('')}
                   </div>
                 </div>
               </div>
@@ -534,8 +531,6 @@
         </div>
       `;
 
-      renderEmojiGraphics(article.querySelector('.msg-react-toolbar'));
-      renderEmojiGraphics(article.querySelector('.msg-reactions'));
 
       const bubble = article.querySelector('[data-open-msg]');
       bubble.addEventListener('click', (evt) => {

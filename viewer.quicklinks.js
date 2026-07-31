@@ -22,6 +22,7 @@
   };
 
   const MESSAGES_API_URL = "/api/messages?limit=1&scope=allowed";
+  const MESSAGE_READ_STATE_API_URL = "/api/message-read-state";
   const MESSAGES_BASE_URL = "/messages/";
   const BLOG_INDEX_URL = "/blog/";
   const TICKETS_ADMIN_URL = "/compte/ticket-admin.html";
@@ -332,7 +333,8 @@
     });
 
     messages.addEventListener("click", () => {
-      localStorage.setItem(STORAGE.seenMessageId, String(messages.dataset.latestMessageId || "0"));
+      const latestId = Number(messages.dataset.latestMessageId || 0);
+      void markMessageSeen(latestId);
       setDotVisible(messages, false);
     });
 
@@ -623,6 +625,46 @@
     }, 10000);
   }
 
+  async function getSeenMessageId() {
+    const localSeenId = Number(localStorage.getItem(STORAGE.seenMessageId) || 0);
+    const me = await getCurrentUser();
+    if (!me?.id) return localSeenId;
+
+    try {
+      const res = await fetch(MESSAGE_READ_STATE_API_URL, {
+        cache: "no-store",
+        credentials: "same-origin",
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok || !data?.logged_in) return localSeenId;
+      return Number(data.seen_message_id || 0);
+    } catch {
+      return localSeenId;
+    }
+  }
+
+  async function markMessageSeen(messageId) {
+    const id = Number(messageId || 0);
+    if (!Number.isSafeInteger(id) || id <= 0) return;
+
+    localStorage.setItem(STORAGE.seenMessageId, String(id));
+
+    const me = await getCurrentUser();
+    if (!me?.id) return;
+
+    try {
+      await fetch(MESSAGE_READ_STATE_API_URL, {
+        method: "POST",
+        credentials: "same-origin",
+        keepalive: true,
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ message_id: id }),
+      });
+    } catch {
+      // Le stockage local reste disponible si le réseau est momentanément indisponible.
+    }
+  }
+
   async function initMessageIndicator(messagesEl) {
     try {
       if (window.SiteAuth?.fetchMe && !window.SiteAuth.loaded) {
@@ -638,7 +680,7 @@
       messagesEl.dataset.latestMessageRoom = latestRoom;
       messagesEl.href = buildMessagesUrl(latestRoom);
       messagesEl.title = latestRoom ? `Messages · ${latestRoom === "global" ? "salon public" : "salon concerné"}` : "Messages";
-      const seenMessageId = Number(localStorage.getItem(STORAGE.seenMessageId) || 0);
+      const seenMessageId = await getSeenMessageId();
       setDotVisible(messagesEl, latestId > seenMessageId);
     } catch {
       // silence: pas bloquant pour l'UI

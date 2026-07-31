@@ -93,6 +93,43 @@ function proxyUrl(key, type, index = null) {
   return `/api/link?${qs.toString()}`;
 }
 
+function getMainTranslations(item, key) {
+  if (!item || typeof item !== 'object' || Array.isArray(item)) return [];
+
+  const rows = [];
+
+  for (const [field, rawValue] of Object.entries(item)) {
+    const match = String(field).match(/^translation(\d*)$/);
+    if (!match) continue;
+
+    const index = match[1] ? Number(match[1]) : 1;
+    if (!Number.isFinite(index) || index < 1) continue;
+
+    const rawLink = String(rawValue || '').trim();
+    if (!rawLink) continue;
+
+    const titleKey = index === 1 ? 'translationTitle' : `translation${index}Title`;
+    const nameKey = index === 1 ? 'translationName' : `translation${index}Name`;
+    const legacyTitleKey = `translationTitle${index}`;
+    const rawTitle = String(item[titleKey] || item[nameKey] || item[legacyTitleKey] || '').trim();
+
+    rows.push({
+      index,
+      title: rawTitle,
+      host: hostLabel(rawLink, 'Lien'),
+      link: proxyUrl(key, index === 1 ? 'translation' : `translation${index}`),
+    });
+  }
+
+  rows.sort((a, b) => a.index - b.index);
+
+  const multiple = rows.length > 1;
+  return rows.map((row, position) => ({
+    ...row,
+    title: row.title || (multiple ? `Traduction ${position + 1}` : ''),
+  }));
+}
+
 
 async function isLoggedIn(context) {
   try {
@@ -191,6 +228,8 @@ export async function onRequest(context) {
 
     const loggedIn = await isLoggedIn(context);
     const f95Info = loggedIn ? cleanF95Info(item.f95Info) : null;
+    const mainTranslations = getMainTranslations(item, key);
+    const firstMainTranslation = mainTranslations[0] || null;
 
     const extrasRaw = Array.isArray(item.translationsExtra) ? item.translationsExtra : [];
     const translationsExtra = extrasRaw.map((x, index) => {
@@ -219,11 +258,13 @@ export async function onRequest(context) {
       f95Info,
       f95InfoRequiresLogin: !loggedIn && hasValue(item.f95Info),
       discordlink: hasValue(item.discordlink) ? proxyUrl(key, 'discordlink') : '',
-      translation: hasValue(item.translation) ? proxyUrl(key, 'translation') : '',
+      translation: firstMainTranslation ? firstMainTranslation.link : '',
+      translationTitle: firstMainTranslation ? firstMainTranslation.title : '',
+      mainTranslations,
       translationsArchive: hasValue(item.translationsArchive) ? proxyUrl(key, 'translationsArchive') : '',
       translationsExtra,
       hasDiscord: hasValue(item.discordlink),
-      hasTranslation: hasValue(item.translation),
+      hasTranslation: mainTranslations.length > 0,
       hasTranslationsArchive: hasValue(item.translationsArchive),
       hasTranslationsExtra: translationsExtra.length > 0,
       hasDescription: hasValue(item.description),

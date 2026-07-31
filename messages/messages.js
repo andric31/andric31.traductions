@@ -1,5 +1,7 @@
 (() => {
   const API_URL = '/api/messages';
+  const READ_STATE_API_URL = '/api/message-read-state';
+  const SEEN_MESSAGE_KEY = 'andric31_seen_message_id';
   const DEFAULT_REFRESH_MS = 7000;
   const NICK_KEY = 'andric31_messages_nickname';
   const ROOM_KEY = 'andric31_messages_room';
@@ -45,6 +47,7 @@
   let openMessageId = null;
   let keepPinnedToBottom = true;
   let lastMessagesSignature = '';
+  let lastSyncedSeenMessageId = 0;
 
   function escapeHtml(value) {
     return String(value ?? '')
@@ -547,6 +550,35 @@
     requestAnimationFrame(() => keepLastMessageVisible({ force: hasNewTail || !previousLastId || shouldStickToBottom, smooth: false }));
   }
 
+  async function markLatestVisibleMessageSeen() {
+    if (document.visibilityState !== 'visible' || !messages.length) return;
+
+    const latestId = Number(messages[messages.length - 1]?.id || 0);
+    if (!Number.isSafeInteger(latestId) || latestId <= 0) return;
+
+    const localSeenId = Number(localStorage.getItem(SEEN_MESSAGE_KEY) || 0);
+    if (latestId > localSeenId) localStorage.setItem(SEEN_MESSAGE_KEY, String(latestId));
+
+    const me = getAuthUser();
+    if (!me?.id || latestId <= lastSyncedSeenMessageId) return;
+
+    try {
+      const res = await fetch(READ_STATE_API_URL, {
+        method: 'POST',
+        credentials: 'same-origin',
+        keepalive: true,
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ message_id: latestId }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.ok) {
+        lastSyncedSeenMessageId = Math.max(latestId, Number(data.seen_message_id || 0));
+      }
+    } catch {
+      // Une prochaine actualisation réessaiera automatiquement.
+    }
+  }
+
   async function fetchMessages({ silent = false } = {}) {
     if (!silent) setStatus('Chargement…');
     const room = getSelectedRoom();
@@ -573,6 +605,7 @@
         ? 'Salon visible par tous, pratique pour discuter rapidement ou demander de l’aide.'
         : 'Salon réservé selon ton niveau d’accès.';
       syncRoomBanners(room);
+      await markLatestVisibleMessageSeen();
     } catch (err) {
       setStatus('Hors ligne', 'error');
       if (!silent) setInfo(err.message || 'Impossible de charger les messages.', 'error');
@@ -683,6 +716,9 @@
     window.visualViewport?.addEventListener('resize', () => {
       if (keepPinnedToBottom) keepLastMessageVisible({ force: true, smooth: false });
     }, { passive: true });
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') void markLatestVisibleMessageSeen();
+    });
     els.message.addEventListener('focus', () => {
       keepPinnedToBottom = true;
       keepLastMessageVisible({ force: true, smooth: true });

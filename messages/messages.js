@@ -66,6 +66,116 @@
     return `<img class="msg-emoji-image" src="${asset}" alt="${escapeHtml(emoji)}" draggable="false" loading="eager">`;
   }
 
+  function renderEmojiAwareText(value) {
+    let out = escapeHtml(String(value || ''));
+    for (const emoji of LOCAL_EMOJI_ASSETS.keys()) {
+      out = out.split(emoji).join(emojiGraphicHtml(emoji));
+    }
+    return out;
+  }
+
+  function getEditorText() {
+    if (!els.message) return '';
+    if (!els.message.isContentEditable) return String(els.message.value || '');
+
+    function readNode(node) {
+      let out = '';
+      for (const child of node.childNodes) {
+        if (child.nodeType === Node.TEXT_NODE) {
+          out += child.nodeValue || '';
+          continue;
+        }
+        if (child.nodeType !== Node.ELEMENT_NODE) continue;
+
+        const tag = child.tagName;
+        if (tag === 'IMG' && child.hasAttribute('data-emoji')) {
+          out += child.getAttribute('data-emoji') || child.getAttribute('alt') || '';
+        } else if (tag === 'BR') {
+          out += '\n';
+        } else {
+          out += readNode(child);
+          if (/^(DIV|P|LI)$/.test(tag) && child.nextSibling && !out.endsWith('\n')) out += '\n';
+        }
+      }
+      return out;
+    }
+
+    return readNode(els.message).replaceAll('\u00a0', ' ');
+  }
+
+  function clearEditor() {
+    if (!els.message) return;
+    if (els.message.isContentEditable) els.message.innerHTML = '';
+    else els.message.value = '';
+  }
+
+  function editorSelectionRange() {
+    const selection = window.getSelection?.();
+    if (!selection) return null;
+
+    if (selection.rangeCount > 0) {
+      const current = selection.getRangeAt(0);
+      if (els.message.contains(current.commonAncestorContainer)) return current;
+    }
+
+    const range = document.createRange();
+    range.selectNodeContents(els.message);
+    range.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    return range;
+  }
+
+  function insertEditorNode(node, trailingSpace = false) {
+    const range = editorSelectionRange();
+    const selection = window.getSelection?.();
+    if (!range || !selection) return;
+
+    range.deleteContents();
+    const fragment = document.createDocumentFragment();
+    fragment.appendChild(node);
+    const spacer = trailingSpace ? document.createTextNode(' ') : null;
+    if (spacer) fragment.appendChild(spacer);
+    range.insertNode(fragment);
+
+    range.setStartAfter(spacer || node);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    els.message.focus();
+    els.message.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  function insertEmojiAtCursor(emoji) {
+    const value = String(emoji || '');
+    if (!els.message.isContentEditable) {
+      insertAtCursor(els.message, `${value} `);
+      return;
+    }
+
+    const asset = LOCAL_EMOJI_ASSETS.get(value);
+    if (!asset) {
+      insertEditorNode(document.createTextNode(`${value} `));
+      return;
+    }
+
+    const image = document.createElement('img');
+    image.className = 'msg-emoji-image';
+    image.src = asset;
+    image.alt = value;
+    image.setAttribute('data-emoji', value);
+    image.setAttribute('draggable', 'false');
+    insertEditorNode(image, true);
+  }
+
+  function insertPlainTextAtCursor(text) {
+    if (!els.message.isContentEditable) {
+      insertAtCursor(els.message, String(text || ''));
+      return;
+    }
+    insertEditorNode(document.createTextNode(String(text || '')));
+  }
+
 
   const LINK_RE = /\b((?:https?:\/\/|www\.)[^\s<>()]+|[a-z0-9][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+\/[^^\s<>()]*)/ig;
 
@@ -105,7 +215,7 @@
 
   function renderMessageText(value, allowLinks = false) {
     const text = String(value || '');
-    if (!allowLinks) return escapeHtml(text);
+    if (!allowLinks) return renderEmojiAwareText(text);
 
     LINK_RE.lastIndex = 0;
     let out = '';
@@ -115,12 +225,12 @@
       const raw = match[0].replace(/[.,!?;:)]$/, '');
       const trailing = match[0].slice(raw.length);
       const start = match.index;
-      out += escapeHtml(text.slice(last, start));
+      out += renderEmojiAwareText(text.slice(last, start));
       const href = normalizeUrlForHref(raw);
       out += `<a class="msg-link" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(raw)}</a>${escapeHtml(trailing)}`;
       last = start + match[0].length;
     }
-    out += escapeHtml(text.slice(last));
+    out += renderEmojiAwareText(text.slice(last));
     return out;
   }
 
@@ -465,7 +575,7 @@
   function renderEmojiPicker() {
     els.emojiPicker.innerHTML = EMOJIS.map((emoji) => `<button class="msg-emoji-item" type="button" data-emoji="${emoji}" aria-label="Ajouter ${emoji}">${emojiGraphicHtml(emoji)}</button>`).join('');
     els.emojiPicker.querySelectorAll('[data-emoji]').forEach((btn) => {
-      btn.addEventListener('click', () => insertAtCursor(els.message, `${btn.getAttribute('data-emoji')} `));
+      btn.addEventListener('click', () => insertEmojiAtCursor(btn.getAttribute('data-emoji')));
     });
   }
 
@@ -513,7 +623,7 @@
                 <span class="msg-author">${escapeHtml(item.nickname)}</span>
                 <span class="msg-date">${escapeHtml(formatDate(item.created_at))}</span>
               </div>
-              ${parsed.reply ? `<div class="msg-quote"><span class="msg-quote-author">${escapeHtml(parsed.reply.author)}</span><span class="msg-quote-text">${escapeHtml(parsed.reply.excerpt)}</span></div>` : ''}
+              ${parsed.reply ? `<div class="msg-quote"><span class="msg-quote-author">${escapeHtml(parsed.reply.author)}</span><span class="msg-quote-text">${renderEmojiAwareText(parsed.reply.excerpt)}</span></div>` : ''}
               <div class="msg-text">${renderMessageText(parsed.body, Boolean(item.links_allowed) || getSelectedRoom() !== 'global')}</div>
               ${reactionHtml ? `<div class="msg-reactions">${reactionHtml}</div>` : ''}
               <div class="msg-actions">
@@ -646,7 +756,7 @@
     evt.preventDefault();
     fillNicknameFromAuth();
     const nickname = els.nickname.value.trim();
-    const message = els.message.value.trim();
+    const message = getEditorText().trim();
     const room = getSelectedRoom();
 
     if (!nickname) return setInfo('Le pseudo est obligatoire.', 'error'), els.nickname.focus();
@@ -672,7 +782,7 @@
 
       if (!getAuthUser()) localStorage.setItem(NICK_KEY, nickname);
       localStorage.setItem(ROOM_KEY, room);
-      els.message.value = '';
+      clearEditor();
       clearReply();
       toggleEmojiPicker(false);
       setInfo('Message envoyé.', 'success');
@@ -754,8 +864,16 @@
       keepLastMessageVisible({ force: true, smooth: true });
     });
     els.message.addEventListener('input', () => {
-      const left = MESSAGE_MAX_LENGTH - els.message.value.length;
-      setInfo(`${left} caractère${left > 1 ? 's' : ''} restant${left > 1 ? 's' : ''}.`);
+      const left = MESSAGE_MAX_LENGTH - getEditorText().length;
+      setInfo(`${left} caractère${Math.abs(left) > 1 ? 's' : ''} restant${Math.abs(left) > 1 ? 's' : ''}.`, left < 0 ? 'error' : '');
+    });
+    els.message.addEventListener('blur', () => {
+      if (!getEditorText().trim()) clearEditor();
+    });
+    els.message.addEventListener('paste', (evt) => {
+      if (!els.message.isContentEditable) return;
+      evt.preventDefault();
+      insertPlainTextAtCursor(evt.clipboardData?.getData('text/plain') || '');
     });
 
     if (window.SiteAuth?.onChange) {

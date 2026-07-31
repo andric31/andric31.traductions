@@ -7,7 +7,7 @@
   <link rel="icon" href="/favicon.png" />
   <script src="/theme-init.js"></script>
   <link rel="stylesheet" href="/themes.css" />
-  <link rel="stylesheet" href="messages.css?v=109-emoji-local" />
+  <link rel="stylesheet" href="messages.css?v=110-emoji-message" />
 </head>
 <body>
   <main class="msg-app">
@@ -106,7 +106,7 @@
 
           <div class="msg-compose-row">
             <label class="msg-field msg-field-grow">
-              <textarea id="messageInput" maxlength="500" rows="2" placeholder="Écris ton message ici…"></textarea>
+              <div id="messageInput" class="msg-message-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Écris ton message" data-placeholder="Écris ton message ici…" spellcheck="true"></div>
             </label>
             <div class="msg-compose-actions">
               <button id="emojiToggleBtn" class="msg-emoji-trigger" type="button" aria-expanded="false" aria-label="Ouvrir le sélecteur d’emojis">☺</button>
@@ -124,6 +124,6 @@
   </main>
 
   <script src="/auth/auth.client.js"></script>
-  <script src="messages.js?v=109-emoji-local"></script>
+  <script src="messages.js?v=110-emoji-message"></script>
 </body>
 </html>

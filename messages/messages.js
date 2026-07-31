@@ -10,7 +10,7 @@
   const MESSAGE_MAX_LENGTH = 500;
   const REACTION_VISITOR_KEY = 'andric31_messages_reaction_visitor';
   const EMOJIS = ['😀','😁','😂','🤣','😊','😍','🥰','😘','😎','🤔','😅','😢','😭','😡','👋','👍','👎','👏','🙏','🔥','✅','❌','🎉','💬','❤️'];
-  const QUICK_REACTIONS = ['👋','👍','❤️','😂','🔥','👏','🎉','😮','🤔','😢','😡'];
+  const QUICK_REACTIONS = ['👋','👍','❤️','🤣','🔥','👏','🎉','😮','🤔','😢','😡'];
   const LOCAL_EMOJI_ASSETS = new Map([['🥰', 'emoji/1f970.svg']]);
   const VALID_ROOMS = new Set(['global', 'private:members', 'private:translators', 'private:moderators', 'private:admins']);
 

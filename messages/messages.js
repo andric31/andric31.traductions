@@ -9,7 +9,7 @@
   const REPLY_PREFIX = '[[reply:';
   const MESSAGE_MAX_LENGTH = 500;
   const REACTION_VISITOR_KEY = 'andric31_messages_reaction_visitor';
-  const EMOJIS = ['😀','😁','🤣','😂','😊','😍','🥰','😘','😎','🤔','😅','😢','😭','😡','👋','👍','👎','👏','🙏','🔥','✅','❌','🎉','💬','❤️'];
+  const EMOJIS = ['😀','😁','😂','🤣','😊','😍','🥰','😘','😎','🤔','😅','😢','😭','😡','👋','👍','👎','👏','🙏','🔥','✅','❌','🎉','💬','❤️'];
   const QUICK_REACTIONS = ['👋','👍','❤️','🤣','🔥','👏','🎉','😮','🤔','😢','😡'];
   const VALID_ROOMS = new Set(['global', 'private:members', 'private:translators', 'private:moderators', 'private:admins']);
 
@@ -390,6 +390,15 @@
     els.emojiToggle.setAttribute('aria-expanded', String(shouldOpen));
   }
 
+  function renderEmojiGraphics(root) {
+    if (!root || !window.twemoji?.parse) return;
+    try {
+      window.twemoji.parse(root, { folder: 'svg', ext: '.svg', className: 'emoji' });
+    } catch {
+      // Si le CDN est indisponible, le navigateur conserve l'emoji natif.
+    }
+  }
+
 
   function getReactionVisitorId() {
     let value = localStorage.getItem(REACTION_VISITOR_KEY) || '';
@@ -457,6 +466,7 @@
 
   function renderEmojiPicker() {
     els.emojiPicker.innerHTML = EMOJIS.map((emoji) => `<button class="msg-emoji-item" type="button" data-emoji="${emoji}" aria-label="Ajouter ${emoji}">${emoji}</button>`).join('');
+    renderEmojiGraphics(els.emojiPicker);
     els.emojiPicker.querySelectorAll('[data-emoji]').forEach((btn) => {
       btn.addEventListener('click', () => insertAtCursor(els.message, `${btn.getAttribute('data-emoji')} `));
     });
@@ -523,6 +533,9 @@
           </div>
         </div>
       `;
+
+      renderEmojiGraphics(article.querySelector('.msg-react-toolbar'));
+      renderEmojiGraphics(article.querySelector('.msg-reactions'));
 
       const bubble = article.querySelector('[data-open-msg]');
       bubble.addEventListener('click', (evt) => {

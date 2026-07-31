@@ -507,6 +507,13 @@ button { border: 0; }
   line-height: 1;
 }
 .msg-delete-btn { color: var(--msg-danger); }
+.msg-react-btn,
+.msg-reaction-chip,
+.msg-emoji-item,
+.msg-emoji-trigger {
+  font-family: "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif;
+  font-variant-emoji: emoji;
+}
 .msg-react-btn.is-active,
 .msg-reaction-chip.is-active {
   border-color: var(--msg-border-strong);
@@ -515,6 +522,7 @@ button { border: 0; }
 .msg-reactions { margin-top: 6px; }
 .msg-reaction-chip {
   display: inline-flex;
+  font-family: "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif;
   align-items: center;
   gap: 5px;
   min-height: 24px;

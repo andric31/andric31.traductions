@@ -8,9 +8,9 @@
   const REFRESH_KEY = 'andric31_messages_refresh_ms';
   const REPLY_PREFIX = '[[reply:';
   const MESSAGE_MAX_LENGTH = 500;
-  const REACT_KEY = 'andric31_messages_reactions';
-  const EMOJIS = ['😀','😁','😂','🤣','😊','😍','🥰','😘','😎','🤔','😅','😢','😭','😡','👍','👎','👏','🙏','🔥','✅','❌','🎉','💬','❤️'];
-  const QUICK_REACTIONS = ['👍','❤️','😂','🔥','👏','🎉','😮','🤔','😢','😡'];
+  const REACTION_VISITOR_KEY = 'andric31_messages_reaction_visitor';
+  const EMOJIS = ['😀','😁','😂','🤣','😊','😍','🥰','😘','😎','🤔','😅','😢','😭','😡','👋','👍','👎','👏','🙏','🔥','✅','❌','🎉','💬','❤️'];
+  const QUICK_REACTIONS = ['👋','👍','❤️','😂','🔥','👏','🎉','😮','🤔','😢','😡'];
   const VALID_ROOMS = new Set(['global', 'private:members', 'private:translators', 'private:moderators', 'private:admins']);
 
   const els = {
@@ -391,21 +391,28 @@
   }
 
 
-  function getReactionStore() {
+  function getReactionVisitorId() {
+    let value = localStorage.getItem(REACTION_VISITOR_KEY) || '';
+    if (/^[a-zA-Z0-9_-]{16,80}$/.test(value)) return value;
+
     try {
-      return JSON.parse(localStorage.getItem(REACT_KEY) || '{}') || {};
+      value = crypto.randomUUID().replaceAll('-', '');
     } catch {
-      return {};
+      value = `${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}_${Math.random().toString(36).slice(2)}`;
     }
+    localStorage.setItem(REACTION_VISITOR_KEY, value);
+    return value;
   }
 
-  function saveReactionStore(store) {
-    localStorage.setItem(REACT_KEY, JSON.stringify(store));
+  function getMessageById(messageId) {
+    return messages.find((item) => String(item?.id) === String(messageId)) || null;
   }
 
-  function getMessageReactions(messageId) {
-    const store = getReactionStore();
-    return store[String(messageId)] || {};
+  function getMessageReactions(messageOrId) {
+    const item = typeof messageOrId === 'object' && messageOrId
+      ? messageOrId
+      : getMessageById(messageOrId);
+    return item?.reactions && typeof item.reactions === 'object' ? item.reactions : {};
   }
 
   function currentReactionUser() {
@@ -414,26 +421,38 @@
   }
 
   function hasUserReaction(messageId, emoji) {
-    const bucket = getMessageReactions(messageId)[emoji];
-    const user = currentReactionUser();
-    return Array.isArray(bucket) && bucket.includes(user);
+    const item = getMessageById(messageId);
+    return Array.isArray(item?.my_reactions) && item.my_reactions.includes(emoji);
   }
 
-  function toggleReaction(messageId, emoji) {
-    const store = getReactionStore();
-    const key = String(messageId);
-    const user = currentReactionUser();
-    store[key] ||= {};
-    store[key][emoji] ||= [];
-    if (store[key][emoji].includes(user)) {
-      store[key][emoji] = store[key][emoji].filter((name) => name !== user);
-      if (!store[key][emoji].length) delete store[key][emoji];
-    } else {
-      store[key][emoji].push(user);
+  async function toggleReaction(messageId, emoji) {
+    const item = getMessageById(messageId);
+    if (!item) return;
+
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          action: 'toggle_reaction',
+          message_id: Number(messageId),
+          emoji,
+          room: getSelectedRoom(),
+          nickname: currentReactionUser(),
+          visitor_id: getReactionVisitorId(),
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) throw new Error(data?.error || 'Réaction impossible');
+
+      item.reactions = data.reactions || {};
+      item.my_reactions = Array.isArray(data.my_reactions) ? data.my_reactions : [];
+      lastMessagesSignature = buildMessagesSignature(messages);
+      render();
+    } catch (err) {
+      setInfo(err.message || 'Impossible d’ajouter cette réaction.', 'error');
     }
-    if (!Object.keys(store[key]).length) delete store[key];
-    saveReactionStore(store);
-    render();
   }
 
   function renderEmojiPicker() {
@@ -451,6 +470,8 @@
         item?.created_at ?? '',
         item?.nickname ?? '',
         item?.message ?? '',
+        JSON.stringify(item?.reactions || {}),
+        JSON.stringify(item?.my_reactions || []),
       ].join('¦')).join('||');
     } catch {
       return String(Date.now());
@@ -471,9 +492,9 @@
       const parsed = parseMessage(item.message);
       const article = document.createElement('article');
       const isOpen = String(item.id) === String(openMessageId);
-      const reactions = getMessageReactions(item.id);
-      const reactionHtml = Object.entries(reactions).map(([emoji, users]) => `
-        <button class="msg-reaction-chip${hasUserReaction(item.id, emoji) ? ' is-active' : ''}" type="button" data-react-chip="${escapeHtml(String(item.id))}" data-emoji="${escapeHtml(emoji)}">${emoji} <span>${Array.isArray(users) ? users.length : 0}</span></button>
+      const reactions = getMessageReactions(item);
+      const reactionHtml = Object.entries(reactions).map(([emoji, count]) => `
+        <button class="msg-reaction-chip${hasUserReaction(item.id, emoji) ? ' is-active' : ''}" type="button" data-react-chip="${escapeHtml(String(item.id))}" data-emoji="${escapeHtml(emoji)}" aria-label="${escapeHtml(String(count))} réaction(s) ${escapeHtml(emoji)}">${escapeHtml(emoji)} <span>${Number(count) || 0}</span></button>
       `).join('');
       article.className = `msg-item${isSelfMessage(item) ? ' is-self' : ''}${isOpen ? ' is-open' : ''}`;
       article.innerHTML = `
@@ -584,7 +605,8 @@
     const room = getSelectedRoom();
     renderSidebarRooms();
     try {
-      const res = await fetch(`${API_URL}?limit=80&room=${encodeURIComponent(room)}`, { cache: 'no-store', credentials: 'same-origin' });
+      const visitorId = getReactionVisitorId();
+      const res = await fetch(`${API_URL}?limit=80&room=${encodeURIComponent(room)}&visitor_id=${encodeURIComponent(visitorId)}`, { cache: 'no-store', credentials: 'same-origin' });
       const data = await res.json();
       if (!res.ok || !data?.ok) throw new Error(data?.error || 'Erreur de chargement');
       const nextMessages = Array.isArray(data.messages) ? data.messages : [];

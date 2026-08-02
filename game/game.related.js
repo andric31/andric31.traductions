@@ -249,6 +249,76 @@
     return '';
   }
 
+  function getUniqueGameKey(g){
+    const canonical = getCanonicalKey(g);
+    if (canonical) return canonical;
+
+    const d = getDisplayData(g);
+    const url = String(d?.url || g?.url || '').trim();
+    if (url) return `url:${url.toLowerCase()}`;
+
+    const title = String(d?.cleanTitle || d?.title || g?.cleanTitle || g?.title || '').trim();
+    return title ? `title:${slug(title)}` : '';
+  }
+
+  function dedupeGames(games){
+    const out = [];
+    const seen = new Set();
+    for (const g of games || []) {
+      if (!g) continue;
+      const key = getUniqueGameKey(g);
+      if (key && seen.has(key)) continue;
+      if (key) seen.add(key);
+      out.push(g);
+    }
+    return out;
+  }
+
+  function normalizeDeveloperRef(raw){
+    if (raw && typeof raw === 'object') {
+      const id = String(raw.id ?? '').trim();
+      if (id) return `id:${id}`;
+      const uid = String(raw.uid ?? '').trim();
+      if (uid) return `uid:${uid}`;
+      return '';
+    }
+
+    const value = String(raw ?? '').trim();
+    if (!value) return '';
+
+    const typed = value.match(/^(id|uid)\s*:\s*(.+)$/i);
+    if (typed) return `${typed[1].toLowerCase()}:${String(typed[2] || '').trim()}`;
+
+    // Sans préfixe, developerRefs contient un ID de jeu.
+    return `id:${value}`;
+  }
+
+  function getDeveloperRefs(g){
+    const d = getDisplayData(g);
+    const raw = [];
+    if (Array.isArray(g?.developerRefs)) raw.push(...g.developerRefs);
+    if (d !== g && Array.isArray(d?.developerRefs)) raw.push(...d.developerRefs);
+    return [...new Set(raw.map(normalizeDeveloperRef).filter(Boolean))];
+  }
+
+  function getDeveloperSelfRefs(g){
+    const refs = [];
+    const id = String(g?.id ?? '').trim();
+    const uid = String(g?.uid ?? '').trim();
+    if (id) refs.push(`id:${id}`);
+    if (uid) refs.push(`uid:${uid}`);
+    return refs;
+  }
+
+  function hasDeveloperReferenceBetween(a, b){
+    const aRefs = new Set(getDeveloperRefs(a));
+    const bRefs = new Set(getDeveloperRefs(b));
+    const aSelf = getDeveloperSelfRefs(a);
+    const bSelf = getDeveloperSelfRefs(b);
+
+    return bSelf.some((ref) => aRefs.has(ref)) || aSelf.some((ref) => bRefs.has(ref));
+  }
+
   function isSameUniverse(a,b){
     const aId = String(a?.id || "").trim();
     const bId = String(b?.id || "").trim();
@@ -708,41 +778,46 @@ ${ratingStatHtml}
 
     const current = ctx.entry;
     const currentTags = getTags(current);
-    const currentKey = getCanonicalKey(current);
 
     let hasAnything = false;
 
     if (authorBlock && authorGrid) {
       const author = getAuthorFromEntry(current);
-      if (!author) {
+      const normAuthor = slug(author);
+      const currentUniqueKey = getUniqueGameKey(current);
+
+      const authorPicked = dedupeGames(ctx.list || [])
+        .filter((g) => {
+          if (!g) return false;
+          const candidateKey = getUniqueGameKey(g);
+          if (currentUniqueKey && candidateKey === currentUniqueKey) return false;
+
+          const sameAuthor = !!normAuthor && slug(getAuthorFromEntry(g)) === normAuthor;
+          const linkedByDeveloperRef = hasDeveloperReferenceBetween(current, g);
+          return sameAuthor || linkedByDeveloperRef;
+        })
+        .sort((a,b) => {
+          const ta = getLastTranslationTs(a), tb = getLastTranslationTs(b);
+          if (tb !== ta) return tb - ta;
+          return String(ctx.getDisplayTitle(a) || '').localeCompare(String(ctx.getDisplayTitle(b) || ''), 'fr');
+        })
+        .map(g => ({ g }));
+
+      if (!authorPicked.length) {
         authorBlock.style.display = 'none';
       } else {
-        const normAuthor = slug(author);
-        const authorPicked = (ctx.list || [])
-          .filter(g => g && getCanonicalKey(g) !== currentKey && slug(getAuthorFromEntry(g)) === normAuthor)
-          .sort((a,b) => {
-            const ta = getLastTranslationTs(a), tb = getLastTranslationTs(b);
-            if (tb !== ta) return tb - ta;
-            return String(ctx.getDisplayTitle(a) || '').localeCompare(String(ctx.getDisplayTitle(b) || ''), 'fr');
-          })
-          .map(g => ({ g }));
-
-        if (!authorPicked.length) {
-          authorBlock.style.display = 'none';
-        } else {
-          prepareGridForReveal(authorGrid);
-          await enrichPicked(authorPicked);
-          const ghostCount = getGhostFillCount(authorPicked.length, 5);
-          authorGrid.innerHTML = authorPicked.map(x => buildCard(x.g, ctx, x)).join('') + buildGhostCards(ghostCount);
-          [...authorGrid.querySelectorAll('.similarCard')].forEach((card, idx) => {
-            const item = authorPicked[idx];
-            if (item) bindCardHoverGallery(card, item.g, String(getDisplayData(item.g).imageUrl || item.g.imageUrl || '/favicon.png').trim() || '/favicon.png');
-          });
-          if (authorSub) authorSub.textContent = author;
-          authorBlock.style.display = '';
-          revealGrid(authorGrid);
-          hasAnything = true;
-        }
+        prepareGridForReveal(authorGrid);
+        await enrichPicked(authorPicked);
+        const ghostCount = getGhostFillCount(authorPicked.length, 5);
+        authorGrid.innerHTML = authorPicked.map(x => buildCard(x.g, ctx, x)).join('') + buildGhostCards(ghostCount);
+        [...authorGrid.querySelectorAll('.similarCard')].forEach((card, idx) => {
+          const item = authorPicked[idx];
+          if (item) bindCardHoverGallery(card, item.g, String(getDisplayData(item.g).imageUrl || item.g.imageUrl || '/favicon.png').trim() || '/favicon.png');
+        });
+        if (authorSub) authorSub.textContent = author;
+        authorBlock.style.display = '';
+        revealGrid(authorGrid);
+        hasAnything = true;
       }
     }
     if (block && grid) {

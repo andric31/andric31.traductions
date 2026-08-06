@@ -244,7 +244,9 @@
   {
     "id": "astaros3d",
     "name": "Astaros 3D",
-    "aliases": [],
+    "aliases": [
+      "Astaros3D"
+    ],
     "avatar": "",
     "banner": "",
     "shortPresentation": "",

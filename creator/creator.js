@@ -150,33 +150,143 @@
     }).join("");
   }
 
+  function buildDirectoryEntries(creators, games) {
+    const entries = new Map();
+
+    function ensure(profile) {
+      const id = window.CreatorFeature.creatorSlug(profile?.id || profile?.name || "");
+      if (!id) return null;
+      if (!entries.has(id)) {
+        entries.set(id, {
+          id,
+          name: String(profile?.name || fallbackName(id)).trim(),
+          aliases: Array.isArray(profile?.aliases) ? profile.aliases.filter(Boolean) : [],
+          avatar: String(profile?.avatar || "").trim(),
+          presentation: String(profile?.shortPresentation || profile?.presentation || "").trim(),
+          links: Array.isArray(profile?.links) ? profile.links : [],
+          games: [],
+        });
+      }
+      return entries.get(id);
+    }
+
+    creators.forEach(ensure);
+
+    games.forEach((game) => {
+      const refs = window.CreatorFeature.getCreatorRefs(game);
+      refs.forEach((ref) => {
+        const profile = window.CreatorFeature.findCreator(creators, ref);
+        const entry = ensure(profile || ref);
+        if (!entry) return;
+        entry.games.push(game);
+      });
+    });
+
+    return [...entries.values()].sort((a, b) => a.name.localeCompare(b.name, "fr", { sensitivity: "base" }));
+  }
+
+  function creatorCard(entry) {
+    const avatar = entry.avatar
+      ? `<img class="creatorDirectoryAvatar" src="${escapeHtml(entry.avatar)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+      : "";
+    const fallbackStyle = entry.avatar ? "display:none" : "";
+    const gameCount = entry.games.length;
+    const summary = entry.presentation || "Fiche du créateur et liste de ses jeux présents sur le site.";
+
+    return `
+      <a class="creatorDirectoryCard" href="${escapeHtml(window.CreatorFeature.buildCreatorUrl(entry))}" data-search="${escapeHtml([entry.name, ...entry.aliases].join(" ").toLowerCase())}">
+        <div class="creatorDirectoryIdentity">
+          ${avatar}
+          <span class="creatorDirectoryAvatar creatorDirectoryAvatarFallback" style="${fallbackStyle}" aria-hidden="true">${escapeHtml(entry.name.charAt(0).toUpperCase() || "?")}</span>
+          <div class="creatorDirectoryIdentityText">
+            <h2 class="creatorDirectoryName">${escapeHtml(entry.name)}</h2>
+            <div class="creatorDirectoryGames">${gameCount} jeu${gameCount > 1 ? "x" : ""}</div>
+          </div>
+        </div>
+        <p class="creatorDirectoryDescription">${escapeHtml(summary)}</p>
+        <div class="creatorDirectoryOpen">Voir la fiche →</div>
+      </a>`;
+  }
+
+  function renderDirectory(entries) {
+    const grid = $("creatorDirectoryGrid");
+    const input = $("creatorSearch");
+    const count = $("creatorDirectoryCount");
+    const empty = $("creatorDirectoryEmpty");
+
+    grid.innerHTML = entries.map(creatorCard).join("");
+
+    function update() {
+      const query = String(input.value || "").trim().toLocaleLowerCase("fr");
+      let visible = 0;
+      grid.querySelectorAll(".creatorDirectoryCard").forEach((card) => {
+        const match = !query || String(card.dataset.search || "").includes(query);
+        card.style.display = match ? "" : "none";
+        if (match) visible += 1;
+      });
+      count.textContent = `${visible} créateur${visible > 1 ? "s" : ""}`;
+      empty.style.display = visible ? "none" : "";
+    }
+
+    input.addEventListener("input", update);
+    update();
+  }
+
+  async function showDirectory(creators, allGames) {
+    document.title = "Créateurs";
+    $("creatorBack").href = "/";
+    $("creatorBack").textContent = "← Retour aux jeux";
+    $("creatorDirectory").style.display = "";
+    renderDirectory(buildDirectoryEntries(creators, allGames));
+  }
+
+  async function showProfile(creators, allGames, requestedId, requestedName) {
+    $("creatorBack").href = "/creator/";
+    $("creatorBack").textContent = "← Tous les créateurs";
+    $("creatorProfile").style.display = "";
+
+    const profile = window.CreatorFeature.findCreator(creators, { id: requestedId, name: requestedName }) || {
+      id: requestedId,
+      name: requestedName || fallbackName(requestedId),
+      aliases: [],
+      avatar: "",
+      banner: "",
+      presentation: "",
+      links: [],
+    };
+    renderProfile(profile, requestedName);
+
+    const games = allGames.filter((game) => {
+      const refs = window.CreatorFeature.getCreatorRefs(game);
+      return refs.some((ref) => {
+        const matched = window.CreatorFeature.findCreator(creators, ref);
+        return (matched?.id || ref.id) === profile.id;
+      });
+    });
+    games.sort((a, b) => getTitle(a).localeCompare(getTitle(b), "fr"));
+    renderGames(games);
+  }
+
   async function init() {
     try {
       const params = new URLSearchParams(location.search);
       const requestedId = window.CreatorFeature.creatorSlug(params.get("id") || "");
       const requestedName = String(params.get("name") || "").trim();
-      if (!requestedId) throw new Error("Aucun créateur indiqué dans l’adresse.");
 
-      const creators = await window.CreatorFeature.fetchCreators();
-      const profile = window.CreatorFeature.findCreator(creators, { id: requestedId, name: requestedName }) || {
-        id: requestedId,
-        name: requestedName || fallbackName(requestedId),
-        aliases: [],
-        avatar: "",
-        banner: "",
-        presentation: "",
-        links: [],
-      };
-      renderProfile(profile, requestedName);
-
-      const raw = await fetchFirstJson(getListUrls());
+      const [creators, raw] = await Promise.all([
+        window.CreatorFeature.fetchCreators(),
+        fetchFirstJson(getListUrls()),
+      ]);
       const allGames = extractGames(raw);
-      const games = allGames.filter((game) => window.CreatorFeature.getCreatorIds(game).includes(requestedId));
-      games.sort((a, b) => getTitle(a).localeCompare(getTitle(b), "fr"));
-      renderGames(games);
+
+      if (requestedId) {
+        await showProfile(creators, allGames, requestedId, requestedName);
+      } else {
+        await showDirectory(creators, allGames);
+      }
     } catch (error) {
       $("creatorError").textContent = String(error?.message || error || "Erreur inconnue");
-      $("creatorPresentation").textContent = "Impossible de charger cette fiche.";
+      if ($("creatorPresentation")) $("creatorPresentation").textContent = "Impossible de charger cette fiche.";
     }
   }
 

@@ -200,3 +200,179 @@ html[data-theme="clair"] .creatorPageLink,
 html[data-theme="light"] .creatorPageLink{
   background:rgba(0,0,0,.025);
 }
+
+/* Annuaire des créateurs */
+.creatorDirectoryHero{
+  padding:30px;
+  border:1px solid var(--border);
+  border-radius:20px;
+  background:
+    radial-gradient(circle at 90% 10%, rgba(255,122,0,.20), transparent 32%),
+    var(--card);
+  box-shadow:0 14px 45px rgba(0,0,0,.24);
+}
+
+.creatorDirectoryHero h1{
+  margin:5px 0 8px;
+  font-size:clamp(30px,5vw,48px);
+  line-height:1.05;
+}
+
+.creatorDirectoryHero p{
+  margin:0;
+  color:var(--muted);
+  line-height:1.55;
+}
+
+.creatorDirectoryTools{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  margin-top:24px;
+}
+
+.creatorSearchWrap{
+  width:min(480px,100%);
+  min-height:46px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:0 14px;
+  border:1px solid var(--border);
+  border-radius:13px;
+  background:rgba(255,255,255,.045);
+}
+
+.creatorSearchWrap span{
+  color:var(--muted);
+  font-size:22px;
+  line-height:1;
+}
+
+.creatorSearch{
+  width:100%;
+  min-width:0;
+  border:0;
+  outline:0;
+  color:var(--fg);
+  background:transparent;
+  font:inherit;
+}
+
+.creatorSearch::placeholder{ color:var(--muted); }
+.creatorDirectoryCount{ color:var(--muted); font-size:13px; white-space:nowrap; }
+.creatorDirectoryPanel{ margin-top:18px; }
+
+.creatorDirectoryGrid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:14px;
+}
+
+.creatorDirectoryCard{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  padding:16px;
+  border:1px solid var(--border);
+  border-radius:15px;
+  color:var(--fg);
+  background:rgba(255,255,255,.035);
+  text-decoration:none;
+  transition:transform .15s ease, filter .15s ease, border-color .15s ease;
+}
+
+.creatorDirectoryCard:hover{
+  transform:translateY(-2px);
+  filter:brightness(1.08);
+  border-color:rgba(255,122,0,.55);
+}
+
+.creatorDirectoryIdentity{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+}
+
+.creatorDirectoryAvatar{
+  width:58px;
+  height:58px;
+  flex:0 0 auto;
+  border-radius:15px;
+  object-fit:cover;
+  background:var(--card);
+}
+
+.creatorDirectoryAvatarFallback{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  font-size:25px;
+  font-weight:950;
+  background:linear-gradient(145deg,#ff8a18,#9c3600);
+}
+
+.creatorDirectoryIdentityText{
+  min-width:0;
+}
+
+.creatorDirectoryName{
+  margin:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  font-size:16px;
+  line-height:1.25;
+}
+
+.creatorDirectoryGames{
+  margin-top:5px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.creatorDirectoryDescription{
+  display:-webkit-box;
+  min-height:42px;
+  margin:14px 0 0;
+  overflow:hidden;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.55;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+}
+
+.creatorDirectoryOpen{
+  margin-top:auto;
+  padding-top:15px;
+  color:var(--accent,#ff7a00);
+  font-size:12px;
+  font-weight:900;
+}
+
+@media(max-width:1000px){
+  .creatorDirectoryGrid{ grid-template-columns:repeat(3,minmax(0,1fr)); }
+}
+
+@media(max-width:760px){
+  .creatorDirectoryGrid{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .creatorDirectoryTools{ align-items:stretch; flex-direction:column; }
+  .creatorDirectoryCount{ white-space:normal; }
+}
+
+@media(max-width:520px){
+  .creatorDirectoryHero{ padding:22px 18px; }
+  .creatorDirectoryGrid{ grid-template-columns:1fr; }
+}
+
+html[data-theme="white"] .creatorDirectoryCard,
+html[data-theme="clair"] .creatorDirectoryCard,
+html[data-theme="light"] .creatorDirectoryCard,
+html[data-theme="white"] .creatorSearchWrap,
+html[data-theme="clair"] .creatorSearchWrap,
+html[data-theme="light"] .creatorSearchWrap{
+  background:rgba(0,0,0,.025);
+}

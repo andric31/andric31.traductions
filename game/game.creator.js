@@ -17,6 +17,26 @@
       .replace(/^-+|-+$/g, "");
   }
 
+  function normalizeGameIds(raw) {
+    const values = Array.isArray(raw) ? raw : raw == null ? [] : [raw];
+    const out = [];
+    const seen = new Set();
+    for (const item of values.flatMap((value) => typeof value === "string" ? value.split(/[\n,;]+/g) : [value])) {
+      const source = item && typeof item === "object" ? item.id || item.threadId || item.url : item;
+      const match = normalizeText(source).match(/(?:threads\/)?(\d+)/i);
+      const id = match ? match[1] : "";
+      if (!id || seen.has(id)) continue;
+      seen.add(id);
+      out.push(id);
+    }
+    return out;
+  }
+
+  function getGameId(game) {
+    const display = getDisplayData(game);
+    return normalizeText(game?.id || display?.id);
+  }
+
   function getDisplayData(game) {
     return game && game.gameData ? game.gameData : game || {};
   }
@@ -33,7 +53,7 @@
     if (!last || /^v(?:ersion)?\b/i.test(last)) return [];
 
     // Le slash est conservé dans certains noms. On ne le découpe que lorsqu'il est entouré d'espaces.
-    return last.split(/\s+(?:\/|&|and)\s+/i).map(normalizeText).filter(Boolean);
+    return last.split(/\s*(?:\/|&|\band\b)\s*/i).map(normalizeText).filter(Boolean);
   }
 
   function normalizeCreatorRefs(raw) {
@@ -94,6 +114,7 @@
         id,
         name,
         aliases: Array.isArray(item.aliases) ? item.aliases.map(normalizeText).filter(Boolean) : [],
+        gameIds: normalizeGameIds(item.gameIds || item.gameRefs || []),
         links: normalizeLinks(item.links),
       };
     }).filter(Boolean);
@@ -171,6 +192,37 @@
     }) || null;
   }
 
+  function getCreatorsForGame(creators, game) {
+    const gameId = getGameId(game);
+    const out = [];
+    const seen = new Set();
+    const add = (profile) => {
+      const key = creatorSlug(profile?.id || profile?.name);
+      if (!key || seen.has(key)) return;
+      seen.add(key);
+      out.push(profile);
+    };
+
+    if (gameId) {
+      creators
+        .filter((creator) => normalizeGameIds(creator.gameIds || []).includes(gameId))
+        .forEach(add);
+    }
+
+    for (const ref of getCreatorRefs(game)) {
+      add(findCreator(creators, ref) || {
+        id: ref.id,
+        name: ref.name,
+        aliases: [],
+        gameIds: [],
+        avatar: "",
+        presentation: "",
+        links: [],
+      });
+    }
+    return out;
+  }
+
   function escapeHtml(value) {
     return String(value ?? "")
       .replace(/&/g, "&amp;")
@@ -201,23 +253,15 @@
     const host = document.getElementById("creatorCard");
     if (!host) return;
 
-    const refs = getCreatorRefs(game);
-    if (!refs.length) {
+    const creators = await fetchCreators();
+    const profiles = getCreatorsForGame(creators, game);
+    if (!profiles.length) {
       host.style.display = "none";
       host.innerHTML = "";
       return;
     }
 
-    const creators = await fetchCreators();
-    const cards = refs.map((ref) => {
-      const profile = findCreator(creators, ref) || {
-        id: ref.id,
-        name: ref.name,
-        aliases: [],
-        avatar: "",
-        presentation: "",
-        links: [],
-      };
+    const cards = profiles.map((profile) => {
       const avatar = normalizeText(profile.avatar);
       const presentation = normalizeText(profile.shortPresentation || profile.presentation);
       const intro = presentation || "Découvre les jeux et les informations de ce créateur.";
@@ -248,6 +292,8 @@
     getCreatorRefs,
     getCreatorIds,
     getCreatorNames,
+    getCreatorsForGame,
+    getGameId,
     fetchCreators,
     findCreator,
     buildCreatorUrl,

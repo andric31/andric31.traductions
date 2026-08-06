@@ -188,22 +188,11 @@
         "type": "steam",
         "label": "Steam",
         "url": "https://store.steampowered.com/search/?developer=Art%20of%20Lust"
-      },
-      {
-        "type": "patreon",
-        "label": "Patreon",
-        "url": "https://www.patreon.com/c/astaros3d/posts?vanity=astaros3d"
-      },
-      {
-        "type": "twitter",
-        "label": "Twitter",
-        "url": "https://twitter.com/Astaros3d"
       }
     ],
     "gameIds": [
       "149862",
       "50915",
-      "291304",
       "282826"
     ]
   },
@@ -872,7 +861,8 @@
       "646",
       "24600",
       "647",
-      "157396"
+      "157396",
+      "85897"
     ]
   },
   {
@@ -1346,7 +1336,9 @@
       }
     ],
     "gameIds": [
-      "6832"
+      "6832",
+      "28771",
+      "29593"
     ]
   },
   {
@@ -2545,7 +2537,8 @@
       }
     ],
     "gameIds": [
-      "287954"
+      "287954",
+      "263902"
     ]
   },
   {
@@ -2564,7 +2557,8 @@
       }
     ],
     "gameIds": [
-      "287954"
+      "287954",
+      "263902"
     ]
   },
   {

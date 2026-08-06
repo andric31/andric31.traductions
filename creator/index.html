@@ -1,1 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Créateur</title>
+  <script>
+  (function(){
+    try{
+      const t=(localStorage.getItem("viewerTheme")||"auto").trim()||"auto";
+      document.documentElement.removeAttribute("data-theme");
+      if(t!=="auto") document.documentElement.setAttribute("data-theme",t);
+    }catch{}
+  })();
+  </script>
+  <link rel="icon" href="/favicon.png">
+  <link rel="stylesheet" href="../viewer.css">
+  <link rel="stylesheet" href="../themes.css">
+  <link rel="stylesheet" href="./creator.css">
+</head>
+<body class="creatorPage">
+  <main class="creatorWrap">
+    <a class="creatorBack" href="/">← Retour aux jeux</a>
 
+    <section id="creatorHero" class="creatorHero" aria-live="polite">
+      <div id="creatorBanner" class="creatorBanner"></div>
+      <div class="creatorHeroBody">
+        <div id="creatorAvatar" class="creatorPageAvatar creatorPageAvatarFallback" aria-hidden="true">?</div>
+        <div class="creatorHeroText">
+          <div class="creatorEyebrow">CRÉATEUR</div>
+          <h1 id="creatorName">Chargement…</h1>
+          <div id="creatorAliases" class="creatorAliases" style="display:none"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="creatorColumns">
+      <article class="creatorPanel creatorPresentationPanel">
+        <h2>Présentation</h2>
+        <div id="creatorPresentation" class="creatorPresentation">Chargement…</div>
+      </article>
+
+      <aside class="creatorPanel creatorLinksPanel">
+        <h2>Liens</h2>
+        <div id="creatorLinks" class="creatorPageLinks"></div>
+        <div id="creatorNoLinks" class="creatorEmpty" style="display:none">Aucun lien renseigné pour le moment.</div>
+      </aside>
+    </section>
+
+    <section class="creatorPanel creatorGamesPanel">
+      <div class="creatorGamesHead">
+        <div>
+          <h2>Jeux du créateur</h2>
+          <div id="creatorGamesCount" class="creatorGamesCount"></div>
+        </div>
+      </div>
+      <div id="creatorGames" class="creatorGamesGrid"></div>
+      <div id="creatorNoGames" class="creatorEmpty" style="display:none">Aucun jeu associé à cette fiche.</div>
+    </section>
+
+    <div id="creatorError" class="creatorError"></div>
+  </main>
+
+  <script src="../game/game.creator.js"></script>
+  <script src="./creator.js"></script>
+</body>
+</html>

@@ -7,6 +7,201 @@
     "/data/f95list.json",
   ];
 
+  // La page Créateurs reste autonome. Ainsi, l'annuaire fonctionne même si
+  // /game/game.creator.js est absent, mis en cache ou chargé en retard.
+  if (!window.CreatorFeature) {
+    const CREATOR_DATA_URLS = ["/data/creators.json", "../data/creators.json"];
+    let creatorPromise = null;
+
+    const normalizeText = (value) => String(value ?? "").trim();
+
+    function creatorSlug(value) {
+      return normalizeText(value)
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+    }
+
+    function getDisplayData(game) {
+      return game && typeof game === "object" && game.gameData && typeof game.gameData === "object"
+        ? game.gameData
+        : game && typeof game === "object"
+          ? game
+          : {};
+    }
+
+    function extractCreatorNamesFromTitle(game) {
+      const display = getDisplayData(game);
+      const source = normalizeText(game?.cleanTitle || display.cleanTitle || display.title || game?.title);
+      if (!source) return [];
+
+      const matches = [...source.matchAll(/\[([^\]]+)\]/g)];
+      if (!matches.length) return [];
+
+      const last = normalizeText(matches[matches.length - 1]?.[1]);
+      if (!last || /^v(?:ersion)?\b/i.test(last)) return [];
+
+      return last
+        .split(/\s+(?:\/|&|and)\s+/i)
+        .map(normalizeText)
+        .filter(Boolean);
+    }
+
+    function normalizeCreatorRefs(raw) {
+      const refs = Array.isArray(raw) ? raw : raw == null ? [] : [raw];
+      return refs.map((item) => {
+        if (item && typeof item === "object") {
+          const id = creatorSlug(item.id || item.slug || item.name);
+          const name = normalizeText(item.name || item.label || item.id);
+          return id ? { id, name: name || id } : null;
+        }
+        const name = normalizeText(item);
+        const id = creatorSlug(name);
+        return id ? { id, name } : null;
+      }).filter(Boolean);
+    }
+
+    function getCreatorRefs(game) {
+      const display = getDisplayData(game);
+      const candidates = [
+        game?.creatorIds,
+        display.creatorIds,
+        game?.creators,
+        display.creators,
+        game?.creator,
+        display.creator,
+      ];
+
+      for (const candidate of candidates) {
+        const refs = normalizeCreatorRefs(candidate);
+        if (refs.length) return refs;
+      }
+
+      return extractCreatorNamesFromTitle(game)
+        .map((name) => ({ id: creatorSlug(name), name }))
+        .filter((ref) => ref.id);
+    }
+
+    function getLinkLabel(type) {
+      const key = creatorSlug(type);
+      const labels = {
+        website: "Site officiel",
+        site: "Site officiel",
+        itch: "Itch.io",
+        "itch-io": "Itch.io",
+        steam: "Steam",
+        patreon: "Patreon",
+        subscribestar: "SubscribeStar",
+        discord: "Discord",
+        f95zone: "F95Zone",
+        f95: "F95Zone",
+        twitter: "X / Twitter",
+        x: "X / Twitter",
+        bluesky: "Bluesky",
+        youtube: "YouTube",
+        github: "GitHub",
+      };
+      return labels[key] || normalizeText(type) || "Lien";
+    }
+
+    function normalizeLinks(raw) {
+      if (Array.isArray(raw)) {
+        return raw.map((item) => {
+          if (!item || typeof item !== "object") return null;
+          const url = normalizeText(item.url || item.href);
+          if (!/^https?:\/\//i.test(url)) return null;
+          return {
+            type: creatorSlug(item.type || item.label || "website") || "website",
+            label: normalizeText(item.label || getLinkLabel(item.type)),
+            url,
+          };
+        }).filter(Boolean);
+      }
+
+      if (raw && typeof raw === "object") {
+        return Object.entries(raw).map(([type, url]) => {
+          const cleanUrl = normalizeText(url);
+          if (!/^https?:\/\//i.test(cleanUrl)) return null;
+          return { type: creatorSlug(type), label: getLinkLabel(type), url: cleanUrl };
+        }).filter(Boolean);
+      }
+
+      return [];
+    }
+
+    function normalizeCreators(raw) {
+      const list = Array.isArray(raw)
+        ? raw
+        : Array.isArray(raw?.creators)
+          ? raw.creators
+          : [];
+
+      return list.map((item) => {
+        if (!item || typeof item !== "object") return null;
+        const name = normalizeText(item.name || item.title || item.id);
+        const id = creatorSlug(item.id || item.slug || name);
+        if (!id || !name) return null;
+        return {
+          ...item,
+          id,
+          name,
+          aliases: Array.isArray(item.aliases)
+            ? item.aliases.map(normalizeText).filter(Boolean)
+            : [],
+          links: normalizeLinks(item.links),
+        };
+      }).filter(Boolean);
+    }
+
+    async function fetchCreators() {
+      if (creatorPromise) return creatorPromise;
+      creatorPromise = (async () => {
+        for (const url of CREATOR_DATA_URLS) {
+          try {
+            const response = await fetch(url, { cache: "no-store" });
+            if (!response.ok) continue;
+            return normalizeCreators(await response.json());
+          } catch {}
+        }
+        return [];
+      })();
+      return creatorPromise;
+    }
+
+    function findCreator(creators, ref) {
+      const target = creatorSlug(ref?.id || ref?.name || ref);
+      if (!target || !Array.isArray(creators)) return null;
+      return creators.find((creator) => {
+        if (!creator || typeof creator !== "object") return false;
+        if (creatorSlug(creator.id) === target) return true;
+        if (creatorSlug(creator.name) === target) return true;
+        const aliases = Array.isArray(creator.aliases) ? creator.aliases : [];
+        return aliases.some((alias) => creatorSlug(alias) === target);
+      }) || null;
+    }
+
+    function buildCreatorUrl(creator) {
+      const id = creatorSlug(creator?.id || creator?.name || creator);
+      const name = normalizeText(creator?.name);
+      const params = new URLSearchParams();
+      if (id) params.set("id", id);
+      if (name) params.set("name", name);
+      return `/creator/?${params.toString()}`;
+    }
+
+    window.CreatorFeature = {
+      creatorSlug,
+      getCreatorRefs,
+      fetchCreators,
+      findCreator,
+      buildCreatorUrl,
+      normalizeLinks,
+      getLinkLabel,
+    };
+  }
+
   function getListUrls() {
     try {
       const src = String(new URLSearchParams(location.search).get("src") || "").trim();

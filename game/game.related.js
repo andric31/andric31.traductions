@@ -123,6 +123,24 @@
   }
 
 
+  function getCreatorKeys(g){
+    if (window.CreatorFeature?.getCreatorIds) {
+      const ids = window.CreatorFeature.getCreatorIds(g);
+      if (Array.isArray(ids) && ids.length) return ids;
+    }
+    const author = getAuthorFromEntry(g);
+    const key = slug(author);
+    return key ? [key] : [];
+  }
+
+  function getCreatorDisplayName(g){
+    if (window.CreatorFeature?.getCreatorNames) {
+      const names = window.CreatorFeature.getCreatorNames(g);
+      if (Array.isArray(names) && names.length) return names.join(' / ');
+    }
+    return getAuthorFromEntry(g);
+  }
+
   function cleanTitleParts(raw){
     let t = String(raw || '').trim();
     let categories = [];
@@ -782,8 +800,8 @@ ${ratingStatHtml}
     let hasAnything = false;
 
     if (authorBlock && authorGrid) {
-      const author = getAuthorFromEntry(current);
-      const normAuthor = slug(author);
+      const creatorName = getCreatorDisplayName(current);
+      const creatorKeys = new Set(getCreatorKeys(current));
       const currentUniqueKey = getUniqueGameKey(current);
 
       const authorPicked = dedupeGames(ctx.list || [])
@@ -792,9 +810,9 @@ ${ratingStatHtml}
           const candidateKey = getUniqueGameKey(g);
           if (currentUniqueKey && candidateKey === currentUniqueKey) return false;
 
-          const sameAuthor = !!normAuthor && slug(getAuthorFromEntry(g)) === normAuthor;
+          const sameCreator = getCreatorKeys(g).some((key) => creatorKeys.has(key));
           const linkedByDeveloperRef = hasDeveloperReferenceBetween(current, g);
-          return sameAuthor || linkedByDeveloperRef;
+          return sameCreator || linkedByDeveloperRef;
         })
         .sort((a,b) => {
           const ta = getLastTranslationTs(a), tb = getLastTranslationTs(b);
@@ -814,7 +832,7 @@ ${ratingStatHtml}
           const item = authorPicked[idx];
           if (item) bindCardHoverGallery(card, item.g, String(getDisplayData(item.g).imageUrl || item.g.imageUrl || '/favicon.png').trim() || '/favicon.png');
         });
-        if (authorSub) authorSub.textContent = author;
+        if (authorSub) authorSub.textContent = creatorName;
         authorBlock.style.display = '';
         revealGrid(authorGrid);
         hasAnything = true;

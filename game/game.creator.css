@@ -1,0 +1,159 @@
+.creatorCard{
+  overflow:hidden;
+}
+
+.creatorMiniProfile + .creatorMiniProfile{
+  border-top:1px solid var(--border);
+  margin-top:14px;
+  padding-top:14px;
+}
+
+.creatorIdentity{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  color:var(--fg);
+  text-decoration:none;
+  border-radius:12px;
+  padding:7px;
+  margin:-7px;
+  transition:background .15s ease, transform .15s ease;
+}
+
+.creatorIdentity:hover{
+  background:rgba(255,255,255,.055);
+  transform:translateY(-1px);
+}
+
+.creatorAvatar{
+  width:50px;
+  height:50px;
+  border-radius:14px;
+  object-fit:cover;
+  flex:0 0 auto;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.05);
+}
+
+.creatorAvatarFallback{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:23px;
+  font-weight:900;
+  color:#fff;
+  background:linear-gradient(145deg, rgba(255,122,0,.95), rgba(170,62,0,.95));
+}
+
+.creatorIdentityText{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+
+.creatorIdentityText strong{
+  font-size:16px;
+  line-height:1.15;
+  overflow-wrap:anywhere;
+}
+
+.creatorIdentityText span{
+  color:var(--muted);
+  font-size:12px;
+}
+
+.creatorMiniText{
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.45;
+  margin:14px 0 0;
+}
+
+.creatorLinks{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.creatorLinksCompact{
+  margin-top:12px;
+}
+
+.creatorLinkButton{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:34px;
+  padding:7px 10px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  color:var(--fg);
+  background:rgba(255,255,255,.05);
+  text-decoration:none;
+  font-size:12px;
+  font-weight:800;
+}
+
+.creatorLinkButton:hover{
+  filter:brightness(1.12);
+}
+
+html[data-theme="white"] .creatorIdentity:hover,
+html[data-theme="clair"] .creatorIdentity:hover,
+html[data-theme="light"] .creatorIdentity:hover{
+  background:rgba(0,0,0,.045);
+}
+
+
+/* La colonne de droite reste réservée à la traduction. */
+.creatorSectionCard{
+  margin-top:18px;
+}
+
+.creatorSectionCard > h3{
+  margin-bottom:14px;
+}
+
+.creatorSectionCard .creatorMiniProfile{
+  display:grid;
+  grid-template-columns:minmax(220px, 310px) minmax(0, 1fr);
+  column-gap:22px;
+  row-gap:10px;
+  align-items:center;
+}
+
+.creatorSectionCard .creatorIdentity{
+  grid-column:1;
+  grid-row:1 / span 2;
+}
+
+.creatorSectionCard .creatorMiniText{
+  grid-column:2;
+  grid-row:1;
+  margin:0;
+}
+
+.creatorSectionCard .creatorLinksCompact{
+  grid-column:2;
+  grid-row:2;
+  margin-top:0;
+}
+
+@media (max-width:760px){
+  .creatorSectionCard .creatorMiniProfile{
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+
+  .creatorSectionCard .creatorIdentity,
+  .creatorSectionCard .creatorMiniText,
+  .creatorSectionCard .creatorLinksCompact{
+    grid-column:1;
+    grid-row:auto;
+  }
+
+  .creatorSectionCard .creatorMiniText{
+    margin-top:2px;
+  }
+}

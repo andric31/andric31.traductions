@@ -2202,6 +2202,9 @@ function renderVideoBlock({ id, videoUrl }) {
     renderBadgesFromGame(display, entry, isCollectionChild);
     renderTranslationStatus(entry);
     initWatchlistForGame({ entry, display, title, counterKey, idParam, uidParam });
+    if (window.CreatorFeature?.renderGameCard) {
+      await window.CreatorFeature.renderGameCard(entry);
+    }
 
     const relatedOut = ensureRelatedContainer();
     if (relatedOut) {

@@ -24,6 +24,21 @@
         .replace(/^-+|-+$/g, "");
     }
 
+    function normalizeGameIds(raw) {
+      const values = Array.isArray(raw) ? raw : raw == null ? [] : [raw];
+      const out = [];
+      const seen = new Set();
+      for (const item of values.flatMap((value) => typeof value === "string" ? value.split(/[\n,;]+/g) : [value])) {
+        const source = item && typeof item === "object" ? item.id || item.threadId || item.url : item;
+        const match = normalizeText(source).match(/(?:threads\/)?(\d+)/i);
+        const id = match ? match[1] : "";
+        if (!id || seen.has(id)) continue;
+        seen.add(id);
+        out.push(id);
+      }
+      return out;
+    }
+
     function getDisplayData(game) {
       return game && typeof game === "object" && game.gameData && typeof game.gameData === "object"
         ? game.gameData
@@ -150,6 +165,7 @@
           aliases: Array.isArray(item.aliases)
             ? item.aliases.map(normalizeText).filter(Boolean)
             : [],
+          gameIds: normalizeGameIds(item.gameIds || item.gameRefs || []),
           links: normalizeLinks(item.links),
         };
       }).filter(Boolean);
@@ -182,6 +198,34 @@
       }) || null;
     }
 
+    function getGameId(game) {
+      const display = getDisplayData(game);
+      return normalizeText(game?.id || display?.id);
+    }
+
+    function getCreatorsForGame(creators, game) {
+      const gameId = getGameId(game);
+      const out = [];
+      const seen = new Set();
+      const add = (profile) => {
+        const key = creatorSlug(profile?.id || profile?.name);
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+        out.push(profile);
+      };
+
+      if (gameId) {
+        creators
+          .filter((creator) => normalizeGameIds(creator.gameIds || []).includes(gameId))
+          .forEach(add);
+      }
+
+      for (const ref of getCreatorRefs(game)) {
+        add(findCreator(creators, ref) || { id: ref.id, name: ref.name, aliases: [], gameIds: [], links: [] });
+      }
+      return out;
+    }
+
     function buildCreatorUrl(creator) {
       const id = creatorSlug(creator?.id || creator?.name || creator);
       const name = normalizeText(creator?.name);
@@ -194,6 +238,8 @@
     window.CreatorFeature = {
       creatorSlug,
       getCreatorRefs,
+      getCreatorsForGame,
+      getGameId,
       fetchCreators,
       findCreator,
       buildCreatorUrl,
@@ -359,6 +405,7 @@
           avatar: String(profile?.avatar || "").trim(),
           presentation: String(profile?.shortPresentation || profile?.presentation || "").trim(),
           links: Array.isArray(profile?.links) ? profile.links : [],
+          gameIds: Array.isArray(profile?.gameIds) ? profile.gameIds : [],
           games: [],
         });
       }
@@ -368,10 +415,9 @@
     creators.forEach(ensure);
 
     games.forEach((game) => {
-      const refs = window.CreatorFeature.getCreatorRefs(game);
-      refs.forEach((ref) => {
-        const profile = window.CreatorFeature.findCreator(creators, ref);
-        const entry = ensure(profile || ref);
+      const profiles = window.CreatorFeature.getCreatorsForGame(creators, game);
+      profiles.forEach((profile) => {
+        const entry = ensure(profile);
         if (!entry) return;
         entry.games.push(game);
       });
@@ -452,11 +498,8 @@
     renderProfile(profile, requestedName);
 
     const games = allGames.filter((game) => {
-      const refs = window.CreatorFeature.getCreatorRefs(game);
-      return refs.some((ref) => {
-        const matched = window.CreatorFeature.findCreator(creators, ref);
-        return (matched?.id || ref.id) === profile.id;
-      });
+      return window.CreatorFeature.getCreatorsForGame(creators, game)
+        .some((matched) => window.CreatorFeature.creatorSlug(matched?.id || matched?.name) === profile.id);
     });
     games.sort((a, b) => getTitle(a).localeCompare(getTitle(b), "fr"));
     renderGames(games);

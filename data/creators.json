@@ -190,6 +190,26 @@
     "links": []
   },
   {
+    "id": "crunchy-cake",
+    "name": "Crunchy Cake",
+    "aliases": [],
+    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/14886625/c0c1790b552f4673bb2ec372e63ab039/eyJoIjoxMDAsInciOjEwMH0%3D/1.png?token-hash=vyHrA-Q1xkNMUCZ8Sr-6bIFwRFoZwtHVE5Kl__7Hd5Q%3D&token-time=1787356800",
+    "banner": "",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "288953"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "http://patreon.com/c/CrunchyCake"
+      }
+    ]
+  },
+  {
     "id": "damned-studios",
     "name": "Damned Studios",
     "aliases": [],

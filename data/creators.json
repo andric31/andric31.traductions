@@ -359,6 +359,37 @@
     ]
   },
   {
+    "id": "society-of-lust",
+    "name": "Society Of Lust",
+    "aliases": [],
+    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/468397/e38dd0d7eb5d4878b342e82de9877b4d/eyJ3Ijo2MjB9/5.png?token-hash=-8eiojlAnQIZiA39oNADVQ5ZTfUUmSbMzt0wure1zSg%3D",
+    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/468397/dd56eb93820a4758b6330256e80486c0/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/14.png?token-hash=1KDD41ObzpvGVYGTMpH98_0lnpVPx4UIN0GG3k493Q0%3D&token-time=1788480000",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "10140",
+      "25695"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/societyoflust"
+      },
+      {
+        "type": "website",
+        "label": "Website",
+        "url": "http://www.societyoflust.com/"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://societyoflust.itch.io/"
+      }
+    ]
+  },
+  {
     "id": "trinciapapere",
     "name": "Trinciapapere",
     "aliases": [],

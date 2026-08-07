@@ -52,8 +52,9 @@
     const last = normalizeText(matches[matches.length - 1]?.[1]);
     if (!last || /^v(?:ersion)?\b/i.test(last)) return [];
 
-    // Le slash est conservé dans certains noms. On ne le découpe que lorsqu'il est entouré d'espaces.
-    return last.split(/\s*(?:\/|&|\band\b)\s*/i).map(normalizeText).filter(Boolean);
+    // Seul le slash sépare automatiquement plusieurs créateurs.
+    // "and" et "&" peuvent appartenir au nom du créateur (ex. Story and Magic).
+    return last.split(/\s*\/\s*/).map(normalizeText).filter(Boolean);
   }
 
   function normalizeCreatorRefs(raw) {

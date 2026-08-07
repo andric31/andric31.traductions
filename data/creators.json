@@ -277,7 +277,9 @@
   {
     "id": "sadpepper",
     "name": "SadPepper",
-    "aliases": [],
+    "aliases": [
+      "Sad Pepper"
+    ],
     "avatar": "",
     "banner": "",
     "shortPresentation": "",

@@ -160,6 +160,32 @@
     "ignoredGameIds": []
   },
   {
+    "id": "black-cat",
+    "name": "Black_Cat",
+    "aliases": [],
+    "avatar": "https://f95zone.to/data/avatars/l/4971/4971184.jpg?1768026778",
+    "banner": "",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "118835",
+      "283515"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/black_cat902.4971184/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/Black_Cat1"
+      }
+    ]
+  },
+  {
     "id": "byaka-games",
     "name": "Byaka Games",
     "aliases": [],

@@ -287,7 +287,7 @@
 
       return `
         <article class="creatorMiniProfile">
-          <a class="creatorIdentity" href="${escapeHtml(buildCreatorUrl(profile))}">
+          <a class="creatorIdentity" href="${escapeHtml(buildCreatorUrl(profile))}" target="_blank" rel="noopener noreferrer">
             ${avatar
               ? `<img class="creatorAvatar" src="${escapeHtml(avatar)}" alt="" referrerpolicy="no-referrer">`
               : `<span class="creatorAvatar creatorAvatarFallback" aria-hidden="true">${escapeHtml(creatorInitial(profile.name))}</span>`}

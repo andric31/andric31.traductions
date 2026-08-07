@@ -302,7 +302,7 @@
         </article>`;
     });
 
-    host.innerHTML = `<h3>👤 Créateur${cards.length > 1 ? "s" : ""}</h3>${cards.join("")}`;
+    host.innerHTML = `<h3>Un jeu de${cards.length > 1 ? "s" : ""}</h3>${cards.join("")}`;
     host.style.display = "";
   }
 

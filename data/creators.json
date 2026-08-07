@@ -264,5 +264,51 @@
     ],
     "ignoredGameIds": [],
     "links": []
+  },
+  {
+    "id": "x3rr4",
+    "name": "X3rr4",
+    "aliases": [],
+    "avatar": "https://f95zone.to/data/avatars/l/774/774059.jpg?1656845369",
+    "banner": "https://f95zone.to/data/covers/user/l/774/774059.jpg?1712425815",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "59541",
+      "76157"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/x3rr4.774059/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/x3rr4"
+      },
+      {
+        "type": "subscribestar",
+        "label": "SubscribeStar",
+        "url": "https://subscribestar.adult/x3rr4"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/ThePjpg"
+      },
+      {
+        "type": "website",
+        "label": "Website",
+        "url": "https://x3rr4.de/"
+      },
+      {
+        "type": "website",
+        "label": "BuyMeACoffee",
+        "url": "https://www.buymeacoffee.com/X3rr4"
+      }
+    ]
   }
 ]

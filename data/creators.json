@@ -1,5 +1,30 @@
 [
   {
+    "id": "ahvl",
+    "name": "AHVL",
+    "aliases": [],
+    "avatar": "https://f95zone.to/data/avatars/l/1577/1577372.jpg?1634674237",
+    "banner": "https://f95zone.to/data/covers/user/l/1577/1577372.jpg?1621552832",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "94024"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "buymeacoffee",
+        "label": "BuyMeACoffee",
+        "url": "https://www.buymeacoffee.com/AHV"
+      },
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/ahvl.1577372/"
+      }
+    ]
+  },
+  {
     "id": "art-of-lust",
     "name": "Art of Lust",
     "aliases": [],
@@ -98,6 +123,36 @@
     "ignoredGameIds": []
   },
   {
+    "id": "byaka-games",
+    "name": "Byaka Games",
+    "aliases": [],
+    "avatar": "",
+    "banner": "",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "114735",
+      "138245"
+    ],
+    "ignoredGameIds": [],
+    "links": []
+  },
+  {
+    "id": "comrade-x",
+    "name": "comrade_x",
+    "aliases": [],
+    "avatar": "",
+    "banner": "",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "27262",
+      "22629"
+    ],
+    "ignoredGameIds": [],
+    "links": []
+  },
+  {
     "id": "phillygames",
     "name": "PhillyGames",
     "aliases": [],
@@ -133,5 +188,22 @@
       "121688"
     ],
     "ignoredGameIds": []
+  },
+  {
+    "id": "trinciapapere",
+    "name": "Trinciapapere",
+    "aliases": [],
+    "avatar": "",
+    "banner": "",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "133594",
+      "166828",
+      "146660",
+      "78934"
+    ],
+    "ignoredGameIds": [],
+    "links": []
   }
 ]

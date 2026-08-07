@@ -301,6 +301,26 @@
     "links": []
   },
   {
+    "id": "mannered-gentleman",
+    "name": "Mannered Gentleman",
+    "aliases": [],
+    "avatar": "",
+    "banner": "",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "59387"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "itch",
+        "label": "Itch",
+        "url": "https://mannered-gentleman.itch.io/malformation-of-a-desired-heaven"
+      }
+    ]
+  },
+  {
     "id": "p1nk-ang3l",
     "name": "P1NK-ANG3L",
     "aliases": [],

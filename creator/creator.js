@@ -166,6 +166,7 @@
             ? item.aliases.map(normalizeText).filter(Boolean)
             : [],
           gameIds: normalizeGameIds(item.gameIds || item.gameRefs || []),
+          ignoredGameIds: normalizeGameIds(item.ignoredGameIds || item.ignoreGameIds || item.excludedGameIds || []),
           links: normalizeLinks(item.links),
         };
       }).filter(Boolean);
@@ -203,11 +204,22 @@
       return normalizeText(game?.id || display?.id);
     }
 
+    function creatorMatchesRef(creator, ref) {
+      const target = creatorSlug(ref?.id || ref?.name || ref);
+      if (!target || !creator) return false;
+      if (creatorSlug(creator.id) === target) return true;
+      if (creatorSlug(creator.name) === target) return true;
+      const aliases = Array.isArray(creator.aliases) ? creator.aliases : [];
+      return aliases.some((alias) => creatorSlug(alias) === target);
+    }
+
     function getCreatorsForGame(creators, game) {
       const gameId = getGameId(game);
       const out = [];
       const seen = new Set();
+      const isIgnored = (profile) => !!gameId && normalizeGameIds(profile?.ignoredGameIds || []).includes(gameId);
       const add = (profile) => {
+        if (!profile || isIgnored(profile)) return;
         const key = creatorSlug(profile?.id || profile?.name);
         if (!key || seen.has(key)) return;
         seen.add(key);
@@ -216,12 +228,18 @@
 
       if (gameId) {
         creators
-          .filter((creator) => normalizeGameIds(creator.gameIds || []).includes(gameId))
+          .filter((creator) => !isIgnored(creator) && normalizeGameIds(creator.gameIds || []).includes(gameId))
           .forEach(add);
       }
 
       for (const ref of getCreatorRefs(game)) {
-        add(findCreator(creators, ref) || { id: ref.id, name: ref.name, aliases: [], gameIds: [], links: [] });
+        const matches = creators.filter((creator) => creatorMatchesRef(creator, ref) && !isIgnored(creator));
+        if (matches.length) {
+          const explicit = gameId ? matches.filter((creator) => normalizeGameIds(creator.gameIds || []).includes(gameId)) : [];
+          (explicit.length ? explicit : matches).forEach(add);
+        } else {
+          add({ id: ref.id, name: ref.name, aliases: [], gameIds: [], ignoredGameIds: [], links: [] });
+        }
       }
       return out;
     }
@@ -406,6 +424,7 @@
           presentation: String(profile?.shortPresentation || profile?.presentation || "").trim(),
           links: Array.isArray(profile?.links) ? profile.links : [],
           gameIds: Array.isArray(profile?.gameIds) ? profile.gameIds : [],
+          ignoredGameIds: Array.isArray(profile?.ignoredGameIds) ? profile.ignoredGameIds : [],
           games: [],
         });
       }

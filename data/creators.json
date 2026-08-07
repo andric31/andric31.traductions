@@ -233,6 +233,28 @@
     ]
   },
   {
+    "id": "fpc-games",
+    "name": "FPC-Games",
+    "aliases": [],
+    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/5861136/f38404ddf31c449daabf6c61772f1ab6/eyJ3Ijo2MjB9/1.jpg?token-hash=lQbAsXxtBQLTAXDZ4xHlqAx6Jmsblt8musvg6aRpJVo%3D",
+    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/5861136/ee79433f1a614691850d0703bcc746af/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/3.jpg?token-hash=1s-Yusthi0qlItIUrYwlFuBviV3gVnepoxas28jG1sU%3D&token-time=1788480000",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "69144",
+      "69897",
+      "93982"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/fpcgames"
+      }
+    ]
+  },
+  {
     "id": "iceridlah-games",
     "name": "Iceridlah Games",
     "aliases": [],

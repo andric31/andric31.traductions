@@ -233,6 +233,22 @@
     ]
   },
   {
+    "id": "iceridlah-games",
+    "name": "Iceridlah Games",
+    "aliases": [],
+    "avatar": "",
+    "banner": "",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "6832",
+      "28771",
+      "29593"
+    ],
+    "ignoredGameIds": [],
+    "links": []
+  },
+  {
     "id": "phillygames",
     "name": "PhillyGames",
     "aliases": [],

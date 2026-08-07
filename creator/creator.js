@@ -399,7 +399,7 @@
       const image = String(display.imageUrl || game.imageUrl || "/favicon.png").trim() || "/favicon.png";
       const version = getVersion(game);
       return `
-        <a class="creatorGameCard" href="${escapeHtml(getGameUrl(game))}">
+        <a class="creatorGameCard" href="${escapeHtml(getGameUrl(game))}" target="_blank" rel="noopener noreferrer">
           <img class="creatorGameThumb" src="${escapeHtml(image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/favicon.png'">
           <div class="creatorGameBody">
             <h3 class="creatorGameTitle">${escapeHtml(getTitle(game))}</h3>
@@ -454,7 +454,7 @@
     const summary = entry.presentation || "Fiche du créateur et liste de ses jeux présents sur le site.";
 
     return `
-      <a class="creatorDirectoryCard" href="${escapeHtml(window.CreatorFeature.buildCreatorUrl(entry))}" data-search="${escapeHtml([entry.name, ...entry.aliases].join(" ").toLowerCase())}">
+      <a class="creatorDirectoryCard" href="${escapeHtml(window.CreatorFeature.buildCreatorUrl(entry))}" target="_blank" rel="noopener noreferrer" data-search="${escapeHtml([entry.name, ...entry.aliases].join(" ").toLowerCase())}">
         <div class="creatorDirectoryIdentity">
           ${avatar}
           <span class="creatorDirectoryAvatar creatorDirectoryAvatarFallback" style="${fallbackStyle}" aria-hidden="true">${escapeHtml(entry.name.charAt(0).toUpperCase() || "?")}</span>

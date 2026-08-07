@@ -629,6 +629,39 @@
     "links": []
   },
   {
+    "id": "vilkas-creative",
+    "name": "Vilkas Creative",
+    "aliases": [],
+    "avatar": "https://f95zone.to/data/avatars/l/5389/5389893.jpg?1690921986",
+    "banner": "",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "133573",
+      "144862",
+      "155619",
+      "161488"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95zone",
+        "url": "https://f95zone.to/members/vilkas-creative.5389893/"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://vilkascreative.itch.io"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.com/invite/2mB8t6Vqwt"
+      }
+    ]
+  },
+  {
     "id": "x3rr4",
     "name": "X3rr4",
     "aliases": [],

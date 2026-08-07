@@ -58,8 +58,10 @@
       const last = normalizeText(matches[matches.length - 1]?.[1]);
       if (!last || /^v(?:ersion)?\b/i.test(last)) return [];
 
+      // Seul le slash est interprété comme une séparation entre plusieurs créateurs.
+      // "and" et "&" restent dans le nom.
       return last
-        .split(/\s+(?:\/|&|and)\s+/i)
+        .split(/\s*\/\s*/)
         .map(normalizeText)
         .filter(Boolean);
     }

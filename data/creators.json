@@ -271,6 +271,37 @@
     "links": []
   },
   {
+    "id": "p1nk-ang3l",
+    "name": "P1NK-ANG3L",
+    "aliases": [],
+    "avatar": "",
+    "banner": "",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "260235",
+      "277839"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "itch",
+        "label": "itch.io",
+        "url": "https://p1nk-ang3l.itch.io/"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/m43SYCNJWT"
+      },
+      {
+        "type": "subscribestar",
+        "label": "Subscribestar",
+        "url": "https://www.subscribestar.com/yourherojayceblackwood"
+      }
+    ]
+  },
+  {
     "id": "phillygames",
     "name": "PhillyGames",
     "aliases": [],

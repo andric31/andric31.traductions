@@ -19,7 +19,7 @@
       },
       {
         "type": "f95zone",
-        "label": "F95Zone",
+        "label": "AHVL",
         "url": "https://f95zone.to/members/ahvl.1577372/"
       }
     ]
@@ -151,6 +151,50 @@
     ],
     "ignoredGameIds": [],
     "links": []
+  },
+  {
+    "id": "dreambig-games",
+    "name": "DreamBig Games",
+    "aliases": [
+      "DreamBigGames"
+    ],
+    "avatar": "https://f95zone.to/data/avatars/l/44/44386.jpg?1562363521",
+    "banner": "https://f95zone.to/data/covers/user/l/44/44386.jpg?1671907317",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "283116",
+      "247782",
+      "186671"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/cw/DreamBigGames"
+      },
+      {
+        "type": "twitter",
+        "label": "Twitter",
+        "url": "https://twitter.com/DreamBig_Games"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://dreambig-games.itch.io/"
+      },
+      {
+        "type": "website",
+        "label": "Webpage",
+        "url": "https://dreambiggame.com/"
+      },
+      {
+        "type": "f95zone",
+        "label": "DreamBig Games",
+        "url": "https://f95zone.to/members/dreambig-games.44386/"
+      }
+    ]
   },
   {
     "id": "phillygames",

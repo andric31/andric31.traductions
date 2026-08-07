@@ -153,6 +153,36 @@
     "links": []
   },
   {
+    "id": "damned-studios",
+    "name": "Damned Studios",
+    "aliases": [],
+    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4568116/d5c86dfa7d984183abff1db3013bc8a8/eyJ3Ijo2MjB9/2.png?token-hash=8Oru1m3xZC-rFiWHK6S6XcL8xVA1MAOMC6V4YZ3De0s%3D",
+    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4568116/783eecab99524f4b890d9e49d34f8ba1/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/2.png?token-hash=RVCSF8xpVxT9piqbKOwbq8rxZ4jNODwoJ_FwNzv3hk4%3D&token-time=1788480000",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "92995"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/damnedstudios"
+      },
+      {
+        "type": "subscribestar",
+        "label": "SubscribeStar",
+        "url": "https://subscribestar.adult/damned-studios"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/cApAfqUdWK"
+      }
+    ]
+  },
+  {
     "id": "dimajio333",
     "name": "Dimajio333",
     "aliases": [],

@@ -170,19 +170,19 @@
     "ignoredGameIds": [],
     "links": [
       {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/dreambig-games.44386/"
+      },
+      {
         "type": "patreon",
         "label": "Patreon",
         "url": "https://www.patreon.com/cw/DreamBigGames"
       },
       {
-        "type": "twitter",
-        "label": "Twitter",
-        "url": "https://twitter.com/DreamBig_Games"
-      },
-      {
-        "type": "itch",
-        "label": "Itch.io",
-        "url": "https://dreambig-games.itch.io/"
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/9d4t3JSzBD"
       },
       {
         "type": "website",
@@ -190,9 +190,24 @@
         "url": "https://dreambiggame.com/"
       },
       {
-        "type": "f95zone",
-        "label": "F95Zone",
-        "url": "https://f95zone.to/members/dreambig-games.44386/"
+        "type": "steam",
+        "label": "Steam",
+        "url": "https://store.steampowered.com/publisher/DreamBigGames"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://dreambig-games.itch.io/"
+      },
+      {
+        "type": "twitter",
+        "label": "Twitter",
+        "url": "https://twitter.com/DreamBig_Games"
+      },
+      {
+        "type": "instagram",
+        "label": "Instagram",
+        "url": "https://www.instagram.com/dreambig_games/"
       }
     ]
   },

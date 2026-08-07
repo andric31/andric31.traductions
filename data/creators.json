@@ -275,6 +275,29 @@
     ]
   },
   {
+    "id": "sadpepper",
+    "name": "SadPepper",
+    "aliases": [],
+    "avatar": "",
+    "banner": "",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "213518",
+      "253311",
+      "263902",
+      "287954"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/cw/SadPepper153"
+      }
+    ]
+  },
+  {
     "id": "trinciapapere",
     "name": "Trinciapapere",
     "aliases": [],

@@ -282,12 +282,17 @@
 
     const cards = profiles.map((profile) => {
       const avatar = normalizeText(profile.avatar);
+      const banner = normalizeText(profile.banner);
       const presentation = normalizeText(profile.shortPresentation || profile.presentation);
       const intro = presentation || "Découvre les jeux et les informations de ce créateur.";
       const links = profile.links.slice(0, 4);
+      const backdrop = banner
+        ? `<span class="creatorBackdrop" aria-hidden="true"><img src="${escapeHtml(banner)}" alt="" referrerpolicy="no-referrer"></span><span class="creatorBackdropShade" aria-hidden="true"></span>`
+        : "";
 
       return `
-        <article class="creatorMiniProfile">
+        <article class="creatorMiniProfile${banner ? " creatorHasBackdrop" : ""}">
+          ${backdrop}
           <a class="creatorIdentity" href="${escapeHtml(buildCreatorUrl(profile))}" target="_blank" rel="noopener noreferrer">
             ${avatar
               ? `<img class="creatorAvatar" src="${escapeHtml(avatar)}" alt="" referrerpolicy="no-referrer">`

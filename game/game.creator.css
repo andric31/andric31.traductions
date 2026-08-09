@@ -84,6 +84,7 @@
   display:inline-flex;
   align-items:center;
   justify-content:center;
+  gap:7px;
   min-height:34px;
   padding:7px 10px;
   border-radius:10px;
@@ -95,9 +96,42 @@
   font-weight:800;
 }
 
+.creatorLinkButtonIcon{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:14px;
+  height:14px;
+  color:var(--muted);
+  flex:0 0 auto;
+}
+
+.creatorLinkButtonIcon.is-wide{ width:16px; }
+.creatorLinkButtonIcon.is-vwide{ width:18px; }
+.creatorLinkButtonIcon.is-narrow{ width:13px; }
+
+.creatorLinkButtonSvg{
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+.creatorLinkButtonIcon.is-discord .creatorLinkButtonSvg{ transform:scale(1.06); transform-origin:center; }
+.creatorLinkButtonIcon.is-bluesky .creatorLinkButtonSvg{ transform:scale(1.02); transform-origin:center; }
+.creatorLinkButtonIcon.is-vndb .creatorLinkButtonSvg{ transform:scale(1.0); transform-origin:center; }
+.creatorLinkButtonIcon.is-steam{ width:16px; height:16px; }
+.creatorLinkButtonIcon.is-steam .creatorLinkButtonSvg{ transform:none; }
+.creatorLinkButtonIcon.is-itch .creatorLinkButtonSvg{ transform:scale(1.0); transform-origin:center; }
+
+.creatorLinkButtonLabel{
+  line-height:1;
+}
+
 .creatorLinkButton:hover{
   filter:brightness(1.12);
 }
+
+.creatorLinkButton:hover .creatorLinkButtonIcon{ color:var(--fg); }
 
 html[data-theme="white"] .creatorIdentity:hover,
 html[data-theme="clair"] .creatorIdentity:hover,

@@ -191,6 +191,10 @@ body.creatorPage{
   display:block;
 }
 
+.creatorPageLinkIcon.is-discord .creatorLinkSvg{ transform:scale(1.2); transform-origin:center; }
+.creatorPageLinkIcon.is-bluesky .creatorLinkSvg{ transform:scale(1.12); transform-origin:center; }
+.creatorPageLinkIcon.is-vndb .creatorLinkSvg{ transform:scale(1.05); transform-origin:center; }
+
 .creatorPageLinkLabel{
   min-width:0;
   overflow-wrap:anywhere;

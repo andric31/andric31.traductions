@@ -157,6 +157,7 @@ body.creatorPage{
   display:flex;
   align-items:center;
   justify-content:space-between;
+  gap:12px;
   min-height:43px;
   padding:0 13px;
   border-radius:11px;
@@ -167,8 +168,42 @@ body.creatorPage{
   font-weight:850;
 }
 
-.creatorPageLink::after{ content:"↗"; color:var(--muted); }
+.creatorPageLinkMain{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+
+.creatorPageLinkIcon{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:18px;
+  height:18px;
+  color:var(--muted);
+  flex:0 0 auto;
+}
+
+.creatorLinkSvg{
+  width:18px;
+  height:18px;
+  display:block;
+}
+
+.creatorPageLinkLabel{
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+
+.creatorPageLinkArrow{
+  color:var(--muted);
+  flex:0 0 auto;
+}
+
 .creatorPageLink:hover{ filter:brightness(1.12); }
+.creatorPageLink:hover .creatorPageLinkIcon,
+.creatorPageLink:hover .creatorPageLinkArrow{ color:var(--fg); }
 
 .creatorGamesPanel{ margin-top:18px; }
 .creatorGamesHead{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }

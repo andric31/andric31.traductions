@@ -186,7 +186,7 @@ body.creatorPage{
 }
 
 .creatorPageLinkIcon.is-wide{ width:20px; }
-.creatorPageLinkIcon.is-vwide{ width:22px; }
+.creatorPageLinkIcon.is-vwide{ width:23px; }
 .creatorPageLinkIcon.is-narrow{ width:16px; }
 
 .creatorLinkSvg{
@@ -198,7 +198,8 @@ body.creatorPage{
 .creatorPageLinkIcon.is-discord .creatorLinkSvg{ transform:scale(1.06); transform-origin:center; }
 .creatorPageLinkIcon.is-bluesky .creatorLinkSvg{ transform:scale(1.02); transform-origin:center; }
 .creatorPageLinkIcon.is-vndb .creatorLinkSvg{ transform:scale(1.0); transform-origin:center; }
-.creatorPageLinkIcon.is-steam .creatorLinkSvg{ transform:scale(1.02); transform-origin:center; }
+.creatorPageLinkIcon.is-steam .creatorLinkSvg{ transform:scale(1.08); transform-origin:center; }
+.creatorPageLinkIcon.is-itch .creatorLinkSvg{ transform:scale(1.08); transform-origin:center; }
 
 .creatorPageLinkLabel{
   min-width:0;

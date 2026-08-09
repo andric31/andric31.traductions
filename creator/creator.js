@@ -55,6 +55,48 @@
       wikidata: wrap(svg("0 0 24 24", `<path d="M4 4h3v16H4V4Zm5 2h2v12H9V6Zm4-2h2v16h-2V4Zm4 3h3v10h-3V7Z"/>`)),
     };
 
+    const candidates = [type, label]
+      .map((value) => String(value || "")
+        .trim()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, ""))
+      .filter(Boolean);
+
+    const directKey = candidates.find((candidate) => icons[candidate]);
+    if (directKey) return icons[directKey];
+
+    const linkUrl = String(url || "").toLowerCase();
+    const domainRules = [
+      [/boosty\.to(?:\/|$)/, "boosty"],
+      [/buymeacoffee\.com(?:\/|$)/, "buymeacoffee"],
+      [/subscribestar\.(?:com|adult)(?:\/|$)/, "subscribestar"],
+      [/patreon\.com(?:\/|$)/, "patreon"],
+      [/(?:discord\.gg|discord(?:app)?\.com)(?:\/|$)/, "discord"],
+      [/bsky\.app(?:\/|$)/, "bluesky"],
+      [/(?:x\.com|twitter\.com)(?:\/|$)/, "x"],
+      [/vndb\.org(?:\/|$)/, "vndb"],
+      [/itch\.io(?:\/|$)/, "itch"],
+      [/(?:steampowered\.com|steamcommunity\.com)(?:\/|$)/, "steam"],
+      [/f95zone\.to(?:\/|$)/, "f95zone"],
+      [/github\.com(?:\/|$)/, "github"],
+      [/(?:youtube\.com|youtu\.be)(?:\/|$)/, "youtube"],
+      [/pixiv\.net(?:\/|$)/, "pixiv"],
+      [/booth\.pm(?:\/|$)/, "booth"],
+      [/dlsite\.com(?:\/|$)/, "dlsite"],
+      [/ci-en\.net(?:\/|$)/, "cien"],
+      [/ko-fi\.com(?:\/|$)/, "kofi"],
+      [/fanbox\.cc(?:\/|$)/, "fanbox"],
+      [/linktr\.ee(?:\/|$)/, "linktree"],
+      [/instagram\.com(?:\/|$)/, "instagram"],
+      [/tiktok\.com(?:\/|$)/, "tiktok"],
+      [/facebook\.com(?:\/|$)/, "facebook"],
+    ];
+    const matchedDomain = domainRules.find(([pattern, iconKey]) => pattern.test(linkUrl) && icons[iconKey]);
+    if (matchedDomain) return icons[matchedDomain[1]];
+
     if (icons[key]) return icons[key];
     return wrap(strokeSvg("0 0 24 24", `<path d="M10 13a5 5 0 0 1 0-7l1.2-1.2a5 5 0 0 1 7 7L16.8 13"></path><path d="M14 11a5 5 0 0 1 0 7l-1.2 1.2a5 5 0 0 1-7-7L7.2 11"></path>`));
   }

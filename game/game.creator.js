@@ -307,7 +307,7 @@
       const banner = normalizeText(profile.banner);
       const presentation = normalizeText(profile.shortPresentation || profile.presentation);
       const intro = presentation || "Découvre les jeux et les informations de ce créateur.";
-      const links = profile.links.slice(0, 4);
+      const links = profile.links;
       const backdrop = banner
         ? `<span class="creatorBackdrop" aria-hidden="true"><img src="${escapeHtml(banner)}" alt="" referrerpolicy="no-referrer"></span><span class="creatorBackdropShade" aria-hidden="true"></span>`
         : "";

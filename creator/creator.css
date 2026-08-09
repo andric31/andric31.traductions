@@ -185,15 +185,20 @@ body.creatorPage{
   flex:0 0 auto;
 }
 
+.creatorPageLinkIcon.is-wide{ width:20px; }
+.creatorPageLinkIcon.is-vwide{ width:22px; }
+.creatorPageLinkIcon.is-narrow{ width:16px; }
+
 .creatorLinkSvg{
-  width:18px;
-  height:18px;
+  width:100%;
+  height:100%;
   display:block;
 }
 
-.creatorPageLinkIcon.is-discord .creatorLinkSvg{ transform:scale(1.2); transform-origin:center; }
-.creatorPageLinkIcon.is-bluesky .creatorLinkSvg{ transform:scale(1.12); transform-origin:center; }
-.creatorPageLinkIcon.is-vndb .creatorLinkSvg{ transform:scale(1.05); transform-origin:center; }
+.creatorPageLinkIcon.is-discord .creatorLinkSvg{ transform:scale(1.06); transform-origin:center; }
+.creatorPageLinkIcon.is-bluesky .creatorLinkSvg{ transform:scale(1.02); transform-origin:center; }
+.creatorPageLinkIcon.is-vndb .creatorLinkSvg{ transform:scale(1.0); transform-origin:center; }
+.creatorPageLinkIcon.is-steam .creatorLinkSvg{ transform:scale(1.02); transform-origin:center; }
 
 .creatorPageLinkLabel{
   min-width:0;

@@ -33,8 +33,18 @@
         "type": "steam",
         "label": "Steam",
         "url": "https://store.steampowered.com/curator/46097968"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p16911"
       }
-    ]
+    ],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p16911"
   },
   {
     "id": "ahvl",
@@ -59,7 +69,12 @@
         "label": "F95Zone",
         "url": "https://f95zone.to/members/ahvl.1577372/"
       }
-    ]
+    ],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": ""
   },
   {
     "id": "art-of-lust",
@@ -86,7 +101,12 @@
       "149862",
       "282826"
     ],
-    "ignoredGameIds": []
+    "ignoredGameIds": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": ""
   },
   {
     "id": "astaros3d",
@@ -111,18 +131,30 @@
         "type": "twitter",
         "label": "X",
         "url": "https://twitter.com/Astaros3d"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p27030"
       }
     ],
     "gameIds": [
       "282826",
       "291304"
     ],
-    "ignoredGameIds": []
+    "ignoredGameIds": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p27030"
   },
   {
     "id": "baap",
     "name": "baap",
-    "aliases": [],
+    "aliases": [
+      "baap36885"
+    ],
     "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4296655/9ee732ac47764a27a294c7453651ab80/eyJoIjoxMDAsInciOjEwMH0%3D/3.jpg?token-hash=L3Qq39_Zq5h_BnKLptJgU0BIqNBY7fYh1rOyCYF9ZYM%3D&token-time=1787356800",
     "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4296655/11faf7f292e545698f3a528a3d051720/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/17.png?token-hash=GYKmM2StTQz6GSXsJq4MRnYpT-vJlsuDwcEEwXuxlbk%3D&token-time=1788480000",
     "shortPresentation": "Créateur indépendant travaillant notamment sur le visual novel Being A Wife.",
@@ -147,12 +179,22 @@
         "type": "subscribestar",
         "label": "Subscribestar",
         "url": "https://subscribestar.adult/baap"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p14117"
       }
     ],
     "gameIds": [
       "116036"
     ],
-    "ignoredGameIds": []
+    "ignoredGameIds": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p14117"
   },
   {
     "id": "black-cat",
@@ -178,7 +220,12 @@
         "label": "Patreon",
         "url": "https://www.patreon.com/Black_Cat1"
       }
-    ]
+    ],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": ""
   },
   {
     "id": "byaka-games",
@@ -193,7 +240,18 @@
       "138245"
     ],
     "ignoredGameIds": [],
-    "links": []
+    "links": [
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p13157"
+      }
+    ],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "amateur_group",
+    "primaryLanguage": "en",
+    "vndbId": "p13157"
   },
   {
     "id": "comrade-x",
@@ -208,7 +266,12 @@
       "27262"
     ],
     "ignoredGameIds": [],
-    "links": []
+    "links": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": ""
   },
   {
     "id": "crunchy-cake",
@@ -228,7 +291,12 @@
         "label": "Patreon",
         "url": "http://patreon.com/c/CrunchyCake"
       }
-    ]
+    ],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": ""
   },
   {
     "id": "damned-studios",
@@ -257,8 +325,18 @@
         "type": "discord",
         "label": "Discord",
         "url": "https://discord.gg/cApAfqUdWK"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p12365"
       }
-    ]
+    ],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "amateur_group",
+    "primaryLanguage": "en",
+    "vndbId": "p12365"
   },
   {
     "id": "dimajio333",
@@ -278,15 +356,28 @@
         "type": "f95zone",
         "label": "F95Zone",
         "url": "https://f95zone.to/members/dimajio333.4406696/"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p16774"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/SadPepper153"
       }
-    ]
+    ],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p16774"
   },
   {
     "id": "dreambig-games",
     "name": "DreamBig Games",
-    "aliases": [
-      "DreamBigGames"
-    ],
+    "aliases": [],
     "avatar": "https://f95zone.to/data/avatars/l/44/44386.jpg?1562363521",
     "banner": "https://f95zone.to/data/covers/user/l/44/44386.jpg?1671907317",
     "shortPresentation": "Studio indépendant spécialisé dans les jeux pour adultes narratifs et les expériences 3D.",
@@ -337,8 +428,33 @@
         "type": "instagram",
         "label": "Instagram",
         "url": "https://www.instagram.com/dreambig_games/"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p24552"
+      },
+      {
+        "type": "twitter",
+        "label": "Xitter",
+        "url": "https://x.com/DreamBig_Games"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/DreamBigGames"
+      },
+      {
+        "type": "subscribestar",
+        "label": "SubscribeStar",
+        "url": "https://subscribestar.adult/onyxdime"
       }
-    ]
+    ],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "amateur_group",
+    "primaryLanguage": "en",
+    "vndbId": "p24552"
   },
   {
     "id": "drpinkcake",
@@ -347,7 +463,7 @@
     "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/1671581/bbf34a75ff034a2d95dea4384c2160a8/eyJoIjozNjAsInciOjM2MH0%3D/7.png?token-hash=kcY7wTPGs4mdrBhvBIbPgwO8NhvUxgQB4psoT4cU4e8%3D&token-time=1787529600",
     "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/1671581/92e8c9d986b74e9db1e071894e55397d/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/14.png?token-hash=m_RJtwlB0ryuvp4zzstByoB1yFobkuepNu_6ax6UHsc%3D&token-time=1788480000",
     "shortPresentation": "",
-    "presentation": "",
+    "presentation": "Discord - Link",
     "gameIds": [
       "25332"
     ],
@@ -372,8 +488,18 @@
         "type": "bluesky",
         "label": "BlueSky",
         "url": "https://bsky.app/profile/drpinkcake.bsky.social"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p8640"
       }
-    ]
+    ],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p8640"
   },
   {
     "id": "fpc-games",
@@ -395,7 +521,12 @@
         "label": "Patreon",
         "url": "https://www.patreon.com/fpcgames"
       }
-    ]
+    ],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": ""
   },
   {
     "id": "iceridlah-games",
@@ -411,7 +542,18 @@
       "29593"
     ],
     "ignoredGameIds": [],
-    "links": []
+    "links": [
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p7168"
+      }
+    ],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p7168"
   },
   {
     "id": "mannered-gentleman",
@@ -431,12 +573,19 @@
         "label": "Itch",
         "url": "https://mannered-gentleman.itch.io/malformation-of-a-desired-heaven"
       }
-    ]
+    ],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": ""
   },
   {
     "id": "p1nk-ang3l",
     "name": "P1NK-ANG3L",
-    "aliases": [],
+    "aliases": [
+      "P1nk-Ang3l-Games"
+    ],
     "avatar": "",
     "banner": "",
     "shortPresentation": "Créatrice ou créateur de visual novels centrés sur la romance sombre et les personnages yandere.",
@@ -461,8 +610,28 @@
         "type": "subscribestar",
         "label": "Subscribestar",
         "url": "https://www.subscribestar.com/yourherojayceblackwood"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p24879"
+      },
+      {
+        "type": "website",
+        "label": "Official website",
+        "url": "https://p1nk-ang3l-games.carrd.co/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/p1nkang3lgames"
       }
-    ]
+    ],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p24879"
   },
   {
     "id": "phillygames",
@@ -492,6 +661,31 @@
         "type": "discord",
         "label": "Discord",
         "url": "https://discord.gg/TReQu7z"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p7162"
+      },
+      {
+        "type": "website",
+        "label": "Official website",
+        "url": "https://philly-games.com/"
+      },
+      {
+        "type": "website",
+        "label": "Wikidata",
+        "url": "https://www.wikidata.org/wiki/Q67391348"
+      },
+      {
+        "type": "twitter",
+        "label": "Xitter",
+        "url": "https://x.com/PhillyGamesXXX"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/phillygames"
       }
     ],
     "gameIds": [
@@ -499,7 +693,12 @@
       "121645",
       "121688"
     ],
-    "ignoredGameIds": []
+    "ignoredGameIds": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p7162"
   },
   {
     "id": "pixil",
@@ -525,13 +724,18 @@
         "label": "Patreon",
         "url": "http://patreon.com/Pixil24"
       }
-    ]
+    ],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": ""
   },
   {
     "id": "sadpepper",
     "name": "SadPepper",
     "aliases": [
-      "Sad Pepper"
+      "Dimajio333"
     ],
     "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/15577675/9d50c1da72ce4440ac1c1bd39a182fe0/eyJ3IjoxMjB9/1.png?token-hash=p-sbIUSSANgFePU5pQODdrs4kpNKhrZOmMOj6OLXWNE%3D&token-time=1787356800",
     "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/15577675/ab24abb66f534765bdd4869fd1c93e80/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/1.png?token-hash=BzI71MdORDsA5J5qJ3xGACkH5ZVF7iHoKAaOgOI-ekA%3D&token-time=1788480000",
@@ -549,8 +753,23 @@
         "type": "patreon",
         "label": "Patreon",
         "url": "https://www.patreon.com/cw/SadPepper153"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p16774"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/SadPepper153"
       }
-    ]
+    ],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p16774"
   },
   {
     "id": "slow-burn-games",
@@ -582,13 +801,30 @@
         "type": "subscribestar",
         "label": "SubscribeStar",
         "url": "https://subscribestar.adult/slowburngames"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p12240"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/SBG84"
       }
-    ]
+    ],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p12240"
   },
   {
     "id": "society-of-lust",
     "name": "Society Of Lust",
-    "aliases": [],
+    "aliases": [
+      "SoL"
+    ],
     "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/468397/e38dd0d7eb5d4878b342e82de9877b4d/eyJ3Ijo2MjB9/5.png?token-hash=-8eiojlAnQIZiA39oNADVQ5ZTfUUmSbMzt0wure1zSg%3D",
     "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/468397/dd56eb93820a4758b6330256e80486c0/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/14.png?token-hash=1KDD41ObzpvGVYGTMpH98_0lnpVPx4UIN0GG3k493Q0%3D&token-time=1788480000",
     "shortPresentation": "Petite équipe indépendante créant des jeux érotiques narratifs situés dans le Trinity-verse.",
@@ -613,8 +849,18 @@
         "type": "itch",
         "label": "Itch.io",
         "url": "https://societyoflust.itch.io/"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p7575"
       }
-    ]
+    ],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "amateur_group",
+    "primaryLanguage": "en",
+    "vndbId": "p7575"
   },
   {
     "id": "storyandmagic",
@@ -639,7 +885,12 @@
         "label": "Patreon",
         "url": "https://www.patreon.com/story_and_magic"
       }
-    ]
+    ],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": ""
   },
   {
     "id": "trinciapapere",
@@ -656,7 +907,12 @@
       "166828"
     ],
     "ignoredGameIds": [],
-    "links": []
+    "links": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": ""
   },
   {
     "id": "vilkas-creative",
@@ -688,8 +944,38 @@
         "type": "discord",
         "label": "Discord",
         "url": "https://discord.com/invite/2mB8t6Vqwt"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p17713"
+      },
+      {
+        "type": "twitter",
+        "label": "Xitter",
+        "url": "https://x.com/vilkas_creative"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/vilkascreative"
+      },
+      {
+        "type": "instagram",
+        "label": "Instagram",
+        "url": "https://www.instagram.com/dallaskontsalidze/"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://lustofpain.itch.io/"
       }
-    ]
+    ],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "amateur_group",
+    "primaryLanguage": "en",
+    "vndbId": "p17713"
   },
   {
     "id": "x3rr4",
@@ -734,7 +1020,17 @@
         "type": "website",
         "label": "BuyMeACoffee",
         "url": "https://www.buymeacoffee.com/X3rr4"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p10924"
       }
-    ]
+    ],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p10924"
   }
 ]

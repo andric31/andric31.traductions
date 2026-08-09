@@ -200,7 +200,7 @@ body.creatorPage{
 .creatorPageLinkIcon.is-vndb .creatorLinkSvg{ transform:scale(1.0); transform-origin:center; }
 .creatorPageLinkIcon.is-steam{ width:20px; height:20px; }
 .creatorPageLinkIcon.is-steam .creatorLinkSvg{ transform:none; }
-.creatorPageLinkIcon.is-itch .creatorLinkSvg{ transform:scale(1.08); transform-origin:center; }
+.creatorPageLinkIcon.is-itch .creatorLinkSvg{ transform:scale(1.0); transform-origin:center; }
 
 .creatorPageLinkLabel{
   min-width:0;

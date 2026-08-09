@@ -106,19 +106,31 @@
       const labels = {
         website: "Site officiel",
         site: "Site officiel",
+        vndb: "VNDB",
+        dlsite: "DLsite",
+        cien: "Ci-en",
+        pixiv: "Pixiv",
+        booth: "BOOTH",
         itch: "Itch.io",
         "itch-io": "Itch.io",
         steam: "Steam",
         patreon: "Patreon",
         subscribestar: "SubscribeStar",
+        buymeacoffee: "Buy Me a Coffee",
+        kofi: "Ko-fi",
+        fanbox: "FANBOX",
         discord: "Discord",
         f95zone: "F95Zone",
         f95: "F95Zone",
+        instagram: "Instagram",
         twitter: "X / Twitter",
         x: "X / Twitter",
         bluesky: "Bluesky",
         youtube: "YouTube",
         github: "GitHub",
+        linktree: "Linktree",
+        facebook: "Facebook",
+        tiktok: "TikTok",
       };
       return labels[key] || normalizeText(type) || "Lien";
     }
@@ -167,6 +179,11 @@
           aliases: Array.isArray(item.aliases)
             ? item.aliases.map(normalizeText).filter(Boolean)
             : [],
+          countryCode: normalizeText(item.countryCode || item.country_code).toUpperCase(),
+          country: normalizeText(item.country),
+          creatorType: normalizeText(item.creatorType),
+          primaryLanguage: normalizeText(item.primaryLanguage || item.primary_language).toLowerCase(),
+          vndbId: normalizeText(item.vndbId || item.vndb).toLowerCase(),
           gameIds: normalizeGameIds(item.gameIds || item.gameRefs || []),
           ignoredGameIds: normalizeGameIds(item.ignoredGameIds || item.ignoreGameIds || item.excludedGameIds || []),
           links: normalizeLinks(item.links),
@@ -347,6 +364,44 @@
       .join(" ") || "Créateur inconnu";
   }
 
+  function flagEmoji(code) {
+    const value = String(code || "").trim().toUpperCase();
+    if (!/^[A-Z]{2}$/.test(value)) return "🌐";
+    return String.fromCodePoint(...[...value].map((char) => 127397 + char.charCodeAt(0)));
+  }
+
+  function regionName(code) {
+    const value = String(code || "").trim().toUpperCase();
+    if (!value) return "";
+    try { return new Intl.DisplayNames(["fr"], { type: "region" }).of(value) || value; } catch { return value; }
+  }
+
+  function languageName(code) {
+    const value = String(code || "").trim().toLowerCase();
+    if (!value) return "";
+    try {
+      const label = new Intl.DisplayNames(["fr"], { type: "language" }).of(value);
+      return label ? label.charAt(0).toUpperCase() + label.slice(1) : value;
+    } catch { return value.toUpperCase(); }
+  }
+
+  function creatorTypeLabel(value) {
+    return ({ company: "Société / studio", individual: "Individu", amateur_group: "Groupe amateur / cercle", other: "Autre" })[String(value || "").trim()] || "";
+  }
+
+  function creatorMetaData(profile) {
+    const items = [];
+    const countryCode = String(profile?.countryCode || "").trim().toUpperCase();
+    const customCountry = String(profile?.country || "").trim();
+    const countryLabel = customCountry || regionName(countryCode);
+    if (countryLabel) items.push({ kind: "country", icon: countryCode ? flagEmoji(countryCode) : "🌐", label: countryLabel });
+    const type = creatorTypeLabel(profile?.creatorType);
+    if (type) items.push({ kind: "type", icon: "👤", label: type });
+    const language = languageName(profile?.primaryLanguage);
+    if (language) items.push({ kind: "language", icon: "💬", label: language });
+    return items;
+  }
+
   function renderProfile(profile, requestedName) {
     const name = String(profile?.name || requestedName || fallbackName(profile?.id)).trim();
     document.title = `${name} · Créateur`;
@@ -356,6 +411,12 @@
     if (aliases.length) {
       $("creatorAliases").textContent = `Également connu sous : ${aliases.join(", ")}`;
       $("creatorAliases").style.display = "";
+    }
+
+    const meta = creatorMetaData(profile);
+    if (meta.length) {
+      $("creatorMeta").innerHTML = meta.map((item) => `<span class="creatorMetaChip"><span class="creatorMetaFlag" aria-hidden="true">${escapeHtml(item.icon)}</span>${escapeHtml(item.label)}</span>`).join("");
+      $("creatorMeta").style.display = "";
     }
 
     const avatar = String(profile?.avatar || "").trim();
@@ -378,7 +439,11 @@
     const presentation = String(profile?.presentation || "").trim();
     $("creatorPresentation").textContent = presentation || "Présentation non renseignée pour le moment.";
 
-    const links = Array.isArray(profile?.links) ? profile.links : [];
+    const links = Array.isArray(profile?.links) ? [...profile.links] : [];
+    const vndbId = String(profile?.vndbId || "").trim().toLowerCase();
+    if (/^p\d+$/.test(vndbId) && !links.some((link) => /vndb\.org/i.test(String(link?.url || "")))) {
+      links.unshift({ type: "vndb", label: "VNDB", url: `https://vndb.org/${vndbId}` });
+    }
     if (!links.length) {
       $("creatorNoLinks").style.display = "";
     } else {
@@ -422,6 +487,11 @@
           id,
           name: String(profile?.name || fallbackName(id)).trim(),
           aliases: Array.isArray(profile?.aliases) ? profile.aliases.filter(Boolean) : [],
+          countryCode: String(profile?.countryCode || "").trim().toUpperCase(),
+          country: String(profile?.country || "").trim(),
+          creatorType: String(profile?.creatorType || "").trim(),
+          primaryLanguage: String(profile?.primaryLanguage || "").trim(),
+          vndbId: String(profile?.vndbId || "").trim(),
           avatar: String(profile?.avatar || "").trim(),
           presentation: String(profile?.shortPresentation || profile?.presentation || "").trim(),
           links: Array.isArray(profile?.links) ? profile.links : [],
@@ -454,9 +524,11 @@
     const fallbackStyle = entry.avatar ? "display:none" : "";
     const gameCount = entry.games.length;
     const summary = entry.presentation || "Fiche du créateur et liste de ses jeux présents sur le site.";
+    const meta = creatorMetaData(entry);
+    const searchText = [entry.name, ...entry.aliases, entry.country, regionName(entry.countryCode), creatorTypeLabel(entry.creatorType), languageName(entry.primaryLanguage)].filter(Boolean).join(" ").toLowerCase();
 
     return `
-      <a class="creatorDirectoryCard" href="${escapeHtml(window.CreatorFeature.buildCreatorUrl(entry))}" target="_blank" rel="noopener noreferrer" data-search="${escapeHtml([entry.name, ...entry.aliases].join(" ").toLowerCase())}">
+      <a class="creatorDirectoryCard" href="${escapeHtml(window.CreatorFeature.buildCreatorUrl(entry))}" target="_blank" rel="noopener noreferrer" data-search="${escapeHtml(searchText)}">
         <div class="creatorDirectoryIdentity">
           ${avatar}
           <span class="creatorDirectoryAvatar creatorDirectoryAvatarFallback" style="${fallbackStyle}" aria-hidden="true">${escapeHtml(entry.name.charAt(0).toUpperCase() || "?")}</span>
@@ -465,6 +537,7 @@
             <div class="creatorDirectoryGames">${gameCount} jeu${gameCount > 1 ? "x" : ""}</div>
           </div>
         </div>
+        ${meta.length ? `<div class="creatorMeta creatorDirectoryMeta">${meta.map((item) => `<span class="creatorMetaChip"><span class="creatorMetaFlag" aria-hidden="true">${escapeHtml(item.icon)}</span>${escapeHtml(item.label)}</span>`).join("")}</div>` : ""}
         <p class="creatorDirectoryDescription">${escapeHtml(summary)}</p>
         <div class="creatorDirectoryOpen">Voir la fiche →</div>
       </a>`;
@@ -511,6 +584,11 @@
       id: requestedId,
       name: requestedName || fallbackName(requestedId),
       aliases: [],
+      countryCode: "",
+      country: "",
+      creatorType: "",
+      primaryLanguage: "",
+      vndbId: "",
       avatar: "",
       banner: "",
       presentation: "",

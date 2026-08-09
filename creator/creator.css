@@ -103,6 +103,29 @@ body.creatorPage{
   font-size:13px;
 }
 
+.creatorMeta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:9px;
+}
+
+.creatorMetaChip{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  min-height:27px;
+  padding:3px 9px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:color-mix(in srgb,var(--card) 82%,transparent);
+  color:var(--fg);
+  font-size:12px;
+  font-weight:800;
+}
+
+.creatorMetaFlag{font-size:15px;line-height:1}
+
 .creatorColumns{
   display:grid;
   grid-template-columns:minmax(0,1fr) 330px;
@@ -376,3 +399,6 @@ html[data-theme="clair"] .creatorSearchWrap,
 html[data-theme="light"] .creatorSearchWrap{
   background:rgba(0,0,0,.025);
 }
+
+.creatorDirectoryMeta{margin-top:10px}
+.creatorDirectoryMeta .creatorMetaChip{font-size:11px;min-height:24px;padding:2px 8px}

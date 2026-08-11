@@ -49,7 +49,9 @@
   {
     "id": "ahvl",
     "name": "AHVL",
-    "aliases": [],
+    "aliases": [
+      "AHV"
+    ],
     "avatar": "https://f95zone.to/data/avatars/l/1577/1577372.jpg?1634674237",
     "banner": "https://f95zone.to/data/covers/user/l/1577/1577372.jpg?1621552832",
     "shortPresentation": "Créateur de The Answer is... WHAT?, un jeu de quiz pour adultes réalisé avec Ren'Py.",

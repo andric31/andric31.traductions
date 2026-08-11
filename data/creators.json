@@ -647,7 +647,7 @@
       {
         "type": "patreon",
         "label": "Patreon",
-        "url": "https://www.patreon.com/phillygames/overview"
+        "url": "https://www.patreon.com/phillygames"
       },
       {
         "type": "other",
@@ -656,18 +656,13 @@
       },
       {
         "type": "twitter",
-        "label": "Twitter",
-        "url": "https://twitter.com/PhillyGamesXXX"
+        "label": "Xitter",
+        "url": "https://x.com/PhillyGamesXXX"
       },
       {
         "type": "discord",
         "label": "Discord",
         "url": "https://discord.gg/TReQu7z"
-      },
-      {
-        "type": "vndb",
-        "label": "VNDB",
-        "url": "https://vndb.org/p7162"
       },
       {
         "type": "website",
@@ -680,18 +675,14 @@
         "url": "https://www.wikidata.org/wiki/Q67391348"
       },
       {
-        "type": "twitter",
-        "label": "Xitter",
-        "url": "https://x.com/PhillyGamesXXX"
-      },
-      {
-        "type": "patreon",
-        "label": "Patreon",
-        "url": "https://www.patreon.com/phillygames"
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p7162"
       }
     ],
     "gameIds": [
       "4907",
+      "25739",
       "121645",
       "121688"
     ],

@@ -871,6 +871,59 @@
     "vndbId": "p12240"
   },
   {
+    "id": "snowstorm",
+    "name": "Snowstorm",
+    "aliases": [
+      "faphero_games"
+    ],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p28583",
+    "avatar": "",
+    "banner": "https://snow-fans.com/header_user.webp",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "73205",
+      "155196"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "subscribestar",
+        "label": "SubscribeStar",
+        "url": "https://subscribestar.adult/faphero"
+      },
+      {
+        "type": "website",
+        "label": "Website",
+        "url": "https://snow-fans.com/"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/TYVypmyunG"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://faphero-games.itch.io/"
+      },
+      {
+        "type": "twitter",
+        "label": "X/Twitter",
+        "url": "https://x.com/SnowstormBTW"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p28583"
+      }
+    ]
+  },
+  {
     "id": "society-of-lust",
     "name": "Society Of Lust",
     "aliases": [

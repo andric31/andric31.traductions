@@ -645,19 +645,14 @@
     "presentation": "PhillyGames développe des visual novels adultes axés sur les choix et une ambiance néo-noir. Il est notamment à l'origine de Depraved Awakening et de City of Broken Dreamers, une série mêlant science-fiction, cyberpunk et intrigue policière.",
     "links": [
       {
+        "type": "website",
+        "label": "Official website",
+        "url": "https://philly-games.com/"
+      },
+      {
         "type": "patreon",
         "label": "Patreon",
         "url": "https://www.patreon.com/phillygames"
-      },
-      {
-        "type": "other",
-        "label": "DeviantArt",
-        "url": "https://phillygames.deviantart.com/"
-      },
-      {
-        "type": "twitter",
-        "label": "Xitter",
-        "url": "https://x.com/PhillyGamesXXX"
       },
       {
         "type": "discord",
@@ -665,9 +660,14 @@
         "url": "https://discord.gg/TReQu7z"
       },
       {
-        "type": "website",
-        "label": "Official website",
-        "url": "https://philly-games.com/"
+        "type": "twitter",
+        "label": "Xitter",
+        "url": "https://x.com/PhillyGamesXXX"
+      },
+      {
+        "type": "other",
+        "label": "DeviantArt",
+        "url": "https://phillygames.deviantart.com/"
       },
       {
         "type": "website",

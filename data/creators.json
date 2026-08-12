@@ -80,6 +80,42 @@
     "vndbId": ""
   },
   {
+    "id": "aldor",
+    "name": "ALDOR",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/14799401/4e4d283122024a92be69654a8d1294c1/eyJoIjoxMDAsInciOjEwMH0%3D/2.png?token-hash=z3qGPso8is5SmR8l7iVxcdmkmH0p0_fg87yppwHS2Bs%3D&token-time=1787788800",
+    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/14799401/084d537f78544c83987d3a05d4e2ba53/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/1.png?token-hash=0HP0iZnivtU0P39g754cCB7mdkviAiIWwb-ckHCv-GA%3D&token-time=1788480000",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "282192",
+      "278269"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "ALDOR",
+        "url": "https://f95zone.to/members/aldor66.9690826/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://patreon.com/cw/ALDOR822"
+      },
+      {
+        "type": "subscribestar",
+        "label": "Subscribestar",
+        "url": "https://subscribestar.adult/aldor"
+      }
+    ]
+  },
+  {
     "id": "art-of-lust",
     "name": "Art of Lust",
     "aliases": [],

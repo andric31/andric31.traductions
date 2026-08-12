@@ -697,6 +697,42 @@
     "vndbId": "p24879"
   },
   {
+    "id": "partedes",
+    "name": "Partedes",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p18811",
+    "avatar": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/1484484/avatars/2a56b9d6-7f79-437d-9868-260c30599e08-380x380_174x15_851x852.jpg",
+    "banner": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/1484484/covers/83aed3b0-29ba-49af-95f3-24f51693def1-1240x0_0x0_1240x233.jpg",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "254542",
+      "297987"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "subscribestar",
+        "label": "Subscribestar",
+        "url": "https://subscribestar.adult/partedes"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.com/invite/947hRDT2Mx"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p18811"
+      }
+    ]
+  },
+  {
     "id": "phillygames",
     "name": "PhillyGames",
     "aliases": [],

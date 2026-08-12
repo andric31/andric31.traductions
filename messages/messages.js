@@ -643,6 +643,17 @@
 
 
       const bubble = article.querySelector('[data-open-msg]');
+
+      // Si le dernier message est au bord du bas, l'ouverture de la barre
+      // de réactions augmente sa hauteur. On recale alors doucement la liste
+      // en bas pour que toute la barre reste visible au-dessus de la zone de saisie.
+      bubble.addEventListener('mouseenter', () => {
+        if (article !== els.list.lastElementChild || !isNearBottom()) return;
+        keepPinnedToBottom = true;
+        requestAnimationFrame(() => keepLastMessageVisible({ force: true, smooth: false }));
+        setTimeout(() => keepLastMessageVisible({ force: true, smooth: false }), 180);
+      });
+
       bubble.addEventListener('click', (evt) => {
         if (evt.target.closest('button')) return;
         openMessageId = isOpen ? null : item.id;

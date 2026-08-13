@@ -473,6 +473,61 @@
     "vndbId": "p16774"
   },
   {
+    "id": "dinotail-games",
+    "name": "DinoTail Games",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p18724",
+    "avatar": "https://f95zone.to/data/avatars/l/5821/5821421.jpg?1676610436",
+    "banner": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/1829047/covers/9bc26019-4c12-4a75-9877-a18c71dc122f-1240x0_0x218_2658x499.png",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "158392"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/dinotail-games.5821421/"
+      },
+      {
+        "type": "subscribestar",
+        "label": "Subscribestar",
+        "url": "https://subscribestar.adult/dinotailgames"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://dinotailgames.itch.io/"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/m6ercefD"
+      },
+      {
+        "type": "instagram",
+        "label": "Instagram",
+        "url": "https://www.instagram.com/dinotailgames/"
+      },
+      {
+        "type": "youtube",
+        "label": "Youtube",
+        "url": "https://www.youtube.com/@dinotailgames"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p18724"
+      }
+    ]
+  },
+  {
     "id": "dreambig-games",
     "name": "DreamBig Games",
     "aliases": [],

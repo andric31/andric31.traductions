@@ -859,6 +859,42 @@
     "vndbId": ""
   },
   {
+    "id": "red-lighthouse",
+    "name": "Red LightHouse",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p13999",
+    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/6454195/e410f87850a749628e8a0b23c8ca4c85/eyJoIjoxMDAsInciOjEwMH0%3D/2.png?token-hash=3XMJHuUeZXOHR0k2MzZIRyYD51M8gzEeT2ftNTWios8%3D&token-time=1787875200",
+    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/6454195/79e5c69ba2cb49ba8a33f963cd2158c2/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/7.jpg?token-hash=jwYIQKdg5iXvmLrnhWYNcmmI_CsWAEvojGI9xCoX8qI%3D&token-time=1788480000",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "77361",
+      "193432"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/RedLightHouse"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/WUkvnHjYpD"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p13999"
+      }
+    ]
+  },
+  {
     "id": "sadpepper",
     "name": "SadPepper",
     "aliases": [

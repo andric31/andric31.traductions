@@ -2123,6 +2123,14 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
     }
   }
 
+
+  function isGalleryAvatarUrl(url) {
+    const u = String(url || "").trim().toLowerCase();
+    if (!u) return false;
+    return /\/data\/avatars?\//i.test(u) ||
+      /^https?:\/\/(?:[^/]+\.)?gravatar\.com\/avatar\//i.test(u);
+  }
+
   function sameImageUrl(a, b) {
     const aa = String(a || "").trim();
     const bb = String(b || "").trim();
@@ -2163,9 +2171,10 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
 
             for (const item of raw) {
               const original = String(item || "").trim();
-              if (!original) continue;
+              if (!original || isGalleryAvatarUrl(original)) continue;
 
               const preview = toF95PreviewUrl(original) || original;
+              if (isGalleryAvatarUrl(preview)) continue;
               const key = normalizeF95MediaKey(preview) || preview;
 
               // Ignore l'image F95 si elle correspond déjà à la cover de la base

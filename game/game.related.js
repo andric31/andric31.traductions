@@ -473,6 +473,14 @@
     return normalizeF95MediaKey(url);
   }
 
+
+  function isGalleryAvatarUrl(url) {
+    const u = String(url || "").trim().toLowerCase();
+    if (!u) return false;
+    return /\/data\/avatars?\//i.test(u) ||
+      /^https?:\/\/(?:[^/]+\.)?gravatar\.com\/avatar\//i.test(u);
+  }
+
   function sameImageUrl(a, b) {
     const aa = String(a || "").trim();
     const bb = String(b || "").trim();
@@ -540,7 +548,7 @@
         }
         for (const item of raw) {
           const u = String(item || '').trim();
-          if (!u) continue;
+          if (!u || isGalleryAvatarUrl(u)) continue;
           const key = normalizeF95MediaKey(u) || u;
           if (base && sameImageUrl(u, base)) continue;
           if (seen.has(key)) continue;

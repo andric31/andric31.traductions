@@ -214,6 +214,14 @@ function galleryUrlKey(raw) {
   }
 }
 
+
+function isGalleryAvatarUrl(url) {
+  const u = String(url || "").trim().toLowerCase();
+  if (!u) return false;
+  return /\/data\/avatars?\//i.test(u) ||
+    /^https?:\/\/(?:[^/]+\.)?gravatar\.com\/avatar\//i.test(u);
+}
+
 function dedupKeepOrder(list) {
   const out = [];
   const seen = new Set();
@@ -346,7 +354,7 @@ async function loadF95Gallery(f95Url, fallbackUrl) {
       if (data.cover) remote.push(data.cover);
       if (Array.isArray(data.gallery)) remote.push(...data.gallery);
       if (remote.length) {
-        const filteredRemote = remote.filter((u) => galleryUrlKey(u) !== fallbackKey);
+        const filteredRemote = remote.filter((u) => !isGalleryAvatarUrl(u) && galleryUrlKey(u) !== fallbackKey);
         merged = fallback ? [fallback, ...filteredRemote] : filteredRemote;
       }
     }

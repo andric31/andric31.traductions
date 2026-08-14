@@ -1226,6 +1226,42 @@
     "vndbId": ""
   },
   {
+    "id": "velkami",
+    "name": "Velkami",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p13622",
+    "avatar": "https://f95zone.to/data/avatars/l/476/476039.jpg?1651572247",
+    "banner": "https://f95zone.to/data/covers/user/l/476/476039.jpg?1649410299",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "107379",
+      "115576"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/velkami.476039/"
+      },
+      {
+        "type": "website",
+        "label": "LoversLab",
+        "url": "https://www.loverslab.com/profile/2313974-velkami/"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p13622"
+      }
+    ]
+  },
+  {
     "id": "vilkas-creative",
     "name": "Vilkas Creative",
     "aliases": [],

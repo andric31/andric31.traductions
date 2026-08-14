@@ -530,7 +530,9 @@
   {
     "id": "dreambig-games",
     "name": "DreamBig Games",
-    "aliases": [],
+    "aliases": [
+      "DreamBigGames"
+    ],
     "avatar": "https://f95zone.to/data/avatars/l/44/44386.jpg?1562363521",
     "banner": "https://f95zone.to/data/covers/user/l/44/44386.jpg?1671907317",
     "shortPresentation": "Studio indépendant spécialisé dans les jeux pour adultes narratifs et les expériences 3D.",

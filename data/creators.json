@@ -765,6 +765,32 @@
     ]
   },
   {
+    "id": "horny-hydra-games",
+    "name": "Horny Hydra Games",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://f95zone.to/data/avatars/l/360/360720.jpg?1691072852",
+    "banner": "https://f95zone.to/data/covers/user/l/360/360720.jpg?1563488234",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "33523",
+      "49157"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95zone",
+        "url": "https://f95zone.to/members/madzeal.360720/"
+      }
+    ]
+  },
+  {
     "id": "iceridlah-games",
     "name": "Iceridlah Games",
     "aliases": [],

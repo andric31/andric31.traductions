@@ -684,6 +684,44 @@
     "vndbId": ""
   },
   {
+    "id": "gfc-studio",
+    "name": "GFC Studio",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "ru",
+    "vndbId": "",
+    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/user/22810661/7b0f27913259444cbde449749a9fac5c/eyJoIjoxMDAsInciOjEwMH0%3D/11.jpg?token-hash=FEcPAP57-k3L2IjMBapBfjQ21JsntDv5s_bEjnFwktg%3D&token-time=1787961600",
+    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/3001624/474101b866c74290aecf6b6a8f179d89/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/41.png?token-hash=O56VW5PHXAQVD4kSKFS6ruWgZSgxNzCcGPJT2AgTySI%3D&token-time=1788480000",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "67692",
+      "115547",
+      "161623",
+      "231335"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/GFCStudio"
+      },
+      {
+        "type": "twitter",
+        "label": "Twitter/X",
+        "url": "https://www.twitter.com/StudioGfc"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.com/invite/dh82H69vhF"
+      }
+    ]
+  },
+  {
     "id": "iceridlah-games",
     "name": "Iceridlah Games",
     "aliases": [],

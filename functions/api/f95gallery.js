@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'gallery-v6';
+const CACHE_VERSION = 'gallery-v7-no-avatars';
 
 export async function onRequest(context) {
   const { request } = context;
@@ -167,6 +167,7 @@ function extractStandaloneImageUrls(html) {
   for (const m of tags) {
     const attrs = m[1] || '';
     if (/smilie|emoji/i.test(attrs)) continue;
+    if (/class=\"[^\"]*\bavatar(?:\b|[-_])/i.test(attrs)) continue;
     const srcm = attrs.match(/(?:data-src|src)="([^"]+)"/i);
     const u = upgradeF95Url(decodeHtml(srcm?.[1] || ''));
     if (!u || /\/thumb\//i.test(u)) continue;
@@ -206,7 +207,8 @@ function isPollutingUrl(u) {
   const s = String(u || '').trim().toLowerCase();
   if (!s) return true;
   if (/\/thumb\//i.test(s)) return true;
-  if (/\/data\/avatars\//i.test(s)) return true;
+  if (/\/data\/avatars?\//i.test(s)) return true;
+  if (/^https?:\/\/(?:[^/]+\.)?gravatar\.com\/avatar\//i.test(s)) return true;
   if (/smilie|emoji/i.test(s)) return true;
   if (/\.(zip|rar|7z|pdf|txt)(?:[?#].*)?$/.test(s)) return true;
   return false;

@@ -1583,6 +1583,41 @@
     "vndbId": ""
   },
   {
+    "id": "ultra-nova-games",
+    "name": "Ultra Nova Games",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/user/126463738/f78789724298444b84d36f0510288058/eyJoIjoxMDAsInciOjEwMH0%3D/2.jpg?token-hash=hbbtVUO0OezE6Dr-DNtADQ5-uXO0rrnkDroGzo-RS28%3D&token-time=1788048000",
+    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/12102164/66ae1e2c6494422c9c09bcb535f48d31/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/6.png?token-hash=RqLkWBEZamfh3sSKkWsskBlAdcbObPA94d3fcLX54zQ%3D&token-time=1788480000",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "310278"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/UltraNovaGames"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://ultra-nova.itch.io/"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.com/invite/DxSkKWx4j3"
+      }
+    ]
+  },
+  {
     "id": "velkami",
     "name": "Velkami",
     "aliases": [],

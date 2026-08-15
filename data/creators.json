@@ -1329,6 +1329,36 @@
     ]
   },
   {
+    "id": "vesperproxy",
+    "name": "VesperProxy",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/user/220314288/e4bb274e117a449e8944925fdb53e7ec/eyJoIjoxMDAsInciOjEwMH0%3D/1.png?token-hash=f-nen5MEUMX-qrFtEkkBfhFVO6r5lPChFGuVeqbtE7Y%3D&token-time=1788048000",
+    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/16418335/bb62dc29670b445b85db340f1be954f8/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/1.png?token-hash=zKGkpcptzobFqCJOQmBtZWi3Q4n6DykIf-6obEbRGzs%3D&token-time=1788480000",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "310742"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/VesperProxy"
+      },
+      {
+        "type": "twitter",
+        "label": "X",
+        "url": "https://x.com/VesperProxy3D"
+      }
+    ]
+  },
+  {
     "id": "vilkas-creative",
     "name": "Vilkas Creative",
     "aliases": [],

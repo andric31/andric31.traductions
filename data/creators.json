@@ -1234,6 +1234,36 @@
     "vndbId": ""
   },
   {
+    "id": "ratedr",
+    "name": "RatedR",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/6638835/a1e304f0fb954bac9942640e2e4a665f/eyJoIjoxMDAsInciOjEwMH0%3D/3.jpeg?token-hash=Uc7-vQvQX_B5K47lvIFiqmoDxLPLBQCQy8Gcg9xO__k%3D&token-time=1788048000",
+    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/6638835/84b95b26757c43778b9668c12d24c6d7/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/11.png?token-hash=lQ5bBI9iIrN4YVG2fAwEjQRXRbnSteFcR4oAe0FagHw%3D&token-time=1788480000",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "310830"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "http://www.patreon.com/cw/ratedr03"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/VYeBTp6Jj"
+      }
+    ]
+  },
+  {
     "id": "red-lighthouse",
     "name": "Red LightHouse",
     "aliases": [],

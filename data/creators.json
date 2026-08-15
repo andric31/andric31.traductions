@@ -1250,6 +1250,52 @@
     "vndbId": "p16774"
   },
   {
+    "id": "salr-games",
+    "name": "SALR Games",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "individual",
+    "primaryLanguage": "es",
+    "vndbId": "p15015",
+    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/5026414/b2976c8e9e5a43fbb24100065069e322/eyJoIjoxMDAsInciOjEwMH0%3D/15.jpg?token-hash=yZB5fO3UTEZ7d8ojYVrxz502hhR75V7sXNdx6xi5dLg%3D&token-time=1788048000",
+    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/5026414/589bc91d17bb4175ae816ebe23e94be9/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/56.jpeg?token-hash=T-8i7xEaTLdBjtwWQJ7d4BT4OrgBeTn0MEQ31y-F5cA%3D&token-time=1788480000",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "73799",
+      "252252"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/SALRStudio"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://salr-games.itch.io/"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/xH7fMq5AnT"
+      },
+      {
+        "type": "kofi",
+        "label": "Ko-fi",
+        "url": "https://ko-fi.com/salrgames"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p15015"
+      }
+    ]
+  },
+  {
     "id": "slow-burn-games",
     "name": "Slow Burn Games",
     "aliases": [],

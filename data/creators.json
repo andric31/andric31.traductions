@@ -839,6 +839,26 @@
         "type": "f95zone",
         "label": "F95Zone",
         "url": "https://f95zone.to/members/jas0nton.5074954/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/JasonTon"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://jasonton.itch.io/mayfly"
+      },
+      {
+        "type": "twitter",
+        "label": "X",
+        "url": "https://x.com/JasonTonGames"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/3ByDCmKh53"
       }
     ]
   },

@@ -700,6 +700,38 @@
     "vndbId": "p8640"
   },
   {
+    "id": "flynn974",
+    "name": "Flynn974",
+    "aliases": [
+      "Flynn"
+    ],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p20193",
+    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/user/219707488/82bdf6dbf3954d1b9d0918bdbaa654d8/eyJoIjoxMDAsInciOjEwMH0%3D/2.png?token-hash=mXr67CsFL1smmMyBEKD8n6XAiKm_ezeEtiKkgtfFwXY%3D&token-time=1788048000",
+    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/16383317/ce9f2e5bd6114ffb84c3ab98ec59c55e/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/1.png?token-hash=Iect12lOlYMVySo1n271oWpfcsEtfJ-hB7Iiu1I8fsU%3D&token-time=1788480000",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "295961"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/cw/Flynn974"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/Z3WTpjW3"
+      }
+    ]
+  },
+  {
     "id": "fpc-games",
     "name": "FPC-Games",
     "aliases": [],

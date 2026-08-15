@@ -438,6 +438,41 @@
     "vndbId": ""
   },
   {
+    "id": "crowlab",
+    "name": "CrowLab",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/15617795/16aa9092f32d404585067e163b0f5b52/eyJoIjoxMDAsInciOjEwMH0%3D/2.png?token-hash=xgMYUWWIXZo6Wa_hu-RQacudDIhV5lxXM7LQwbtfhNM%3D&token-time=1788048000",
+    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/15617795/f26a07f553f945e4822b33eaea9a0d47/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/5.jpeg?token-hash=B0SHSrMv4E8ksLjI45zso0j8jJtpUE0_gTbaPIbPcUY%3D&token-time=1788480000",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "309861"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/cw/CrowLab"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://crowlab.itch.io/"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/fcftqphD52"
+      }
+    ]
+  },
+  {
     "id": "crunchy-cake",
     "name": "Crunchy Cake",
     "aliases": [],

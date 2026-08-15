@@ -858,6 +858,47 @@
     ]
   },
   {
+    "id": "lament-entertainment",
+    "name": "Lament Entertainment",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p14984",
+    "avatar": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/1617765/avatars/ae1a75dd-9246-49d3-94c3-dbe9add11b52-380x380_22x0_754x754.png",
+    "banner": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/1617765/covers/27fef679-09be-4c92-8ddd-6b3e7928eae9-1240x0_1x380_1809x339.png",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "125534",
+      "275636"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "subscribestar",
+        "label": "Subscribestar",
+        "url": "https://subscribestar.art/dark-door-media"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://lament-entertainment.itch.io/"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/SzX3VNes4e"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p14984"
+      }
+    ]
+  },
+  {
     "id": "mannered-gentleman",
     "name": "Mannered Gentleman",
     "aliases": [],

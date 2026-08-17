@@ -1016,6 +1016,41 @@
     "vndbId": ""
   },
   {
+    "id": "mischievousbunny",
+    "name": "mischievousbunny",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/13263932/eb0aa0931fc148998be5c0a6cd15c490/eyJoIjozNjAsInciOjM2MH0%3D/2.png?token-hash=JfuBzmzhNwDNKGXpxrKjIAeEEvpiVmzS07qvaJyGUPg%3D&token-time=1788220800",
+    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/13263932/85b79a5b9fc64dd0834f901db1d2cb48/eyJ3IjoxOTIwLCJ3ZSI6MX0%3D/6.png?token-hash=bHFFEu3NXukszFi-2KTrWczQHUxe4POT24JbvILXrCk%3D&token-time=1788480000",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "237987"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/SuccubusDance"
+      },
+      {
+        "type": "subscribestar",
+        "label": "SubscribeStar",
+        "url": "https://subscribestar.art/succubus-dance"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://mischievousbunny.itch.io/succubus-dance"
+      }
+    ]
+  },
+  {
     "id": "nencity",
     "name": "Nencity",
     "aliases": [],

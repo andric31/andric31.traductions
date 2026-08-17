@@ -1016,6 +1016,36 @@
     "vndbId": ""
   },
   {
+    "id": "nencity",
+    "name": "Nencity",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/840281/fecdb32df38242f6b3bf9812054b0bf2/eyJ3Ijo2MjB9/3.png?token-hash=PWgbjyoSbix7xZKiEDz5qg0HQcVGvx-nDkQq3nkQEN4%3D",
+    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/840281/65838d26f45b48e7bb419c79dc5cd2e6/eyJ3IjoxOTIwLCJ3ZSI6MX0%3D/6.png?token-hash=4uKINmHKmdC9XF5SOlGXsnD-pybQUnnTa6moH6lAwnw%3D&token-time=1788480000",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "285782"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/NenCity"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/2WwNZXyAgb"
+      }
+    ]
+  },
+  {
     "id": "ntr-bakery",
     "name": "NTR Bakery",
     "aliases": [],

@@ -116,6 +116,36 @@
     ]
   },
   {
+    "id": "apple-tart-games",
+    "name": "Apple Tart Games",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4113610/cfa8379cfd4f4ba082763ea14c6c6173/eyJoIjozNjAsInciOjM2MH0%3D/3.png?token-hash=0ukgiMrUicGmZ9scRmxYNC-5zb16_xhlZEptMoWxoZA%3D&token-time=1788393600",
+    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4113610/572abfc7e6ba44599bb544eb487ad0f4/eyJ3IjoxOTIwLCJ3ZSI6MX0%3D/8.png?token-hash=Rgftk8UHKPIRsAIdPUuLep12A67uridtuaSdl64G7Ig%3D&token-time=1788480000",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "70909"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/AppleTartGames"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.com/invite/pHMAWgURNC"
+      }
+    ]
+  },
+  {
     "id": "art-of-lust",
     "name": "Art of Lust",
     "aliases": [],

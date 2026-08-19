@@ -117,8 +117,10 @@
   },
   {
     "id": "apple-tart-games",
-    "name": "Apple Tart Games",
-    "aliases": [],
+    "name": "Apple Tart",
+    "aliases": [
+      "Apple Tart Games"
+    ],
     "countryCode": "",
     "country": "",
     "creatorType": "",
@@ -129,7 +131,8 @@
     "shortPresentation": "",
     "presentation": "",
     "gameIds": [
-      "70909"
+      "70909",
+      "128585"
     ],
     "ignoredGameIds": [],
     "links": [
@@ -141,7 +144,12 @@
       {
         "type": "discord",
         "label": "Discord",
-        "url": "https://discord.com/invite/pHMAWgURNC"
+        "url": "https://discord.com/invite/pqNXMRufK6"
+      },
+      {
+        "type": "twitter",
+        "label": "Twitter",
+        "url": "https://twitter.com/AppleTartGames"
       }
     ]
   },

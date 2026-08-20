@@ -1440,7 +1440,7 @@
   // =========================
 
   const CAT_ALLOWED = ["VN", "Collection"];
-  const ENGINE_ALLOWED = ["Ren'Py", "RPGM", "Unity", "Godot", "Others", "Wolf RPG"];
+  const ENGINE_ALLOWED = ["Ren'Py", "RPGM", "Unity", "Godot", "HTML", "Others", "Wolf RPG"];
   const STATUS_ALLOWED = ["Completed", "Abandoned", "Onhold"];
   const ENGINE_RAW = {
     renpy: "Ren'Py",
@@ -1456,7 +1456,9 @@
     godot: "Godot",
     others: "Others",
     other: "Others",
-    html: "Others",
+    html: "HTML",
+    html5: "HTML",
+    web: "HTML",
     wolf: null,
     wolfrpg: "Wolf RPG",
     "wolf rpg": "Wolf RPG",

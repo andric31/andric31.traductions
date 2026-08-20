@@ -1791,6 +1791,31 @@
     ]
   },
   {
+    "id": "v1si0n4ry",
+    "name": "v1si0n4ry",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p9027",
+    "avatar": "",
+    "banner": "",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "9215"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p9027"
+      }
+    ]
+  },
+  {
     "id": "velkami",
     "name": "Velkami",
     "aliases": [],

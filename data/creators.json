@@ -1799,7 +1799,7 @@
     "creatorType": "individual",
     "primaryLanguage": "en",
     "vndbId": "p9027",
-    "avatar": "",
+    "avatar": "https://f95zone.to/data/avatars/l/412/412315.jpg?1518375459",
     "banner": "",
     "shortPresentation": "",
     "presentation": "",
@@ -1808,6 +1808,11 @@
     ],
     "ignoredGameIds": [],
     "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/v1si0n4ry.412315/"
+      },
       {
         "type": "vndb",
         "label": "VNDB",

@@ -846,6 +846,56 @@
     "vndbId": "p8640"
   },
   {
+    "id": "escovic-games",
+    "name": "Escovic Games",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/9929899/58f6bc737c024d2cb9434bf1942de558/eyJ3Ijo2MjB9/1.png?token-hash=kDNcmuaJD_VaPP5cGNk02N_kOjnA4i8qnqqYhjZD5lg%3D&token-time=1788566400",
+    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/9929899/ab33ae40e0b34a9eb7b98344bff92115/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/7.webp?token-hash=InvxsmPXCDdLCnMUcYXLCrn-GRYDnOlZYmrNhh4PUCU%3D&token-time=1788480000",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "271611"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/escovicgames"
+      },
+      {
+        "type": "subscribestar",
+        "label": "SuscribeStar",
+        "url": "https://subscribestar.adult/escovic-games"
+      },
+      {
+        "type": "twitter",
+        "label": "Twitter",
+        "url": "https://x.com/EscovicGames"
+      },
+      {
+        "type": "tiktok",
+        "label": "Tiktok",
+        "url": "https://www.tiktok.com/@escovicgames"
+      },
+      {
+        "type": "bluesky",
+        "label": "bluesky",
+        "url": "https://bsky.app/profile/escovicgames.bsky.social"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/uTeTKeEWYm"
+      }
+    ]
+  },
+  {
     "id": "flynn974",
     "name": "Flynn974",
     "aliases": [

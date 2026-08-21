@@ -576,6 +576,54 @@
     "vndbId": "p12365"
   },
   {
+    "id": "deepsleep",
+    "name": "DeepSleep",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "amateur_group",
+    "primaryLanguage": "en",
+    "vndbId": "p7321",
+    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/884865/10a2be4729ea4e11b4bd3827b7623224/eyJoIjoxMDAsInciOjEwMH0%3D/1.gif?token-hash=KD-LX1VnuDnZLbtqQBh1mZS0Jp_bTUz7mUc6dCLR-gQ%3D&token-time=1788566400",
+    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/884865/30acdec7cc5945219bd584f8bc541676/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/1.jpg?token-hash=8x4IgX19MP9Z_Yz4B_0iApZOqaSmKTI3EP-0pHKiCKY%3D&token-time=1788480000",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "6289",
+      "14536",
+      "23878",
+      "272992"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "website",
+        "label": "Website",
+        "url": "http://www.deepsleepgames.com/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/deepsleep"
+      },
+      {
+        "type": "subscribestar",
+        "label": "Subscribestar",
+        "url": "https://subscribestar.adult/deepsleepgames"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/VTaRmxV"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p7321"
+      }
+    ]
+  },
+  {
     "id": "dimajio333",
     "name": "Dimajio333",
     "aliases": [],

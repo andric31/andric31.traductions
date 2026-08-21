@@ -1217,6 +1217,63 @@
     ]
   },
   {
+    "id": "mr-rabbit-team",
+    "name": "Mr. Rabbit Team",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "amateur_group",
+    "primaryLanguage": "en",
+    "vndbId": "p22576",
+    "avatar": "https://img.itch.zone/aW1nLzc4NTg1NDcucG5n/original/78JqSl.png",
+    "banner": "https://img.itch.zone/aW1nLzc4NTg1NDcucG5n/original/78JqSl.png",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "17958",
+      "46791",
+      "220979"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "website",
+        "label": "Website",
+        "url": "https://www.mrrabbitteam.com/"
+      },
+      {
+        "type": "subscribestar",
+        "label": "Subscribestar",
+        "url": "https://subscribestar.adult/mrrabbitteamsnzk"
+      },
+      {
+        "type": "subscribestar",
+        "label": "SubscribeStar",
+        "url": "https://subscribestar.adult/wilykatsadventure"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://m-rabbit.itch.io/"
+      },
+      {
+        "type": "twitter",
+        "label": "X/Twitter",
+        "url": "https://x.com/MrRabbitTeam"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.com/invite/G6wB7Q2upZ"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p22576"
+      }
+    ]
+  },
+  {
     "id": "nencity",
     "name": "Nencity",
     "aliases": [],

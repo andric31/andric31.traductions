@@ -1274,6 +1274,36 @@
     ]
   },
   {
+    "id": "msteph",
+    "name": "msTeph!",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://f95zone.to/data/avatars/l/4050/4050637.jpg?1787211612",
+    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/11939927/851f309ebb9547799f0aafbd227227a7/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/3.png?token-hash=nXPnkB80Xmi8zslcf8Bi14xDPIbPZ7ORGh3CiFJybAo%3D&token-time=1788480000",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "202593"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/msteph.4050637/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/msteph"
+      }
+    ]
+  },
+  {
     "id": "nencity",
     "name": "Nencity",
     "aliases": [],

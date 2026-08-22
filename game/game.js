@@ -2350,6 +2350,9 @@ function renderVideoBlock({ id, videoUrl }) {
       if (t === "auto avec correction") {
         return { title: "🤖 Traduction automatique avec correction", note: "Version pré-corrigée en automatique." };
       }
+      if (t === "par ia") {
+        return { title: "🤖 Traduction automatique par IA", note: "Version traduite automatiquement par IA." };
+      }
       if (t === "auto avec relecture") {
         return { title: "👀 Traduction automatique avec relecture", note: "Version pré-relue manuellement." };
       }

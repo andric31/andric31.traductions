@@ -478,7 +478,9 @@
   {
     "id": "cosmobot-7-0",
     "name": "Cosmobot-7.0",
-    "aliases": [],
+    "aliases": [
+      "Cosmobot"
+    ],
     "countryCode": "",
     "country": "",
     "creatorType": "",

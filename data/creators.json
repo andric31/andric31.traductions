@@ -476,6 +476,36 @@
     "vndbId": ""
   },
   {
+    "id": "cosmobot-7-0",
+    "name": "Cosmobot-7.0",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/13052205/51f395b6a12743c88971fa7381ef8ba9/eyJoIjoxMDAsInciOjEwMH0%3D/5.png?token-hash=740sdmojQLlp9WUkYTREb0x4Ud8e5bL67WH_SqBaZHQ%3D&token-time=1788652800",
+    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/13052205/e4b7029c8edd4571b84e761bd64e3f80/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/8.png?token-hash=wWMBJEfXaWBa7EOQ2hg1EqdkKUrltwYzz2N6cgI4C6w%3D&token-time=1788480000",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "275823"
+    ],
+    "ignoredGameIds": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/cw/cosmobot70"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.com/invite/gTfB4YTPCv"
+      }
+    ]
+  },
+  {
     "id": "crowlab",
     "name": "CrowLab",
     "aliases": [],

@@ -44,7 +44,8 @@
     "country": "",
     "creatorType": "individual",
     "primaryLanguage": "en",
-    "vndbId": "p16911"
+    "vndbId": "p16911",
+    "otherGames": []
   },
   {
     "id": "ahvl",
@@ -77,7 +78,8 @@
     "country": "",
     "creatorType": "",
     "primaryLanguage": "",
-    "vndbId": ""
+    "vndbId": "",
+    "otherGames": []
   },
   {
     "id": "aldor",
@@ -113,7 +115,8 @@
         "label": "Subscribestar",
         "url": "https://subscribestar.adult/aldor"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "apple-tart-games",
@@ -151,7 +154,8 @@
         "label": "Twitter",
         "url": "https://twitter.com/AppleTartGames"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "art-of-lust",
@@ -183,7 +187,8 @@
     "country": "",
     "creatorType": "",
     "primaryLanguage": "",
-    "vndbId": ""
+    "vndbId": "",
+    "otherGames": []
   },
   {
     "id": "astaros3d",
@@ -224,7 +229,87 @@
     "country": "",
     "creatorType": "individual",
     "primaryLanguage": "en",
-    "vndbId": "p27030"
+    "vndbId": "p27030",
+    "otherGames": []
+  },
+  {
+    "id": "azienda",
+    "name": "Azienda",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "amateur_group",
+    "primaryLanguage": "en",
+    "vndbId": "p10907",
+    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4331938/d79061f041f74da693e03a97c77c94f6/eyJoIjozNjAsInciOjM2MH0%3D/11.png?token-hash=Tmw6BuqLODUYEXSywR8-JJyEcC8Z1MWJiOAuuzQqiNs%3D&token-time=1788739200",
+    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4331938/053d14e105ed4e72ba719e5917ec1b39/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/27.png?token-hash=iGVHMu1GCeatACG1-NJI38txJzk2ap_JnV9lFEQGXXA%3D&token-time=1788480000",
+    "shortPresentation": "",
+    "presentation": "Les membres sont Furoshiki, Operae, Mint et Cy (CyCaDeLiC).",
+    "gameIds": [
+      "61634",
+      "66415",
+      "131246",
+      "252031"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "website",
+        "label": "Webpage",
+        "url": "https://aziendagames.com/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/azienda"
+      },
+      {
+        "type": "subscribestar",
+        "label": "SubscribeStar",
+        "url": "https://subscribestar.adult/azienda"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://azienda.itch.io/"
+      },
+      {
+        "type": "twitter",
+        "label": "Xitter",
+        "url": "https://x.com/AziendaGames"
+      },
+      {
+        "type": "bluesky",
+        "label": "Bluesky",
+        "url": "https://bsky.app/profile/aziendagames.bsky.social"
+      },
+      {
+        "type": "pixiv",
+        "label": "Pixiv",
+        "url": "https://www.pixiv.net/en/users/52441207"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.com/invite/PvkZNEHqnZ"
+      },
+      {
+        "type": "dlsite",
+        "label": "Ci-en",
+        "url": "https://ci-en.dlsite.com/creator/30231"
+      },
+      {
+        "type": "youtube",
+        "label": "Youtube",
+        "url": "https://www.youtube.com/@AziendaGames"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p10907"
+      }
+    ]
   },
   {
     "id": "baap",
@@ -272,7 +357,8 @@
     "country": "",
     "creatorType": "individual",
     "primaryLanguage": "en",
-    "vndbId": "p14117"
+    "vndbId": "p14117",
+    "otherGames": []
   },
   {
     "id": "black-cat",
@@ -303,7 +389,8 @@
     "country": "",
     "creatorType": "",
     "primaryLanguage": "",
-    "vndbId": ""
+    "vndbId": "",
+    "otherGames": []
   },
   {
     "id": "byaka-games",
@@ -329,7 +416,8 @@
     "country": "",
     "creatorType": "amateur_group",
     "primaryLanguage": "en",
-    "vndbId": "p13157"
+    "vndbId": "p13157",
+    "otherGames": []
   },
   {
     "id": "chaste-degenerate",
@@ -370,7 +458,8 @@
         "label": "itch.io",
         "url": "https://chaste-degenerate.itch.io/"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "cheesecake-studio",
@@ -428,7 +517,8 @@
         "label": "VNDB",
         "url": "https://vndb.org/p27111"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "chefnts",
@@ -453,7 +543,8 @@
         "label": "Patreon",
         "url": "https://www.patreon.com/ChefNTS"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "comrade-x",
@@ -473,7 +564,8 @@
     "country": "",
     "creatorType": "",
     "primaryLanguage": "",
-    "vndbId": ""
+    "vndbId": "",
+    "otherGames": []
   },
   {
     "id": "cosmobot-7-0",
@@ -505,7 +597,8 @@
         "label": "Discord",
         "url": "https://discord.com/invite/gTfB4YTPCv"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "crowlab",
@@ -540,7 +633,8 @@
         "label": "Discord",
         "url": "https://discord.gg/fcftqphD52"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "crunchy-cake",
@@ -565,7 +659,8 @@
     "country": "",
     "creatorType": "",
     "primaryLanguage": "",
-    "vndbId": ""
+    "vndbId": "",
+    "otherGames": []
   },
   {
     "id": "damned-studios",
@@ -605,7 +700,8 @@
     "country": "",
     "creatorType": "amateur_group",
     "primaryLanguage": "en",
-    "vndbId": "p12365"
+    "vndbId": "p12365",
+    "otherGames": []
   },
   {
     "id": "deepsleep",
@@ -653,7 +749,8 @@
         "label": "VNDB",
         "url": "https://vndb.org/p7321"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "dimajio333",
@@ -689,7 +786,8 @@
     "country": "",
     "creatorType": "individual",
     "primaryLanguage": "en",
-    "vndbId": "p16774"
+    "vndbId": "p16774",
+    "otherGames": []
   },
   {
     "id": "dinotail-games",
@@ -744,7 +842,8 @@
         "label": "VNDB",
         "url": "https://vndb.org/p18724"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "dreambig-games",
@@ -828,7 +927,8 @@
     "country": "",
     "creatorType": "amateur_group",
     "primaryLanguage": "en",
-    "vndbId": "p24552"
+    "vndbId": "p24552",
+    "otherGames": []
   },
   {
     "id": "drpinkcake",
@@ -875,7 +975,8 @@
     "country": "",
     "creatorType": "individual",
     "primaryLanguage": "en",
-    "vndbId": "p8640"
+    "vndbId": "p8640",
+    "otherGames": []
   },
   {
     "id": "escovic-games",
@@ -925,7 +1026,8 @@
         "label": "Discord",
         "url": "https://discord.gg/uTeTKeEWYm"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "flynn974",
@@ -957,7 +1059,8 @@
         "label": "Discord",
         "url": "https://discord.gg/Z3WTpjW3"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "fpc-games",
@@ -984,7 +1087,8 @@
     "country": "",
     "creatorType": "",
     "primaryLanguage": "",
-    "vndbId": ""
+    "vndbId": "",
+    "otherGames": []
   },
   {
     "id": "gfc-studio",
@@ -1022,7 +1126,8 @@
         "label": "Discord",
         "url": "https://discord.com/invite/dh82H69vhF"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "horny-hydra-games",
@@ -1048,7 +1153,8 @@
         "label": "F95zone",
         "url": "https://f95zone.to/members/madzeal.360720/"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "iceridlah-games",
@@ -1075,7 +1181,8 @@
     "country": "",
     "creatorType": "individual",
     "primaryLanguage": "en",
-    "vndbId": "p7168"
+    "vndbId": "p7168",
+    "otherGames": []
   },
   {
     "id": "jasonton",
@@ -1115,7 +1222,8 @@
         "label": "Discord",
         "url": "https://discord.gg/3ByDCmKh53"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "lament-entertainment",
@@ -1156,7 +1264,8 @@
         "label": "VNDB",
         "url": "https://vndb.org/p14984"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "lewdspace",
@@ -1186,7 +1295,8 @@
         "label": "Discord",
         "url": "https://discord.gg/gwZKNENRdx"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "mannered-gentleman",
@@ -1211,7 +1321,8 @@
     "country": "",
     "creatorType": "",
     "primaryLanguage": "",
-    "vndbId": ""
+    "vndbId": "",
+    "otherGames": []
   },
   {
     "id": "mischievousbunny",
@@ -1246,7 +1357,8 @@
         "label": "Itch.io",
         "url": "https://mischievousbunny.itch.io/succubus-dance"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "mr-rabbit-team",
@@ -1303,7 +1415,8 @@
         "label": "VNDB",
         "url": "https://vndb.org/p22576"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "msteph",
@@ -1334,7 +1447,8 @@
         "label": "Patreon",
         "url": "https://www.patreon.com/msteph"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "nencity",
@@ -1364,7 +1478,8 @@
         "label": "Discord",
         "url": "https://discord.gg/2WwNZXyAgb"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "ntr-bakery",
@@ -1404,7 +1519,8 @@
         "label": "VNDB",
         "url": "https://vndb.org/p27657"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "otb-games",
@@ -1444,7 +1560,8 @@
         "label": "Twitter",
         "url": "https://x.com/OtB_AdultGames"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "p1nk-ang3l",
@@ -1497,7 +1614,8 @@
     "country": "",
     "creatorType": "individual",
     "primaryLanguage": "en",
-    "vndbId": "p24879"
+    "vndbId": "p24879",
+    "otherGames": []
   },
   {
     "id": "partedes",
@@ -1533,7 +1651,8 @@
         "label": "VNDB",
         "url": "https://vndb.org/p18811"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "phillygames",
@@ -1591,7 +1710,8 @@
     "country": "",
     "creatorType": "individual",
     "primaryLanguage": "en",
-    "vndbId": "p7162"
+    "vndbId": "p7162",
+    "otherGames": []
   },
   {
     "id": "pixil",
@@ -1622,7 +1742,8 @@
     "country": "",
     "creatorType": "",
     "primaryLanguage": "",
-    "vndbId": ""
+    "vndbId": "",
+    "otherGames": []
   },
   {
     "id": "ratedr",
@@ -1652,7 +1773,8 @@
         "label": "Discord",
         "url": "https://discord.gg/VYeBTp6Jj"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "red-lighthouse",
@@ -1688,7 +1810,8 @@
         "label": "VNDB",
         "url": "https://vndb.org/p13999"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "sadpepper",
@@ -1728,7 +1851,8 @@
     "country": "",
     "creatorType": "individual",
     "primaryLanguage": "en",
-    "vndbId": "p16774"
+    "vndbId": "p16774",
+    "otherGames": []
   },
   {
     "id": "salr-games",
@@ -1775,7 +1899,8 @@
         "label": "VNDB",
         "url": "https://vndb.org/p15015"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "sinkusin",
@@ -1815,7 +1940,8 @@
         "label": "itch.io",
         "url": "https://sinkusin.itch.io/"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "slow-burn-games",
@@ -1863,7 +1989,8 @@
     "country": "",
     "creatorType": "individual",
     "primaryLanguage": "en",
-    "vndbId": "p12240"
+    "vndbId": "p12240",
+    "otherGames": []
   },
   {
     "id": "snowstorm",
@@ -1916,7 +2043,8 @@
         "label": "VNDB",
         "url": "https://vndb.org/p28583"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "society-of-lust",
@@ -1959,7 +2087,8 @@
     "country": "",
     "creatorType": "amateur_group",
     "primaryLanguage": "en",
-    "vndbId": "p7575"
+    "vndbId": "p7575",
+    "otherGames": []
   },
   {
     "id": "storyandmagic",
@@ -1989,7 +2118,8 @@
     "country": "",
     "creatorType": "",
     "primaryLanguage": "",
-    "vndbId": ""
+    "vndbId": "",
+    "otherGames": []
   },
   {
     "id": "trinciapapere",
@@ -2011,7 +2141,8 @@
     "country": "",
     "creatorType": "",
     "primaryLanguage": "",
-    "vndbId": ""
+    "vndbId": "",
+    "otherGames": []
   },
   {
     "id": "ultra-nova-games",
@@ -2046,7 +2177,8 @@
         "label": "Discord",
         "url": "https://discord.com/invite/DxSkKWx4j3"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "v1si0n4ry",
@@ -2076,7 +2208,8 @@
         "label": "VNDB",
         "url": "https://vndb.org/p9027"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "velkami",
@@ -2112,7 +2245,8 @@
         "label": "VNDB",
         "url": "https://vndb.org/p13622"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "vesperproxy",
@@ -2142,7 +2276,8 @@
         "label": "X",
         "url": "https://x.com/VesperProxy3D"
       }
-    ]
+    ],
+    "otherGames": []
   },
   {
     "id": "vilkas-creative",
@@ -2205,7 +2340,8 @@
     "country": "",
     "creatorType": "amateur_group",
     "primaryLanguage": "en",
-    "vndbId": "p17713"
+    "vndbId": "p17713",
+    "otherGames": []
   },
   {
     "id": "x3rr4",
@@ -2261,6 +2397,7 @@
     "country": "",
     "creatorType": "individual",
     "primaryLanguage": "en",
-    "vndbId": "p10924"
+    "vndbId": "p10924",
+    "otherGames": []
   }
 ]

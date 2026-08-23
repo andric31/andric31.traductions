@@ -927,6 +927,47 @@
     "otherGames": []
   },
   {
+    "id": "domper",
+    "name": "Domper",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://f95zone.to/data/avatars/l/1731/1731885.jpg?1781324250",
+    "banner": "https://pbs.twimg.com/profile_banners/2069981676726292481/1785358105/1500x500",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "302544"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/domper.1731885/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/cw/Domper"
+      },
+      {
+        "type": "twitter",
+        "label": "X/Twitter",
+        "url": "https://x.com/DomperGames"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/U53P3x9KS"
+      }
+    ]
+  },
+  {
     "id": "dreambig-games",
     "name": "DreamBig Games",
     "aliases": [

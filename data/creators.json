@@ -1380,6 +1380,26 @@
     "otherGames": []
   },
   {
+    "id": "lokitos-games",
+    "name": "Lokitos Games",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "",
+    "banner": "",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "131634"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": []
+  },
+  {
     "id": "mannered-gentleman",
     "name": "Mannered Gentleman",
     "aliases": [],

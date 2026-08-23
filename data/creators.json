@@ -1858,7 +1858,7 @@
     "aliases": [
       "Dimajio333"
     ],
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/15577675/9d50c1da72ce4440ac1c1bd39a182fe0/eyJ3IjoxMjB9/1.png?token-hash=p-sbIUSSANgFePU5pQODdrs4kpNKhrZOmMOj6OLXWNE%3D&token-time=1787356800",
+    "avatar": "https://images.kaguya.io/producers/019df7a4-c47c-72b2-ba5d-fe8bc081b74e-360w.webp",
     "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/15577675/ab24abb66f534765bdd4869fd1c93e80/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/1.png?token-hash=BzI71MdORDsA5J5qJ3xGACkH5ZVF7iHoKAaOgOI-ekA%3D&token-time=1788480000",
     "shortPresentation": "Créateur indépendant de visual novels pour adultes, avec un intérêt marqué pour les récits NTR.",
     "presentation": "SadPepper crée des visual novels pour adultes principalement orientés vers le genre NTR. Il présente cette activité comme un projet personnel développé par passion, avec des jeux mis à disposition gratuitement et un soutien communautaire facultatif.",
@@ -1873,17 +1873,12 @@
       {
         "type": "patreon",
         "label": "Patreon",
-        "url": "https://www.patreon.com/cw/SadPepper153"
+        "url": "https://www.patreon.com/SadPepper153"
       },
       {
         "type": "vndb",
         "label": "VNDB",
         "url": "https://vndb.org/p16774"
-      },
-      {
-        "type": "patreon",
-        "label": "Patreon",
-        "url": "https://www.patreon.com/SadPepper153"
       }
     ],
     "countryCode": "",

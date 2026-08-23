@@ -740,6 +740,48 @@
     "otherGames": []
   },
   {
+    "id": "dark-anu",
+    "name": "Dark Anu",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/7227120/733b064fcade4870bc8157f6d6f18b0f/eyJoIjoxMDAsInciOjEwMH0%3D/3.png?token-hash=R8F2u-_Oad3zw3tynX42ilEPOnm9rY7TCs-6r6jr-P4%3D&token-time=1788739200",
+    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/7227120/43fa3d964abb4f3c9ccd6260562de8f5/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/5.png?token-hash=jRwBM0PprIXNz347q7ggTFj0Y1Aynd0XPaC75jzpTvQ%3D&token-time=1788480000",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "131634",
+      "135406"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "website",
+        "label": "Website",
+        "url": "https://darkanu.com/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/darkanu"
+      },
+      {
+        "type": "subscribestar",
+        "label": "Subscribestar",
+        "url": "https://subscribestar.adult/darkanu"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/vw9YWumSuk"
+      }
+    ]
+  },
+  {
     "id": "deepsleep",
     "name": "DeepSleep",
     "aliases": [],

@@ -93,6 +93,11 @@
     .event-admin-week-game strong { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .event-admin-week-game small { display:block; color:var(--muted); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .event-admin-choice-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .event-admin-action-head { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+    .event-admin-action-head h2 { margin:0; }
+    .event-admin-day-item { display:grid; grid-template-columns:150px minmax(135px,.55fr) 1fr auto; gap:10px; align-items:center; padding:8px 10px; border-radius:13px; border:1px solid var(--border, var(--auth-border)); background:rgba(255,255,255,.035); }
+    .event-admin-day-item.is-selected-week { border-color:rgba(255,184,77,.58); background:rgba(255,184,77,.10); }
+    .event-admin-day-item.is-today { box-shadow:0 0 0 1px rgba(126,224,161,.42) inset; }
     @media (max-width:850px){ .event-admin-advent-grid { grid-template-columns:repeat(3, minmax(0, 1fr)); } .event-admin-advent-fields { grid-template-columns:1fr; } }
 
     .event-admin-advent-grid { display:grid; grid-template-columns:repeat(6, minmax(0, 1fr)); gap:10px; margin-top:10px; }
@@ -104,7 +109,7 @@
     .event-admin-advent-editor { display:grid; gap:10px; margin-top:12px; padding:12px; border-radius:16px; border:1px solid rgba(255,184,77,.35); background:rgba(255,184,77,.07); }
     .event-admin-advent-editor h4 { margin:0; }
     .event-admin-advent-fields { display:grid; grid-template-columns:80px 1fr 1fr; gap:10px; }
-    @media (max-width:850px){ .event-admin-main-actions, .event-admin-stop-actions, .event-admin-grid, .event-admin-row, .event-admin-current, .event-admin-event-item, .event-admin-week-item { grid-template-columns:1fr; } .event-admin-cover { width:150px; } .event-admin-week-thumb { width:100%; height:120px; } .event-admin-linked-grid, .event-admin-game { grid-template-columns:1fr; } .event-admin-game .auth-btn { grid-column:1 / -1; } .event-admin-event-actions { justify-content:stretch; } }
+    @media (max-width:850px){ .event-admin-main-actions, .event-admin-stop-actions, .event-admin-grid, .event-admin-row, .event-admin-current, .event-admin-event-item, .event-admin-week-item, .event-admin-day-item { grid-template-columns:1fr; } .event-admin-cover { width:150px; } .event-admin-week-thumb { width:100%; height:120px; } .event-admin-linked-grid, .event-admin-game { grid-template-columns:1fr; } .event-admin-game .auth-btn { grid-column:1 / -1; } .event-admin-event-actions { justify-content:stretch; } }
   </style>
 </head>
 <body>
@@ -140,8 +145,11 @@
         <div id="activeEventState" class="event-admin-active-banner off">Chargement de l’état actuel…</div>
         <div id="eventsList" class="event-admin-event-list"><div class="event-admin-msg">Chargement de la liste…</div></div>
 
-        <form id="eventForm" class="event-admin-card" autocomplete="off">
-          <h2 id="eventActionTitle">☀️ Gestion de cet événement</h2>
+        <form id="eventForm" class="event-admin-card" autocomplete="off" hidden>
+          <div class="event-admin-action-head">
+            <h2 id="eventActionTitle">📅 Gestion de cet événement</h2>
+            <button class="auth-btn mini" id="closeEventBtn" type="button">Fermer</button>
+          </div>
 
           <div class="event-admin-linked-panel" id="eventLinkedPanel">
             <div class="event-admin-msg">Chargement de l’événement sélectionné…</div>
@@ -173,6 +181,7 @@
             <label class="auth-label"><span>Mode si aucun jeu ne correspond <span class="event-admin-help" tabindex="0" data-tip="Détermine quoi faire si aucun jeu ne contient les mots-clés demandés.">?</span></span>
               <select class="auth-select" id="fallbackMode">
                 <option value="weekly_random">Choisir un jeu au hasard chaque semaine</option>
+                <option value="daily_random">Choisir un jeu au hasard chaque jour</option>
                 <option value="">Ne rien afficher</option>
               </select>
             </label>
@@ -190,10 +199,10 @@
     <div id="eventMsg" class="event-admin-hidden">Chargement…</div>
     <div id="currentGame" class="event-admin-hidden"></div>
 
-    <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
+    <section class="auth-card auth-hidden" id="gamePickerSection" data-auth-only data-role-min="admin" hidden>
       <div class="event-admin-card">
-        <h2>🔎 Changer le jeu affiché <span class="event-admin-help" tabindex="0" data-tip="Cette partie sert à changer le jeu affiché pour la semaine sélectionnée.">?</span></h2>
-        <p class="event-admin-note" style="margin-top:0;">Clique d’abord sur <strong>Changer</strong> dans une semaine du calendrier, puis cherche le jeu ici et clique sur <strong>Changer</strong>. Le changement sera sauvegardé pour cette semaine.</p>
+        <h2>🔎 Changer le jeu proposé <span class="event-admin-help" tabindex="0" data-tip="Cette partie sert à changer le jeu du jour ou de la semaine sélectionnée dans le calendrier.">?</span></h2>
+        <p class="event-admin-note" style="margin-top:0;">Clique d’abord sur <strong>Changer</strong> dans le calendrier de l’événement, puis cherche le jeu ici et clique sur <strong>Changer</strong>. Le changement sera sauvegardé pour la période sélectionnée.</p>
         <label class="auth-label"><span>Recherche <span class="event-admin-help" tabindex="0" data-tip="Tu peux chercher par titre, tag, ID ou UID. Le bouton Changer force ce jeu sur la page événement.">?</span></span><input class="auth-input" id="gameSearch" placeholder="Titre, tag, ID…" /></label>
         <div class="event-admin-pill-list" id="gamesSummary"></div>
         <div class="event-admin-results" id="gamesResults"><div class="event-admin-msg">Chargement des jeux…</div></div>
@@ -234,13 +243,36 @@
     let configDefaultEventId = '';
     let eventCatalog = [];
     let allGames = [];
+    let loadedGamesUrl = '';
     let currentSelection = null;
     let selectedWeekKey = ''; // semaine ciblée quand on clique sur Changer dans le calendrier
+    let selectedDayKey = ''; // journée ciblée pour les événements quotidiens
     let selectedAdventDay = 1; // case ciblée pour le calendrier de l’avent
 
     const $ = (id) => document.getElementById(id);
     const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const norm = (v) => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+    function isNoEventEntry(event) {
+      const type = norm(event?.type || event?.mode || '').replace(/_/g, '-');
+      return event?.enabled === false || type === 'no-event' || String(event?.id || '') === 'aucun-evenement';
+    }
+
+    function setEventManagementOpen(open, showGamePicker = true) {
+      const form = $('eventForm');
+      const picker = $('gamePickerSection');
+      if (form) form.hidden = !open;
+      if (picker) picker.hidden = !open || !showGamePicker;
+    }
+
+    function closeEventManagement() {
+      activeEvent = null;
+      currentSelection = null;
+      selectedWeekKey = '';
+      selectedDayKey = '';
+      setEventManagementOpen(false);
+      renderEventsList();
+    }
 
     async function fetchJson(url, fallback, options = {}) {
       const timeoutMs = Number(options.timeoutMs || 12000);
@@ -424,14 +456,34 @@
       const baseEvent = await fetchJson(`/evenements/${encodeURIComponent(id)}.json`, null, { timeoutMs: 8000 });
       if (!baseEvent) throw new Error(`Impossible de charger /evenements/${id}.json`);
       activeEvent = await loadSavedEvent(baseEvent);
+      selectedWeekKey = '';
+      selectedDayKey = '';
       fillForm(activeEvent);
-      renderCurrent();
+      const needsGames = !isNoEventEntry(activeEvent) && !isAdventEvent(activeEvent);
+      setEventManagementOpen(true, needsGames);
+      if (needsGames) await ensureGamesLoaded(activeEvent);
+      await renderCurrent();
+      if (needsGames) renderGames();
       renderEventsList();
       $('eventMsg').textContent = `Événement chargé : ${id}.`;
       $('eventMsg').className = 'event-admin-msg ok';
     }
 
-    async function saveEventToSite(event, message = 'Événement sauvegardé sur le site.') {
+    async function ensureGamesLoaded(event) {
+      const listUrl = String(event?.list_url || DEFAULT_LIST_URL).trim() || DEFAULT_LIST_URL;
+      if (allGames.length && loadedGamesUrl === listUrl) return allGames;
+      $('gamesResults').innerHTML = '<div class="event-admin-msg">Chargement des jeux…</div>';
+      const rawGames = await fetchDefaultListWithBackup(listUrl, [], { timeoutMs: 10000 });
+      allGames = flattenGames(rawGames);
+      loadedGamesUrl = listUrl;
+      if (!allGames.length) {
+        $('gamesResults').innerHTML = '<div class="event-admin-msg err">Aucun jeu chargé.</div>';
+        $('gamesSummary').innerHTML = '<span class="event-admin-pill warn">Jeux : 0</span>';
+      }
+      return allGames;
+    }
+
+    async function persistEvent(event) {
       const res = await fetch('/api/evenement', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -440,6 +492,11 @@
       });
       const data = await res.json().catch(() => null);
       if (!res.ok || !data?.ok) throw new Error(data?.error || 'Sauvegarde impossible.');
+      return data;
+    }
+
+    async function saveEventToSite(event, message = 'Événement sauvegardé sur le site.') {
+      const data = await persistEvent(event);
       activeEvent = { ...(activeEvent || {}), ...(data.event || event) };
       fillForm(activeEvent);
       renderCurrent();
@@ -558,6 +615,11 @@
     }
     function pickGame(games,event){
       const weeklyMode = isWeeklyCalendarEvent(event);
+      const dailyMode = isDailyGameEvent(event);
+      const currentDayKey = getActiveDailyDateKey(event);
+      const dailyForced = dailyMode ? findGameByRef(games, getDailyGameRef(event, currentDayKey)) : null;
+      if (dailyForced) return { game:dailyForced, reason:'Choix manuel pour cette journée', matchedKeywords:[], score:null };
+
       const currentWeekKey = weekKeyFromDate(getLastChangeBoundary(new Date(), event));
       const weeklyForced = findGameByRef(games, getWeeklyOverride(event, currentWeekKey));
       if (weeklyForced) return { game:weeklyForced, reason:'', matchedKeywords:[], score:null };
@@ -565,7 +627,7 @@
       // Pour les événements à calendrier hebdomadaire, la source de vérité est le calendrier :
       // 1) changement manuel de la semaine, 2) rotation automatique.
       // L'ancien "selected_game_id" global est ignoré pour éviter d'avoir 3 jeux différents.
-      if (!weeklyMode) {
+      if (!weeklyMode && !dailyMode) {
         const wantedId=String(event?.selected_game_id||'').trim(); const wantedUid=String(event?.selected_game_uid||'').trim();
         if(wantedId || wantedUid){
           const forced=findGameByRef(games, { id:wantedId, uid:wantedUid });
@@ -578,12 +640,12 @@
       let blockedApplied = false;
       const applyBlocked = (entries) => { const base=dedupePool(entries); const filtered=base.filter((entry)=>!isBlockedGame(entry.game,event)); if(filtered.length){ blockedApplied = filtered.length !== base.length; return filtered; } return base; };
       pool = applyBlocked(pool);
-      if((!pool.length || pool.every((entry)=>isBlockedGame(entry.game,event))) && String(event?.fallback_mode||'').trim()==='weekly_random') pool = applyBlocked(valid.map((g)=>({game:g, analysis:{score:0, found:[]}})).sort((a,b)=>getTitle(a.game).localeCompare(getTitle(b.game),'fr')));
+      if((!pool.length || pool.every((entry)=>isBlockedGame(entry.game,event))) && ['weekly_random','daily_random'].includes(String(event?.fallback_mode||'').trim())) pool = applyBlocked(valid.map((g)=>({game:g, analysis:{score:0, found:[]}})).sort((a,b)=>getTitle(a.game).localeCompare(getTitle(b.game),'fr')));
       if(!pool.length) return { game:null, reason:'Aucun jeu trouvé.', matchedKeywords:[], score:null };
 
-      const baseIndex = weeklyMode ? getCalendarWeekIndex(event) : getRotationIndex(event);
+      const baseIndex = dailyMode ? getDailyIndex(event, currentDayKey) : (weeklyMode ? getCalendarWeekIndex(event) : getRotationIndex(event));
       const selected = pool[(baseIndex + getCalendarSeedOffset(event, pool.length)) % pool.length];
-      const reasonBase = selected.analysis.found?.length ? `Auto : ${selected.analysis.found.join(', ')}` : 'Auto : rotation hebdomadaire';
+      const reasonBase = selected.analysis.found?.length ? `Auto : ${selected.analysis.found.join(', ')}` : `Auto : rotation ${dailyMode ? 'quotidienne' : 'hebdomadaire'}`;
       return { game:selected.game, reason: blockedApplied ? `${reasonBase} — jeux déjà utilisés ignorés` : reasonBase, matchedKeywords:selected.analysis.found || [], score:selected.analysis.score };
     }
 
@@ -630,6 +692,55 @@
       const id = String(event?.id || '').trim();
       const mode = String(event?.selection_mode || event?.selection || event?.change_frequency || '').toLowerCase();
       return id === 'ete-2026' || mode.includes('weekly') || mode.includes('semaine');
+    }
+
+    function isDailyGameEvent(event) {
+      const type = norm(event?.type || event?.mode || '');
+      const mode = norm(event?.selection_mode || event?.selection || event?.change_frequency || '');
+      return type.includes('daily') || type.includes('quotidien') || mode.includes('daily') || mode.includes('jour');
+    }
+
+    function getEventDateKeys(event) {
+      const start = parseDateOnly(event?.start_at);
+      const end = parseDateOnly(event?.end_at);
+      if (!start || !end || end.getTime() < start.getTime()) return [];
+      const keys = [];
+      for (const date = new Date(start); date.getTime() <= end.getTime() && keys.length < 31; date.setDate(date.getDate() + 1)) {
+        keys.push(weekKeyFromDate(date));
+      }
+      return keys;
+    }
+
+    function normalizeDailyGames(event) {
+      const raw = Array.isArray(event?.daily_games) ? event.daily_games : [];
+      const byDate = new Map(raw.map((item) => [String(item?.date || '').slice(0, 10), item]));
+      return getEventDateKeys(event).map((date) => ({ date, ...(byDate.get(date) || {}) }));
+    }
+
+    function getDailyGameRef(event, dateKey) {
+      const item = normalizeDailyGames(event).find((entry) => entry.date === dateKey);
+      if (!item || (!String(item.id || '').trim() && !String(item.uid || '').trim())) return null;
+      return item;
+    }
+
+    function setDailyGameRef(event, dateKey, patch) {
+      const days = normalizeDailyGames(event).map((item) => item.date === dateKey ? { ...item, ...patch, date: dateKey } : item);
+      return { ...event, daily_games: days };
+    }
+
+    function getActiveDailyDateKey(event, date = new Date()) {
+      const keys = getEventDateKeys(event);
+      if (!keys.length) return weekKeyFromDate(date);
+      const today = weekKeyFromDate(date);
+      if (today < keys[0]) return keys[0];
+      if (today > keys[keys.length - 1]) return keys[keys.length - 1];
+      return today;
+    }
+
+    function getDailyIndex(event, dateKey) {
+      const keys = getEventDateKeys(event);
+      const index = keys.indexOf(dateKey || getActiveDailyDateKey(event));
+      return Math.max(0, index);
     }
 
     function getCalendarFirstWeek(event) {
@@ -699,7 +810,7 @@
         .filter((entry)=>entry.analysis.score > 0)
         .sort((a,b)=>b.analysis.score-a.analysis.score || getTitle(a.game).localeCompare(getTitle(b.game),'fr'));
       pool = dedupePool(pool).filter((entry)=>!isBlockedGame(entry.game,event));
-      if (!pool.length && String(event?.fallback_mode || '').trim() === 'weekly_random') {
+      if (!pool.length && ['weekly_random','daily_random'].includes(String(event?.fallback_mode || '').trim())) {
         pool = dedupePool(valid.map((g)=>({ game:g, analysis:{ score:0, found:[] } })).sort((a,b)=>getTitle(a.game).localeCompare(getTitle(b.game),'fr')))
           .filter((entry)=>!isBlockedGame(entry.game,event));
       }
@@ -774,6 +885,61 @@
         </div>`;
     }
 
+    function renderDailyPanel(event) {
+      const panel = $('eventLinkedPanel');
+      if (!panel) return;
+      const days = normalizeDailyGames(event);
+      const autoEvent = { ...event, daily_games:[], selected_game_id:'', selected_game_uid:'' };
+      const pool = getAutoPoolForPreview(allGames, autoEvent);
+      const seed = getCalendarSeedOffset(event, pool.length);
+      const todayKey = weekKeyFromDate(new Date());
+      const activeKey = getActiveDailyDateKey(event);
+
+      const rows = days.map((day) => {
+        const manualGame = findGameByRef(allGames, getDailyGameRef(event, day.date));
+        const autoEntry = pool.length ? pool[(getDailyIndex(event, day.date) + seed) % pool.length] : null;
+        const game = manualGame || autoEntry?.game || null;
+        const image = game ? getImage(game) : '';
+        const date = parseDateOnly(day.date);
+        const dateLabel = date
+          ? new Intl.DateTimeFormat('fr-FR', { weekday:'long', day:'numeric', month:'long' }).format(date)
+          : day.date;
+        const label = manualGame ? 'Jeu choisi manuellement' : (game ? 'Choix automatique — tu peux le changer' : 'Aucun jeu trouvé');
+        return `
+          <div class="event-admin-day-item ${selectedDayKey === day.date ? 'is-selected-week' : ''} ${todayKey === day.date ? 'is-today' : ''}">
+            <span class="event-admin-week-thumb">${image ? `<img src="${esc(image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.closest('.event-admin-week-thumb').innerHTML='<span>🎮</span>'">` : '<span>🎮</span>'}</span>
+            <span class="event-admin-week-date">${esc(dateLabel)}${todayKey === day.date ? ' • aujourd’hui' : ''}</span>
+            <span class="event-admin-week-game"><strong>${esc(game ? getTitle(game) : 'À choisir')}</strong><small>${esc(label)}</small></span>
+            <button class="auth-btn mini" type="button" data-day-change="${esc(day.date)}">Changer</button>
+          </div>`;
+      }).join('') || '<div class="event-admin-msg err">Aucune journée définie pour cet événement.</div>';
+
+      const activeGame = currentSelection?.game || null;
+      const activeDate = parseDateOnly(activeKey);
+      const activeDateLabel = activeDate
+        ? new Intl.DateTimeFormat('fr-FR', { weekday:'long', day:'numeric', month:'long' }).format(activeDate)
+        : activeKey;
+
+      panel.innerHTML = `
+        <div class="event-admin-linked-head">
+          <div>
+            <h3 class="event-admin-linked-title">${esc(event.icon || event.emoji || '🎒')} ${esc(event.title || 'Rentrée scolaire')}</h3>
+            <p class="event-admin-linked-subtitle">Un jeu différent est proposé chaque jour. Clique sur « Changer » pour remplacer le choix d’une journée.</p>
+          </div>
+          <div class="event-admin-choice-actions">
+            <button class="auth-btn mini" id="regenerateDailyCalendarBtn" type="button" title="Conserve les jeux choisis manuellement et renouvelle les autres propositions.">🔄 Renouveler les choix automatiques</button>
+          </div>
+        </div>
+        <div class="event-admin-linked-grid">
+          <div class="event-admin-linked-box"><strong>🎯 Journée affichée</strong><small>${esc(activeDateLabel || '—')} — ${esc(activeGame ? getTitle(activeGame) : 'Aucun jeu')}</small></div>
+          <div class="event-admin-linked-box"><strong>🔁 Règle actuelle</strong><small>Un nouveau jeu chaque jour à ${esc(String(event.change_hour ?? 0))}h</small></div>
+        </div>
+        <div>
+          <strong>📆 Les 7 jeux de la semaine</strong>
+          <div class="event-admin-week-preview" style="margin-top:8px;">${rows}</div>
+        </div>`;
+    }
+
     function renderEventLinkedPanel(event) {
       const panel = $('eventLinkedPanel');
       if (!panel) return;
@@ -796,6 +962,11 @@
 
       if (isAdventEvent(event)) {
         renderAdventPanel(event);
+        return;
+      }
+
+      if (isDailyGameEvent(event)) {
+        renderDailyPanel(event);
         return;
       }
 
@@ -926,7 +1097,7 @@
         return `<article class="event-admin-game">
           ${image ? `<img src="${esc(image)}" alt="" referrerpolicy="no-referrer" onerror="this.parentElement.innerHTML='<span>🎮</span>'">` : '<div class="placeholder">🎮</div>'}
           <div><strong>${esc(getTitle(g))}</strong><small>ID : ${esc(id || '—')} ${uid ? `• UID : ${esc(uid)}` : ''}</small></div>
-          <button class="auth-btn mini" type="button" data-pick-id="${esc(id)}" data-pick-uid="${esc(uid)}" title="Change le jeu de la semaine sélectionnée, ou le jeu affiché maintenant si aucune semaine n’est sélectionnée.">Changer</button>
+          <button class="auth-btn mini" type="button" data-pick-id="${esc(id)}" data-pick-uid="${esc(uid)}" title="Change le jeu du jour ou de la semaine sélectionnée.">Changer</button>
         </article>`;
       }).join('') || '<div class="event-admin-msg">Aucun résultat.</div>';
     }
@@ -935,6 +1106,14 @@
       const event = formEvent();
       const game = findGameByRef(allGames, { id, uid });
       const pickedName = game ? getTitle(game) : 'jeu choisi';
+      if (isDailyGameEvent(event) && selectedDayKey) {
+        const next = setDailyGameRef(event, selectedDayKey, { id, uid, title:pickedName });
+        activeEvent = next;
+        fillForm(activeEvent);
+        await renderCurrent();
+        await saveEventToSite(next, `Jeu du ${selectedDayKey} changé et sauvegardé : ${pickedName}.`);
+        return;
+      }
       if (selectedWeekKey) {
         event.weekly_overrides = (event.weekly_overrides && typeof event.weekly_overrides === 'object') ? { ...event.weekly_overrides } : {};
         event.weekly_overrides[selectedWeekKey] = { id, uid, title: pickedName };
@@ -947,6 +1126,16 @@
       $('selectedUid').value = uid || '';
       renderCurrent();
       await saveEventToSite(formEvent(), `Jeu affiché maintenant changé et sauvegardé : ${pickedName}.`);
+    }
+
+    async function regenerateDailyCalendar() {
+      const event = formEvent();
+      if (!isDailyGameEvent(event)) return;
+      event.calendar_seed = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      selectedDayKey = '';
+      activeEvent = { ...(activeEvent || {}), ...event };
+      await renderCurrent();
+      await saveEventToSite(event, 'Les propositions automatiques ont été renouvelées. Les choix manuels sont conservés.');
     }
 
     async function regenerateAutomaticCalendar() {
@@ -968,31 +1157,12 @@
 
     async function init() {
       if (window.__ensureEventAdminPage && !window.__ensureEventAdminPage()) return;
-      const config = await fetchJson('/evenements/config.json', { event_actif:'ete-2026', event_files:['ete-2026'] });
+      const config = await fetchJson('/evenements/config.json', { event_actif:'aucun-evenement', event_files:['aucun-evenement'] });
       configDefaultEventId = String(config.event_actif || config.active_event || '').trim();
       await loadEventsState();
       await loadEventCatalog(config);
+      closeEventManagement();
       renderEventsList();
-
-      const eventId = String((activeState.enabled === false ? 'aucun-evenement' : activeState.active_event) || configDefaultEventId || eventCatalog[0]?.id || 'ete-2026').trim() || 'ete-2026';
-      await selectEvent(eventId);
-      $('eventMsg').textContent = `Événement chargé : ${eventId}. Chargement de la liste des jeux…`;
-      $('eventMsg').className = 'event-admin-msg ok';
-      $('gamesResults').innerHTML = '<div class="event-admin-msg">Chargement des jeux…</div>';
-
-      const rawGames = await fetchDefaultListWithBackup(activeEvent.list_url || DEFAULT_LIST_URL, [], { timeoutMs: 10000 });
-      allGames = flattenGames(rawGames);
-      if (!allGames.length) {
-        $('currentGame').innerHTML = '<div class="event-admin-msg err">Liste des jeux introuvable ou trop lente à charger. Vérifie list_url dans le JSON.</div>';
-        $('gamesResults').innerHTML = '<div class="event-admin-msg err">Aucun jeu chargé.</div>';
-        $('gamesSummary').innerHTML = '<span class="event-admin-pill warn">Jeux : 0</span>';
-        return;
-      }
-      await renderCurrent();
-      renderGames();
-      renderEventsList();
-      $('eventMsg').textContent = `Événement chargé : ${eventId}. Sauvegarde Cloudflare active.`;
-      $('eventMsg').className = 'event-admin-msg ok';
     }
 
     $('eventForm')?.addEventListener('submit', (e) => { e.preventDefault(); renderCurrent(); $('jsonMsg').textContent = 'Prévisualisation mise à jour.'; $('jsonMsg').className = 'event-admin-msg ok'; });
@@ -1001,6 +1171,7 @@
       if (!ok) return;
       try {
         await saveActiveState('aucun-evenement', true);
+        closeEventManagement();
         $('jsonMsg').textContent = 'Page “aucun événement en cours” appliquée et sauvegardée.';
         $('jsonMsg').className = 'event-admin-msg ok';
       } catch (err) {
@@ -1011,6 +1182,7 @@
 
 
     $('saveEventBtn')?.addEventListener('click', () => { renderCurrent(); saveEventToSite(formEvent()).catch((err)=>{ $('jsonMsg').textContent = err?.message || 'Sauvegarde impossible.'; $('jsonMsg').className = 'event-admin-msg err'; }); });
+    $('closeEventBtn')?.addEventListener('click', closeEventManagement);
     document.addEventListener('click', (e) => {
       const adventSelect = e.target.closest('[data-advent-select]');
       if (adventSelect) {
@@ -1044,6 +1216,11 @@
         regenerateAutomaticCalendar().catch((err)=>{ $('jsonMsg').textContent = err?.message || 'Calendrier impossible à refaire.'; $('jsonMsg').className = 'event-admin-msg err'; });
         return;
       }
+      const regenerateDaily = e.target.closest('#regenerateDailyCalendarBtn');
+      if (regenerateDaily) {
+        regenerateDailyCalendar().catch((err)=>{ $('jsonMsg').textContent = err?.message || 'Propositions impossibles à renouveler.'; $('jsonMsg').className = 'event-admin-msg err'; });
+        return;
+      }
       const scrollPicker = e.target.closest('#scrollGamePickerBtn');
       if (scrollPicker) {
         const search = $('gameSearch');
@@ -1053,11 +1230,25 @@
       }
       const weekChange = e.target.closest('[data-week-change]');
       if (weekChange) {
+        selectedDayKey = '';
         selectedWeekKey = weekChange.dataset.weekChange || '';
         renderCurrent();
         const search = $('gameSearch');
         if (search) search.placeholder = `Chercher le nouveau jeu pour la semaine du ${selectedWeekKey}`;
         $('jsonMsg').textContent = `Semaine sélectionnée : ${selectedWeekKey}. Cherche un jeu en bas puis clique sur Changer.`;
+        $('jsonMsg').className = 'event-admin-msg ok';
+        search?.scrollIntoView({ behavior:'smooth', block:'center' });
+        setTimeout(()=>search?.focus(), 350);
+        return;
+      }
+      const dayChange = e.target.closest('[data-day-change]');
+      if (dayChange) {
+        selectedWeekKey = '';
+        selectedDayKey = dayChange.dataset.dayChange || '';
+        renderCurrent();
+        const search = $('gameSearch');
+        if (search) search.placeholder = `Chercher le jeu du ${selectedDayKey}`;
+        $('jsonMsg').textContent = `Journée sélectionnée : ${selectedDayKey}. Cherche un jeu en bas puis clique sur Changer.`;
         $('jsonMsg').className = 'event-admin-msg ok';
         search?.scrollIntoView({ behavior:'smooth', block:'center' });
         setTimeout(()=>search?.focus(), 350);
@@ -1081,13 +1272,13 @@
         }
         if (launchBtn) {
           const id = launchBtn.dataset.launchEvent || '';
-          await selectEvent(id);
-          const next = formEvent();
+          const baseEvent = await fetchJson(`/evenements/${encodeURIComponent(id)}.json`, null, { timeoutMs: 8000 });
+          if (!baseEvent) throw new Error(`Impossible de charger /evenements/${id}.json`);
+          const next = await loadSavedEvent(baseEvent);
           next.enabled = true;
-          await saveEventToSite(next, 'Réglages de l’événement sauvegardés.');
+          await persistEvent(next);
           await saveActiveState(id, true);
-          $('jsonMsg').textContent = `Événement lancé sur le site : ${id}.`;
-          $('jsonMsg').className = 'event-admin-msg ok';
+          closeEventManagement();
           window.scrollTo({ top:0, behavior:'smooth' });
           return;
         }

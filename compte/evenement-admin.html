@@ -12,8 +12,8 @@
   <style>
     html:not(.auth-ready) body { visibility:hidden; }
     html.auth-denied body { visibility:visible; }
-    .event-admin-layout { width:min(1240px, calc(100% - 18px)); margin:12px auto 24px !important; display:grid; gap:14px; }
-    body .auth-shell.event-admin-layout { margin-top:12px !important; }
+    .event-admin-layout { width:min(1240px, calc(100% - 18px)); margin:8px auto 24px !important; padding:8px 0 16px !important; display:grid; gap:14px; }
+    body .auth-shell.event-admin-layout { margin-top:8px !important; padding-top:8px !important; }
     .event-admin-grid { display:grid; grid-template-columns:minmax(320px,.95fr) minmax(360px,1.25fr); gap:14px; align-items:start; }
     .event-admin-simple-actions { display:grid; gap:10px; }
     .event-admin-simple-actions .auth-btn { justify-content:center; min-height:44px; font-size:15px; }
@@ -84,6 +84,7 @@
     .event-admin-no-event-main { margin-top:0; }
 
     .event-admin-workspace { display:grid; gap:14px; margin-top:18px; padding:16px; border:1px solid rgba(92,164,255,.35); border-radius:20px; background:linear-gradient(180deg, rgba(92,164,255,.07), rgba(255,255,255,.018)); }
+    .event-admin-workspace[hidden] { display:none !important; }
     .event-admin-workspace-head { position:sticky; top:8px; z-index:8; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:12px 14px; border:1px solid var(--border, var(--auth-border)); border-radius:16px; background:var(--card-bg, #151927); box-shadow:0 12px 30px rgba(0,0,0,.22); }
     .event-admin-workspace-head h2 { margin:0; }
     .event-admin-workspace-head p { margin:4px 0 0; }

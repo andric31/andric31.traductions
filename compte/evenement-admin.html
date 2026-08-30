@@ -12,13 +12,16 @@
   <style>
     html:not(.auth-ready) body { visibility:hidden; }
     html.auth-denied body { visibility:visible; }
-    .event-admin-layout { width:min(1180px, calc(100% - 18px)); margin:12px auto 18px !important; display:grid; gap:14px; }
+    .event-admin-layout { width:min(1240px, calc(100% - 18px)); margin:12px auto 24px !important; display:grid; gap:14px; }
     body .auth-shell.event-admin-layout { margin-top:12px !important; }
     .event-admin-grid { display:grid; grid-template-columns:minmax(320px,.95fr) minmax(360px,1.25fr); gap:14px; align-items:start; }
     .event-admin-simple-actions { display:grid; gap:10px; }
     .event-admin-simple-actions .auth-btn { justify-content:center; min-height:44px; font-size:15px; }
-    .event-admin-details { margin-top:12px; border-top:1px solid var(--border, var(--auth-border)); padding-top:12px; }
-    .event-admin-details summary { cursor:pointer; color:var(--muted); font-weight:800; }
+    .event-admin-details { margin:0; }
+    .event-admin-details > summary { cursor:pointer; list-style:none; }
+    .event-admin-details > summary::-webkit-details-marker { display:none; }
+    .event-admin-details > summary .event-admin-section-title { margin-bottom:0; }
+    .event-admin-details[open] > summary { padding-bottom:14px; border-bottom:1px solid var(--border, var(--auth-border)); margin-bottom:14px; }
     .event-admin-hidden { display:none !important; }
     .event-admin-toolbar { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
     .event-admin-note { color:var(--muted); font-size:13px; line-height:1.55; }
@@ -58,11 +61,17 @@
     .event-admin-disabled-card h3 { margin:0 0 8px; }
     .event-admin-mini-help { color:var(--muted); font-size:12px; line-height:1.45; margin:6px 0 0; }
 
-    .event-admin-event-list { display:grid; gap:10px; margin-top:12px; }
-    .event-admin-event-item { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; padding:12px; border-radius:15px; border:1px solid var(--border, var(--auth-border)); background:rgba(255,255,255,.035); }
+    .event-admin-catalog-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+    .event-admin-catalog-head h2 { margin:0 0 5px; }
+    .event-admin-catalog-help { margin-top:12px; color:var(--muted); font-size:12px; }
+    .event-admin-catalog-help summary { cursor:pointer; font-weight:800; }
+    .event-admin-event-list { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; margin-top:12px; }
+    .event-admin-event-item { display:grid; grid-template-columns:1fr; gap:12px; align-content:space-between; min-height:145px; padding:14px; border-radius:15px; border:1px solid var(--border, var(--auth-border)); background:rgba(255,255,255,.035); }
     .event-admin-event-item.is-selected { border-color:rgba(126,224,161,.55); background:rgba(126,224,161,.08); }
     .event-admin-event-item.is-active { box-shadow:0 0 0 1px rgba(126,224,161,.34) inset; }
-    .event-admin-event-actions { display:flex; flex-wrap:wrap; gap:7px; justify-content:flex-end; }
+    .event-admin-event-actions { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:7px; }
+    .event-admin-event-actions .auth-btn { justify-content:center; min-width:0; }
+    .event-admin-no-event-item .event-admin-event-actions { grid-template-columns:minmax(0, 1fr) auto; }
     .event-admin-event-actions .event-admin-apply-btn { background:#2f4f85; border-color:rgba(110,156,230,.45); color:#f5f8ff; }
     .event-admin-event-actions .event-admin-test-btn { background:#23283a; border-color:rgba(255,255,255,.12); color:#eef2ff; }
     .event-admin-event-actions .event-admin-open-btn { background:#171b2b; border-color:rgba(255,255,255,.10); color:#eef2ff; }
@@ -74,7 +83,21 @@
     .event-admin-no-event-item.is-active { box-shadow:0 0 0 1px rgba(255,184,77,.34) inset; }
     .event-admin-no-event-main { margin-top:0; }
 
-    .event-admin-linked-panel { display:grid; gap:12px; margin:12px 0 14px; padding:14px; border-radius:18px; border:1px solid rgba(92,164,255,.36); background:linear-gradient(135deg, rgba(92,164,255,.10), rgba(255,255,255,.025)); }
+    .event-admin-workspace { display:grid; gap:14px; margin-top:18px; padding:16px; border:1px solid rgba(92,164,255,.35); border-radius:20px; background:linear-gradient(180deg, rgba(92,164,255,.07), rgba(255,255,255,.018)); }
+    .event-admin-workspace-head { position:sticky; top:8px; z-index:8; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:12px 14px; border:1px solid var(--border, var(--auth-border)); border-radius:16px; background:var(--card-bg, #151927); box-shadow:0 12px 30px rgba(0,0,0,.22); }
+    .event-admin-workspace-head h2 { margin:0; }
+    .event-admin-workspace-head p { margin:4px 0 0; }
+    .event-admin-flow { display:grid; gap:12px; }
+    .event-admin-workspace-section { padding:14px; border:1px solid var(--border, var(--auth-border)); border-radius:17px; background:rgba(0,0,0,.10); }
+    .event-admin-section-title { display:flex; align-items:flex-start; gap:10px; margin-bottom:12px; }
+    .event-admin-section-title h3 { margin:0; font-size:18px; }
+    .event-admin-section-title p { margin:4px 0 0; }
+    .event-admin-step-number { flex:0 0 auto; display:grid; place-items:center; width:29px; height:29px; border-radius:10px; background:rgba(92,164,255,.18); border:1px solid rgba(92,164,255,.4); color:#b9d6ff; font-size:14px; font-weight:900; }
+    .event-admin-details-body { display:grid; gap:10px; }
+    .event-admin-save-row { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-top:4px; padding-top:12px; border-top:1px solid var(--border, var(--auth-border)); }
+    .event-admin-save-row p { margin:0; }
+
+    .event-admin-linked-panel { display:grid; gap:12px; margin:0; padding:14px; border-radius:16px; border:1px solid rgba(92,164,255,.28); background:linear-gradient(135deg, rgba(92,164,255,.08), rgba(255,255,255,.02)); }
     .event-admin-linked-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap; }
     .event-admin-linked-title { margin:0; font-size:20px; line-height:1.25; }
     .event-admin-linked-subtitle { margin:5px 0 0; color:var(--muted); font-size:13px; line-height:1.45; }
@@ -109,7 +132,7 @@
     .event-admin-advent-editor { display:grid; gap:10px; margin-top:12px; padding:12px; border-radius:16px; border:1px solid rgba(255,184,77,.35); background:rgba(255,184,77,.07); }
     .event-admin-advent-editor h4 { margin:0; }
     .event-admin-advent-fields { display:grid; grid-template-columns:80px 1fr 1fr; gap:10px; }
-    @media (max-width:850px){ .event-admin-main-actions, .event-admin-stop-actions, .event-admin-grid, .event-admin-row, .event-admin-current, .event-admin-event-item, .event-admin-week-item, .event-admin-day-item { grid-template-columns:1fr; } .event-admin-cover { width:150px; } .event-admin-week-thumb { width:100%; height:120px; } .event-admin-linked-grid, .event-admin-game { grid-template-columns:1fr; } .event-admin-game .auth-btn { grid-column:1 / -1; } .event-admin-event-actions { justify-content:stretch; } }
+    @media (max-width:850px){ .event-admin-main-actions, .event-admin-stop-actions, .event-admin-grid, .event-admin-row, .event-admin-current, .event-admin-week-item, .event-admin-day-item, .event-admin-event-list { grid-template-columns:1fr; } .event-admin-cover { width:150px; } .event-admin-week-thumb { width:100%; height:120px; } .event-admin-linked-grid, .event-admin-game { grid-template-columns:1fr; } .event-admin-game .auth-btn { grid-column:1 / -1; } .event-admin-event-actions { grid-template-columns:1fr; } .event-admin-no-event-item .event-admin-event-actions { grid-template-columns:1fr; } .event-admin-workspace-head { position:static; } }
   </style>
 </head>
 <body>
@@ -140,52 +163,94 @@
 
     <section class="auth-card auth-hidden" data-auth-only data-role-min="admin">
       <div class="event-admin-card">
-        <h2>📋 Liste des événements</h2>
-        <p class="event-admin-note" style="margin-top:0;">La liste vient de <strong>/evenements/config.json</strong>. Quand tu déploies un nouvel événement, ajoute juste son ID dans <code>event_files</code> et il apparaîtra ici.</p>
+        <div class="event-admin-catalog-head">
+          <div>
+            <h2>📋 Événements disponibles</h2>
+            <p class="event-admin-note" style="margin:0;">Ouvre un événement pour le préparer, ou lance-le directement sur le site.</p>
+          </div>
+        </div>
         <div id="activeEventState" class="event-admin-active-banner off">Chargement de l’état actuel…</div>
         <div id="eventsList" class="event-admin-event-list"><div class="event-admin-msg">Chargement de la liste…</div></div>
+        <details class="event-admin-catalog-help">
+          <summary>Informations techniques</summary>
+          <p>La liste vient de <strong>/evenements/config.json</strong>. Pour ajouter un futur événement, ajoute son ID dans <code>event_files</code>.</p>
+        </details>
 
-        <form id="eventForm" class="event-admin-card" autocomplete="off" hidden>
-          <div class="event-admin-action-head">
-            <h2 id="eventActionTitle">📅 Gestion de cet événement</h2>
-            <button class="auth-btn mini" id="closeEventBtn" type="button">Fermer</button>
-          </div>
-
-          <div class="event-admin-linked-panel" id="eventLinkedPanel">
-            <div class="event-admin-msg">Chargement de l’événement sélectionné…</div>
-          </div>
-
-          <div class="event-admin-simple-actions">
-            <div class="event-admin-action-box">
-              <button class="auth-btn" id="saveEventBtn" type="button" title="Sauvegarde uniquement les changements faits dans les réglages avancés : titre, texte, jour, heure et mots-clés.">💾 Enregistrer le titre / texte <span class="event-admin-help" tabindex="0" data-tip="À utiliser seulement après avoir modifié les réglages avancés : titre, texte affiché, jour de changement, heure ou mots-clés.">?</span></button>
-              <p class="event-admin-action-desc">Sauvegarde les textes et règles si tu les as modifiés plus bas.</p>
+        <form id="eventForm" class="event-admin-workspace" autocomplete="off" hidden>
+          <div class="event-admin-workspace-head">
+            <div>
+              <h2 id="eventActionTitle">📅 Gestion de cet événement</h2>
+              <p class="event-admin-note">Prépare le programme, choisis les jeux, puis modifie les réglages seulement si nécessaire.</p>
             </div>
+            <button class="auth-btn mini" id="closeEventBtn" type="button">Fermer</button>
           </div>
 
           <div id="jsonMsg" class="event-admin-msg"></div>
 
-          <details class="event-admin-details">
-            <summary>⚙️ Modifier le texte et les règles de l’événement <span class="event-admin-help" tabindex="0" data-tip="Partie avancée. Tu peux la laisser fermée si tu veux seulement changer le jeu.">?</span></summary>
-            <label class="auth-label"><span>Événement actif <span class="event-admin-help" tabindex="0" data-tip="Nom du fichier événement, par exemple ete-2026. Pour un futur événement, ce sera son ID, comme noel-2026.">?</span></span><input class="auth-input" id="eventId" placeholder="ete-2026" /></label>
-            <label class="auth-label"><span>Titre <span class="event-admin-help" tabindex="0" data-tip="Titre affiché sur la page événement publique.">?</span></span><input class="auth-input" id="eventTitle" /></label>
-            <label class="auth-label"><span>Texte affiché <span class="event-admin-help" tabindex="0" data-tip="Petit texte de présentation affiché sous le titre de l’événement.">?</span></span><textarea class="auth-input" id="eventText" rows="3"></textarea></label>
-            <div class="event-admin-row">
-              <label class="auth-label"><span>Changer le jeu le <span class="event-admin-help" tabindex="0" data-tip="Jour de la semaine utilisé par la rotation automatique.">?</span></span>
-                <select class="auth-select" id="changeDay">
-                  <option value="monday">Lundi</option><option value="tuesday">Mardi</option><option value="wednesday">Mercredi</option><option value="thursday">Jeudi</option><option value="friday">Vendredi</option><option value="saturday">Samedi</option><option value="sunday">Dimanche</option>
-                </select>
-              </label>
-              <label class="auth-label"><span>Heure du changement <span class="event-admin-help" tabindex="0" data-tip="Heure de rotation automatique, entre 0 et 23. Exemple : 8 = 8h du matin.">?</span></span><input class="auth-input" id="changeHour" type="number" min="0" max="23" step="1" /></label>
-            </div>
-            <label class="auth-label"><span>Mots-clés pour choisir automatiquement <span class="event-admin-help" tabindex="0" data-tip="Le site cherche ces mots dans les titres, descriptions et tags des jeux. Sépare les mots par des virgules.">?</span></span><textarea class="auth-input" id="keywords" rows="4" placeholder="summer, beach, plage..."></textarea><p class="event-admin-mini-help">Exemple : summer, beach, plage. Plus les mots sont précis, plus le choix sera ciblé.</p></label>
-            <label class="auth-label"><span>Mode si aucun jeu ne correspond <span class="event-admin-help" tabindex="0" data-tip="Détermine quoi faire si aucun jeu ne contient les mots-clés demandés.">?</span></span>
-              <select class="auth-select" id="fallbackMode">
-                <option value="weekly_random">Choisir un jeu au hasard chaque semaine</option>
-                <option value="daily_random">Choisir un jeu au hasard chaque jour</option>
-                <option value="">Ne rien afficher</option>
-              </select>
-            </label>
-          </details>
+          <div class="event-admin-flow">
+            <section class="event-admin-workspace-section">
+              <div class="event-admin-section-title">
+                <span class="event-admin-step-number">1</span>
+                <div>
+                  <h3>Programme de l’événement</h3>
+                  <p class="event-admin-note">Visualise les jours ou les semaines, puis clique sur « Changer » à l’endroit voulu.</p>
+                </div>
+              </div>
+              <div class="event-admin-linked-panel" id="eventLinkedPanel">
+                <div class="event-admin-msg">Chargement de l’événement sélectionné…</div>
+              </div>
+            </section>
+
+            <section class="event-admin-workspace-section" id="gamePickerSection" hidden>
+              <div class="event-admin-section-title">
+                <span class="event-admin-step-number">2</span>
+                <div>
+                  <h3>Choisir le jeu</h3>
+                  <p class="event-admin-note">Après avoir choisi une date dans le programme, recherche ici le jeu qui doit la remplacer.</p>
+                </div>
+              </div>
+              <label class="auth-label"><span>Recherche <span class="event-admin-help" tabindex="0" data-tip="Tu peux chercher par titre, tag, ID ou UID.">?</span></span><input class="auth-input" id="gameSearch" placeholder="Titre, tag, ID…" /></label>
+              <div class="event-admin-pill-list" id="gamesSummary"></div>
+              <div class="event-admin-results" id="gamesResults"><div class="event-admin-msg">Chargement des jeux…</div></div>
+            </section>
+
+            <details class="event-admin-details event-admin-workspace-section">
+              <summary>
+                <span class="event-admin-section-title">
+                  <span class="event-admin-step-number">3</span>
+                  <span>
+                    <strong>Réglages avancés</strong>
+                    <span class="event-admin-note" style="display:block;margin-top:4px;">Titre, texte, heure et choix automatiques. Laisse cette partie fermée si tu changes seulement les jeux.</span>
+                  </span>
+                </span>
+              </summary>
+              <div class="event-admin-details-body">
+                <label class="auth-label"><span>Identifiant de l’événement <span class="event-admin-help" tabindex="0" data-tip="Nom du fichier événement, par exemple ete-2026.">?</span></span><input class="auth-input" id="eventId" placeholder="ete-2026" /></label>
+                <label class="auth-label"><span>Titre affiché <span class="event-admin-help" tabindex="0" data-tip="Titre affiché sur la page événement publique.">?</span></span><input class="auth-input" id="eventTitle" /></label>
+                <label class="auth-label"><span>Texte de présentation <span class="event-admin-help" tabindex="0" data-tip="Petit texte affiché sous le titre de l’événement.">?</span></span><textarea class="auth-input" id="eventText" rows="3"></textarea></label>
+                <div class="event-admin-row">
+                  <label class="auth-label"><span>Jour du changement hebdomadaire <span class="event-admin-help" tabindex="0" data-tip="Utilisé seulement par les événements qui changent une fois par semaine.">?</span></span>
+                    <select class="auth-select" id="changeDay">
+                      <option value="monday">Lundi</option><option value="tuesday">Mardi</option><option value="wednesday">Mercredi</option><option value="thursday">Jeudi</option><option value="friday">Vendredi</option><option value="saturday">Samedi</option><option value="sunday">Dimanche</option>
+                    </select>
+                  </label>
+                  <label class="auth-label"><span>Heure du changement <span class="event-admin-help" tabindex="0" data-tip="Heure de rotation automatique, entre 0 et 23.">?</span></span><input class="auth-input" id="changeHour" type="number" min="0" max="23" step="1" /></label>
+                </div>
+                <label class="auth-label"><span>Mots-clés du choix automatique <span class="event-admin-help" tabindex="0" data-tip="Le site cherche ces mots dans les titres, descriptions et tags des jeux. Sépare-les par des virgules.">?</span></span><textarea class="auth-input" id="keywords" rows="4" placeholder="school, student, academy..."></textarea><p class="event-admin-mini-help">Plus les mots sont précis, plus les propositions correspondent au thème.</p></label>
+                <label class="auth-label"><span>Si aucun jeu ne correspond <span class="event-admin-help" tabindex="0" data-tip="Détermine quoi faire si aucun jeu ne contient les mots-clés demandés.">?</span></span>
+                  <select class="auth-select" id="fallbackMode">
+                    <option value="weekly_random">Choisir un jeu au hasard chaque semaine</option>
+                    <option value="daily_random">Choisir un jeu au hasard chaque jour</option>
+                    <option value="">Ne rien afficher</option>
+                  </select>
+                </label>
+                <div class="event-admin-save-row">
+                  <p class="event-admin-action-desc">Enregistre uniquement les réglages affichés dans cette partie.</p>
+                  <button class="auth-btn primary" id="saveEventBtn" type="button">💾 Enregistrer les réglages</button>
+                </div>
+              </div>
+            </details>
+          </div>
 
           <input class="event-admin-hidden" id="selectedId" />
           <input class="event-admin-hidden" id="selectedUid" />
@@ -198,16 +263,6 @@
 
     <div id="eventMsg" class="event-admin-hidden">Chargement…</div>
     <div id="currentGame" class="event-admin-hidden"></div>
-
-    <section class="auth-card auth-hidden" id="gamePickerSection" data-auth-only data-role-min="admin" hidden>
-      <div class="event-admin-card">
-        <h2>🔎 Changer le jeu proposé <span class="event-admin-help" tabindex="0" data-tip="Cette partie sert à changer le jeu du jour ou de la semaine sélectionnée dans le calendrier.">?</span></h2>
-        <p class="event-admin-note" style="margin-top:0;">Clique d’abord sur <strong>Changer</strong> dans le calendrier de l’événement, puis cherche le jeu ici et clique sur <strong>Changer</strong>. Le changement sera sauvegardé pour la période sélectionnée.</p>
-        <label class="auth-label"><span>Recherche <span class="event-admin-help" tabindex="0" data-tip="Tu peux chercher par titre, tag, ID ou UID. Le bouton Changer force ce jeu sur la page événement.">?</span></span><input class="auth-input" id="gameSearch" placeholder="Titre, tag, ID…" /></label>
-        <div class="event-admin-pill-list" id="gamesSummary"></div>
-        <div class="event-admin-results" id="gamesResults"><div class="event-admin-msg">Chargement des jeux…</div></div>
-      </div>
-    </section>
   </main>
 
   <script src="/auth/auth.client.js"></script>
@@ -401,10 +456,11 @@
       const defaultActiveId = String(configDefaultEventId || '').trim();
       const activeId = activeState.enabled === false ? '' : (savedActiveId || defaultActiveId);
       const isNoEventActive = activeState.enabled && activeId === 'aucun-evenement';
+      const activeMeta = eventCatalog.find((event) => event.id === activeId);
       const activeLabel = isNoEventActive
         ? '🌙 Page aucun événement en cours appliquée'
         : (activeState.enabled && activeId
-          ? `✅ Événement en cours : ${activeId}${savedActiveId ? ' (sauvegardé)' : ' (depuis config.json)'}`
+          ? `✅ Événement en cours : ${activeMeta?.title || activeId}`
           : '🚫 Aucun événement en cours');
       const banner = $('activeEventState');
       if (banner) {
@@ -420,11 +476,10 @@
           return `<article class="event-admin-event-item event-admin-no-event-item ${isSelected ? 'is-selected' : ''} ${isActive ? 'is-active' : ''}">
             <div>
               <strong>🚫 ${esc(ev.title || 'Aucun événement en cours')}</strong>
-              <small style="display:block;color:var(--muted);margin-top:4px;">ID : ${esc(ev.id)}${ev.date ? ` • ${esc(ev.date)}` : ''}${ev.hasFile ? '' : ' • fichier JSON non trouvé'}</small>
+              <small style="display:block;color:var(--muted);margin-top:5px;">Affiche une page de pause propre entre deux événements.</small>
               <div class="event-admin-pill-list">
                 ${isActive ? '<span class="event-admin-pill ok">En cours</span>' : ''}
                 ${isSelected ? '<span class="event-admin-pill">Sélectionné</span>' : ''}
-                <span class="event-admin-pill">${esc(ev.source)}</span>
               </div>
             </div>
             <div class="event-admin-event-actions">
@@ -436,11 +491,10 @@
         return `<article class="event-admin-event-item ${isSelected ? 'is-selected' : ''} ${isActive ? 'is-active' : ''}">
           <div>
             <strong>${esc(ev.title || ev.id)}</strong>
-            <small style="display:block;color:var(--muted);margin-top:4px;">ID : ${esc(ev.id)}${ev.date ? ` • ${esc(ev.date)}` : ''}${ev.hasFile ? '' : ' • fichier JSON non trouvé'}</small>
+            <small style="display:block;color:var(--muted);margin-top:5px;">${ev.date ? `📆 ${esc(ev.date)}` : `ID : ${esc(ev.id)}`}${ev.hasFile ? '' : ' • fichier JSON non trouvé'}</small>
             <div class="event-admin-pill-list">
               ${isActive ? '<span class="event-admin-pill ok">En cours</span>' : ''}
-              ${isSelected ? '<span class="event-admin-pill">Sélectionné</span>' : ''}
-              <span class="event-admin-pill">${esc(ev.source)}</span>
+              ${isSelected ? '<span class="event-admin-pill">Ouvert</span>' : ''}
             </div>
           </div>
           <div class="event-admin-event-actions">

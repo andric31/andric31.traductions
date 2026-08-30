@@ -1,8 +1,9 @@
 {
-  "event_actif": "ete-2026",
+  "event_actif": "aucun-evenement",
   "event_files": [
     "aucun-evenement",
-    "calendrier-avent-2025",
-    "ete-2026"
+    "rentree-scolaire-2026",
+    "ete-2026",
+    "calendrier-avent-2025"
   ]
 }

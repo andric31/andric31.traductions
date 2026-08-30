@@ -385,6 +385,49 @@
     return id === 'ete-2026' || mode.includes('weekly') || mode.includes('semaine');
   }
 
+  function isDailyGameEvent(event) {
+    const type = normalizeText(event?.type || event?.mode || '');
+    const mode = normalizeText(event?.selection_mode || event?.selection || event?.change_frequency || '');
+    return type.includes('daily') || type.includes('quotidien') || mode.includes('daily') || mode.includes('jour');
+  }
+
+  function getEventDateKeys(event) {
+    const start = parseDateOnly(event?.start_at);
+    const end = parseDateOnly(event?.end_at);
+    if (!start || !end || end.getTime() < start.getTime()) return [];
+    const keys = [];
+    for (const date = new Date(start); date.getTime() <= end.getTime() && keys.length < 31; date.setDate(date.getDate() + 1)) {
+      keys.push(weekKeyFromDate(date));
+    }
+    return keys;
+  }
+
+  function normalizeDailyGames(event) {
+    const raw = Array.isArray(event?.daily_games) ? event.daily_games : [];
+    const byDate = new Map(raw.map((item) => [String(item?.date || '').slice(0, 10), item]));
+    return getEventDateKeys(event).map((date) => ({ date, ...(byDate.get(date) || {}) }));
+  }
+
+  function getDailyGameRef(event, dateKey) {
+    const item = normalizeDailyGames(event).find((entry) => entry.date === dateKey);
+    if (!item || (!String(item.id || '').trim() && !String(item.uid || '').trim())) return null;
+    return item;
+  }
+
+  function getActiveDailyDateKey(event, date = new Date()) {
+    const keys = getEventDateKeys(event);
+    if (!keys.length) return weekKeyFromDate(date);
+    const today = weekKeyFromDate(date);
+    if (today < keys[0]) return keys[0];
+    if (today > keys[keys.length - 1]) return keys[keys.length - 1];
+    return today;
+  }
+
+  function getDailyIndex(event, dateKey) {
+    const keys = getEventDateKeys(event);
+    return Math.max(0, keys.indexOf(dateKey || getActiveDailyDateKey(event)));
+  }
+
   function getWeeklyOverride(event, weekKey) {
     const overrides = event?.weekly_overrides;
     if (!overrides || typeof overrides !== 'object' || !weekKey) return null;
@@ -413,6 +456,12 @@
   }
 
   function getNextChangeDate(event) {
+    if (isDailyGameEvent(event)) {
+      const next = new Date();
+      next.setHours(getChangeHour(event), 0, 0, 0);
+      if (next.getTime() <= Date.now()) next.setDate(next.getDate() + 1);
+      return next;
+    }
     const next = getLastChangeBoundary(new Date(), event);
     next.setDate(next.getDate() + 7);
     return next;
@@ -508,6 +557,19 @@
   function pickGame(games, event) {
     if (!games.length) return { game: null, reason: '', summary: '', tags: [] };
 
+    const dailyMode = isDailyGameEvent(event);
+    const currentDayKey = getActiveDailyDateKey(event);
+    const dailyForced = dailyMode ? findGameByRef(games, getDailyGameRef(event, currentDayKey)) : null;
+    if (dailyForced) {
+      return {
+        game: dailyForced,
+        reason: '',
+        summary: getGameDescription(dailyForced),
+        tags: getGameTags(dailyForced),
+        matchedKeywords: []
+      };
+    }
+
     // Priorité au changement manuel de la semaine en cours.
     // Comme ça, si tu changes uniquement la semaine du 08/15/22...,
     // la page publique affiche le même jeu que l'admin pour cette semaine.
@@ -526,7 +588,7 @@
 
     // Pour un événement à calendrier hebdomadaire, on ignore l'ancien jeu global forcé.
     // Sinon l'admin, le calendrier et la page publique peuvent afficher trois jeux différents.
-    if (!weeklyMode) {
+    if (!weeklyMode && !dailyMode) {
       const wantedId = String(event.selected_game_id || '').trim();
       const wantedUid = String(event.selected_game_uid || '').trim();
       if (wantedId || wantedUid) {
@@ -569,7 +631,7 @@
 
     rotationPool = applyBlockedFilter(rotationPool);
 
-    if ((!rotationPool.length || rotationPool.every((entry) => isBlockedGame(entry.game, event))) && String(event.fallback_mode || '').trim() === 'weekly_random') {
+    if ((!rotationPool.length || rotationPool.every((entry) => isBlockedGame(entry.game, event))) && ['weekly_random','daily_random'].includes(String(event.fallback_mode || '').trim())) {
       rotationPool = applyBlockedFilter(validGames
         .map((g) => ({
           game: g,
@@ -595,14 +657,14 @@
 
     // Important : on utilise toute la liste de candidats au thème, pas seulement le petit groupe de tête.
     // Comme ça, le jeu avance vraiment à chaque changement hebdomadaire au lieu de pouvoir retomber sur le même.
-    const rotationIndex = getCalendarWeekIndex(event);
+    const rotationIndex = dailyMode ? getDailyIndex(event, currentDayKey) : getCalendarWeekIndex(event);
     const eventOffset = getCalendarSeedOffset(event, rotationPool.length);
     const selected = rotationPool[(rotationIndex + eventOffset) % rotationPool.length];
 
     const uniqueKeywords = [...new Set((selected.analysis.found || []).map((item) => item.keyword))];
     const reasonBase = uniqueKeywords.length
-      ? `Sélection automatique de la semaine, basée sur le thème ${uniqueKeywords.join(', ')}.`
-      : 'Sélection automatique de la semaine.';
+      ? `Sélection automatique ${dailyMode ? 'du jour' : 'de la semaine'}, basée sur le thème ${uniqueKeywords.join(', ')}.`
+      : `Sélection automatique ${dailyMode ? 'du jour' : 'de la semaine'}.`;
     const reason = blockedApplied
       ? `${reasonBase} Les jeux déjà utilisés ont été ignorés.`
       : reasonBase;
@@ -952,7 +1014,7 @@
             ${image ? `<img src="${escapeHtml(image)}" alt="" loading="lazy">` : '<div class="event-game-placeholder">🎮</div>'}
           </div>
           <div class="event-game-info">
-            <span class="event-game-label">Cette semaine</span>
+            <span class="event-game-label">${isDailyGameEvent(event) ? 'Aujourd’hui' : 'Cette semaine'}</span>
             <h3>${escapeHtml(title)}</h3>
           </div>
         </aside>
@@ -967,7 +1029,7 @@
     const testNoEvent = ['none', 'no-event', 'aucun', 'off'].includes(testId.toLowerCase());
     const normalizedTestId = testNoEvent ? 'aucun-evenement' : testId;
 
-    const config = await fetchJson(CONFIG_URL, { event_actif: 'ete-2026', event_files: ['ete-2026'] });
+    const config = await fetchJson(CONFIG_URL, { event_actif: 'aucun-evenement', event_files: ['aucun-evenement'] });
     const activeState = normalizedTestId ? { activeId: normalizedTestId, enabled: true, source: 'test' } : await loadActiveState(config);
 
     if (!activeState.enabled || !activeState.activeId) {

@@ -1,0 +1,38 @@
+/* Événement rentrée scolaire 2026 */
+.active-card.event-theme-rentree-scolaire-2026 {
+  background:
+    radial-gradient(circle at 13% 15%, rgba(255, 240, 171, .34), transparent 30%),
+    linear-gradient(135deg, #173e63 0%, #245a78 48%, #bb6d3f 100%) !important;
+  border-color: rgba(255, 218, 143, .62) !important;
+  box-shadow: 0 22px 52px rgba(14, 45, 72, .34) !important;
+}
+
+.active-card.event-theme-rentree-scolaire-2026 .event-title,
+.active-card.event-theme-rentree-scolaire-2026 .event-text {
+  color: #fff9e9 !important;
+  text-shadow: 0 3px 10px rgba(0, 24, 44, .45) !important;
+}
+
+.active-card.event-theme-rentree-scolaire-2026 .event-pill {
+  background: rgba(7, 34, 56, .34) !important;
+  border-color: rgba(255, 235, 190, .42) !important;
+  color: #fff7df !important;
+}
+
+.active-card.event-theme-rentree-scolaire-2026 .event-main-link,
+.active-card.event-theme-rentree-scolaire-2026 .event-secondary-link {
+  background: linear-gradient(135deg, #ffe39b, #e7a85d) !important;
+  border-color: rgba(255, 247, 218, .5) !important;
+  color: #342006 !important;
+}
+
+.active-card.event-theme-rentree-scolaire-2026 .event-next-game-timer {
+  background: rgba(7, 34, 56, .4) !important;
+  border-color: rgba(255, 235, 190, .4) !important;
+  color: #fff7df !important;
+}
+
+.active-card.event-theme-rentree-scolaire-2026 .event-game-card {
+  background: rgba(10, 28, 45, .9) !important;
+  border-color: rgba(255, 218, 143, .36) !important;
+}

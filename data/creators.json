@@ -1442,6 +1442,49 @@
     "links": []
   },
   {
+    "id": "manager-xgame",
+    "name": "Manager_XGame",
+    "aliases": [
+      "ANTON3000"
+    ],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "individual",
+    "primaryLanguage": "ru",
+    "vndbId": "p28068",
+    "avatar": "https://images.boosty.to/user/43360452/avatar?change_time=1769266016&croped=1&mh=320&mw=320",
+    "banner": "https://images.boosty.to/blog/43360452/cover?change_time=1769261701",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "298833"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/Manager_XGame"
+      },
+      {
+        "type": "website",
+        "label": "Boosty",
+        "url": "https://boosty.to/managerm"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://manager-xgame.itch.io/"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p28068"
+      }
+    ]
+  },
+  {
     "id": "mannered-gentleman",
     "name": "Mannered Gentleman",
     "aliases": [],

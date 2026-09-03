@@ -1656,6 +1656,42 @@
     ]
   },
   {
+    "id": "noname-team",
+    "name": "Noname Team",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://img.itch.zone/aW1nLzE2MTA5MzQ0LnBuZw==/80x80%23/brhC86.png",
+    "banner": "https://attachments.f95zone.to/2024/07/3897468_Banner.png",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "218345"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/NonameTeam989"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://nonameteam.itch.io/"
+      },
+      {
+        "type": "twitter",
+        "label": "X / Twitter",
+        "url": "https://x.com/NoNameTeem"
+      }
+    ]
+  },
+  {
     "id": "ntr-bakery",
     "name": "NTR Bakery",
     "aliases": [],

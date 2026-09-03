@@ -1349,6 +1349,37 @@
     "otherGames": []
   },
   {
+    "id": "koi-spirit",
+    "name": "Koi Spirit",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "amateur_group",
+    "primaryLanguage": "en",
+    "vndbId": "p19073",
+    "avatar": "https://pbs.twimg.com/profile_images/1552809345951232000/UUHk5GYU_400x400.jpg",
+    "banner": "https://pbs.twimg.com/profile_banners/1552809267878449152/1659053825/600x200",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "169597"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "twitter",
+        "label": "Xitter",
+        "url": "https://x.com/koi_supi99"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p19073"
+      }
+    ]
+  },
+  {
     "id": "lament-entertainment",
     "name": "Lament Entertainment",
     "aliases": [],

@@ -1513,6 +1513,47 @@
     "otherGames": []
   },
   {
+    "id": "milflover",
+    "name": "Milflover",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://f95zone.to/data/avatars/l/413/413141.jpg?1774096855",
+    "banner": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/4476549/covers/a736233f-8853-484a-8997-a9a70800898f-1240x0_1x594_5502x1031.jpg",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "291756"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/milfslover.413141/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/cw/Milfover"
+      },
+      {
+        "type": "subscribestar",
+        "label": "Subscribestar",
+        "url": "https://subscribestar.adult/milflover"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/6w89z2k4"
+      }
+    ]
+  },
+  {
     "id": "mischievousbunny",
     "name": "mischievousbunny",
     "aliases": [],

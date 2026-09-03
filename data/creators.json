@@ -1504,6 +1504,47 @@
     "otherGames": []
   },
   {
+    "id": "misherumaxis",
+    "name": "MisheruMaxis",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://pbs.twimg.com/profile_images/2065350460043591680/S-HHkSmJ_400x400.jpg",
+    "banner": "https://pbs.twimg.com/profile_banners/1893301944204365824/1781252898/1500x500",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "313546"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/cw/misherumaxis"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://misherumaxis.itch.io/"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.com/invite/KDFhNdJC3p"
+      },
+      {
+        "type": "twitter",
+        "label": "Twitter",
+        "url": "https://x.com/MisheruMaxis"
+      }
+    ]
+  },
+  {
     "id": "mr-rabbit-team",
     "name": "Mr. Rabbit Team",
     "aliases": [],

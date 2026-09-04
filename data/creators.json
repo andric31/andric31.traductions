@@ -5,7 +5,6 @@
     "aliases": [],
     "avatar": "https://f95zone.to/data/avatars/l/4643/4643591.jpg?1672693612",
     "banner": "",
-    "shortPresentation": "Créateur de visual novels pour adultes, notamment autour de la série Rebellion.",
     "presentation": "AGHAMUS développe des visual novels pour adultes. Sur itch.io, son catalogue comprend notamment Rebellion: The Beginning et Rebellion: Rise of The Damned, deux projets narratifs rattachés au même univers.",
     "gameIds": [
       "143672",
@@ -55,7 +54,6 @@
     ],
     "avatar": "https://f95zone.to/data/avatars/l/1577/1577372.jpg?1634674237",
     "banner": "https://f95zone.to/data/covers/user/l/1577/1577372.jpg?1621552832",
-    "shortPresentation": "Créateur de The Answer is... WHAT?, un jeu de quiz pour adultes réalisé avec Ren'Py.",
     "presentation": "AHVL est le créateur de The Answer is... WHAT?, un jeu de quiz pour adultes mêlant trivia, rendu 3D et contenu mature. Le projet a été publié sur itch.io et développé avec Ren'Py.",
     "gameIds": [
       "44793",
@@ -90,9 +88,8 @@
     "creatorType": "",
     "primaryLanguage": "",
     "vndbId": "",
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/14799401/4e4d283122024a92be69654a8d1294c1/eyJoIjoxMDAsInciOjEwMH0%3D/2.png?token-hash=z3qGPso8is5SmR8l7iVxcdmkmH0p0_fg87yppwHS2Bs%3D&token-time=1787788800",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/14799401/084d537f78544c83987d3a05d4e2ba53/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/1.png?token-hash=0HP0iZnivtU0P39g754cCB7mdkviAiIWwb-ckHCv-GA%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "avatar": "https://f95zone.to/data/avatars/l/9690/9690826.jpg?1763930591",
+    "banner": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/3914348/covers/36ab862f-1604-43fb-be3a-24528d5ccb1c-1240x0_1x36_1920x360.png",
     "presentation": "",
     "gameIds": [
       "282192",
@@ -129,9 +126,8 @@
     "creatorType": "",
     "primaryLanguage": "",
     "vndbId": "",
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4113610/cfa8379cfd4f4ba082763ea14c6c6173/eyJoIjozNjAsInciOjM2MH0%3D/3.png?token-hash=0ukgiMrUicGmZ9scRmxYNC-5zb16_xhlZEptMoWxoZA%3D&token-time=1788393600",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4113610/572abfc7e6ba44599bb544eb487ad0f4/eyJ3IjoxOTIwLCJ3ZSI6MX0%3D/8.png?token-hash=Rgftk8UHKPIRsAIdPUuLep12A67uridtuaSdl64G7Ig%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "avatar": "https://pbs.twimg.com/profile_images/1385902348686426116/9sEqnm9t_400x400.jpg",
+    "banner": "https://pbs.twimg.com/profile_banners/1204844195401191424/1584053103/600x200",
     "presentation": "",
     "gameIds": [
       "70909",
@@ -155,26 +151,31 @@
         "url": "https://twitter.com/AppleTartGames"
       }
     ],
-    "otherGames": []
+    "otherGames": [
+      {
+        "name": "Sir Stretchalot - The Wenches in the Well",
+        "platform": "Steam",
+        "url": "https://store.steampowered.com/app/1273110/Sir_Stretchalot__The_Wenches_in_the_Well/"
+      },
+      {
+        "name": "Sir Stretchalot - The Plight of the Elves",
+        "platform": "Steam",
+        "url": "https://store.steampowered.com/app/2054620/Sir_Stretchalot__The_Plight_of_the_Elves/"
+      }
+    ]
   },
   {
     "id": "art-of-lust",
     "name": "Art of Lust",
     "aliases": [],
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/2618030/178e5121191b475889792ed965e9da69/eyJ3Ijo2MjB9/1.jpg?token-hash=TaijrNLOdnmI90MNCyL8xSUzzfH7iP6YNV1F1ulxSfY%3D",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/2618030/cdbe4daf29ed4a8f828de3a7ed520e97/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/3.jpg?token-hash=MqXTcACzLoArNW0gHvhWY7PGW6D9C4wDRAk50MmXAhU%3D&token-time=1788480000",
-    "shortPresentation": "Équipe de création à l'origine de House of Lust et co-créatrice d'Island of Lust.",
+    "avatar": "",
+    "banner": "",
     "presentation": "Art of Lust développe des jeux pour adultes centrés sur la narration et les relations entre personnages. L'équipe travaille notamment sur House of Lust et a déjà terminé Island of Lust, réalisé en collaboration avec Astaros 3D.",
     "links": [
       {
         "type": "patreon",
         "label": "Patreon",
         "url": "https://www.patreon.com/artoflust"
-      },
-      {
-        "type": "steam",
-        "label": "Steam",
-        "url": "https://store.steampowered.com/search/?developer=Art%20of%20Lust"
       }
     ],
     "gameIds": [
@@ -188,15 +189,20 @@
     "creatorType": "",
     "primaryLanguage": "",
     "vndbId": "",
-    "otherGames": []
+    "otherGames": [
+      {
+        "name": "Island of Lust",
+        "platform": "Steam",
+        "url": "https://store.steampowered.com/app/1755880/Island_of_Lust/"
+      }
+    ]
   },
   {
     "id": "astaros3d",
     "name": "Astaros 3D",
     "aliases": [],
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/730669/bdbbec9598734b918098f958cdb6ea85/eyJoIjoxMDAsInciOjEwMH0%3D/2.png?token-hash=BWSTFMDhd2xTld9SnaCqKtjFyX8fr6uw9ZsWGFZ9MoY%3D&token-time=1787356800",
+    "avatar": "",
     "banner": "",
-    "shortPresentation": "Créateur de jeux pour adultes en 3D, connu notamment pour My Cute Roommate, Girl House et Island of Lust.",
     "presentation": "Astaros 3D crée des jeux pour adultes en 3D. Son catalogue comprend notamment My Cute Roommate, Girl House et Island of Lust, ce dernier ayant été développé avec Art of Lust. Il publie également ses projets et informations de développement sur itch.io et Patreon.",
     "links": [
       {
@@ -241,9 +247,8 @@
     "creatorType": "amateur_group",
     "primaryLanguage": "en",
     "vndbId": "p10907",
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4331938/d79061f041f74da693e03a97c77c94f6/eyJoIjozNjAsInciOjM2MH0%3D/11.png?token-hash=Tmw6BuqLODUYEXSywR8-JJyEcC8Z1MWJiOAuuzQqiNs%3D&token-time=1788739200",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4331938/053d14e105ed4e72ba719e5917ec1b39/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/27.png?token-hash=iGVHMu1GCeatACG1-NJI38txJzk2ap_JnV9lFEQGXXA%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "avatar": "https://pbs.twimg.com/profile_images/1899907706569265152/6F22yQL2_400x400.jpg",
+    "banner": "https://pbs.twimg.com/profile_banners/1249076774580953088/1740761151/600x200",
     "presentation": "Les membres sont Furoshiki, Operae, Mint et Cy (CyCaDeLiC).",
     "gameIds": [
       "61634",
@@ -317,9 +322,8 @@
     "aliases": [
       "baap36885"
     ],
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4296655/9ee732ac47764a27a294c7453651ab80/eyJoIjoxMDAsInciOjEwMH0%3D/3.jpg?token-hash=GMn0NBOKb5Xw8l35c_dD4wddVRIRSx0HGetsoeobcRw%3D&token-time=1788739200",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4296655/11faf7f292e545698f3a528a3d051720/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/17.png?token-hash=GYKmM2StTQz6GSXsJq4MRnYpT-vJlsuDwcEEwXuxlbk%3D&token-time=1788480000",
-    "shortPresentation": "Créateur indépendant travaillant notamment sur le visual novel Being A Wife.",
+    "avatar": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/1176519/avatars/0fede6a9-3a77-4fee-98e0-b7523aae08ae-380x380_1x1_114x113.png",
+    "banner": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/1176519/covers/8fb2350f-a231-4a0f-9ebd-8fdb6f7ae90f-1240x0_0x1_2499x469.png",
     "presentation": "baap développe plusieurs projets de jeu, dont Being A Wife, un visual novel narratif à choix centré sur les relations entre personnages et les conséquences des décisions du joueur. Il expérimente également d'autres formes de jeu et de développement en parallèle.",
     "links": [
       {
@@ -361,7 +365,6 @@
     "aliases": [],
     "avatar": "https://f95zone.to/data/avatars/l/4971/4971184.jpg?1768026778",
     "banner": "",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "118835",
@@ -393,7 +396,6 @@
     "aliases": [],
     "avatar": "",
     "banner": "",
-    "shortPresentation": "Studio indépendant spécialisé dans les jeux pour adultes, avec plusieurs titres publiés sur Steam.",
     "presentation": "Byaka Games développe et publie des jeux pour adultes mêlant visual novel, aventure et simulation. Son catalogue Steam comprend notamment Sunny Love, NTR Dream, Asian Caprice et MILF Dream.",
     "gameIds": [
       "114735",
@@ -425,8 +427,7 @@
     "vndbId": "p20658",
     "avatar": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/913724/avatars/24342228-7630-418c-ac5d-35d8b23e47df-380x380_0x0_1023x1023.png",
     "banner": "https://pbs.twimg.com/profile_banners/1547511223016718338/1757677266/600x200",
-    "shortPresentation": "",
-    "presentation": "",
+    "presentation": "Bonjour à toutes et à tous ! Nous sommes Candylight Studio et nous sommes ravis de vous accueillir ! \nChez Candylight Studio, nous créons des jeux pour adultes : ce n’est pas seulement notre travail, c’est aussi notre passion. Nous sommes une équipe de personnes talentueuses et créatives qui aiment ce qu’elles font. Nous nous entraidons chaque jour pour l’écriture, la création des rendus et le développement des meilleurs jeux possibles. Aujourd’hui, nous souhaitons agrandir notre petite famille en accueillant de nouveaux artistes talentueux. Nous croyons sincèrement en ce projet, ainsi qu’en ceux qui suivront, et nous aimerions les voir atteindre tout leur potentiel grâce à l’aide de nouvelles personnes passionnées et talentueuses.",
     "gameIds": [
       "126667",
       "241258",
@@ -487,8 +488,7 @@
     "primaryLanguage": "",
     "vndbId": "",
     "avatar": "https://f95zone.to/data/avatars/o/2044/2044003.jpg?1596912191",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/11000093/2a579855dc504f199ae3f6c2c7f2b8a2/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/1.png?token-hash=mtsOSYTovRUBI9VKRt0WDRa4vOO2ybPOGDSauPuRpRo%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "banner": "",
     "presentation": "",
     "gameIds": [
       "291378"
@@ -528,8 +528,7 @@
     "primaryLanguage": "",
     "vndbId": "",
     "avatar": "https://secure.gravatar.com/avatar/2cc44a55c9a14e981b60a01782b27440?s=192",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4510836/1c6393507a9f43d7b6b4bd9c290be089/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/15.png?token-hash=L4D9bXvePKgzEAH3lQso_etd03SVPFS0QRsnhrSPo9w%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "banner": "",
     "presentation": "",
     "gameIds": [
       "57272",
@@ -571,9 +570,8 @@
     "creatorType": "amateur_group",
     "primaryLanguage": "en",
     "vndbId": "p27111",
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4834148/0b0064f946ed478bb190397281565dfa/eyJoIjoxMDAsInciOjEwMH0%3D/16.jpg?token-hash=65oTlWaOng4SwbjGQbfPAUSzw8eZDaJ2tC5IwQ2jOqo%3D&token-time=1787702400",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4834148/98cd121c7c1344f68c04b137304415e2/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/3.jpeg?token-hash=aAye0JD3jPd_C7BeeZ3HAcmqc94KDwL6sgnXZYBlEoA%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "avatar": "",
+    "banner": "",
     "presentation": "",
     "gameIds": [
       "74935",
@@ -628,9 +626,8 @@
     "creatorType": "",
     "primaryLanguage": "",
     "vndbId": "",
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/user/86401731/b5915142e95244ed8c88b2750254296e/eyJoIjozNjAsInciOjM2MH0%3D/5.png?token-hash=xG68D-Te7ZMTg6_CXnJgllFeVNevlfE7jDHZrIxBoUA%3D&token-time=1788048000",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/9886205/716798870b0c4586b6c422732b6f9871/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/10.png?token-hash=q9zHN4Yb3kkm7nxzXkt9R30ZJbOZNcPQYTLn9GGK7XY%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "avatar": "",
+    "banner": "",
     "presentation": "",
     "gameIds": [
       "307270"
@@ -651,7 +648,6 @@
     "aliases": [],
     "avatar": "",
     "banner": "",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "22629",
@@ -677,9 +673,8 @@
     "creatorType": "",
     "primaryLanguage": "",
     "vndbId": "",
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/13052205/51f395b6a12743c88971fa7381ef8ba9/eyJoIjoxMDAsInciOjEwMH0%3D/5.png?token-hash=740sdmojQLlp9WUkYTREb0x4Ud8e5bL67WH_SqBaZHQ%3D&token-time=1788652800",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/13052205/e4b7029c8edd4571b84e761bd64e3f80/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/8.png?token-hash=wWMBJEfXaWBa7EOQ2hg1EqdkKUrltwYzz2N6cgI4C6w%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "avatar": "",
+    "banner": "",
     "presentation": "",
     "gameIds": [
       "275823"
@@ -708,9 +703,8 @@
     "creatorType": "",
     "primaryLanguage": "",
     "vndbId": "",
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/15617795/16aa9092f32d404585067e163b0f5b52/eyJoIjoxMDAsInciOjEwMH0%3D/2.png?token-hash=xgMYUWWIXZo6Wa_hu-RQacudDIhV5lxXM7LQwbtfhNM%3D&token-time=1788048000",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/15617795/f26a07f553f945e4822b33eaea9a0d47/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/5.jpeg?token-hash=B0SHSrMv4E8ksLjI45zso0j8jJtpUE0_gTbaPIbPcUY%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "avatar": "",
+    "banner": "",
     "presentation": "",
     "gameIds": [
       "309861"
@@ -739,9 +733,8 @@
     "id": "crunchy-cake",
     "name": "Crunchy Cake",
     "aliases": [],
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/14886625/c0c1790b552f4673bb2ec372e63ab039/eyJoIjoxMDgwLCJ3IjoxMDgwfQ%3D%3D/1.png?token-hash=exRnPPCNhSMlGqF1ol3mzSlHqSzknpPFDBB85rLMjtQ%3D&token-time=1787356800",
+    "avatar": "",
     "banner": "",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "288953"
@@ -765,9 +758,8 @@
     "id": "damned-studios",
     "name": "Damned Studios",
     "aliases": [],
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4568116/d5c86dfa7d984183abff1db3013bc8a8/eyJ3Ijo2MjB9/2.png?token-hash=8Oru1m3xZC-rFiWHK6S6XcL8xVA1MAOMC6V4YZ3De0s%3D",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4568116/783eecab99524f4b890d9e49d34f8ba1/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/2.png?token-hash=RVCSF8xpVxT9piqbKOwbq8rxZ4jNODwoJ_FwNzv3hk4%3D&token-time=1788480000",
-    "shortPresentation": "Équipe indépendante internationale développant des jeux pour adultes, notamment Parasite Black.",
+    "avatar": "",
+    "banner": "",
     "presentation": "Damned Studios est une équipe indépendante composée de créateurs issus de plusieurs pays. Le studio développe des jeux pour adultes ambitieux et est notamment à l'origine de Parasite Black.",
     "gameIds": [
       "92995"
@@ -811,9 +803,8 @@
     "creatorType": "",
     "primaryLanguage": "",
     "vndbId": "",
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/7227120/733b064fcade4870bc8157f6d6f18b0f/eyJoIjoxMDAsInciOjEwMH0%3D/3.png?token-hash=R8F2u-_Oad3zw3tynX42ilEPOnm9rY7TCs-6r6jr-P4%3D&token-time=1788739200",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/7227120/43fa3d964abb4f3c9ccd6260562de8f5/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/5.png?token-hash=jRwBM0PprIXNz347q7ggTFj0Y1Aynd0XPaC75jzpTvQ%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "avatar": "",
+    "banner": "",
     "presentation": "",
     "gameIds": [
       "90687",
@@ -854,9 +845,8 @@
     "creatorType": "amateur_group",
     "primaryLanguage": "en",
     "vndbId": "p7321",
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/884865/10a2be4729ea4e11b4bd3827b7623224/eyJoIjoxMDAsInciOjEwMH0%3D/1.gif?token-hash=KD-LX1VnuDnZLbtqQBh1mZS0Jp_bTUz7mUc6dCLR-gQ%3D&token-time=1788566400",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/884865/30acdec7cc5945219bd584f8bc541676/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/1.jpg?token-hash=8x4IgX19MP9Z_Yz4B_0iApZOqaSmKTI3EP-0pHKiCKY%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "avatar": "",
+    "banner": "",
     "presentation": "",
     "gameIds": [
       "6289",
@@ -900,7 +890,6 @@
     "aliases": [],
     "avatar": "https://f95zone.to/data/avatars/l/4406/4406696.jpg?1771352138",
     "banner": "",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "101011",
@@ -945,7 +934,6 @@
     "vndbId": "p18724",
     "avatar": "https://f95zone.to/data/avatars/l/5821/5821421.jpg?1676610436",
     "banner": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/1829047/covers/9bc26019-4c12-4a75-9877-a18c71dc122f-1240x0_0x218_2658x499.png",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "158392"
@@ -1001,7 +989,6 @@
     "vndbId": "",
     "avatar": "https://f95zone.to/data/avatars/l/1731/1731885.jpg?1781324250",
     "banner": "https://pbs.twimg.com/profile_banners/2069981676726292481/1785358105/1500x500",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "302544"
@@ -1039,7 +1026,6 @@
     ],
     "avatar": "https://f95zone.to/data/avatars/l/44/44386.jpg?1562363521",
     "banner": "https://f95zone.to/data/covers/user/l/44/44386.jpg?1671907317",
-    "shortPresentation": "Studio indépendant spécialisé dans les jeux pour adultes narratifs et les expériences 3D.",
     "presentation": "DreamBig Games est un studio indépendant de jeux pour adultes qui développe aussi bien des projets narratifs que des expériences plus directes. Son catalogue compte de nombreux titres publiés sur Steam, ainsi que plusieurs projets en développement comme Lewd Network et Vikings: Sex and Blood.",
     "gameIds": [
       "186671",
@@ -1122,9 +1108,8 @@
     "aliases": [
       "Dr PinkCake"
     ],
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/1671581/bbf34a75ff034a2d95dea4384c2160a8/eyJoIjozNjAsInciOjM2MH0%3D/7.png?token-hash=kcY7wTPGs4mdrBhvBIbPgwO8NhvUxgQB4psoT4cU4e8%3D&token-time=1787529600",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/1671581/92e8c9d986b74e9db1e071894e55397d/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/14.png?token-hash=m_RJtwlB0ryuvp4zzstByoB1yFobkuepNu_6ax6UHsc%3D&token-time=1788480000",
-    "shortPresentation": "Dr PinkCake, également connu sous les noms DPC ou Pink, est un développeur indépendant professionnel principalement connu pour avoir créé les visual novels adultes Acting Lessons et Being a DIK. Il réalise lui-même l’essentiel du développement de ses jeux, notamment l’écriture, la programmation ainsi que la création et le rendu des scènes.",
+    "avatar": "",
+    "banner": "",
     "presentation": "Dr PinkCake, parfois abrégé DPC ou simplement Pink, est un développeur de jeux indépendant professionnel et le créateur de Being a DIK. Il s’agit de son deuxième visual novel pour adultes, après son premier jeu, Acting Lessons.\n\nIl travaille principalement seul et prend en charge pratiquement tous les aspects de ses projets : écriture, programmation, mise en scène, poses et rendus graphiques, mais également une partie de la communication et de la gestion commerciale. Ce fonctionnement lui permet de conserver un contrôle créatif total sur ses jeux. Lors des dernières étapes de développement, il fait toutefois appel à un petit groupe de testeurs pour vérifier les nouveaux épisodes avant leur sortie.\n\nÀ l’époque d’Acting Lessons, Dr PinkCake développait encore ses jeux pendant son temps libre tout en conservant un emploi principal. Après le succès de ce premier titre et la sortie du premier épisode de Being a DIK, il a décidé de se consacrer entièrement au développement de jeux. Sa popularité a ensuite fortement progressé, faisant de lui l’un des créateurs les plus importants dans le domaine des visual novels pour adultes.\n\nSon travail est notamment financé via Patreon, où les abonnés peuvent accéder, selon leur niveau de soutien, aux nouvelles du développement, à des aperçus, des sondages, des guides ainsi qu’aux nouvelles versions du jeu. Ses titres sont également disponibles sur Steam et GOG sous forme de saisons regroupant plusieurs épisodes.\n\nDr PinkCake publie régulièrement des informations sur l’avancement de ses projets et échange avec sa communauté à travers Patreon, Discord et les réseaux sociaux. Il organise également des sessions de questions-réponses dans lesquelles il partage des informations sur son parcours, ses méthodes de travail et ses nombreuses expériences dans des domaines tels que la programmation, la photographie, la gestion de projets, la musique et la production.",
     "gameIds": [
       "25332"
@@ -1173,9 +1158,8 @@
     "creatorType": "",
     "primaryLanguage": "",
     "vndbId": "",
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/9929899/58f6bc737c024d2cb9434bf1942de558/eyJ3Ijo2MjB9/1.png?token-hash=kDNcmuaJD_VaPP5cGNk02N_kOjnA4i8qnqqYhjZD5lg%3D&token-time=1788566400",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/9929899/ab33ae40e0b34a9eb7b98344bff92115/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/7.webp?token-hash=InvxsmPXCDdLCnMUcYXLCrn-GRYDnOlZYmrNhh4PUCU%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "avatar": "",
+    "banner": "",
     "presentation": "",
     "gameIds": [
       "271611"
@@ -1226,9 +1210,8 @@
     "creatorType": "individual",
     "primaryLanguage": "en",
     "vndbId": "p20193",
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/user/219707488/82bdf6dbf3954d1b9d0918bdbaa654d8/eyJoIjoxMDAsInciOjEwMH0%3D/2.png?token-hash=mXr67CsFL1smmMyBEKD8n6XAiKm_ezeEtiKkgtfFwXY%3D&token-time=1788048000",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/16383317/ce9f2e5bd6114ffb84c3ab98ec59c55e/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/1.png?token-hash=Iect12lOlYMVySo1n271oWpfcsEtfJ-hB7Iiu1I8fsU%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "avatar": "",
+    "banner": "",
     "presentation": "",
     "gameIds": [
       "295961"
@@ -1252,9 +1235,8 @@
     "id": "fpc-games",
     "name": "FPC-Games",
     "aliases": [],
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/5861136/f38404ddf31c449daabf6c61772f1ab6/eyJ3Ijo2MjB9/1.jpg?token-hash=lQbAsXxtBQLTAXDZ4xHlqAx6Jmsblt8musvg6aRpJVo%3D",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/5861136/ee79433f1a614691850d0703bcc746af/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/3.jpg?token-hash=1s-Yusthi0qlItIUrYwlFuBviV3gVnepoxas28jG1sU%3D&token-time=1788480000",
-    "shortPresentation": "Créateur indépendant spécialisé dans les jeux pour adultes.",
+    "avatar": "",
+    "banner": "",
     "presentation": "FPC-Games développe des jeux pour adultes et partage l'avancement de ses projets auprès de sa communauté, notamment via Patreon.",
     "gameIds": [
       "69144",
@@ -1285,9 +1267,8 @@
     "creatorType": "",
     "primaryLanguage": "ru",
     "vndbId": "",
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/user/22810661/7b0f27913259444cbde449749a9fac5c/eyJoIjoxMDAsInciOjEwMH0%3D/11.jpg?token-hash=FEcPAP57-k3L2IjMBapBfjQ21JsntDv5s_bEjnFwktg%3D&token-time=1787961600",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/3001624/474101b866c74290aecf6b6a8f179d89/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/41.png?token-hash=O56VW5PHXAQVD4kSKFS6ruWgZSgxNzCcGPJT2AgTySI%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "avatar": "",
+    "banner": "",
     "presentation": "",
     "gameIds": [
       "67692",
@@ -1326,7 +1307,6 @@
     "vndbId": "",
     "avatar": "https://f95zone.to/data/avatars/l/360/360720.jpg?1691072852",
     "banner": "https://f95zone.to/data/covers/user/l/360/360720.jpg?1563488234",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "33523",
@@ -1348,7 +1328,6 @@
     "aliases": [],
     "avatar": "",
     "banner": "",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "6832",
@@ -1379,9 +1358,8 @@
     "creatorType": "",
     "primaryLanguage": "zh",
     "vndbId": "",
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/9251944/dd6516a8b05c4ff3ae5b49e3c4506073/eyJoIjoxMDAsInciOjEwMH0%3D/9.gif?token-hash=2IzpqQ06kG1zBBIzef_pOxRX40DUaulD9ytlNV6S6VE%3D&token-time=1788048000",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/9251944/be555b5f79f34ad1aec1b403cff2a175/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/24.png?token-hash=2e1CxWdNWcgfZvT7iuqqO6N21doMjnyiivGpQpcIuSU%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "avatar": "",
+    "banner": "",
     "presentation": "",
     "gameIds": [
       "142322"
@@ -1422,7 +1400,6 @@
     "vndbId": "p19073",
     "avatar": "https://pbs.twimg.com/profile_images/1552809345951232000/UUHk5GYU_400x400.jpg",
     "banner": "https://pbs.twimg.com/profile_banners/1552809267878449152/1659053825/600x200",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "169597"
@@ -1453,7 +1430,6 @@
     "vndbId": "p14984",
     "avatar": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/1617765/avatars/ae1a75dd-9246-49d3-94c3-dbe9add11b52-380x380_22x0_754x754.png",
     "banner": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/1617765/covers/27fef679-09be-4c92-8ddd-6b3e7928eae9-1240x0_1x380_1809x339.png",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "125534",
@@ -1495,7 +1471,6 @@
     "vndbId": "",
     "avatar": "https://f95zone.to/data/avatars/l/6808/6808142.jpg?1753296113",
     "banner": "",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "264966"
@@ -1526,7 +1501,6 @@
     "vndbId": "",
     "avatar": "",
     "banner": "",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "131634"
@@ -1548,7 +1522,6 @@
     "vndbId": "p28068",
     "avatar": "https://images.boosty.to/user/43360452/avatar?change_time=1769266016&croped=1&mh=320&mw=320",
     "banner": "https://images.boosty.to/blog/43360452/cover?change_time=1769261701",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "298831",
@@ -1586,7 +1559,6 @@
     "aliases": [],
     "avatar": "",
     "banner": "",
-    "shortPresentation": "Créateur de visual novels, notamment Malformation of the Desired Heaven.",
     "presentation": "Mannered Gentleman développe des visual novels. Son projet Malformation of the Desired Heaven est présenté comme un court prélude servant d'introduction à une histoire principale plus large.",
     "gameIds": [
       "59387"
@@ -1617,7 +1589,6 @@
     "vndbId": "",
     "avatar": "https://f95zone.to/data/avatars/l/413/413141.jpg?1774096855",
     "banner": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/4476549/covers/a736233f-8853-484a-8997-a9a70800898f-1240x0_1x594_5502x1031.jpg",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "291756"
@@ -1656,9 +1627,8 @@
     "creatorType": "",
     "primaryLanguage": "",
     "vndbId": "",
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/13263932/eb0aa0931fc148998be5c0a6cd15c490/eyJoIjozNjAsInciOjM2MH0%3D/2.png?token-hash=JfuBzmzhNwDNKGXpxrKjIAeEEvpiVmzS07qvaJyGUPg%3D&token-time=1788220800",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/13263932/85b79a5b9fc64dd0834f901db1d2cb48/eyJ3IjoxOTIwLCJ3ZSI6MX0%3D/6.png?token-hash=bHFFEu3NXukszFi-2KTrWczQHUxe4POT24JbvILXrCk%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "avatar": "",
+    "banner": "",
     "presentation": "",
     "gameIds": [
       "237987"
@@ -1694,7 +1664,6 @@
     "vndbId": "",
     "avatar": "https://pbs.twimg.com/profile_images/2065350460043591680/S-HHkSmJ_400x400.jpg",
     "banner": "https://pbs.twimg.com/profile_banners/1893301944204365824/1781252898/1500x500",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "313546"
@@ -1735,7 +1704,6 @@
     "vndbId": "p22576",
     "avatar": "https://img.itch.zone/aW1nLzc4NTg1NDcucG5n/original/78JqSl.png",
     "banner": "https://img.itch.zone/aW1nLzc4NTg1NDcucG5n/original/78JqSl.png",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "17958",
@@ -1792,8 +1760,7 @@
     "primaryLanguage": "",
     "vndbId": "",
     "avatar": "https://f95zone.to/data/avatars/l/4050/4050637.jpg?1787211612",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/11939927/851f309ebb9547799f0aafbd227227a7/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/3.png?token-hash=nXPnkB80Xmi8zslcf8Bi14xDPIbPZ7ORGh3CiFJybAo%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "banner": "",
     "presentation": "",
     "gameIds": [
       "202593",
@@ -1823,9 +1790,8 @@
     "creatorType": "",
     "primaryLanguage": "",
     "vndbId": "",
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/840281/fecdb32df38242f6b3bf9812054b0bf2/eyJ3Ijo2MjB9/3.png?token-hash=PWgbjyoSbix7xZKiEDz5qg0HQcVGvx-nDkQq3nkQEN4%3D",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/840281/65838d26f45b48e7bb419c79dc5cd2e6/eyJ3IjoxOTIwLCJ3ZSI6MX0%3D/6.png?token-hash=4uKINmHKmdC9XF5SOlGXsnD-pybQUnnTa6moH6lAwnw%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "avatar": "",
+    "banner": "",
     "presentation": "",
     "gameIds": [
       "285782"
@@ -1856,7 +1822,6 @@
     "vndbId": "p13625",
     "avatar": "https://f95zone.to/data/avatars/o/653/653271.jpg?1603814410",
     "banner": "",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "79138"
@@ -1887,7 +1852,6 @@
     "vndbId": "",
     "avatar": "https://img.itch.zone/aW1nLzE2MTA5MzQ0LnBuZw==/80x80%23/brhC86.png",
     "banner": "https://attachments.f95zone.to/2024/07/3897468_Banner.png",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "218345"
@@ -1923,7 +1887,6 @@
     "vndbId": "p27657",
     "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/14865532/18b529e5b9cc411eb18fc35bfe182851/eyJoIjoxMDAsInciOjEwMH0%3D/2.png?token-hash=FgnpW5hNogr7RaIz3Ch9cfGaRyCOYELi_IbY6HdLtJg%3D&token-time=1788048000",
     "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/14865532/96a5aa3de3bf4c6bbee7ae08ec410bdd/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/2.png?token-hash=Je3CK7e5HmjiQ_rhhZqDJmMusRS1HfPNjEkv8x3qYkQ%3D&token-time=1788480000",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "273915"
@@ -1963,8 +1926,7 @@
     "primaryLanguage": "",
     "vndbId": "",
     "avatar": "https://f95zone.to/data/avatars/o/5/5720.jpg?1746517636",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/13951725/3b433493f5f649a4855ef18834cbd2d4/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/13.png?token-hash=LbEIQnLQ2fAi40g13v7v-Budc0ozWpoUgID1BqPtU-I%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "banner": "",
     "presentation": "",
     "gameIds": [
       "254333"
@@ -2002,7 +1964,6 @@
     ],
     "avatar": "",
     "banner": "",
-    "shortPresentation": "Créatrice ou créateur de visual novels centrés sur la romance sombre et les personnages yandere.",
     "presentation": "P1NK-ANG3L développe des visual novels à tonalité sombre, souvent centrés sur l'obsession et la romance yandere. Son catalogue comprend notamment Your Hero, Jayce Blackwood, Your Stalker, Jayce Blackwood et Your Affliction, Lester Diaz.",
     "gameIds": [
       "260235",
@@ -2059,7 +2020,6 @@
     "vndbId": "p18811",
     "avatar": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/1484484/avatars/2a56b9d6-7f79-437d-9868-260c30599e08-380x380_174x15_851x852.jpg",
     "banner": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/1484484/covers/83aed3b0-29ba-49af-95f3-24f51693def1-1240x0_0x0_1240x233.jpg",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "254542",
@@ -2089,9 +2049,8 @@
     "id": "phillygames",
     "name": "PhillyGames",
     "aliases": [],
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/1147927/0e280a1adb29435caa70d016aac20056/eyJoIjozNjAsInciOjM2MH0%3D/1.png?token-hash=WZJoHtMVg896X0wl6mfush_mlIWg45fRAx0TL_0PK3w%3D&token-time=1787270400",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/1147927/952d989a8d34490abe670081ea0feb7f/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/4.jpg?token-hash=CebsfnzYRkzZGSfVC5Jum8DgdKvtoKOUMHyZZocylvs%3D&token-time=1788480000",
-    "shortPresentation": "Créateur de visual novels adultes à forte identité narrative, notamment Depraved Awakening et City of Broken Dreamers.",
+    "avatar": "",
+    "banner": "",
     "presentation": "PhillyGames développe des visual novels adultes axés sur les choix et une ambiance néo-noir. Il est notamment à l'origine de Depraved Awakening et de City of Broken Dreamers, une série mêlant science-fiction, cyberpunk et intrigue policière.",
     "links": [
       {
@@ -2115,7 +2074,7 @@
         "url": "https://x.com/PhillyGamesXXX"
       },
       {
-        "type": "other",
+        "type": "website",
         "label": "DeviantArt",
         "url": "https://phillygames.deviantart.com/"
       },
@@ -2150,7 +2109,6 @@
     "aliases": [],
     "avatar": "https://f95zone.to/data/avatars/l/60/60085.jpg?1601658796",
     "banner": "",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "62869",
@@ -2185,9 +2143,8 @@
     "creatorType": "",
     "primaryLanguage": "",
     "vndbId": "",
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/6638835/a1e304f0fb954bac9942640e2e4a665f/eyJoIjoxMDAsInciOjEwMH0%3D/3.jpeg?token-hash=Uc7-vQvQX_B5K47lvIFiqmoDxLPLBQCQy8Gcg9xO__k%3D&token-time=1788048000",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/6638835/84b95b26757c43778b9668c12d24c6d7/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/11.png?token-hash=lQ5bBI9iIrN4YVG2fAwEjQRXRbnSteFcR4oAe0FagHw%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "avatar": "",
+    "banner": "",
     "presentation": "",
     "gameIds": [
       "310830"
@@ -2216,9 +2173,8 @@
     "creatorType": "individual",
     "primaryLanguage": "en",
     "vndbId": "p13999",
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/6454195/e410f87850a749628e8a0b23c8ca4c85/eyJoIjoxMDAsInciOjEwMH0%3D/2.png?token-hash=3XMJHuUeZXOHR0k2MzZIRyYD51M8gzEeT2ftNTWios8%3D&token-time=1787875200",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/6454195/79e5c69ba2cb49ba8a33f963cd2158c2/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/7.jpg?token-hash=jwYIQKdg5iXvmLrnhWYNcmmI_CsWAEvojGI9xCoX8qI%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "avatar": "",
+    "banner": "",
     "presentation": "",
     "gameIds": [
       "77361",
@@ -2251,8 +2207,7 @@
       "Dimajio333"
     ],
     "avatar": "https://images.kaguya.io/producers/019df7a4-c47c-72b2-ba5d-fe8bc081b74e-360w.webp",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/15577675/ab24abb66f534765bdd4869fd1c93e80/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/1.png?token-hash=BzI71MdORDsA5J5qJ3xGACkH5ZVF7iHoKAaOgOI-ekA%3D&token-time=1788480000",
-    "shortPresentation": "Créateur indépendant de visual novels pour adultes, avec un intérêt marqué pour les récits NTR.",
+    "banner": "",
     "presentation": "SadPepper crée des visual novels pour adultes principalement orientés vers le genre NTR. Il présente cette activité comme un projet personnel développé par passion, avec des jeux mis à disposition gratuitement et un soutien communautaire facultatif.",
     "gameIds": [
       "213518",
@@ -2289,9 +2244,8 @@
     "creatorType": "individual",
     "primaryLanguage": "es",
     "vndbId": "p15015",
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/5026414/b2976c8e9e5a43fbb24100065069e322/eyJoIjoxMDAsInciOjEwMH0%3D/15.jpg?token-hash=yZB5fO3UTEZ7d8ojYVrxz502hhR75V7sXNdx6xi5dLg%3D&token-time=1788048000",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/5026414/589bc91d17bb4175ae816ebe23e94be9/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/56.jpeg?token-hash=T-8i7xEaTLdBjtwWQJ7d4BT4OrgBeTn0MEQ31y-F5cA%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "avatar": "",
+    "banner": "",
     "presentation": "",
     "gameIds": [
       "92957",
@@ -2339,7 +2293,6 @@
     "vndbId": "",
     "avatar": "https://pbs.twimg.com/profile_images/1841868362004987905/Abgv0bfC_400x400.png",
     "banner": "https://img.itch.zone/aW1nLzE3NzE2NDg3LnBuZw==/original/%2BnAyM5.png",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "221055"
@@ -2369,8 +2322,7 @@
     "primaryLanguage": "",
     "vndbId": "",
     "avatar": "https://f95zone.to/data/avatars/l/10144/10144148.jpg?1765110389",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/15024960/02eafeee50f34f71bf08a443e4c9e789/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/3.jpeg?token-hash=cOInjxR77g_u9Y7fpzBg3vUmIj4G-vJqWOF23dPX2jA%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "banner": "",
     "presentation": "",
     "gameIds": [
       "279704"
@@ -2406,7 +2358,6 @@
     "aliases": [],
     "avatar": "https://f95zone.to/data/avatars/l/4222/4222672.jpg?1704886997",
     "banner": "",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "73285",
@@ -2462,7 +2413,6 @@
     "vndbId": "p28583",
     "avatar": "https://pbs.twimg.com/profile_images/2024972604692480001/q9v6oJhF_400x400.png",
     "banner": "https://snow-fans.com/header_user.webp",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "73205",
@@ -2509,9 +2459,8 @@
     "aliases": [
       "SoL"
     ],
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/468397/e38dd0d7eb5d4878b342e82de9877b4d/eyJ3Ijo2MjB9/5.png?token-hash=-8eiojlAnQIZiA39oNADVQ5ZTfUUmSbMzt0wure1zSg%3D",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/468397/dd56eb93820a4758b6330256e80486c0/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/14.png?token-hash=1KDD41ObzpvGVYGTMpH98_0lnpVPx4UIN0GG3k493Q0%3D&token-time=1788480000",
-    "shortPresentation": "Petite équipe indépendante créant des jeux érotiques narratifs situés dans le Trinity-verse.",
+    "avatar": "",
+    "banner": "",
     "presentation": "Society Of Lust est une petite équipe de développement qui crée des jeux pour adultes centrés sur l'immersion et la narration. Ses projets se déroulent dans le Trinity-verse, un univers partagé qui relie notamment My Life with Laura, Lewd Stories of Trinity et SoL-Games.",
     "gameIds": [
       "10140",
@@ -2552,8 +2501,7 @@
     "name": "story and magic",
     "aliases": [],
     "avatar": "https://f95zone.to/data/avatars/l/4591/4591694.jpg?1642863613",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/8026853/815548d0c35847d6bf703faca1372b8c/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/3.jpg?token-hash=DK-0WzAIJhhoFfikWkAcdjIaL7dyUQFcf-uV9EtraE0%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "banner": "",
     "presentation": "",
     "gameIds": [
       "110815"
@@ -2584,7 +2532,6 @@
     "aliases": [],
     "avatar": "",
     "banner": "",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "78934",
@@ -2610,9 +2557,8 @@
     "creatorType": "",
     "primaryLanguage": "",
     "vndbId": "",
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/user/126463738/f78789724298444b84d36f0510288058/eyJoIjoxMDAsInciOjEwMH0%3D/2.jpg?token-hash=hbbtVUO0OezE6Dr-DNtADQ5-uXO0rrnkDroGzo-RS28%3D&token-time=1788048000",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/12102164/66ae1e2c6494422c9c09bcb535f48d31/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/6.png?token-hash=RqLkWBEZamfh3sSKkWsskBlAdcbObPA94d3fcLX54zQ%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "avatar": "",
+    "banner": "",
     "presentation": "",
     "gameIds": [
       "310278"
@@ -2648,7 +2594,6 @@
     "vndbId": "p9027",
     "avatar": "https://f95zone.to/data/avatars/l/412/412315.jpg?1518375459",
     "banner": "",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "9215"
@@ -2679,7 +2624,6 @@
     "vndbId": "p13622",
     "avatar": "https://f95zone.to/data/avatars/l/476/476039.jpg?1651572247",
     "banner": "https://f95zone.to/data/covers/user/l/476/476039.jpg?1649410299",
-    "shortPresentation": "",
     "presentation": "",
     "gameIds": [
       "107379",
@@ -2714,9 +2658,8 @@
     "creatorType": "",
     "primaryLanguage": "",
     "vndbId": "",
-    "avatar": "https://c10.patreonusercontent.com/4/patreon-media/p/user/220314288/e4bb274e117a449e8944925fdb53e7ec/eyJoIjoxMDAsInciOjEwMH0%3D/1.png?token-hash=f-nen5MEUMX-qrFtEkkBfhFVO6r5lPChFGuVeqbtE7Y%3D&token-time=1788048000",
-    "banner": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/16418335/bb62dc29670b445b85db340f1be954f8/eyJ3Ijo5NjAsIndlIjoxfQ%3D%3D/1.png?token-hash=zKGkpcptzobFqCJOQmBtZWi3Q4n6DykIf-6obEbRGzs%3D&token-time=1788480000",
-    "shortPresentation": "",
+    "avatar": "",
+    "banner": "",
     "presentation": "",
     "gameIds": [
       "310742"
@@ -2742,7 +2685,6 @@
     "aliases": [],
     "avatar": "https://f95zone.to/data/avatars/l/5389/5389893.jpg?1690921986",
     "banner": "",
-    "shortPresentation": "Équipe de développement de visual novels pour adultes, connue notamment pour Lust of Pain et Lesson in Loyalty.",
     "presentation": "Vilkas Creative est une équipe de développement de jeux pour adultes qui met l'accent sur les visual novels narratifs et le retour de sa communauté. Son catalogue comprend notamment Lust of Pain, Lesson in Loyalty et Silent House.",
     "gameIds": [
       "133573",
@@ -2806,7 +2748,6 @@
     "aliases": [],
     "avatar": "https://f95zone.to/data/avatars/l/774/774059.jpg?1656845369",
     "banner": "https://f95zone.to/data/covers/user/l/774/774059.jpg?1712425815",
-    "shortPresentation": "Artiste 3D et créateur de contenu pour adultes, également développeur du jeu Hanna Futile Resistance.",
     "presentation": "X3rr4 réalise des rendus et illustrations 3D pour adultes et partage une partie de son travail sur son site officiel. Il développe également Hanna Futile Resistance et publie régulièrement des créations, fanarts et contenus destinés à sa communauté.",
     "gameIds": [
       "59541",

@@ -149,6 +149,11 @@
         "type": "twitter",
         "label": "Twitter",
         "url": "https://twitter.com/AppleTartGames"
+      },
+      {
+        "type": "steam",
+        "label": "Steam",
+        "url": "https://store.steampowered.com/search/?developer=Apple%20Tart"
       }
     ],
     "otherGames": [

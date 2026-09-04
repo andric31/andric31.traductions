@@ -415,6 +415,69 @@
     "otherGames": []
   },
   {
+    "id": "candylight-studio",
+    "name": "Candylight Studio",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "amateur_group",
+    "primaryLanguage": "en",
+    "vndbId": "p20658",
+    "avatar": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/913724/avatars/24342228-7630-418c-ac5d-35d8b23e47df-380x380_0x0_1023x1023.png",
+    "banner": "https://pbs.twimg.com/profile_banners/1547511223016718338/1757677266/600x200",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "126667",
+      "241258",
+      "271397"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "website",
+        "label": "Website",
+        "url": "https://www.candylightstudio.com/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://patreon.com/candylight"
+      },
+      {
+        "type": "subscribestar",
+        "label": "SubscribeStar",
+        "url": "https://subscribestar.adult/candylight-studio"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/eCpWFKfBry"
+      },
+      {
+        "type": "twitter",
+        "label": "Twitter",
+        "url": "https://x.com/CandylightStud1"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://candylight-studio.itch.io/"
+      },
+      {
+        "type": "steam",
+        "label": "Steam",
+        "url": "https://store.steampowered.com/curator/45604051"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p20658"
+      }
+    ]
+  },
+  {
     "id": "cata1yct",
     "name": "cata1yct",
     "aliases": [],

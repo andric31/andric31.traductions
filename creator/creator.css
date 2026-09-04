@@ -263,6 +263,76 @@ body.creatorPage{
 .creatorGameTitle{ margin:0; font-size:14px; line-height:1.35; }
 .creatorGameMeta{ margin-top:8px; color:var(--muted); font-size:11px; }
 
+.creatorExternalGames{
+  margin-top:20px;
+  padding-top:18px;
+  border-top:1px solid var(--border);
+}
+
+.creatorExternalGamesTitle{
+  margin:0 0 11px;
+  font-size:15px;
+}
+
+.creatorExternalGamesList{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.creatorExternalGame{
+  display:grid;
+  grid-template-columns:24px minmax(0,1fr) auto 18px;
+  align-items:center;
+  gap:11px;
+  min-height:45px;
+  padding:8px 12px;
+  border:1px solid var(--border);
+  border-radius:11px;
+  color:var(--fg);
+  background:rgba(255,255,255,.035);
+  text-decoration:none;
+  transition:background .15s ease,border-color .15s ease,transform .15s ease;
+}
+
+.creatorExternalGame:hover{
+  border-color:color-mix(in srgb,var(--accent,#58a6ff) 65%,var(--border));
+  background:rgba(255,255,255,.065);
+  transform:translateX(2px);
+}
+
+.creatorExternalGameIcon{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.creatorExternalGameIcon .creatorPageLinkIcon{
+  color:var(--muted);
+}
+
+.creatorExternalGameName{
+  min-width:0;
+  font-size:13px;
+  font-weight:800;
+  overflow-wrap:anywhere;
+}
+
+.creatorExternalGamePlatform{
+  padding:3px 8px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  color:var(--muted);
+  background:color-mix(in srgb,var(--card) 82%,transparent);
+  font-size:11px;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+.creatorExternalGameArrow{
+  color:var(--muted);
+}
+
 .creatorEmpty{ color:var(--muted); line-height:1.5; }
 .creatorError{ color:#ff7676; margin-top:14px; font-weight:800; }
 
@@ -278,11 +348,17 @@ body.creatorPage{
   .creatorPageAvatar{ width:88px; height:88px; border-radius:20px; }
   .creatorPageLinks{ grid-template-columns:1fr; }
   .creatorGamesGrid{ grid-template-columns:1fr; }
+  .creatorExternalGame{ grid-template-columns:22px minmax(0,1fr) 18px; }
+  .creatorExternalGamePlatform{ grid-column:2; justify-self:start; }
+  .creatorExternalGameArrow{ grid-column:3; grid-row:1 / span 2; }
 }
 
 html[data-theme="white"] .creatorGameCard,
 html[data-theme="clair"] .creatorGameCard,
 html[data-theme="light"] .creatorGameCard,
+html[data-theme="white"] .creatorExternalGame,
+html[data-theme="clair"] .creatorExternalGame,
+html[data-theme="light"] .creatorExternalGame,
 html[data-theme="white"] .creatorPageLink,
 html[data-theme="clair"] .creatorPageLink,
 html[data-theme="light"] .creatorPageLink{

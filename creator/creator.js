@@ -475,6 +475,24 @@
     return `${sample.slice(0, end).trimEnd()}…`;
   }
 
+  function normalizeExternalGames(raw) {
+    if (!Array.isArray(raw)) return [];
+    const seen = new Set();
+    const games = [];
+    for (const item of raw) {
+      if (!item || typeof item !== "object") continue;
+      const url = String(item.url || item.href || item.link || "").trim();
+      if (!/^https?:\/\//i.test(url)) continue;
+      const key = url.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const platform = String(item.platform || item.type || "Autre").trim() || "Autre";
+      const name = String(item.name || item.title || item.label || "Jeu externe").trim() || "Jeu externe";
+      games.push({ name, platform, url });
+    }
+    return games;
+  }
+
   function flagEmoji(code) {
     const value = String(code || "").trim().toUpperCase();
     if (!/^[A-Z]{2}$/.test(value)) return "🌐";
@@ -572,12 +590,14 @@
     }
   }
 
-  function renderGames(games) {
-    $("creatorGamesCount").textContent = `${games.length} jeu${games.length > 1 ? "x" : ""} trouvé${games.length > 1 ? "s" : ""}`;
-    if (!games.length) {
-      $("creatorNoGames").style.display = "";
-      return;
-    }
+  function renderGames(games, profile) {
+    const externalGames = normalizeExternalGames(profile?.otherGames);
+    const siteCount = `${games.length} jeu${games.length > 1 ? "x" : ""} sur le site`;
+    const externalCount = externalGames.length
+      ? ` · ${externalGames.length} lien${externalGames.length > 1 ? "s" : ""} externe${externalGames.length > 1 ? "s" : ""}`
+      : "";
+    $("creatorGamesCount").textContent = `${siteCount}${externalCount}`;
+    $("creatorNoGames").style.display = games.length || externalGames.length ? "none" : "";
 
     $("creatorGames").innerHTML = games.map((game) => {
       const display = getDisplay(game);
@@ -592,6 +612,17 @@
           </div>
         </a>`;
     }).join("");
+
+    const externalHost = $("creatorExternalGames");
+    const externalList = $("creatorExternalGamesList");
+    externalHost.hidden = !externalGames.length;
+    externalList.innerHTML = externalGames.map((game) => `
+      <a class="creatorExternalGame" href="${escapeHtml(game.url)}" target="_blank" rel="noopener noreferrer">
+        <span class="creatorExternalGameIcon" aria-hidden="true">${getLinkIcon(game.platform, game.platform, game.url)}</span>
+        <span class="creatorExternalGameName">${escapeHtml(game.name)}</span>
+        <span class="creatorExternalGamePlatform">${escapeHtml(game.platform)}</span>
+        <span class="creatorExternalGameArrow" aria-hidden="true">↗</span>
+      </a>`).join("");
   }
 
   function buildDirectoryEntries(creators, games) {
@@ -719,7 +750,7 @@
         .some((matched) => window.CreatorFeature.creatorSlug(matched?.id || matched?.name) === profile.id);
     });
     games.sort((a, b) => getTitle(a).localeCompare(getTitle(b), "fr"));
-    renderGames(games);
+    renderGames(games, profile);
   }
 
   async function init() {

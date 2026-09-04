@@ -17,7 +17,7 @@
   <link rel="icon" href="/favicon.png">
   <link rel="stylesheet" href="../viewer.css">
   <link rel="stylesheet" href="../themes.css">
-  <link rel="stylesheet" href="./creator.css?v=13">
+  <link rel="stylesheet" href="./creator.css?v=14">
 </head>
 <body class="creatorPage">
   <main class="creatorWrap">
@@ -78,12 +78,16 @@
         </div>
         <div id="creatorGames" class="creatorGamesGrid"></div>
         <div id="creatorNoGames" class="creatorEmpty" style="display:none">Aucun jeu associé à cette fiche.</div>
+        <div id="creatorExternalGames" class="creatorExternalGames" hidden>
+          <h3 class="creatorExternalGamesTitle">Liens externes des jeux</h3>
+          <div id="creatorExternalGamesList" class="creatorExternalGamesList"></div>
+        </div>
       </section>
     </div>
 
     <div id="creatorError" class="creatorError"></div>
   </main>
 
-  <script src="./creator.js?v=26"></script>
+  <script src="./creator.js?v=27"></script>
 </body>
 </html>

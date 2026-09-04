@@ -2266,6 +2266,37 @@
     "otherGames": []
   },
   {
+    "id": "saltystupidfish",
+    "name": "SaltyStupidFish",
+    "aliases": [],
+    "countryCode": "",
+    "country": "",
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://pbs.twimg.com/profile_images/1841868362004987905/Abgv0bfC_400x400.png",
+    "banner": "https://img.itch.zone/aW1nLzE3NzE2NDg3LnBuZw==/original/%2BnAyM5.png",
+    "shortPresentation": "",
+    "presentation": "",
+    "gameIds": [
+      "221055"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/saltystupidfish"
+      },
+      {
+        "type": "twitter",
+        "label": "Twitter",
+        "url": "https://x.com/FishStupid67746"
+      }
+    ]
+  },
+  {
     "id": "sinkusin",
     "name": "SinKuSin",
     "aliases": [],

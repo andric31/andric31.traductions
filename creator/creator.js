@@ -466,6 +466,15 @@
       .join(" ") || "Créateur inconnu";
   }
 
+  function presentationExcerpt(value, maxLength = 220) {
+    const text = String(value ?? "").trim().replace(/\s+/g, " ");
+    if (text.length <= maxLength) return text;
+    const sample = text.slice(0, maxLength + 1);
+    const wordBreak = sample.lastIndexOf(" ");
+    const end = wordBreak >= Math.floor(maxLength * 0.7) ? wordBreak : maxLength;
+    return `${sample.slice(0, end).trimEnd()}…`;
+  }
+
   function flagEmoji(code) {
     const value = String(code || "").trim().toUpperCase();
     if (!/^[A-Z]{2}$/.test(value)) return "🌐";
@@ -602,7 +611,7 @@
           primaryLanguage: String(profile?.primaryLanguage || "").trim(),
           vndbId: String(profile?.vndbId || "").trim(),
           avatar: String(profile?.avatar || "").trim(),
-          presentation: String(profile?.shortPresentation || profile?.presentation || "").trim(),
+          presentation: presentationExcerpt(profile?.presentation || profile?.shortPresentation),
           links: Array.isArray(profile?.links) ? profile.links : [],
           gameIds: Array.isArray(profile?.gameIds) ? profile.gameIds : [],
           ignoredGameIds: Array.isArray(profile?.ignoredGameIds) ? profile.ignoredGameIds : [],

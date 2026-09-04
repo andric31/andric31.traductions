@@ -515,7 +515,7 @@
   }
 
   function creatorTypeLabel(value) {
-    return ({ company: "Société / studio", individual: "Individu", amateur_group: "Groupe amateur / cercle", other: "Autre" })[String(value || "").trim()] || "";
+    return ({ company: "Studio", individual: "Créateur indépendant", amateur_group: "Équipe indépendante", other: "Autre" })[String(value || "").trim()] || "";
   }
 
   function creatorMetaData(profile) {

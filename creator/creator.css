@@ -263,21 +263,13 @@ body.creatorPage{
 .creatorGameTitle{ margin:0; font-size:14px; line-height:1.35; }
 .creatorGameMeta{ margin-top:8px; color:var(--muted); font-size:11px; }
 
-.creatorExternalGames{
-  margin-top:20px;
-  padding-top:18px;
-  border-top:1px solid var(--border);
-}
-
-.creatorExternalGamesTitle{
-  margin:0 0 11px;
-  font-size:15px;
-}
+.creatorExternalGamesPanel{ margin-top:18px; }
 
 .creatorExternalGamesList{
   display:flex;
   flex-direction:column;
   gap:8px;
+  margin-top:16px;
 }
 
 .creatorExternalGame{

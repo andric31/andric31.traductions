@@ -592,12 +592,8 @@
 
   function renderGames(games, profile) {
     const externalGames = normalizeExternalGames(profile?.otherGames);
-    const siteCount = `${games.length} jeu${games.length > 1 ? "x" : ""} sur le site`;
-    const externalCount = externalGames.length
-      ? ` · ${externalGames.length} lien${externalGames.length > 1 ? "s" : ""} externe${externalGames.length > 1 ? "s" : ""}`
-      : "";
-    $("creatorGamesCount").textContent = `${siteCount}${externalCount}`;
-    $("creatorNoGames").style.display = games.length || externalGames.length ? "none" : "";
+    $("creatorGamesCount").textContent = `${games.length} jeu${games.length > 1 ? "x" : ""} sur le site`;
+    $("creatorNoGames").style.display = games.length ? "none" : "";
 
     $("creatorGames").innerHTML = games.map((game) => {
       const display = getDisplay(game);
@@ -616,6 +612,7 @@
     const externalHost = $("creatorExternalGames");
     const externalList = $("creatorExternalGamesList");
     externalHost.hidden = !externalGames.length;
+    $("creatorExternalGamesCount").textContent = `${externalGames.length} lien${externalGames.length > 1 ? "s" : ""} externe${externalGames.length > 1 ? "s" : ""}`;
     externalList.innerHTML = externalGames.map((game) => `
       <a class="creatorExternalGame" href="${escapeHtml(game.url)}" target="_blank" rel="noopener noreferrer">
         <span class="creatorExternalGameIcon" aria-hidden="true">${getLinkIcon(game.platform, game.platform, game.url)}</span>

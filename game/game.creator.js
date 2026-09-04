@@ -8,6 +8,15 @@
     return String(value ?? "").trim();
   }
 
+  function presentationExcerpt(value, maxLength = 220) {
+    const text = normalizeText(value).replace(/\s+/g, " ");
+    if (text.length <= maxLength) return text;
+    const sample = text.slice(0, maxLength + 1);
+    const wordBreak = sample.lastIndexOf(" ");
+    const end = wordBreak >= Math.floor(maxLength * 0.7) ? wordBreak : maxLength;
+    return `${sample.slice(0, end).trimEnd()}…`;
+  }
+
   function creatorSlug(value) {
     return normalizeText(value)
       .normalize("NFD")
@@ -342,7 +351,7 @@
     const cards = profiles.map((profile) => {
       const avatar = normalizeText(profile.avatar);
       const banner = normalizeText(profile.banner);
-      const presentation = normalizeText(profile.shortPresentation || profile.presentation);
+      const presentation = presentationExcerpt(profile.presentation || profile.shortPresentation);
       const intro = presentation || "Découvre les jeux et les informations de ce créateur.";
       const links = profile.links;
       const backdrop = banner

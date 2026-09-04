@@ -153,14 +153,14 @@
     ],
     "otherGames": [
       {
-        "name": "Sir Stretchalot - The Wenches in the Well",
-        "platform": "Steam",
-        "url": "https://store.steampowered.com/app/1273110/Sir_Stretchalot__The_Wenches_in_the_Well/"
-      },
-      {
         "name": "Sir Stretchalot - The Plight of the Elves",
         "platform": "Steam",
         "url": "https://store.steampowered.com/app/2054620/Sir_Stretchalot__The_Plight_of_the_Elves/"
+      },
+      {
+        "name": "Sir Stretchalot - The Wenches in the Well",
+        "platform": "Steam",
+        "url": "https://store.steampowered.com/app/1273110/Sir_Stretchalot__The_Wenches_in_the_Well/"
       }
     ]
   },

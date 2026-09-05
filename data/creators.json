@@ -44,7 +44,23 @@
     "creatorType": "individual",
     "primaryLanguage": "en",
     "vndbId": "p16911",
-    "otherGames": []
+    "otherGames": [
+      {
+        "name": "Rebellion: The Beginning",
+        "platform": "Steam",
+        "url": "https://store.steampowered.com/app/2549760/Rebellion_The_Beginning/?curator_clanid=46097968"
+      },
+      {
+        "name": "Rebellion: Rise of the Damned",
+        "platform": "Steam",
+        "url": "https://store.steampowered.com/app/2902570/Rebellion_Rise_of_the_Damned/?curator_clanid=46097968"
+      },
+      {
+        "name": "Valeria: The Last Heir",
+        "platform": "Steam",
+        "url": "https://store.steampowered.com/app/4596940/Valeria_The_Last_Heir/?curator_clanid=46097968"
+      }
+    ]
   },
   {
     "id": "ahvl",
@@ -62,14 +78,14 @@
     "ignoredGameIds": [],
     "links": [
       {
-        "type": "buymeacoffee",
-        "label": "BuyMeACoffee",
-        "url": "https://www.buymeacoffee.com/AHV"
-      },
-      {
         "type": "f95zone",
         "label": "F95Zone",
         "url": "https://f95zone.to/members/ahvl.1577372/"
+      },
+      {
+        "type": "buymeacoffee",
+        "label": "BuyMeACoffee",
+        "url": "https://www.buymeacoffee.com/AHV"
       }
     ],
     "countryCode": "",

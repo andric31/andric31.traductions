@@ -381,6 +381,41 @@
     "otherGames": []
   },
   {
+    "id": "bittersweet3d",
+    "name": "Bittersweet3D",
+    "aliases": [],
+    "creatorType": "individual",
+    "primaryLanguage": "ko",
+    "vndbId": "p31036",
+    "avatar": "https://images.gamestorylog.com/game-assets/devlogo/bittersweet3d-devlogo-1.webp",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "279987"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/Bittersweet3D"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.com/invite/UGQgKVfxYn"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p31036"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "black-cat",
     "name": "Black_Cat",
     "aliases": [],

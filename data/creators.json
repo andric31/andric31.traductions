@@ -2221,6 +2221,31 @@
     "otherGames": []
   },
   {
+    "id": "realbite",
+    "name": "RealBite",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "314378"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95zone",
+        "url": "https://f95zone.to/members/realbite.4608511/"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "red-lighthouse",
     "name": "Red LightHouse",
     "aliases": [],

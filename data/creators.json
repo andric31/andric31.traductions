@@ -2864,6 +2864,62 @@
     "otherGames": []
   },
   {
+    "id": "white-phantom-games",
+    "name": "White Phantom Games",
+    "aliases": [],
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p8434",
+    "avatar": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/94158/avatars/69568dcb-a697-430c-a43d-14fae3626c63-380x380_81x129_841x841.png",
+    "banner": "https://f95zone.to/data/covers/thread/l/33/33797.jpg",
+    "presentation": "Patreon.",
+    "gameIds": [
+      "33797"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [
+      {
+        "name": "Defending Lydia Collier",
+        "platform": "Steam",
+        "url": "https://store.steampowered.com/app/2065800/Defending_Lydia_Collier/"
+      },
+      {
+        "name": "Defending Lydia Collier",
+        "platform": "Itch.io",
+        "url": "https://whitephantomgames.itch.io/defending-lydia-collier"
+      }
+    ],
+    "links": [
+      {
+        "type": "website",
+        "label": "Website",
+        "url": "https://www.whitephantomgames.co.uk/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/whitephantomgames"
+      },
+      {
+        "type": "subscribestar",
+        "label": "SubscribeStar",
+        "url": "https://subscribestar.adult/white-phantom-games"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discordapp.com/invite/UYBDRdN"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p8434"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "x3rr4",
     "name": "X3rr4",
     "aliases": [],

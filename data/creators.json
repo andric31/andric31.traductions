@@ -1758,7 +1758,7 @@
     "creatorType": "amateur_group",
     "primaryLanguage": "en",
     "vndbId": "p22576",
-    "avatar": "https://img.itch.zone/aW1nLzc4NTg1NDcucG5n/original/78JqSl.png",
+    "avatar": "https://www.mrrabbitteam.com/assets/img/logo.png",
     "banner": "https://img.itch.zone/aW1nLzc4NTg1NDcucG5n/original/78JqSl.png",
     "presentation": "",
     "gameIds": [
@@ -1804,7 +1804,33 @@
         "url": "https://vndb.org/p22576"
       }
     ],
-    "otherGames": []
+    "otherGames": [
+      {
+        "name": "Family Mysteries",
+        "platform": "Itch.io",
+        "url": "https://m-rabbit.itch.io/family-mysteries"
+      },
+      {
+        "name": "Wilykat's Adventure",
+        "platform": "Itch.io",
+        "url": "https://draida.itch.io/wilykats-adventure"
+      },
+      {
+        "name": "The Scientist",
+        "platform": "Itch.io",
+        "url": "https://mr-rabbitandyola.itch.io/the-scientist"
+      },
+      {
+        "name": "Pirate Trainer",
+        "platform": "Itch.io",
+        "url": "https://m-rabbit.itch.io/pirate-trainer"
+      },
+      {
+        "name": "LittleMan Remake",
+        "platform": "Itch.io",
+        "url": "https://m-rabbit.itch.io/little-man"
+      }
+    ]
   },
   {
     "id": "msteph",

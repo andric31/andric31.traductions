@@ -1476,6 +1476,58 @@
     ]
   },
   {
+    "id": "kompas-productions",
+    "name": "Kompas Productions",
+    "aliases": [
+      "DarkCookie"
+    ],
+    "creatorType": "amateur_group",
+    "primaryLanguage": "en",
+    "vndbId": "p11813",
+    "avatar": "https://wiki.summertimesaga.com/images/thumb/b/b4/Kompas_Productions_Logo.png/187px-Kompas_Productions_Logo.png",
+    "banner": "https://attachments.f95zone.to/2017/03/16274_1BleHw0igXMLh4Z1cJrMLlIAep8n1BXa4RLyewgqyNNxAN7wb6TrwOj4uYR2foys_large_2.jpg",
+    "presentation": "",
+    "gameIds": [
+      "276"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "website",
+        "label": "Website",
+        "url": "https://summertimesaga.com/"
+      },
+      {
+        "type": "website",
+        "label": "Wiki",
+        "url": "https://wiki.summertimesaga.com/Summertime_Saga_Wiki"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/summertimesaga"
+      },
+      {
+        "type": "website",
+        "label": "Picarto",
+        "url": "https://picarto.tv/DarkCookie"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discordapp.com/invite/mHJwKqx"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p11813"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "lament-entertainment",
     "name": "Lament Entertainment",
     "aliases": [],

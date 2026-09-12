@@ -1621,9 +1621,9 @@
     "id": "man-from-icecream-van",
     "name": "Man from icecream van",
     "aliases": [],
-    "creatorType": "",
-    "primaryLanguage": "",
-    "vndbId": "",
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p23931",
     "avatar": "https://f95zone.to/data/avatars/l/8359/8359382.jpg?1768490246",
     "banner": "",
     "presentation": "",
@@ -1648,6 +1648,11 @@
         "type": "discord",
         "label": "Discord",
         "url": "https://discord.gg/ZksTqfhXMb"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p23931"
       }
     ],
     "countryCode": "",

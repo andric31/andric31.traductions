@@ -1618,6 +1618,42 @@
     "links": []
   },
   {
+    "id": "man-from-icecream-van",
+    "name": "Man from icecream van",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://f95zone.to/data/avatars/l/8359/8359382.jpg?1768490246",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "237767",
+      "278955"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/man-from-icecream-van.8359382/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/icecreamvan"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/ZksTqfhXMb"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "manager-xgame",
     "name": "Manager_XGame",
     "aliases": [

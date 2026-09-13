@@ -1,0 +1,439 @@
+/* Noël / calendrier de l’avent — rendu refait à zéro */
+
+/* Neutralise le layout général des cartes événement */
+#activeEvent .xmas-calendar-card {
+  display: block !important;
+  grid-template-columns: none !important;
+  width: 100% !important;
+  max-width: 1180px !important;
+  margin: 0 auto !important;
+  padding: clamp(22px, 3vw, 36px) !important;
+  overflow: hidden !important;
+  border-radius: 30px !important;
+  border: 1px solid rgba(255,255,255,.28) !important;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(255,255,255,.52), transparent 25%),
+    radial-gradient(circle at 92% 85%, rgba(140,25,42,.34), transparent 31%),
+    linear-gradient(135deg, #123728 0%, #17643f 52%, #7b2530 100%) !important;
+  box-shadow: 0 28px 70px rgba(0,0,0,.34) !important;
+}
+
+#activeEvent .xmas-calendar-card::before,
+#activeEvent .xmas-calendar-card::after {
+  display: none !important;
+}
+
+.xmas-hero {
+  position: relative;
+  z-index: 1;
+  max-width: 850px;
+  margin-bottom: 28px;
+}
+
+.xmas-icon {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: rgba(255,255,255,.14);
+  border: 1px solid rgba(255,255,255,.25);
+  font-size: 34px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 12px 24px rgba(0,0,0,.18);
+}
+
+.xmas-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.xmas-pills span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  color: #fff8f0;
+  background: rgba(255,255,255,.16);
+  border: 1px solid rgba(255,255,255,.30);
+  font-size: 13px;
+  font-weight: 900;
+  text-shadow: 0 2px 8px rgba(0,0,0,.28);
+}
+
+.xmas-hero h2 {
+  margin: 20px 0 0;
+  color: #fff8f0;
+  font-size: clamp(42px, 5.2vw, 72px);
+  line-height: .96;
+  letter-spacing: -.055em;
+  text-shadow: 0 5px 18px rgba(0,0,0,.32);
+}
+
+.xmas-hero p {
+  margin: 16px 0 0;
+  max-width: 720px;
+  color: rgba(255,248,240,.94);
+  font-size: clamp(16px, 1.35vw, 20px);
+  line-height: 1.55;
+  text-shadow: 0 3px 12px rgba(0,0,0,.25);
+}
+
+.xmas-calendar-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(14px, 1.6vw, 22px);
+  width: 100%;
+}
+
+.xmas-door {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  aspect-ratio: 1 / 1;
+  min-height: 260px;
+  padding: 0;
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 24px;
+  overflow: hidden;
+  color: #fff8f0;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.11), rgba(0,0,0,.27)),
+    linear-gradient(135deg, rgba(17,72,49,.95), rgba(91,25,38,.90));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 16px 30px rgba(0,0,0,.22);
+  transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+}
+
+.xmas-door.is-available {
+  cursor: pointer;
+}
+
+.xmas-door.is-available:hover {
+  transform: translateY(-4px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 22px 38px rgba(0,0,0,.28);
+}
+
+.xmas-door.is-locked {
+  opacity: .48;
+  cursor: not-allowed;
+  filter: saturate(.7);
+}
+
+.xmas-door.is-opening {
+  animation: xmasOpen .62s cubic-bezier(.2,.85,.22,1);
+}
+
+.xmas-door.is-today:not(.is-revealed) {
+  animation: xmasGlow 1.8s ease-in-out infinite;
+}
+
+.xmas-door-front {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 9px;
+  padding: 18px;
+  text-align: center;
+}
+
+.xmas-door-front::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent 47%, rgba(255,220,132,.96) 47% 53%, transparent 53%),
+    linear-gradient(0deg, transparent 47%, rgba(255,220,132,.96) 47% 53%, transparent 53%);
+  pointer-events: none;
+}
+
+.xmas-door-front::after {
+  content: "";
+  position: absolute;
+  width: 58px;
+  height: 32px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, 20px);
+  background:
+    radial-gradient(circle at 25% 50%, #ff5aa0 0 10px, transparent 11px),
+    radial-gradient(circle at 75% 50%, #ff5aa0 0 10px, transparent 11px),
+    linear-gradient(#d62862, #d62862);
+  background-size: 50% 100%, 50% 100%, 8px 100%;
+  background-position: left, right, center;
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 3px 5px rgba(0,0,0,.25));
+  pointer-events: none;
+}
+
+.xmas-door-number,
+.xmas-door-status,
+.xmas-door-mini-title {
+  position: relative;
+  z-index: 1;
+}
+
+.xmas-door-number {
+  color: #fff8f0;
+  font-size: clamp(48px, 4vw, 72px);
+  font-weight: 1000;
+  line-height: .9;
+  letter-spacing: -.06em;
+  text-shadow: 0 5px 16px rgba(0,0,0,.38);
+}
+
+.xmas-door-status {
+  color: #fff8f0;
+  font-size: 14px;
+  font-weight: 1000;
+  text-shadow: 0 2px 8px rgba(0,0,0,.34);
+}
+
+.xmas-door-mini-title {
+  max-width: 100%;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: #fff8f0;
+  font-size: 15px;
+  font-weight: 1000;
+  line-height: 1.18;
+  text-shadow: 0 2px 8px rgba(0,0,0,.36);
+}
+
+.xmas-door.is-revealed:not(.is-opened) {
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.95), rgba(244,221,153,.92)),
+    linear-gradient(135deg, #fff4d8, #e5c05e);
+}
+
+.xmas-door.is-revealed:not(.is-opened) .xmas-door-number,
+.xmas-door.is-revealed:not(.is-opened) .xmas-door-status,
+.xmas-door.is-revealed:not(.is-opened) .xmas-door-mini-title {
+  color: #2c1600;
+  text-shadow: none;
+}
+
+.xmas-door.is-revealed:not(.is-opened) .xmas-door-front::before,
+.xmas-door.is-revealed:not(.is-opened) .xmas-door-front::after {
+  opacity: 0;
+}
+
+.xmas-door-content {
+  height: 100%;
+  display: grid;
+  grid-template-rows: 46% 54%;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.98), rgba(246,225,167,.96)),
+    linear-gradient(135deg, #fff4d8, #e5c05e);
+  color: #2c1600;
+}
+
+.xmas-door-image {
+  min-height: 0;
+  overflow: hidden;
+  background: rgba(50,30,0,.10);
+}
+
+.xmas-door-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.xmas-door-placeholder {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 46px;
+}
+
+.xmas-door-body {
+  min-height: 0;
+  padding: 10px 12px 12px;
+  overflow: hidden;
+  text-align: left;
+}
+
+.xmas-door-badge {
+  display: inline-flex;
+  padding: 5px 9px;
+  border-radius: 999px;
+  color: #6f4500;
+  background: rgba(255,255,255,.58);
+  border: 1px solid rgba(80,40,0,.10);
+  font-size: 11px;
+  font-weight: 1000;
+}
+
+.xmas-door-body strong {
+  display: block;
+  margin: 7px 0 4px;
+  color: #2c1600;
+  font-size: clamp(18px, 1.25vw, 23px);
+  line-height: 1.02;
+}
+
+.xmas-door-body p {
+  margin: 0;
+  color: rgba(44,22,0,.86);
+  font-size: 12.5px;
+  line-height: 1.28;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.xmas-door-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 8px;
+}
+
+.xmas-door-links a {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, #fff4d8, #e1bd5c);
+  color: #2c1600;
+  border: 1px solid rgba(80,40,0,.14);
+  font-size: 12px;
+  font-weight: 1000;
+  text-decoration: none;
+}
+
+@keyframes xmasGlow {
+  0%, 100% { box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 16px 30px rgba(0,0,0,.22); }
+  50% { box-shadow: 0 0 0 9px rgba(255,246,217,.14), inset 0 1px 0 rgba(255,255,255,.18), 0 22px 38px rgba(0,0,0,.28); }
+}
+
+@keyframes xmasOpen {
+  0% { transform: perspective(900px) rotateY(0deg) scale(1); }
+  38% { transform: perspective(900px) rotateY(-68deg) scale(1.03); }
+  100% { transform: perspective(900px) rotateY(0deg) scale(1); }
+}
+
+@media (max-width: 920px) {
+  .xmas-calendar-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .xmas-door {
+    min-height: 215px;
+  }
+}
+
+@media (max-width: 660px) {
+  .xmas-calendar-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .xmas-door {
+    min-height: 230px;
+  }
+}
+
+@media (max-width: 430px) {
+  .xmas-calendar-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* Nettoyage : suppression du petit élément rose bizarre sur les cases fermées */
+.xmas-door-front::after {
+  display: none !important;
+}
+
+/* Bouton de remise à zéro des cases ouvertes */
+.xmas-reset-zone {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
+}
+
+.xmas-reset-btn {
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.28);
+  background: rgba(255,255,255,.14);
+  color: #fff8f0;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 10px 24px rgba(0,0,0,.18);
+  transition: transform .16s ease, background .16s ease, box-shadow .16s ease;
+}
+
+.xmas-reset-btn:hover {
+  transform: translateY(-2px);
+  background: rgba(255,255,255,.20);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 14px 28px rgba(0,0,0,.22);
+}
+
+
+/* Variante compacte du haut de la tuile Noël */
+.xmas-icon {
+  display: none !important;
+}
+
+.xmas-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 12px 18px;
+  max-width: none !important;
+  margin-bottom: 22px !important;
+}
+
+.xmas-pills {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: start;
+  justify-content: flex-end;
+  margin-top: 0 !important;
+}
+
+.xmas-hero h2 {
+  grid-column: 1;
+  margin-top: 0 !important;
+  font-size: clamp(34px, 4vw, 56px) !important;
+  line-height: .98 !important;
+}
+
+.xmas-hero p {
+  grid-column: 1;
+  margin-top: 8px !important;
+  max-width: 620px !important;
+  font-size: clamp(14px, 1.1vw, 17px) !important;
+  line-height: 1.35 !important;
+}
+
+.xmas-calendar-grid {
+  margin-top: 6px;
+}
+
+@media (max-width: 720px) {
+  .xmas-hero {
+    display: block;
+  }
+
+  .xmas-pills {
+    justify-content: flex-start;
+    margin-bottom: 12px;
+  }
+}

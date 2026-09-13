@@ -1,0 +1,33 @@
+{
+  "id": "journee-traduction-2026",
+  "type": "daily_game_event",
+  "title": "Journée internationale de la traduction",
+  "icon": "🌍",
+  "css": "journee-traduction-2026",
+  "enabled": false,
+  "status_label": "Journée internationale de la traduction",
+  "date": "30 septembre 2026",
+  "date_label": "30 septembre 2026",
+  "start_at": "2026-09-30",
+  "end_at": "2026-09-30",
+  "text": "Aujourd’hui, célébrons celles et ceux qui rendent ces jeux accessibles en français. Découvre un jeu traduit mis à l’honneur pour l’occasion.",
+  "description": "Un coup de projecteur sur les jeux traduits et le travail des traducteurs.",
+  "short_rule": "Un jeu traduit à découvrir.",
+  "list_url": "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json",
+  "selection": "daily",
+  "selection_mode": "daily_keywords",
+  "change_frequency": "daily",
+  "change_hour": 0,
+  "timer_label": "Nouveau jeu dans",
+  "selection_keywords": [],
+  "fallback_mode": "daily_random",
+  "calendar_seed": "journee-traduction-2026",
+  "daily_games": [
+    {
+      "date": "2026-09-30",
+      "title": "Choix automatique"
+    }
+  ],
+  "blocked_game_keys": [],
+  "repeat_prevention": true
+}

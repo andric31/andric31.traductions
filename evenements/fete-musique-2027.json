@@ -1,0 +1,47 @@
+{
+  "id": "fete-musique-2027",
+  "type": "daily_game_event",
+  "title": "Fête de la musique",
+  "icon": "🎵",
+  "css": "fete-musique-2027",
+  "enabled": false,
+  "status_label": "Fête de la musique",
+  "date": "21 juin 2027",
+  "date_label": "21 juin 2027",
+  "start_at": "2027-06-21",
+  "end_at": "2027-06-21",
+  "text": "Monte le son ! Pour la Fête de la musique, découvre un jeu traduit autour des artistes, de la scène ou de la musique.",
+  "description": "La musique, la scène et les artistes à l’honneur.",
+  "short_rule": "Un jeu traduit à découvrir.",
+  "list_url": "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json",
+  "selection": "daily",
+  "selection_mode": "daily_keywords",
+  "change_frequency": "daily",
+  "change_hour": 0,
+  "timer_label": "Nouveau jeu dans",
+  "selection_keywords": [
+    "music",
+    "musique",
+    "musician",
+    "musicien",
+    "singer",
+    "chanteur",
+    "chanteuse",
+    "concert",
+    "band",
+    "idol",
+    "rock",
+    "guitar",
+    "guitare"
+  ],
+  "fallback_mode": "daily_random",
+  "calendar_seed": "fete-musique-2027",
+  "daily_games": [
+    {
+      "date": "2027-06-21",
+      "title": "Choix automatique"
+    }
+  ],
+  "blocked_game_keys": [],
+  "repeat_prevention": true
+}

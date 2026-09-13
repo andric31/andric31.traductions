@@ -1,0 +1,27 @@
+/* Journée internationale de la traduction */
+.active-card.event-theme-journee-traduction-2026 {
+  background: radial-gradient(circle at 15% 12%, rgba(255,255,255,.14), transparent 32%),
+    linear-gradient(135deg, #153f55 0%, #225e66 52%, #10363b 100%) !important;
+  border: 1px solid #b9f1e8;
+}
+.event-theme-journee-traduction-2026 .event-title,
+.event-theme-journee-traduction-2026 .event-text {
+  color: #fff9f2 !important;
+  text-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+.event-theme-journee-traduction-2026 .event-pill,
+.event-theme-journee-traduction-2026 .event-next-game-timer {
+  background: rgba(0,0,0,.24) !important;
+  border-color: rgba(255,255,255,.38) !important;
+  color: #fff9f2 !important;
+}
+.event-theme-journee-traduction-2026 .event-main-link,
+.event-theme-journee-traduction-2026 .event-secondary-link {
+  background: #b9f1e8 !important;
+  color: #252331 !important;
+  border-color: rgba(255,255,255,.5) !important;
+}
+.event-theme-journee-traduction-2026 .event-game-card {
+  background: var(--card, #181c29) !important;
+  border-color: rgba(255,255,255,.35) !important;
+}

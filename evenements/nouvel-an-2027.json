@@ -1,0 +1,57 @@
+{
+  "id": "nouvel-an-2027",
+  "type": "daily_game_event",
+  "title": "Nouvel An — nouvelles aventures",
+  "icon": "🎆",
+  "css": "nouvel-an-2027",
+  "enabled": false,
+  "status_label": "Nouvel An",
+  "date": "1er → 7 janvier 2027",
+  "date_label": "1er → 7 janvier 2027",
+  "start_at": "2027-01-01",
+  "end_at": "2027-01-07",
+  "text": "Bonne année ! Pour bien démarrer 2027, pars à la découverte d’un jeu traduit différent chaque jour.",
+  "description": "Sept découvertes pour commencer l’année en français.",
+  "short_rule": "Un jeu traduit différent chaque jour.",
+  "list_url": "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json",
+  "selection": "daily",
+  "selection_mode": "daily_keywords",
+  "change_frequency": "daily",
+  "change_hour": 0,
+  "timer_label": "Nouveau jeu dans",
+  "selection_keywords": [],
+  "fallback_mode": "daily_random",
+  "calendar_seed": "nouvel-an-2027",
+  "daily_games": [
+    {
+      "date": "2027-01-01",
+      "title": "Choix automatique"
+    },
+    {
+      "date": "2027-01-02",
+      "title": "Choix automatique"
+    },
+    {
+      "date": "2027-01-03",
+      "title": "Choix automatique"
+    },
+    {
+      "date": "2027-01-04",
+      "title": "Choix automatique"
+    },
+    {
+      "date": "2027-01-05",
+      "title": "Choix automatique"
+    },
+    {
+      "date": "2027-01-06",
+      "title": "Choix automatique"
+    },
+    {
+      "date": "2027-01-07",
+      "title": "Choix automatique"
+    }
+  ],
+  "blocked_game_keys": [],
+  "repeat_prevention": true
+}

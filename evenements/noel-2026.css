@@ -1,0 +1,27 @@
+/* Noël — les découvertes sous le sapin */
+.active-card.event-theme-noel-2026 {
+  background: radial-gradient(circle at 15% 12%, rgba(255,255,255,.14), transparent 32%),
+    linear-gradient(135deg, #113c2c 0%, #23573e 52%, #672c35 100%) !important;
+  border: 1px solid #ffe3aa;
+}
+.event-theme-noel-2026 .event-title,
+.event-theme-noel-2026 .event-text {
+  color: #fff9f2 !important;
+  text-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+.event-theme-noel-2026 .event-pill,
+.event-theme-noel-2026 .event-next-game-timer {
+  background: rgba(0,0,0,.24) !important;
+  border-color: rgba(255,255,255,.38) !important;
+  color: #fff9f2 !important;
+}
+.event-theme-noel-2026 .event-main-link,
+.event-theme-noel-2026 .event-secondary-link {
+  background: #ffe3aa !important;
+  color: #252331 !important;
+  border-color: rgba(255,255,255,.5) !important;
+}
+.event-theme-noel-2026 .event-game-card {
+  background: var(--card, #181c29) !important;
+  border-color: rgba(255,255,255,.35) !important;
+}

@@ -1,0 +1,51 @@
+{
+  "id": "paques-2027",
+  "type": "daily_game_event",
+  "title": "Pâques — chasse aux découvertes",
+  "icon": "🐣",
+  "css": "paques-2027",
+  "enabled": false,
+  "status_label": "Pâques",
+  "date": "27 → 29 mars 2027",
+  "date_label": "27 → 29 mars 2027",
+  "start_at": "2027-03-27",
+  "end_at": "2027-03-29",
+  "text": "Pars à la chasse aux découvertes ! Un jeu traduit t’attend chaque jour pendant le week-end de Pâques.",
+  "description": "Trois découvertes pendant le week-end de Pâques, célébré le 28 mars.",
+  "short_rule": "Un jeu traduit différent chaque jour.",
+  "list_url": "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json",
+  "selection": "daily",
+  "selection_mode": "daily_keywords",
+  "change_frequency": "daily",
+  "change_hour": 0,
+  "timer_label": "Nouveau jeu dans",
+  "selection_keywords": [
+    "easter",
+    "pâques",
+    "spring",
+    "printemps",
+    "rabbit",
+    "lapin",
+    "bunny",
+    "garden",
+    "jardin"
+  ],
+  "fallback_mode": "daily_random",
+  "calendar_seed": "paques-2027",
+  "daily_games": [
+    {
+      "date": "2027-03-27",
+      "title": "Choix automatique"
+    },
+    {
+      "date": "2027-03-28",
+      "title": "Choix automatique"
+    },
+    {
+      "date": "2027-03-29",
+      "title": "Choix automatique"
+    }
+  ],
+  "blocked_game_keys": [],
+  "repeat_prevention": true
+}

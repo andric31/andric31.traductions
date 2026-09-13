@@ -1,0 +1,43 @@
+{
+  "id": "poisson-avril-2027",
+  "type": "daily_game_event",
+  "title": "Poisson d’avril — place à l’humour",
+  "icon": "🐟",
+  "css": "poisson-avril-2027",
+  "enabled": false,
+  "status_label": "Poisson d’avril",
+  "date": "1er avril 2027",
+  "date_label": "1er avril 2027",
+  "start_at": "2027-04-01",
+  "end_at": "2027-04-01",
+  "text": "Pour le 1er avril, place aux situations improbables, aux parodies et aux aventures qui ne se prennent pas trop au sérieux.",
+  "description": "Un jeu traduit sous le signe de l’humour et des situations décalées.",
+  "short_rule": "Un jeu traduit à découvrir.",
+  "list_url": "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json",
+  "selection": "daily",
+  "selection_mode": "daily_keywords",
+  "change_frequency": "daily",
+  "change_hour": 0,
+  "timer_label": "Nouveau jeu dans",
+  "selection_keywords": [
+    "comedy",
+    "comédie",
+    "humor",
+    "humour",
+    "funny",
+    "drôle",
+    "parody",
+    "parodie",
+    "satire"
+  ],
+  "fallback_mode": "daily_random",
+  "calendar_seed": "poisson-avril-2027",
+  "daily_games": [
+    {
+      "date": "2027-04-01",
+      "title": "Choix automatique"
+    }
+  ],
+  "blocked_game_keys": [],
+  "repeat_prevention": true
+}

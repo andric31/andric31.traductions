@@ -1,0 +1,43 @@
+{
+  "id": "chandeleur-2027",
+  "type": "daily_game_event",
+  "title": "Chandeleur — pause gourmande",
+  "icon": "🥞",
+  "css": "chandeleur-2027",
+  "enabled": false,
+  "status_label": "Chandeleur",
+  "date": "2 février 2027",
+  "date_label": "2 février 2027",
+  "start_at": "2027-02-02",
+  "end_at": "2027-02-02",
+  "text": "Entre deux crêpes, découvre un jeu traduit pour une pause gourmande et pleine de découvertes.",
+  "description": "Une pause autour de la cuisine, des cafés et des gourmandises.",
+  "short_rule": "Un jeu traduit à découvrir.",
+  "list_url": "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json",
+  "selection": "daily",
+  "selection_mode": "daily_keywords",
+  "change_frequency": "daily",
+  "change_hour": 0,
+  "timer_label": "Nouveau jeu dans",
+  "selection_keywords": [
+    "cooking",
+    "cuisine",
+    "restaurant",
+    "café",
+    "cafe",
+    "bakery",
+    "boulangerie",
+    "food",
+    "chef"
+  ],
+  "fallback_mode": "daily_random",
+  "calendar_seed": "chandeleur-2027",
+  "daily_games": [
+    {
+      "date": "2027-02-02",
+      "title": "Choix automatique"
+    }
+  ],
+  "blocked_game_keys": [],
+  "repeat_prevention": true
+}

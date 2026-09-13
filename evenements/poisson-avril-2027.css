@@ -1,0 +1,27 @@
+/* Poisson d’avril — place à l’humour */
+.active-card.event-theme-poisson-avril-2027 {
+  background: radial-gradient(circle at 15% 12%, rgba(255,255,255,.14), transparent 32%),
+    linear-gradient(135deg, #153e5b 0%, #275c72 52%, #3c3764 100%) !important;
+  border: 1px solid #bceef5;
+}
+.event-theme-poisson-avril-2027 .event-title,
+.event-theme-poisson-avril-2027 .event-text {
+  color: #fff9f2 !important;
+  text-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+.event-theme-poisson-avril-2027 .event-pill,
+.event-theme-poisson-avril-2027 .event-next-game-timer {
+  background: rgba(0,0,0,.24) !important;
+  border-color: rgba(255,255,255,.38) !important;
+  color: #fff9f2 !important;
+}
+.event-theme-poisson-avril-2027 .event-main-link,
+.event-theme-poisson-avril-2027 .event-secondary-link {
+  background: #bceef5 !important;
+  color: #252331 !important;
+  border-color: rgba(255,255,255,.5) !important;
+}
+.event-theme-poisson-avril-2027 .event-game-card {
+  background: var(--card, #181c29) !important;
+  border-color: rgba(255,255,255,.35) !important;
+}

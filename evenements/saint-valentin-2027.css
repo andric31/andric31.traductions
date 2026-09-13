@@ -1,0 +1,27 @@
+/* Saint-Valentin — semaine des romances */
+.active-card.event-theme-saint-valentin-2027 {
+  background: radial-gradient(circle at 15% 12%, rgba(255,255,255,.14), transparent 32%),
+    linear-gradient(135deg, #451c3e 0%, #713047 52%, #4a214e 100%) !important;
+  border: 1px solid #ffd0dc;
+}
+.event-theme-saint-valentin-2027 .event-title,
+.event-theme-saint-valentin-2027 .event-text {
+  color: #fff9f2 !important;
+  text-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+.event-theme-saint-valentin-2027 .event-pill,
+.event-theme-saint-valentin-2027 .event-next-game-timer {
+  background: rgba(0,0,0,.24) !important;
+  border-color: rgba(255,255,255,.38) !important;
+  color: #fff9f2 !important;
+}
+.event-theme-saint-valentin-2027 .event-main-link,
+.event-theme-saint-valentin-2027 .event-secondary-link {
+  background: #ffd0dc !important;
+  color: #252331 !important;
+  border-color: rgba(255,255,255,.5) !important;
+}
+.event-theme-saint-valentin-2027 .event-game-card {
+  background: var(--card, #181c29) !important;
+  border-color: rgba(255,255,255,.35) !important;
+}

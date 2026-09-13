@@ -1,0 +1,27 @@
+/* 1er Mai — brin de bonheur */
+.active-card.event-theme-premier-mai-2027 {
+  background: radial-gradient(circle at 15% 12%, rgba(255,255,255,.14), transparent 32%),
+    linear-gradient(135deg, #1e3f2b 0%, #3d5e36 52%, #254a4b 100%) !important;
+  border: 1px solid #e0eebe;
+}
+.event-theme-premier-mai-2027 .event-title,
+.event-theme-premier-mai-2027 .event-text {
+  color: #fff9f2 !important;
+  text-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+.event-theme-premier-mai-2027 .event-pill,
+.event-theme-premier-mai-2027 .event-next-game-timer {
+  background: rgba(0,0,0,.24) !important;
+  border-color: rgba(255,255,255,.38) !important;
+  color: #fff9f2 !important;
+}
+.event-theme-premier-mai-2027 .event-main-link,
+.event-theme-premier-mai-2027 .event-secondary-link {
+  background: #e0eebe !important;
+  color: #252331 !important;
+  border-color: rgba(255,255,255,.5) !important;
+}
+.event-theme-premier-mai-2027 .event-game-card {
+  background: var(--card, #181c29) !important;
+  border-color: rgba(255,255,255,.35) !important;
+}

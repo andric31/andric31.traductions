@@ -1,0 +1,67 @@
+{
+  "id": "noel-2026",
+  "type": "daily_game_event",
+  "title": "Noël — les découvertes sous le sapin",
+  "icon": "🎄",
+  "css": "noel-2026",
+  "enabled": false,
+  "status_label": "Noël",
+  "date": "25 → 31 décembre 2026",
+  "date_label": "25 → 31 décembre 2026",
+  "start_at": "2026-12-25",
+  "end_at": "2026-12-31",
+  "text": "Installe-toi au chaud : un jeu traduit différent t’attend chaque jour pour accompagner cette fin d’année.",
+  "description": "Une découverte par jour pour prolonger les fêtes de fin d’année.",
+  "short_rule": "Un jeu traduit différent chaque jour.",
+  "list_url": "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json",
+  "selection": "daily",
+  "selection_mode": "daily_keywords",
+  "change_frequency": "daily",
+  "change_hour": 0,
+  "timer_label": "Nouveau jeu dans",
+  "selection_keywords": [
+    "christmas",
+    "noël",
+    "xmas",
+    "winter",
+    "hiver",
+    "snow",
+    "neige",
+    "gift",
+    "cadeau"
+  ],
+  "fallback_mode": "daily_random",
+  "calendar_seed": "noel-2026",
+  "daily_games": [
+    {
+      "date": "2026-12-25",
+      "title": "Choix automatique"
+    },
+    {
+      "date": "2026-12-26",
+      "title": "Choix automatique"
+    },
+    {
+      "date": "2026-12-27",
+      "title": "Choix automatique"
+    },
+    {
+      "date": "2026-12-28",
+      "title": "Choix automatique"
+    },
+    {
+      "date": "2026-12-29",
+      "title": "Choix automatique"
+    },
+    {
+      "date": "2026-12-30",
+      "title": "Choix automatique"
+    },
+    {
+      "date": "2026-12-31",
+      "title": "Choix automatique"
+    }
+  ],
+  "blocked_game_keys": [],
+  "repeat_prevention": true
+}

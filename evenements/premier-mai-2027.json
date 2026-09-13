@@ -1,0 +1,44 @@
+{
+  "id": "premier-mai-2027",
+  "type": "daily_game_event",
+  "title": "1er Mai — brin de bonheur",
+  "icon": "🌿",
+  "css": "premier-mai-2027",
+  "enabled": false,
+  "status_label": "1er Mai",
+  "date": "1er mai 2027",
+  "date_label": "1er mai 2027",
+  "start_at": "2027-05-01",
+  "end_at": "2027-05-01",
+  "text": "Un brin de muguet et une nouvelle découverte : profite d’une parenthèse de jeu en français pour le 1er Mai.",
+  "description": "Une découverte entre nature, jardins et vie à la campagne.",
+  "short_rule": "Un jeu traduit à découvrir.",
+  "list_url": "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json",
+  "selection": "daily",
+  "selection_mode": "daily_keywords",
+  "change_frequency": "daily",
+  "change_hour": 0,
+  "timer_label": "Nouveau jeu dans",
+  "selection_keywords": [
+    "nature",
+    "garden",
+    "jardin",
+    "farm",
+    "ferme",
+    "countryside",
+    "campagne",
+    "village",
+    "forest",
+    "forêt"
+  ],
+  "fallback_mode": "daily_random",
+  "calendar_seed": "premier-mai-2027",
+  "daily_games": [
+    {
+      "date": "2027-05-01",
+      "title": "Choix automatique"
+    }
+  ],
+  "blocked_game_keys": [],
+  "repeat_prevention": true
+}

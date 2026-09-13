@@ -1,0 +1,33 @@
+{
+  "id": "fete-nationale-2027",
+  "type": "daily_game_event",
+  "title": "14 Juillet — fête des découvertes",
+  "icon": "🎇",
+  "css": "fete-nationale-2027",
+  "enabled": false,
+  "status_label": "14 Juillet",
+  "date": "14 juillet 2027",
+  "date_label": "14 juillet 2027",
+  "start_at": "2027-07-14",
+  "end_at": "2027-07-14",
+  "text": "Pour le 14 Juillet, place à une nouvelle découverte en français. Un jeu traduit t’attend entre deux feux d’artifice !",
+  "description": "Un jeu traduit mis à l’honneur pour la fête nationale.",
+  "short_rule": "Un jeu traduit à découvrir.",
+  "list_url": "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json",
+  "selection": "daily",
+  "selection_mode": "daily_keywords",
+  "change_frequency": "daily",
+  "change_hour": 0,
+  "timer_label": "Nouveau jeu dans",
+  "selection_keywords": [],
+  "fallback_mode": "daily_random",
+  "calendar_seed": "fete-nationale-2027",
+  "daily_games": [
+    {
+      "date": "2027-07-14",
+      "title": "Choix automatique"
+    }
+  ],
+  "blocked_game_keys": [],
+  "repeat_prevention": true
+}

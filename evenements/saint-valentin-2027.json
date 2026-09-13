@@ -1,0 +1,67 @@
+{
+  "id": "saint-valentin-2027",
+  "type": "daily_game_event",
+  "title": "Saint-Valentin — semaine des romances",
+  "icon": "💝",
+  "css": "saint-valentin-2027",
+  "enabled": false,
+  "status_label": "Saint-Valentin",
+  "date": "8 → 14 février 2027",
+  "date_label": "8 → 14 février 2027",
+  "start_at": "2027-02-08",
+  "end_at": "2027-02-14",
+  "text": "Des premières rencontres aux grandes histoires d’amour, découvre une romance traduite différente chaque jour jusqu’à la Saint-Valentin.",
+  "description": "Sept jeux autour des rencontres et des histoires d’amour.",
+  "short_rule": "Un jeu traduit différent chaque jour.",
+  "list_url": "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json",
+  "selection": "daily",
+  "selection_mode": "daily_keywords",
+  "change_frequency": "daily",
+  "change_hour": 0,
+  "timer_label": "Nouveau jeu dans",
+  "selection_keywords": [
+    "romance",
+    "romantic",
+    "romantique",
+    "dating",
+    "rendez-vous",
+    "love",
+    "amour",
+    "relationship",
+    "valentine"
+  ],
+  "fallback_mode": "daily_random",
+  "calendar_seed": "saint-valentin-2027",
+  "daily_games": [
+    {
+      "date": "2027-02-08",
+      "title": "Choix automatique"
+    },
+    {
+      "date": "2027-02-09",
+      "title": "Choix automatique"
+    },
+    {
+      "date": "2027-02-10",
+      "title": "Choix automatique"
+    },
+    {
+      "date": "2027-02-11",
+      "title": "Choix automatique"
+    },
+    {
+      "date": "2027-02-12",
+      "title": "Choix automatique"
+    },
+    {
+      "date": "2027-02-13",
+      "title": "Choix automatique"
+    },
+    {
+      "date": "2027-02-14",
+      "title": "Choix automatique"
+    }
+  ],
+  "blocked_game_keys": [],
+  "repeat_prevention": true
+}

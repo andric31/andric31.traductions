@@ -1,0 +1,27 @@
+/* Fête de la musique */
+.active-card.event-theme-fete-musique-2027 {
+  background: radial-gradient(circle at 15% 12%, rgba(255,255,255,.14), transparent 32%),
+    linear-gradient(135deg, #24204f 0%, #4f2c6e 52%, #164a65 100%) !important;
+  border: 1px solid #e4d5ff;
+}
+.event-theme-fete-musique-2027 .event-title,
+.event-theme-fete-musique-2027 .event-text {
+  color: #fff9f2 !important;
+  text-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+.event-theme-fete-musique-2027 .event-pill,
+.event-theme-fete-musique-2027 .event-next-game-timer {
+  background: rgba(0,0,0,.24) !important;
+  border-color: rgba(255,255,255,.38) !important;
+  color: #fff9f2 !important;
+}
+.event-theme-fete-musique-2027 .event-main-link,
+.event-theme-fete-musique-2027 .event-secondary-link {
+  background: #e4d5ff !important;
+  color: #252331 !important;
+  border-color: rgba(255,255,255,.5) !important;
+}
+.event-theme-fete-musique-2027 .event-game-card {
+  background: var(--card, #181c29) !important;
+  border-color: rgba(255,255,255,.35) !important;
+}

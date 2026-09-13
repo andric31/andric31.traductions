@@ -1,0 +1,27 @@
+/* Chandeleur — pause gourmande */
+.active-card.event-theme-chandeleur-2027 {
+  background: radial-gradient(circle at 15% 12%, rgba(255,255,255,.14), transparent 32%),
+    linear-gradient(135deg, #553416 0%, #714421 52%, #472b37 100%) !important;
+  border: 1px solid #ffe4ab;
+}
+.event-theme-chandeleur-2027 .event-title,
+.event-theme-chandeleur-2027 .event-text {
+  color: #fff9f2 !important;
+  text-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+.event-theme-chandeleur-2027 .event-pill,
+.event-theme-chandeleur-2027 .event-next-game-timer {
+  background: rgba(0,0,0,.24) !important;
+  border-color: rgba(255,255,255,.38) !important;
+  color: #fff9f2 !important;
+}
+.event-theme-chandeleur-2027 .event-main-link,
+.event-theme-chandeleur-2027 .event-secondary-link {
+  background: #ffe4ab !important;
+  color: #252331 !important;
+  border-color: rgba(255,255,255,.5) !important;
+}
+.event-theme-chandeleur-2027 .event-game-card {
+  background: var(--card, #181c29) !important;
+  border-color: rgba(255,255,255,.35) !important;
+}

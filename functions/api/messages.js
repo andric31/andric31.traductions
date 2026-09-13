@@ -1,4 +1,5 @@
 import { assertSameOrigin, ensureAuthTables, getSessionUser, normalizePseudoKey } from './_auth.js';
+import { notifyNewMessage } from './_discord.js';
 
 const ALLOWED_REACTION_EMOJIS = new Set([
   '😀','😁','😂','🤣','😊','😍','🥰','😘','😎','🤔','😅','😢','😭','😡',
@@ -501,10 +502,17 @@ export async function onRequest(context) {
       if (!claim.ok) return json({ ok: false, error: claim.error }, claim.status || 409);
     }
 
-    await env.DB.prepare(`
+    const result = await env.DB.prepare(`
       INSERT INTO messages_global (nickname, message, created_at, ip_hash, user_agent, room_type, room_key, owner_user_id, links_allowed)
       VALUES (?1, ?2, strftime('%Y-%m-%dT%H:%M:%fZ','now'), ?3, ?4, ?5, ?6, ?7, ?8)
     `).bind(finalNickname, message, ipHash, userAgent, roomInfo.roomType, roomInfo.roomKey, roomInfo.ownerUserId, linksAllowed).run();
+
+    await notifyNewMessage(context, {
+      id: result?.meta?.last_row_id || result?.lastRowId || null,
+      nickname: finalNickname,
+      roomKey: roomInfo.roomKey,
+      body: roomInfo.roomKey === 'global' ? messageBody : '',
+    });
 
     return json({ ok: true });
   }

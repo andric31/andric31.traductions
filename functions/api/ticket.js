@@ -1,4 +1,5 @@
 import { ensureAuthTables, findAuthPseudoConflict, hashPassword, normalizePseudoKey, validatePassword } from './_auth.js';
+import { notifyTicketOpened } from './_discord.js';
 
 const json = (data, status = 200) => new Response(JSON.stringify(data, null, 2), {
   status,
@@ -198,6 +199,7 @@ Mot de passe : enregistré de manière sécurisée (non visible par l’administ
   `).bind(name, contact, category, priority, title, message, pageUrl, userAgent, ipHash, signupPasswordHash).run();
 
   const id = result.meta?.last_row_id || result.lastRowId || null;
+  await notifyTicketOpened(context, { id, name, category, priority, title });
   return json({ ok: true, id, ticket: { id, name, contact, category, priority, title, status: 'open', admin_comment: '' } }, 201);
 }
 

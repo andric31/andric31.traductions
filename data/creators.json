@@ -2875,6 +2875,41 @@
     "country": ""
   },
   {
+    "id": "stannystanny",
+    "name": "StannyStanny",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://f95zone.to/data/avatars/o/15/15861.jpg?1676603649",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "149543"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/stannystanny.15861/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/stannystannycreations"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/tAFzSgAnfM"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "storyandmagic",
     "name": "story and magic",
     "aliases": [],

@@ -37,15 +37,33 @@
     return start || end || '';
   }
 
-  async function fetchJson(url, fallback) {
+  async function fetchJson(url, fallback, options = {}) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), options.timeoutMs || 8000);
     try {
       const glue = url.includes('?') ? '&' : '?';
-      const res = await fetch(`${url}${glue}v=${Math.floor(Date.now() / 60000)}`, { cache: 'no-store' });
+      const res = await fetch(`${url}${glue}v=${Math.floor(Date.now() / 60000)}`, { cache: 'no-store', signal: controller.signal });
       if (!res.ok) return fallback;
-      return res.json();
+      return await res.json();
     } catch {
       return fallback;
+    } finally {
+      clearTimeout(timer);
     }
+  }
+
+  async function fetchListWithBackup(url) {
+    const primary = String(url || DEFAULT_LIST_URL).trim() || DEFAULT_LIST_URL;
+    const sources = primary === DEFAULT_LIST_URL
+      ? [primary, '/api/f95list', '/data/f95list.json']
+      : [primary];
+    for (const source of sources) {
+      const data = await fetchJson(source, null, { timeoutMs: 6000 });
+      if (!data || typeof data !== 'object' || data.ok === false || data.error) continue;
+      // Les structures acceptées sont celles du lecteur de liste ci-dessous.
+      if (Array.isArray(data) || Array.isArray(data.games) || Object.values(data).some(Array.isArray)) return data;
+    }
+    return null;
   }
 
   function getActiveEventUrl(config, forcedId = '') {
@@ -1065,7 +1083,7 @@
     }
 
     const listUrl = getListUrl(event);
-    const raw = await fetchJson(listUrl, null);
+    const raw = await fetchListWithBackup(listUrl);
     const games = flattenGames(raw);
     const selection = await enrichSelectionWithPrivateData(pickGame(games, event));
     renderActiveEvent(event, selection, raw ? '' : 'La base f95list.json est peut-être inaccessible.');

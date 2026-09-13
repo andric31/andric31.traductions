@@ -1,5 +1,6 @@
 import { ensureAuthTables, findAuthPseudoConflict, hashPassword, normalizePseudoKey, validatePassword } from './_auth.js';
 import { notifyTicketOpened } from './_discord.js';
+export const DISCORD_NOTIFICATIONS_VERSION = 'discord-notifications-1';
 
 const json = (data, status = 200) => new Response(JSON.stringify(data, null, 2), {
   status,

@@ -42,23 +42,97 @@ async function sendOnce(url, payload) {
       redirect: 'error',
       signal: controller.signal,
     });
+    const body = await response.json().catch(() => null);
     let retryAfter = NaN;
     if (response.status === 429) {
-      const body = await response.json().catch(() => null);
       const delay = body?.retry_after ?? response.headers.get('retry-after');
       if (delay !== null && delay !== undefined && delay !== '') retryAfter = Number(delay);
-    } else {
-      await response.body?.cancel();
     }
-    return { ok: response.ok, status: response.status, retryAfter };
+    return {
+      ok: response.ok,
+      status: response.status,
+      retryAfter,
+      discordCode: Number.isSafeInteger(body?.code) ? body.code : null,
+      messageId: /^\d+$/.test(String(body?.id || '')) ? String(body.id) : null,
+    };
   } finally {
     clearTimeout(timeout);
   }
 }
 
+export function getDiscordConfiguration(env) {
+  const raw = String(env?.DISCORD_WEBHOOK_URL || '').trim();
+  if (!raw) return {
+    configured: false, valid: false, code: 'missing_webhook',
+    message: 'DISCORD_WEBHOOK_URL est absent de ce déploiement. Ajoute ce secret en Production puis redéploie le site.',
+  };
+  try {
+    webhookUrl(raw);
+    return { configured: true, valid: true, code: 'ready', message: 'Le webhook est présent et son format est valide. Tu peux tester l’envoi.' };
+  } catch {
+    return {
+      configured: true, valid: false, code: 'invalid_webhook',
+      message: 'Le format de DISCORD_WEBHOOK_URL est invalide. Recopie l’URL complète depuis Discord, enregistre le secret puis redéploie.',
+    };
+  }
+}
+
+// Appelé uniquement par l’API de diagnostic, après contrôle de la session admin.
+export async function runDiscordTest(context) {
+  const config = getDiscordConfiguration(context.env);
+  if (!config.valid) return { ok: false, code: config.code, message: config.message };
+  try {
+    const url = webhookUrl(String(context.env.DISCORD_WEBHOOK_URL).trim());
+    const payload = {
+      allowed_mentions: { parse: [] },
+      embeds: [{
+        title: '✅ Test des notifications du site',
+        description: 'Ce message de test a été demandé depuis la page de diagnostic administrateur d’Andric31.',
+        color: 0x57a876,
+        timestamp: new Date().toISOString(),
+      }],
+    };
+    let result = await sendOnce(url, payload);
+    if (result.status === 429 && Number.isFinite(result.retryAfter)
+        && result.retryAfter >= 0 && result.retryAfter <= 5) {
+      await new Promise(resolve => setTimeout(resolve, Math.ceil(result.retryAfter * 1000) + 50));
+      result = await sendOnce(url, payload);
+    }
+    const details = { http_status: result.status, discord_code: result.discordCode };
+    if (result.ok && result.messageId) return {
+      ok: true, code: 'sent', ...details, message_id: result.messageId,
+      message: 'Discord a confirmé la création du message de test. Vérifie le salon sélectionné dans les réglages de ton webhook.',
+    };
+    const reasons = {
+      400: 'Discord refuse le message ou la destination. Vérifie que le webhook cible un salon textuel classique, puis utilise le code du rapport pour identifier le refus.',
+      401: 'Discord refuse l’authentification du webhook. Recopie son URL complète dans le secret puis redéploie.',
+      403: 'Discord refuse l’accès au salon. Vérifie le webhook et les autorisations de sa destination.',
+      404: 'Discord ne trouve pas ce webhook. Il a peut-être été supprimé ou son URL est incomplète. Crée un webhook, remplace le secret puis redéploie.',
+      429: 'Discord limite temporairement les envois. Attends avant de relancer le test.',
+    };
+    return {
+      ok: false, code: result.ok ? 'unexpected_response' : 'discord_rejected', ...details,
+      ...(Number.isFinite(result.retryAfter) ? { retry_after_seconds: result.retryAfter } : {}),
+      message: result.ok
+        ? 'La réponse reçue ne confirme pas la création d’un message Discord. Copie le rapport pour analyser ce résultat.'
+        : reasons[result.status] || 'L’envoi à Discord a échoué. Le rapport indique le statut HTTP reçu.',
+    };
+  } catch (error) {
+    return {
+      ok: false, code: error?.name === 'AbortError' ? 'timeout' : 'network_error',
+      message: error?.name === 'AbortError'
+        ? 'Discord n’a pas répondu dans le délai de 8 secondes. L’envoi ne peut pas être confirmé.'
+        : 'Cloudflare n’a pas pu terminer la connexion à Discord. L’envoi ne peut pas être confirmé.',
+    };
+  }
+}
+
 function scheduleDiscord(context, kind, buildEmbed) {
   const raw = String(context.env?.DISCORD_WEBHOOK_URL || '').trim();
-  if (!raw) return;
+  if (!raw) {
+    console.info(`[Discord] ${kind} : désactivé, DISCORD_WEBHOOK_URL absent de ce déploiement.`);
+    return;
+  }
 
   const task = (async () => {
     let url;
@@ -80,7 +154,8 @@ function scheduleDiscord(context, kind, buildEmbed) {
       await new Promise(resolve => setTimeout(resolve, Math.ceil(result.retryAfter * 1000) + 50));
       result = await sendOnce(url, payload);
     }
-    if (!result.ok) console.warn(`[Discord] ${kind} : échec HTTP ${result.status}.`);
+    if (!result.ok) console.warn(`[Discord] ${kind} : échec HTTP ${result.status}, code Discord ${result.discordCode ?? 'non fourni'}.`);
+    else console.info(`[Discord] ${kind} : envoi accepté par Discord (HTTP ${result.status}).`);
   })().catch(() => {
     // Ne jamais journaliser l'URL du webhook, les données privées ou l'erreur brute.
     console.warn(`[Discord] ${kind} : envoi impossible (réseau ou délai dépassé).`);

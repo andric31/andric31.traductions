@@ -1,5 +1,6 @@
 import { assertSameOrigin, ensureAuthTables, getSessionUser, normalizePseudoKey } from './_auth.js';
 import { notifyNewMessage } from './_discord.js';
+export const DISCORD_NOTIFICATIONS_VERSION = 'discord-notifications-1';
 
 const ALLOWED_REACTION_EMOJIS = new Set([
   '😀','😁','😂','🤣','😊','😍','🥰','😘','😎','🤔','😅','😢','😭','😡',

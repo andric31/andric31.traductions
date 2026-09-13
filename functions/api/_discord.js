@@ -134,7 +134,7 @@ export async function runDiscordTest(context) {
       allowed_mentions: { parse: [] },
       embeds: [{
         title: '✅ Test des notifications du site',
-        description: 'Ce message de test a été demandé depuis la page de diagnostic administrateur d’Andric31.',
+        description: 'Ce message de test a été demandé depuis la page de diagnostic administrateur.',
         color: 0x57a876,
         timestamp: new Date().toISOString(),
       }],
@@ -238,7 +238,7 @@ export function notifyTicketOpened(context, ticket) {
       { name: 'Priorité', value: text(({ faible: 'Faible', normal: 'Normale', urgent: 'Urgente' })[ticket.priority]), inline: true },
     ],
     description: 'Ouvre la gestion des tickets pour consulter la demande et y répondre.',
-    footer: { text: 'Andric31 • Tickets' },
+    footer: { text: 'Tickets' },
   }));
 }
 
@@ -257,7 +257,7 @@ export function notifyNewMessage(context, message) {
       description: message.roomKey === 'global'
         ? text(message.body, 1000)
         : 'Un nouveau message a été publié. Ouvre le salon sur le site pour le lire.',
-      footer: { text: `Andric31 • Message ${message.id || ''}`.trim() },
+      footer: { text: `Message ${message.id || ''}`.trim() },
     };
   });
 }

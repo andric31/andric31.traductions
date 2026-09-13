@@ -506,7 +506,8 @@
     }
 
     event.id = String(event.id || activeId).trim();
-    if (event.enabled === false) return null;
+    const eventType = eventNormalizeText(event.type || event.mode || '').replace(/_/g, '-');
+    if (event.enabled === false || event.id === 'aucun-evenement' || eventType === 'no-event') return null;
     return event;
   }
 

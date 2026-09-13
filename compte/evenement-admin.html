@@ -167,7 +167,7 @@
         <div class="event-admin-catalog-head">
           <div>
             <h2>📋 Événements disponibles</h2>
-            <p class="event-admin-note" style="margin:0;">Ouvre un événement pour le préparer, ou lance-le directement sur le site.</p>
+            <p class="event-admin-note" style="margin:0;">Ouvrir, enregistrer ou tester un événement ne l’active pas. Seul « Lancer » l’affiche sur le site. Les dates n’activent aucun événement automatiquement.</p>
           </div>
         </div>
         <div id="activeEventState" class="event-admin-active-banner off">Chargement de l’état actuel…</div>
@@ -311,7 +311,7 @@
 
     function isNoEventEntry(event) {
       const type = norm(event?.type || event?.mode || '').replace(/_/g, '-');
-      return event?.enabled === false || type === 'no-event' || String(event?.id || '') === 'aucun-evenement';
+      return type === 'no-event' || String(event?.id || '') === 'aucun-evenement';
     }
 
     function setEventManagementOpen(open, showGamePicker = true) {
@@ -441,6 +441,8 @@
         catalog.push({
           id,
           title: base?.title || saved?.title || id,
+          icon: base?.icon || base?.emoji || '📅',
+          description: base?.description || base?.text || '',
           date: base?.date || base?.period || base?.date_label || '',
           hasFile: !!base,
           source: base ? 'fichier' : 'cloudflare'
@@ -491,10 +493,11 @@
         }
         return `<article class="event-admin-event-item ${isSelected ? 'is-selected' : ''} ${isActive ? 'is-active' : ''}">
           <div>
-            <strong>${esc(ev.title || ev.id)}</strong>
+            <strong>${esc(ev.icon)} ${esc(ev.title || ev.id)}</strong>
             <small style="display:block;color:var(--muted);margin-top:5px;">${ev.date ? `📆 ${esc(ev.date)}` : `ID : ${esc(ev.id)}`}${ev.hasFile ? '' : ' • fichier JSON non trouvé'}</small>
+            ${ev.description ? `<small style="display:block;color:var(--muted);margin-top:5px;">${esc(ev.description)}</small>` : ''}
             <div class="event-admin-pill-list">
-              ${isActive ? '<span class="event-admin-pill ok">En cours</span>' : ''}
+              ${isActive ? '<span class="event-admin-pill ok">En cours</span>' : '<span class="event-admin-pill">Désactivé</span>'}
               ${isSelected ? '<span class="event-admin-pill">Ouvert</span>' : ''}
             </div>
           </div>
@@ -990,7 +993,7 @@
           <div class="event-admin-linked-box"><strong>🔁 Règle actuelle</strong><small>Un nouveau jeu chaque jour à ${esc(String(event.change_hour ?? 0))}h</small></div>
         </div>
         <div>
-          <strong>📆 Les 7 jeux de la semaine</strong>
+          <strong>📆 ${days.length === 1 ? 'Le jeu de l’événement' : `Les ${days.length} journées de l’événement`}</strong>
           <div class="event-admin-week-preview" style="margin-top:8px;">${rows}</div>
         </div>`;
     }
@@ -1003,7 +1006,7 @@
 
 
       const isNoEvent = String(event.type || event.mode || '').toLowerCase().replace('_','-') === 'no-event' || String(event.id || '') === 'aucun-evenement';
-      if (event.enabled === false || isNoEvent) {
+      if (isNoEvent) {
         panel.innerHTML = `
           <div class="event-admin-linked-head">
             <div>
@@ -1087,7 +1090,7 @@
       $('jsonOutput').value = JSON.stringify(event, null, 2);
 
       const isNoEvent = String(event.type || event.mode || '').toLowerCase().replace('_','-') === 'no-event' || String(event.id || '') === 'aucun-evenement';
-      if (event.enabled === false || isNoEvent) {
+      if (isNoEvent) {
         currentSelection = { game: null, reason: 'Page aucun événement.', score: 0 };
         renderEventLinkedPanel(event);
         $('currentGame').innerHTML = `

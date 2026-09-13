@@ -468,13 +468,17 @@
   }
 
   async function fetchEventJson(url, fallback = null) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
     try {
       const glue = url.includes("?") ? "&" : "?";
-      const res = await fetch(`${url}${glue}v=${Math.floor(Date.now() / 60000)}`, { cache: "no-store" });
+      const res = await fetch(`${url}${glue}v=${Math.floor(Date.now() / 60000)}`, { cache: "no-store", signal: controller.signal });
       if (!res.ok) return fallback;
       return await res.json();
     } catch {
       return fallback;
+    } finally {
+      clearTimeout(timer);
     }
   }
 
@@ -489,7 +493,7 @@
       enabled = savedState.enabled !== false;
     }
 
-    if (!enabled || !activeId) return null;
+    if (!enabled || !activeId || activeId === 'aucun-evenement') return null;
 
     const localEvent = await fetchEventJson(`/evenements/${encodeURIComponent(activeId)}.json`, null);
     let event = localEvent && typeof localEvent === "object" ? { ...localEvent } : { id: activeId };
@@ -576,8 +580,14 @@
     return `${id}|weekly|${getWeeklyBoundaryKey(event)}|${title}`;
   }
 
+  let eventIndicatorBusy = false;
+  let lastEventIndicatorCheck = null;
+
   async function initEventIndicator(eventsEl) {
-    if (!eventsEl) return;
+    if (!eventsEl || document.hidden || eventIndicatorBusy) return;
+    if (lastEventIndicatorCheck !== null && Date.now() - lastEventIndicatorCheck < 60000) return;
+    eventIndicatorBusy = true;
+    lastEventIndicatorCheck = Date.now();
     try {
       const event = await loadActiveEventForIndicator();
       if (!event || !isEventInPeriod(event)) {
@@ -593,6 +603,8 @@
     } catch {
       eventsEl.dataset.latestEventSignature = "";
       setDotVisible(eventsEl, false);
+    } finally {
+      eventIndicatorBusy = false;
     }
   }
 
@@ -621,9 +633,12 @@
       if (blogEl) initBlogIndicator(blogEl);
       if (ticketEl) initTicketIndicator(ticketEl);
       if (messagesEl) initMessageIndicator(messagesEl);
-      if (eventsEl) initEventIndicator(eventsEl);
       if (notificationsEl) initNotificationIndicator(notificationsEl);
     }, 10000);
+    window.setInterval(() => initEventIndicator(eventsEl), 60000);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) initEventIndicator(eventsEl);
+    });
   }
 
   async function getSeenMessageId() {

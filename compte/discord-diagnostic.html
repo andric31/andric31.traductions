@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Diagnostic Discord — Andric31</title>
+  <link rel="icon" href="/favicon.png">
+  <script src="/theme-init.js"></script>
+  <link rel="stylesheet" href="/viewer.css">
+  <link rel="stylesheet" href="/themes.css">
+  <link rel="stylesheet" href="/auth/auth.css">
+  <style>
+    .discord-diagnostic{width:min(820px,calc(100% - 32px));margin:36px auto;display:grid;gap:18px}
+    .discord-diagnostic h1{margin:0 0 12px}.discord-diagnostic p{line-height:1.65}
+    .diagnostic-state{padding:16px;border:1px solid var(--border,#596078);border-radius:14px;white-space:pre-line;overflow-wrap:anywhere}
+    .diagnostic-state[data-state="error"]{border-color:#db7373}.diagnostic-state[data-state="ok"]{border-color:#58ac87}
+    .diagnostic-checks{display:grid;gap:9px;margin:18px 0;padding-left:24px}
+    .diagnostic-report{box-sizing:border-box;width:100%;min-height:190px;resize:vertical;padding:14px;border:1px solid var(--border,#596078);border-radius:12px;color:var(--fg,#eee);background:var(--card,#151925);font:13px/1.55 monospace}
+    .discord-diagnostic button:disabled{opacity:.55;cursor:wait}.discord-diagnostic [hidden]{display:none!important}
+  </style>
+</head>
+<body>
+  <main class="discord-diagnostic">
+    <section class="auth-card">
+      <h1 class="auth-title">🔔 Diagnostic Discord</h1>
+      <p>Vérifie les notifications de ton site. Le bouton de test enverra un message dans le salon choisi pour ton webhook.</p>
+      <div id="state" class="diagnostic-state" role="status" aria-live="polite">Vérification de ton accès administrateur…</div>
+      <ul id="checks" class="diagnostic-checks" hidden></ul>
+      <div class="auth-actions">
+        <button id="test" class="auth-btn primary" type="button" disabled>Envoyer un message de test</button>
+        <button id="refresh" class="auth-btn" type="button" disabled>Vérifier la configuration</button>
+        <a id="login" class="auth-btn" href="/connexion/" hidden>Se connecter</a>
+        <a class="auth-btn" href="/compte/ticket-admin.html">Retour aux tickets</a>
+      </div>
+    </section>
+    <section id="reportSection" class="auth-card" hidden>
+      <h2>Résultat à transmettre</h2>
+      <p>Si le problème persiste, copie ce rapport. Il ne contient ni l’URL du webhook ni les clés d’accès.</p>
+      <textarea id="report" class="diagnostic-report" aria-label="Rapport de diagnostic" readonly></textarea>
+      <div class="auth-actions"><button id="copy" class="auth-btn" type="button">Copier le rapport</button></div>
+    </section>
+  </main>
+  <script>
+    (() => {
+      const state = document.getElementById('state');
+      const checks = document.getElementById('checks');
+      const test = document.getElementById('test');
+      const refresh = document.getElementById('refresh');
+      const login = document.getElementById('login');
+      const report = document.getElementById('report');
+      const reportSection = document.getElementById('reportSection');
+      const copy = document.getElementById('copy');
+      let busy = false;
+      function show(message, kind) { state.textContent = message; state.dataset.state = kind; }
+      async function run(sendTest = false) {
+        if (busy) return;
+        busy = true; test.disabled = true; refresh.disabled = true;
+        login.hidden = true; checks.hidden = true; reportSection.hidden = true;
+        show(sendTest ? 'Envoi du message de test à Discord…' : 'Vérification de la configuration…', 'waiting');
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30000);
+        let canTest = false;
+        try {
+          const response = await fetch('/api/discord-diagnostic', {
+            method: sendTest ? 'POST' : 'GET', credentials: 'same-origin', cache: 'no-store',
+            signal: controller.signal,
+            ...(sendTest ? { headers: { 'content-type': 'application/json', 'x-discord-test': '1' }, body: JSON.stringify({ action: 'send_test' }) } : {}),
+          });
+          const data = await response.json().catch(() => null);
+          if (!data || data.version !== 'discord-diagnostic-1') throw new Error('L’API de diagnostic n’est pas disponible dans ce déploiement. Ajoute les fichiers du ZIP puis redéploie le site.');
+          if (!response.ok || !data.ok) {
+            login.hidden = response.status !== 401;
+            throw new Error(data.error || 'Le diagnostic est indisponible.');
+          }
+          canTest = data.configuration.valid;
+          checks.replaceChildren();
+          for (const [label, ready] of [
+            ['Webhook configuré', data.configuration.valid],
+            ['Notifications des tickets présentes dans ce déploiement', data.integrations.tickets],
+            ['Notifications des messages présentes dans ce déploiement', data.integrations.messages],
+          ]) {
+            const item = document.createElement('li'); item.textContent = `${ready ? '✅' : '❌'} ${label}`; checks.appendChild(item);
+          }
+          checks.hidden = false;
+          const result = data.test;
+          let message = result ? result.message : data.configuration.message;
+          if (!data.integrations.tickets || !data.integrations.messages) message += '\nLes fichiers des notifications ne sont pas tous à jour. Remplace ticket.js et messages.js avec ceux du ZIP puis redéploie.';
+          show(message, (result ? result.ok : canTest) && data.integrations.tickets && data.integrations.messages ? 'ok' : 'error');
+          report.value = JSON.stringify({ date: new Date().toISOString(), ...data }, null, 2);
+          reportSection.hidden = false; copy.textContent = 'Copier le rapport';
+        } catch (error) {
+          show(error.name === 'AbortError' ? 'Le diagnostic a dépassé le délai d’attente. L’envoi éventuel ne peut pas être confirmé.' : error.message, 'error');
+        } finally {
+          clearTimeout(timeout); busy = false; refresh.disabled = false; test.disabled = !canTest;
+        }
+      }
+      refresh.addEventListener('click', () => run(false));
+      test.addEventListener('click', () => run(true));
+      copy.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(report.value); copy.textContent = 'Rapport copié'; }
+        catch { report.focus(); report.select(); copy.textContent = 'Texte sélectionné : Ctrl+C pour copier'; }
+      });
+      run(false);
+    })();
+  </script>
+</body>
+</html>

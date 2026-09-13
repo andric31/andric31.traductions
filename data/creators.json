@@ -1256,6 +1256,41 @@
     "otherGames": []
   },
   {
+    "id": "fallen-eros",
+    "name": "Fallen Eros",
+    "aliases": [],
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p13233",
+    "avatar": "",
+    "banner": "https://img.itch.zone/aW1nLzE1OTg4ODE3LnBuZw==/original/xYA%2BVu.png",
+    "presentation": "",
+    "gameIds": [
+      "106980"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/FallenEros"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://raspberrysoft.itch.io/"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p13233"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "flynn974",
     "name": "Flynn974",
     "aliases": [

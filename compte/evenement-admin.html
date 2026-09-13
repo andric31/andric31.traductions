@@ -134,6 +134,9 @@
     .event-admin-advent-editor h4 { margin:0; }
     .event-admin-advent-fields { display:grid; grid-template-columns:80px 1fr 1fr; gap:10px; }
     @media (max-width:850px){ .event-admin-main-actions, .event-admin-stop-actions, .event-admin-grid, .event-admin-row, .event-admin-current, .event-admin-week-item, .event-admin-day-item, .event-admin-event-list { grid-template-columns:1fr; } .event-admin-cover { width:150px; } .event-admin-week-thumb { width:100%; height:120px; } .event-admin-linked-grid, .event-admin-game { grid-template-columns:1fr; } .event-admin-game .auth-btn { grid-column:1 / -1; } .event-admin-event-actions { grid-template-columns:1fr; } .event-admin-no-event-item .event-admin-event-actions { grid-template-columns:1fr; } .event-admin-workspace-head { position:static; } }
+    .event-admin-catalog-filters { display:grid; grid-template-columns:minmax(0,2fr) minmax(180px,1fr); gap:12px; margin-top:14px; }
+    .event-admin-catalog-count { margin:8px 0 0; }
+    @media(max-width:600px) { .event-admin-catalog-filters { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
@@ -171,6 +174,12 @@
           </div>
         </div>
         <div id="activeEventState" class="event-admin-active-banner off">Chargement de l’état actuel…</div>
+        <div class="event-admin-catalog-filters">
+          <label class="auth-label"><span>Rechercher un événement</span><input class="auth-input" id="eventSearch" type="search" placeholder="Halloween, musique, 2027…" autocomplete="off"></label>
+          <label class="auth-label"><span>Période</span><select class="auth-input" id="eventPeriodFilter"><option value="all">Tous</option><option value="upcoming">À venir / période actuelle</option><option value="past">Passés</option></select></label>
+        </div>
+        <p class="event-admin-note event-admin-catalog-count" id="eventCatalogCount" role="status" aria-live="polite"></p>
+        <p class="event-admin-note" style="margin:4px 0 0;">L’entrée active reste en premier. La page « Aucun événement » reste toujours accessible.</p>
         <div id="eventsList" class="event-admin-event-list"><div class="event-admin-msg">Chargement de la liste…</div></div>
         <details class="event-admin-catalog-help">
           <summary>Informations techniques</summary>
@@ -444,12 +453,30 @@
           icon: base?.icon || base?.emoji || '📅',
           description: base?.description || base?.text || '',
           date: base?.date || base?.period || base?.date_label || '',
+          start_at: String(base?.start_at || saved?.start_at || '').slice(0,10),
+          end_at: String(base?.end_at || saved?.end_at || '').slice(0,10),
           hasFile: !!base,
           source: base ? 'fichier' : 'cloudflare'
         });
       }
       eventCatalog = catalog;
       return catalog;
+    }
+
+    function filterEventCatalog(catalog, activeId, query, period, today) {
+      const terms = norm(query).trim().split(/\s+/).filter(Boolean);
+      const rank = event => event.id === activeId ? 0 : event.id === 'aucun-evenement' ? 1 : 2;
+      return catalog.filter(event => {
+        if (rank(event) < 2) return true;
+        const text = norm([event.title, event.description, event.date, event.id].join(' '));
+        if (!terms.every(term => text.includes(term))) return false;
+        const lastDay = event.end_at || event.start_at;
+        if (period === 'past') return !!lastDay && lastDay < today;
+        if (period === 'upcoming') return !!lastDay && lastDay >= today;
+        return true;
+      }).sort((a, b) => rank(a) - rank(b)
+        || (a.start_at || '9999-12-31').localeCompare(b.start_at || '9999-12-31')
+        || a.title.localeCompare(b.title, 'fr'));
     }
 
     function renderEventsList() {
@@ -471,7 +498,12 @@
         banner.className = `event-admin-active-banner ${activeState.enabled && activeId && !isNoEventActive ? '' : 'off'}`;
       }
       const selectedId = activeEvent?.id || '';
-      wrap.innerHTML = eventCatalog.map((ev)=>{
+      const now = new Date();
+      const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+      const shown = filterEventCatalog(eventCatalog, activeId, $('eventSearch')?.value || '', $('eventPeriodFilter')?.value || 'all', today);
+      const count = $('eventCatalogCount');
+      if (count) count.textContent = `${shown.length} entrée${shown.length > 1 ? 's' : ''} affichée${shown.length > 1 ? 's' : ''} sur ${eventCatalog.length}`;
+      wrap.innerHTML = shown.map((ev)=>{
         const isSelected = selectedId === ev.id;
         const isActive = activeState.enabled && activeId === ev.id;
         const isNoEvent = ev.id === 'aucun-evenement';
@@ -1347,6 +1379,8 @@
     });
 
     $('gameSearch')?.addEventListener('input', renderGames);
+    $('eventSearch')?.addEventListener('input', renderEventsList);
+    $('eventPeriodFilter')?.addEventListener('change', renderEventsList);
     $('gamesResults')?.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-pick-id]');
       if (!btn) return;

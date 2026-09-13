@@ -3098,6 +3098,41 @@
     "otherGames": []
   },
   {
+    "id": "velnidokra",
+    "name": "VelniDokra",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://f95zone.to/data/avatars/l/8655/8655512.jpg?1739818685",
+    "banner": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/4054983/covers/e57a27fb-2432-4e12-a230-ef989d87afd2-1240x0_0x330_1919x360.jpg",
+    "presentation": "",
+    "gameIds": [
+      "245537"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/velnidokra.8655512/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/VelniDokra"
+      },
+      {
+        "type": "subscribestar",
+        "label": "Subscribestar",
+        "url": "https://subscribestar.adult/veklnidokra"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "vesperproxy",
     "name": "VesperProxy",
     "aliases": [],

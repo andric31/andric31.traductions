@@ -941,6 +941,47 @@
     "otherGames": []
   },
   {
+    "id": "dik-tate",
+    "name": "Dik Tate",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "293376"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [
+      {
+        "name": "Dice Dik Saga Website",
+        "platform": "dicediksaga.com",
+        "url": "https://dicediksaga.com/"
+      },
+      {
+        "name": "Dice Dik Saga",
+        "platform": "Itch.io",
+        "url": "https://diktate.itch.io/dice-dik-saga"
+      }
+    ],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/dicediksaga"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.com/invite/xXxhXvYNEZ"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "dimajio333",
     "name": "Dimajio333",
     "aliases": [],

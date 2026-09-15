@@ -1,5 +1,40 @@
 [
   {
+    "id": "absentstudio",
+    "name": "AbsentStudio",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://img.itch.zone/aW1nLzE4Njk1NzIxLmpwZw==/80x80%23/DHWzmK.jpg",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "130063"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/AbsentStudio"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://absentstudio.itch.io/"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.com/invite/9TBGrEtz"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "aghamus",
     "name": "AGHAMUS",
     "aliases": [],

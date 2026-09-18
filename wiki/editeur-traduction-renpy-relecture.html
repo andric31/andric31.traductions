@@ -3,473 +3,517 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Éditeur de Traductions Ren'Py pour Relecture</title>
+  <title>Éditeur de traductions Ren'Py</title>
 
   <script src="/theme-init.js"></script>
-<link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=1">
+  <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=1">
   <link rel="stylesheet" href="/themes.css" />
-<link rel="stylesheet" href="wiki.css" />
+  <link rel="stylesheet" href="wiki.css" />
+  <style>
+    .capture-image {
+      margin: 1.25rem auto;
+      text-align: center;
+      width: 100%;
+    }
+    .capture-image img {
+      display: block;
+      width: auto;
+      max-width: 100%;
+      height: auto;
+      margin: 0 auto;
+      border-radius: 14px;
+      box-shadow: 0 12px 34px rgba(0,0,0,.28);
+    }
+    .image-wrap .tutorial-img {
+      width: auto !important;
+      max-width: 100%;
+      height: auto;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .capture-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      margin: 1.25rem 0;
+    }
+    .capture-grid .capture-image { margin: 0; }
+    @media (max-width: 820px) {
+      .capture-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
 
 <header class="topbar">
   <a class="back" href="index.html">⬅ Retour</a>
   <div class="topbar-inner">
-    <h1>🛠️ 📝 Éditeur de Traductions pour Relecture</h1>
-    <p class="subtitle">Outil dédié à la correction et relecture de mes traductions Ren'Py</p>
+    <h1>📝 Éditeur de traductions Ren'Py</h1>
+    <p class="subtitle">Corriger une traduction en jeu et en temps réel</p>
   </div>
 </header>
 
 <main class="page">
 
-  <!-- Image principale -->
   <div class="image-wrap">
-    <img src="img/Editeur_Relecture_Renpy/fr_relecture_4.webp" alt="Éditeur Ren'Py Relecture" class="tutorial-img">
+    <img src="img/Editeur_Relecture_Renpy/relecteur_intro.webp" alt="Aperçu du Relecteur Ren'Py" class="tutorial-img">
   </div>
 
-  <!-- Sommaire -->
+  <section class="card" id="presentation">
+    <h2>🛠️ Présentation</h2>
+
+    <p>
+      Le <strong>Relecteur Ren'Py</strong> est un outil que j'utilise pour relire, corriger et contrôler mes traductions
+      directement pendant une partie. Il récupère ce qui est réellement affiché par le jeu, retrouve la traduction
+      correspondante et permet de la modifier sans devoir chercher manuellement la bonne ligne dans les fichiers.
+    </p>
+
+    <div class="callout info">
+      <strong>Version actuelle :</strong> éditeur <strong>0.5</strong> — build <strong>0.12.70</strong>.<br>
+      Deux modes sont disponibles : <strong>Normal</strong> pour la relecture courante et <strong>Expert</strong> pour les balises,
+      sources et cas techniques.
+    </div>
+
+    <p>
+      Le mode Normal privilégie une interface lisible : le texte Ren'Py est rendu visuellement, les parties générées par le jeu
+      sont protégées et les éléments techniques sont masqués autant que possible. Le mode Expert donne accès au texte brut,
+      aux balises et aux informations de source.
+    </p>
+
+    <div class="callout warning">
+      <strong>Par défaut, l'outil reste destiné à mes traductions.</strong><br>
+      La traduction <code>fr_zenpy_DeepL_andric31</code> est prioritaire et utilisable sans activation supplémentaire.
+      L'utilisation avec d'autres dossiers de traduction peut être débloquée <strong>sur demande et par PC</strong> depuis l'onglet Version.
+    </div>
+
+  </section>
+
+  <div class="sep"></div>
+
   <section class="card" id="sommaire">
     <h2>🧭 Sommaire</h2>
     <ul class="toc">
-      <li><a href="#presentation">🛠️ Présentation</a></li>
       <li><a href="#telechargement">🔗 Téléchargement & compatibilité</a></li>
-      <li><a href="#changelog">🆕 Historique des versions</a></li>
       <li><a href="#installation">🚀 Installation</a></li>
-      <li><a href="#utilisation">🖥️ Utilisation</a></li>
-      <li><a href="#rechargement">🔄 Rechargement automatique</a></li>
-      <li><a href="#features">⚙️ Fonctionnalités principales</a></li>
-      <li><a href="#presentation_v02">🟦 Présentation de l’éditeur (v0.2)</a></li>
-      <li><a href="#tech_plus">🧩 Infos techniques supplémentaires</a></li>
-      <li><a href="#tech_relecture">🧠 Infos techniques de relecture</a></li>
-      <li><a href="#bonnes_pratiques">💡 Bonnes pratiques</a></li>
-      <li><a href="#cas_particuliers">🔍 Cas particuliers</a></li>
-      <li><a href="#partager">📤 Partager vos corrections</a></li>
-      <li><a href="#faq">❓ FAQ</a></li>
-      <li><a href="#depannage">🧯 Dépannage</a></li>
-      <li><a href="#credits">👥 Crédits / Remerciements</a></li>
-      <li><a href="#avenir">🔄 Fonctionnalités à venir</a></li>
-      <li><a href="#etat">🚧 État actuel</a></li>
+      <li><a href="#dialogue">💬 Dialogue & correction</a></li>
+      <li><a href="#modes">🟦 Modes Normal / Expert</a></li>
+      <li><a href="#choix">🔀 Choix du jeu</a></li>
+      <li><a href="#sandbox">🧩 Interface & Sandbox</a></li>
+      <li><a href="#images">🖼️ Images à l'écran</a></li>
+      <li><a href="#sources">🧠 Détection de la source de traduction</a></li>
+      <li><a href="#rechargement">🔄 Enregistrement & rechargement du jeu</a></li>
+      <li><a href="#reglages">⚙️ Réglages</a></li>
+      <li><a href="#activation">🔓 Autres traductions & activation</a></li>
+      <li><a href="#partager">📦 Notes & partage</a></li>
+      <li><a href="#technique">🧠 Balises et éléments protégés</a></li>
+      <li><a href="#faq">❓ FAQ / dépannage</a></li>
+      <li><a href="#changelog">🆕 Évolution de l'outil</a></li>
     </ul>
   </section>
 
   <div class="sep"></div>
 
-  <!-- Présentation -->
-  <section class="card" id="presentation">
-    <h2>🛠️ 📝 Présentation</h2>
-
-    <p>
-      Bonjour,<br>
-      Je propose un petit outil destiné aux personnes qui ne savent pas,
-      ou ne souhaitent pas, modifier directement les fichiers de traduction.
-    </p>
-
-    <p>
-      Ce projet a été développé à l’origine pour répondre à une demande
-      visant une solution simple et accessible.
-    </p>
-
-    <div class="callout warning">
-      ❗ <strong>Dans un premier temps :</strong><br>
-      Cette version est <strong>exclusive à mes traductions</strong> ! Elle ne fonctionne pas avec un dossier
-      <code>french</code> ni avec tout autre dossier de traduction.
-    </div>
-  </section>
-
-  <div class="sep"></div>
-
-  <!-- Téléchargement -->
   <section class="card" id="telechargement">
     <h2>🔗 Téléchargement & compatibilité</h2>
 
     <p>
-      🔗 Lien de téléchargement :
-      <a href="https://mega.nz/folder/jMdBSBrB#hN1MaMhfeA5d6ucuajt5AQ" target="_blank" rel="noopener">
-        Télécharger l’éditeur
+      🔗 <a href="https://mega.nz/folder/jMdBSBrB#hN1MaMhfeA5d6ucuajt5AQ" target="_blank" rel="noopener">
+        Télécharger le Relecteur Ren'Py
       </a>
     </p>
 
+    <p>
+      L'outil est conçu pour les jeux <strong>Ren'Py 7 et 8</strong>. Certaines fonctions dépendent toutefois de la façon dont
+      chaque jeu a été construit : écrans personnalisés, systèmes de texte maison, images générées, etc.
+    </p>
+
     <div class="callout warning">
-      ⚠️ <strong>ATTENTION :</strong> il s’agit d’une version en test.<br>
-      Pensez à vérifier régulièrement vos fichiers et à effectuer des sauvegardes.
+      ⚠️ Il s'agit d'un outil de relecture et de correction en évolution régulière. Gardez toujours une copie de votre traduction
+      avant une grosse session de modifications.
     </div>
-
-    <p><strong>Compatibilité :</strong> Ren'Py 8 (Ren'Py 7 partiellement compatible)</p>
   </section>
 
   <div class="sep"></div>
 
-  <!-- Changelog -->
-  <section class="card" id="changelog">
-    <h2>🆕 Historique des versions</h2>
-
-    <ul>
-      <li><strong>v0.1</strong> — Version initiale.</li>
-
-      <li class="mt">
-        <strong>MISE À JOUR v0.2</strong>
-        <ul>
-          <li>Nouveau système de protection des balises (désactivable dans les réglages).</li>
-          <li>Ajout d’un popup au démarrage pour rappeler d’activer le rechargement automatique (désactivable).</li>
-          <li>Ajout de deux boutons de correction vers <strong>LanguageTool</strong> et <strong>Reverso</strong>.</li>
-          <li>Prise en charge du <strong>mode plein écran</strong> du jeu.</li>
-          <li>Protection automatique des guillemets <code>"</code> en <code>\"</code> (insertion / modification / enregistrement).</li>
-          <li>Correction de différents bugs.</li>
-        </ul>
-      </li>
-
-      <li class="mt">
-        <strong>MISE À JOUR v0.3</strong>
-        <ul>
-          <li>Ajout d’un bouton pour ouvrir le fichier de traduction à la ligne correspondante.</li>
-          <li>Ajout d’un onglet <strong>Aides</strong> avec quelques détails sur la relecture.</li>
-          <li>Correction de différents bugs.</li>
-        </ul>
-      </li>
-
-      <li class="mt">
-        <strong>MISE À JOUR v0.4</strong>
-        <ul>
-          <li>Prise en charge des <strong>lignes de choix</strong> dans un nouvel onglet.</li>
-          <li>…</li>
-        </ul>
-      </li>
-    </ul>
-  </section>
-
-  <div class="sep"></div>
-
-  <!-- Installation -->
   <section class="card" id="installation">
     <h2>🚀 Installation</h2>
 
+    <p>Extraire</strong> l’archive <code>.rar</code> dans le dossier du jeu (là où se trouve l’exécutable <code>.exe</code> du jeu).</p>
+
+    <figure class="capture-image">
+      <img src="img/Editeur_Relecture_Renpy/relecteur_00_installation.webp" alt="Capture du Relecteur Ren'Py" loading="lazy" onerror="this.parentElement.style.display='none'">
+    </figure>
+
+    <pre>
+Dossier du jeu\
+├─ fr_relecture.exe
+└─ game\
+   └─ fr_relecture.rpe</pre>
+
     <ol>
-      <li><strong>Extraire</strong> l’archive <code>.rar</code> dans le dossier du jeu (là où se trouve l’exécutable <code>.exe</code> du jeu).</li>
-      <li>✅ Pour que le jeu soit compatible avec l’éditeur, extraire l’archive <strong>avant de lancer le jeu</strong>.</li>
+      <li><code>fr_relecture.exe</code> à la racine du jeu, à côté de l'exécutable du jeu.</li>
+      <li><code>fr_relecture.rpe</code> dans le dossier <code>game</code>.</li>
+      <li>Si vous venez d'ajouter le fichier <code>.rpe</code>, redémarrez complètement le jeu une fois.</li>
+      <li>Lancez le relecteur avant, pendant ou après le jeu : il se reconnecte automatiquement dès que la liaison est disponible.</li>
     </ol>
 
-    <div class="image-wrap">
-      <img src="img/Editeur_Relecture_Renpy/01.webp" class="tutorial-img" alt="Extraction de l’archive">
-    </div>
+  </section>
 
-    <h3>📂 Fichiers créés</h3>
-    <pre>
-./fr_relecture.exe        # Exécutable de l'éditeur
-./game/fr_relecture.rpyc  # Fichier de lecture du jeu pour l'éditeur
-    </pre>
+  <div class="sep"></div>
+
+  <section class="card" id="dialogue">
+    <h2>💬 Dialogue & correction en temps réel</h2>
 
     <p>
-      Le fichier <code>fr_relecture.rpyc</code> doit être présent dans le dossier <code>game</code>
-      afin d’être lu par le jeu au démarrage.
+      L'onglet <strong>Dialogue</strong> suit la réplique réellement affichée dans le jeu. Il affiche l'original et la traduction
+      utilisée, puis permet de corriger la phrase directement. Le retour arrière / historique Ren'Py est également pris en compte :
+      le relecteur se resynchronise sur l'écran courant au lieu de conserver une ancienne phrase.
+    </p>
+
+    <ul>
+      <li><strong>Texte original</strong> : phrase source anglaise retrouvée dans le jeu ou la traduction.</li>
+      <li><strong>Correction</strong> : traduction française éditable.</li>
+      <li><strong>Mise en forme visuelle</strong> : gras, italique, souligné, barré, taille et couleur sans avoir à écrire les balises à la main.</li>
+      <li><strong>DeepL / Google Traduction</strong> : aide rapide à partir du texte original.</li>
+      <li><strong>LanguageTool / Reverso</strong> : outils de vérification du français.</li>
+      <li><strong>Nom du personnage</strong> : affiché en lecture seule avec son style ; un clic permet de le retrouver dans Interface & Sandbox.</li>
+    </ul>
+
+    <p>
+      Les valeurs que le jeu ajoute dynamiquement peuvent apparaître grisées ou protégées. Elles ne sont pas modifiées par erreur
+      avec le reste du dialogue : le bouton <strong>Corriger le texte grisé</strong> ouvre la traduction liée correspondante quand elle existe.
+    </p>
+
+    <figure class="capture-image">
+      <img src="img/Editeur_Relecture_Renpy/relecteur_02_dialogue.webp" alt="Capture du Relecteur Ren'Py" loading="lazy" onerror="this.parentElement.style.display='none'">
+    </figure>
+  </section>
+
+  <div class="sep"></div>
+
+  <section class="card" id="modes">
+    <h2>🟦 Modes Normal et Expert</h2>
+
+    <h3>Mode Normal</h3>
+    <ul>
+      <li>Interface pensée pour la relecture sans afficher le code Ren'Py inutilement.</li>
+      <li>Les balises de mise en forme sont rendues visuellement.</li>
+      <li>Variables, ajouts automatiques et parties non traduisibles restent protégés.</li>
+      <li>Les corrections sont limitées aux éléments de traduction réellement modifiables.</li>
+    </ul>
+
+    <h3>Mode Expert</h3>
+    <ul>
+      <li>Affiche le texte brut, les balises et échappements Ren'Py.</li>
+      <li>Affiche la source de traduction utilisée et la ligne correspondante.</li>
+      <li><strong>Traductions liées…</strong> permet d'inspecter et corriger les valeurs utilisées par des variables/remplacements.</li>
+      <li><strong>Ouvrir la traduction</strong> ouvre directement le bon fichier à la ligne concernée.</li>
+      <li>Des fonctions supplémentaires sont disponibles dans Images, notamment l'extraction de l'original.</li>
+    </ul>
+
+    <figure class="capture-image">
+      <img src="img/Editeur_Relecture_Renpy/relecteur_02_dialogue_expert.webp" alt="Capture du Relecteur Ren'Py" loading="lazy" onerror="this.parentElement.style.display='none'">
+    </figure>
+  </section>
+
+  <div class="sep"></div>
+
+  <section class="card" id="choix">
+    <h2>🔀 Choix du jeu</h2>
+
+    <p>
+      Lorsqu'un écran de choix apparaît, l'onglet <strong>Choix</strong> liste les réponses détectées. Chaque option peut être relue
+      séparément, avec son original et sa traduction. L'onglet indique aussi les nouveaux choix à relire.
+    </p>
+
+    <ul>
+      <li>Navigation rapide entre toutes les réponses présentes à l'écran.</li>
+      <li>Correction avec la même mise en forme que les dialogues en mode Normal.</li>
+      <li>Accès direct au fichier de traduction en mode Expert.</li>
+      <li>Possibilité d'enregistrer un choix individuellement ou plusieurs corrections lorsque l'écran le permet.</li>
+    </ul>
+
+    <figure class="capture-image">
+      <img src="img/Editeur_Relecture_Renpy/relecteur_03_choix.webp" alt="Capture du Relecteur Ren'Py" loading="lazy" onerror="this.parentElement.style.display='none'">
+    </figure>
+  </section>
+
+  <div class="sep"></div>
+
+  <section class="card" id="sandbox">
+    <h2>🧩 Interface & Sandbox</h2>
+
+    <p>
+      Cet onglet affiche les <strong>textes actuellement visibles dans le jeu</strong>, pas seulement les dialogues : interface,
+      personnage, boutons, choix, zones de saisie et autres textes d'écran.
+    </p>
+
+    <ul>
+      <li><strong>Filtre</strong> placé à gauche pour afficher Tous / Interface / Personnage / Dialogue / Choix / Saisie.</li>
+      <li><strong>Recherche</strong> dans la liste des éléments visibles.</li>
+      <li><strong>Figer la liste</strong> pour examiner un écran pendant que le jeu continue.</li>
+      <li>Correction à droite avec les outils de mise en forme lorsque la source est modifiable.</li>
+      <li>Un nom de personnage cliqué depuis Dialogue est retrouvé ici sans forcer un filtre Personnage.</li>
+    </ul>
+
+
+    <figure class="capture-image">
+      <img src="img/Editeur_Relecture_Renpy/relecteur_04_sandbox.webp" alt="Capture du Relecteur Ren'Py" loading="lazy" onerror="this.parentElement.style.display='none'">
+    </figure>
+    <div class="callout info">
+      Les analyses lourdes sont priorisées selon l'onglet ouvert : quand vous êtes dans Dialogue, Interface & Sandbox et Images
+      ne continuent pas à scanner inutilement en arrière-plan.
+    </div>
+  </section>
+
+  <div class="sep"></div>
+
+  <section class="card" id="images">
+    <h2>🖼️ Images présentes à l'écran</h2>
+
+    <p>
+      L'onglet <strong>Images</strong> détecte uniquement les images de l'écran actuel. Il permet de comparer la ressource originale
+      du jeu et la version traduite réellement utilisée.
+    </p>
+
+    <ul>
+      <li>Liste des images visibles avec indication de présence d'une version traduite.</li>
+      <li>Aperçu côte à côte : <strong>Original du jeu</strong> / <strong>Traduction utilisée</strong>.</li>
+      <li>Recherche et possibilité de figer la liste.</li>
+      <li>Chargement des aperçus uniquement à la demande pour éviter de ralentir le jeu.</li>
+      <li>En mode Expert : bouton <strong>Extraire l'original…</strong> quand la source peut être retrouvée dans les fichiers ou une archive RPA.</li>
+    </ul>
+
+    <figure class="capture-image">
+      <img src="img/Editeur_Relecture_Renpy/relecteur_05_images.webp" alt="Capture du Relecteur Ren'Py" loading="lazy" onerror="this.parentElement.style.display='none'">
+    </figure>
+  </section>
+
+  <div class="sep"></div>
+
+  <section class="card" id="sources">
+    <h2>🧠 Détection de la source de traduction</h2>
+
+    <p>
+      Un même texte peut exister dans plusieurs endroits : fichier <code>.rpy</code>, bloc <code>old/new</code>,
+      <code>strings.rpy</code> ou encore un JSON utilisé par <code>replaceText</code>. Le relecteur compare ce qui est réellement affiché
+      à l'écran avec les traductions trouvées afin d'identifier la source utilisée.
+    </p>
+
+    <p><strong>Ordre de décision :</strong></p>
+    <ol>
+      <li>Recherche d'abord une traduction Ren'Py <code>.rpy</code> correspondant au texte réellement affiché.</li>
+      <li>Si le résultat ne correspond pas, vérifie si <code>replaceText</code> modifie ensuite cette traduction.</li>
+      <li>Le JSON n'est donc pas considéré comme source simplement parce qu'une clé similaire existe dedans.</li>
+    </ol>
+
+    <p>
+      En mode Expert, la ligne d'information précise le fichier et la ligne utilisés lorsque la source a pu être confirmée.
     </p>
   </section>
 
   <div class="sep"></div>
 
-  <!-- Utilisation -->
-  <section class="card" id="utilisation">
-    <h2>🖥️ Utilisation</h2>
-
-    <h3>2️⃣ Exécuter <code>fr_relecture.exe</code></h3>
-    <p>
-      ✅ L’exécutable <code>fr_relecture.exe</code> peut être lancé <strong>avant</strong>, <strong>pendant</strong> ou <strong>après</strong> le jeu.
-    </p>
-
-    <div class="image-wrap">
-      <img src="img/Editeur_Relecture_Renpy/Dialogue.webp" class="tutorial-img" alt="Fenêtre principale">
-    </div>
-
-    <p>
-      Le lancement de l’éditeur créera un fichier temporaire nommé <code>fr_relecture_temp.json</code>.
-    </p>
-
-    <h3>3️⃣ Commencer la correction des lignes</h3>
-    <p>
-      ✅ L’éditeur affiche en temps réel ce qui se passe à l’écran. Avancez ou reculez dans le jeu :
-      la ligne de dialogue en cours sera affichée. Modifiez un mot, une expression ou toute la ligne !
-    </p>
-
-    <div class="image-wrap">
-      <img src="img/Editeur_Relecture_Renpy/Dialogue_edit.webp" class="tutorial-img" alt="Édition d’une ligne">
-    </div>
-
-    <div class="callout warning">
-      <strong>Informations techniques (IMPORTANT)</strong><br>
-      Toute modification de ligne est enregistrée <strong>temporairement</strong> dans <code>fr_relecture_temp.json</code>.<br>
-      💡 À savoir ❗ Ces modifications sont visibles uniquement dans l’éditeur, <strong>pas dans le jeu</strong>.
-    </div>
-
-    <div class="callout warning">
-      ⚠️ Donc attention : ne fermez pas l’éditeur sans avoir cliqué sur <strong>Enregistrer la correction</strong>.<br>
-      Ce bouton enregistre tout votre travail dans les fichiers <code>.rpy</code> de traduction.
-    </div>
-
-    <p>
-      ❗ Vous pouvez utiliser ce bouton à tout moment : modifiez une ligne, puis cliquez sur le bouton pour enregistrer.
-    </p>
-  </section>
-
-  <div class="sep"></div>
-
-  <!-- Rechargement -->
   <section class="card" id="rechargement">
-    <h2>🔄 Activation du rechargement automatique</h2>
+    <h2>🔄 Enregistrement & rechargement du jeu</h2>
 
-    <div class="image-wrap">
-      <img src="img/Editeur_Relecture_Renpy/04_Recharge.webp" class="tutorial-img" alt="Rechargement">
+    <p>
+      <strong>Enregistrer la correction</strong> écrit directement dans le fichier de traduction concerné. Le comportement dépend ensuite
+      du type de traduction :
+    </p>
+
+    <ul>
+      <li><strong>replaceText / JSON</strong> : le relecteur demande un rechargement immédiat du processeur lorsqu'il est disponible.</li>
+      <li><strong>traduction Ren'Py .rpy</strong> : utilisez <strong>Recharger le jeu</strong> pour demander à Ren'Py de relire ses scripts.</li>
+    </ul>
+
+    <p>
+      Le bouton <strong>Recharger le jeu</strong> est intégré au relecteur. Il n'est plus nécessaire de conserver un autoreload permanent
+      qui modifierait le comportement du jeu pendant toute la session.
+    </p>
+  </section>
+
+  <div class="sep"></div>
+
+  <section class="card" id="reglages">
+    <h2>⚙️ Réglages</h2>
+
+    <ul>
+      <li><strong>Mode de relecture</strong> : Normal ou Expert.</li>
+      <li><strong>Opacité de la fenêtre</strong> : barre moderne, valeur par défaut 90 %.</li>
+      <li><strong>Rendre opaque</strong> : retour immédiat à 100 %.</li>
+      <li><strong>Traduction utilisée</strong> : sélecteur disponible pour les autres dossiers après activation.</li>
+      <li><strong>Toujours au premier plan</strong>.</li>
+      <li><strong>Message de confirmation d'enregistrement</strong>.</li>
+    </ul>
+
+    <figure class="capture-image">
+      <img src="img/Editeur_Relecture_Renpy/relecteur_06_reglages.webp" alt="Capture du Relecteur Ren'Py" loading="lazy" onerror="this.parentElement.style.display='none'">
+    </figure>
+
+    <p>
+      Les réglages sont mémorisés dans <code>fr_relecture_config.json</code>.
+    </p>
+  </section>
+
+  <div class="sep"></div>
+
+  <section class="card" id="activation">
+    <h2>🔓 Utiliser le relecteur avec d'autres traductions</h2>
+
+    <p>
+      Le relecteur reste fixée sur <code>fr_zenpy_DeepL_andric31</code>. Depuis l'onglet <strong>Version</strong>,
+      le bouton <strong>Activer pour d'autres traductions</strong> permet de demander le déblocage pour un PC.
+    </p>
+
+    <p>Une fois l'autorisation accordée :</p>
+    <ul>
+      <li>le sélecteur <strong>Traduction utilisée</strong> devient disponible dans Réglages ;</li>
+      <li>la traduction fr_zenpy_DeepL_andric31 reste prioritaire ;</li>
+      <li>viennent ensuite les dossiers commençant par <code>fr</code>, <code>french</code>, <code>francais</code> ou <code>français</code> ;</li>
+      <li>puis les autres dossiers présents dans <code>game/tl</code>.</li>
+    </ul>
+
+    <div class="capture-grid">
+
+    <figure class="capture-image">
+      <img src="img/Editeur_Relecture_Renpy/relecteur_07_activation_demande.webp" alt="Capture du Relecteur Ren'Py" loading="lazy" onerror="this.parentElement.style.display='none'">
+    </figure>
+
+    <figure class="capture-image">
+      <img src="img/Editeur_Relecture_Renpy/relecteur_08_activation_active.webp" alt="Capture du Relecteur Ren'Py" loading="lazy" onerror="this.parentElement.style.display='none'">
+    </figure>
     </div>
-
-    <p>
-      Pour activer l’affichage des modifications dans le jeu, il faut recharger le jeu à chaque fois.
-      Le bouton <strong>Enregistrer la correction</strong> peut effectuer ce rechargement automatiquement,
-      mais une première manipulation manuelle est nécessaire.
-    </p>
-
-    <p>
-      👉 En jeu, appuyez sur <strong>Maj + R</strong> pour effectuer le rechargement initial.
-      Ensuite, à chaque appui sur “Enregistrer la correction”, les dialogues modifiés seront affichés dans le jeu.
-    </p>
 
     <div class="callout info">
-      😅 Si vous quittez le jeu pour faire une pause, l’appui sur <strong>Maj + R</strong> devra être refait au retour.
+      <strong>Activation locale et persistante :</strong><br>
+      la licence signée est enregistrée dans
+      <code>%LOCALAPPDATA%\andric31Apps\fr_relecture\activation</code>.<br>
+      Elle est liée à l'application et au PC. Une fois activée, la vérification se fait <strong>localement</strong>
     </div>
-  </section>
-
-  <div class="sep"></div>
-
-  <!-- Fonctionnalités principales -->
-  <section class="card" id="features">
-    <h2>⚙️ Fonctionnalités principales</h2>
-
-    <ul>
-      <li>Protection automatique des balises <code>[]</code> (désactivable)</li>
-      <li>Protection automatique des guillemets <code>"</code> → <code>\"</code></li>
-      <li>Boutons : DeepL, Google, <strong>LanguageTool</strong>, <strong>Reverso</strong></li>
-      <li>Notes personnelles (<code>fr_relecture_notes.txt</code>)</li>
-      <li>Export / partage des corrections en <code>.zip</code></li>
-      <li>Mode fenêtre toujours au-dessus</li>
-      <li>Réglage d’opacité</li>
-      <li>Ouverture du fichier de traduction à la ligne correspondante (v0.3)</li>
-      <li>Prise en charge des lignes de choix dans un onglet dédié (v0.4)</li>
-      <li>Prise en charge du mode plein écran du jeu (v0.2)</li>
-    </ul>
-  </section>
-
-  <div class="sep"></div>
-
-  <!-- Présentation v0.2 -->
-  <section class="card" id="presentation_v02">
-    <h2>🟦 Présentation de l’éditeur (v0.2)</h2>
-
-    <h3>⚙️ Dialogue</h3>
-    <ul>
-      <li><strong>Ligne commentée (originale)</strong> : affiche la ligne originale non traduite.</li>
-      <li><strong>Boutons DeepL / Google</strong> : ouvre une page dans le navigateur avec la ligne originale copiée.</li>
-      <li><strong>Phrase affichée à l’écran (traduction)</strong> : affiche la ligne de traduction visible en jeu.</li>
-      <li><strong>Enregistrer la correction</strong> : enregistre vos modifications directement dans les fichiers de traduction.</li>
-    </ul>
-
-    <h3>📝 Prendre des notes</h3>
-    <p>
-      Permet d’écrire librement des notes durant la relecture.
-      Un fichier <code>fr_relecture_notes.txt</code> sera créé par le bouton d’enregistrement des notes
-      et automatiquement rechargé à chaque ouverture de l’éditeur.
-    </p>
-
-    <h3>📦 Partager vos corrections</h3>
-    <p>Permet d’archiver votre travail dans un fichier <code>.zip</code>.</p>
-
-    <h3>🔧 Réglages</h3>
-    <ul>
-      <li><strong>Opacité</strong> : transparence de la fenêtre pour mieux voir le jeu en arrière-plan.</li>
-      <li><strong>Fenêtre toujours au premier plan</strong> : garde l’éditeur visible au-dessus du jeu.</li>
-      <li><strong>Message de confirmation d’enregistrement</strong> : active/désactive la confirmation.</li>
-      <li><strong>Protéger les balises […]</strong> : empêche les modifications accidentelles (sauf suppression si sélectionnée).</li>
-      <li><strong>Protection des guillemets échappés</strong> : non modifiable (automatique).</li>
-    </ul>
-
-    <h3>ℹ️ Version</h3>
-    <p>Affiche des informations sur l’éditeur et des liens de contact.</p>
-  </section>
-
-  <div class="sep"></div>
-
-  <!-- Infos techniques supplémentaires -->
-  <section class="card" id="tech_plus">
-    <h2>🧩 Informations techniques supplémentaires</h2>
 
     <p>
-      Le premier lancement de <code>fr_relecture.exe</code> se fera toujours avec les paramètres par défaut.<br>
-      Si un paramètre est modifié, il sera sauvegardé dans <code>fr_relecture_config.json</code>.
-      Au prochain redémarrage du même <code>fr_relecture.exe</code>, vos paramètres seront chargés depuis ce fichier.
-    </p>
-
-    <p>
-      Si vous utilisez <code>fr_relecture.exe</code> sur un autre jeu, les paramètres par défaut seront utilisés.
-    </p>
-
-    <div class="callout info">
-      💡 <strong>Petite astuce :</strong><br>
-      Si vous voulez garder vos réglages, copiez simplement <code>fr_relecture_config.json</code>
-      dans votre nouveau projet.
-    </div>
-  </section>
-
-  <div class="sep"></div>
-
-  <!-- Infos techniques de relecture -->
-  <section class="card" id="tech_relecture">
-    <h2>🧠 Informations techniques de relecture</h2>
-
-    <h3>✅ Balises protégées (entre crochets)</h3>
-    <p>
-      Les blocs entre crochets <code>[]</code> sont automatiquement protégés lors de l’édition
-      (désactivable dans les réglages). Cela évite les erreurs (balise mal ouverte / non refermée / différente de l’originale)
-      et limite les risques de plantage.
-    </p>
-    <pre>
-[mc] [mom.name] [penny.name!c]
-    </pre>
-    <p>
-      Exemple : <code>[mc]</code> sera automatiquement remplacé par le nom du personnage principal choisi par le joueur.
-    </p>
-
-    <h3>⚠️ Balises NON protégées (entre accolades)</h3>
-    <p>
-      Les balises de style <code>{}</code> ne sont pas protégées. Si elles sont modifiées, mal fermées ou supprimées,
-      cela peut entraîner des erreurs d’affichage ou un comportement imprévu.
-    </p>
-    <pre>
-{b}texte{/b} → Gras
-{i}texte{/i} → Italique
-{u}texte{/u} → Souligné
-{s}texte{/s} → Barré
-{color=#FF0000}texte{/color} → Texte coloré
-{size=20}texte{/size} → Taille 20
-{size=+5}texte{/size} → Augmente la taille de 5
-{size=-5}texte{/size} → Diminue la taille de 5
-{w} → Pause pendant l'affichage
-    </pre>
-
-    <h3>⏸️ Pause {w}</h3>
-    <p>
-      Si <code>{w}</code> est présent, il ne s’affichera pas dans le jeu : le dialogue s’arrêtera temporairement à cet endroit.
-      C’est normal si l’éditeur affiche toute la ligne d’un coup : il faut avancer dans le jeu pour voir la suite après la pause.
-    </p>
-
-    <h3>↩️ Saut de ligne</h3>
-    <p>Pour faire un saut de ligne, utilisez <code>\n</code> :</p>
-    <pre>
-Bonjour.\nComment vas-tu ?
-    </pre>
-    <p>Affiché en jeu :</p>
-    <pre>
-Bonjour.
-Comment vas-tu ?
-    </pre>
-
-    <h3>🔒 Guillemets</h3>
-    <p>
-      Les guillemets <code>"</code> sont automatiquement protégés avec un antislash <code>\"</code> lors de l’insertion,
-      modification ou enregistrement.
-    </p>
-    <pre>
-Il a dit \"Bonjour\".
-    </pre>
-    <p>
-      En jeu, les antislashs ne sont pas affichés : <em>Il a dit "Bonjour".</em>
+      Une personne qui n'a jamais demandé de déblocage ne génère aucune requête d'activation. Les vérifications réseau ne sont utilisées
+      que temporairement pendant une demande en attente.
     </p>
   </section>
 
   <div class="sep"></div>
 
-  <!-- Bonnes pratiques -->
-  <section class="card" id="bonnes_pratiques">
-    <h2>💡 Bonnes pratiques de relecture</h2>
-    <ul>
-      <li>Relisez toujours en contexte, en observant ce qui est affiché à l’écran.</li>
-      <li>Ne modifiez pas les balises <code>{}</code> ou <code>[]</code> si vous n’êtes pas sûr de leur fonction.</li>
-      <li>Sauvegardez régulièrement via <strong>Enregistrer la correction</strong>.</li>
-    </ul>
-  </section>
-
-  <div class="sep"></div>
-
-  <!-- Cas particuliers -->
-  <section class="card" id="cas_particuliers">
-    <h2>🔍 Cas particuliers à connaître</h2>
-    <p>
-      Pensez à utiliser un chemin d’accès simple pour l’emplacement du jeu.
-      Évitez les caractères spéciaux comme les crochets <code>[</code> ou <code>]</code> dans le nom des dossiers.
-    </p>
-
-    <pre>
-✅ C:\Jeux\MonJeu
-⛔ C:\[Traductions]\Jeu X
-    </pre>
-  </section>
-
-  <div class="sep"></div>
-
-  <!-- Partager -->
   <section class="card" id="partager">
-    <h2>📤 Comment partager vos corrections</h2>
-    <div class="callout info">
-      (à venir)
-    </div>
-  </section>
+    <h2>📦 Notes & partage des corrections</h2>
 
-  <div class="sep"></div>
-
-  <!-- FAQ -->
-  <section class="card" id="faq">
-    <h2>❓ Questions fréquentes (FAQ)</h2>
-
-    <h3>Aucun dialogue ne s'affiche ?</h3>
+    <h3>Notes</h3>
     <p>
-      Vérifie que tu as bien <code>fr_relecture.rpyc</code> dans le dossier <code>game</code>,
-      <strong>avant</strong> de lancer le jeu.
+      L'onglet Notes permet de conserver des remarques de relecture dans <code>fr_relecture_notes.txt</code>.
     </p>
-  </section>
 
-  <div class="sep"></div>
-
-  <!-- Dépannage -->
-  <section class="card" id="depannage">
-    <h2>🧯 Dépannage</h2>
-    <div class="callout info">
-      (à venir)
-    </div>
-  </section>
-
-  <div class="sep"></div>
-
-  <!-- Crédits -->
-  <section class="card" id="credits">
-    <h2>👥 Crédits / Remerciements</h2>
-    <div class="callout info">
-      (à venir)
-    </div>
-  </section>
-
-  <div class="sep"></div>
-
-  <!-- À venir -->
-  <section class="card" id="avenir">
-    <h2>🔄 Fonctionnalités à venir</h2>
+    <h3>Partager</h3>
+    <p>Deux types d'archives peuvent être générés :</p>
     <ul>
-      <li>Mode sombre / clair</li>
+      <li><strong>.rpy / .json ZIP</strong> : uniquement les fichiers de traduction utiles aux corrections.</li>
+      <li><strong>Dossier complet ZIP</strong> : archive du dossier de traduction complet.</li>
     </ul>
   </section>
 
   <div class="sep"></div>
 
-  <!-- État actuel -->
-  <section class="card" id="etat">
-    <h2>🚧 État actuel & phase de test</h2>
+  <section class="card" id="technique">
+    <h2>🧠 Balises et éléments protégés</h2>
+
+    <h3>Variables Ren'Py</h3>
     <p>
-      ✅ L’outil est pleinement opérationnel et actuellement en phase de test.<br>
-      Des mises à jour viendront progressivement améliorer l’expérience selon vos besoins !
+      Les variables entre crochets ne doivent généralement pas être traduites. En mode Normal, elles sont conservées et les valeurs
+      calculées par le jeu peuvent être affichées comme parties protégées.
+    </p>
+    <pre>
+[config.name]  [mc]  [mom.name]  [city]
+    </pre>
+
+    <h3>Mise en forme Ren'Py</h3>
+    <p>Le mode Normal rend les styles visuellement ; le mode Expert affiche les balises brutes.</p>
+    <pre>
+{b}gras{/b}
+{i}italique{/i}
+{u}souligné{/u}
+{s}barré{/s}
+{color=#FF0000}couleur{/color}
+{size=+5}taille{/size}
+    </pre>
+
+    <h3>Texte composé par le jeu</h3>
+    <p>
+      Lorsqu'une phrase mélange une partie traduisible et une valeur ajoutée par le jeu, la zone de correction peut être coupée en deux :
+      la traduction à gauche et l'ajout protégé à droite. Le cadre garde la même hauteur que l'éditeur normal pour éviter les changements
+      de disposition pendant la relecture.
+    </p>
+
+    <figure class="capture-image">
+      <img src="img/Editeur_Relecture_Renpy/relecteur_09_texte_compose.webp" alt="Capture du Relecteur Ren'Py" loading="lazy" onerror="this.parentElement.style.display='none'">
+    </figure>
+  </section>
+
+  <div class="sep"></div>
+
+  <section class="card" id="faq">
+    <h2>❓ FAQ / dépannage</h2>
+
+    <h3>Le relecteur reste vide alors que le jeu est ouvert</h3>
+    <p>
+      Vérifiez que <code>game/fr_relecture.rpe</code> est bien présent puis redémarrez le jeu. Le bouton <strong>Actualiser</strong>
+      force également un nouveau relevé de l'écran courant.
+    </p>
+
+    <h3>Une partie du texte est grisée</h3>
+    <p>
+      Elle est probablement générée par le jeu, liée à une variable ou issue d'une autre traduction. Utilisez
+      <strong>Corriger le texte grisé</strong> ou, en Expert, <strong>Traductions liées…</strong>.
+    </p>
+
+    <h3>Le nom du personnage doit être corrigé</h3>
+    <p>
+      Le nom affiché dans Dialogue est volontairement en lecture seule. Cliquez dessus pour l'ouvrir dans
+      <strong>Interface & Sandbox</strong>, où les outils de correction et de mise en forme sont disponibles.
+    </p>
+
+    <h3>Une correction .rpy n'apparaît pas encore dans le jeu</h3>
+    <p>Cliquez sur <strong>Recharger le jeu</strong> après l'enregistrement.</p>
+
+    <h3>L'activation est-elle liée à toutes les applications Andric31 ?</h3>
+    <p>
+      Non. Une activation est liée à <strong>une application précise</strong> et à un PC. Une future application utilisera sa propre licence
+      dans un sous-dossier séparé de <code>%LOCALAPPDATA%\andric31Apps</code>.
+    </p>
+  </section>
+
+  <div class="sep"></div>
+
+  <section class="card" id="changelog">
+    <h2>🆕 Évolution de l'outil</h2>
+
+    <p>Le projet a beaucoup évolué depuis les premières versions. Les principales étapes actuelles sont :</p>
+
+    <ul>
+      <li><strong>v0.1 → v0.4</strong> : base de relecture, corrections, choix, ouverture des fichiers et premiers outils externes.</li>
+      <li><strong>v0.12.x</strong> : refonte complète de l'interface et de la détection en jeu.</li>
+      <li>Ajout des modes <strong>Normal / Expert</strong> et de la mise en forme visuelle.</li>
+      <li>Ajout de <strong>Interface & Sandbox</strong> et de la détection priorisée selon l'onglet actif.</li>
+      <li>Ajout de l'onglet <strong>Images</strong> avec comparaison original / traduction utilisée.</li>
+      <li>Amélioration de la détection <code>.rpy</code> / <code>replaceText</code> et des textes dynamiques.</li>
+      <li>Rechargement Ren'Py intégré et synchronisation lors des retours arrière.</li>
+      <li>Sélecteur de traduction et système d'activation par PC pour les traductions externes.</li>
+      <li><strong>0.12.69</strong> : licence locale signée et stockage commun sous <code>%LOCALAPPDATA%\andric31Apps</code>.</li>
+    </ul>
+  </section>
+
+  <div class="sep"></div>
+
+  <section class="card" id="etat">
+    <h2>🚧 État actuel</h2>
+    <p>
+      ✅ Le relecteur est utilisé activement pour mes traductions et continue d'évoluer au fil des jeux rencontrés.
+      L'objectif reste le même : rendre la relecture en contexte plus rapide, plus sûre et beaucoup moins technique qu'une correction
+      manuelle directe dans les fichiers Ren'Py.
     </p>
   </section>
 

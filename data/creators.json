@@ -1282,6 +1282,65 @@
     "otherGames": []
   },
   {
+    "id": "eromantis",
+    "name": "Eromantis",
+    "aliases": [
+      "Forbidden Candy Games"
+    ],
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p18116",
+    "avatar": "https://f95zone.to/data/avatars/l/3756/3756620.jpg?1691091043",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "171710",
+      "177954"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [
+      {
+        "name": "Lewd Delivery",
+        "platform": "Steam",
+        "url": "https://store.steampowered.com/app/2233840/Lewd_Delivery/"
+      },
+      {
+        "name": "Village Slut Transformation",
+        "platform": "Steam",
+        "url": "https://store.steampowered.com/app/2940010/Village_Slut_Transformation/"
+      },
+      {
+        "name": "Village Slut Transformation",
+        "platform": "Itch.io",
+        "url": "https://eromantis.itch.io/village-slut-transformation"
+      }
+    ],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/eromantis.3756620/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/eromantis/"
+      },
+      {
+        "type": "website",
+        "label": "Boosty",
+        "url": "https://boosty.to/eromantis"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p18116"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "escovic-games",
     "name": "Escovic Games",
     "aliases": [],

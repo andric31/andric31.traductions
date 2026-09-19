@@ -1523,6 +1523,53 @@
     "otherGames": []
   },
   {
+    "id": "hooldrafolk",
+    "name": "Hooldrafolk",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://f95zone.to/data/avatars/l/6537/6537548.jpg?1789551865",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "200570",
+      "255041"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [
+      {
+        "name": "Under the same roof REDUX",
+        "platform": "Itch.io",
+        "url": "https://hooldrafolk.itch.io/under-the-same-roof"
+      },
+      {
+        "name": "Return to Roots",
+        "platform": "Itch.io",
+        "url": "https://hooldrafolk.itch.io/return-to-roots"
+      }
+    ],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/hooldrafolk.6537548/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/cw/Hooldrafolk?utm_campaign=creatorshare_creator"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://hooldrafolk.itch.io/"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "horny-hydra-games",
     "name": "Horny Hydra Games",
     "aliases": [],

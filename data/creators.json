@@ -2270,6 +2270,31 @@
     "otherGames": []
   },
   {
+    "id": "nuverotic",
+    "name": "Nuverotic",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://images.gamestorylog.com/game-assets/devlogo/nuverotic-devlogo-1(1).webp",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "244811"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [
+      {
+        "name": "Harvesting Corruption",
+        "platform": "Patreon",
+        "url": "https://www.patreon.com/cw/HarvestingCorruption"
+      }
+    ],
+    "links": [],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "otb-games",
     "name": "OtB Games",
     "aliases": [],

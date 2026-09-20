@@ -158,7 +158,7 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
                color:#000;
                border:none;
              ">
-            📥 Chrome / Edge / Brave / Opera
+            📥 Télécharger pour Chrome / Edge / Brave / Opera ...
           </a>
         
           <a href="${DOWNLOAD_URL_F}"
@@ -173,7 +173,7 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
                color:#000;
                border:none;
              ">
-            🦊 Firefox
+            🦊 Télécharger pour Firefox
           </a>
         </div>
 

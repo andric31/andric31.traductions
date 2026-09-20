@@ -6,8 +6,6 @@
   const SS_KEY = "viewer_annonce_minimized";
   const ANNOUNCE_URL = "/annonce.html";
 
-  function $(sel) { return document.querySelector(sel); }
-
   function ensureHost() {
     // Host placé dans index.html: <div id="viewerAnnonceHost"></div>
     let host = document.getElementById("viewerAnnonceHost");
@@ -52,23 +50,31 @@
     }
 
     host.innerHTML = `
-      <div class="viewer-annonce ${minimized ? "is-min" : ""}">
+      <section class="viewer-annonce ${minimized ? "is-min" : ""}" aria-labelledby="viewerAnnonceTitle">
         <div class="viewer-annonce__bar">
-          <div class="viewer-annonce__title">📢 Annonce</div>
-          <button type="button" class="viewer-annonce__btn" id="viewerAnnonceToggle">
-            ${minimized ? "Afficher" : "Réduire"}
+          <div class="viewer-annonce__title" id="viewerAnnonceTitle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l12-5v16L8 15H4a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2ZM8 9v6m-3 0 2 6h3l-2-6"/></svg>
+            Annonces
+          </div>
+          <button type="button" class="viewer-annonce__btn" id="viewerAnnonceToggle" aria-controls="viewerAnnonceBody" aria-expanded="${!minimized}">
+            <span>${minimized ? "Afficher" : "Réduire"}</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 14 6-6 6 6"/></svg>
           </button>
         </div>
-        <div class="viewer-annonce__body">${html}</div>
-      </div>
+        <div class="viewer-annonce__body" id="viewerAnnonceBody" ${minimized ? "hidden" : ""}>${html}</div>
+      </section>
     `;
 
     const btn = host.querySelector("#viewerAnnonceToggle");
     if (btn) {
       btn.addEventListener("click", () => {
-        const nowMin = getMinimized();
-        setMinimized(!nowMin);
-        render(html);
+        const panel = host.querySelector(".viewer-annonce");
+        const body = host.querySelector("#viewerAnnonceBody");
+        const nowMin = panel.classList.toggle("is-min");
+        setMinimized(nowMin);
+        body.hidden = nowMin;
+        btn.setAttribute("aria-expanded", String(!nowMin));
+        btn.querySelector("span").textContent = nowMin ? "Afficher" : "Réduire";
       });
     }
   }

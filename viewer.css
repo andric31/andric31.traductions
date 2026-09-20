@@ -1274,19 +1274,17 @@ a.card.card-link *{
   line-height:1.4;
   text-decoration:none;
   white-space:nowrap;
-  transition:background .18s ease,border-color .18s ease,transform .18s ease,box-shadow .18s ease;
+  box-shadow:none;
+  transition:background .18s ease,border-color .18s ease;
 }
 .viewer-release--main .viewer-release__cta{
   background:color-mix(in srgb,var(--release-color) 22%,var(--card));
-  box-shadow:0 4px 12px -8px var(--release-color),inset 0 1px 0 var(--soft-05);
 }
 .viewer-release__cta svg{ flex:none; width:16px; height:16px; }
 @media (hover:hover){
   .viewer-release__cta:hover{
-    transform:translateY(-2px);
     border-color:var(--release-color);
     background:color-mix(in srgb,var(--release-color) 27%,var(--card));
-    box-shadow:0 7px 18px -10px var(--release-color);
   }
 }
 .viewer-annonce__btn:focus-visible,
@@ -1306,7 +1304,6 @@ a.card.card-link *{
 @media (prefers-reduced-motion:reduce){
   .viewer-release__cta,
   .viewer-annonce__btn{ transition:none; }
-  .viewer-release__cta:hover{ transform:none; }
 }
 /* Le message de maintenance et les annonces libres restent centrés. */
 .viewer-annonce.is-locked .viewer-annonce__body{ text-align:center; }

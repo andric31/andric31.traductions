@@ -1203,9 +1203,9 @@ a.card.card-link *{
   border-color:color-mix(in srgb,var(--release-color) 30%,var(--border));
   border-radius:15px;
   background:var(--btn);
-  background:linear-gradient(145deg,color-mix(in srgb,var(--release-color) 19%,var(--card)),color-mix(in srgb,var(--release-color) 5%,var(--card)));
+  background:color-mix(in srgb,var(--release-color) 10%,var(--card));
   color:var(--release-color);
-  box-shadow:0 5px 14px -9px var(--release-color),inset 0 1px 0 var(--soft-05);
+  box-shadow:none;
 }
 .viewer-release__icon svg{ width:27px; height:27px; }
 .viewer-release__content{ min-width:0; }

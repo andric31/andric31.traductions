@@ -6,7 +6,8 @@
 C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
 `.trim();
 
-  const DOWNLOAD_URL = "https://mega.nz/folder/zFsCQJbJ#PkeQbqOCla9RCwoy9sK4tw".replace("qO","qO"); // (no-op, garde ton URL si tu veux)
+  const DOWNLOAD_URL_C = "https://mega.nz/file/PREQXQ5b#MMLCpxs5knpVs_ab91pBfYsamterSiPwuMyHPrbSWaY".replace("qO","qO"); // (no-op, garde ton URL si tu veux)
+  const DOWNLOAD_URL_F = "https://mega.nz/file/XANESKrS#9SdDuVPQSpXYKRTonuEH9Mc-xF02Mmd6863h51hnn0o".replace("qO","qO");
   const EXT_DL_ID = "__viewer_extension_download__";
 
   const ADMIN_VIEWER_STORAGE_KEY = "andric31AdminViewerMode";
@@ -144,9 +145,8 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
         </div>
 
         <!-- Bouton téléchargement -->
-        <div style="display:flex;justify-content:center;margin:14px 0;">
-          <a id="extDownloadBtn"
-             href="${DOWNLOAD_URL}"
+        <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:14px 0;">
+          <a href="${DOWNLOAD_URL_C}"
              target="_blank"
              class="btn btn-page"
              style="
@@ -158,7 +158,22 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
                color:#000;
                border:none;
              ">
-            📥 Télécharger l’extension (MEGA)
+            📥 Chrome / Edge / Brave / Opera
+          </a>
+        
+          <a href="${DOWNLOAD_URL_F}"
+             target="_blank"
+             class="btn btn-page"
+             style="
+               min-width:260px;
+               padding:10px 14px;
+               font-weight:800;
+               border-radius:12px;
+               background:#3ddc84;
+               color:#000;
+               border:none;
+             ">
+            🦊 Firefox
           </a>
         </div>
 

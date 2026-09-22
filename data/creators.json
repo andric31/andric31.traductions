@@ -2060,6 +2060,42 @@
     ]
   },
   {
+    "id": "monia",
+    "name": "Monia",
+    "aliases": [],
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p14883",
+    "avatar": "https://f95zone.to/data/avatars/l/4047/4047393.jpg?1630141422",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "91182",
+      "254204"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/monia.4047393/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/Monia_Se"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p14883"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "mr-rabbit-team",
     "name": "Mr. Rabbit Team",
     "aliases": [],

@@ -1163,7 +1163,7 @@ a.card.card-link *{
 .viewer-annonce.is-min .viewer-annonce__body{ display:none; }
 .viewer-release-stack{
   display:grid;
-  grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);
+  grid-template-columns:minmax(0,1.35fr) repeat(2,minmax(0,1fr));
   gap:12px;
   text-align:left;
 }
@@ -1194,6 +1194,7 @@ a.card.card-link *{
   background:var(--release-color);
 }
 .viewer-release--secondary{ --release-color:var(--accent); }
+.viewer-release--image-extension{ --release-color:var(--primary); }
 .viewer-release__icon{
   display:grid;
   place-items:center;
@@ -1291,6 +1292,8 @@ a.card.card-link *{
 .viewer-annonce__btn:focus-visible,
 .viewer-release__cta:focus-visible{ outline:2px solid var(--primary); outline-offset:3px; }
 @media (max-width:1200px){
+  .viewer-release-stack{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .viewer-release--main{ grid-column:1 / -1; }
   .viewer-release{ grid-template-columns:44px minmax(0,1fr); gap:12px; padding:18px; }
   .viewer-release__icon{ width:44px; height:48px; border-radius:12px; }
   .viewer-release__cta{ grid-column:2; justify-self:start; }

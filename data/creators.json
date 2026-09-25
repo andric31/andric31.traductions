@@ -1426,6 +1426,31 @@
     "country": ""
   },
   {
+    "id": "fecamp",
+    "name": "Fecamp",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://images.gamestorylog.com/game-assets/devlogo/fecamp-devlogo-1-6e898ddafcc5.webp",
+    "banner": "",
+    "presentation": "Créateur d'un visual novel pour adultes axé sur la narration, traitant d'amour, de choix inattendus et de ce que nous ne disons pas toujours tout haut.",
+    "gameIds": [
+      "316244"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/fecamp"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "flynn974",
     "name": "Flynn974",
     "aliases": [

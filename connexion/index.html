@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="/themes.css" />
   <link rel="stylesheet" href="/auth/auth.css" />
   <script src="/theme-init.js"></script>
+  <link rel="stylesheet" href="/auth/discord.css?v=20260926-1" />
 </head>
 <body>
   <main class="auth-shell">
@@ -49,6 +50,7 @@
             </div>
             <div id="loginMsg" class="auth-msg"></div>
           </form>
+          <div data-discord-mode="login"></div>
         </div>
 
         <div class="auth-box">
@@ -118,5 +120,6 @@
       }
     });
   </script>
+  <script src="/auth/discord.client.js?v=20260926-1"></script>
 </body>
 </html>

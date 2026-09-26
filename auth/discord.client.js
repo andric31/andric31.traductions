@@ -53,7 +53,7 @@
     title.append(element('span', 'discord-logo'), document.createTextNode(mode === 'login' ? 'Connexion avec Discord' : 'Compte Discord'));
     const help = element('p', 'discord-panel-help', mode === 'signup'
       ? 'Facultatif : associe ton Discord à cette demande. Après validation du compte, tu pourras te connecter avec Discord ou ton mot de passe.'
-      : mode === 'link' ? 'Lie ton compte Discord pour te connecter au site.'
+      : mode === 'link' ? 'Facultatif : lie ton compte Discord pour te connecter au site.'
       : 'Utilise le compte Discord déjà lié à ton compte du site.');
     const state = element('p', 'discord-panel-state');
     const message = element('p', 'discord-panel-message');
@@ -68,7 +68,6 @@
     const button = element('button', 'discord-button', mode === 'signup' ? 'Associer mon Discord' : mode === 'link' ? 'Lier mon compte Discord' : 'Se connecter avec Discord');
     button.type = 'button';
     if (mode === 'signup' && data.logged_in) {
-      state.textContent = 'Tu as déjà un compte. La liaison Discord se fait dans tes paramètres.';
       const account = element('a', 'discord-button', 'Ouvrir mes paramètres'); account.href = '/compte/'; actions.append(account);
     } else if (mode === 'link' && !data.logged_in) {
       state.textContent = 'Connecte-toi pour lier ton compte Discord.';

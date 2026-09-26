@@ -921,7 +921,8 @@ function renderF95InfoBlock(f95Info, discordExclusive = false) {
 
   const info = f95Info && typeof f95Info === "object" ? f95Info : null;
   const developerLinks = discordExclusive ? [] : normalizeF95LinkList(info?.developerLinks);
-  const threadLinks = discordExclusive ? [] : normalizeF95LinkList(info?.threadLinks || info?.links || info?.downloadLinks);
+  // L'API réserve ces liens F95 aux membres connectés, y compris pour une traduction exclusive.
+  const threadLinks = normalizeF95LinkList(info?.threadLinks || info?.links || info?.downloadLinks);
   const extraInfos = normalizeF95ExtraInfos(info?.extraInfos);
   const lastEdited = String(
     info?.lastEdited ||

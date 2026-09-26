@@ -79,6 +79,10 @@ function buildPrivateLinksKey(game) {
   return title ? `title__${title}` : "";
 }
 
+function isDiscordExclusive(entry) {
+  return String(entry?.discordExclusive ?? entry?.gameData?.discordExclusive ?? "").trim().toLowerCase() === "oui";
+}
+
 async function fetchPrivateGameData(privateKey) {
   const key = String(privateKey || "").trim();
   if (!key) return null;
@@ -100,6 +104,7 @@ async function fetchPrivateGameData(privateKey) {
 function mergePrivateGameData(entry, privateData) {
   if (!privateData || typeof privateData !== "object") return entry;
   const out = { ...(entry || {}) };
+  out.discordExclusive = isDiscordExclusive(entry) || isDiscordExclusive(privateData) ? "oui" : "non défini";
 
   for (const k of [
     "discordlink",
@@ -907,7 +912,7 @@ function renderF95InfoLinks(threadLinks) {
   return parts.join("");
 }
 
-function renderF95InfoBlock(f95Info) {
+function renderF95InfoBlock(f95Info, discordExclusive = false) {
   const box = $("f95InfoBox");
   const grid = $("f95InfoGrid");
   const linksBox = $("f95LinksBox");
@@ -915,8 +920,8 @@ function renderF95InfoBlock(f95Info) {
   if (!box || !grid) return;
 
   const info = f95Info && typeof f95Info === "object" ? f95Info : null;
-  const developerLinks = normalizeF95LinkList(info?.developerLinks);
-  const threadLinks = normalizeF95LinkList(info?.threadLinks || info?.links || info?.downloadLinks);
+  const developerLinks = discordExclusive ? [] : normalizeF95LinkList(info?.developerLinks);
+  const threadLinks = discordExclusive ? [] : normalizeF95LinkList(info?.threadLinks || info?.links || info?.downloadLinks);
   const extraInfos = normalizeF95ExtraInfos(info?.extraInfos);
   const lastEdited = String(
     info?.lastEdited ||
@@ -2183,6 +2188,7 @@ function renderVideoBlock({ id, videoUrl }) {
     const privateLinksKey = buildPrivateLinksKey(entry);
     const privateGameData = await fetchPrivateGameData(privateLinksKey);
     entry = mergePrivateGameData(entry, privateGameData);
+    const discordExclusive = isDiscordExclusive(entry);
     if (page && typeof page === "object") page.entry = entry;
 
     const display = entry?.gameData ? entry.gameData : entry;
@@ -2203,6 +2209,15 @@ function renderVideoBlock({ id, videoUrl }) {
     document.title = title;
 
     setText("title", title);
+    if ($("discordExclusiveNotice")) $("discordExclusiveNotice").hidden = !discordExclusive;
+    if (discordExclusive) {
+      const actions = document.querySelector(".gameActionsCard");
+      actions?.classList.add("discord-exclusive-actions");
+      const heading = actions?.querySelector("h3");
+      const intro = actions?.querySelector(".sideIntro");
+      if (heading) heading.textContent = "Discord & F95Zone";
+      if (intro) intro.textContent = "Retrouve cette traduction exclusivement sur Discord.";
+    }
     setCover(display.imageUrl || entry.imageUrl || "");
     loadF95Gallery(display.url || entry.url || "", display.imageUrl || entry.imageUrl || "");
     renderTags(display.tags || entry.tags || []);
@@ -2262,7 +2277,7 @@ function renderVideoBlock({ id, videoUrl }) {
       mainInfoBox.style.display = (hasTags || hasDesc || !!entry.f95Info) ? "" : "none";
     }
 
-    renderF95InfoBlock(entry.f95Info || null);
+    renderF95InfoBlock(entry.f95Info || null, discordExclusive);
 
     const videoAnchor =
       (relatedOut && relatedOut.innerHTML.trim())
@@ -2275,7 +2290,9 @@ function renderVideoBlock({ id, videoUrl }) {
       videoUrl: (entry.videoUrl || "").trim(),
     });
 
-    setHref("btnDiscord", (entry.discordlink || "").trim());
+    const discordHref = String(entry.discordlink || (entry.hasDiscord && privateLinksKey
+      ? `/api/link?key=${encodeURIComponent(privateLinksKey)}&type=discordlink` : "")).trim();
+    setHref("btnDiscord", discordHref);
     if ($("btnDiscord")) {
       $("btnDiscord").textContent = "💬 Discord";
       $("btnDiscord").classList.add("btn-discord");
@@ -2287,7 +2304,7 @@ function renderVideoBlock({ id, videoUrl }) {
       $("btnF95").classList.add("btn-f95");
     }
 
-    const archiveHref = (entry.translationsArchive || "").trim();
+    const archiveHref = discordExclusive ? "" : (entry.translationsArchive || "").trim();
     const translationType = String(entry.translationType || "").trim().toLowerCase();
 
     function normalizeMainTranslationsForDisplay(source) {
@@ -2338,7 +2355,7 @@ function renderVideoBlock({ id, videoUrl }) {
       }));
     }
 
-    const mainTranslations = normalizeMainTranslationsForDisplay(entry);
+    const mainTranslations = discordExclusive ? [] : normalizeMainTranslationsForDisplay(entry);
     const primaryMainTranslation = mainTranslations[0] || null;
     const megaHref = primaryMainTranslation ? primaryMainTranslation.link : "";
 
@@ -2517,7 +2534,7 @@ function renderVideoBlock({ id, videoUrl }) {
       return tile;
     }
 
-    const extraRaw = entry.translationsExtra;
+    const extraRaw = discordExclusive ? [] : entry.translationsExtra;
     const extraList = Array.isArray(extraRaw) ? extraRaw : (extraRaw ? [extraRaw] : []);
     const extraValid = extraList
       .map(x => {
@@ -2686,7 +2703,17 @@ function renderVideoBlock({ id, videoUrl }) {
 
     const notes = (entry.notes || "").trim();
     if (notes) {
-      setHtml("notesText", formatRichText(notes));
+      let notesHtml = formatRichText(notes);
+      if (discordExclusive) {
+        const template = document.createElement("template");
+        template.innerHTML = notesHtml;
+        for (const link of template.content.querySelectorAll("a")) {
+          const label = link.textContent || "";
+          link.replaceWith(document.createTextNode(/^https?:\/\//i.test(label) ? "" : label));
+        }
+        notesHtml = template.innerHTML;
+      }
+      setHtml("notesText", notesHtml);
       show("notesBox", true);
     } else {
       show("notesBox", false);

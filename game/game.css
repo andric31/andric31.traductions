@@ -417,6 +417,23 @@ body:not(.mode-game){
 }
 .btnLike:hover{ filter: brightness(1.08); }
 
+.discord-exclusive-notice{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  margin:0 0 16px;
+  padding:14px 16px;
+  border:1px solid #aeb2ff;
+  border-radius:12px;
+  background:#454dc0;
+  color:#fff;
+  line-height:1.45;
+}
+.discord-exclusive-notice[hidden]{display:none !important}
+.discord-exclusive-notice strong{font-size:17px;color:#fff}
+.discord-exclusive-notice span{font-size:13px;color:#fff}
+.gameActionsCard.discord-exclusive-actions{border-color:#7d84f5}
+
 #btnDiscord.btn-discord{
   background:#5865F2;
   border-color:#5865F2;

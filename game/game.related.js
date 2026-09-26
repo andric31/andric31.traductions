@@ -679,6 +679,7 @@
     const ratingText = formatRatingForCard(extra?.rating?.avg, extra?.rating?.count);
     const translationText = formatRelativeTranslationTime(extra?.lastTranslationTs);
     const translationTitle = formatAbsoluteDateTime(extra?.lastTranslationTs);
+    const discordExclusive = String(candidate.discordExclusive ?? candidate.gameData?.discordExclusive ?? '').trim().toLowerCase() === 'oui';
     const ratingStatHtml = showRating ? `
               <span class="card-stat card-stat-rating" title="Note étoile moyenne et nombre de votes">
                 <span class="stat-icon stat-icon-rating" aria-hidden="true"></span>
@@ -686,10 +687,11 @@
               </span>` : '';
 
     return `
-      <a class="similarCard card card-link" href="${href}" target="_blank" rel="noopener" aria-label="Ouvrir : ${escapeHtml(title)}">
+      <a class="similarCard card card-link${discordExclusive ? ' discord-exclusive-card' : ''}" href="${href}" target="_blank" rel="noopener" aria-label="Ouvrir : ${escapeHtml(title)}${discordExclusive ? ' — Exclusivité Discord' : ''}">
         <img class="similarThumb thumb" src="${escapeHtml(image)}" alt="" referrerpolicy="no-referrer"
              loading="lazy"
              onerror="this.onerror=null;this.src='/favicon.png';this.classList.add('is-fallback');">
+        ${discordExclusive ? '<span class="discord-exclusive-badge">Exclusivité Discord</span>' : ''}
         <div class="similarBody body">
           <h3 class="similarTitle name clamp-2">${escapeHtml(title)}</h3>
           <div class="similarBadges badges-line one-line">${badgesLineHtml(candidate)}</div>

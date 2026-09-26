@@ -2502,6 +2502,42 @@
     "otherGames": []
   },
   {
+    "id": "otterside-games",
+    "name": "Otterside Games",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://pbs.twimg.com/profile_images/1480482673135132673/zOiX_0Dz_400x400.jpg",
+    "banner": "https://pbs.twimg.com/profile_banners/1480480586850521091/1668512172/600x200",
+    "presentation": "",
+    "gameIds": [
+      "146209"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [
+      {
+        "name": "Scarlet Maiden",
+        "platform": "Steam",
+        "url": "https://store.steampowered.com/app/1968840/Scarlet_Maiden/"
+      }
+    ],
+    "links": [
+      {
+        "type": "twitter",
+        "label": "Twitter",
+        "url": "https://twitter.com/OttersideGames"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.com/invite/F62b7ZbDVp"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "p1nk-ang3l",
     "name": "P1NK-ANG3L",
     "aliases": [

@@ -5,7 +5,6 @@
   const draftKey = 'ticket-discord-draft-v1';
   const draftFields = ['ticketName', 'ticketPriority', 'ticketTitle', 'ticketMessage'];
   const resultMessages = {
-    linked: 'Ton compte Discord est maintenant lié. Tu peux aussi l’utiliser pour te connecter au site.',
     verified: 'Compte Discord vérifié. Termine le formulaire pour envoyer ta demande à un administrateur.',
     logged_in: 'Connexion avec Discord réussie.',
     cancelled: 'Autorisation Discord annulée. Tu peux réessayer.',
@@ -56,6 +55,7 @@
       : mode === 'link' ? 'Facultatif : lie ton compte Discord pour te connecter au site.'
       : 'Utilise le compte Discord déjà lié à ton compte du site.');
     const state = element('p', 'discord-panel-state');
+    state.setAttribute('role', 'status');
     const message = element('p', 'discord-panel-message');
     message.setAttribute('role', 'status'); message.setAttribute('aria-live', 'polite');
     if (resultMessages[result]) message.textContent = resultMessages[result];
@@ -63,8 +63,11 @@
     const identity = mode === 'signup' ? data.signup : data.linked;
     const linked = !!identity;
     if (mode === 'signup' && result === 'verified' && !identity) message.textContent = 'La vérification Discord a expiré. Associe à nouveau ton compte avant de l’inclure dans la demande.';
-    if (identity) state.textContent = `${mode === 'signup' ? 'Discord vérifié' : 'Discord lié'} : @${identity.discord_username}`;
-    else state.textContent = mode === 'link' ? 'Aucun compte Discord lié.' : '';
+    if (identity) {
+      const discordName = String(identity.discord_display_name || '').trim() || identity.discord_username;
+      state.append(element('span', 'discord-panel-identity', `${mode === 'signup' ? 'Discord vérifié' : 'Discord lié'} : ${discordName}`));
+      if (mode === 'link') state.append(document.createTextNode(' '), element('span', 'discord-panel-linked-help', 'Tu peux aussi l’utiliser pour te connecter au site.'));
+    } else state.textContent = mode === 'link' ? 'Aucun compte Discord lié.' : '';
     const button = element('button', 'discord-button', mode === 'signup' ? 'Associer mon Discord' : mode === 'link' ? 'Lier mon compte Discord' : 'Se connecter avec Discord');
     button.type = 'button';
     if (mode === 'signup' && data.logged_in) {
@@ -89,7 +92,7 @@
       catch (err) { message.textContent = err.message; button.disabled = false; }
     });
     if (linked && mode !== 'login') {
-      const remove = element('button', 'discord-button secondary', mode === 'signup' ? 'Retirer de la demande' : 'Délier Discord'); remove.type = 'button';
+      const remove = element('button', mode === 'signup' ? 'discord-button secondary' : 'discord-button danger', mode === 'signup' ? 'Retirer de la demande' : 'Délier Discord'); remove.type = 'button';
       remove.addEventListener('click', async () => {
         if (mode === 'link' && !confirm('Délier Discord de ton compte ? Tu pourras toujours te connecter avec ton mot de passe.')) return;
         remove.disabled = true;

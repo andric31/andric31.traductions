@@ -6,7 +6,12 @@
 .discord-panel-message:empty,.discord-panel-state:empty{display:none}
 .discord-panel-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .discord-panel-actions .discord-panel-state{margin:0;flex:1 1 180px;min-width:0}
+.discord-panel-linked-help{margin-inline-start:8px}
 .discord-button{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border:1px solid #7983f8;border-radius:10px;background:#5865f2;color:#fff!important;font:inherit;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;max-width:100%;white-space:normal}
 .discord-button:hover{background:#4752c4}.discord-button:disabled{opacity:.55;cursor:default}
 .discord-button.secondary{background:var(--btn,#303646);color:var(--fg,#edf0fa)!important;border-color:var(--border,#535b78)}
+.discord-button.danger{background:#b42332;border-color:#cf3948;color:#fff!important;transition:background-color .15s,border-color .15s}
+.discord-button.danger:hover:not(:disabled){background:#941b28;border-color:#eb5463}
+.discord-button.danger:focus-visible{outline:2px solid #f87171;outline-offset:2px}
+.discord-button.danger:active:not(:disabled){background:#801724}
 .discord-logo{display:inline-block;width:22px;height:22px;flex:0 0 22px;background:currentColor;mask:var(--discord-logo) center/contain no-repeat;-webkit-mask:var(--discord-logo) center/contain no-repeat}

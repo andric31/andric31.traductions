@@ -2342,9 +2342,9 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
                 <span class="stat-icon stat-icon-views" aria-hidden="true"></span>
                 <span>${formatInt(views)}</span>
               </span>
-              <span class="card-stat" title="Nombre de téléchargements">
+              ${g.discordExclusive ? '' : `<span class="card-stat" title="Nombre de téléchargements">
                 <span class="stat-icon stat-icon-downloads" aria-hidden="true"></span>
-                <span>${formatInt(mega)}</span>
+                <span>${formatInt(mega)}</span>`}
               </span>
               <span class="card-stat" title="Nombre de j'aime">
                 <span class="stat-icon stat-icon-likes" aria-hidden="true"></span>

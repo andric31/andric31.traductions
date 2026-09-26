@@ -1,6 +1,7 @@
 // /functions/api/link.js
 // Redirection protégée vers les liens privés d'un jeu.
 // Source privée : GitHub privé andric31/f95list_private_links/f95list_links.json
+import { getDiscordExclusivity } from './_discord_exclusive.js';
 
 const DEFAULT_PRIVATE_OWNER = 'andric31';
 const DEFAULT_PRIVATE_REPO = 'f95list_private_links';
@@ -116,6 +117,10 @@ export async function onRequest(context) {
     const doc = await fetchPrivateLinksDoc(context);
     const item = getItem(doc, key);
     if (!item) return json({ ok: false, error: 'Lien privé introuvable pour ce jeu' }, 404);
+
+    if (type !== 'discordlink' && await getDiscordExclusivity(context, key, item)) {
+      return json({ ok: false, error: 'Traduction disponible exclusivement sur Discord.' }, 403);
+    }
 
     let target = '';
     if (type === 'translationsExtra') target = getExtraLink(item, index);

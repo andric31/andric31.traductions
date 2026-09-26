@@ -1,5 +1,6 @@
 // /functions/api/f95list_links.js
 // Renvoie uniquement les infos privées nécessaires à UNE fiche jeu, sans exposer les vrais liens.
+import { getDiscordExclusivity } from './_discord_exclusive.js';
 
 const DEFAULT_PRIVATE_OWNER = 'andric31';
 const DEFAULT_PRIVATE_REPO = 'f95list_private_links';
@@ -226,12 +227,17 @@ export async function onRequest(context) {
     const item = getItem(doc, key);
     if (!item) return json({ ok: false, found: false, key });
 
+    const discordExclusive = await getDiscordExclusivity(context, key, item);
     const loggedIn = await isLoggedIn(context);
     const f95Info = loggedIn ? cleanF95Info(item.f95Info) : null;
-    const mainTranslations = getMainTranslations(item, key);
+    if (discordExclusive && f95Info) {
+      f95Info.threadLinks = [];
+      f95Info.developerLinks = [];
+    }
+    const mainTranslations = discordExclusive ? [] : getMainTranslations(item, key);
     const firstMainTranslation = mainTranslations[0] || null;
 
-    const extrasRaw = Array.isArray(item.translationsExtra) ? item.translationsExtra : [];
+    const extrasRaw = !discordExclusive && Array.isArray(item.translationsExtra) ? item.translationsExtra : [];
     const translationsExtra = extrasRaw.map((x, index) => {
       let name = 'Lien';
       let link = '';
@@ -252,6 +258,7 @@ export async function onRequest(context) {
       ok: true,
       found: true,
       key,
+      discordExclusive: discordExclusive ? 'oui' : 'non défini',
       translationType: String(item.translationType || '').trim(),
       description: String(item.description || '').trim(),
       notes: String(item.notes || '').trim(),
@@ -261,11 +268,11 @@ export async function onRequest(context) {
       translation: firstMainTranslation ? firstMainTranslation.link : '',
       translationTitle: firstMainTranslation ? firstMainTranslation.title : '',
       mainTranslations,
-      translationsArchive: hasValue(item.translationsArchive) ? proxyUrl(key, 'translationsArchive') : '',
+      translationsArchive: !discordExclusive && hasValue(item.translationsArchive) ? proxyUrl(key, 'translationsArchive') : '',
       translationsExtra,
       hasDiscord: hasValue(item.discordlink),
       hasTranslation: mainTranslations.length > 0,
-      hasTranslationsArchive: hasValue(item.translationsArchive),
+      hasTranslationsArchive: !discordExclusive && hasValue(item.translationsArchive),
       hasTranslationsExtra: translationsExtra.length > 0,
       hasDescription: hasValue(item.description),
       hasNotes: hasValue(item.notes),

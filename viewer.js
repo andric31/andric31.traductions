@@ -1677,6 +1677,7 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
       engine: engines[0] || null,
       status: STATUS_ALLOWED.includes(finalStatus) || finalStatus === "En cours" ? finalStatus : "En cours",
       translationType: String(game.translationType || "").trim(),
+      discordExclusive: String(game.discordExclusive ?? game.gameData?.discordExclusive ?? "").trim().toLowerCase() === "oui",
       discord: String(game.discordlink || ""),
       translation: String(game.translation || ""),
       description: String(game.gameData?.description || game.description || "").trim(),
@@ -2288,6 +2289,7 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
       const g = state.filtered[i];
       const card = document.createElement("a");
       card.className = "card card-link";
+      if (g.discordExclusive) card.classList.add("discord-exclusive-card");
 
       const imgSrc = (g.image || "").trim() || "/favicon.png";
       const pageHref = buildGameUrl(g.__raw || g);
@@ -2313,7 +2315,7 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
       card.href = pageHref;
       card.target = "_blank";
       card.rel = "noopener";
-      card.setAttribute("aria-label", `Ouvrir : ${getDisplayTitle(g.__raw || g)}`);
+      card.setAttribute("aria-label", `Ouvrir : ${getDisplayTitle(g.__raw || g)}${g.discordExclusive ? ' — Exclusivité Discord' : ''}`);
 
       card.innerHTML = `
         <img src="${imgSrc}" class="thumb" alt=""
@@ -2322,6 +2324,7 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
              onerror="this.onerror=null;this.src='/favicon.png';this.classList.add('is-fallback');">
         ${updateRibbon}
         ${personalIconsHtml}
+        ${g.discordExclusive ? '<span class="discord-exclusive-badge">Exclusivité Discord</span>' : ''}
         <div class="body">
           <h3 class="name clamp-2">${escapeHtml(getDisplayTitle(g.__raw || g))}</h3>
           <div class="badges-line one-line">${badgesLineHtml(g)} ${listTagsHtml}</div>

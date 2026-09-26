@@ -472,6 +472,27 @@ a.card.card-link *{
   transform: translateY(-1px);
 }
 
+/* Indicateur permanent : indépendant du filtre des badges de mise à jour. */
+.card.discord-exclusive-card{border-color:#7d84f5}
+.card .discord-exclusive-badge{
+  position:absolute;
+  top:62px;
+  left:10px;
+  z-index:3;
+  max-width:calc(100% - 20px);
+  box-sizing:border-box;
+  padding:7px 10px;
+  border:1px solid #aeb2ff;
+  border-radius:8px;
+  background:#454dc0;
+  color:#fff !important;
+  font-size:12px;
+  font-weight:800;
+  line-height:1.25;
+  box-shadow:0 3px 12px rgba(0,0,0,.35);
+  pointer-events:none;
+}
+
 /* mini "bouton" indicatif (sans lien interne) */
 .btn-page--ghost{
   pointer-events: none;

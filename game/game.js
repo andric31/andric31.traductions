@@ -2190,6 +2190,8 @@ function renderVideoBlock({ id, videoUrl }) {
     const privateGameData = await fetchPrivateGameData(privateLinksKey);
     entry = mergePrivateGameData(entry, privateGameData);
     const discordExclusive = isDiscordExclusive(entry);
+    const downloadStat = $("statMegaClicks")?.closest(".statsItem");
+    if (downloadStat) downloadStat.style.display = discordExclusive ? "none" : "";
     if (page && typeof page === "object") page.entry = entry;
 
     const display = entry?.gameData ? entry.gameData : entry;

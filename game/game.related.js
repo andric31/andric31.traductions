@@ -705,9 +705,9 @@
                 <span class="stat-icon stat-icon-views" aria-hidden="true"></span>
                 <span>${formatInt(extra?.stats?.views)}</span>
               </span>
-              <span class="card-stat" title="Nombre de téléchargements">
+              ${discordExclusive ? '' : `<span class="card-stat" title="Nombre de téléchargements">
                 <span class="stat-icon stat-icon-downloads" aria-hidden="true"></span>
-                <span>${formatInt(extra?.stats?.mega)}</span>
+                <span>${formatInt(extra?.stats?.mega)}</span>`}
               </span>
               <span class="card-stat" title="Nombre de j'aime">
                 <span class="stat-icon stat-icon-likes" aria-hidden="true"></span>

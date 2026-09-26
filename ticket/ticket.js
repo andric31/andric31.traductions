@@ -7,10 +7,12 @@
   function rawVal(id){ return document.getElementById(id)?.value || ''; }
   form?.addEventListener('submit', async (event) => {
     event.preventDefault();
+    await window.DiscordLink?.ready;
     const payload = {
       name: val('ticketName'),
       contact: '',
       category: val('ticketCategory'),
+      link_discord: val('ticketCategory') === 'inscription' && !!window.DiscordLink?.signupSelected,
       priority: val('ticketPriority') || 'normal',
       title: val('ticketTitle'),
       message: val('ticketMessage'),
@@ -44,6 +46,7 @@
       const data = await resp.json().catch(() => null);
       if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Envoi impossible.');
       form.reset();
+      if (payload.link_discord) window.DiscordLink?.clearSignup();
       document.getElementById('ticketCategory')?.dispatchEvent(new Event('change'));
       setStatus(`Ticket envoyé ✅ Référence #${data.ticket?.id || data.id}.`, 'ok');
     } catch (err) {

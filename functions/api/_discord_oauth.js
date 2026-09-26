@@ -78,13 +78,45 @@ export function redirectResult(context, mode, result, cookies = []) {
   for (const c of cookies) headers.append('set-cookie', c);
   return new Response(null, { status: 303, headers });
 }
-async function discordFetch(url, options) {
+const OAUTH_ERROR_CODES = new Set(['invalid_client', 'invalid_grant', 'invalid_request',
+  'invalid_scope', 'unauthorized_client', 'unsupported_grant_type', 'access_denied',
+  'server_error', 'temporarily_unavailable']);
+class DiscordOAuthError extends Error {
+  constructor(stage, reason, status = 0, code = '') {
+    super('Discord OAuth failed');
+    this.stage = stage;
+    this.reason = reason;
+    this.status = status;
+    this.code = OAUTH_ERROR_CODES.has(code) ? code : '';
+  }
+}
+// Journalise seulement des catégories contrôlées : jamais l'URL du callback,
+// les cookies, le corps des réponses Discord, les codes OAuth ni les secrets.
+export function logDiscordError(stage, error) {
+  const known = error instanceof DiscordOAuthError;
+  const message = String(error?.message || '');
+  const reason = known ? error.reason : stage === 'configuration' ? 'configuration_missing'
+    : /no such table|no such column|syntax error/i.test(message) ? 'database_schema_error'
+    : /D1_ERROR|SQLITE|constraint|database/i.test(message) ? 'database_error' : 'server_error';
+  const detail = { stage: known ? error.stage : stage, reason };
+  if (known && error.status) detail.http_status = error.status;
+  if (known && error.code) detail.discord_error = error.code;
+  console.error('[Discord OAuth]', JSON.stringify(detail));
+}
+async function discordFetch(url, options, stage) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 10000);
   try {
     const response = await fetch(url, { ...options, signal: controller.signal, redirect: 'error' });
-    if (!response.ok) throw new Error('Discord unavailable');
-    return await response.json();
+    if (!response.ok) {
+      const body = await response.json().catch(() => null);
+      throw new DiscordOAuthError(stage, 'http_error', response.status, body?.error);
+    }
+    try { return await response.json(); }
+    catch { throw new DiscordOAuthError(stage, 'invalid_response', response.status); }
+  } catch (error) {
+    if (error instanceof DiscordOAuthError) throw error;
+    throw new DiscordOAuthError(stage, controller.signal.aborted ? 'timeout' : 'network_error');
   } finally { clearTimeout(timer); }
 }
 export async function exchangeIdentity(context, code) {
@@ -93,12 +125,13 @@ export async function exchangeIdentity(context, code) {
     method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({ client_id: cfg.id, client_secret: cfg.secret,
       grant_type: 'authorization_code', code, redirect_uri: cfg.redirect }).toString(),
-  });
-  if (!token.access_token || !String(token.scope || '').split(' ').includes('identify')) throw new Error('Invalid scope');
+  }, 'token_exchange');
+  if (!token?.access_token) throw new DiscordOAuthError('token_exchange', 'missing_access_token');
+  if (!String(token.scope || '').split(' ').includes('identify')) throw new DiscordOAuthError('token_exchange', 'missing_identify_scope');
   const user = await discordFetch('https://discord.com/api/v10/users/@me', {
     headers: { authorization: `Bearer ${token.access_token}` },
-  });
-  if (!/^\d{17,20}$/.test(String(user.id || '')) || user.bot) throw new Error('Invalid Discord identity');
+  }, 'identity_read');
+  if (!/^\d{17,20}$/.test(String(user?.id || '')) || user.bot) throw new DiscordOAuthError('identity_read', 'invalid_identity');
   const clean = value => String(value || '').replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 80);
   return { id: String(user.id), username: clean(user.username), display_name: clean(user.global_name || user.username) };
 }

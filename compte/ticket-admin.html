@@ -146,7 +146,7 @@
         <div class="ticket-card-head">
           <div>
             <div class="ticket-title">#${esc(t.id)} · ${esc(t.title || 'Sans titre')} ${closed && t.closed_at ? `<small> · clôturé le ${esc(dateFr(t.closed_at))}</small>` : ''}</div>
-            <div class="ticket-meta"><span>Créé le ${esc(dateFr(t.created_at))}</span><span>par ${esc(t.name || 'Anonyme')}</span>${t.contact ? `<span>contact : ${esc(t.contact)}</span>` : ''}${t.account_username ? `<span>compte créé : ${esc(t.account_username)}</span>` : ''}${url ? `<a href="${esc(url)}" target="_blank" rel="noopener">page envoyée</a>` : ''}</div>
+            <div class="ticket-meta"><span>Créé le ${esc(dateFr(t.created_at))}</span><span>par ${esc(t.name || 'Anonyme')}</span>${t.contact ? `<span>contact : ${esc(t.contact)}</span>` : ''}${t.signup_discord_id ? `<span>Discord vérifié : @${esc(t.signup_discord_username)} · ${esc(t.signup_discord_id)}</span>` : ''}${t.account_username ? `<span>compte créé : ${esc(t.account_username)}</span>` : ''}${url ? `<a href="${esc(url)}" target="_blank" rel="noopener">page envoyée</a>` : ''}</div>
           </div>
           <div class="ticket-meta"><span class="ticket-pill ${closed ? 'closed' : 'open'}">${closed ? 'Clôturé' : 'Ouvert'}</span><span class="ticket-pill">${esc(categoryLabel(t.category))}</span><span class="ticket-pill ${urgent ? 'urgent' : ''}">${esc(priorityLabel(t.priority))}</span></div>
         </div>
@@ -227,7 +227,7 @@
           Object.assign(t, data.ticket || { status:'closed', account_username: data.created?.username || username });
           let notificationSent = false;
           try {
-            const message = `✅ Création de compte — Ticket #${id} : le compte a été créé. Tu peux maintenant te connecter avec le pseudo et le mot de passe choisis dans ta demande.`;
+            const message = `✅ Création de compte — Ticket #${id} : le compte a été créé. Tu peux maintenant te connecter avec le pseudo et le mot de passe choisis dans ta demande.${t.signup_discord_id ? ' Tu peux aussi utiliser le bouton Se connecter avec Discord.' : ''}`;
             await api('/api/messages', { method:'POST', body:JSON.stringify({ nickname:'Admin', message, room:'global' }) });
             notificationSent = true;
           } catch {}

@@ -444,6 +444,7 @@
       .watchlist-cover { width: 62px; height: 48px; }
     }
   </style>
+  <link rel="stylesheet" href="/auth/discord.css?v=20260926-1" />
 </head>
 <body>
   <main class="auth-shell">
@@ -486,6 +487,7 @@
 
           <div class="account-control-panel">
             <h2 class="account-control-title">⚙️ Paramètres du compte</h2>
+            <div data-discord-mode="link"></div>
             <p class="account-control-help">Gère ton mot de passe, l'affichage et les notifications.</p>
             <div class="account-quick-grid">
               <button class="account-quick-card" id="openPasswordModalBtn" type="button"><span class="account-quick-ico">🔐</span><span><strong>Changer mon mot de passe</strong><span>Modifie ton mot de passe de connexion.</span></span></button>
@@ -1049,5 +1051,6 @@
       }
     });
   </script>
+  <script src="/auth/discord.client.js?v=20260926-1"></script>
 </body>
 </html>

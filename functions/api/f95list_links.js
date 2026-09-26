@@ -231,7 +231,6 @@ export async function onRequest(context) {
     const loggedIn = await isLoggedIn(context);
     const f95Info = loggedIn ? cleanF95Info(item.f95Info) : null;
     if (discordExclusive && f95Info) {
-      f95Info.threadLinks = [];
       f95Info.developerLinks = [];
     }
     const mainTranslations = discordExclusive ? [] : getMainTranslations(item, key);

@@ -67,7 +67,6 @@
     if (identity) {
       const discordName = String(identity.discord_display_name || '').trim() || identity.discord_username;
       state.append(element('span', 'discord-panel-identity', `${mode === 'signup' ? 'Discord vérifié' : 'Discord lié'} : ${discordName}`));
-      if (mode === 'link') state.append(document.createTextNode(' '), element('span', 'discord-panel-linked-help', 'Tu peux aussi l’utiliser pour te connecter au site.'));
     } else state.textContent = mode === 'link' ? 'Aucun compte Discord lié.' : '';
     const button = element('button', 'discord-button', mode === 'signup' ? 'Associer mon Discord' : mode === 'link' ? 'Lier mon compte Discord' : 'Se connecter avec Discord');
     button.type = 'button';

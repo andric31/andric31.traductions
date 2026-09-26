@@ -7,6 +7,7 @@ import {
   json,
   requireUser,
 } from './_auth.js';
+import { ensureDiscordTables, ensureTicketDiscordColumns, discordOwner } from './_discord_oauth.js';
 
 function getTicketDb(env) {
   for (const name of ['TICKETS_DB', 'DB', 'AUTH_DB']) {
@@ -64,6 +65,8 @@ export async function onRequest(context) {
 
     await ensureAuthTables(env.DB);
     await ensureTicketSchema(ticketDb);
+    await ensureTicketDiscordColumns(ticketDb);
+    await ensureDiscordTables(env.DB);
 
     const auth = await requireUser(env.DB, env, request);
     if (!auth.ok) return auth.response;
@@ -75,7 +78,7 @@ export async function onRequest(context) {
     if (!Number.isInteger(id) || id <= 0) return json({ ok: false, error: 'Ticket invalide.' }, 400);
 
     const ticket = await ticketDb.prepare(`
-      SELECT id, name, category, message, signup_password_hash, account_created_at, account_username
+      SELECT id, name, category, message, signup_password_hash, account_created_at, account_username, signup_discord_id, signup_discord_username
       FROM tickets_global
       WHERE id = ?1
       LIMIT 1
@@ -102,10 +105,22 @@ export async function onRequest(context) {
       legacyPasswordUsed = true;
     }
 
-    await env.DB.prepare(`
+    const discordId = String(ticket.signup_discord_id || '');
+    if (discordId && await discordOwner(env.DB, discordId)) return json({ ok: false, error: 'Ce compte Discord est déjà lié à un autre compte. Le compte demandé n’a pas été créé.' }, 409);
+    const creation = [env.DB.prepare(`
       INSERT INTO auth_users (username, display_name, password_hash, role, is_active)
       VALUES (?1, ?2, ?3, 'member', 1)
-    `).bind(username, username, passwordHash).run();
+    `).bind(username, username, passwordHash)];
+    if (discordId) creation.push(env.DB.prepare(`
+      INSERT INTO auth_discord_links (user_id, discord_id, discord_username, discord_display_name)
+      VALUES ((SELECT id FROM auth_users WHERE username = ?), ?, ?, ?)
+    `).bind(username, discordId, ticket.signup_discord_username, ticket.signup_discord_username));
+    // Même transaction D1 : aucune création partielle si Discord est déjà utilisé.
+    try { await env.DB.batch(creation); }
+    catch (error) {
+      if (/unique|constraint/i.test(String(error?.message))) return json({ ok: false, error: 'Ce pseudo ou ce compte Discord est déjà utilisé.' }, 409);
+      throw error;
+    }
 
     const comment = legacyPasswordUsed
       ? 'Compte créé depuis un ancien ticket. Le mot de passe historique a été accepté exceptionnellement puis supprimé du ticket.'
@@ -132,7 +147,7 @@ export async function onRequest(context) {
 
     const updatedTicket = await ticketDb.prepare(`
       SELECT id, name, contact, category, priority, title, message, status, page_url,
-             created_at, updated_at, closed_at, admin_comment, account_created_at, account_username
+             created_at, updated_at, closed_at, admin_comment, account_created_at, account_username, signup_discord_id, signup_discord_username
       FROM tickets_global WHERE id = ?1
     `).bind(id).first();
 

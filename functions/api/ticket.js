@@ -1,12 +1,14 @@
-import { ensureAuthTables, findAuthPseudoConflict, hashPassword, normalizePseudoKey, validatePassword } from './_auth.js';
+import { ensureAuthTables, findAuthPseudoConflict, hashPassword, normalizePseudoKey, validatePassword, assertSameOrigin } from './_auth.js';
 import { notifyTicketOpened } from './_discord.js';
+import { ensureDiscordTables, ensureTicketDiscordColumns, signupProof, discordOwner, sameOrigin, cookie, SIGNUP_COOKIE } from './_discord_oauth.js';
 export const DISCORD_NOTIFICATIONS_VERSION = 'discord-notifications-1';
 
-const json = (data, status = 200) => new Response(JSON.stringify(data, null, 2), {
+const json = (data, status = 200, extraHeaders = {}) => new Response(JSON.stringify(data, null, 2), {
   status,
   headers: {
     'content-type': 'application/json; charset=utf-8',
     'cache-control': 'no-store',
+    ...extraHeaders,
   },
 });
 
@@ -47,6 +49,7 @@ async function ensureSchema(db) {
   try { await db.prepare(`ALTER TABLE tickets_global ADD COLUMN signup_password_hash TEXT DEFAULT ''`).run(); } catch {}
   try { await db.prepare(`ALTER TABLE tickets_global ADD COLUMN account_created_at TEXT DEFAULT ''`).run(); } catch {}
   try { await db.prepare(`ALTER TABLE tickets_global ADD COLUMN account_username TEXT DEFAULT ''`).run(); } catch {}
+  await ensureTicketDiscordColumns(db);
 }
 
 function clean(value, max = 1000) {
@@ -117,7 +120,7 @@ export async function onRequestGet(context) {
 
   const limit = Math.min(Math.max(Number(url.searchParams.get('limit') || 100), 1), 300);
   const status = url.searchParams.get('status');
-  let query = `SELECT id, name, contact, category, priority, title, message, status, page_url, created_at, updated_at, closed_at, admin_comment, account_created_at, account_username FROM tickets_global`;
+  let query = `SELECT id, name, contact, category, priority, title, message, status, page_url, created_at, updated_at, closed_at, admin_comment, account_created_at, account_username, signup_discord_id, signup_discord_username FROM tickets_global`;
   const binds = [];
   if (status && ['open', 'closed'].includes(status)) {
     query += ` WHERE status = ?`;
@@ -131,6 +134,7 @@ export async function onRequestGet(context) {
 }
 
 export async function onRequestPost(context) {
+  if (!assertSameOrigin(context.request)) return json({ ok: false, error: 'Origine invalide.' }, 403);
   const db = getDb(context.env);
   if (!db) return json({ ok: false, error: 'Base D1 introuvable. Ajoute un binding DB ou TICKETS_DB.' }, 500);
   await ensureSchema(db);
@@ -152,6 +156,7 @@ export async function onRequestPost(context) {
   if (!name || !title || !message) return json({ ok: false, error: 'Nom, titre et message sont obligatoires.' }, 400);
   if (message.length < 8) return json({ ok: false, error: 'Message trop court.' }, 400);
   let signupPasswordHash = '';
+  let discord = null;
   if (category === 'inscription') {
     const requestedPseudoKey = normalizePseudoKey(name);
     if (!requestedPseudoKey || name.length < 3) {
@@ -178,6 +183,16 @@ export async function onRequestPost(context) {
       return json({ ok: false, error: 'Une demande de création de compte utilise déjà ce pseudo.' }, 409);
     }
 
+    if (body.link_discord === true) {
+      if (!sameOrigin(context.request) || !context.env?.DB) return json({ ok: false, error: 'Liaison Discord indisponible.' }, 403);
+      discord = await signupProof(context);
+      if (!discord) return json({ ok: false, error: 'La vérification Discord a expiré. Associe à nouveau ton compte Discord avant l’envoi.' }, 400);
+      await ensureDiscordTables(context.env.DB);
+      if (await discordOwner(context.env.DB, discord.discord_id)) return json({ ok: false, error: 'Ce compte Discord est déjà lié à un compte du site.' }, 409);
+      const pendingDiscord = await db.prepare(`SELECT id FROM tickets_global WHERE signup_discord_id = ? AND category = 'inscription' AND status = 'open' AND account_created_at = ''`).bind(discord.discord_id).first();
+      if (pendingDiscord) return json({ ok: false, error: 'Une demande est déjà en attente pour ce compte Discord.' }, 409);
+    }
+
     if (!signupPassword || !signupPasswordConfirm) return json({ ok: false, error: 'Mot de passe obligatoire pour une création de compte.' }, 400);
     if (signupPassword !== signupPasswordConfirm) return json({ ok: false, error: 'Les deux mots de passe ne sont pas identiques.' }, 400);
     const pwError = validatePassword(signupPassword);
@@ -194,14 +209,26 @@ Pseudo souhaité : ${name}
 Mot de passe : enregistré de manière sécurisée (non visible par l’administrateur)`.slice(0, 5000);
   }
 
-  const result = await db.prepare(`
-    INSERT INTO tickets_global (name, contact, category, priority, title, message, status, page_url, user_agent, ip_hash, signup_password_hash, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, 'open', ?, ?, ?, ?, datetime('now'), datetime('now'))
-  `).bind(name, contact, category, priority, title, message, pageUrl, userAgent, ipHash, signupPasswordHash).run();
+  let result;
+  try {
+    const insert = db.prepare(`
+      INSERT INTO tickets_global (name, contact, category, priority, title, message, status, page_url, user_agent, ip_hash, signup_password_hash,
+        signup_discord_id, signup_discord_username, signup_discord_proof, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, 'open', ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+    `).bind(name, contact, category, priority, title, message, pageUrl, userAgent, ipHash, signupPasswordHash,
+      discord?.discord_id || '', discord?.discord_username || '', discord?.token_hash || '');
+    result = discord ? (await db.batch([insert,
+      db.prepare('DELETE FROM ticket_discord_proofs WHERE token_hash = ?').bind(discord.token_hash)
+    ]))[0] : await insert.run();
+  } catch (error) {
+    if (discord && /unique|constraint/i.test(String(error?.message))) return json({ ok: false, error: 'Cette demande Discord a déjà été envoyée.' }, 409);
+    throw error;
+  }
 
   const id = result.meta?.last_row_id || result.lastRowId || null;
   await notifyTicketOpened(context, { id, name, category, priority, title });
-  return json({ ok: true, id, ticket: { id, name, contact, category, priority, title, status: 'open', admin_comment: '' } }, 201);
+  return json({ ok: true, id, ticket: { id, name, contact, category, priority, title, status: 'open', admin_comment: '' } }, 201,
+    discord ? { 'set-cookie': cookie(SIGNUP_COOKIE) } : {});
 }
 
 export async function onRequestPatch(context) {
@@ -229,7 +256,7 @@ export async function onRequestPatch(context) {
     await db.prepare(`UPDATE tickets_global SET status = ?, updated_at = datetime('now'), closed_at = CASE WHEN ? = 'closed' THEN COALESCE(NULLIF(closed_at, ''), datetime('now')) ELSE '' END WHERE id = ?`)
       .bind(status, status, id).run();
   }
-  const row = await db.prepare(`SELECT id, name, contact, category, priority, title, message, status, page_url, created_at, updated_at, closed_at, admin_comment, account_created_at, account_username FROM tickets_global WHERE id = ?`).bind(id).first();
+  const row = await db.prepare(`SELECT id, name, contact, category, priority, title, message, status, page_url, created_at, updated_at, closed_at, admin_comment, account_created_at, account_username, signup_discord_id, signup_discord_username FROM tickets_global WHERE id = ?`).bind(id).first();
   if (!row) return json({ ok: false, error: 'Ticket introuvable.' }, 404);
   return json({ ok: true, ticket: row });
 }

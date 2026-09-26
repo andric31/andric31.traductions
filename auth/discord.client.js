@@ -50,10 +50,11 @@
     mount.classList.add('discord-panel');
     const title = element('strong', 'discord-panel-title');
     title.append(element('span', 'discord-logo'), document.createTextNode(mode === 'login' ? 'Connexion avec Discord' : 'Compte Discord'));
-    const help = element('p', 'discord-panel-help', mode === 'signup'
-      ? 'Facultatif : associe ton Discord à cette demande. Après validation du compte, tu pourras te connecter avec Discord ou ton mot de passe.'
-      : mode === 'link' ? 'Facultatif : lie ton compte Discord pour te connecter au site.'
+    const help = element('p', 'discord-panel-help', mode === 'link'
+      ? 'Facultatif : lie ton compte Discord pour te connecter au site.'
       : 'Utilise le compte Discord déjà lié à ton compte du site.');
+    if (mode === 'signup') help.replaceChildren(element('strong', '', 'Facultatif :'),
+      document.createTextNode(' lie ton compte Discord pour te connecter facilement au site une fois ton inscription validée.'));
     const state = element('p', 'discord-panel-state');
     state.setAttribute('role', 'status');
     const message = element('p', 'discord-panel-message');

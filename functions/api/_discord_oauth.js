@@ -107,7 +107,12 @@ async function discordFetch(url, options, stage) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 10000);
   try {
-    const response = await fetch(url, { ...options, signal: controller.signal, redirect: 'error' });
+    // workerd n'accepte pas toujours redirect: 'error'. En mode manual,
+    // aucun secret n'est transféré à une autre URL : tout 3xx est refusé ici.
+    const response = await fetch(url, { ...options, signal: controller.signal, redirect: 'manual' });
+    if (response.status >= 300 && response.status < 400) {
+      throw new DiscordOAuthError(stage, 'unexpected_redirect', response.status);
+    }
     if (!response.ok) {
       const body = await response.json().catch(() => null);
       throw new DiscordOAuthError(stage, 'http_error', response.status, body?.error);
@@ -116,7 +121,9 @@ async function discordFetch(url, options, stage) {
     catch { throw new DiscordOAuthError(stage, 'invalid_response', response.status); }
   } catch (error) {
     if (error instanceof DiscordOAuthError) throw error;
-    throw new DiscordOAuthError(stage, controller.signal.aborted ? 'timeout' : 'network_error');
+    const reason = controller.signal.aborted ? 'timeout'
+      : /invalid redirect|unsupported.*redirect/i.test(String(error?.message || '')) ? 'unsupported_redirect_mode' : 'network_error';
+    throw new DiscordOAuthError(stage, reason);
   } finally { clearTimeout(timer); }
 }
 export async function exchangeIdentity(context, code) {

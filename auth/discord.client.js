@@ -14,7 +14,7 @@
     already_linked: 'Ce compte Discord ou ce compte du site possède déjà une liaison.',
     not_linked: 'Aucun compte du site n’est encore lié à ce Discord. Connecte-toi avec ton mot de passe pour le lier, ou attends la validation de ton ticket.',
     inactive: 'Ce compte du site est désactivé. Contacte un administrateur.',
-    unavailable: 'Discord est temporairement indisponible. Réessaie plus tard.',
+    unavailable: 'La connexion à Discord a échoué. Réessaie ou contacte un administrateur.',
   };
   let signup = null;
   const params = new URLSearchParams(location.search);
@@ -53,7 +53,7 @@
     title.append(element('span', 'discord-logo'), document.createTextNode(mode === 'login' ? 'Connexion avec Discord' : 'Compte Discord'));
     const help = element('p', 'discord-panel-help', mode === 'signup'
       ? 'Facultatif : associe ton Discord à cette demande. Après validation du compte, tu pourras te connecter avec Discord ou ton mot de passe.'
-      : mode === 'link' ? 'Lie ton Discord pour pouvoir l’utiliser à la connexion. Ton mot de passe reste disponible.'
+      : mode === 'link' ? 'Lie ton compte Discord pour te connecter au site.'
       : 'Utilise le compte Discord déjà lié à ton compte du site.');
     const state = element('p', 'discord-panel-state');
     const message = element('p', 'discord-panel-message');
@@ -99,7 +99,8 @@
       });
       actions.append(remove);
     }
-    mount.append(title, help, state, actions, message);
+    actions.append(state);
+    mount.append(title, help, actions, message);
   }
   let refreshId = 0;
   async function refresh() {

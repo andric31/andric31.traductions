@@ -5,6 +5,7 @@
 .discord-panel-help{color:var(--muted,#b4bfd4)}
 .discord-panel-message:empty,.discord-panel-state:empty{display:none}
 .discord-panel-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.discord-panel-actions .discord-panel-state{margin:0;flex:1 1 180px;min-width:0}
 .discord-button{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border:1px solid #7983f8;border-radius:10px;background:#5865f2;color:#fff!important;font:inherit;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;max-width:100%;white-space:normal}
 .discord-button:hover{background:#4752c4}.discord-button:disabled{opacity:.55;cursor:default}
 .discord-button.secondary{background:var(--btn,#303646);color:var(--fg,#edf0fa)!important;border-color:var(--border,#535b78)}

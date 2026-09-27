@@ -2437,6 +2437,75 @@
     "otherGames": []
   },
   {
+    "id": "ntrman",
+    "name": "NTRMAN",
+    "aliases": [],
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p9188",
+    "avatar": "https://pbs.twimg.com/profile_images/1970887943717040129/AqAvcXEn.jpg",
+    "banner": "",
+    "presentation": "Another pixiv",
+    "gameIds": [
+      "36009",
+      "68270",
+      "96440",
+      "108030",
+      "160854",
+      "217630",
+      "255799",
+      "260451",
+      "272673",
+      "289116"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/ntrman"
+      },
+      {
+        "type": "twitter",
+        "label": "Xitter",
+        "url": "https://x.com/kosu900"
+      },
+      {
+        "type": "fanbox",
+        "label": "Fanbox",
+        "url": "https://ntrman.fanbox.cc/"
+      },
+      {
+        "type": "bluesky",
+        "label": "Bluesky",
+        "url": "https://bsky.app/profile/kosu900.bsky.social"
+      },
+      {
+        "type": "pixiv",
+        "label": "Pixiv",
+        "url": "https://www.pixiv.net/member.php?id=38440971"
+      },
+      {
+        "type": "website",
+        "label": "Fantia",
+        "url": "https://fantia.jp/fanclubs/511579"
+      },
+      {
+        "type": "booth",
+        "label": "BOOTH",
+        "url": "https://ntrman.booth.pm/"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p9188"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "nuverotic",
     "name": "Nuverotic",
     "aliases": [],

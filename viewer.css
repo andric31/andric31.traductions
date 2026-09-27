@@ -481,17 +481,17 @@ a.card.card-link *{
   justify-content:center;
   gap:4px;
   position:absolute;
-  top:40px;
+  top:32px;
   left:-47px;
   z-index:3;
   width:200px;
   box-sizing:border-box;
-  padding:5px 24px;
+  padding:7px 28px 7px 12px;
   border:1px solid #aeb2ff;
   border-radius:0;
   background:linear-gradient(180deg, #5862d6, #454dc0);
   color:#fff !important;
-  font-size:10px;
+  font-size:10.5px;
   font-weight:800;
   line-height:1.2;
   white-space:nowrap;
@@ -517,9 +517,9 @@ a.card.card-link *{
   vertical-align:-4px;
 }
 .card .discord-exclusive-badge::before{
-  width:13px;
-  height:13px;
-  flex:0 0 13px;
+  width:14px;
+  height:14px;
+  flex:0 0 14px;
 }
 
 

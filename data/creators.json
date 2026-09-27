@@ -3150,6 +3150,41 @@
     "country": ""
   },
   {
+    "id": "restorationstation",
+    "name": "RestorationStation",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "308944"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/RestorationStation438"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://restorationstation.itch.io/"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.com/invite/ab4H5jyYb3"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "roki",
     "name": "Roki",
     "aliases": [],

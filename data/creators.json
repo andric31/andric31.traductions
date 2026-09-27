@@ -2716,6 +2716,67 @@
     "otherGames": []
   },
   {
+    "id": "puydev",
+    "name": "puydev",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://f95zone.to/data/avatars/l/3052/3052518.jpg?1730582048",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "302960"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [
+      {
+        "name": "Redline Lust",
+        "platform": "Itch.io",
+        "url": "https://puydev.itch.io/redlinelust"
+      },
+      {
+        "name": "Redline Lust",
+        "platform": "Steam",
+        "url": "https://store.steampowered.com/app/5257970/Redline_Lust/"
+      },
+      {
+        "name": "Summer Like a Dream",
+        "platform": "Itch.io",
+        "url": "https://puydev.itch.io/summerlikeadream"
+      },
+      {
+        "name": "Summer Like a Dream",
+        "platform": "Steam",
+        "url": "https://store.steampowered.com/app/4860880/Summer_Like_a_Dream"
+      }
+    ],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/puydev.3052518/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/puydev"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://puydev.itch.io/"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.com/invite/fYtKyTDAPX"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "ratedr",
     "name": "RatedR",
     "aliases": [],

@@ -3672,6 +3672,48 @@
     "country": ""
   },
   {
+    "id": "the-church-of-ntr",
+    "name": "The Church of NTR",
+    "aliases": [
+      "NTR教団"
+    ],
+    "creatorType": "amateur_group",
+    "primaryLanguage": "ja",
+    "vndbId": "p20314",
+    "avatar": "",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "100040"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "dlsite",
+        "label": "DLsite",
+        "url": "https://www.dlsite.com/maniax/circle/profile/=/maker_id/RG55105.html"
+      },
+      {
+        "type": "dlsite",
+        "label": "Ci-en",
+        "url": "https://ci-en.dlsite.com/creator/24521"
+      },
+      {
+        "type": "steam",
+        "label": "Steam",
+        "url": "https://store.steampowered.com/search/?developer=NTR%E6%95%99%E5%9B%A3%20"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p20314"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "trinciapapere",
     "name": "Trinciapapere",
     "aliases": [],

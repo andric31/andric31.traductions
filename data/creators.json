@@ -2716,6 +2716,51 @@
     "otherGames": []
   },
   {
+    "id": "pusswuss",
+    "name": "PussWuss",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://f95zone.to/data/avatars/l/10485/10485381.jpg?1770060881",
+    "banner": "",
+    "presentation": "PusssWuss Studio est un studio d'animation audacieux qui donne vie aux fantasmes créatifs et visuels de ses clients, du style le plus classique au plus excentrique. Leur philosophie associe le plaisir à la création à travers la promesse de réaliser n'importe quel projet d'illustration ou d'animation, tant qu'il reste dans le cadre de la légalité.",
+    "gameIds": [
+      "277998"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/pusswuss_studio.10485381/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/cw/PussWussStudio"
+      },
+      {
+        "type": "twitter",
+        "label": "Twitter",
+        "url": "https://x.com/PussWussStudio"
+      },
+      {
+        "type": "website",
+        "label": "AllMyLinks",
+        "url": "https://allmylinks.com/pusswuss-studio#link-6022625"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.com/invite/BxWtZfJBSE"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "puydev",
     "name": "puydev",
     "aliases": [],

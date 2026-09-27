@@ -3536,6 +3536,61 @@
     "otherGames": []
   },
   {
+    "id": "technobrake",
+    "name": "TechnoBrake",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://pbs.twimg.com/profile_images/1765179986686988288/I3gSa8Kq_400x400.jpg",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "44110"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/technobrake"
+      },
+      {
+        "type": "subscribestar",
+        "label": "Subscribebstar",
+        "url": "https://subscribestar.adult/technobrake"
+      },
+      {
+        "type": "dlsite",
+        "label": "DLsite",
+        "url": "https://www.dlsite.com/maniax/circle/profile/=/maker_id/RG15386.html"
+      },
+      {
+        "type": "twitter",
+        "label": "Twitter",
+        "url": "https://x.com/technobrake1"
+      },
+      {
+        "type": "website",
+        "label": "DeviantArt",
+        "url": "https://www.deviantart.com/technobrake"
+      },
+      {
+        "type": "cien",
+        "label": "Ci-en",
+        "url": "https://ci-en.jp/creator/926"
+      },
+      {
+        "type": "website",
+        "label": "Hentai-Foundry",
+        "url": "https://www.hentai-foundry.com/user/technobrake/profile"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "trinciapapere",
     "name": "Trinciapapere",
     "aliases": [],

@@ -1893,6 +1893,52 @@
     "otherGames": []
   },
   {
+    "id": "leave2gether",
+    "name": "Leave2gether",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://pbs.twimg.com/profile_images/1408869624066813954/9way-d9D_400x400.jpg",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "960",
+      "63320"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/leave2gether"
+      },
+      {
+        "type": "subscribestar",
+        "label": "Subscribestar",
+        "url": "https://subscribestar.adult/leave2gether"
+      },
+      {
+        "type": "website",
+        "label": "Website",
+        "url": "http://leave2gether.com/"
+      },
+      {
+        "type": "twitter",
+        "label": "Twitter",
+        "url": "https://twitter.com/leave2gether"
+      },
+      {
+        "type": "website",
+        "label": "Newgrounds",
+        "url": "https://www.newgrounds.com/portal/view/764143"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "lewdspace",
     "name": "LewdSpace",
     "aliases": [],

@@ -177,11 +177,6 @@
 
       if (norm === 'wolf') break;
 
-      if (norm === 'flash') {
-        cut = i + 1;
-        continue;
-      }
-
       if (norm === 'others' || norm === 'other') {
         if (!engines.includes('Others')) engines.push('Others');
         othersExplicit = true;
@@ -233,9 +228,11 @@
     const d = getDisplayData(g);
     const rawTitle = String(d.title || g?.title || '').trim();
     const parsed = cleanTitleParts(rawTitle);
+    const rawEngine = String(d.engine || g?.engine || '').trim();
+    const engine = rawEngine ? (ENGINE_RAW[slug(rawEngine)] || rawEngine) : '';
     return {
       categories: Array.isArray(parsed.categories) ? parsed.categories : [],
-      engines: Array.isArray(parsed.engines) ? parsed.engines : [],
+      engines: engine ? [engine] : (Array.isArray(parsed.engines) ? parsed.engines : []),
       status: parsed.status || 'En cours'
     };
   }

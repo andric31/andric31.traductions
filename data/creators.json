@@ -254,6 +254,63 @@
     ]
   },
   {
+    "id": "arvus-games",
+    "name": "Arvus Games",
+    "aliases": [],
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p31090",
+    "avatar": "https://images.gamestorylog.com/game-assets/devlogo/arvus-games-devlogo-1.webp",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "466",
+      "218071"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [
+      {
+        "name": "Starmaker Story",
+        "platform": "Itch.io",
+        "url": "https://arvusgames.itch.io/starmaker"
+      },
+      {
+        "name": "Starmaker Story",
+        "platform": "Steam",
+        "url": "https://store.steampowered.com/app/3269660/Starmaker_Story/"
+      }
+    ],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/Roundscape"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://arvusgames.itch.io/"
+      },
+      {
+        "type": "twitter",
+        "label": "Twitter",
+        "url": "https://x.com/ArvusGames"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.com/invite/arvusgames"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p31090"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "astaros3d",
     "name": "Astaros 3D",
     "aliases": [],

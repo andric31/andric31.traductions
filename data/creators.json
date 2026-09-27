@@ -1605,6 +1605,31 @@
     "otherGames": []
   },
   {
+    "id": "gosg",
+    "name": "GOSG",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "310844"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/cw/Shadow952"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "hooldrafolk",
     "name": "Hooldrafolk",
     "aliases": [],

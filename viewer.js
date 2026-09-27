@@ -906,7 +906,7 @@
       updateBadgesToggle.addEventListener("change", (e) => {
         const enabledNow = (e.target?.value || "on") !== "off";
         setUpdateBadgesEnabled(enabledNow);
-        render();
+        renderGrid();
       });
     }
 
@@ -1440,7 +1440,7 @@
   // =========================
 
   const CAT_ALLOWED = ["VN", "Collection"];
-  const ENGINE_ALLOWED = ["Ren'Py", "RPGM", "Unity", "Godot", "HTML", "Others", "Wolf RPG"];
+  const ENGINE_ALLOWED = ["Ren'Py", "RPGM", "Unity", "Godot", "HTML", "Flash", "Others", "Wolf RPG"];
   const STATUS_ALLOWED = ["Completed", "Abandoned", "Onhold"];
   const ENGINE_RAW = {
     renpy: "Ren'Py",
@@ -1462,7 +1462,7 @@
     wolf: null,
     wolfrpg: "Wolf RPG",
     "wolf rpg": "Wolf RPG",
-    flash: null,
+    flash: "Flash",
   };
 
   const SEP_RE = /[\u2014\u2013\-:]/;
@@ -1557,11 +1557,6 @@
 
       if (norm === "wolf") break;
 
-      if (norm === "flash") {
-        cut = i + 1;
-        continue;
-      }
-
       if (norm === "others" || norm === "other") {
         if (!engines.includes("Others")) engines.push("Others");
         othersExplicit = true;
@@ -1642,7 +1637,10 @@ const categories = Array.isArray(c.categories) ? c.categories : game.category ? 
       const engNorm = ENGINE_RAW[slug(game.gameData.engine)] || game.gameData.engine;
       engines = [engNorm];
     } else if (!engines || engines.length === 0) {
-      if (!String(game.id || "").trim() && String(game.collection || "").trim()) {
+      if (String(game.engine || "").trim()) {
+        const rawEngine = String(game.engine).trim();
+        engines = [ENGINE_RAW[slug(rawEngine)] || rawEngine];
+      } else if (!String(game.id || "").trim() && String(game.collection || "").trim()) {
         const cp = cleanTitle(String(game.title || ""));
         engines = Array.isArray(cp.engines) ? cp.engines : [];
       }

@@ -472,27 +472,33 @@ a.card.card-link *{
   transform: translateY(-1px);
 }
 
-/* Indicateur permanent : indépendant du filtre des badges de mise à jour. */
+/* Ruban permanent, en diagonale sous AJOUT / MAJ.
+   Il reste visible lorsque les rubans de mise à jour sont masqués. */
 .card.discord-exclusive-card{border-color:#7d84f5}
 .card .discord-exclusive-badge{
-  display:inline-flex;
+  display:flex;
   align-items:center;
-  gap:6px;
+  justify-content:center;
+  gap:4px;
   position:absolute;
-  top:62px;
-  left:10px;
+  top:40px;
+  left:-47px;
   z-index:3;
-  max-width:calc(100% - 20px);
+  width:200px;
   box-sizing:border-box;
-  padding:7px 10px;
+  padding:5px 24px;
   border:1px solid #aeb2ff;
-  border-radius:8px;
-  background:#454dc0;
+  border-radius:0;
+  background:linear-gradient(180deg, #5862d6, #454dc0);
   color:#fff !important;
-  font-size:12px;
+  font-size:10px;
   font-weight:800;
-  line-height:1.25;
+  line-height:1.2;
+  white-space:nowrap;
+  text-shadow:0 1px 2px rgba(0,0,0,.35);
   box-shadow:0 3px 12px rgba(0,0,0,.35);
+  transform:rotate(-45deg);
+  transform-origin:center;
   pointer-events:none;
 }
 .card .discord-exclusive-badge::before,
@@ -509,6 +515,11 @@ a.card.card-link *{
   height:20px;
   margin-right:7px;
   vertical-align:-4px;
+}
+.card .discord-exclusive-badge::before{
+  width:13px;
+  height:13px;
+  flex:0 0 13px;
 }
 
 

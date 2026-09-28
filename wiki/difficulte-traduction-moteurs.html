@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Difficulté de traduction des moteurs — andric31</title>
+  <script src="/theme-init.js"></script>
+  <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=1">
+  <link rel="stylesheet" href="/themes.css" />
+  <link rel="stylesheet" href="wiki.css" />
+
+  <style>
+    html{
+      scroll-behavior: smooth;
+    }
+
+    .level-block{
+      margin-top: 30px;
+      scroll-margin-top: 18px;
+      --level: #7c8aa5;
+      --level-2: #aab4c8;
+    }
+
+    .level-simple{ --level: #22c978; --level-2: #78f0b2; }
+    .level-medium{ --level: #f2b930; --level-2: #ffe07a; }
+    .level-hard{ --level: #ff7b2f; --level-2: #ffb36f; }
+    .level-very-hard{ --level: #f04464; --level-2: #ff8198; }
+    .level-variable{ --level: #7d83ff; --level-2: #b7baff; }
+
+    .level-head{
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+      padding: 16px 18px;
+      border: 1px solid color-mix(in srgb, var(--level) 58%, var(--wiki-border) 42%);
+      border-radius: 18px;
+      background: linear-gradient(135deg,
+        color-mix(in srgb, var(--level) 24%, var(--wiki-card) 76%),
+        color-mix(in srgb, var(--level-2) 10%, var(--wiki-card) 90%));
+      box-shadow: 0 12px 30px color-mix(in srgb, var(--level) 12%, transparent);
+    }
+
+    .level-head::before{
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 5px;
+      background: linear-gradient(180deg, var(--level-2), var(--level));
+    }
+
+    .level-dot{
+      width: 16px;
+      height: 16px;
+      flex: 0 0 16px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--level-2), var(--level));
+      box-shadow:
+        0 0 0 5px color-mix(in srgb, var(--level) 13%, transparent),
+        0 0 20px color-mix(in srgb, var(--level) 34%, transparent);
+    }
+
+    .level-head h2{
+      margin: 0;
+      font-size: 21px;
+      color: var(--wiki-text);
+    }
+
+    .level-head p{
+      margin: 4px 0 0;
+      color: color-mix(in srgb, var(--wiki-text) 76%, var(--wiki-muted) 24%);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .engine-grid{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .engine-item{
+      position: relative;
+      overflow: hidden;
+      padding: 18px 18px 17px;
+      border: 1px solid color-mix(in srgb, var(--level) 24%, var(--wiki-border) 76%);
+      border-top: 3px solid var(--level);
+      border-radius: 16px;
+      background: linear-gradient(180deg,
+        color-mix(in srgb, var(--level) 9%, var(--wiki-card) 91%),
+        var(--wiki-card));
+      box-shadow: 0 10px 26px rgba(0,0,0,0.10);
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+
+    .engine-item:hover{
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--level) 48%, var(--wiki-border) 52%);
+      box-shadow: 0 14px 34px color-mix(in srgb, var(--level) 10%, rgba(0,0,0,0.18));
+    }
+
+    .engine-item h3{
+      margin: 0 0 8px;
+      font-size: 18px;
+      color: color-mix(in srgb, var(--level-2) 72%, var(--wiki-text) 28%);
+    }
+
+    .engine-item p{
+      margin: 0;
+      color: var(--wiki-muted);
+      line-height: 1.65;
+      font-size: 14px;
+    }
+
+    .intro-card{
+      margin-bottom: 18px;
+      border-color: color-mix(in srgb, #53c8ff 25%, var(--wiki-border) 75%);
+      background: linear-gradient(135deg,
+        color-mix(in srgb, #53c8ff 9%, var(--wiki-card) 91%),
+        color-mix(in srgb, #d967ff 7%, var(--wiki-card) 93%));
+    }
+
+    .intro-card p{
+      margin: 0;
+      line-height: 1.75;
+      color: var(--wiki-muted);
+    }
+
+    .summary-card{
+      padding: 18px;
+      border: 1px solid color-mix(in srgb, #8a7dff 30%, var(--wiki-border) 70%);
+      border-radius: 18px;
+      background:
+        linear-gradient(135deg,
+          color-mix(in srgb, #4cc9f0 10%, var(--wiki-card) 90%),
+          color-mix(in srgb, #f15bb5 8%, var(--wiki-card) 92%),
+          color-mix(in srgb, #fee440 6%, var(--wiki-card) 94%));
+      box-shadow: 0 12px 34px rgba(0,0,0,0.10);
+    }
+
+    .summary-card h2{
+      margin: 0 0 6px;
+      font-size: 20px;
+      color: var(--wiki-text);
+    }
+
+    .summary-card > p{
+      margin: 0 0 14px;
+      color: var(--wiki-muted);
+      font-size: 14px;
+    }
+
+    .summary-grid{
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .level-link{
+      --link-color: #8b94aa;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 72px;
+      padding: 11px 12px;
+      border: 1px solid color-mix(in srgb, var(--link-color) 42%, var(--wiki-border) 58%);
+      border-radius: 14px;
+      background: linear-gradient(180deg,
+        color-mix(in srgb, var(--link-color) 17%, var(--wiki-card) 83%),
+        color-mix(in srgb, var(--link-color) 8%, var(--wiki-card) 92%));
+      color: var(--wiki-text);
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+
+    .level-link:hover{
+      transform: translateY(-2px);
+      border-color: var(--link-color);
+      box-shadow: 0 10px 24px color-mix(in srgb, var(--link-color) 14%, transparent);
+    }
+
+    .level-link strong{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 3px;
+      font-size: 14px;
+    }
+
+    .summary-marker{
+      width: 12px;
+      height: 12px;
+      flex: 0 0 12px;
+      border-radius: 3px;
+      background: var(--link-color);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--link-color) 16%, transparent);
+    }
+
+    .level-link span{
+      color: var(--wiki-muted);
+      font-size: 12px;
+    }
+
+    .link-simple{ --link-color: #22c978; }
+    .link-medium{ --link-color: #f2b930; }
+    .link-hard{ --link-color: #ff7b2f; }
+    .link-very-hard{ --link-color: #f04464; }
+    .link-variable{ --link-color: #7d83ff; }
+
+    .note{
+      margin-top: 28px;
+      padding: 17px 18px;
+      border: 1px solid color-mix(in srgb, #45d7ff 30%, var(--wiki-border-strong) 70%);
+      border-radius: 16px;
+      background: linear-gradient(135deg,
+        color-mix(in srgb, #45d7ff 10%, var(--wiki-accent-soft) 90%),
+        color-mix(in srgb, #8cff9b 8%, var(--wiki-accent-soft) 92%));
+      color: var(--wiki-muted);
+      line-height: 1.7;
+    }
+
+    @media (max-width: 900px){
+      .summary-grid{
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px){
+      .engine-grid{
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px){
+      .summary-grid{
+        grid-template-columns: 1fr;
+      }
+
+      .level-link{
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="back" href="index.html">⬅ Retour</a>
+  <h1>Difficulté de traduction des moteurs</h1>
+  <p class="subtitle">Classement général des moteurs selon la difficulté pour extraire, traduire et réinjecter les textes d’un jeu.</p>
+</header>
+
+<main class="page">
+
+  <section class="card intro-card">
+    <p>
+      Ce classement donne une idée générale. La difficulté varie selon le jeu,
+      sa version, les outils à disposition et l'architecture du code source.
+    </p>
+  </section>
+
+  <section class="summary-card" aria-labelledby="sommaire-niveaux">
+    <h2 id="sommaire-niveaux">Sommaire des niveaux</h2>
+    <p>Clique sur un niveau pour aller directement à la section correspondante.</p>
+
+    <nav class="summary-grid" aria-label="Sommaire des niveaux de difficulté">
+      <a class="level-link link-simple" href="#niveau-1">
+        <strong><span class="summary-marker" aria-hidden="true"></span>Niveau 1</strong>
+        <span>Simple</span>
+      </a>
+      <a class="level-link link-medium" href="#niveau-2">
+        <strong><span class="summary-marker" aria-hidden="true"></span>Niveau 2</strong>
+        <span>Intermédiaire</span>
+      </a>
+      <a class="level-link link-hard" href="#niveau-3">
+        <strong><span class="summary-marker" aria-hidden="true"></span>Niveau 3</strong>
+        <span>Difficile</span>
+      </a>
+      <a class="level-link link-very-hard" href="#niveau-4">
+        <strong><span class="summary-marker" aria-hidden="true"></span>Niveau 4</strong>
+        <span>Très difficile</span>
+      </a>
+      <a class="level-link link-variable" href="#niveau-variable">
+        <strong><span class="summary-marker" aria-hidden="true"></span>Variable</strong>
+        <span>Selon le moteur</span>
+      </a>
+    </nav>
+  </section>
+
+  <section class="level-block level-simple" id="niveau-1">
+    <div class="level-head">
+      <span class="level-dot" aria-hidden="true"></span>
+      <div>
+        <h2>Niveau 1 — Simple</h2>
+        <p>Les moteurs les plus accessibles pour la traduction.</p>
+      </div>
+    </div>
+
+    <div class="engine-grid">
+      <article class="engine-item">
+        <h3>Ren'Py</h3>
+        <p>Système de traduction <strong>tl/</strong> natif et textes généralement faciles à identifier. C’est le moteur le plus simple à traduire.</p>
+      </article>
+
+      <article class="engine-item">
+        <h3>RPGM</h3>
+        <p>Données bien structurées, souvent en JSON ou dans des formats RPG Maker connus. L’extraction et la réinjection sont généralement simples.</p>
+      </article>
+
+      <article class="engine-item">
+        <h3>HTML</h3>
+        <p>Les textes sont souvent directement accessibles dans les fichiers HTML, JavaScript ou JSON.</p>
+      </article>
+
+      <article class="engine-item">
+        <h3>QSP</h3>
+        <p>Principalement du texte et du script. Les chaînes sont généralement assez faciles à extraire et à réinjecter.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="level-block level-medium" id="niveau-2">
+    <div class="level-head">
+      <span class="level-dot" aria-hidden="true"></span>
+      <div>
+        <h2>Niveau 2 — Intermédiaire</h2>
+        <p>Formats propriétaires ou outils un peu moins répandus.</p>
+      </div>
+    </div>
+
+    <div class="engine-grid">
+      <article class="engine-item">
+        <h3>ADRIFT</h3>
+        <p>Très orienté texte, mais son format propriétaire et le nombre limité d’outils modernes rendent le travail moins direct.</p>
+      </article>
+
+      <article class="engine-item">
+        <h3>TADS</h3>
+        <p>Beaucoup de texte, mais certaines chaînes peuvent être intégrées dans les scripts ou dans des fichiers compilés.</p>
+      </article>
+
+      <article class="engine-item">
+        <h3>RAGS</h3>
+        <p>Jeux souvent très textuels, mais les bases de données et formats propriétaires peuvent compliquer la modification.</p>
+      </article>
+
+      <article class="engine-item">
+        <h3>Wolf RPG</h3>
+        <p>Structure assez régulière, mais formats propriétaires et problèmes d’encodage possibles, notamment avec les jeux japonais.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="level-block level-hard" id="niveau-3">
+    <div class="level-head">
+      <span class="level-dot" aria-hidden="true"></span>
+      <div>
+        <h2>Niveau 3 — Difficile</h2>
+        <p>Plus de formats, de ressources et de cas particuliers à gérer.</p>
+      </div>
+    </div>
+
+    <div class="engine-grid">
+      <article class="engine-item">
+        <h3>Flash</h3>
+        <p>Il faut souvent décompiler les fichiers SWF. Les textes peuvent être mélangés à l’ActionScript, aux polices ou directement intégrés dans des images.</p>
+      </article>
+
+      <article class="engine-item">
+        <h3>Java</h3>
+        <p>Très variable : simple avec des fichiers de langue séparés, beaucoup plus complexe lorsque les textes sont intégrés dans des JAR ou des classes compilées.</p>
+      </article>
+
+      <article class="engine-item">
+        <h3>Godot</h3>
+        <p>Les textes peuvent être répartis dans les scripts, scènes, ressources ou fichiers PCK, avec plusieurs systèmes de localisation possibles.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="level-block level-very-hard" id="niveau-4">
+    <div class="level-head">
+      <span class="level-dot" aria-hidden="true"></span>
+      <div>
+        <h2>Niveau 4 — Très difficile</h2>
+        <p>Moteurs complexes avec de nombreuses méthodes de stockage des textes.</p>
+      </div>
+    </div>
+
+    <div class="engine-grid">
+      <article class="engine-item">
+        <h3>Unity</h3>
+        <p>Les textes peuvent être dispersés dans les assets, bundles, MonoBehaviour, DLL, TextMeshPro ou différents systèmes de localisation. Certains jeux utilisent aussi IL2CPP.</p>
+      </article>
+
+      <article class="engine-item">
+        <h3>Unreal Engine</h3>
+        <p>Assets cuits, fichiers PAK, UCAS/UTOC, LOCRES, Blueprints et différences importantes selon la version du moteur rendent la traduction plus délicate.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="level-block level-variable" id="niveau-variable">
+    <div class="level-head">
+      <span class="level-dot" aria-hidden="true"></span>
+      <div>
+        <h2>Variable</h2>
+        <p>Impossible d’attribuer une difficulté fixe.</p>
+      </div>
+    </div>
+
+    <div class="engine-grid">
+      <article class="engine-item">
+        <h3>Others</h3>
+        <p>Cette catégorie peut contenir un simple format texte comme un moteur totalement propriétaire. La difficulté dépend donc entièrement du jeu.</p>
+        <p style="margin-top:10px;"><strong>Exemples :</strong> Tyrano, KiriKiri, YU-RIS, Visual Novel Maker, GameMaker Studio...</p>
+      </article>
+    </div>
+  </section>
+
+  <div class="note">
+    <strong>À retenir :</strong> ce classement concerne surtout la difficulté technique de traduction d’un jeu : repérer les textes, les extraire, les traduire puis les réinjecter sans casser le jeu.
+  </div>
+
+</main>
+
+<footer class="footer">
+  <p>© andric31 — Tutos & Aide</p>
+</footer>
+
+</body>
+</html>

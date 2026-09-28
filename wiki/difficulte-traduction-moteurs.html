@@ -220,6 +220,19 @@
       line-height: 1.7;
     }
 
+    .image-wrap{
+      margin-top: 28px;
+      width: 100%;
+    }
+
+    .image-wrap img{
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      border-radius: 16px;
+    }
+
     @media (max-width: 900px){
       .summary-grid{
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -423,11 +436,15 @@
     <strong>À retenir :</strong> ce classement concerne surtout la difficulté technique de traduction d’un jeu : repérer les textes, les extraire, les traduire puis les réinjecter sans casser le jeu.
   </div>
 
-</main>
+  <div class="image-wrap">
+    <img src="img/difficulte-traduction-moteurs.webp">
+  </div>
 
 <footer class="footer">
   <p>© andric31 — Tutos & Aide</p>
 </footer>
+
+</main>
 
 </body>
 </html>

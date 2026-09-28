@@ -943,6 +943,48 @@
     "otherGames": []
   },
   {
+    "id": "dangames",
+    "name": "DanGames",
+    "aliases": [],
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p28394",
+    "avatar": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/2370389/avatars/16808c2b-e839-4221-bb06-e09b75d70919-380x380_0x0_1023x1023.png",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "203076",
+      "258928",
+      "262710"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/dangames"
+      },
+      {
+        "type": "subscribestar",
+        "label": "Subscribestar",
+        "url": "https://subscribestar.adult/dangames"
+      },
+      {
+        "type": "steam",
+        "label": "Steam",
+        "url": "https://store.steampowered.com/search/?developer=Dan%20Games&snr=1_5_9__2000"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p28394"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "dark-anu",
     "name": "Dark Anu",
     "aliases": [],

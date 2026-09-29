@@ -2504,7 +2504,13 @@
         "url": "https://discord.gg/2WwNZXyAgb"
       }
     ],
-    "otherGames": []
+    "otherGames": [
+      {
+        "name": "Midnight Exploration",
+        "platform": "Itch.io",
+        "url": "https://nencity.itch.io/midnight-exploration"
+      }
+    ]
   },
   {
     "id": "night-mirror",

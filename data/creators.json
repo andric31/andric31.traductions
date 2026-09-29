@@ -791,6 +791,48 @@
     "otherGames": []
   },
   {
+    "id": "cocoaboom",
+    "name": "CocoaBoom",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://f95zone.to/data/avatars/l/9031/9031335.jpg?1750936146",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "260233",
+      "306845"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [
+      {
+        "name": "The Purple House",
+        "platform": "Itch.io",
+        "url": "https://cocoaboom.itch.io/the-purple-house"
+      }
+    ],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/cocoa-boom.9031335/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/c/CocoaBoom"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.com/invite/KvnzBRmj4J"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "comrade-x",
     "name": "comrade_x",
     "aliases": [],

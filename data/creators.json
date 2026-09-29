@@ -2485,7 +2485,7 @@
     "creatorType": "",
     "primaryLanguage": "",
     "vndbId": "",
-    "avatar": "",
+    "avatar": "https://pbs.twimg.com/profile_images/2101519638550937600/aRj6bBD1_400x400.png",
     "banner": "",
     "presentation": "",
     "gameIds": [
@@ -2499,9 +2499,29 @@
         "url": "https://www.patreon.com/NenCity"
       },
       {
+        "type": "twitter",
+        "label": "X / Twitter",
+        "url": "https://x.com/Nencity26"
+      },
+      {
         "type": "discord",
         "label": "Discord",
         "url": "https://discord.gg/2WwNZXyAgb"
+      },
+      {
+        "type": "youtube",
+        "label": "YouTube",
+        "url": "https://www.youtube.com/channel/UCGQTPcp6ShMrcIgn08phzeg"
+      },
+      {
+        "type": "tiktok",
+        "label": "TikTok",
+        "url": "https://tiktok.com/@nencity26"
+      },
+      {
+        "type": "instagram",
+        "label": "Instagram",
+        "url": "https://www.instagram.com/nencity.midnightexploration"
       }
     ],
     "otherGames": [

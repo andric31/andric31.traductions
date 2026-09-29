@@ -2140,6 +2140,36 @@
     "otherGames": []
   },
   {
+    "id": "mayonnaisee",
+    "name": "mayonnaisee",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "145645"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/c/mayonnaisee1"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://mayonnaises.itch.io/"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "milflover",
     "name": "Milflover",
     "aliases": [],

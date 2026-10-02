@@ -853,6 +853,47 @@
     "otherGames": []
   },
   {
+    "id": "connection",
+    "name": "Connection",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://pbs.twimg.com/profile_images/1609224981556363267/tUfP-Jq7_400x400.jpg",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "214008"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [
+      {
+        "name": "Summer Clover",
+        "platform": "Steam",
+        "url": "https://store.steampowered.com/app/2458860/Summer_Clover/"
+      }
+    ],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/ConnectionStudio"
+      },
+      {
+        "type": "twitter",
+        "label": "Twitter",
+        "url": "https://x.com/Connection2022"
+      },
+      {
+        "type": "steam",
+        "label": "Steam",
+        "url": "https://store.steampowered.com/curator/37024735"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "cosmobot-7-0",
     "name": "Cosmobot-7.0",
     "aliases": [
@@ -883,6 +924,52 @@
       }
     ],
     "otherGames": []
+  },
+  {
+    "id": "cremosito",
+    "name": "Cremosito",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://pbs.twimg.com/profile_images/1782368702467338240/1Z2-xapI_400x400.jpg",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "244797"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [
+      {
+        "name": "The Shipwreck",
+        "platform": "Itch.io",
+        "url": "https://cremosito.itch.io/the-shipwreck"
+      }
+    ],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/c/Cremosito/home"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://cremosito.itch.io/"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.com/invite/6MJanAe3"
+      },
+      {
+        "type": "twitter",
+        "label": "Twitter",
+        "url": "https://x.com/Cremositogames"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
   },
   {
     "id": "crowlab",

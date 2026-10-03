@@ -1619,6 +1619,42 @@
     "otherGames": []
   },
   {
+    "id": "eventides",
+    "name": "EvenTides",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://f95zone.to/data/avatars/l/11713/11713070.jpg?1787700487",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "312335"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [
+      {
+        "name": "My Succubus Problem!",
+        "platform": "Itch.io",
+        "url": "https://eventidess.itch.io/my-succubus-problem"
+      }
+    ],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/eventides.11713070/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/cw/eventidesworks"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "fallen-eros",
     "name": "Fallen Eros",
     "aliases": [],

@@ -1937,6 +1937,47 @@
     "otherGames": []
   },
   {
+    "id": "imperiumromantum",
+    "name": "ImperiumRomantum",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://f95zone.to/data/avatars/l/9179/9179868.jpg?1787173855",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "296891"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [
+      {
+        "name": "University Rush",
+        "platform": "Steam",
+        "url": "https://store.steampowered.com/app/4170610/University_Rush/"
+      }
+    ],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/imperiumromantum.9179868/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/c/ImperiumRomantum"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.com/invite/u6HR9qzTYy"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "jasonton",
     "name": "JasonTon",
     "aliases": [],

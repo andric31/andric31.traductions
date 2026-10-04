@@ -474,7 +474,6 @@ a.card.card-link *{
 
 /* Ruban permanent, en diagonale sous AJOUT / MAJ.
    Il reste visible lorsque les rubans de mise à jour sont masqués. */
-.card.discord-exclusive-card{border-color:#7d84f5}
 .card .discord-exclusive-badge{
   display:flex;
   align-items:center;

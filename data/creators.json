@@ -1977,6 +1977,46 @@
     "otherGames": []
   },
   {
+    "id": "ker",
+    "name": "Ker",
+    "aliases": [],
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p12981",
+    "avatar": "https://images.gamestorylog.com/game-assets/devlogo/ker-devlogo-1.webp",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "317185"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://kervn.itch.io/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/kergames"
+      },
+      {
+        "type": "steam",
+        "label": "Steam",
+        "url": "https://store.steampowered.com/developer/Ker"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p12981"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "koi-spirit",
     "name": "Koi Spirit",
     "aliases": [],

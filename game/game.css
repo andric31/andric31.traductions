@@ -437,7 +437,7 @@ body:not(.mode-game){
   display:block;
   margin:0 0 16px;
   padding:13px 16px 13px 20px;
-  border:1px solid var(--border,rgba(150,160,185,.25));
+  border:1px solid transparent;
   border-radius:12px;
   background:linear-gradient(105deg,rgba(85,121,182,.11),rgba(255,255,255,.025) 50%,rgba(162,78,96,.08)),var(--card,#171b29);
   color:var(--fg,#e8eaf0);
@@ -448,12 +448,14 @@ body:not(.mode-game){
 .integrated-french-notice::before{
   content:"";
   position:absolute;
-  left:0;
-  top:11px;
-  bottom:11px;
-  width:3px;
-  border-radius:2px;
-  background:linear-gradient(to bottom,#7895c9 0 33.333%,#d8dce5 33.333% 66.666%,#bb7a85 66.666% 100%);
+  inset:-1px;
+  padding:1px;
+  border-radius:inherit;
+  background:linear-gradient(105deg,rgba(104,146,216,.65) 0%,rgba(104,146,216,.65) 25%,rgba(218,224,235,.5) 50%,rgba(200,115,130,.65) 75%,rgba(200,115,130,.65) 100%);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
   pointer-events:none;
 }
 .integrated-french-notice strong{font-size:16px;color:var(--fg,#e8eaf0);margin-right:8px}

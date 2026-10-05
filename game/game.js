@@ -3,6 +3,8 @@
 const DEFAULT_URL = "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json";
 const DEFAULT_BACKUP_URL = "/api/f95list";
 const DEFAULT_STATIC_BACKUP_URL = "/data/f95list.json";
+const INTEGRATED_FRENCH_LIST_URL = "https://raw.githubusercontent.com/andric31/traductions/refs/heads/main/f95list_vofr.json";
+const INTEGRATED_FRENCH_PAGE_URL = "https://traductions.pages.dev/vofr/";
 
 const ADMIN_VIEWER_STORAGE_KEY = "andric31AdminViewerMode";
 
@@ -81,6 +83,83 @@ function buildPrivateLinksKey(game) {
 
 function isDiscordExclusive(entry) {
   return String(entry?.discordExclusive ?? entry?.gameData?.discordExclusive ?? "").trim().toLowerCase() === "oui";
+}
+
+// Les uid sont propres à chaque liste : ils ne permettent pas de comparer
+// la liste d'andric31 avec la liste VO FR. On utilise les identifiants F95.
+function getIntegratedFrenchKeys(game) {
+  if (!game || typeof game !== "object") return [];
+  const keys = new Set();
+  const collection = String(game.collection || "").trim();
+  const display = game.gameData && typeof game.gameData === "object" ? game.gameData : game;
+  const addId = (value) => {
+    const id = String(value ?? "").trim();
+    // Un enfant ne doit pas hériter du signalement de toute sa collection.
+    if (/^[1-9]\d*$/.test(id) && id !== collection) keys.add(`id:${id}`);
+  };
+  for (const data of [game, display]) {
+    addId(data.id);
+    try {
+      const url = new URL(String(data.url || ""));
+      if (/^(www\.)?f95zone\.to$/i.test(url.hostname)) {
+        const match = url.pathname.match(/^\/threads\/(?:[^/]*\.)?([1-9]\d*)(?:\/|$)/i);
+        if (match) addId(match[1]);
+      }
+    } catch {}
+  }
+  if (collection) {
+    const title = String(display.cleanTitle || display.title || "")
+      .normalize("NFKC").toLowerCase().replace(/\s+/g, " ").trim();
+    if (title) keys.add(`collection:${collection}|title:${title}`);
+  }
+  return [...keys];
+}
+
+function findIntegratedFrenchGame(entry, games) {
+  const keys = new Set(getIntegratedFrenchKeys(entry));
+  if (!keys.size) return null;
+  return games.find((game) => getIntegratedFrenchKeys(game).some((key) => keys.has(key))) || null;
+}
+
+function buildIntegratedFrenchSourceUrl(game) {
+  const url = new URL(INTEGRATED_FRENCH_PAGE_URL);
+  const id = String(game?.id || "").trim();
+  const collection = String(game?.collection || "").trim();
+  const uid = String(game?.uid ?? "").trim();
+  if (collection && uid) {
+    url.searchParams.set("id", collection);
+    url.searchParams.set("uid", uid);
+  } else if (!collection && id) {
+    url.searchParams.set("id", id);
+  } else if (uid) {
+    url.searchParams.set("uid", uid);
+  }
+  return url.href;
+}
+
+async function renderIntegratedFrenchNotice(entry) {
+  const notice = $("integratedFrenchNotice");
+  if (!notice) return;
+  notice.hidden = true;
+  if (!getIntegratedFrenchKeys(entry).length) return;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
+  try {
+    const response = await fetch(INTEGRATED_FRENCH_LIST_URL, { cache: "no-store", signal: controller.signal });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const raw = await response.json();
+    const match = findIntegratedFrenchGame(entry, extractGames(raw));
+    if (!match) return;
+    const source = $("integratedFrenchSource");
+    if (source) source.href = buildIntegratedFrenchSourceUrl(match);
+    notice.hidden = false;
+  } catch (error) {
+    // Une liste indisponible ne doit jamais empêcher l'affichage de la fiche.
+    console.warn("Vérification du français intégré indisponible.", error);
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 async function fetchPrivateGameData(privateKey) {
@@ -2213,6 +2292,7 @@ function renderVideoBlock({ id, videoUrl }) {
 
     setText("title", title);
     if ($("discordExclusiveNotice")) $("discordExclusiveNotice").hidden = !discordExclusive;
+    void renderIntegratedFrenchNotice(entry);
     if (discordExclusive) {
       const actions = document.querySelector(".gameActionsCard");
       actions?.classList.add("discord-exclusive-actions");

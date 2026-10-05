@@ -433,30 +433,31 @@ body:not(.mode-game){
 .gameActionsCard.discord-exclusive-actions{border-color:#7d84f5}
 
 .integrated-french-notice{
+  position:relative;
   display:block;
   margin:0 0 16px;
-  padding:14px 16px;
-  border:1px solid #74cdaa;
+  padding:13px 16px 13px 20px;
+  border:1px solid var(--border,rgba(150,160,185,.25));
   border-radius:12px;
-  background:#165b45;
-  color:#fff;
+  background:linear-gradient(105deg,rgba(85,121,182,.11),rgba(255,255,255,.025) 50%,rgba(162,78,96,.08)),var(--card,#171b29);
+  color:var(--fg,#e8eaf0);
   line-height:1.45;
   overflow-wrap:anywhere;
 }
 .integrated-french-notice[hidden]{display:none !important}
-.integrated-french-notice strong{font-size:17px;color:#fff;margin-right:8px}
-.integrated-french-notice span{font-size:13px;color:#fff}
-.integrated-french-notice a{
-  display:inline-block;
-  margin-top:4px;
-  font-size:13px;
-  font-weight:700;
-  color:#fff;
-  text-decoration:underline;
-  text-underline-offset:3px;
+.integrated-french-notice::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:11px;
+  bottom:11px;
+  width:3px;
+  border-radius:2px;
+  background:linear-gradient(to bottom,#7895c9 0 33.333%,#d8dce5 33.333% 66.666%,#bb7a85 66.666% 100%);
+  pointer-events:none;
 }
-.integrated-french-notice a:hover{text-decoration-thickness:2px}
-.integrated-french-notice a:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:2px}
+.integrated-french-notice strong{font-size:16px;color:var(--fg,#e8eaf0);margin-right:8px}
+.integrated-french-notice span{font-size:13px;color:var(--muted,#aab2c8)}
 
 #btnDiscord.btn-discord{
   background:#5865F2;

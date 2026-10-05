@@ -4,7 +4,6 @@ const DEFAULT_URL = "https://raw.githubusercontent.com/andric31/f95list/main/f95
 const DEFAULT_BACKUP_URL = "/api/f95list";
 const DEFAULT_STATIC_BACKUP_URL = "/data/f95list.json";
 const INTEGRATED_FRENCH_LIST_URL = "https://raw.githubusercontent.com/andric31/traductions/refs/heads/main/f95list_vofr.json";
-const INTEGRATED_FRENCH_PAGE_URL = "https://traductions.pages.dev/vofr/";
 
 const ADMIN_VIEWER_STORAGE_KEY = "andric31AdminViewerMode";
 
@@ -121,22 +120,6 @@ function findIntegratedFrenchGame(entry, games) {
   return games.find((game) => getIntegratedFrenchKeys(game).some((key) => keys.has(key))) || null;
 }
 
-function buildIntegratedFrenchSourceUrl(game) {
-  const url = new URL(INTEGRATED_FRENCH_PAGE_URL);
-  const id = String(game?.id || "").trim();
-  const collection = String(game?.collection || "").trim();
-  const uid = String(game?.uid ?? "").trim();
-  if (collection && uid) {
-    url.searchParams.set("id", collection);
-    url.searchParams.set("uid", uid);
-  } else if (!collection && id) {
-    url.searchParams.set("id", id);
-  } else if (uid) {
-    url.searchParams.set("uid", uid);
-  }
-  return url.href;
-}
-
 async function renderIntegratedFrenchNotice(entry) {
   const notice = $("integratedFrenchNotice");
   if (!notice) return;
@@ -151,8 +134,6 @@ async function renderIntegratedFrenchNotice(entry) {
     const raw = await response.json();
     const match = findIntegratedFrenchGame(entry, extractGames(raw));
     if (!match) return;
-    const source = $("integratedFrenchSource");
-    if (source) source.href = buildIntegratedFrenchSourceUrl(match);
     notice.hidden = false;
   } catch (error) {
     // Une liste indisponible ne doit jamais empêcher l'affichage de la fiche.

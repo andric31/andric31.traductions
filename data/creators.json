@@ -1655,6 +1655,57 @@
     "country": ""
   },
   {
+    "id": "escape-sauce",
+    "name": "Escape Sauce",
+    "aliases": [],
+    "creatorType": "amateur_group",
+    "primaryLanguage": "en",
+    "vndbId": "p11253",
+    "avatar": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/291902/avatars/15cc7cd1-1c3c-49ea-89ff-0eadd925d60e-380x380_0x1_1023x1024.png",
+    "banner": "",
+    "presentation": "Escape Sauce est une très petite équipe de développeurs et développeuses qui créent des jeux pour adultes et des romans visuels aux illustrations réalisées à la main, explorant des thèmes et des univers fictifs variés.",
+    "gameIds": [
+      "68192"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [
+      {
+        "name": "Refuge of Embers",
+        "platform": "Steam",
+        "url": "https://store.steampowered.com/app/2175740/Refuge_of_Embers/"
+      },
+      {
+        "name": "Refuge of Embers",
+        "platform": "Itch.io",
+        "url": "https://escape-sauce.itch.io/refuge-of-embers"
+      }
+    ],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/EscapeSauce"
+      },
+      {
+        "type": "subscribestar",
+        "label": "SubscribeStar",
+        "url": "https://www.subscribestar.com/escape-sauce"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/xAu35v4x5R"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p11253"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "escovic-games",
     "name": "Escovic Games",
     "aliases": [],

@@ -508,6 +508,47 @@
     "country": ""
   },
   {
+    "id": "black-train",
+    "name": "Black Train",
+    "aliases": [],
+    "creatorType": "individual",
+    "primaryLanguage": "ja",
+    "vndbId": "p3202",
+    "avatar": "https://media.ci-en.jp/public/icon/creator/00003354/ad1a1e7da74b5c338130facc3906a9b680b41d15ba2fc55333f3b87c821ba8e0/image-200-c.jpg",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "73900"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [
+      {
+        "name": "Explorer of Yggdrasil",
+        "platform": "Steam",
+        "url": "https://store.steampowered.com/app/1328900/Explorer_of_Yggdrasil/"
+      }
+    ],
+    "links": [
+      {
+        "type": "dlsite",
+        "label": "DLsite",
+        "url": "https://www.dlsite.com/ecchi-eng/circle/profile/=/maker_id/RG10624.html"
+      },
+      {
+        "type": "dlsite",
+        "label": "Ci-en",
+        "url": "https://ci-en.dlsite.com/creator/3354"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p3202"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "black-cat",
     "name": "Black_Cat",
     "aliases": [],

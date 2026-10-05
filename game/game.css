@@ -459,7 +459,14 @@ body:not(.mode-game){
   pointer-events:none;
 }
 .integrated-french-notice strong{font-size:16px;color:var(--fg,#e8eaf0);margin-right:8px}
-.integrated-french-notice span{font-size:13px;color:var(--muted,#aab2c8)}
+.integrated-french-notice > span{font-size:13px;color:var(--muted,#aab2c8)}
+.integrated-french-notice strong > span{font-size:inherit}
+.integrated-french-notice .integrated-fr-blue{color:#5989d8}
+.integrated-french-notice .integrated-fr-white{
+  color:#fff;
+  text-shadow:0 1px 2px rgba(20,28,45,.7),0 0 1px rgba(20,28,45,.7);
+}
+.integrated-french-notice .integrated-fr-red{color:#d9697a}
 
 #btnDiscord.btn-discord{
   background:#5865F2;

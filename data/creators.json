@@ -1655,6 +1655,46 @@
     "country": ""
   },
   {
+    "id": "erotic-drop",
+    "name": "Erotic Drop",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/1839540/avatars/933bec56-4158-41fc-a3a5-05698cff47f4-380x380_821x136_256x255.jpg",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "317337"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "subscribestar",
+        "label": "Subscribestar",
+        "url": "https://subscribestar.adult/eroticdrop"
+      },
+      {
+        "type": "kofi",
+        "label": "ko-fi",
+        "url": "https://ko-fi.com/stefano_and_luana"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://eroticdrop.itch.io/"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/3QEUA85ZVs"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "escape-sauce",
     "name": "Escape Sauce",
     "aliases": [],

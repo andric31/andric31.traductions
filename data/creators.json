@@ -4282,6 +4282,43 @@
     "otherGames": []
   },
   {
+    "id": "vaultman",
+    "name": "VaultMan",
+    "aliases": [],
+    "creatorType": "individual",
+    "primaryLanguage": "en",
+    "vndbId": "p14727",
+    "avatar": "https://images.gamestorylog.com/game-assets/devlogo/vaultman-devlogo-1.webp",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "3142",
+      "173280",
+      "21422"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "website",
+        "label": "Website",
+        "url": "https://vaultplay.com/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/VaultMan"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p14727"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "velkami",
     "name": "Velkami",
     "aliases": [],

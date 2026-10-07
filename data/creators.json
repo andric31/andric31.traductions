@@ -3981,6 +3981,36 @@
     "otherGames": []
   },
   {
+    "id": "slopemup",
+    "name": "SlopEmUp",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://pbs.twimg.com/profile_images/2104356770743521281/GgJPrMIo_400x400.jpg",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "317828"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "twitter",
+        "label": "Twitter",
+        "url": "https://x.com/letsslopemup"
+      },
+      {
+        "type": "buymeacoffee",
+        "label": "BuyMeACoffee",
+        "url": "https://buymeacoffee.com/slopemup"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "slow-burn-games",
     "name": "Slow Burn Games",
     "aliases": [],

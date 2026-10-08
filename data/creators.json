@@ -3048,6 +3048,36 @@
     ]
   },
   {
+    "id": "ntorare",
+    "name": "Ntorare",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://pbs.twimg.com/profile_images/2056624327253184512/xIbQ-rMX_400x400.jpg",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "306254"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/cw/Ntorare"
+      },
+      {
+        "type": "twitter",
+        "label": "Twitter",
+        "url": "https://x.com/brocketzer72260"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "ntr-bakery",
     "name": "NTR Bakery",
     "aliases": [],

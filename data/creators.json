@@ -473,6 +473,46 @@
     "otherGames": []
   },
   {
+    "id": "belle",
+    "name": "Belle",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://f95zone.to/data/avatars/l/217/217636.jpg?1519592009",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "224416"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/belle.217636/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/longlivetheprincess"
+      },
+      {
+        "type": "subscribestar",
+        "label": "SubscribeStar",
+        "url": "https://subscribestar.adult/long-live-the-princess"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.com/invite/zC8A9hK"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "bittersweet3d",
     "name": "Bittersweet3D",
     "aliases": [],

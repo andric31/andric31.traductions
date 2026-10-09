@@ -167,6 +167,36 @@
     "otherGames": []
   },
   {
+    "id": "antipodegames",
+    "name": "AntipodeGames",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://f95zone.to/data/avatars/l/9581/9581460.jpg?1780662474",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "267421"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/antipodegames.9581460/"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://antipodegames.itch.io/dating-sasha"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "apple-tart-games",
     "name": "Apple Tart",
     "aliases": [

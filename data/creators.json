@@ -4011,6 +4011,41 @@
     ]
   },
   {
+    "id": "sihirbaz-arttzz",
+    "name": "Sihirbaz_arttzz",
+    "aliases": [],
+    "creatorType": "individual",
+    "primaryLanguage": "tr",
+    "vndbId": "p24273",
+    "avatar": "",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "281299"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/sihirbaz"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/aWBChjqV24"
+      },
+      {
+        "type": "vndb",
+        "label": "VNDB",
+        "url": "https://vndb.org/p24273"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "sinkusin",
     "name": "SinKuSin",
     "aliases": [],

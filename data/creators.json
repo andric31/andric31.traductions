@@ -4673,6 +4673,46 @@
     "country": ""
   },
   {
+    "id": "verpa",
+    "name": "VERPA",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://pbs.twimg.com/profile_images/1715046457433042944/iYd-qS_a_400x400.jpg",
+    "banner": "https://pbs.twimg.com/profile_banners/1279527702903558147/1731535042/1500x500",
+    "presentation": "",
+    "gameIds": [
+      "281379"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/verpa"
+      },
+      {
+        "type": "twitter",
+        "label": "Twitter",
+        "url": "https://x.com/VerpaXXX"
+      },
+      {
+        "type": "linktree",
+        "label": "Linktree",
+        "url": "https://linktr.ee/verpagames"
+      },
+      {
+        "type": "bluesky",
+        "label": "Bluesky",
+        "url": "https://bsky.app/profile/verpagames.bsky.social"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "vesperproxy",
     "name": "VesperProxy",
     "aliases": [],

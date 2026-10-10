@@ -1440,7 +1440,7 @@
   // =========================
 
   const CAT_ALLOWED = ["VN", "Collection"];
-  const ENGINE_ALLOWED = ["Ren'Py", "RPGM", "Unity", "Godot", "HTML", "Flash", "Others", "Wolf RPG"];
+  const ENGINE_ALLOWED = ["Ren'Py", "RPGM", "Unity", "Godot", "Unreal Engine", "HTML", "Flash", "Others", "Wolf RPG"];
   const STATUS_ALLOWED = ["Completed", "Abandoned", "Onhold"];
   const ENGINE_RAW = {
     renpy: "Ren'Py",
@@ -1454,6 +1454,10 @@
     "rpg maker": "RPGM",
     unity: "Unity",
     godot: "Godot",
+    unreal: "Unreal Engine",
+    unrealengine: "Unreal Engine",
+    ue4: "Unreal Engine",
+    ue5: "Unreal Engine",
     others: "Others",
     other: "Others",
     html: "HTML",
@@ -1556,6 +1560,13 @@
       }
 
       if (norm === "wolf") break;
+
+      if (norm === "unreal" && tokens[i + 1] && tokens[i + 1].toLowerCase().replace(/[^\w']/g, "") === "engine") {
+        if (!engines.includes("Unreal Engine")) engines.push("Unreal Engine");
+        cut = i + 2;
+        i++;
+        continue;
+      }
 
       if (norm === "others" || norm === "other") {
         if (!engines.includes("Others")) engines.push("Others");

@@ -1006,6 +1006,41 @@
     "country": ""
   },
   {
+    "id": "conquering-eluria-empire",
+    "name": "Conquering Eluria Empire",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://f95zone.to/data/avatars/l/10892/10892753.jpg?1776053725",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "302907"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/eluriaempire.10892753/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/cw/EluriaEmpire"
+      },
+      {
+        "type": "subscribestar",
+        "label": "Subscribestar",
+        "url": "https://subscribestar.art/conquering-eluria-empire"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "cosmobot-7-0",
     "name": "Cosmobot-7.0",
     "aliases": [

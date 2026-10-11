@@ -885,7 +885,7 @@
     "creatorType": "",
     "primaryLanguage": "",
     "vndbId": "",
-    "avatar": "",
+    "avatar": "https://f95zone.to/data/avatars/l/11513/11513164.jpg?1785589978",
     "banner": "",
     "presentation": "",
     "gameIds": [
@@ -893,6 +893,11 @@
     ],
     "ignoredGameIds": [],
     "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/chef_nts.11513164/"
+      },
       {
         "type": "patreon",
         "label": "Patreon",

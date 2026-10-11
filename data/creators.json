@@ -2060,6 +2060,57 @@
     "otherGames": []
   },
   {
+    "id": "gloomy-ghost-studio",
+    "name": "Gloomy Ghost Studio",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://f95zone.to/data/avatars/l/5355/5355827.jpg?1683043770",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "160994"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [
+      {
+        "name": "Strangers on Paper",
+        "platform": "Steam",
+        "url": "https://store.steampowered.com/app/2478810/Strangers_on_Paper/"
+      },
+      {
+        "name": "Strangers on Paper",
+        "platform": "Itch.io",
+        "url": "https://ggst.itch.io/strangers-on-paper"
+      }
+    ],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/gloomyghost.5355827/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/gloomyghost"
+      },
+      {
+        "type": "youtube",
+        "label": "YouTube",
+        "url": "https://www.youtube.com/@gloomyghoststudio"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.com/invite/hPeeQeqeVy"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "gosg",
     "name": "GOSG",
     "aliases": [],

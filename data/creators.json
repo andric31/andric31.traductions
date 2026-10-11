@@ -3787,7 +3787,7 @@
     "primaryLanguage": "",
     "vndbId": "",
     "avatar": "https://f95zone.to/data/avatars/l/4608/4608511.jpg?1789179162",
-    "banner": "",
+    "banner": "https://pbs.twimg.com/profile_banners/2101755079158284288/1789933127/1500x500",
     "presentation": "",
     "gameIds": [
       "314378"
@@ -3799,6 +3799,16 @@
         "type": "f95zone",
         "label": "F95zone",
         "url": "https://f95zone.to/members/realbite.4608511/"
+      },
+      {
+        "type": "twitter",
+        "label": "X",
+        "url": "https://x.com/RealBiteStudio"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/JRDA2w2xqV"
       }
     ],
     "countryCode": "",

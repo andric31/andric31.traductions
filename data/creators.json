@@ -2861,8 +2861,8 @@
     "creatorType": "",
     "primaryLanguage": "",
     "vndbId": "",
-    "avatar": "",
-    "banner": "",
+    "avatar": "https://pbs.twimg.com/profile_images/2087875186255163393/BRW-v-jb_400x400.jpg",
+    "banner": "https://pbs.twimg.com/profile_banners/2087870172816093184/1786624268/1500x500",
     "presentation": "",
     "gameIds": [
       "237987"
@@ -2870,22 +2870,28 @@
     "ignoredGameIds": [],
     "links": [
       {
-        "type": "patreon",
-        "label": "Patreon",
+        "type": "twitter",
+        "label": "X / Twitter",
+        "url": "https://x.com/YoruhanaStudios"
+      }
+    ],
+    "otherGames": [
+      {
+        "name": "Succubus Dance",
+        "platform": "Patreon",
         "url": "https://www.patreon.com/SuccubusDance"
       },
       {
-        "type": "subscribestar",
-        "label": "SubscribeStar",
-        "url": "https://subscribestar.art/succubus-dance"
+        "name": "Succubus Dance",
+        "platform": "Itch.io",
+        "url": "https://mischievousbunny.itch.io/succubus-dance"
       },
       {
-        "type": "itch",
-        "label": "Itch.io",
-        "url": "https://mischievousbunny.itch.io/succubus-dance"
+        "name": "Succubus Dance",
+        "platform": "subscribestar.art",
+        "url": "https://subscribestar.art/succubus-dance"
       }
-    ],
-    "otherGames": []
+    ]
   },
   {
     "id": "misherumaxis",

@@ -2873,6 +2873,11 @@
         "type": "twitter",
         "label": "X / Twitter",
         "url": "https://x.com/YoruhanaStudios"
+      },
+      {
+        "type": "linktree",
+        "label": "Linktree",
+        "url": "https://linktr.ee/yoruhanastudios"
       }
     ],
     "otherGames": [

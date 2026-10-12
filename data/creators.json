@@ -676,6 +676,42 @@
     "otherGames": []
   },
   {
+    "id": "c3-art",
+    "name": "c3 art",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://pbs.twimg.com/profile_images/1617341830596792327/9EGoeW0S_400x400.jpg",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "246302"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [
+      {
+        "name": "Blood Crawler",
+        "platform": "Steam",
+        "url": "https://store.steampowered.com/app/2564070/Blood_Crawler/"
+      }
+    ],
+    "links": [
+      {
+        "type": "twitter",
+        "label": "Twitter",
+        "url": "https://x.com/c3art2022"
+      },
+      {
+        "type": "dlsite",
+        "label": "Cien",
+        "url": "https://ci-en.dlsite.com/creator/15414"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "candylight-studio",
     "name": "Candylight Studio",
     "aliases": [],

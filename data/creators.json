@@ -2855,7 +2855,9 @@
   {
     "id": "mischievousbunny",
     "name": "mischievousbunny",
-    "aliases": [],
+    "aliases": [
+      "Yoruhana Studios"
+    ],
     "countryCode": "",
     "country": "",
     "creatorType": "",
@@ -2863,7 +2865,7 @@
     "vndbId": "",
     "avatar": "https://pbs.twimg.com/profile_images/2087875186255163393/BRW-v-jb_400x400.jpg",
     "banner": "https://pbs.twimg.com/profile_banners/2087870172816093184/1786624268/1500x500",
-    "presentation": "",
+    "presentation": "🎮 Studio indépendant NSFW spécialisé dans la création de jeux dessinés à la main.",
     "gameIds": [
       "237987"
     ],

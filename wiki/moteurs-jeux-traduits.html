@@ -9,16 +9,21 @@
   <script src="/theme-init.js"></script>
   <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=1">
   <link rel="stylesheet" href="/themes.css">
-  <link rel="stylesheet" href="wiki.css?v=20261013">
+  <link rel="stylesheet" href="wiki.css?v=20261013-3">
 </head>
 <body class="engine-guide">
 <a class="guide-skip" href="#guide-content">Aller au contenu</a>
 <header class="topbar" id="haut">
   <div class="guide-topline"><a class="back" href="index.html">← Retour au wiki</a><span>Mis à jour le <time datetime="2026-10-13">13 octobre 2026</time></span></div>
-  <div class="wiki-kicker">Comprendre les fichiers de son jeu</div>
-  <h1>Moteurs de jeux<br><span>et traduction</span></h1>
+  <div class="guide-hero-layout">
+    <div class="guide-hero-copy">
+      <div class="wiki-kicker">Comprendre les fichiers de son jeu</div>
+      <h1>Moteurs de jeux<br><span>et traduction</span></h1>
+    </div>
+    <img class="guide-hero-image" src="img/Moteurs_de_jeux_traduit.png" alt="Illustration des moteurs de jeux traduits" decoding="async">
+  </div>
   <p class="subtitle">Reconnaître un moteur, retrouver ses textes et comprendre comment une traduction s’intègre au jeu.</p>
-  <nav class="guide-sections" aria-label="Sections du guide"><a href="#reperes">Les repères</a><a href="#fiches">13 fiches</a><a href="#methode">La méthode</a><a href="#questions">Questions fréquentes</a><a href="#lexique">Lexique</a></nav>
+  <nav class="guide-sections" aria-label="Sections du guide"><a href="#reperes">Les repères</a><a href="#fiches">Fiches</a><a href="#methode">La méthode</a><a href="#questions">Questions fréquentes</a><a href="#lexique">Lexique</a></nav>
 </header>
 <main class="page" id="guide-content">
   <section class="card guide-intro" id="reperes" aria-labelledby="reperes-title">
@@ -36,13 +41,7 @@
     <div class="guide-section-head"><div><p class="eyebrow">Trouver son moteur</p><h2 id="fiches-title">Les fiches détaillées</h2></div><span class="guide-count" id="engine-count" role="status" aria-live="polite" aria-atomic="true">13 fiches</span></div>
     <form class="guide-search" id="engine-search-form" role="search" hidden>
       <label for="engine-query">Rechercher un moteur, un fichier ou un terme</label>
-      <div class="guide-search-row"><input type="search" id="engine-query" placeholder="Ex. : Unity, .pck, data.win, langue…" autocomplete="off" aria-controls="engine-list"><button type="button" id="engine-reset">Réinitialiser</button></div>
-      <fieldset class="guide-filters"><legend>Filtrer les fiches</legend>
-        <label><input type="radio" name="engine-family" value="all" checked> Toutes</label>
-        <label><input type="radio" name="engine-family" value="vn"> Visual novels</label>
-        <label><input type="radio" name="engine-family" value="engine"> Autres moteurs</label>
-        <label><input type="radio" name="engine-family" value="web"> Technologies web</label>
-      </fieldset>
+      <div class="guide-search-row"><input type="search" id="engine-query" placeholder="Ex. : Unity, .pck, data.win…" autocomplete="off" aria-controls="engine-list"><button type="button" id="engine-reset">Réinitialiser</button></div>
     </form>
     <nav class="engine-toc" aria-label="Accès direct aux moteurs"><a href="#renpy">Ren’Py</a><a href="#rpg-maker">RPG Maker MV / MZ</a><a href="#unity">Unity</a><a href="#godot">Godot</a><a href="#tyrano">TyranoBuilder / TyranoScript</a><a href="#kirikiri">KiriKiri / KAG</a><a href="#vnm">Visual Novel Maker</a><a href="#wolf">WOLF RPG Editor</a><a href="#unreal">Unreal Engine</a><a href="#gamemaker">GameMaker / GameMaker Studio</a><a href="#html5">HTML5 / jeux web</a><a href="#electron">Electron</a><a href="#nwjs">NW.js / Node-Webkit</a></nav>
     <noscript><p>Les treize fiches restent accessibles ci-dessous. Utilise le sommaire ou la recherche de ton navigateur.</p></noscript>
@@ -211,7 +210,7 @@
       <div><dt>Mémoire de traduction</dt><dd>Ensemble de textes déjà traduits, réutilisables lors d’une reprise ou d’une mise à jour. Le contexte peut nécessiter une relecture.</dd></div>
     </dl>
   </section>
-  <aside class="guide-next" aria-label="Autres guides"><a href="extraire-traduction-renpy.html">Installer une traduction Ren’Py →</a><a href="traduction-godot-pck.html">Guide Godot et PCK →</a><a href="traduction-others-asar.html">Guide des archives ASAR →</a></aside>
+  <aside class="guide-next" aria-label="Autres guides"><a href="extraire-traduction-renpy.html">Installer une traduction Ren’Py →</a><a href="traduction-godot-pck.html">Guide Godot et PCK →</a><a href="traduction-others-asar.html">Guide des archives ASAR →</a><a href="difficulte-traduction-moteurs.html">Difficulté de traduction des moteurs →</aside>
 </main>
 <footer class="footer guide-footer"><p>© andric31 — Wiki, traductions et ressources</p><a href="#haut">Retour en haut ↑</a></footer>
 <script>

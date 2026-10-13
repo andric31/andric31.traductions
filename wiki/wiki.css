@@ -463,10 +463,13 @@ code{
 .engine-guide .topbar { padding-top: 24px; text-align: left; }
 .engine-guide .topbar h1 { font-size: clamp(34px, 6vw, 60px); line-height: 1.08; }
 .engine-guide .topbar h1 span { color: var(--wiki-link); }
-.engine-guide .subtitle { margin-left: 0; max-width: 760px; }
+.engine-guide .subtitle { margin-left: 0; max-width: none; }
+.guide-hero-layout { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 32px; align-items: center; }
+.guide-hero-copy { min-width: 0; }
+.guide-hero-image { display: block; width: 100%; height: auto; max-height: 210px; object-fit: contain; border-radius: 14px; }
 .engine-guide .wiki-kicker { margin: 0 0 16px; }
 .engine-guide .card { height: auto; }
-.engine-guide .card:hover { transform: none; }
+.engine-guide .card:hover { transform: none; border-color: var(--wiki-border); }
 .engine-guide .card h2 { margin: 0 0 14px; font-size: clamp(23px, 3vw, 30px); }
 .engine-guide .card h3 { margin: 20px 0 8px; font-size: 17px; }
 .engine-guide .card p { margin: 8px 0 14px; line-height: 1.75; }
@@ -485,10 +488,10 @@ code{
 .guide-sections { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--wiki-border); }
 .guide-sections a { font-size: 14px; font-weight: 650; padding: 4px 0; }
 .guide-concepts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin: 22px 0; }
-.guide-concepts > div { border-left: 2px solid var(--wiki-border-strong); padding-left: 16px; }
+.guide-concepts > div { border-left: 2px solid var(--wiki-border); padding-left: 16px; }
 .engine-guide .guide-concepts h3 { margin: 0 0 8px; }
 .engine-guide .guide-concepts p { margin-bottom: 0; font-size: 14px; }
-.engine-guide .guide-note { padding: 12px 16px; background: var(--wiki-accent-soft); border-radius: 12px; font-size: 14px; margin: 18px 0 0; }
+.engine-guide .guide-note { padding: 12px 16px; background: var(--wiki-soft); border: 1px solid var(--wiki-border); border-radius: 12px; font-size: 14px; margin: 18px 0 0; }
 .engine-guide .guide-directory { margin-top: 38px; }
 .guide-section-head { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 18px; }
 .guide-section-head h2 { margin: 0; }
@@ -497,22 +500,22 @@ code{
 .guide-search { background: var(--wiki-card); border: 1px solid var(--wiki-border); padding: 20px; border-radius: 18px; }
 .guide-search > label { display: block; margin-bottom: 10px; font-weight: 650; font-size: 14px; }
 .guide-search-row { display: flex; gap: 10px; }
-.guide-search-row input { min-width: 0; flex: 1; width: 100%; padding: 12px 14px; border: 1px solid var(--wiki-border-strong); border-radius: 10px; color: var(--wiki-text); background: var(--wiki-soft); font: inherit; }
+.guide-search-row input { min-width: 0; flex: 1; width: 100%; padding: 12px 14px; border: 1px solid var(--wiki-border); border-radius: 10px; color: var(--wiki-text); background: var(--wiki-soft); font: inherit; }
 .guide-search-row input::placeholder { color: var(--wiki-muted); opacity: 1; }
-.guide-search-row button { color: var(--wiki-text); background: var(--wiki-accent-soft); border: 1px solid var(--wiki-border-strong); border-radius: 10px; padding: 10px 14px; font: inherit; font-size: 14px; cursor: pointer; }
-.guide-search-row button:hover { background: var(--wiki-accent-soft-2); }
+.guide-search-row button { color: var(--wiki-text); background: var(--wiki-soft); border: 1px solid var(--wiki-border); border-radius: 10px; padding: 10px 14px; font: inherit; font-size: 14px; cursor: pointer; }
+.guide-search-row button:hover { background: var(--wiki-soft-strong); }
 .guide-filters { display: flex; flex-wrap: wrap; gap: 8px 18px; border: 0; padding: 0; margin: 16px 0 0; }
 .guide-filters legend { font-size: 12px; color: var(--wiki-muted); margin-bottom: 8px; }
 .guide-filters label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 14px; padding: 4px 0; }
 .guide-filters input { accent-color: var(--wiki-link); }
 .engine-toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 24px; }
 .engine-toc a { display: inline-block; font-size: 13px; border: 1px solid var(--wiki-border); border-radius: 8px; padding: 8px 11px; background: var(--wiki-soft); }
-.engine-toc a:hover { background: var(--wiki-accent-soft); border-color: var(--wiki-border-strong); }
+.engine-toc a:hover { background: var(--wiki-soft-strong); border-color: var(--wiki-border); }
 .engine-guide .guide-empty { padding: 24px; text-align: center; border: 1px solid var(--wiki-border); border-radius: 16px; }
 .engine-guide .engine-card { margin: 0 0 18px; padding: 26px; }
 .engine-heading { display: flex; align-items: center; gap: 14px; }
 .engine-heading > div { min-width: 0; }
-.engine-icon { width: 52px; height: 52px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; border-radius: 14px; background: var(--wiki-accent-soft); font-size: 26px; }
+.engine-icon { width: 52px; height: 52px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; border-radius: 14px; background: var(--wiki-soft); font-size: 26px; }
 .engine-guide .engine-category { font-size: 12px; font-weight: 700; letter-spacing: .03em; color: var(--wiki-muted); margin: 0 0 5px; }
 .engine-guide .engine-heading h2 { margin: 0; }
 .engine-number { margin-left: auto; align-self: flex-start; font: 600 13px ui-monospace, monospace; color: var(--wiki-muted); padding-top: 4px; }
@@ -521,12 +524,12 @@ code{
 .engine-guide .engine-recognize h3 { margin: 0 0 6px; }
 .engine-guide .engine-recognize p { margin: 0; font-size: 14px; }
 .engine-files { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin: 22px 0; }
-.engine-files dt { font-size: 13px; font-weight: 750; color: var(--wiki-link); margin-bottom: 7px; }
+.engine-files dt { font-size: 13px; font-weight: 750; color: var(--wiki-text); margin-bottom: 7px; }
 .engine-files dd { margin: 0; font-size: 14px; color: var(--wiki-muted); line-height: 1.75; }
 .engine-guide code { font-size: .9em; padding: 1px 4px; border-radius: 4px; background: var(--wiki-soft); color: var(--wiki-text); }
 .engine-details { border-top: 1px solid var(--wiki-border); padding-top: 14px; }
 .engine-guide summary { cursor: pointer; font-weight: 650; line-height: 1.55; }
-.engine-guide summary::marker { color: var(--wiki-link); }
+.engine-guide summary::marker { color: var(--wiki-muted); }
 .engine-guide details[open] > summary { margin-bottom: 12px; }
 .engine-guide .engine-details p { font-size: 14px; }
 .engine-sources { display: flex; flex-wrap: wrap; gap: 8px 20px; padding: 0; list-style: none; }
@@ -538,7 +541,7 @@ code{
 .engine-guide :is(.guide-method, .guide-faq, .guide-glossary) { margin-top: 30px; }
 .guide-steps { margin: 22px 0; padding-left: 28px; }
 .guide-steps li { padding-left: 8px; margin-bottom: 18px; }
-.guide-steps li::marker { color: var(--wiki-link); font-weight: 800; }
+.guide-steps li::marker { color: var(--wiki-text); font-weight: 800; }
 .engine-guide .guide-steps h3 { margin: 0; }
 .engine-guide .guide-steps p { margin: 6px 0 0; font-size: 15px; }
 .guide-method-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
@@ -557,6 +560,14 @@ code{
 .guide-next a { font-size: 14px; color: var(--wiki-link); }
 .guide-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; border-top: 1px solid var(--wiki-border); }
 .guide-footer p, .guide-footer a { font-size: 13px; }
+@media (max-width: 800px) {
+  .guide-hero-layout { grid-template-columns: minmax(0, 1fr) 200px; gap: 20px; }
+  .guide-hero-image { max-height: 170px; }
+}
+@media (max-width: 600px) {
+  .guide-hero-layout { grid-template-columns: 1fr; gap: 18px; }
+  .guide-hero-image { width: min(200px, 100%); max-height: 160px; justify-self: center; }
+}
 @media (max-width: 720px) {
   .guide-concepts, .engine-files, .guide-patches { grid-template-columns: 1fr; }
   .engine-guide .engine-card { padding: 20px; }
@@ -584,4 +595,62 @@ code{
   .engine-guide .card { box-shadow: none; break-inside: avoid; }
   .engine-guide .card[hidden] { display: block !important; }
   .guide-search, .engine-toc, .guide-sections, .guide-skip, .guide-empty { display: none !important; }
+}
+
+/* Une couleur par moteur, reprise dans le sommaire et la fiche. */
+.engine-guide :is(#renpy, .engine-toc a[href="#renpy"]) { --engine-hue: #ed82b8; }
+.engine-guide :is(#rpg-maker, .engine-toc a[href="#rpg-maker"]) { --engine-hue: #efc267; }
+.engine-guide :is(#unity, .engine-toc a[href="#unity"]) { --engine-hue: #afc4dc; }
+.engine-guide :is(#godot, .engine-toc a[href="#godot"]) { --engine-hue: #65a9ed; }
+.engine-guide :is(#tyrano, .engine-toc a[href="#tyrano"]) { --engine-hue: #eaa272; }
+.engine-guide :is(#kirikiri, .engine-toc a[href="#kirikiri"]) { --engine-hue: #ba98ed; }
+.engine-guide :is(#vnm, .engine-toc a[href="#vnm"]) { --engine-hue: #d887d4; }
+.engine-guide :is(#wolf, .engine-toc a[href="#wolf"]) { --engine-hue: #84bca2; }
+.engine-guide :is(#unreal, .engine-toc a[href="#unreal"]) { --engine-hue: #e68491; }
+.engine-guide :is(#gamemaker, .engine-toc a[href="#gamemaker"]) { --engine-hue: #8dc76b; }
+.engine-guide :is(#html5, .engine-toc a[href="#html5"]) { --engine-hue: #ee9279; }
+.engine-guide :is(#electron, .engine-toc a[href="#electron"]) { --engine-hue: #6fc9cd; }
+.engine-guide :is(#nwjs, .engine-toc a[href="#nwjs"]) { --engine-hue: #8e9ee7; }
+
+.engine-guide .engine-card {
+  border-inline-start: 3px solid var(--engine-hue);
+}
+.engine-guide .engine-card:hover {
+  border-inline-start-color: var(--engine-hue);
+}
+.engine-guide .engine-heading h2 {
+  color: color-mix(in srgb, var(--engine-hue) 50%, var(--wiki-text));
+}
+.engine-guide .engine-icon {
+  background: color-mix(in srgb, var(--engine-hue) 13%, transparent);
+  border: 1px solid color-mix(in srgb, var(--engine-hue) 30%, var(--wiki-border));
+}
+.engine-guide .engine-details summary::marker {
+  color: var(--engine-hue);
+}
+.engine-guide .engine-sources a,
+.engine-guide .engine-links a:first-child {
+  color: color-mix(in srgb, var(--engine-hue) 50%, var(--wiki-text));
+}
+.engine-guide .engine-toc a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.engine-guide .engine-toc a::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: var(--engine-hue);
+}
+.engine-guide .engine-toc a:hover {
+  background: color-mix(in srgb, var(--engine-hue) 10%, var(--wiki-soft));
+  border-color: color-mix(in srgb, var(--engine-hue) 45%, var(--wiki-border));
+}
+.engine-guide .wiki-kicker {
+  border-color: var(--wiki-border-strong);
+  background: color-mix(in srgb, var(--accent, #6ce0b0) 7%, transparent);
 }

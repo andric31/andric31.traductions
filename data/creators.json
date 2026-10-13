@@ -1567,6 +1567,36 @@
     ]
   },
   {
+    "id": "dottorugames",
+    "name": "DottoruGames",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://media.ci-en.jp/public/icon/creator/00012756/5f3d28563eb10f098243b783d681bda1c5c3d7391eab53729a47f0c1e74bcc62/image-200-c.jpg",
+    "banner": "https://media.ci-en.jp/public/cover/creator/00012756/6724dd99ab409d3edf603f0883976539f6c838e18ccaa9e2599bb107df0f7cd4/image-990-c.jpg",
+    "presentation": "",
+    "gameIds": [
+      "116833"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "dlsite",
+        "label": "DLsite",
+        "url": "https://www.dlsite.com/maniax/circle/profile/=/maker_id/RG53398.html"
+      },
+      {
+        "type": "dlsite",
+        "label": "Ci-en",
+        "url": "https://ci-en.dlsite.com/creator/12756/article/1009281"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "doubledouble",
     "name": "DOUBLEDOUBLE",
     "aliases": [],

@@ -1,15 +1,44 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Difficulté de traduction des moteurs — andric31</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Difficulté technique de traduction des jeux : cinq niveaux indicatifs, facteurs qui facilitent ou compliquent le travail et cas particuliers par moteur.">
+  <title>Difficulté technique de traduction des jeux — andric31</title>
   <script src="/theme-init.js"></script>
   <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=1">
-  <link rel="stylesheet" href="/themes.css" />
-  <link rel="stylesheet" href="wiki.css" />
-
+  <link rel="stylesheet" href="/themes.css">
+  <link rel="stylesheet" href="wiki.css">
   <style>
+@layer difficulty-preview {
+  :root {
+    --wiki-page-max: 1040px;
+    --wiki-text: var(--fg, #e8eaf0);
+    --wiki-muted: var(--muted, #aab2c8);
+    --wiki-card: var(--card, #171b29);
+    --wiki-border: var(--border, #30364a);
+    --wiki-border-strong: color-mix(in srgb, var(--accent, #6ce0b0) 24%, var(--wiki-border));
+    --wiki-accent-soft: color-mix(in srgb, var(--accent, #6ce0b0) 12%, transparent);
+    --wiki-link: var(--accent, #6ce0b0);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg, #10141f); color: var(--wiki-text); font-family: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif; }
+  .topbar, .page, .footer { width: min(var(--wiki-page-max), calc(100% - 32px)); margin: 0 auto; }
+  .topbar { padding: 24px 0 28px; text-align: center; }
+  h1 { margin: 0; font-size: clamp(30px, 5vw, 48px); line-height: 1.15; }
+  h2 { font-size: 24px; }
+  p, li, dd { line-height: 1.75; }
+  a { color: inherit; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .back { display: inline-flex; padding: 10px 14px; border: 1px solid var(--wiki-border); border-radius: 12px; color: var(--wiki-muted); }
+  .subtitle { margin: 16px 0 0; color: var(--wiki-muted); font-size: 17px; }
+  .card { padding: 22px; border: 1px solid var(--wiki-border); border-radius: 20px; background: var(--wiki-card); }
+  .page { padding-bottom: 32px; }
+  .footer { padding: 20px 0; color: var(--wiki-muted); }
+  code { overflow-wrap: anywhere; }
+}
+
+
     html{
       scroll-behavior: smooth;
     }
@@ -254,197 +283,175 @@
         min-height: auto;
       }
     }
-  </style>
+  
+
+    .difficulty-topline { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 24px; }
+    .difficulty-topline .back { margin-bottom: 0; }
+    .difficulty-updated { margin-left: auto; color: var(--wiki-muted, #aab2c8); font-size: 12px; line-height: 1.6; text-align: right; }
+    .difficulty-page { background: var(--bg, #10141f); }
+    .difficulty-page .topbar { padding-top: 24px; }
+    .difficulty-page .subtitle { max-width: none; }
+    .difficulty-page .card { height: auto; }
+    .difficulty-page .card:hover { transform: none; }
+    .difficulty-page .intro-card h2 { margin: 0 0 12px; font-size: 22px; }
+    .difficulty-page .intro-card p + p { margin-top: 12px; }
+    .intro-example { padding: 12px 14px; border: 1px solid var(--wiki-border); border-radius: 12px; background: var(--wiki-accent-soft); font-size: 14px; }
+    .review-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 18px 0; }
+    .review-step { padding: 17px; border: 1px solid var(--wiki-border); border-radius: 14px; background: var(--wiki-card); }
+    .review-step h2 { font-size: 16px; margin: 0 0 8px; }
+    .review-step p { color: var(--wiki-muted); font-size: 14px; line-height: 1.7; margin: 0; }
+    .review-step:nth-child(1) { border-top: 3px solid #64a5e9; }
+    .review-step:nth-child(2) { border-top: 3px solid #b291e9; }
+    .review-step:nth-child(3) { border-top: 3px solid #eeb966; }
+    .engine-grid { align-items: stretch; }
+    .engine-item { display: flex; flex-direction: column; }
+    .engine-item h3 { color: color-mix(in srgb, var(--level) 40%, var(--wiki-text) 60%); }
+    .engine-item .case-label { color: var(--wiki-muted); font-size: 12px; margin: 0 0 12px; line-height: 1.6; }
+    .factor-list { margin: 0; }
+    .factor-list > div + div { margin-top: 12px; }
+    .factor-list dt { color: var(--wiki-text); font-weight: 750; font-size: 13px; margin-bottom: 4px; }
+    .factor-list dd { color: var(--wiki-muted); margin: 0; font-size: 14px; line-height: 1.7; overflow-wrap: anywhere; }
+    .engine-item .engine-nuance { font-size: 13px; border-top: 1px solid var(--wiki-border); margin-top: 15px; padding-top: 12px; line-height: 1.65; }
+    .engine-more { display: flex; flex-wrap: wrap; gap: 14px; margin-top: auto; padding-top: 13px; font-size: 13px; }
+    .engine-more a { color: color-mix(in srgb, var(--level) 40%, var(--wiki-text) 60%); text-decoration: underline; text-underline-offset: 3px; }
+    .level-block code, .intro-card code { padding: 1px 4px; border-radius: 4px; background: color-mix(in srgb, var(--wiki-text) 5%, transparent); font-size: .9em; }
+    .difficulty-resources { margin-top: 24px; padding: 18px; border: 1px solid var(--wiki-border); border-radius: 14px; }
+    .difficulty-page summary { font-weight: 650; cursor: pointer; line-height: 1.6; }
+    .difficulty-resources p, .difficulty-resources li { font-size: 14px; color: var(--wiki-muted); }
+    .difficulty-resources ul { columns: 2; column-gap: 28px; padding-left: 20px; }
+    .difficulty-resources li { margin-bottom: 8px; break-inside: avoid; }
+    .difficulty-resources a { text-decoration: underline; text-underline-offset: 3px; }
+    .difficulty-next { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; padding: 24px 0 0; color: var(--wiki-link); font-size: 14px; }
+    .difficulty-page :is(a, summary):focus-visible { outline: 3px solid var(--wiki-link); outline-offset: 4px; }
+    .difficulty-page .difficulty-image { margin: 24px 0 0; width: 100%; }
+    .difficulty-image a { display: block; border-radius: 16px; }
+    .difficulty-image img { display: block; width: 100%; height: auto; border-radius: 16px; }
+    @media (max-width: 760px) { .review-steps { grid-template-columns: 1fr; } }
+    @media (max-width: 560px) { .difficulty-resources ul { columns: 1; } }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .difficulty-page * { transition: none !important; } }
+</style>
 </head>
-<body>
-
-<header class="topbar">
-  <a class="back" href="index.html">⬅ Retour</a>
-  <h1>Difficulté de traduction des moteurs</h1>
-  <p class="subtitle">Classement général des moteurs selon la difficulté pour extraire, traduire et réinjecter les textes d’un jeu.</p>
+<body class="difficulty-page">
+<header class="topbar" id="haut">
+  <div class="difficulty-topline"><a class="back" href="index.html">← Retour au wiki</a><span class="difficulty-updated">Mis à jour le <time datetime="2026-10-13">13 octobre 2026</time></span></div>
+  <h1>Difficulté technique<br>de traduction des jeux</h1>
+  <p class="subtitle">Cinq repères pour comprendre le travail nécessaire, au-delà du nom du moteur.</p>
 </header>
-
 <main class="page">
-
-  <section class="card intro-card">
-    <p>
-      Ce classement donne une idée générale. La difficulté varie selon le jeu,
-      sa version, les outils à disposition et l'architecture du code source.
-    </p>
+  <section class="card intro-card" aria-labelledby="intro-title">
+    <h2 id="intro-title">Le moteur donne une piste, les fichiers font la différence</h2>
+    <p>Ces niveaux sont des repères indicatifs pour <strong>retrouver les textes, intégrer la traduction et obtenir un affichage correct</strong>. Ils ne mesurent ni la qualité littéraire de la traduction ni le temps nécessaire pour relire les dialogues.</p>
+    <p>Un même moteur peut relever de plusieurs niveaux selon le jeu, sa version, les fichiers disponibles et les outils compatibles. Chaque fiche précise donc <strong>le cas concerné</strong>, ce qui facilite le travail et ce qui le complique.</p>
+    <p class="intro-example"><strong>Exemple :</strong> un jeu Unity avec des tables de langue bien organisées peut être plus accessible qu’un jeu Ren’Py dont les menus sont entièrement dessinés dans des images. Le nom du moteur ne suffit pas à fixer la difficulté.</p>
   </section>
 
-  <section class="summary-card" aria-labelledby="sommaire-niveaux">
-    <h2 id="sommaire-niveaux">Sommaire des niveaux</h2>
-    <p>Clique sur un niveau pour aller directement à la section correspondante.</p>
+  <figure class="difficulty-image">
+    <a href="img/difficulte-traduction-moteurs.webp?v=20261013" target="_blank" rel="noopener" aria-label="Agrandir le tableau illustré des moteurs de jeux (nouvel onglet)">
+      <img src="img/difficulte-traduction-moteurs.webp?v=20261013" width="1672" height="941" alt="Tableau illustré avec des barres de difficulté pour Ren’Py, RPGM, HTML, Wolf RPG, Godot, Unity, Unreal Engine et Autres. Niveaux indicatifs selon le jeu et les outils." fetchpriority="high" decoding="async">
+    </a>
+  </figure>
 
-    <nav class="summary-grid" aria-label="Sommaire des niveaux de difficulté">
-      <a class="level-link link-simple" href="#niveau-1">
-        <strong><span class="summary-marker" aria-hidden="true"></span>Niveau 1</strong>
-        <span>Simple</span>
-      </a>
-      <a class="level-link link-medium" href="#niveau-2">
-        <strong><span class="summary-marker" aria-hidden="true"></span>Niveau 2</strong>
-        <span>Intermédiaire</span>
-      </a>
-      <a class="level-link link-hard" href="#niveau-3">
-        <strong><span class="summary-marker" aria-hidden="true"></span>Niveau 3</strong>
-        <span>Difficile</span>
-      </a>
-      <a class="level-link link-very-hard" href="#niveau-4">
-        <strong><span class="summary-marker" aria-hidden="true"></span>Niveau 4</strong>
-        <span>Très difficile</span>
-      </a>
-      <a class="level-link link-variable" href="#niveau-variable">
-        <strong><span class="summary-marker" aria-hidden="true"></span>Variable</strong>
-        <span>Selon le moteur</span>
-      </a>
-    </nav>
-  </section>
-
-  <section class="level-block level-simple" id="niveau-1">
-    <div class="level-head">
-      <span class="level-dot" aria-hidden="true"></span>
-      <div>
-        <h2>Niveau 1 — Simple</h2>
-        <p>Les moteurs les plus accessibles pour la traduction.</p>
-      </div>
-    </div>
-
-    <div class="engine-grid">
-      <article class="engine-item">
-        <h3>Ren'Py</h3>
-        <p>Système de traduction <strong>tl/</strong> natif et textes généralement faciles à identifier. C’est le moteur le plus simple à traduire.</p>
-      </article>
-
-      <article class="engine-item">
-        <h3>RPGM</h3>
-        <p>Données bien structurées, souvent en JSON ou dans des formats RPG Maker connus. L’extraction et la réinjection sont généralement simples.</p>
-      </article>
-
-      <article class="engine-item">
-        <h3>HTML</h3>
-        <p>Les textes sont souvent directement accessibles dans les fichiers HTML, JavaScript ou JSON.</p>
-      </article>
-
-      <article class="engine-item">
-        <h3>QSP</h3>
-        <p>Principalement du texte et du script. Les chaînes sont généralement assez faciles à extraire et à réinjecter.</p>
-      </article>
-    </div>
-  </section>
-
-  <section class="level-block level-medium" id="niveau-2">
-    <div class="level-head">
-      <span class="level-dot" aria-hidden="true"></span>
-      <div>
-        <h2>Niveau 2 — Intermédiaire</h2>
-        <p>Formats propriétaires ou outils un peu moins répandus.</p>
-      </div>
-    </div>
-
-    <div class="engine-grid">
-      <article class="engine-item">
-        <h3>ADRIFT</h3>
-        <p>Très orienté texte, mais son format propriétaire et le nombre limité d’outils modernes rendent le travail moins direct.</p>
-      </article>
-
-      <article class="engine-item">
-        <h3>TADS</h3>
-        <p>Beaucoup de texte, mais certaines chaînes peuvent être intégrées dans les scripts ou dans des fichiers compilés.</p>
-      </article>
-
-      <article class="engine-item">
-        <h3>RAGS</h3>
-        <p>Jeux souvent très textuels, mais les bases de données et formats propriétaires peuvent compliquer la modification.</p>
-      </article>
-
-      <article class="engine-item">
-        <h3>Wolf RPG</h3>
-        <p>Structure assez régulière, mais formats propriétaires et problèmes d’encodage possibles, notamment avec les jeux japonais.</p>
-      </article>
-    </div>
-  </section>
-
-  <section class="level-block level-hard" id="niveau-3">
-    <div class="level-head">
-      <span class="level-dot" aria-hidden="true"></span>
-      <div>
-        <h2>Niveau 3 — Difficile</h2>
-        <p>Plus de formats, de ressources et de cas particuliers à gérer.</p>
-      </div>
-    </div>
-
-    <div class="engine-grid">
-      <article class="engine-item">
-        <h3>Flash</h3>
-        <p>Il faut souvent décompiler les fichiers SWF. Les textes peuvent être mélangés à l’ActionScript, aux polices ou directement intégrés dans des images.</p>
-      </article>
-
-      <article class="engine-item">
-        <h3>Java</h3>
-        <p>Très variable : simple avec des fichiers de langue séparés, beaucoup plus complexe lorsque les textes sont intégrés dans des JAR ou des classes compilées.</p>
-      </article>
-
-      <article class="engine-item">
-        <h3>Godot</h3>
-        <p>Les textes peuvent être répartis dans les scripts, scènes, ressources ou fichiers PCK, avec plusieurs systèmes de localisation possibles.</p>
-      </article>
-    </div>
-  </section>
-
-  <section class="level-block level-very-hard" id="niveau-4">
-    <div class="level-head">
-      <span class="level-dot" aria-hidden="true"></span>
-      <div>
-        <h2>Niveau 4 — Très difficile</h2>
-        <p>Moteurs complexes avec de nombreuses méthodes de stockage des textes.</p>
-      </div>
-    </div>
-
-    <div class="engine-grid">
-      <article class="engine-item">
-        <h3>Unity</h3>
-        <p>Les textes peuvent être dispersés dans les assets, bundles, MonoBehaviour, DLL, TextMeshPro ou différents systèmes de localisation. Certains jeux utilisent aussi IL2CPP.</p>
-      </article>
-
-      <article class="engine-item">
-        <h3>Unreal Engine</h3>
-        <p>Assets cuits, fichiers PAK, UCAS/UTOC, LOCRES, Blueprints et différences importantes selon la version du moteur rendent la traduction plus délicate.</p>
-      </article>
-    </div>
-  </section>
-
-  <section class="level-block level-variable" id="niveau-variable">
-    <div class="level-head">
-      <span class="level-dot" aria-hidden="true"></span>
-      <div>
-        <h2>Variable</h2>
-        <p>Impossible d’attribuer une difficulté fixe.</p>
-      </div>
-    </div>
-
-    <div class="engine-grid">
-      <article class="engine-item">
-        <h3>Others</h3>
-        <p>Cette catégorie peut contenir un simple format texte comme un moteur totalement propriétaire. La difficulté dépend donc entièrement du jeu.</p>
-        <p style="margin-top:10px;"><strong>Exemples :</strong> Tyrano, KiriKiri, YU-RIS, Visual Novel Maker, GameMaker Studio...</p>
-      </article>
-    </div>
-  </section>
-
-  <div class="note">
-    <strong>À retenir :</strong> ce classement concerne surtout la difficulté technique de traduction d’un jeu : repérer les textes, les extraire, les traduire puis les réinjecter sans casser le jeu.
+  <div class="review-steps" aria-label="Les trois aspects de la difficulté technique">
+    <section class="review-step"><h2>1. Retrouver les textes</h2><p>Localiser les dialogues, menus et messages. Distinguer ce qui s’affiche à l’écran des identifiants ou commandes techniques.</p></section>
+    <section class="review-step"><h2>2. Intégrer la traduction</h2><p>Charger une langue, modifier des ressources ou utiliser un lecteur compatible, en conservant les liens avec le jeu.</p></section>
+    <section class="review-step"><h2>3. Vérifier le rendu</h2><p>Contrôler les accents, les polices, les retours à la ligne, les images et les textes construits pendant la partie.</p></section>
   </div>
 
-  <div class="image-wrap">
-    <img src="img/difficulte-traduction-moteurs.webp">
-  </div>
+  <section class="summary-card" aria-labelledby="sommaire-niveaux"><h2 id="sommaire-niveaux">Les cinq repères</h2><p>Les exemples ci-dessous décrivent des configurations de jeu, pas un classement définitif des moteurs.</p><nav class="summary-grid" aria-label="Sommaire des niveaux de difficulté"><a class="level-link link-simple" href="#niveau-1"><strong><span class="summary-marker" aria-hidden="true"></span>Niveau 1</strong><span>Simple</span></a><a class="level-link link-medium" href="#niveau-2"><strong><span class="summary-marker" aria-hidden="true"></span>Niveau 2</strong><span>Intermédiaire</span></a><a class="level-link link-hard" href="#niveau-3"><strong><span class="summary-marker" aria-hidden="true"></span>Niveau 3</strong><span>Difficile</span></a><a class="level-link link-very-hard" href="#niveau-4"><strong><span class="summary-marker" aria-hidden="true"></span>Niveau 4</strong><span>Très difficile</span></a><a class="level-link link-variable" href="#niveau-variable"><strong><span class="summary-marker" aria-hidden="true"></span>Variable</strong><span>À examiner au cas par cas</span></a></nav></section>
+  <section class="level-block level-simple" id="niveau-1" aria-labelledby="titre-1">
+  <div class="level-head"><span class="level-dot" aria-hidden="true"></span><div><h2 id="titre-1">Niveau 1 — Simple</h2><p>Cas favorables : textes structurés et méthode d’intégration connue.</p></div></div>
+  <div class="engine-grid"><article class="engine-item">
+  <h3>Ren’Py</h3><p class="case-label">Avec le système de traduction intégré</p>
+  <dl class="factor-list"><div><dt>Ce qui facilite</dt><dd>Les fichiers de traduction du dossier <code>game/tl/</code> relient les dialogues et les menus à leurs sources.</dd></div><div><dt>Ce qui complique</dt><dd>Les interfaces personnalisées, les textes dans les images et les changements d’identifiants lors des mises à jour.</dd></div></dl>
+  <p class="engine-nuance">Généralement accessible avec le système natif ; cela ne rend pas chaque jeu automatiquement simple.</p><div class="engine-more"><a href="moteurs-jeux-traduits.html#renpy">Voir la fiche du moteur →</a></div>
+</article><article class="engine-item">
+  <h3>RPG Maker MV / MZ</h3><p class="case-label">Avec les données standard du moteur</p>
+  <dl class="factor-list"><div><dt>Ce qui facilite</dt><dd>Les dialogues d’événements et les données sont organisés dans des fichiers JSON.</dd></div><div><dt>Ce qui complique</dt><dd>Les plugins ajoutant leurs propres textes, les codes de contrôle et les fenêtres trop étroites pour le français.</dd></div></dl>
+  <p class="engine-nuance">Ce repère vise MV et MZ. XP, VX et VX Ace utilisent d’autres formats et doivent être étudiés séparément.</p><div class="engine-more"><a href="moteurs-jeux-traduits.html#rpg-maker">Voir la fiche du moteur →</a></div>
+</article></div>
+</section><section class="level-block level-medium" id="niveau-2" aria-labelledby="titre-2">
+  <div class="level-head"><span class="level-dot" aria-hidden="true"></span><div><h2 id="titre-2">Niveau 2 — Intermédiaire</h2><p>Formats ou scénarios connus, avec des adaptations et des contrôles à prévoir.</p></div></div>
+  <div class="engine-grid"><article class="engine-item">
+  <h3>WOLF RPG Editor</h3><p class="case-label">Avec des outils compatibles avec le jeu</p>
+  <dl class="factor-list"><div><dt>Ce qui facilite</dt><dd>La structure des cartes, des événements communs et des bases de données permet de cibler les textes.</dd></div><div><dt>Ce qui complique</dt><dd>L’encodage, les polices, les accents et la taille des fenêtres de dialogue ou de choix.</dd></div></dl>
+  <p class="engine-nuance">L’extraction peut bien fonctionner alors que le rendu en français demande encore du travail.</p><div class="engine-more"><a href="moteurs-jeux-traduits.html#wolf">Voir la fiche du moteur →</a></div>
+</article><article class="engine-item">
+  <h3>TyranoBuilder / TyranoScript</h3><p class="case-label">Avec des scénarios accessibles</p>
+  <dl class="factor-list"><div><dt>Ce qui facilite</dt><dd>Les fichiers <code>.ks</code> permettent de retrouver dialogues, choix et commandes de mise en scène.</dd></div><div><dt>Ce qui complique</dt><dd>Les variables, les balises, les menus personnalisés et les textes intégrés aux images.</dd></div></dl>
+  <p class="engine-nuance">Les commandes doivent rester intactes. Un fichier .ks n’indique pas forcément Tyrano : KAG emploie aussi cette extension.</p><div class="engine-more"><a href="moteurs-jeux-traduits.html#tyrano">Voir la fiche du moteur →</a></div>
+</article><article class="engine-item">
+  <h3>Visual Novel Maker</h3><p class="case-label">Avec les données et le système de langue accessibles</p>
+  <dl class="factor-list"><div><dt>Ce qui facilite</dt><dd>La gestion des langues et l’organisation des scènes peuvent fournir des correspondances claires.</dd></div><div><dt>Ce qui complique</dt><dd>Les scripts, les extensions et les interfaces personnalisées, qui peuvent ajouter des textes ailleurs.</dd></div></dl>
+  <p class="engine-nuance">Le contenu réellement exporté doit être examiné : un projet source et un jeu distribué ne se présentent pas toujours de la même manière.</p><div class="engine-more"><a href="moteurs-jeux-traduits.html#vnm">Voir la fiche du moteur →</a></div>
+</article><article class="engine-item">
+  <h3>QSP</h3><p class="case-label">Avec accès aux textes et au script</p>
+  <dl class="factor-list"><div><dt>Ce qui facilite</dt><dd>Les scènes textuelles et les outils de conversion du projet permettent d’identifier les passages à traduire.</dd></div><div><dt>Ce qui complique</dt><dd>Les phrases construites par le script, les variables et les chaînes qui servent aussi à la logique du jeu.</dd></div></dl>
+  <p class="engine-nuance">Un jeu très textuel n’est pas forcément un simple document : il faut préserver le code qui relie ses scènes.</p>
+</article></div>
+</section><section class="level-block level-hard" id="niveau-3" aria-labelledby="titre-3">
+  <div class="level-head"><span class="level-dot" aria-hidden="true"></span><div><h2 id="titre-3">Niveau 3 — Difficile</h2><p>Ressources regroupées, scripts ou affichage nécessitant un travail plus technique.</p></div></div>
+  <div class="engine-grid"><article class="engine-item">
+  <h3>KiriKiri / KAG</h3><p class="case-label">Quand les scénarios sont dans des archives</p>
+  <dl class="factor-list"><div><dt>Ce qui facilite</dt><dd>Des scénarios KAG accessibles rendent les dialogues plus faciles à suivre.</dd></div><div><dt>Ce qui complique</dt><dd>Les variantes d’archives XP3, les encodages, les scripts TJS et les interfaces faites sur mesure.</dd></div></dl>
+  <p class="engine-nuance">Avec des scénarios déjà accessibles, certains jeux demandent moins de travail que ce niveau ne le laisse penser.</p><div class="engine-more"><a href="moteurs-jeux-traduits.html#kirikiri">Voir la fiche du moteur →</a></div>
+</article><article class="engine-item">
+  <h3>GameMaker / GameMaker Studio</h3><p class="case-label">Quand les textes sont intégrés au jeu exporté</p>
+  <dl class="factor-list"><div><dt>Ce qui facilite</dt><dd>Des fichiers de langue externes ou une structure bien comprise par un outil adapté.</dd></div><div><dt>Ce qui complique</dt><dd>Les données regroupées dans <code>data.win</code>, les phrases assemblées par le code et les réglages d’affichage.</dd></div></dl>
+  <p class="engine-nuance">Trouver le texte ne règle pas forcément les retours à la ligne, les heures ou les limites des fenêtres.</p><div class="engine-more"><a href="moteurs-jeux-traduits.html#gamemaker">Voir la fiche du moteur →</a></div>
+</article><article class="engine-item">
+  <h3>Godot</h3><p class="case-label">Quand les textes sont dispersés dans les ressources</p>
+  <dl class="factor-list"><div><dt>Ce qui facilite</dt><dd>Des tables de traduction identifiées et un mécanisme de chargement de langue déjà prévu.</dd></div><div><dt>Ce qui complique</dt><dd>Les scènes, scripts et ressources binaires répartis dans un PCK, ainsi que les différences entre exports.</dd></div></dl>
+  <p class="engine-nuance">Un jeu avec des fichiers de langue bien organisés peut relever d’un niveau inférieur.</p><div class="engine-more"><a href="moteurs-jeux-traduits.html#godot">Voir la fiche du moteur →</a></div>
+</article><article class="engine-item">
+  <h3>Flash</h3><p class="case-label">Quand les textes et les ressources sont intégrés au SWF</p>
+  <dl class="factor-list"><div><dt>Ce qui facilite</dt><dd>L’accès au projet source ou à des textes externes chargés par le jeu.</dd></div><div><dt>Ce qui complique</dt><dd>Les textes gérés par ActionScript, les polices intégrées, les animations et les éléments graphiques.</dd></div></dl>
+  <p class="engine-nuance">Même après modification des mots, il faut vérifier les caractères disponibles et leur affichage.</p>
+</article></div>
+</section><section class="level-block level-very-hard" id="niveau-4" aria-labelledby="titre-4">
+  <div class="level-head"><span class="level-dot" aria-hidden="true"></span><div><h2 id="titre-4">Niveau 4 — Très difficile</h2><p>Les cas complexes : textes dispersés et intégration demandant une adaptation importante.</p></div></div>
+  <div class="engine-grid"><article class="engine-item">
+  <h3>Unity</h3><p class="case-label">Cas complexe, pas une difficulté systématique</p>
+  <dl class="factor-list"><div><dt>Ce qui facilite</dt><dd>Des tables de localisation reconnues, des TextAssets structurés ou un lecteur de traduction compatible.</dd></div><div><dt>Ce qui complique</dt><dd>Les multiples sources de texte : assets, bundles, composants, code et interfaces. Le backend Mono ou IL2CPP peut aussi changer la méthode.</dd></div></dl>
+  <p class="engine-nuance">Des fichiers de langue séparés peuvent simplifier fortement le travail. Ce niveau décrit les jeux nécessitant plusieurs méthodes ou une adaptation importante.</p><div class="engine-more"><a href="moteurs-jeux-traduits.html#unity">Voir la fiche du moteur →</a></div>
+</article><article class="engine-item">
+  <h3>Unreal Engine</h3><p class="case-label">Cas complexe, pas une difficulté systématique</p>
+  <dl class="factor-list"><div><dt>Ce qui facilite</dt><dd>Des ressources de localisation <code>.locres</code> identifiées et un chargement de langue ou de patch maîtrisé.</dd></div><div><dt>Ce qui complique</dt><dd>Les ressources préparées pour l’exécution, les formats PAK ou IoStore, les textes hors des tables et les particularités du jeu.</dd></div></dl>
+  <p class="engine-nuance">La présence de fichiers de langue utilisables peut ramener le travail à un niveau plus accessible.</p><div class="engine-more"><a href="moteurs-jeux-traduits.html#unreal">Voir la fiche du moteur →</a></div>
+</article></div>
+</section><section class="level-block level-variable" id="niveau-variable" aria-labelledby="titre-variable">
+  <div class="level-head"><span class="level-dot" aria-hidden="true"></span><div><h2 id="titre-variable">Variable</h2><p>La technologie ou l’étiquette ne suffit pas : il faut examiner les fichiers et les outils disponibles.</p></div></div>
+  <div class="engine-grid"><article class="engine-item">
+  <h3>HTML5 / jeux web</h3><p class="case-label">Technologies web, pas un moteur unique</p>
+  <dl class="factor-list"><div><dt>Ce qui facilite</dt><dd>Des fichiers de langue séparés ou des textes clairement identifiés dans les pages et les données.</dd></div><div><dt>Ce qui complique</dt><dd>Le code généré ou compacté, les phrases dynamiques et les interfaces dessinées dans des images ou un canevas.</dd></div></dl>
+  <p class="engine-nuance">Peut être très accessible ou demander une adaptation conséquente, selon la façon dont le jeu a été conçu.</p><div class="engine-more"><a href="moteurs-jeux-traduits.html#html5">Voir la fiche du moteur →</a></div>
+</article><article class="engine-item">
+  <h3>Java</h3><p class="case-label">Langage et environnement, pas un moteur unique</p>
+  <dl class="factor-list"><div><dt>Ce qui facilite</dt><dd>Des ressources de langue externes ou un projet source permettant de modifier puis reconstruire le jeu.</dd></div><div><dt>Ce qui complique</dt><dd>Les textes intégrés aux classes compilées et les phrases produites par le code.</dd></div></dl>
+  <p class="engine-nuance">La présence d’un JAR ne suffit pas à conclure : il faut regarder les ressources qu’il contient.</p>
+</article><article class="engine-item">
+  <h3>ADRIFT</h3><p class="case-label">Selon le projet et sa version</p>
+  <dl class="factor-list"><div><dt>Ce qui facilite</dt><dd>Un projet exploitable avec un éditeur compatible et des descriptions clairement identifiées.</dd></div><div><dt>Ce qui complique</dt><dd>La logique des actions, les règles de reconnaissance des commandes et la compatibilité entre versions.</dd></div></dl>
+  <p class="engine-nuance">Les fichiers d’aventure TAF et les paquets BLORB ne se traitent pas comme de simples documents texte.</p>
+</article><article class="engine-item">
+  <h3>TADS</h3><p class="case-label">Selon l’accès au projet source</p>
+  <dl class="factor-list"><div><dt>Ce qui facilite</dt><dd>Le code source et les ressources du jeu permettent de suivre la logique des descriptions et des messages.</dd></div><div><dt>Ce qui complique</dt><dd>Un jeu fourni uniquement sous forme compilée, ainsi que la grammaire et le vocabulaire des commandes.</dd></div></dl>
+  <p class="engine-nuance">Traduire les descriptions ne suffit pas toujours : l’interpréteur doit aussi comprendre ce que le joueur saisit.</p>
+</article><article class="engine-item">
+  <h3>RAGS</h3><p class="case-label">Selon l’accès aux données et la compatibilité des outils</p>
+  <dl class="factor-list"><div><dt>Ce qui facilite</dt><dd>Des outils adaptés capables d’exposer les textes et la structure du jeu.</dd></div><div><dt>Ce qui complique</dt><dd>Les actions, les conditions et la vérification du fonctionnement après modification ou conversion.</dd></div></dl>
+  <p class="engine-nuance">La présence de beaucoup de texte ne garantit pas une modification simple du fichier de jeu.</p>
+</article><article class="engine-item">
+  <h3>Others, Electron et NW.js</h3><p class="case-label">Une catégorie ou un environnement d’exécution</p>
+  <dl class="factor-list"><div><dt>Ce qui facilite</dt><dd>Identifier d’abord le vrai moteur et les fichiers qui portent les dialogues et les menus.</dd></div><div><dt>Ce qui complique</dt><dd>Déduire la méthode à partir de la seule étiquette « Others » ou d’une archive, sans examiner son contenu.</dd></div></dl>
+  <p class="engine-nuance">Others est une catégorie de rangement. Electron et NW.js exécutent des applications qui peuvent utiliser des moteurs très différents.</p><div class="engine-more"><a href="moteurs-jeux-traduits.html#electron">Electron →</a> <a href="moteurs-jeux-traduits.html#nwjs">NW.js →</a></div>
+</article></div>
+</section>
 
-<footer class="footer">
-  <p>© andric31 — Tutos & Aide</p>
-</footer>
+  <aside class="note"><strong>À retenir :</strong> une extraction réussie ne signifie pas que la traduction est terminée. Un menu, un historique ou une image peuvent encore demander une correction. Les outils et lecteurs autonomes peuvent réduire le travail, mais la vérification en jeu reste nécessaire.</aside>
 
+  <details class="difficulty-resources"><summary>Sur quoi reposent ces repères ?</summary><p>Les descriptions s’appuient sur l’organisation des ressources et les systèmes de traduction des moteurs. Les niveaux sont une appréciation pratique des cas décrits, et non une notation officielle des éditeurs.</p><ul><li><a href="https://www.renpy.org/doc/html/translation.html" target="_blank" rel="noopener noreferrer">Ren’Py — traduction</a></li><li><a href="https://rpgmakerofficial.com/product/MZ_help-en/01_08.html" target="_blank" rel="noopener noreferrer">RPG Maker MZ — base de données</a></li><li><a href="https://silversecond.com/WOLF_Translation_tool/Manual.html" target="_blank" rel="noopener noreferrer">WOLF RPG — traduction</a></li><li><a href="https://tyranobuilder.com/tag/" target="_blank" rel="noopener noreferrer">TyranoScript — commandes</a></li><li><a href="https://asset.visualnovelmaker.com/help/GameScript_Getting_Started.htm" target="_blank" rel="noopener noreferrer">VNM — scripts</a></li><li><a href="https://krkrz.github.io/docs/kirikiriz/j/contents/Files.html" target="_blank" rel="noopener noreferrer">KiriKiri — fichiers et archives</a></li><li><a href="https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_translations.html" target="_blank" rel="noopener noreferrer">Godot — traductions</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.localization@1.5/manual/index.html" target="_blank" rel="noopener noreferrer">Unity — localisation</a></li><li><a href="https://dev.epicgames.com/documentation/unreal-engine/localization-overview-for-unreal-engine?lang=fr" target="_blank" rel="noopener noreferrer">Unreal — localisation</a></li><li><a href="https://manual.gamemaker.io/beta/en/GameMaker_Language/GML_Reference/General_Game_Control/game_change.htm" target="_blank" rel="noopener noreferrer">GameMaker — données du jeu</a></li><li><a href="https://dev.qsp.org/docs/language/qsp-keywords/qsp-keywords-statements/" target="_blank" rel="noopener noreferrer">QSP — script</a></li><li><a href="https://wiki.adrift.co/FAQ_-_Frequently_Asked_Questions" target="_blank" rel="noopener noreferrer">ADRIFT — formats</a></li><li><a href="https://www.tads.org/t3doc/doc/sysman/build.htm" target="_blank" rel="noopener noreferrer">TADS — compilation</a></li><li><a href="https://helpx.adobe.com/animate/desktop/multimedia-and-video/classic-text.html" target="_blank" rel="noopener noreferrer">Flash / Animate — polices et textes</a></li><li><a href="https://github.com/Kassy2048/rags2html" target="_blank" rel="noopener noreferrer">RAGS — outil rags2html, par son auteur</a></li></ul></details>
+  <nav class="difficulty-next" aria-label="Pour continuer"><a href="moteurs-jeux-traduits.html">Reconnaître les moteurs et leurs formats →</a><a href="#haut">Retour en haut ↑</a></nav>
 </main>
-
+<footer class="footer"><p>© andric31 — Wiki, traductions et ressources</p></footer>
 </body>
 </html>

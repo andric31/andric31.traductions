@@ -1,223 +1,267 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Moteurs de jeux traduits — andric31</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Guide des moteurs de jeux et de leur traduction : Ren’Py, RPG Maker, Unity, Godot, WOLF RPG, Unreal, GameMaker et technologies web. Formats, identification, langues et patchs.">
+  <meta name="color-scheme" content="dark light">
+  <title>Moteurs de jeux et traduction — Wiki andric31</title>
   <script src="/theme-init.js"></script>
-<link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=1">
-  <link rel="stylesheet" href="/themes.css" />
-<link rel="stylesheet" href="wiki.css" />
-
-  <style>
-    .engine-card{
-      margin-bottom: 32px;
-    }
-    .engine-card h2{
-      margin-bottom: 6px;
-    }
-    .engine-meta{
-      font-size: 14px;
-      opacity: 0.8;
-      margin-bottom: 12px;
-    }
-    .engine-meta a{
-      color: #6ec1ff;
-      text-decoration: none;
-    }
-    .engine-meta a:hover{
-      text-decoration: underline;
-    }
-    .engine-sep{
-      height: 1px;
-      background: rgba(255,255,255,0.08);
-      margin: 32px 0;
-    }
-    .image-wrap{
-      margin: 24px 0;
-      text-align: center;
-    }
-    .tutorial-img{
-      max-width: 100%;
-      height: auto;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-    }
-  </style>
+  <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=1">
+  <link rel="stylesheet" href="/themes.css">
+  <link rel="stylesheet" href="wiki.css?v=20261013">
 </head>
-<body>
-
-<header class="topbar">
-  <a class="back" href="index.html">⬅ Retour</a>
-  <h1>🧠 Moteurs de jeux (que je traduis)</h1>
-  <p class="subtitle">Les principaux moteurs que je rencontre dans mes projets de traduction.</p>
+<body class="engine-guide">
+<a class="guide-skip" href="#guide-content">Aller au contenu</a>
+<header class="topbar" id="haut">
+  <div class="guide-topline"><a class="back" href="index.html">← Retour au wiki</a><span>Mis à jour le <time datetime="2026-10-13">13 octobre 2026</time></span></div>
+  <div class="wiki-kicker">Comprendre les fichiers de son jeu</div>
+  <h1>Moteurs de jeux<br><span>et traduction</span></h1>
+  <p class="subtitle">Reconnaître un moteur, retrouver ses textes et comprendre comment une traduction s’intègre au jeu.</p>
+  <nav class="guide-sections" aria-label="Sections du guide"><a href="#reperes">Les repères</a><a href="#fiches">13 fiches</a><a href="#methode">La méthode</a><a href="#questions">Questions fréquentes</a><a href="#lexique">Lexique</a></nav>
 </header>
-
-<main class="page">
-
-  <div class="image-wrap">
-    <img src="img/Moteurs_de_jeux_traduit.png"
-         alt="Moteurs de jeux traduits"
-         class="tutorial-img">
-  </div>
-
-  <!-- RENPY -->
-  <section class="card engine-card">
-    <h2>🐍 Ren’Py</h2>
-    <div class="engine-meta">
-      🗂️ Formats principaux : <strong>.rpy .rpyc</strong><br>
-      🌐 Site officiel :
-      <a href="https://www.renpy.org" target="_blank" rel="noopener noreferrer">renpy.org</a>
+<main class="page" id="guide-content">
+  <section class="card guide-intro" id="reperes" aria-labelledby="reperes-title">
+    <p class="eyebrow">Avant de commencer</p><h2 id="reperes-title">Un moteur, plusieurs façons de ranger les textes</h2>
+    <p>Voici les moteurs et technologies que l’on peut rencontrer dans mes projets de traduction. Les extensions sont des indices : elles ne disent pas, à elles seules, où se trouvent tous les dialogues ni si un jeu est déjà pris en charge par un outil.</p>
+    <div class="guide-concepts">
+      <div><h3>Le moteur</h3><p>Il fait fonctionner le jeu et ses scènes. Exemples : Ren’Py, Unity ou GameMaker.</p></div>
+      <div><h3>L’environnement</h3><p>Il permet de lancer une application. Electron et NW.js peuvent héberger différents jeux web.</p></div>
+      <div><h3>Le conteneur</h3><p>Il regroupe des fichiers. Une archive <code>.rpa</code>, <code>.xp3</code> ou <code>.asar</code> n’est pas un simple texte à traduire.</p></div>
     </div>
-
-    <p>
-      Ren’Py est un moteur open source spécialisé dans les Visual Novels. 📖💖  
-      Il utilise le langage Python, ce qui le rend puissant et personnalisable. 🐍  
-      C’est l’un des moteurs les plus répandus dans le domaine des jeux narratifs.
-    </p>
+    <p class="guide-note">Un même jeu peut combiner plusieurs de ces éléments. Pour l’identifier, on croise les noms de dossiers, les fichiers et le contenu des ressources.</p>
   </section>
 
-  <div class="engine-sep"></div>
-
-  <!-- RPGM -->
-  <section class="card engine-card">
-    <h2>🏰 RPG Maker MV (RPGM)</h2>
-    <div class="engine-meta">
-      🗂️ Formats principaux : <strong>.json .js</strong><br>
-      🌐 Site officiel :
-      <a href="https://www.rpgmakerweb.com" target="_blank" rel="noopener noreferrer">rpgmakerweb.com</a>
-    </div>
-
-    <p>
-      RPG Maker est spécialisé dans les jeux de rôle 2D classiques. ⚔️🗺️  
-      Il s’appuie sur JavaScript pour la personnalisation et utilise des fichiers JSON pour stocker les données.
-    </p>
+  <section class="guide-directory" id="fiches" aria-labelledby="fiches-title">
+    <div class="guide-section-head"><div><p class="eyebrow">Trouver son moteur</p><h2 id="fiches-title">Les fiches détaillées</h2></div><span class="guide-count" id="engine-count" role="status" aria-live="polite" aria-atomic="true">13 fiches</span></div>
+    <form class="guide-search" id="engine-search-form" role="search" hidden>
+      <label for="engine-query">Rechercher un moteur, un fichier ou un terme</label>
+      <div class="guide-search-row"><input type="search" id="engine-query" placeholder="Ex. : Unity, .pck, data.win, langue…" autocomplete="off" aria-controls="engine-list"><button type="button" id="engine-reset">Réinitialiser</button></div>
+      <fieldset class="guide-filters"><legend>Filtrer les fiches</legend>
+        <label><input type="radio" name="engine-family" value="all" checked> Toutes</label>
+        <label><input type="radio" name="engine-family" value="vn"> Visual novels</label>
+        <label><input type="radio" name="engine-family" value="engine"> Autres moteurs</label>
+        <label><input type="radio" name="engine-family" value="web"> Technologies web</label>
+      </fieldset>
+    </form>
+    <nav class="engine-toc" aria-label="Accès direct aux moteurs"><a href="#renpy">Ren’Py</a><a href="#rpg-maker">RPG Maker MV / MZ</a><a href="#unity">Unity</a><a href="#godot">Godot</a><a href="#tyrano">TyranoBuilder / TyranoScript</a><a href="#kirikiri">KiriKiri / KAG</a><a href="#vnm">Visual Novel Maker</a><a href="#wolf">WOLF RPG Editor</a><a href="#unreal">Unreal Engine</a><a href="#gamemaker">GameMaker / GameMaker Studio</a><a href="#html5">HTML5 / jeux web</a><a href="#electron">Electron</a><a href="#nwjs">NW.js / Node-Webkit</a></nav>
+    <noscript><p>Les treize fiches restent accessibles ci-dessous. Utilise le sommaire ou la recherche de ton navigateur.</p></noscript>
+    <p class="guide-empty" id="engine-empty" hidden>Aucune fiche ne correspond. Essaie un nom de moteur ou une extension, ou réinitialise la recherche.</p>
+    <div id="engine-list"><article class="card engine-card" id="renpy" data-family="vn" aria-labelledby="renpy-title">
+      <header class="engine-heading"><span class="engine-icon" aria-hidden="true">🐍</span><div><p class="engine-category">Visual novel</p><h2 id="renpy-title">Ren’Py</h2></div><span class="engine-number" aria-hidden="true">01</span></header>
+      <p class="engine-intro">Moteur open source spécialisé dans les romans visuels. Il associe un langage de scénario à Python pour gérer les dialogues, les choix, les personnages et l’interface.</p>
+      <div class="engine-recognize"><h3>Comment le reconnaître</h3><p>Un dossier <code>game</code>, des scripts <code>.rpy</code> ou <code>.rpyc</code>, parfois des archives <code>.rpa</code>. Le dossier <code>renpy</code> est un autre indice fréquent.</p></div>
+      <dl class="engine-files"><div><dt>Scripts</dt><dd><code>.rpy</code> : source lisible ; <code>.rpyc</code> : version compilée utilisée par le moteur.</dd></div><div><dt>Archives</dt><dd><code>.rpa</code> : regroupent des scripts, images, sons ou autres ressources.</dd></div><div><dt>Langues</dt><dd>Les traductions du système intégré sont généralement placées dans <code>game/tl/&lt;langue&gt;/</code>.</dd></div></dl>
+      <h3>Pour la traduction</h3><p>Le système intégré peut traduire les dialogues, les choix, les menus et les ressources propres à une langue. Les noms de fichiers et les identifiants de dialogue servent à relier la traduction à sa source.</p>
+      <details class="engine-details"><summary>Particularités et documentation</summary><p>Lors d’une mise à jour du jeu, conserver la traduction existante et vérifier les nouvelles lignes. Les variables, les balises et les identifiants ne doivent pas être traduits comme des phrases.</p><ul class="engine-sources"><li><a href="https://www.renpy.org/doc/html/translation.html" target="_blank" rel="noopener noreferrer">Traductions et dossier tl</a></li><li><a href="https://www.renpy.org/doc/html/build.html" target="_blank" rel="noopener noreferrer">Scripts et archives</a></li></ul></details>
+      <footer class="engine-links"><a href="https://www.renpy.org/" target="_blank" rel="noopener noreferrer">renpy.org</a><a href="#renpy" aria-label="Lien direct vers Ren’Py">Lien direct ↗</a></footer>
+    </article>
+<article class="card engine-card" id="rpg-maker" data-family="engine" aria-labelledby="rpg-maker-title">
+      <header class="engine-heading"><span class="engine-icon" aria-hidden="true">🏰</span><div><p class="engine-category">RPG en 2D · RPGM</p><h2 id="rpg-maker-title">RPG Maker MV / MZ</h2></div><span class="engine-number" aria-hidden="true">02</span></header>
+      <p class="engine-intro">Ces versions de RPG Maker servent à créer des jeux de rôle, d’aventure et des histoires interactives en 2D. Leur fonctionnement et leurs plugins reposent sur JavaScript.</p>
+      <div class="engine-recognize"><h3>Comment le reconnaître</h3><p>Des dossiers <code>data</code> et <code>js</code>, avec des fichiers comme <code>Map001.json</code>, <code>Actors.json</code> ou <code>System.json</code>. Sous MV, ils sont souvent dans <code>www</code>.</p></div>
+      <dl class="engine-files"><div><dt>Données</dt><dd><code>.json</code> : cartes, événements, personnages, objets, compétences et termes du système.</dd></div><div><dt>Scripts</dt><dd><code>.js</code> : fonctionnement du moteur et plugins, qui peuvent aussi contenir des textes affichés.</dd></div><div><dt>Images</dt><dd>Certains boutons, titres et menus sont dessinés dans les ressources graphiques.</dd></div></dl>
+      <h3>Pour la traduction</h3><p>Les dialogues se trouvent notamment dans les événements. Les descriptions et les noms figurent aussi dans la base de données ; les plugins peuvent ajouter leurs propres messages.</p>
+      <details class="engine-details"><summary>Particularités et documentation</summary><p>Cette fiche concerne MV et MZ. Les anciennes versions XP, VX et VX Ace utilisent d’autres formats et le système RGSS : une méthode destinée à MV/MZ ne s’applique pas automatiquement à ces jeux. Les codes de contrôle des messages doivent être conservés.</p><ul class="engine-sources"><li><a href="https://rpgmakerofficial.com/product/MZ_help-en/01_08.html" target="_blank" rel="noopener noreferrer">Base de données de MZ</a></li><li><a href="https://rpgmakerofficial.com/product/MZ_help-en/01_11_05.html" target="_blank" rel="noopener noreferrer">Plugins officiels</a></li></ul></details>
+      <footer class="engine-links"><a href="https://www.rpgmakerweb.com/" target="_blank" rel="noopener noreferrer">rpgmakerweb.com</a><a href="#rpg-maker" aria-label="Lien direct vers RPG Maker MV / MZ">Lien direct ↗</a></footer>
+    </article>
+<article class="card engine-card" id="unity" data-family="engine" aria-labelledby="unity-title">
+      <header class="engine-heading"><span class="engine-icon" aria-hidden="true">🎮</span><div><p class="engine-category">2D / 3D</p><h2 id="unity-title">Unity</h2></div><span class="engine-number" aria-hidden="true">03</span></header>
+      <p class="engine-intro">Moteur polyvalent utilisé pour des jeux en 2D et en 3D. Son nom ne désigne pas un format de traduction : chaque projet peut organiser ses textes différemment.</p>
+      <div class="engine-recognize"><h3>Comment le reconnaître</h3><p>Sous Windows, un dossier portant souvent le nom du jeu suivi de <code>_Data</code>, et des fichiers comme <code>UnityPlayer.dll</code> ou <code>globalgamemanagers</code>.</p></div>
+      <dl class="engine-files"><div><dt>Ressources</dt><dd><code>.assets</code> et AssetBundles : contiennent des objets, textes, images et autres données. L’extension des bundles peut varier.</dd></div><div><dt>Textes</dt><dd><code>.json</code>, <code>.xml</code>, <code>.csv</code>, <code>.txt</code> ou TextAssets intégrés aux ressources, selon le projet.</dd></div><div><dt>Systèmes de langue</dt><dd>Unity Localization ou des bibliothèques ajoutées par le jeu. Les scripts et les interfaces peuvent aussi fournir des textes.</dd></div></dl>
+      <h3>Pour la traduction</h3><p>Il faut repérer les dialogues, les menus et les tables de langue réellement utilisés. Une bibliothèque détectée aide à choisir la méthode, mais ne prouve pas que tous les textes passent par elle.</p>
+      <details class="engine-details"><summary>Particularités et documentation</summary><p>Un lecteur de traduction au lancement peut éviter de redistribuer de gros fichiers modifiés, lorsqu’il est compatible. Mono et IL2CPP n’offrent pas les mêmes possibilités. Les textes des images nécessitent un traitement séparé.</p><ul class="engine-sources"><li><a href="https://docs.unity3d.com/Manual/class-TextAsset.html" target="_blank" rel="noopener noreferrer">TextAssets</a></li><li><a href="https://docs.unity3d.com/Manual/AssetBundlesIntro.html" target="_blank" rel="noopener noreferrer">AssetBundles</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.localization@1.5/manual/index.html" target="_blank" rel="noopener noreferrer">Unity Localization</a></li></ul></details>
+      <footer class="engine-links"><a href="https://unity.com/" target="_blank" rel="noopener noreferrer">unity.com</a><a href="#unity" aria-label="Lien direct vers Unity">Lien direct ↗</a></footer>
+    </article>
+<article class="card engine-card" id="godot" data-family="engine" aria-labelledby="godot-title">
+      <header class="engine-heading"><span class="engine-icon" aria-hidden="true">🤖</span><div><p class="engine-category">2D / 3D</p><h2 id="godot-title">Godot</h2></div><span class="engine-number" aria-hidden="true">04</span></header>
+      <p class="engine-intro">Moteur open source de création de jeux en 2D et en 3D. Il utilise notamment GDScript et C# et possède un système intégré de traduction.</p>
+      <div class="engine-recognize"><h3>Comment le reconnaître</h3><p>Un fichier <code>.pck</code> à côté de l’exécutable est un indice fréquent. Le paquet de ressources peut aussi être incorporé à l’exécutable : l’absence de fichier PCK séparé n’exclut pas Godot.</p></div>
+      <dl class="engine-files"><div><dt>Paquet</dt><dd><code>.pck</code> : regroupe les ressources du jeu.</dd></div><div><dt>Projet</dt><dd><code>.tscn</code> et <code>.tres</code> pour des scènes et ressources textuelles ; <code>.gd</code> pour GDScript. Des formes binaires peuvent être présentes après export.</dd></div><div><dt>Langues</dt><dd><code>.csv</code>, <code>.po</code> et ressources <code>.translation</code>, selon le système et l’export utilisés.</dd></div></dl>
+      <h3>Pour la traduction</h3><p>Les textes peuvent être stockés dans les scènes, les scripts ou des tables de traduction. Si le jeu utilise des clés de langue, il faut préserver ces clés et traduire leurs valeurs.</p>
+      <details class="engine-details"><summary>Particularités et documentation</summary><p>Un fichier de langue ajouté n’est utile que si le jeu le charge. Un patch PCK peut être employé lorsque le chargement et la structure du jeu le permettent ; renommer un fichier ne suffit pas à le faire reconnaître.</p><ul class="engine-sources"><li><a href="https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_translations.html" target="_blank" rel="noopener noreferrer">Import des traductions</a></li><li><a href="https://docs.godotengine.org/en/stable/tutorials/export/exporting_pcks.html" target="_blank" rel="noopener noreferrer">Paquets, patchs et mods</a></li></ul></details>
+      <footer class="engine-links"><a href="https://godotengine.org/" target="_blank" rel="noopener noreferrer">godotengine.org</a><a href="#godot" aria-label="Lien direct vers Godot">Lien direct ↗</a></footer>
+    </article>
+<article class="card engine-card" id="tyrano" data-family="vn" aria-labelledby="tyrano-title">
+      <header class="engine-heading"><span class="engine-icon" aria-hidden="true">🦖</span><div><p class="engine-category">Visual novel</p><h2 id="tyrano-title">TyranoBuilder / TyranoScript</h2></div><span class="engine-number" aria-hidden="true">05</span></header>
+      <p class="engine-intro">TyranoBuilder fournit un éditeur visuel pour créer des romans visuels avec TyranoScript. Le jeu s’appuie sur des technologies web et des scénarios organisés en scènes.</p>
+      <div class="engine-recognize"><h3>Comment le reconnaître</h3><p>Des scénarios <code>.ks</code>, souvent dans <code>data/scenario</code>, accompagnés des fichiers du moteur Tyrano et d’une page de lancement HTML.</p></div>
+      <dl class="engine-files"><div><dt>Scénarios</dt><dd><code>.ks</code> : dialogues, choix, commandes et mise en scène.</dd></div><div><dt>Scripts et réglages</dt><dd>JavaScript et fichiers de configuration, dont la forme dépend du projet.</dd></div><div><dt>Interface</dt><dd>Textes, éléments HTML et images peuvent participer aux menus et aux boutons.</dd></div></dl>
+      <h3>Pour la traduction</h3><p>Les textes du scénario sont mélangés aux commandes. Il faut traduire les dialogues et les libellés tout en conservant les balises, les variables et les chemins vers les ressources.</p>
+      <details class="engine-details"><summary>Particularités et documentation</summary><p>TyranoScript et KAG emploient tous deux des fichiers .ks, mais ce sont des systèmes différents. L’extension seule ne suffit pas à choisir le bon outil.</p><ul class="engine-sources"><li><a href="https://tyranobuilder.com/tag/" target="_blank" rel="noopener noreferrer">Référence TyranoScript</a></li><li><a href="https://tyranobuilder.com/tutorials/create-a-scene" target="_blank" rel="noopener noreferrer">Création des scènes</a></li></ul></details>
+      <footer class="engine-links"><a href="https://tyranobuilder.com/" target="_blank" rel="noopener noreferrer">tyranobuilder.com</a><a href="#tyrano" aria-label="Lien direct vers TyranoBuilder / TyranoScript">Lien direct ↗</a></footer>
+    </article>
+<article class="card engine-card" id="kirikiri" data-family="vn" aria-labelledby="kirikiri-title">
+      <header class="engine-heading"><span class="engine-icon" aria-hidden="true">🦊</span><div><p class="engine-category">Visual novel</p><h2 id="kirikiri-title">KiriKiri / KAG</h2></div><span class="engine-number" aria-hidden="true">06</span></header>
+      <p class="engine-intro">KiriKiri est un moteur japonais utilisé notamment pour les romans visuels. KAG, pour KiriKiri Adventure Game, est un système de scénarios fonctionnant avec ce moteur.</p>
+      <div class="engine-recognize"><h3>Comment le reconnaître</h3><p>Des archives <code>.xp3</code> ou, lorsque les fichiers sont accessibles, des scénarios <code>.ks</code> et un script de démarrage <code>startup.tjs</code>.</p></div>
+      <dl class="engine-files"><div><dt>Archives</dt><dd><code>.xp3</code> : regroupent les ressources du jeu.</dd></div><div><dt>Scénarios</dt><dd><code>.ks</code> : texte de l’histoire et commandes KAG.</dd></div><div><dt>Logique</dt><dd><code>.tjs</code> : scripts TJS, utilisés pour le fonctionnement et la personnalisation.</dd></div></dl>
+      <h3>Pour la traduction</h3><p>Les dialogues peuvent être dans les scénarios, tandis que des messages et des éléments de menu se trouvent dans les scripts ou dans les images.</p>
+      <details class="engine-details"><summary>Particularités et documentation</summary><p>La structure, l’encodage et les éventuelles variantes d’archives dépendent du jeu. Les commandes KAG et les expressions TJS doivent garder leur sens et leur syntaxe.</p><ul class="engine-sources"><li><a href="https://krkrz.github.io/krkr2doc/kag3doc/contents/Intro.html" target="_blank" rel="noopener noreferrer">Présentation de KAG</a></li><li><a href="https://krkrz.github.io/docs/kirikiriz/j/contents/Files.html" target="_blank" rel="noopener noreferrer">Fichiers de KiriKiri Z</a></li></ul></details>
+      <footer class="engine-links"><a href="https://krkrz.github.io/" target="_blank" rel="noopener noreferrer">krkrz.github.io</a><a href="#kirikiri" aria-label="Lien direct vers KiriKiri / KAG">Lien direct ↗</a></footer>
+    </article>
+<article class="card engine-card" id="vnm" data-family="vn" aria-labelledby="vnm-title">
+      <header class="engine-heading"><span class="engine-icon" aria-hidden="true">📖</span><div><p class="engine-category">Visual novel · VNM</p><h2 id="vnm-title">Visual Novel Maker</h2></div><span class="engine-number" aria-hidden="true">07</span></header>
+      <p class="engine-intro">Outil dédié aux romans visuels, avec un éditeur de scènes, de personnages et de choix. Il peut être personnalisé par des scripts et des extensions JavaScript ou CoffeeScript.</p>
+      <div class="engine-recognize"><h3>Comment le reconnaître</h3><p>Dans les projets et certaines distributions, des dossiers <code>data</code> et <code>resources</code>. Le fichier <code>Game.vnproject</code> identifie un projet source, mais n’est pas nécessairement fourni avec le jeu.</p></div>
+      <dl class="engine-files"><div><dt>Données</dt><dd>Données de scènes, de personnages et d’interface, notamment structurées en JSON.</dd></div><div><dt>Scripts</dt><dd>JavaScript ; CoffeeScript peut être utilisé pendant le développement puis compilé en JavaScript.</dd></div><div><dt>Langues</dt><dd>Le moteur propose une gestion des langues pour les textes du jeu.</dd></div></dl>
+      <h3>Pour la traduction</h3><p>Les dialogues et les menus peuvent être liés à la configuration des langues. Les interfaces personnalisées et les textes dessinés dans les images demandent parfois un traitement complémentaire.</p>
+      <details class="engine-details"><summary>Particularités et documentation</summary><p>Il faut distinguer les fichiers du projet de ceux du jeu exporté. Le fichier .vnproject ne contient pas à lui seul les dialogues ; il sert à ouvrir et identifier le projet.</p><ul class="engine-sources"><li><a href="https://asset.visualnovelmaker.com/help/Data_Getting_Started.htm" target="_blank" rel="noopener noreferrer">Structure du projet</a></li><li><a href="https://asset.visualnovelmaker.com/help/GameScript_Getting_Started.htm" target="_blank" rel="noopener noreferrer">Scripts du jeu</a></li><li><a href="https://asset.visualnovelmaker.com/help/Mass_Edit.htm" target="_blank" rel="noopener noreferrer">Textes et langues</a></li></ul></details>
+      <footer class="engine-links"><a href="https://www.visualnovelmaker.com/" target="_blank" rel="noopener noreferrer">visualnovelmaker.com</a><a href="#vnm" aria-label="Lien direct vers Visual Novel Maker">Lien direct ↗</a></footer>
+    </article>
+<article class="card engine-card" id="wolf" data-family="engine" aria-labelledby="wolf-title">
+      <header class="engine-heading"><span class="engine-icon" aria-hidden="true">🐺</span><div><p class="engine-category">RPG / aventure en 2D</p><h2 id="wolf-title">WOLF RPG Editor</h2></div><span class="engine-number" aria-hidden="true">08</span></header>
+      <p class="engine-intro">Moteur japonais permettant de créer des RPG et des jeux d’aventure en 2D. Son système d’événements et ses bases de données permettent de personnaliser les interactions du jeu.</p>
+      <div class="engine-recognize"><h3>Comment le reconnaître</h3><p>Un dossier <code>Data</code> avec notamment <code>BasicData</code> et des cartes, ou des ressources regroupées dans des fichiers <code>.wolf</code>.</p></div>
+      <dl class="engine-files"><div><dt>Archives</dt><dd><code>.wolf</code> : ressources regroupées ; leur présentation peut varier selon la version et le jeu.</dd></div><div><dt>Cartes</dt><dd><code>.mps</code> : cartes et événements associés.</dd></div><div><dt>Données</dt><dd><code>.dat</code> : événements communs, paramètres et bases de données, selon le fichier.</dd></div></dl>
+      <h3>Pour la traduction</h3><p>Les dialogues, les choix, les noms et les descriptions peuvent être répartis dans les cartes, les événements communs et les bases de données. Le contenu des images doit être traité à part.</p>
+      <details class="engine-details"><summary>Particularités et documentation</summary><p>Après traduction, vérifier les accents, la police et la largeur des fenêtres, notamment pour les choix. Une phrase correcte peut devenir illisible si le moteur ne possède pas les glyphes nécessaires ou si le texte déborde.</p><ul class="engine-sources"><li><a href="https://silversecond.com/WolfRPGEditor/Help/" target="_blank" rel="noopener noreferrer">Manuel du moteur</a></li><li><a href="https://silversecond.com/WOLF_Translation_tool/Manual.html" target="_blank" rel="noopener noreferrer">Outil officiel de traduction</a></li></ul></details>
+      <footer class="engine-links"><a href="https://silversecond.com/WolfRPGEditor/" target="_blank" rel="noopener noreferrer">silversecond.com/WolfRPGEditor</a><a href="#wolf" aria-label="Lien direct vers WOLF RPG Editor">Lien direct ↗</a></footer>
+    </article>
+<article class="card engine-card" id="unreal" data-family="engine" aria-labelledby="unreal-title">
+      <header class="engine-heading"><span class="engine-icon" aria-hidden="true">🌀</span><div><p class="engine-category">Moteur 3D</p><h2 id="unreal-title">Unreal Engine</h2></div><span class="engine-number" aria-hidden="true">09</span></header>
+      <p class="engine-intro">Moteur utilisé pour de nombreux jeux en 3D. Il propose un système de localisation des textes et des ressources, mais chaque projet choisit ce qu’il y intègre.</p>
+      <div class="engine-recognize"><h3>Comment le reconnaître</h3><p>Un dossier <code>Content/Paks</code> et des fichiers <code>.pak</code>, ou des ensembles <code>.utoc</code> / <code>.ucas</code>, constituent des indices courants.</p></div>
+      <dl class="engine-files"><div><dt>Archives</dt><dd><code>.pak</code> ; avec IoStore, conteneurs <code>.utoc</code> / <code>.ucas</code>.</dd></div><div><dt>Langues</dt><dd><code>.locres</code> : traductions compilées. Les fichiers <code>.po</code> servent notamment aux échanges pendant le développement.</dd></div><div><dt>Autres ressources</dt><dd>Des textes ou interfaces peuvent se trouver dans d’autres ressources, dont les assets <code>.uasset</code>.</dd></div></dl>
+      <h3>Pour la traduction</h3><p>Quand le système de localisation est utilisé, les ressources de langue permettent de relier les textes à leurs identifiants. Il faut aussi vérifier les menus, les sous-titres et les interfaces personnalisées.</p>
+      <details class="engine-details"><summary>Particularités et documentation</summary><p>Tous les textes ne sont pas forcément dans les .locres. La création d’un patch séparé dépend de la version, du format des ressources et de la façon dont le jeu charge ses paquets.</p><ul class="engine-sources"><li><a href="https://dev.epicgames.com/documentation/unreal-engine/localization-overview-for-unreal-engine?lang=fr" target="_blank" rel="noopener noreferrer">Présentation de la localisation</a></li><li><a href="https://dev.epicgames.com/documentation/unreal-engine/packaging-your-project?lang=fr" target="_blank" rel="noopener noreferrer">Préparation des paquets</a></li></ul></details>
+      <footer class="engine-links"><a href="https://www.unrealengine.com/" target="_blank" rel="noopener noreferrer">unrealengine.com</a><a href="#unreal" aria-label="Lien direct vers Unreal Engine">Lien direct ↗</a></footer>
+    </article>
+<article class="card engine-card" id="gamemaker" data-family="engine" aria-labelledby="gamemaker-title">
+      <header class="engine-heading"><span class="engine-icon" aria-hidden="true">🛠️</span><div><p class="engine-category">Jeux en 2D</p><h2 id="gamemaker-title">GameMaker / GameMaker Studio</h2></div><span class="engine-number" aria-hidden="true">10</span></header>
+      <p class="engine-intro">Moteur principalement destiné aux jeux en 2D : plateformes, aventure, RPG ou gestion. Il utilise notamment son propre langage, GML, pour programmer le jeu.</p>
+      <div class="engine-recognize"><h3>Comment le reconnaître</h3><p>Sous Windows, la présence de <code>data.win</code> à côté de l’exécutable est un indice fréquent. Le nom et l’organisation des données peuvent varier selon la distribution.</p></div>
+      <dl class="engine-files"><div><dt>Jeu exporté</dt><dd><code>data.win</code> ou autre fichier <code>.win</code> : données et ressources utilisées par le jeu sous Windows.</dd></div><div><dt>Fichiers externes</dt><dd>Selon le projet, des fichiers <code>.json</code>, <code>.csv</code>, <code>.txt</code> ou d’autres ressources peuvent être chargés séparément.</dd></div><div><dt>Textes</dt><dd>Les messages peuvent être intégrés aux données du jeu ou produits par sa logique d’affichage.</dd></div></dl>
+      <h3>Pour la traduction</h3><p>Il faut des outils adaptés au jeu exporté. Certaines phrases sont assemblées à partir de plusieurs morceaux ou accompagnées d’une valeur : nom, heure, nombre d’objets…</p>
+      <details class="engine-details"><summary>Particularités et documentation</summary><p>data.win n’est pas un document texte ordinaire. Modifier seulement un mot ne résout pas nécessairement les questions de retours à la ligne, de police ou de format de l’heure ; ces comportements peuvent être définis par le code.</p><ul class="engine-sources"><li><a href="https://gamemaker.io/en" target="_blank" rel="noopener noreferrer">Présentation de GameMaker</a></li><li><a href="https://manual.gamemaker.io/beta/en/GameMaker_Language/GML_Reference/General_Game_Control/game_change.htm" target="_blank" rel="noopener noreferrer">Fichiers de données et lancement</a></li></ul></details>
+      <footer class="engine-links"><a href="https://gamemaker.io/" target="_blank" rel="noopener noreferrer">gamemaker.io</a><a href="#gamemaker" aria-label="Lien direct vers GameMaker / GameMaker Studio">Lien direct ↗</a></footer>
+    </article>
+<article class="card engine-card" id="html5" data-family="web" aria-labelledby="html5-title">
+      <header class="engine-heading"><span class="engine-icon" aria-hidden="true">🌐</span><div><p class="engine-category">Technologies web</p><h2 id="html5-title">HTML5 / jeux web</h2></div><span class="engine-number" aria-hidden="true">11</span></header>
+      <p class="engine-intro">Cette catégorie regroupe les jeux construits avec les technologies du Web. HTML5 n’est pas un moteur unique : le jeu peut utiliser une bibliothèque, un moteur spécialisé ou du code propre.</p>
+      <div class="engine-recognize"><h3>Comment le reconnaître</h3><p>Une page telle que <code>index.html</code>, des scripts JavaScript et des ressources web. Un jeu peut fonctionner dans un navigateur ou être distribué comme une application de bureau.</p></div>
+      <dl class="engine-files"><div><dt>Structure</dt><dd><code>.html</code> : page et éléments de l’interface.</dd></div><div><dt>Logique et données</dt><dd><code>.js</code> pour les scripts ; <code>.json</code> et autres fichiers pour les données, selon le projet.</dd></div><div><dt>Présentation</dt><dd><code>.css</code> : styles, dimensions et mise en page, plutôt que stockage principal des dialogues.</dd></div></dl>
+      <h3>Pour la traduction</h3><p>Les textes peuvent être présents dans les pages, les scripts ou des fichiers de langue. Il faut préserver les balises HTML, les variables et le fonctionnement des interactions.</p>
+      <details class="engine-details"><summary>Particularités et documentation</summary><p>Tous les jeux web ne rangent pas leurs textes de la même manière. Une extension .html ou .js ne permet pas, seule, d’identifier le moteur ni de choisir une méthode universelle.</p><ul class="engine-sources"><li><a href="https://developer.mozilla.org/en-US/docs/Games/Introduction" target="_blank" rel="noopener noreferrer">Développement de jeux web</a></li></ul></details>
+      <footer class="engine-links"><a href="https://developer.mozilla.org/fr/docs/Games" target="_blank" rel="noopener noreferrer">Documentation MDN</a><a href="#html5" aria-label="Lien direct vers HTML5 / jeux web">Lien direct ↗</a></footer>
+    </article>
+<article class="card engine-card" id="electron" data-family="web" aria-labelledby="electron-title">
+      <header class="engine-heading"><span class="engine-icon" aria-hidden="true">⚡</span><div><p class="engine-category">Environnement d’exécution</p><h2 id="electron-title">Electron</h2></div><span class="engine-number" aria-hidden="true">12</span></header>
+      <p class="engine-intro">Framework open source qui permet de créer des applications de bureau avec HTML, CSS et JavaScript. Il embarque Chromium et Node.js ; certains jeux l’utilisent pour fonctionner dans leur propre fenêtre.</p>
+      <div class="engine-recognize"><h3>Comment le reconnaître</h3><p>Un fichier <code>resources/app.asar</code> ou un dossier <code>resources/app</code> contenant l’application sont des indices fréquents.</p></div>
+      <dl class="engine-files"><div><dt>Paquet</dt><dd><code>.asar</code> : archive regroupant les fichiers de l’application.</dd></div><div><dt>Contenu</dt><dd><code>.html</code>, <code>.js</code>, <code>.json</code>, <code>.css</code> et ressources graphiques.</dd></div><div><dt>Organisation</dt><dd>Certains fichiers peuvent rester en dehors de l’archive, selon la façon dont l’application est distribuée.</dd></div></dl>
+      <h3>Pour la traduction</h3><p>Il faut identifier le système de jeu présent dans l’application, puis les dialogues et l’interface qu’il charge. Electron décrit l’environnement d’exécution, pas l’organisation des textes.</p>
+      <details class="engine-details"><summary>Particularités et documentation</summary><p>Une archive .asar n’est pas un moteur ni un fichier de traduction. Son contenu doit conserver une structure compatible avec l’application après modification.</p><ul class="engine-sources"><li><a href="https://www.electronjs.org/" target="_blank" rel="noopener noreferrer">Présentation officielle</a></li><li><a href="https://www.electronjs.org/docs/latest/tutorial/application-distribution" target="_blank" rel="noopener noreferrer">Distribution des applications</a></li></ul></details>
+      <footer class="engine-links"><a href="https://www.electronjs.org/" target="_blank" rel="noopener noreferrer">electronjs.org</a><a href="#electron" aria-label="Lien direct vers Electron">Lien direct ↗</a></footer>
+    </article>
+<article class="card engine-card" id="nwjs" data-family="web" aria-labelledby="nwjs-title">
+      <header class="engine-heading"><span class="engine-icon" aria-hidden="true">💻</span><div><p class="engine-category">Environnement d’exécution</p><h2 id="nwjs-title">NW.js / Node-Webkit</h2></div><span class="engine-number" aria-hidden="true">13</span></header>
+      <p class="engine-intro">Environnement associant Chromium et Node.js pour exécuter des applications web dans une fenêtre autonome. Node-Webkit est son ancien nom.</p>
+      <div class="engine-recognize"><h3>Comment le reconnaître</h3><p>Des fichiers web avec un manifeste <code>package.json</code>, parfois dans un paquet <code>package.nw</code>. Le paquet peut aussi être incorporé à l’exécutable.</p></div>
+      <dl class="engine-files"><div><dt>Manifeste</dt><dd><code>package.json</code> : décrit notamment le point de lancement de l’application.</dd></div><div><dt>Paquet</dt><dd><code>.nw</code> : peut être une archive ZIP contenant l’application ; des distributions utilisent aussi un dossier.</dd></div><div><dt>Contenu</dt><dd>Pages HTML, scripts JavaScript, données JSON et autres ressources du jeu.</dd></div></dl>
+      <h3>Pour la traduction</h3><p>Comme pour Electron, les textes se trouvent dans l’application exécutée. Un même jeu peut donc être identifié à la fois par son moteur et par NW.js.</p>
+      <details class="engine-details"><summary>Particularités et documentation</summary><p>La présence de package.json seule ne confirme pas NW.js, car d’autres applications l’utilisent aussi. Croiser plusieurs indices évite de confondre le moteur, son environnement et le format de ses archives.</p><ul class="engine-sources"><li><a href="https://docs.nwjs.io/" target="_blank" rel="noopener noreferrer">Documentation NW.js</a></li><li><a href="https://docs.nwjs.io/For%20Users/Package%20and%20Distribute/" target="_blank" rel="noopener noreferrer">Paquets et distribution</a></li></ul></details>
+      <footer class="engine-links"><a href="https://nwjs.io/" target="_blank" rel="noopener noreferrer">nwjs.io</a><a href="#nwjs" aria-label="Lien direct vers NW.js / Node-Webkit">Lien direct ↗</a></footer>
+    </article></div>
   </section>
 
-  <div class="engine-sep"></div>
-
-  <!-- UNITY -->
-  <section class="card engine-card">
-    <h2>🎮 Unity</h2>
-    <div class="engine-meta">
-      🗂️ Formats principaux : <strong>.json .xml .csv .txt</strong><br>
-      🌐 Site officiel :
-      <a href="https://unity.com" target="_blank" rel="noopener noreferrer">unity.com</a>
+  <section class="card guide-method" id="methode" aria-labelledby="methode-title">
+    <p class="eyebrow">Du fichier au texte affiché</p><h2 id="methode-title">Ce qu’une traduction doit prendre en compte</h2>
+    <ol class="guide-steps">
+      <li><h3>Identifier le jeu et ses langues</h3><p>Repérer le moteur, la version du jeu et les systèmes de langue utilisés. La présence d’un « localizer » indique un mécanisme de localisation, pas forcément plusieurs traductions complètes.</p></li>
+      <li><h3>Retrouver tous les textes utiles</h3><p>Dialogues, choix, menus, inventaire, historique, sauvegardes et messages de confirmation peuvent venir de sources différentes. Un texte classé « code du jeu » peut être une vraie phrase affichée : ce classement indique son origine.</p></li>
+      <li><h3>Préserver le fonctionnement</h3><p>Les identifiants, chemins, variables et balises restent intacts. Par exemple, dans <code>Bonjour {player}</code>, le nom de la variable doit être conservé. Une chaîne ambiguë doit être examinée dans son contexte avant d’être traduite.</p></li>
+      <li><h3>Contrôler le résultat en jeu</h3><p>Vérifier les accents, les retours à la ligne, les boutons et les textes dynamiques. Une heure en 24 h, une date en français ou une phrase révélée lettre par lettre peuvent demander une adaptation de l’affichage.</p></li>
+    </ol>
+    <div class="guide-method-grid">
+      <div class="guide-panel"><h3>Fichiers de langue</h3><p>Quand le jeu possède des tables de localisation, leurs clés permettent de relier les traductions aux bons textes. Ajouter le français demande aussi que le jeu charge la nouvelle langue et sache la sélectionner.</p></div>
+      <div class="guide-panel"><h3>Images à traduire</h3><p>Un mot dessiné dans une image n’est pas une chaîne de texte. Il faut conserver sa correspondance avec l’original, ses dimensions, sa transparence et ses différents états : normal, survol ou sélection.</p></div>
     </div>
-
-    <p>
-      Moteur très répandu pour la 2D et la 3D. 🌍✨  
-      Les fichiers peuvent contenir dialogues, configurations et données de jeu.
-    </p>
+    <h3 class="guide-subheading">Comprendre le patch fourni</h3>
+    <div class="guide-method-grid guide-patches">
+      <div class="guide-panel"><h4>Copie directe</h4><p>Les fichiers préparés sont copiés dans le jeu, à l’emplacement indiqué. Le paquet peut contenir de nouveaux fichiers ou remplacer certaines ressources.</p></div>
+      <div class="guide-panel"><h4>Patch compact</h4><p>Il contient surtout les différences à appliquer. Un outil ou un exécutable peut reconstruire les fichiers traduits à partir de la version originale attendue.</p></div>
+      <div class="guide-panel"><h4>Lecteur autonome</h4><p>Il charge des traductions externes pendant l’exécution. Selon son intégration, il peut limiter la redistribution de gros fichiers, mais sa compatibilité dépend du moteur et du jeu.</p></div>
+    </div>
+    <p class="guide-note">La méthode d’installation est celle indiquée dans la traduction téléchargée. Le nom du moteur ne permet pas de décider seul où copier les fichiers.</p>
   </section>
 
-  <div class="engine-sep"></div>
-
-  <!-- GODOT -->
-  <section class="card engine-card">
-    <h2>👾 🌀 Godot</h2>
-    <div class="engine-meta">
-      🗂️ Formats principaux : <strong>.pck (.tscn .tres .dtl .gd)</strong><br>
-      🌐 Site officiel :
-      <a href="https://godotengine.org" target="_blank" rel="noopener noreferrer">godotengine.org</a>
-    </div>
-
-    <p>
-      Godot est un moteur open source très flexible, utilisé en 2D comme en 3D. 🖼️🧊  
-      Il utilise son propre langage : GDScript.
-    </p>
+  <section class="card guide-faq" id="questions" aria-labelledby="questions-title">
+    <p class="eyebrow">Les cas que l’on rencontre souvent</p><h2 id="questions-title">Questions fréquentes</h2>
+    <details><summary>Pourquoi reste-t-il de l’anglais alors que les dialogues sont traduits ?</summary><p>Le menu, l’historique ou une boîte de confirmation peuvent utiliser d’autres fichiers. Le texte peut aussi être assemblé pendant le jeu ou intégré à une image. Il faut d’abord retrouver sa source pour choisir la bonne correction.</p></details>
+    <details><summary>Renommer « English » en « Français » ajoute-t-il une langue ?</summary><p>Non. Cela modifie uniquement le libellé visible. Une vraie langue française suppose que ses ressources soient chargées et sélectionnées. Un patch peut aussi traduire le contenu de la langue anglaise existante ; ce fonctionnement doit être distingué d’un ajout de langue.</p></details>
+    <details><summary>Pourquoi une traduction peut-elle peser plusieurs gigaoctets ?</summary><p>Quelques textes modifiés peuvent se trouver dans une grosse archive qui contient aussi des images et des sons. Redistribuer toute cette archive augmente fortement la taille du patch. Un fichier de langue séparé, un patch différentiel ou un lecteur compatible peuvent parfois réduire ce volume.</p></details>
+    <details><summary>« Incertain » veut-il dire que le texte ne doit pas être traduit ?</summary><p>Non. Cela signifie que l’outil manque de contexte pour distinguer un texte visible d’un identifiant technique. Un nom de lieu ou un libellé court peut être traduisible. L’inclusion de ces chaînes dépend des réglages de l’outil ; il faut vérifier le résumé de préparation.</p></details>
+    <details><summary>Pourquoi la même image apparaît-elle comme Sprite et Texture2D ?</summary><p>Dans Unity, une texture fournit l’image et un sprite peut désigner une zone de cette texture. Les deux extractions peuvent donc se ressembler ou être identiques, mais un sprite peut aussi n’être qu’un morceau d’un atlas. Il faut garder une correspondance fiable, plutôt que se fier uniquement au nom du PNG.</p></details>
+    <details><summary>Une mise à jour du jeu conserve-t-elle forcément la traduction ?</summary><p>Les dialogues, les identifiants et les ressources peuvent changer. Une mémoire de traduction aide à réutiliser les textes connus, mais un patch préparé pour une version donnée doit être vérifié avant d’être appliqué à une autre.</p></details>
+    <details><summary>Une police correcte suffit-elle à éviter les mots coupés ?</summary><p>Elle permet d’afficher les caractères, mais les coupures peuvent aussi venir de la largeur d’une fenêtre, d’une limite de lignes ou d’un effet d’apparition progressive. Il faut contrôler la mise en page avec les textes traduits, souvent plus longs.</p></details>
   </section>
 
-  <div class="engine-sep"></div>
-
-  <!-- TYRANO -->
-  <section class="card engine-card">
-    <h2>🦊 🦖 TyranoBuilder (TyranoScript)</h2>
-    <div class="engine-meta">
-      🗂️ Formats principaux : <strong>.ks .json</strong><br>
-      🌐 Site officiel :
-      <a href="https://tyranobuilder.com" target="_blank" rel="noopener noreferrer">tyranobuilder.com</a>
-    </div>
-
-    <p>
-      Tyrano est un moteur japonais spécialisé dans les Visual Novels. 🎌💬  
-      Il repose sur une syntaxe KS simple, personnalisable via JavaScript.
-    </p>
+  <section class="card guide-glossary" id="lexique" aria-labelledby="lexique-title">
+    <p class="eyebrow">Les mots utiles</p><h2 id="lexique-title">Petit lexique</h2>
+    <dl>
+      <div><dt>Localisation</dt><dd>Adaptation d’un jeu à une langue : textes, formats de date et d’heure, polices et parfois images.</dd></div>
+      <div><dt>Asset / ressource</dt><dd>Élément utilisé par le jeu : image, son, police, scène, texte ou données.</dd></div>
+      <div><dt>Archive / conteneur</dt><dd>Fichier regroupant plusieurs ressources, parfois compressées. Son extension n’indique pas directement où se trouvent les phrases.</dd></div>
+      <div><dt>Chaîne de texte</dt><dd>Suite de caractères stockée par le jeu. Elle peut représenter un dialogue, mais aussi un chemin ou un identifiant technique.</dd></div>
+      <div><dt>Clé / identifiant</dt><dd>Repère stable utilisé pour retrouver un texte ou une ressource. On traduit généralement la valeur associée, pas la clé.</dd></div>
+      <div><dt>Variable / balise</dt><dd>Élément remplacé ou interprété par le jeu : nom du personnage, valeur numérique, couleur, pause… Sa syntaxe doit être conservée.</dd></div>
+      <div><dt>Atlas / sprite</dt><dd>Un atlas rassemble plusieurs images sur une texture. Un sprite peut utiliser une portion de cette texture.</dd></div>
+      <div><dt>Mémoire de traduction</dt><dd>Ensemble de textes déjà traduits, réutilisables lors d’une reprise ou d’une mise à jour. Le contexte peut nécessiter une relecture.</dd></div>
+    </dl>
   </section>
-
-  <div class="engine-sep"></div>
-
-  <!-- KIRIKIRI -->
-  <section class="card engine-card">
-    <h2>🐟🐟 KiriKiri / KAG</h2>
-    <div class="engine-meta">
-      🗂️ Formats principaux : <strong>.xp3 (.ks .tjs)</strong><br>
-      🌐 Site officiel :
-      <a href="https://krkrz.github.io" target="_blank" rel="noopener noreferrer">krkrz.github.io</a>
-    </div>
-
-    <p>
-      Moteur japonais très répandu pour les Visual Novels. 🗾💬  
-      Utilise KAG Script pour les dialogues et TJS (proche de JavaScript) pour la logique.
-    </p>
-  </section>
-
-  <div class="engine-sep"></div>
-
-  <!-- VNM -->
-  <section class="card engine-card">
-    <h2>🧾🎨 Visual Novel Maker (VNM)</h2>
-    <div class="engine-meta">
-      🗂️ Formats principaux : <strong>.json .xml</strong><br>
-      🌐 Site officiel :
-      <a href="https://visualnovelmaker.com" target="_blank" rel="noopener noreferrer">visualnovelmaker.com</a>
-    </div>
-
-    <p>
-      Développé par Kadokawa (RPG Maker) et distribué par Degica. 🎭💬  
-      Moteur dédié aux Visual Novels, avec personnalisation via JavaScript.
-    </p>
-  </section>
-
-  <div class="engine-sep"></div>
-
-  <!-- ELECTRON -->
-  <section class="card engine-card">
-    <h2>⚡💻 Electron</h2>
-    <div class="engine-meta">
-      🗂️ Formats principaux : <strong>.json .js .html .css (.asar)</strong><br>
-      🌐 Site officiel :
-      <a href="https://electronjs.org" target="_blank" rel="noopener noreferrer">electronjs.org</a>
-    </div>
-
-    <p>
-      Framework open source permettant de créer des applications desktop avec des technologies web. 🌐💻  
-      Certains jeux utilisent Electron comme base.
-    </p>
-  </section>
-
-  <div class="engine-sep"></div>
-
-  <!-- NWJS -->
-  <section class="card engine-card">
-    <h2>🌐 NW.js (Node-Webkit)</h2>
-    <div class="engine-meta">
-      🗂️ Formats principaux : <strong>.nw .json .js</strong><br>
-      🌐 Site officiel :
-      <a href="https://nwjs.io" target="_blank" rel="noopener noreferrer">nwjs.io</a>
-    </div>
-
-    <p>
-      Combine Node.js et Chromium pour exécuter des jeux ou applis comme un programme PC. 💻  
-      Permet de transformer un projet HTML5/JavaScript en application autonome.
-    </p>
-  </section>
-
+  <aside class="guide-next" aria-label="Autres guides"><a href="extraire-traduction-renpy.html">Installer une traduction Ren’Py →</a><a href="traduction-godot-pck.html">Guide Godot et PCK →</a><a href="traduction-others-asar.html">Guide des archives ASAR →</a></aside>
 </main>
-
-<footer class="footer">
-  <p>© andric31 — Tutos & Aide</p>
-</footer>
-
+<footer class="footer guide-footer"><p>© andric31 — Wiki, traductions et ressources</p><a href="#haut">Retour en haut ↑</a></footer>
+<script>
+(() => {
+  'use strict';
+  const form = document.getElementById('engine-search-form');
+  const query = document.getElementById('engine-query');
+  const count = document.getElementById('engine-count');
+  const empty = document.getElementById('engine-empty');
+  const choices = Array.from(form.querySelectorAll('input[name="engine-family"]'));
+  const normalize = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[’‘']/g, '');
+  const cards = Array.from(document.querySelectorAll('.engine-card')).map(node => ({node, text: normalize(node.textContent)}));
+  function update() {
+    const terms = normalize(query.value).trim().split(/\s+/).filter(Boolean);
+    const family = choices.find(choice => choice.checked).value;
+    let visible = 0;
+    for (const {node, text} of cards) {
+      const show = (family === 'all' || node.dataset.family === family) && terms.every(term => text.includes(term));
+      node.hidden = !show;
+      if (show) visible++;
+    }
+    count.textContent = visible === cards.length ? `${visible} fiches` : `${visible} fiche${visible > 1 ? 's' : ''} sur ${cards.length}`;
+    empty.hidden = visible !== 0;
+  }
+  function reset() {
+    query.value = '';
+    choices.forEach(choice => { choice.checked = choice.value === 'all'; });
+    update();
+  }
+  function revealHash() {
+    let id;
+    try { id = decodeURIComponent(location.hash.slice(1)); } catch (_) { return; }
+    const match = cards.find(({node}) => node.id === id);
+    if (match && match.node.hidden) {
+      reset();
+      match.node.scrollIntoView({block: 'start'});
+    }
+  }
+  form.hidden = false;
+  form.addEventListener('submit', event => event.preventDefault());
+  query.addEventListener('input', update);
+  choices.forEach(choice => choice.addEventListener('change', update));
+  document.getElementById('engine-reset').addEventListener('click', () => { reset(); query.focus(); });
+  document.querySelector('.engine-toc').addEventListener('click', event => {
+    if (event.target.closest('a')) reset();
+  });
+  window.addEventListener('hashchange', revealHash);
+  update();
+  revealHash();
+})();
+</script>
 </body>
 </html>

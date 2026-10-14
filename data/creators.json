@@ -2242,6 +2242,33 @@
     "country": ""
   },
   {
+    "id": "happy-monster-co-ltd",
+    "name": "Happy monster co., ltd.",
+    "aliases": [
+      "HappyMonster"
+    ],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://avatars.fastly.steamstatic.com/863e8e53a8c1f76809a564185bc457f9d0fb2988_full.jpg",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "134410"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [
+      {
+        "name": "Waifu Fighter",
+        "platform": "Steam",
+        "url": "https://store.steampowered.com/app/1757490/Fist/"
+      }
+    ],
+    "links": [],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "hooldrafolk",
     "name": "Hooldrafolk",
     "aliases": [],

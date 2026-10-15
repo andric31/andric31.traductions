@@ -4049,6 +4049,36 @@
     "otherGames": []
   },
   {
+    "id": "redsky",
+    "name": "Redsky",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/2501405/avatars/e7ff81c1-f1b1-4b47-9fc9-bf14657189ee-380x380_0x0_1024x1024.png",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "308360"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/c/redsky_games"
+      },
+      {
+        "type": "subscribestar",
+        "label": "SubscribeStar",
+        "url": "https://subscribestar.adult/redsky"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "respirit",
     "name": "respirit",
     "aliases": [],

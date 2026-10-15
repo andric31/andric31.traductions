@@ -4681,6 +4681,42 @@
     "otherGames": []
   },
   {
+    "id": "super-alex",
+    "name": "Super Alex",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://images.gamestorylog.com/game-assets/devlogo/super-alex-devlogo-1.webp",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "5483",
+      "44511"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/SUPER_ALEX"
+      },
+      {
+        "type": "instagram",
+        "label": "Instagram",
+        "url": "https://www.instagram.com/superalexgamedev"
+      },
+      {
+        "type": "youtube",
+        "label": "YouTube",
+        "url": "https://youtube.com/channel/UC6xSXvP8EY7TzEt8s-OSr6g"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "technobrake",
     "name": "TechnoBrake",
     "aliases": [],

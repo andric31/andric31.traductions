@@ -1773,6 +1773,52 @@
     "otherGames": []
   },
   {
+    "id": "entropy-digital-entertainment",
+    "name": "Entropy Digital Entertainment",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://pbs.twimg.com/profile_images/1810764302132838400/p7iHR5Pr_400x400.jpg",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "167078"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [
+      {
+        "name": "Office Affairs",
+        "platform": "Itch.io",
+        "url": "https://entropydigitalgames.itch.io/office-affairs"
+      }
+    ],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/cw/entropyde"
+      },
+      {
+        "type": "twitter",
+        "label": "X / Twitter",
+        "url": "https://x.com/EntropyDE"
+      },
+      {
+        "type": "website",
+        "label": "Webpage",
+        "url": "https://www.entropyadultgames.com/"
+      },
+      {
+        "type": "youtube",
+        "label": "YouTube",
+        "url": "https://youtube.com/channel/UC0QkDBUVrzrWQc3YzufC4eg"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "eromantis",
     "name": "Eromantis",
     "aliases": [

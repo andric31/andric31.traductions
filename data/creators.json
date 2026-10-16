@@ -1806,6 +1806,11 @@
         "url": "https://x.com/EntropyDE"
       },
       {
+        "type": "steam",
+        "label": "Steam",
+        "url": "https://store.steampowered.com/developer/EntropyDigital"
+      },
+      {
         "type": "website",
         "label": "Webpage",
         "url": "https://www.entropyadultgames.com/"

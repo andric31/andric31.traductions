@@ -1788,13 +1788,7 @@
       "253077"
     ],
     "ignoredGameIds": [],
-    "otherGames": [
-      {
-        "name": "Office Affairs",
-        "platform": "Itch.io",
-        "url": "https://entropydigitalgames.itch.io/office-affairs"
-      }
-    ],
+    "otherGames": [],
     "links": [
       {
         "type": "patreon",
@@ -1810,6 +1804,11 @@
         "type": "steam",
         "label": "Steam",
         "url": "https://store.steampowered.com/developer/EntropyDigital"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://entropydigitalgames.itch.io/"
       },
       {
         "type": "website",

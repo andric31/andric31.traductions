@@ -5224,6 +5224,66 @@
     "otherGames": []
   },
   {
+    "id": "visualnovels",
+    "name": "VisualNovels",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/2846891/avatars/4e1b2c26-2249-43d9-97fb-5397104a7342-380x380_2x1_2000x2000.jpg",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "238954",
+      "242349",
+      "254665",
+      "258281",
+      "281337",
+      "290561"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "website",
+        "label": "sites.google.com",
+        "url": "https://sites.google.com/view/visualnovels/home?authuser=0"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/cw/velvetnovella"
+      },
+      {
+        "type": "subscribestar",
+        "label": "Subscribestar",
+        "url": "https://subscribestar.adult/visualnovels"
+      },
+      {
+        "type": "twitter",
+        "label": "Twitter",
+        "url": "https://twitter.com/ArtistDias"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/qNP5TpyxRa?utm_source=gamestorylog&utm_medium=developer_page&utm_campaign=discord_velvet_novella"
+      },
+      {
+        "type": "youtube",
+        "label": "YouTube",
+        "url": "https://youtube.com/channel/UCXNDREz6CJvr84FwlKJ2Iig"
+      },
+      {
+        "type": "tiktok",
+        "label": "TikTok",
+        "url": "https://tiktok.com/@velvet.novella"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "white-phantom-games",
     "name": "White Phantom Games",
     "aliases": [],

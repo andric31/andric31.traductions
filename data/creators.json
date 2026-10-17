@@ -5334,5 +5334,30 @@
     "primaryLanguage": "en",
     "vndbId": "p10924",
     "otherGames": []
+  },
+  {
+    "id": "yoogame",
+    "name": "YooGame",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "132929"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "steam",
+        "label": "Steam",
+        "url": "https://store.steampowered.com/app/2109460/VillageRhapsody/"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
   }
 ]

@@ -167,6 +167,36 @@
     "otherGames": []
   },
   {
+    "id": "ammolite",
+    "name": "Ammolite",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://www.ammolite-game.com/images/material/top_logo.png",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "286687"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "website",
+        "label": "Official Website",
+        "url": "https://www.ammolite-game.com/top.html"
+      },
+      {
+        "type": "dlsite",
+        "label": "DLSite",
+        "url": "https://www.dlsite.com/pro/circle/profile/=/maker_id/VG02089.html"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "antipodegames",
     "name": "AntipodeGames",
     "aliases": [],

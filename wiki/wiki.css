@@ -608,6 +608,7 @@ code{
 .engine-guide :is(#wolf, .engine-toc a[href="#wolf"]) { --engine-hue: #84bca2; }
 .engine-guide :is(#unreal, .engine-toc a[href="#unreal"]) { --engine-hue: #e68491; }
 .engine-guide :is(#gamemaker, .engine-toc a[href="#gamemaker"]) { --engine-hue: #8dc76b; }
+.engine-guide :is(#cocos-creator, .engine-toc a[href="#cocos-creator"]) { --engine-hue: #53bce8; }
 .engine-guide :is(#html5, .engine-toc a[href="#html5"]) { --engine-hue: #ee9279; }
 .engine-guide :is(#electron, .engine-toc a[href="#electron"]) { --engine-hue: #6fc9cd; }
 .engine-guide :is(#nwjs, .engine-toc a[href="#nwjs"]) { --engine-hue: #8e9ee7; }
@@ -624,6 +625,13 @@ code{
 .engine-guide .engine-icon {
   background: color-mix(in srgb, var(--engine-hue) 13%, transparent);
   border: 1px solid color-mix(in srgb, var(--engine-hue) 30%, var(--wiki-border));
+}
+.engine-guide .engine-icon svg {
+  display: block;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  color: var(--engine-hue, var(--wiki-link));
 }
 .engine-guide .engine-details summary::marker {
   color: var(--engine-hue);

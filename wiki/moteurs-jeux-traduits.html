@@ -3,18 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Guide des moteurs de jeux et de leur traduction : Ren’Py, RPG Maker, Unity, Godot, WOLF RPG, Unreal, GameMaker et technologies web. Formats, identification, langues et patchs.">
+  <meta name="description" content="Guide des moteurs de jeux et de leur traduction : Ren’Py, RPG Maker, Unity, Godot, WOLF RPG, Unreal, GameMaker, Cocos Creator et technologies web. Formats, identification, langues et patchs.">
   <meta name="color-scheme" content="dark light">
   <title>Moteurs de jeux et traduction — Wiki andric31</title>
   <script src="/theme-init.js"></script>
   <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=1">
   <link rel="stylesheet" href="/themes.css">
-  <link rel="stylesheet" href="wiki.css?v=20261013-3">
+  <link rel="stylesheet" href="wiki.css?v=20261017-cocos-2">
 </head>
 <body class="engine-guide">
 <a class="guide-skip" href="#guide-content">Aller au contenu</a>
 <header class="topbar" id="haut">
-  <div class="guide-topline"><a class="back" href="index.html">← Retour au wiki</a><span>Mis à jour le <time datetime="2026-10-13">13 octobre 2026</time></span></div>
+  <div class="guide-topline"><a class="back" href="index.html">← Retour au wiki</a><span>Mis à jour le <time datetime="2026-10-17">17 octobre 2026</time></span></div>
   <div class="guide-hero-layout">
     <div class="guide-hero-copy">
       <div class="wiki-kicker">Comprendre les fichiers de son jeu</div>
@@ -38,13 +38,13 @@
   </section>
 
   <section class="guide-directory" id="fiches" aria-labelledby="fiches-title">
-    <div class="guide-section-head"><div><p class="eyebrow">Trouver son moteur</p><h2 id="fiches-title">Les fiches détaillées</h2></div><span class="guide-count" id="engine-count" role="status" aria-live="polite" aria-atomic="true">13 fiches</span></div>
+    <div class="guide-section-head"><div><p class="eyebrow">Trouver son moteur</p><h2 id="fiches-title">Les fiches détaillées</h2></div><span class="guide-count" id="engine-count" role="status" aria-live="polite" aria-atomic="true">14 fiches</span></div>
     <form class="guide-search" id="engine-search-form" role="search" hidden>
       <label for="engine-query">Rechercher un moteur, un fichier ou un terme</label>
       <div class="guide-search-row"><input type="search" id="engine-query" placeholder="Ex. : Unity, .pck, data.win…" autocomplete="off" aria-controls="engine-list"><button type="button" id="engine-reset">Réinitialiser</button></div>
     </form>
-    <nav class="engine-toc" aria-label="Accès direct aux moteurs"><a href="#renpy">Ren’Py</a><a href="#rpg-maker">RPG Maker MV / MZ</a><a href="#unity">Unity</a><a href="#godot">Godot</a><a href="#tyrano">TyranoBuilder / TyranoScript</a><a href="#kirikiri">KiriKiri / KAG</a><a href="#vnm">Visual Novel Maker</a><a href="#wolf">WOLF RPG Editor</a><a href="#unreal">Unreal Engine</a><a href="#gamemaker">GameMaker / GameMaker Studio</a><a href="#html5">HTML5 / jeux web</a><a href="#electron">Electron</a><a href="#nwjs">NW.js / Node-Webkit</a></nav>
-    <noscript><p>Les treize fiches restent accessibles ci-dessous. Utilise le sommaire ou la recherche de ton navigateur.</p></noscript>
+    <nav class="engine-toc" aria-label="Accès direct aux moteurs"><a href="#renpy">Ren’Py</a><a href="#rpg-maker">RPG Maker MV / MZ</a><a href="#unity">Unity</a><a href="#godot">Godot</a><a href="#tyrano">TyranoBuilder / TyranoScript</a><a href="#kirikiri">KiriKiri / KAG</a><a href="#vnm">Visual Novel Maker</a><a href="#wolf">WOLF RPG Editor</a><a href="#unreal">Unreal Engine</a><a href="#gamemaker">GameMaker / GameMaker Studio</a><a href="#cocos-creator">Cocos Creator</a><a href="#html5">HTML5 / jeux web</a><a href="#electron">Electron</a><a href="#nwjs">NW.js / Node-Webkit</a></nav>
+    <noscript><p>Les quatorze fiches restent accessibles ci-dessous. Utilise le sommaire ou la recherche de ton navigateur.</p></noscript>
     <p class="guide-empty" id="engine-empty" hidden>Aucune fiche ne correspond. Essaie un nom de moteur ou une extension, ou réinitialise la recherche.</p>
     <div id="engine-list"><article class="card engine-card" id="renpy" data-family="vn" aria-labelledby="renpy-title">
       <header class="engine-heading"><span class="engine-icon" aria-hidden="true">🐍</span><div><p class="engine-category">Visual novel</p><h2 id="renpy-title">Ren’Py</h2></div><span class="engine-number" aria-hidden="true">01</span></header>
@@ -136,8 +136,17 @@
       <details class="engine-details"><summary>Particularités et documentation</summary><p>data.win n’est pas un document texte ordinaire. Modifier seulement un mot ne résout pas nécessairement les questions de retours à la ligne, de police ou de format de l’heure ; ces comportements peuvent être définis par le code.</p><ul class="engine-sources"><li><a href="https://gamemaker.io/en" target="_blank" rel="noopener noreferrer">Présentation de GameMaker</a></li><li><a href="https://manual.gamemaker.io/beta/en/GameMaker_Language/GML_Reference/General_Game_Control/game_change.htm" target="_blank" rel="noopener noreferrer">Fichiers de données et lancement</a></li></ul></details>
       <footer class="engine-links"><a href="https://gamemaker.io/" target="_blank" rel="noopener noreferrer">gamemaker.io</a><a href="#gamemaker" aria-label="Lien direct vers GameMaker / GameMaker Studio">Lien direct ↗</a></footer>
     </article>
+<article class="card engine-card" id="cocos-creator" data-family="engine" aria-labelledby="cocos-creator-title">
+      <header class="engine-heading"><span class="engine-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" focusable="false" aria-hidden="true"><path d="M16 3 28 10v13l-12 7L4 23V10Z" fill="currentColor" fill-opacity=".14"/><path d="m4 10 12 7 12-7M16 17v13M10 6.5l12 7" stroke-linecap="round"/></svg></span><div><p class="engine-category">2D / 3D · exports web et natifs</p><h2 id="cocos-creator-title">Cocos Creator</h2></div><span class="engine-number" aria-hidden="true">11</span></header>
+      <p class="engine-intro">Moteur de création de jeux en 2D et en 3D, avec un éditeur de scènes et de composants. Un jeu peut être exporté pour le Web ou une plateforme native. Certains jeux PC hébergent leur version web dans Electron.</p>
+      <div class="engine-recognize"><h3>Comment le reconnaître</h3><p>Dans certains exports web Creator 2.x : un script <code>cocos2d-js…js</code>, un dossier <code>assets</code> et des sous-dossiers <code>import</code> et <code>native</code>, accompagnés de fichiers <code>config…json</code> et <code>index…js</code>. Les noms et l’organisation varient selon la version et les options d’export.</p></div>
+      <dl class="engine-files"><div><dt>Ressources</dt><dd>Fichiers JSON et paquets de ressources (Asset Bundles) : scènes, composants, données et références aux images.</dd></div><div><dt>Textes</dt><dd>Tables de langue, chaînes JavaScript et libellés des composants d’interface, comme <code>Label</code> ou <code>RichText</code>.</dd></div><div><dt>Images</dt><dd>Textures, atlas et animations : des boutons ou messages peuvent être dessinés directement dans une image.</dd></div></dl>
+      <h3>Pour la traduction</h3><p>Il faut retrouver les dialogues, choix et menus, puis préserver les identifiants et les liens entre ressources. Les textes français peuvent demander un ajustement des cadres, des retours à la ligne ou de la taille de police. La langue traduite doit aussi être chargée par le jeu.</p>
+      <details class="engine-details"><summary>Particularités et documentation</summary><p>Le format des ressources dépend de la version de Creator et de la compilation. Des données compactées ou encodées demandent un lecteur compatible. Les textes peints dans les images nécessitent une retouche séparée, en conservant les dimensions, la transparence et les positions dans les atlas.</p><p>Si le jeu utilise Electron, <strong>Cocos Creator reste le moteur</strong> et Electron son environnement d’exécution sur PC.</p><ul class="engine-sources"><li><a href="https://docs.cocos.com/creator/2.4/manual/en/asset-manager/bundle.html" target="_blank" rel="noopener noreferrer">Creator 2.4 — organisation des Asset Bundles</a></li><li><a href="https://docs.cocos.com/creator/2.4/manual/en/components/label.html" target="_blank" rel="noopener noreferrer">Creator 2.4 — textes, cadres et retours à la ligne</a></li><li><a href="https://docs.cocos.com/creator/2.4/manual/en/publish/publish-web.html" target="_blank" rel="noopener noreferrer">Creator 2.4 — export web</a></li></ul></details>
+      <footer class="engine-links"><a href="https://www.cocos.com/en/creator" target="_blank" rel="noopener noreferrer">Site officiel Cocos Creator</a><a href="#cocos-creator" aria-label="Lien direct vers Cocos Creator">Lien direct ↗</a></footer>
+    </article>
 <article class="card engine-card" id="html5" data-family="web" aria-labelledby="html5-title">
-      <header class="engine-heading"><span class="engine-icon" aria-hidden="true">🌐</span><div><p class="engine-category">Technologies web</p><h2 id="html5-title">HTML5 / jeux web</h2></div><span class="engine-number" aria-hidden="true">11</span></header>
+      <header class="engine-heading"><span class="engine-icon" aria-hidden="true">🌐</span><div><p class="engine-category">Technologies web</p><h2 id="html5-title">HTML5 / jeux web</h2></div><span class="engine-number" aria-hidden="true">12</span></header>
       <p class="engine-intro">Cette catégorie regroupe les jeux construits avec les technologies du Web. HTML5 n’est pas un moteur unique : le jeu peut utiliser une bibliothèque, un moteur spécialisé ou du code propre.</p>
       <div class="engine-recognize"><h3>Comment le reconnaître</h3><p>Une page telle que <code>index.html</code>, des scripts JavaScript et des ressources web. Un jeu peut fonctionner dans un navigateur ou être distribué comme une application de bureau.</p></div>
       <dl class="engine-files"><div><dt>Structure</dt><dd><code>.html</code> : page et éléments de l’interface.</dd></div><div><dt>Logique et données</dt><dd><code>.js</code> pour les scripts ; <code>.json</code> et autres fichiers pour les données, selon le projet.</dd></div><div><dt>Présentation</dt><dd><code>.css</code> : styles, dimensions et mise en page, plutôt que stockage principal des dialogues.</dd></div></dl>
@@ -146,16 +155,16 @@
       <footer class="engine-links"><a href="https://developer.mozilla.org/fr/docs/Games" target="_blank" rel="noopener noreferrer">Documentation MDN</a><a href="#html5" aria-label="Lien direct vers HTML5 / jeux web">Lien direct ↗</a></footer>
     </article>
 <article class="card engine-card" id="electron" data-family="web" aria-labelledby="electron-title">
-      <header class="engine-heading"><span class="engine-icon" aria-hidden="true">⚡</span><div><p class="engine-category">Environnement d’exécution</p><h2 id="electron-title">Electron</h2></div><span class="engine-number" aria-hidden="true">12</span></header>
+      <header class="engine-heading"><span class="engine-icon" aria-hidden="true">⚡</span><div><p class="engine-category">Environnement d’exécution</p><h2 id="electron-title">Electron</h2></div><span class="engine-number" aria-hidden="true">13</span></header>
       <p class="engine-intro">Framework open source qui permet de créer des applications de bureau avec HTML, CSS et JavaScript. Il embarque Chromium et Node.js ; certains jeux l’utilisent pour fonctionner dans leur propre fenêtre.</p>
       <div class="engine-recognize"><h3>Comment le reconnaître</h3><p>Un fichier <code>resources/app.asar</code> ou un dossier <code>resources/app</code> contenant l’application sont des indices fréquents.</p></div>
       <dl class="engine-files"><div><dt>Paquet</dt><dd><code>.asar</code> : archive regroupant les fichiers de l’application.</dd></div><div><dt>Contenu</dt><dd><code>.html</code>, <code>.js</code>, <code>.json</code>, <code>.css</code> et ressources graphiques.</dd></div><div><dt>Organisation</dt><dd>Certains fichiers peuvent rester en dehors de l’archive, selon la façon dont l’application est distribuée.</dd></div></dl>
-      <h3>Pour la traduction</h3><p>Il faut identifier le système de jeu présent dans l’application, puis les dialogues et l’interface qu’il charge. Electron décrit l’environnement d’exécution, pas l’organisation des textes.</p>
+      <h3>Pour la traduction</h3><p>Il faut identifier le système de jeu présent dans l’application, puis les dialogues et l’interface qu’il charge. Electron décrit l’environnement d’exécution, pas l’organisation des textes. Un jeu peut par exemple utiliser <a href="#cocos-creator">Cocos Creator</a> comme moteur et Electron pour sa fenêtre sur PC.</p>
       <details class="engine-details"><summary>Particularités et documentation</summary><p>Une archive .asar n’est pas un moteur ni un fichier de traduction. Son contenu doit conserver une structure compatible avec l’application après modification.</p><ul class="engine-sources"><li><a href="https://www.electronjs.org/" target="_blank" rel="noopener noreferrer">Présentation officielle</a></li><li><a href="https://www.electronjs.org/docs/latest/tutorial/application-distribution" target="_blank" rel="noopener noreferrer">Distribution des applications</a></li></ul></details>
       <footer class="engine-links"><a href="https://www.electronjs.org/" target="_blank" rel="noopener noreferrer">electronjs.org</a><a href="#electron" aria-label="Lien direct vers Electron">Lien direct ↗</a></footer>
     </article>
 <article class="card engine-card" id="nwjs" data-family="web" aria-labelledby="nwjs-title">
-      <header class="engine-heading"><span class="engine-icon" aria-hidden="true">💻</span><div><p class="engine-category">Environnement d’exécution</p><h2 id="nwjs-title">NW.js / Node-Webkit</h2></div><span class="engine-number" aria-hidden="true">13</span></header>
+      <header class="engine-heading"><span class="engine-icon" aria-hidden="true">💻</span><div><p class="engine-category">Environnement d’exécution</p><h2 id="nwjs-title">NW.js / Node-Webkit</h2></div><span class="engine-number" aria-hidden="true">14</span></header>
       <p class="engine-intro">Environnement associant Chromium et Node.js pour exécuter des applications web dans une fenêtre autonome. Node-Webkit est son ancien nom.</p>
       <div class="engine-recognize"><h3>Comment le reconnaître</h3><p>Des fichiers web avec un manifeste <code>package.json</code>, parfois dans un paquet <code>package.nw</code>. Le paquet peut aussi être incorporé à l’exécutable.</p></div>
       <dl class="engine-files"><div><dt>Manifeste</dt><dd><code>package.json</code> : décrit notamment le point de lancement de l’application.</dd></div><div><dt>Paquet</dt><dd><code>.nw</code> : peut être une archive ZIP contenant l’application ; des distributions utilisent aussi un dossier.</dd></div><div><dt>Contenu</dt><dd>Pages HTML, scripts JavaScript, données JSON et autres ressources du jeu.</dd></div></dl>
@@ -225,7 +234,7 @@
   const cards = Array.from(document.querySelectorAll('.engine-card')).map(node => ({node, text: normalize(node.textContent)}));
   function update() {
     const terms = normalize(query.value).trim().split(/\s+/).filter(Boolean);
-    const family = choices.find(choice => choice.checked).value;
+    const family = choices.find(choice => choice.checked)?.value || 'all';
     let visible = 0;
     for (const {node, text} of cards) {
       const show = (family === 'all' || node.dataset.family === family) && terms.every(term => text.includes(term));

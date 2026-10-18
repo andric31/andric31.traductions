@@ -3240,6 +3240,46 @@
     ]
   },
   {
+    "id": "mrblack",
+    "name": "MRBlack",
+    "aliases": [],
+    "creatorType": "individual",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/104359/avatars/bf997e8b-af70-4a7a-ae69-afe0f360b2b1-380x380_0x0_2048x2048.png",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "247868"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/mr_black_studio.3313025/"
+      },
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/c/mrblackstudios/"
+      },
+      {
+        "type": "subscribestar",
+        "label": "Subscribstar",
+        "url": "https://subscribestar.adult/mrblack"
+      },
+      {
+        "type": "website",
+        "label": "Boosty",
+        "url": "https://boosty.to/b4black"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "msteph",
     "name": "msTeph!",
     "aliases": [],

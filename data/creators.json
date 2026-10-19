@@ -2215,6 +2215,41 @@
     "otherGames": []
   },
   {
+    "id": "franktopia",
+    "name": "FRANKTOPIA",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "https://d3ts7pb9ldoin4.cloudfront.net/uploads_v2/users/3361084/avatars/ff42b326-4a76-447a-81d8-907f08e33212-380x380_0x0_1024x1024.png",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "318643"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "patreon",
+        "label": "Patreon",
+        "url": "https://www.patreon.com/franktopiagames"
+      },
+      {
+        "type": "subscribestar",
+        "label": "Subscribestar",
+        "url": "https://subscribestar.adult/franktopia"
+      },
+      {
+        "type": "itch",
+        "label": "Itch.io",
+        "url": "https://franktopia.itch.io/inside-the-griffins-v-01"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "gfc-studio",
     "name": "GFC Studio",
     "aliases": [],

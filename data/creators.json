@@ -35,6 +35,36 @@
     "country": ""
   },
   {
+    "id": "adam",
+    "name": "ADAM!",
+    "aliases": [],
+    "creatorType": "",
+    "primaryLanguage": "",
+    "vndbId": "",
+    "avatar": "",
+    "banner": "",
+    "presentation": "",
+    "gameIds": [
+      "301756"
+    ],
+    "ignoredGameIds": [],
+    "otherGames": [],
+    "links": [
+      {
+        "type": "f95zone",
+        "label": "F95Zone",
+        "url": "https://f95zone.to/members/adam.1891797/"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "url": "https://discord.gg/5TuSjC6kx"
+      }
+    ],
+    "countryCode": "",
+    "country": ""
+  },
+  {
     "id": "aghamus",
     "name": "AGHAMUS",
     "aliases": [],

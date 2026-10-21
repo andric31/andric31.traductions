@@ -317,27 +317,13 @@
       font-size: 12px;
     }
 
-    /* Raccourci R2 : toute la largeur du bloc Admin, avec une cible plus grande. */
+    /* Raccourci R2 : même largeur et même présentation que la vue admin. */
     .account-admin-r2-link {
-      box-sizing: border-box;
       margin-top: 10px;
-      min-height: 66px;
-      padding: 14px 18px;
+      min-height: 76px;
       text-decoration: none;
       color: var(--title, var(--fg));
       transition: background .16s ease, border-color .16s ease;
-    }
-    .account-admin-r2-link .account-notif-setting-text {
-      gap: 12px;
-      font-size: 15px;
-      line-height: 1.4;
-    }
-    .account-admin-r2-link .account-notif-setting-ico {
-      width: 26px;
-      font-size: 23px;
-    }
-    .account-admin-r2-link .account-admin-mode-desc {
-      font-size: 13px;
     }
     .account-admin-r2-link:hover {
       background: rgba(80,160,255,.12);
@@ -483,12 +469,6 @@
     main.auth-shell .auth-card {
       width: 100% !important;
       margin: 0 !important;
-    }
-
-    /* Plus d'espace pour l'administration, sans élargir les autres comptes. */
-    main.auth-shell:has(#adminR2ManagerLink) {
-      width: min(1360px, calc(100% - 24px)) !important;
-      max-width: 1360px !important;
     }
 
 @media (max-width: 700px) {

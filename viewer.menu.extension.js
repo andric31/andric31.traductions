@@ -35,14 +35,14 @@ C’est simple, rapide, et super pratique pour suivre mes trads sans te perdre !
   // ✅ 4 images (2 “avant”, 2 “après”)
   const IMAGES = {
     before: [
-      "/img/f95list_extension_vignette_icon_multi.png",
-      "/img/f95list_extension_thread_icon_multi.png"
+      "/medias/img/f95list_extension/f95list_extension_vignette_icon_multi.png",
+      "/medias/img/f95list_extension/f95list_extension_thread_icon_multi.png"
     ],
     after: [
-      "/img/f95list_extension_vignette_multi.png",
-      "/img/f95list_extension_thread_multi.png"
+      "/medias/img/f95list_extension/f95list_extension_vignette_multi.png",
+      "/medias/img/f95list_extension/f95list_extension_thread_multi.png"
     ],
-    settings: "/img/f95list_extension_param.png"
+    settings: "/medias/img/f95list_extension/f95list_extension_param.png"
   };
 
   function escapeHtml(s) {

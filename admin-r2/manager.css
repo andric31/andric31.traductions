@@ -3,3 +3,29 @@
 @media(max-width:1100px){.page-title{flex-wrap:wrap}.app{padding:24px 16px}.page-head{padding:0 24px}.explorer{grid-template-columns:160px minmax(0,1fr)}.sidebar{padding-left:8px;padding-right:8px}.tool{padding:7px}.tool span:last-child{display:none}.list-head,.list .entry{grid-template-columns:24px minmax(130px,1fr) 80px 90px 65px 25px;gap:6px}.items.grid{grid-template-columns:repeat(auto-fill,minmax(145px,1fr))}.header-links{gap:15px}}
 @media(max-width:800px){.sidebar{display:none}.explorer{grid-template-columns:minmax(0,1fr)}.page-title{align-items:flex-start;flex-direction:column;gap:18px}.page-head{height:70px;padding:0 18px}.brand{font-size:15px}.brand-mark{width:35px;height:35px}.header-links .private-badge{display:none}.header-links{gap:13px}.header-links a:last-child{display:none}.app{padding:23px 12px}h1{font-size:23px}.title-actions{width:100%}.title-actions .primary{margin-left:0}.filterbar{padding:14px 12px 10px;gap:6px}.filterbar select{max-width:120px;padding:8px 4px}.filterbar #filter{display:none}.actionsbar{padding:8px 10px}.addressbar{padding:7px 8px;gap:4px}.items{padding:0 12px 16px}.items.grid{gap:10px;grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}.selection-line{padding:7px 14px 12px}.statusbar{padding:12px}.statusbar #statusRight{display:none}.list-head,.list .entry{grid-template-columns:20px minmax(110px,1fr) 65px 24px}.list-head .date,.list-head .type,.list .entry .date,.list .entry .type{display:none}.bottom-note{line-height:1.7;text-align:center;padding:0 10px}.preview-dialog{max-height:94vh}.dialog-head{padding:16px}.dialog-head h2{font-size:16px}.link-panel{padding:15px}.dialog-footer{padding:14px;flex-wrap:wrap}.clipboard-info,.notice,.progress-panel{margin-left:12px;margin-right:12px}.entry:not(.selected):not(:hover):not(:focus-within) .check{opacity:1}.selection-line #folderSummary{font-size:9px}.load-more{flex-direction:column}.separator{margin:0 3px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+/* Arborescence des dossiers : même largeur de page, sous-dossiers repliables. */
+.tree-hint{font-size:9px;color:#7e8da8;line-height:1.6;margin:8px 6px 0}
+.root-folders{overflow-x:hidden;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#3b4b67 transparent;scrollbar-gutter:stable;margin-top:10px;max-height:465px;padding:7px 0 10px;min-width:0}
+.tree-node,.tree-children{min-width:0}
+.tree-row{display:flex;align-items:center;min-height:35px;border:1px solid transparent;border-radius:6px;padding-left:calc(var(--tree-depth,0)*12px);margin:2px 0;color:#9eacc3;min-width:0}
+.tree-row:hover{background:#202b3e;color:#e0e9fa}
+.tree-row.ancestor{color:#bbcce8}
+.tree-row.active{background:#263b5d;border-color:#49658d;color:#e4eeff}
+.tree-toggle,.tree-link{border:0;background:none;box-shadow:none;color:inherit;display:flex;align-items:center;min-height:33px;padding:0;min-width:0;border-radius:4px;font:inherit}
+.tree-toggle{width:20px;flex:0 0 20px;justify-content:center}
+.tree-toggle svg{width:12px;height:12px;transition:transform .14s}
+.tree-toggle.expanded:not(.loading) svg{transform:rotate(90deg)}
+.tree-toggle.leaf{visibility:hidden}
+.tree-toggle.loading svg{animation:r2-tree-spin .85s linear infinite}
+.tree-link{flex:1;gap:6px;padding:5px 5px 5px 1px;text-align:left;font-size:11px}
+.tree-link>svg{width:15px;height:15px;flex:0 0 15px;color:#c7ab70}
+.tree-row.active .tree-link>svg{color:#91b7ff}
+.tree-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.6;min-width:0}
+.tree-message{font-size:10px;color:#8193b0;padding:7px 0 7px calc(20px + var(--tree-depth,0)*12px)}
+.tree-empty{font-size:10px;color:#8193b0;margin:10px 7px;line-height:1.6}
+.tree-retry{font-size:10px;background:none;border:0;color:#d6b079;padding:7px;max-width:100%;text-align:left;text-decoration:underline}
+.tree-toggle:focus-visible,.tree-link:focus-visible{outline:2px solid #86b0ff;outline-offset:-2px}
+.tree-busy{pointer-events:none;opacity:.65}
+@keyframes r2-tree-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.tree-toggle.loading svg{animation:none}}

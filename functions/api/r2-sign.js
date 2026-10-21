@@ -1,7 +1,7 @@
 import {validKey,sign,fail,category} from './_r2.js';
 import {json} from './_auth.js';
 export async function onRequestGet({request,env}) {
- if(!env.MEDIA_R2 || !env.MEDIA_SIGNING_SECRET)return fail('R2 non configuré',503);
+ if(!env.MEDIA_BUCKET || !env.R2_SIGNING_SECRET)return fail('R2 non configuré',503);
  const url=new URL(request.url),key=url.searchParams.get('key')||'';
  if(!validKey(key))return fail('Fichier invalide');
  // Anti-hotlink: only issue public media tokens for page navigations originating from this site.

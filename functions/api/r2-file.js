@@ -1,11 +1,11 @@
 import {validKey,verify,fail} from './_r2.js';
 export async function onRequest({request,env}) {
  if(!['GET','HEAD'].includes(request.method))return fail('Méthode refusée',405);
- if(!env.MEDIA_R2)return fail('R2 non configuré',503);
+ if(!env.MEDIA_BUCKET)return fail('R2 non configuré',503);
  const u=new URL(request.url),key=u.searchParams.get('key')||'';
  if(!validKey(key)||!await verify(env,key,u.searchParams.get('exp'),u.searchParams.get('sig')))return fail('Lien expiré ou invalide',403);
  const headers=new Headers({'cache-control':'private, no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer','content-security-policy':"default-src 'none'; sandbox"});
- const range=request.headers.get('range');const obj=await env.MEDIA_R2.get(key,range?{range:request.headers}:{});
+ const range=request.headers.get('range');const obj=await env.MEDIA_BUCKET.get(key,range?{range:request.headers}:{});
  if(!obj)return fail('Fichier introuvable',404);
  obj.writeHttpMetadata(headers);
  if(!headers.has('content-type'))headers.set('content-type','application/octet-stream');

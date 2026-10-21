@@ -5,6 +5,23 @@ import { MARKER, PART_SIZE, check, objectKey, folderKey, isMarker, contentType, 
   mustExist, exists, destinationFree, parentsFree, metadata, uploadId, partNumber, fileSize,
   uploadedParts, preview } from './_r2_explorer.js';
 
+// Un dossier R2 conserve un marqueur pour pouvoir rester vide. Seuls ses
+// propres marqueurs sont ignorés : un fichier de 0 octet ou le marqueur d'un
+// sous-dossier constituent du contenu. null signifie « non déterminé ».
+async function folderIsEmpty(bucket,prefix) {
+  let cursor;const seen=new Set();
+  for(let page=0;page<3;page++) {
+    const result=await bucket.list({prefix,limit:3,...(cursor?{cursor}:{})});
+    if(result.objects.some(object=>object.key!==prefix && object.key!==prefix+MARKER)
+      || (result.delimitedPrefixes||[]).some(key=>key!==prefix))return false;
+    if(!result.truncated)return true;
+    // Ne pas conclure « vide » sur une page incomplète ou un curseur incohérent.
+    if(!result.cursor||seen.has(result.cursor))return null;
+    seen.add(result.cursor);cursor=result.cursor;
+  }
+  return null;
+}
+
 export async function onRequest(context) {
   let authorized=false;
   try {
@@ -59,6 +76,15 @@ export async function onRequest(context) {
     const body=await request.json().catch(()=>null);
     check(body && typeof body==='object' && !Array.isArray(body),'Requête invalide.');
 
+    if(body.action==='folder-status') {
+      check(Array.isArray(body.prefixes)&&body.prefixes.length>0&&body.prefixes.length<=12,
+        'Vérification limitée à 12 dossiers par requête.');
+      const prefixes=[...new Set(body.prefixes.map(prefix=>folderKey(prefix)))];
+      const folders=[];
+      for(const key of prefixes)folders.push({key,empty:await folderIsEmpty(bucket,key)});
+      return json({ok:true,folders});
+    }
+    // Conservé uniquement pour l'importation de vrais fichiers de 0 octet.
     if(body.action==='create-empty') {
       const key=objectKey(body.key);
       await destinationFree(bucket,key);

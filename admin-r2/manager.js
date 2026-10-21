@@ -30,9 +30,11 @@
   const collator=new Intl.Collator('fr',{numeric:true,sensitivity:'base'});
   function saved(k,fallback) {try{return localStorage.getItem(k)||fallback;}catch{return fallback;}}
   function save(k,v) {try{localStorage.setItem(k,v);}catch{}}
-  function initialPrefix(){try{return new URLSearchParams(location.hash.slice(1)).get('d')||'';}catch{return '';}}
-  const state={prefix:initialPrefix(),entries:[],selected:new Set(),clipboard:null,cursor:null,history:[],busy:false,cancel:false,loading:false,loadId:0,view:saved('r2.explorer.view','grid'),preview:null,anchor:null,xhr:null,phase:'',copies:0};
+  function prefixFromHash(){try{return new URLSearchParams(location.hash.slice(1)).get('d')||'';}catch{return '';}}
+  const state={prefix:'',entries:[],selected:new Set(),clipboard:null,cursor:null,history:[],busy:false,cancel:false,loading:false,loadId:0,view:saved('r2.explorer.view','grid'),preview:null,anchor:null,xhr:null,phase:'',copies:0};
   if(!['grid','list'].includes(state.view))state.view='grid';
+  // Une recharge ne doit pas restaurer la position de défilement de l'ancien dossier.
+  try{history.scrollRestoration='manual';}catch{}
   // Les dossiers sont chargés branche par branche, pas par inventaire complet du bucket.
   // Une nouvelle visite repart toujours avec une arborescence repliée.
   // L'ouverture des branches est conservée uniquement en mémoire, dans cette page.
@@ -274,7 +276,7 @@
     if(force)invalidateTree();
     const id=++tree.syncId;
     // Ne charger que la racine et les branches ouvertes pendant cette visite.
-    // Un lien direct vers un sous-dossier garde l'arbre replié à l'arrivée.
+    // La racine est imposée au démarrage ; les branches ne s'ouvrent qu'en naviguant.
     await readTree('');if(id!==tree.syncId)return;
     const queue=[...treeNode('').children],seen=new Set();
     while(queue.length){
@@ -285,12 +287,36 @@
     }
     renderSidebar();revealCurrentFolder();
   }
+  function updateFolderAddress(prefix=''){
+    // Le fragment sert seulement à la navigation dans la visite en cours.
+    // replaceState ne déclenche pas hashchange et ne recharge pas le document.
+    try{history.replaceState(history.state,'',location.pathname+location.search+(prefix?'#d='+encodeURIComponent(prefix):''));}catch{}
+  }
+  function resetVisitScroll(){
+    $('rootFolders').scrollTop=0;
+    window.scrollTo({top:0,left:0,behavior:'instant'});
+  }
+  async function startAtRoot(){
+    // Aucune reprise du dernier dossier, même si l'URL contient encore #d=….
+    // Invalider les chargements en cours pour qu'une ancienne réponse ne
+    // réaffiche pas le sous-dossier après un retour via le cache du navigateur.
+    state.loadId++;
+    state.prefix='';state.entries=[];state.cursor=null;state.history=[];
+    state.selected.clear();state.anchor=null;state.clipboard=null;
+    tree.expanded.clear();invalidateTree();
+    clearTimeout(searchTimer);$('search').value='';$('filter').value='all';
+    hideMenu();closePreview();
+    if($('promptDialog').open)finishPrompt(null);
+    notice('');$('toast').hidden=true;
+    updateFolderAddress();render();resetVisitScroll();
+    await load();await refreshRoots();
+  }
   async function navigate(prefix,remember=true){
     if(state.busy)return;
     if(prefix===state.prefix&&!state.loading){expandPath(prefix);await refreshRoots();return;}
     if(remember)state.history.push(state.prefix);state.prefix=prefix;state.cursor=null;state.anchor=null;state.selected.clear();$('search').value='';notice('');hideMenu();
     expandPath(prefix);renderBreadcrumbs();
-    history.replaceState(null,'',location.pathname+(prefix?'#d='+encodeURIComponent(prefix):''));await load();await refreshRoots();
+    updateFolderAddress(prefix);await load();await refreshRoots();
   }
   function setClipboard(mode){if(!state.selected.size||state.busy)return;state.clipboard={mode,entries:selectedEntries().map(e=>({...e}))};render();toast(state.selected.size+' élément(s) '+(mode==='cut'?'coupé(s)':'copié(s)')+'. Ouvrez le dossier de destination.');}
   function validName(value){if(!value||value==='.'||value==='..'||value===MARKER||/[\/\\\u0000-\u001f\u007f]/.test(value))return 'Choisissez un nom sans / ni \\, et non réservé.';if(value.length>250)return 'Ce nom est trop long.';return '';}
@@ -500,10 +526,12 @@
   window.addEventListener('dragleave',e=>{if(!isFileDrag(e))return;dragDepth=Math.max(0,dragDepth-1);if(!dragDepth)$('dropOverlay').hidden=true;});
   window.addEventListener('drop',async e=>{if(!isFileDrag(e))return;e.preventDefault();dragDepth=0;$('dropOverlay').hidden=true;if(state.busy)return;try{const result=await droppedItems(e.dataTransfer);await importFiles(result.items,result.folders);}catch(error){notice(error.message,'error');}});
   window.addEventListener('beforeunload',e=>{if(state.busy){e.preventDefault();e.returnValue='';}});
-  window.addEventListener('hashchange',()=>navigate(initialPrefix()));
+  window.addEventListener('hashchange',()=>navigate(prefixFromHash()));
   window.addEventListener('pageshow',event=>{
-    // Le navigateur peut restaurer une page en mémoire lors d'un retour arrière.
-    if(event.persisted){tree.expanded.clear();tree.syncId++;renderSidebar();$('rootFolders').scrollTop=0;}
+    // Nouvelle visite depuis le cache : remettre les deux panneaux à la racine.
+    // Ne pas perturber un transfert que le navigateur aurait conservé en cours.
+    if(event.persisted){if(!state.busy)void startAtRoot();}
+    else resetVisitScroll();
   });
-  render();load().then(()=>refreshRoots());
+  void startAtRoot();
 })();

@@ -317,6 +317,39 @@
       font-size: 12px;
     }
 
+    /* Raccourci R2 : même largeur et même présentation que la vue admin. */
+    .account-admin-r2-link {
+      margin-top: 10px;
+      min-height: 46px;
+      text-decoration: none;
+      color: var(--title, var(--fg));
+      transition: background .16s ease, border-color .16s ease;
+    }
+    .account-admin-r2-link:hover {
+      background: rgba(80,160,255,.12);
+      border-color: var(--primary, #4da3ff);
+    }
+    .account-admin-r2-link:focus-visible {
+      outline: 2px solid var(--primary, #4da3ff);
+      outline-offset: 3px;
+    }
+    .account-admin-r2-arrow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 44px;
+      height: 24px;
+      color: var(--primary, #4da3ff);
+      font-size: 20px;
+      line-height: 1;
+    }
+    @media (max-width: 700px) {
+      .account-admin-r2-link .account-admin-mode-desc {
+        display: block;
+        margin: 3px 0 0;
+      }
+    }
+
     .account-notif-setting-text {
       display: flex;
       align-items: center;
@@ -937,6 +970,13 @@
             <button class="account-notif-switch" id="adminViewerModeAccountToggle" type="button" role="switch" aria-checked="false" aria-label="Activer la vue admin sans compteurs"></button>
           </div>
           <div id="adminViewerModeAccountState" style="display:none;">Désactivée</div>
+          <a class="account-notif-setting account-admin-mode-line account-admin-r2-link" id="adminR2ManagerLink" href="/admin-r2/">
+            <span class="account-notif-setting-text">
+              <span class="account-notif-setting-ico" aria-hidden="true">🗂️</span>
+              <span>Gestionnaire de fichiers R2 <span class="account-admin-mode-desc">Images, vidéos, documents et traductions.</span></span>
+            </span>
+            <span class="account-admin-r2-arrow" aria-hidden="true">→</span>
+          </a>
           <div class="account-admin-grid">
             <a class="account-admin-card" href="/compte/admin.html"><strong>👥 Membres</strong><span>Comptes, rôles et mots de passe.</span></a>
             <a class="account-admin-card" href="/compte/ticket-admin.html"><strong>🎫 Tickets</strong><span>Demandes envoyées depuis le formulaire.</span></a>

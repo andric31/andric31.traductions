@@ -1,20 +1,19 @@
-import { requireUser } from '../api/_auth.js';
-
-// Protection côté serveur des fichiers statiques /admin-r2/*.
-// Réutilise la session et le rôle admin du site.
+import {requireUser} from '../api/_auth.js';
+import {silent} from '../api/_r2.js';
+// La même session administrateur protège la page ET tous ses fichiers statiques.
 export async function onRequest(context) {
-  const { env, request } = context;
-  if (!env.DB) return new Response('Configuration de connexion indisponible.', { status: 503, headers: { 'Cache-Control': 'no-store' } });
   try {
-    const auth = await requireUser(env.DB, env, request);
-    if (!auth.ok) return new Response('Connexion administrateur requise.', { status: 401, headers: { 'Cache-Control': 'no-store' } });
-    if (auth.user.role !== 'admin') return new Response('Accès réservé à l’administrateur.', { status: 403, headers: { 'Cache-Control': 'no-store' } });
-    const response = await context.next();
-    const headers = new Headers(response.headers);
-    headers.set('Cache-Control', 'private, no-store');
-    headers.set('X-Content-Type-Options', 'nosniff');
-    return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
-  } catch (_) {
-    return new Response('Vérification administrateur indisponible.', { status: 503, headers: { 'Cache-Control': 'no-store' } });
-  }
+    if(!context.env.DB)return silent(503);
+    const auth=await requireUser(context.env.DB,context.env,context.request);
+    if(!auth.ok)return silent(401);
+    if(auth.user.role!=='admin')return silent(403);
+    if(context.request.headers.get('sec-fetch-site')==='cross-site')return silent(403);
+    const response=await context.next(),headers=new Headers(response.headers);
+    headers.set('Cache-Control','private, no-store');
+    headers.set('X-Content-Type-Options','nosniff');
+    headers.set('Cross-Origin-Resource-Policy','same-origin');
+    headers.set('Referrer-Policy','same-origin');
+    headers.set('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' blob: data:; media-src 'self' blob:; connect-src 'self'; font-src 'self'; object-src 'none'; frame-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
+    return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
+  } catch { return silent(503); }
 }

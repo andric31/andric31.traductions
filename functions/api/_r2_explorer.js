@@ -114,7 +114,7 @@ export async function preview(request, bucket, key, attachment) {
   const headers = new Headers({
     'Content-Type':type,'Content-Length':String(range?range.length:obj.size),'Accept-Ranges':'bytes',
     'Content-Disposition':disposition(key,attachment||!inline), 'ETag':obj.httpEtag || '"'+obj.etag+'"',
-    'Cache-Control':'private, no-store', 'Vary':'Cookie', 'X-Content-Type-Options':'nosniff',
+    'Cache-Control':'private, no-store', 'Vary':'Cookie, Referer, Sec-Fetch-Site', 'X-Content-Type-Options':'nosniff',
     'Cross-Origin-Resource-Policy':'same-origin', 'Referrer-Policy':'no-referrer',
     'Content-Security-Policy':"default-src 'none'; sandbox; frame-ancestors 'self'"
   });

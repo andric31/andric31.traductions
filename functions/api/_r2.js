@@ -45,24 +45,52 @@ export async function verify(env,key,exp,sig) {
   return equal(await mac(env.R2_SIGNING_SECRET,`${key}\n${exp}`),sig);
 }
 export function mediaPath(key) { return '/medias/'+key.split('/').map(encodeURIComponent).join('/'); }
-export async function signedMedia(env,key,{ttl=900,access='site',download=false}={}) {
-  if(!['site','share'].includes(access))throw new Error('Type de lien invalide.');
+// Un ticket renouvelable n'est créé que par le chemin permanent /medias/.
+// Le bit renew est signé : on ne peut pas rendre un partage externe renouvelable.
+export async function signedMedia(env,key,{ttl=900,access='site',download=false,renew=false}={}) {
+  if(!['site','share'].includes(access) || (renew && access!=='site'))throw new Error('Type de lien invalide.');
   const exp=Math.floor(Date.now()/1000)+ttlValue(ttl),dl=download?'1':'0';
-  const sig=await mac(env.R2_SIGNING_SECRET,`r2-v2\n${key}\n${exp}\n${access}\n${dl}`);
+  const message=renew?`r2-v3\n${key}\n${exp}\n${access}\n${dl}\n1`:`r2-v2\n${key}\n${exp}\n${access}\n${dl}`;
+  const sig=await mac(env.R2_SIGNING_SECRET,message);
   const params=new URLSearchParams({exp:String(exp),sig,access});
   if(download)params.set('dl','1');
+  if(renew)params.set('renew','1');
   return {url:mediaPath(key)+'?'+params,expires:exp};
 }
-export async function verifyMedia(env,key,params) {
+// Séparer authenticité et expiration permet une nouvelle autorisation contrôlée,
+// sans jamais servir un fichier sur la seule base d'une signature expirée.
+export async function mediaTokenState(env,key,params) {
   const exp=params.get('exp'),sig=params.get('sig'),access=params.get('access'),dl=params.get('dl')||'0';
-  if(!env.R2_SIGNING_SECRET||!validToken(exp,sig)||!['site','share'].includes(access)||!['0','1'].includes(dl))return false;
-  if(['exp','sig','access','dl'].some(p=>params.getAll(p).length>1))return false;
-  return equal(await mac(env.R2_SIGNING_SECRET,`r2-v2\n${key}\n${exp}\n${access}\n${dl}`),sig);
+  const renewable=params.has('renew'),now=Math.floor(Date.now()/1000);
+  if(!env.R2_SIGNING_SECRET || !/^\d{10,11}$/.test(exp||'') || +exp>now+86400 || !/^[a-f0-9]{64}$/.test(sig||''))return 'invalid';
+  if(!['site','share'].includes(access)||!['0','1'].includes(dl))return 'invalid';
+  if(renewable && (params.get('renew')!=='1' || access!=='site'))return 'invalid';
+  if(['exp','sig','access','dl','renew'].some(p=>params.getAll(p).length>1))return 'invalid';
+  const message=renewable?`r2-v3\n${key}\n${exp}\n${access}\n${dl}\n1`:`r2-v2\n${key}\n${exp}\n${access}\n${dl}`;
+  if(!equal(await mac(env.R2_SIGNING_SECRET,message),sig))return 'invalid';
+  return +exp>now?'valid':'expired';
+}
+export async function verifyMedia(env,key,params) {
+  return await mediaTokenState(env,key,params)==='valid';
 }
 // Anti-hotlink uniquement : ce contrôle ne remplace pas une session pour des fichiers privés.
 export function fromSite(request) {
-  if(request.headers.get('sec-fetch-site')==='cross-site')return false;
-  try { return new URL(request.headers.get('referer')||'').origin===new URL(request.url).origin; } catch { return false; }
+  const origin = new URL(request.url).origin;
+  const fetchSite = request.headers.get('sec-fetch-site');
+  const referer = request.headers.get('referer');
+  // Referrer-Policy: no-referrer (déjà utilisé par le site) ne doit pas
+  // empêcher ses propres images/vidéos de se charger. Le navigateur envoie
+  // Sec-Fetch-Site indépendamment de cette politique de confidentialité.
+  // Ne pas accepter "same-site" : un autre sous-domaine n'est pas ce site.
+  if (fetchSite !== null && fetchSite !== 'same-origin') return false;
+  // Refuser aussi des en-têtes contradictoires ou un référent invalide.
+  if (referer) {
+    try { if (new URL(referer).origin !== origin) return false; }
+    catch { return false; }
+  }
+  if (fetchSite === 'same-origin') return true;
+  // Repli pour un navigateur ancien : référent de même origine obligatoire.
+  return Boolean(referer);
 }
 export async function admin(context) {
   const {env,request}=context;

@@ -1,8 +1,17 @@
-import {validKey,category,fromSite,silent,signedMedia,verifyMedia,verify,admin} from './_r2.js';
+import {validKey,category,fromSite,silent,signedMedia,mediaTokenState,verify,admin} from './_r2.js';
 import {preview,MARKER} from './_r2_explorer.js';
 import {json} from './_auth.js';
 const isPublicMedia = key => ['image','video'].includes(category(key));
 function accepted(key) { return validKey(key) && !key.split('/').includes(MARKER); }
+function redirectMedia(token) {
+  // Ne pas mettre la redirection en cache. GET/HEAD et Range sont conservés
+  // lors d'une nouvelle requête : la vidéo peut demander la suite du même fichier.
+  return new Response(null,{status:302,headers:{
+    Location:token.url,'Cache-Control':'private, no-store','Referrer-Policy':'same-origin',
+    'Cross-Origin-Resource-Policy':'same-origin','X-Content-Type-Options':'nosniff',
+    'Vary':'Cookie, Referer, Sec-Fetch-Site'
+  }});
+}
 export async function serveMedia(context, key, legacy=false) {
   const {env,request}=context;
   try {
@@ -14,10 +23,24 @@ export async function serveMedia(context, key, legacy=false) {
       if(!await verify(env,key,url.searchParams.get('exp'),url.searchParams.get('sig')))return silent();
       return await preview(request,env.MEDIA_BUCKET,key,false);
     }
-    const hasToken=['sig','exp','access','dl'].some(p=>url.searchParams.has(p));
+    const hasToken=['sig','exp','access','dl','renew'].some(p=>url.searchParams.has(p));
     if(hasToken) {
-      if(!await verifyMedia(env,key,url.searchParams))return silent();
+      const status=await mediaTokenState(env,key,url.searchParams);
+      if(status==='invalid')return silent();
       if(url.searchParams.get('access')==='site' && !fromSite(request))return silent();
+      if(status==='expired') {
+        // Aucun renouvellement des liens temporaires ponctuels / partages externes.
+        if(url.searchParams.get('access')!=='site' || url.searchParams.get('renew')!=='1')return silent();
+        // Rejouer l'autorisation actuelle, pas seulement la validité d'un ancien ticket.
+        if(!isPublicMedia(key)) {
+          const a=await admin(context);if(a.response)return silent(a.response.status);
+        }
+        if(!await env.MEDIA_BUCKET.head(key))return silent(404);
+        return redirectMedia(await signedMedia(env,key,{
+          ttl:category(key)==='video'?3600:900,access:'site',
+          download:url.searchParams.get('dl')==='1',renew:true
+        }));
+      }
       return await preview(request,env.MEDIA_BUCKET,key,url.searchParams.get('dl')==='1');
     }
     // Une adresse permanente ne devient pas une URL publique de contournement.
@@ -27,11 +50,8 @@ export async function serveMedia(context, key, legacy=false) {
       const a=await admin(context); if(a.response)return silent(a.response.status);
     }
     if(!await env.MEDIA_BUCKET.head(key))return silent(404);
-    const token=await signedMedia(env,key,{ttl:category(key)==='video'?3600:900,access:'site',download:category(key)==='archive'});
-    return new Response(null,{status:302,headers:{
-      Location:token.url,'Cache-Control':'private, no-store','Referrer-Policy':'same-origin',
-      'Cross-Origin-Resource-Policy':'same-origin','X-Content-Type-Options':'nosniff'
-    }});
+    const token=await signedMedia(env,key,{ttl:category(key)==='video'?3600:900,access:'site',download:category(key)==='archive',renew:true});
+    return redirectMedia(token);
   } catch { return silent(404); }
 }
 // Ancienne API conservée pour les clients qui lisent encore son résultat JSON.

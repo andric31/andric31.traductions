@@ -142,7 +142,7 @@
             <h3 class="menu-help-h3">Barre du haut</h3>
             <div class="menu-help-grid">
               <div class="menu-help-media">
-                <img class="menu-help-img" src="img/menu/Menu_barre_haut.png" alt="Barre du haut" loading="lazy">
+                <img class="menu-help-img" src="/medias/img/menu/Menu_barre_haut.png" alt="Barre du haut" loading="lazy">
               </div>
               <div class="mh-subpanel mh-connected-note">
                 <strong>Mode connecté :</strong> la barre du haut change lorsqu’un compte est connecté.
@@ -214,7 +214,7 @@
             <h3 class="menu-help-h3">Recherche & filtres</h3>
             <div class="menu-help-grid">
               <div class="menu-help-media">
-                <img class="menu-help-img" src="img/menu/Menu_barre_haut2.png" alt="Recherche et filtres" loading="lazy">
+                <img class="menu-help-img" src="/medias/img/menu/Menu_barre_haut2.png" alt="Recherche et filtres" loading="lazy">
               </div>
               <dl class="menu-help-dl">
                 <div class="menu-help-row"><dt><span class="mh-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span><span>Recherche</span></dt><dd>Champ « Rechercher un jeu. » pour trouver un jeu.</dd></div>

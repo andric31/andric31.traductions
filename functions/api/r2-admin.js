@@ -76,6 +76,19 @@ export async function onRequest(context) {
     const body=await request.json().catch(()=>null);
     check(body && typeof body==='object' && !Array.isArray(body),'Requête invalide.');
 
+    if(body.action==='folder-dates') {
+      const prefix=folderKey(body.prefix);
+      check(!body.cursor || (typeof body.cursor==='string' && body.cursor.length<=4096),'Curseur invalide.');
+      // Une page de métadonnées à la fois : aucun téléchargement du contenu.
+      // La récursion inclut les sous-dossiers et les anciens fichiers déjà présents.
+      const result=await bucket.list({prefix,limit:1000,cursor:body.cursor||undefined});
+      let newest=0;
+      for(const object of result.objects) {
+        if(object.key.startsWith(prefix))newest=Math.max(newest,+new Date(object.uploaded)||0);
+      }
+      check(!result.truncated || (result.cursor && result.cursor!==body.cursor),'Lecture du dossier incomplète.',503);
+      return json({ok:true,prefix,uploaded:newest?new Date(newest).toISOString():null,cursor:result.truncated?result.cursor:null});
+    }
     if(body.action==='folder-status') {
       check(Array.isArray(body.prefixes)&&body.prefixes.length>0&&body.prefixes.length<=12,
         'Vérification limitée à 12 dossiers par requête.');

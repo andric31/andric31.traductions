@@ -5,10 +5,7 @@ import { getDiscordExclusivity } from './_discord_exclusive.js';
 import { validKey, category } from './_r2.js';
 import { preview } from './_r2_explorer.js';
 
-const DEFAULT_PRIVATE_OWNER = 'andric31';
-const DEFAULT_PRIVATE_REPO = 'f95list_private_links';
-const DEFAULT_PRIVATE_BRANCH = 'main';
-const DEFAULT_PRIVATE_PATH = 'f95list_links.json';
+import { fetchPrivateLinksDoc } from './_list_sources.js';
 
 const CORS_HEADERS = {
   'access-control-allow-origin': '*',
@@ -26,53 +23,6 @@ function json(data, status = 200, extraHeaders = {}) {
       ...extraHeaders,
     },
   });
-}
-
-function decodeBase64Utf8(encoded) {
-  const binary = atob(String(encoded || '').replace(/\s/g, ''));
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
-  return new TextDecoder('utf-8').decode(bytes);
-}
-
-function getEnv(context, name, fallback = '') {
-  return String(context.env?.[name] || fallback || '').trim();
-}
-
-function getToken(context) {
-  return getEnv(context, 'GITHUB_PRIVATE_TOKEN') || getEnv(context, 'GITHUB_TOKEN') || getEnv(context, 'GH_TOKEN');
-}
-
-async function fetchPrivateLinksDoc(context) {
-  const owner = getEnv(context, 'PRIVATE_LINKS_OWNER', DEFAULT_PRIVATE_OWNER);
-  const repo = getEnv(context, 'PRIVATE_LINKS_REPO', DEFAULT_PRIVATE_REPO);
-  const branch = getEnv(context, 'PRIVATE_LINKS_BRANCH', DEFAULT_PRIVATE_BRANCH);
-  const path = getEnv(context, 'PRIVATE_LINKS_PATH', DEFAULT_PRIVATE_PATH).replace(/^\/+/, '');
-  const token = getToken(context);
-
-  if (!token) {
-    throw new Error('Token GitHub privé manquant. Ajoute GITHUB_PRIVATE_TOKEN dans les variables Cloudflare Pages.');
-  }
-
-  const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path.split('/').map(encodeURIComponent).join('/')}?ref=${encodeURIComponent(branch)}`;
-
-  const resp = await fetch(apiUrl, {
-    headers: {
-      'accept': 'application/vnd.github.raw+json',
-      'authorization': `Bearer ${token}`,
-      'user-agent': 'andric31-traductions-pages',
-      'x-github-api-version': '2022-11-28',
-    },
-    cf: { cacheTtl: 60, cacheEverything: true },
-  });
-
-  if (!resp.ok) {
-    throw new Error(`GitHub privé HTTP ${resp.status}`);
-  }
-
-  const text = await resp.text();
-  if (!String(text || '').trim()) throw new Error('Fichier privé vide ou illisible');
-  return JSON.parse(text);
 }
 
 function getItem(doc, key) {

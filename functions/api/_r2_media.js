@@ -35,7 +35,7 @@ export async function serveMedia(context, key, legacy=false) {
         if(!isPublicMedia(key)) {
           const a=await admin(context);if(a.response)return silent(a.response.status);
         }
-        if(!await env.MEDIA_BUCKET.head(key))return silent(404);
+        // L’existence sera vérifiée par GET après validation du nouveau ticket.
         return redirectMedia(await signedMedia(env,key,{
           ttl:category(key)==='video'?3600:900,access:'site',
           download:url.searchParams.get('dl')==='1',renew:true
@@ -49,7 +49,7 @@ export async function serveMedia(context, key, legacy=false) {
       // Les téléchargements visiteurs ne sont PAS ouverts sans les règles métier du site.
       const a=await admin(context); if(a.response)return silent(a.response.status);
     }
-    if(!await env.MEDIA_BUCKET.head(key))return silent(404);
+    // Pas de HEAD redondant : la réponse signée vérifiera l’existence en lisant le fichier.
     const token=await signedMedia(env,key,{ttl:category(key)==='video'?3600:900,access:'site',download:category(key)==='archive',renew:true});
     return redirectMedia(token);
   } catch { return silent(404); }

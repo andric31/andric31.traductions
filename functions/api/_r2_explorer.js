@@ -105,22 +105,55 @@ function rangeOf(header, size) {
   end=Math.min(end,size-1);
   return {offset:start,length:end-start+1};
 }
-export async function preview(request, bucket, key, attachment) {
-  const obj = await mustExist(bucket,key);
-  const range = rangeOf(request.headers.get('range'),obj.size);
-  if (range === false) return new Response(null,{status:416,headers:{'Content-Range':`bytes */${obj.size}`,'Cache-Control':'private, no-store'}});
-  const type = contentType(key,obj.httpMetadata?.contentType);
+// Les autorisations sont vérifiées par la route appelante AVANT preview().
+// Ce cache est uniquement privé, toujours revalidé : aucune réponse publique
+// ou utilisable hors ligne après expiration / refus de la session n'est créée.
+function previewHeaders(obj, key, attachment, range = null, revalidate = false) {
+  const type = contentType(key, obj.httpMetadata?.contentType);
   const inline = /^(image\/|video\/|audio\/|text\/plain$|application\/pdf$)/.test(type);
   const headers = new Headers({
     'Content-Type':type,'Content-Length':String(range?range.length:obj.size),'Accept-Ranges':'bytes',
     'Content-Disposition':disposition(key,attachment||!inline), 'ETag':obj.httpEtag || '"'+obj.etag+'"',
-    'Cache-Control':'private, no-store', 'Vary':'Cookie, Referer, Sec-Fetch-Site', 'X-Content-Type-Options':'nosniff',
+    'Cache-Control':revalidate?'private, no-cache, max-age=0, must-revalidate':'private, no-store',
+    'Vary':'Cookie, Referer, Sec-Fetch-Site', 'X-Content-Type-Options':'nosniff',
     'Cross-Origin-Resource-Policy':'same-origin', 'Referrer-Policy':'no-referrer',
     'Content-Security-Policy':"default-src 'none'; sandbox; frame-ancestors 'self'"
   });
   if(range) headers.set('Content-Range',`bytes ${range.offset}-${range.offset+range.length-1}/${obj.size}`);
-  if(request.method==='HEAD') return new Response(null,{status:range?206:200,headers});
-  const result = await bucket.get(key,{...(range?{range}:{}),onlyIf:{etagMatches:obj.etag}});
+  return headers;
+}
+export async function preview(request, bucket, key, attachment) {
+  const rangeHeader = request.headers.get('range');
+  // Chemin habituel d'une image : get() retourne déjà le fichier ET ses
+  // métadonnées. Un head() préalable doublait inutilement les accès R2.
+  if(request.method === 'GET' && !rangeHeader) {
+    const image = !attachment && category(key) === 'image';
+    const validator = image ? request.headers.get('if-none-match') : null;
+    const condition = validator ? {onlyIf:new Headers({'If-None-Match':validator})} : {};
+    let obj = await bucket.get(key,condition);
+    check(obj,'Fichier introuvable : '+key,404);
+    const revalidate = image && /^image\//.test(contentType(key,obj.httpMetadata?.contentType));
+    if(!obj.body) {
+      if(validator && revalidate) {
+        const headers=previewHeaders(obj,key,attachment,null,true);
+        headers.delete('Content-Length');
+        return new Response(null,{status:304,headers});
+      }
+      // Une extension image peut porter un autre MIME. Ne jamais envoyer un
+      // 304 pour un téléchargement / document non prévu pour ce cache privé.
+      obj=await bucket.get(key);
+      check(obj && obj.body,'Le fichier a changé pendant son ouverture. Actualisez.',409);
+    }
+    return new Response(obj.body,{status:200,headers:previewHeaders(obj,key,attachment,null,revalidate)});
+  }
+  // HEAD et lecture partielle (vidéo, reprise de téléchargement) : on garde
+  // le contrôle de la taille, des bornes et de la version entre HEAD et GET.
+  const obj=await mustExist(bucket,key);
+  const range=rangeOf(rangeHeader,obj.size);
+  if(range === false) return new Response(null,{status:416,headers:{'Content-Range':`bytes */${obj.size}`,'Cache-Control':'private, no-store'}});
+  const headers=previewHeaders(obj,key,attachment,range);
+  if(request.method === 'HEAD') return new Response(null,{status:range?206:200,headers});
+  const result=await bucket.get(key,{...(range?{range}:{}),onlyIf:{etagMatches:obj.etag}});
   check(result && result.body,'Le fichier a changé pendant son ouverture. Actualisez.',409);
   return new Response(result.body,{status:range?206:200,headers});
 }

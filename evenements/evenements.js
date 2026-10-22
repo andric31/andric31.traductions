@@ -53,17 +53,7 @@
   }
 
   async function fetchListWithBackup(url) {
-    const primary = String(url || DEFAULT_LIST_URL).trim() || DEFAULT_LIST_URL;
-    const sources = primary === DEFAULT_LIST_URL
-      ? [primary, '/api/f95list', '/data/f95list.json']
-      : [primary];
-    for (const source of sources) {
-      const data = await fetchJson(source, null, { timeoutMs: 6000 });
-      if (!data || typeof data !== 'object' || data.ok === false || data.error) continue;
-      // Les structures acceptées sont celles du lecteur de liste ci-dessous.
-      if (Array.isArray(data) || Array.isArray(data.games) || Object.values(data).some(Array.isArray)) return data;
-    }
-    return null;
+    try { return await SiteDataSources.loadList(url || DEFAULT_LIST_URL); } catch { return null; }
   }
 
   function getActiveEventUrl(config, forcedId = '') {

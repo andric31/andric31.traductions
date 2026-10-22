@@ -138,6 +138,7 @@
     .event-admin-catalog-count { margin:8px 0 0; }
     @media(max-width:600px) { .event-admin-catalog-filters { grid-template-columns:1fr; } }
   </style>
+  <script src="/list-sources.js?v=20261022-r2-secours"></script>
 </head>
 <body>
   <main class="auth-shell event-admin-layout">
@@ -354,17 +355,8 @@
 
 
     async function fetchDefaultListWithBackup(url, fallback, options = {}) {
-      const primaryUrl = String(url || DEFAULT_LIST_URL).trim() || DEFAULT_LIST_URL;
-      const data = await fetchJson(primaryUrl, null, options);
-      if (data !== null) return data;
-      if (primaryUrl !== DEFAULT_LIST_URL) return fallback;
-      console.warn('⚠️ GitHub bloqué ou indisponible, chargement via Cloudflare…');
-      const apiData = await fetchJson(DEFAULT_BACKUP_URL, null, options);
-      if (apiData !== null) return apiData;
-      console.warn('⚠️ API Cloudflare indisponible, chargement de /data/f95list.json…');
-      return await fetchJson(DEFAULT_STATIC_BACKUP_URL, fallback, options);
-    }
-
+      try { return await SiteDataSources.loadList(url || DEFAULT_LIST_URL); } catch { return fallback; }
+  }
 
     function looksLikeAdventEventRaw(event) {
       const type = norm(event?.type || event?.mode || '');

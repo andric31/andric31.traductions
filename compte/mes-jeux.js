@@ -175,26 +175,7 @@
   }
 
   async function fetchDefaultListWithBackup() {
-    try {
-      const resp = await fetch(DEFAULT_LIST_URL, { cache: 'no-store' });
-      if (!resp.ok) throw new Error('HTTP ' + resp.status);
-      console.log('✅ f95list chargée depuis GitHub');
-      return await resp.json();
-    } catch (err) {
-      console.warn('⚠️ GitHub bloqué ou indisponible, chargement via Cloudflare…', err);
-      try {
-        const backup = await fetch(DEFAULT_BACKUP_URL, { cache: 'no-store' });
-        if (!backup.ok) throw new Error('Cloudflare fallback HTTP ' + backup.status);
-        console.log('✅ f95list chargée via Cloudflare API');
-        return await backup.json();
-      } catch (apiErr) {
-        console.warn('⚠️ API Cloudflare indisponible, chargement de /data/f95list.json…', apiErr);
-        const staticBackup = await fetch(DEFAULT_STATIC_BACKUP_URL, { cache: 'no-store' });
-        if (!staticBackup.ok) throw new Error('Cloudflare data fallback HTTP ' + staticBackup.status);
-        console.log('✅ f95list chargée depuis /data/f95list.json');
-        return await staticBackup.json();
-      }
-    }
+    return SiteDataSources.loadList(DEFAULT_LIST_URL);
   }
 
   async function loadTranslationCatalog() {

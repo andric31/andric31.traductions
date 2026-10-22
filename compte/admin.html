@@ -277,6 +277,7 @@
     .member-card.is-open .member-head { padding-right:0; }
   }
 </style>
+  <script src="/list-sources.js?v=20261022-r2-secours"></script>
 </head>
 <body>
   <main class="auth-shell admin-layout">
@@ -519,25 +520,7 @@
           const map = new Map();
           try {
             const url = getF95ListUrl();
-            let raw;
-            try {
-              const r = await fetch(url, { cache: 'no-store' });
-              if (!r.ok) throw new Error('HTTP ' + r.status);
-              raw = await r.json();
-            } catch (err) {
-              if (url !== F95LIST_DEFAULT_URL) return map;
-              console.warn('⚠️ GitHub bloqué ou indisponible, chargement via Cloudflare…', err);
-              try {
-                const backup = await fetch(F95LIST_BACKUP_URL, { cache: 'no-store' });
-                if (!backup.ok) throw new Error('Cloudflare fallback HTTP ' + backup.status);
-                raw = await backup.json();
-              } catch (apiErr) {
-                console.warn('⚠️ API Cloudflare indisponible, chargement de /data/f95list.json…', apiErr);
-                const staticBackup = await fetch(F95LIST_STATIC_BACKUP_URL, { cache: 'no-store' });
-                if (!staticBackup.ok) return map;
-                raw = await staticBackup.json();
-              }
-            }
+            const raw = await SiteDataSources.loadList(url);
             for (const g of extractF95Games(raw)) {
               const key = gameKeyOfF95Entry(g);
               const title = String(g?.cleanTitle || g?.title || '').trim();

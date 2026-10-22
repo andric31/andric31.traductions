@@ -7,7 +7,13 @@ export async function onRequest(context) {
     const auth=await requireUser(context.env.DB,context.env,context.request);
     if(!auth.ok)return silent(401);
     if(auth.user.role!=='admin')return silent(403);
-    if(context.request.headers.get('sec-fetch-site')==='cross-site')return silent(403);
+    // Opening the admin page from F95 is a navigation, not an API request.
+    // Keep the admin session check above and reject cross-site embeds/fetches.
+    const request=context.request;
+    const navigation=request.method==='GET'
+      && request.headers.get('sec-fetch-mode')==='navigate'
+      && request.headers.get('sec-fetch-dest')==='document';
+    if(request.headers.get('sec-fetch-site')==='cross-site'&&!navigation)return silent(403);
     const response=await context.next(),headers=new Headers(response.headers);
     headers.set('Cache-Control','private, no-store');
     headers.set('X-Content-Type-Options','nosniff');

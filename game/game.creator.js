@@ -183,17 +183,7 @@
   }
 
   async function fetchCreators() {
-    if (creatorPromise) return creatorPromise;
-    creatorPromise = (async () => {
-      for (const url of CREATOR_DATA_URLS) {
-        try {
-          const response = await fetch(url, { cache: "no-store" });
-          if (!response.ok) continue;
-          return normalizeCreators(await response.json());
-        } catch {}
-      }
-      return [];
-    })();
+    if (!creatorPromise) creatorPromise = SiteDataSources.loadCreators().then(normalizeCreators).catch(() => []);
     return creatorPromise;
   }
 

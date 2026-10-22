@@ -126,20 +126,14 @@ async function renderIntegratedFrenchNotice(entry) {
   notice.hidden = true;
   if (!getIntegratedFrenchKeys(entry).length) return;
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 10000);
   try {
-    const response = await fetch(INTEGRATED_FRENCH_LIST_URL, { cache: "no-store", signal: controller.signal });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const raw = await response.json();
+    const raw = await SiteDataSources.loadList(INTEGRATED_FRENCH_LIST_URL);
     const match = findIntegratedFrenchGame(entry, extractGames(raw));
     if (!match) return;
     notice.hidden = false;
   } catch (error) {
     // Une liste indisponible ne doit jamais empêcher l'affichage de la fiche.
     console.warn("Vérification du français intégré indisponible.", error);
-  } finally {
-    clearTimeout(timer);
   }
 }
 
@@ -169,6 +163,7 @@ function mergePrivateGameData(entry, privateData) {
   for (const k of [
     "discordlink",
     "translation",
+    "cloudflareTranslation",
     "translationTitle",
     "translationType",
     "translationsArchive",
@@ -195,6 +190,7 @@ function mergePrivateGameData(entry, privateData) {
   for (const k of [
     "hasDiscord",
     "hasTranslation",
+    "hasCloudflareTranslation",
     "hasTranslationsExtra",
     "hasTranslationsArchive",
     "hasDescription",
@@ -375,7 +371,7 @@ function displayGalleryImage(src, logicalUrl) {
 
 async function galleryGoTo(index, { automatic = false, direction = 1 } = {}) {
   if (automatic && galleryState.pending) return false;
-  if (!galleryState.urls.length && !galleryState.initialPromise) return false;
+  if (!galleryState.urls.length && !galleryState.initialPromise && !galleryState.cloudflare.length) return false;
   const session = galleryState.session;
   const token = ++galleryState.navigation;
   const len = galleryState.urls.length;
@@ -438,6 +434,13 @@ async function galleryGoTo(index, { automatic = false, direction = 1 } = {}) {
         continue;
       }
       if (source) continue;
+      if (!galleryState.usingCloudflare && galleryState.cloudflare.length) {
+        galleryState.usingCloudflare = true;
+        galleryState.urls = galleryState.cloudflare.slice();
+        galleryState.failed.clear();
+        tried.clear();
+        continue;
+      }
       if (!galleryState.displayedUrl) showGalleryPlaceholder();
       return false;
     }
@@ -500,9 +503,13 @@ function setupGalleryEvents() {
   });
 }
 
-async function loadF95Gallery(f95Url, fallbackUrl) {
+async function loadF95Gallery(f95Url, fallbackUrl, cloudflareImages) {
   setupGalleryEvents();
   setCover(fallbackUrl);
+  galleryState.cloudflare = [...new Set([cloudflareImages?.cover, ...(Array.isArray(cloudflareImages?.gallery) ? cloudflareImages.gallery : [])].filter(raw => {
+    if (!raw) return false;
+    try { const u = new URL(raw, location.origin); return !u.username && !u.password && u.origin === location.origin && u.pathname.startsWith('/medias/traductions/'); } catch { return false; }
+  }))];
   const session = galleryState.session;
   galleryState.loadedForUrl = window.GameImages.getF95ThreadUrl(f95Url, fallbackUrl);
   if (galleryState.loadedForUrl) {
@@ -515,7 +522,7 @@ async function loadF95Gallery(f95Url, fallbackUrl) {
       }).catch(() => {});
   }
   // L'image d'origine et les métadonnées se chargent en parallèle.
-  if (galleryState.urls.length) void galleryGoTo(0);
+  if (galleryState.urls.length || galleryState.cloudflare.length || galleryState.initialPromise) void galleryGoTo(0);
   return galleryState.initialPromise;
 }
 
@@ -754,26 +761,8 @@ function renderSeriesBlocks(seriesList, games, currentCanonicalKey) {
 }
 
 async function fetchJson(url) {
-  const primaryUrl = String(url || DEFAULT_URL).trim() || DEFAULT_URL;
-  try {
-    const r = await fetch(primaryUrl, { cache: "no-store" });
-    if (!r.ok) throw new Error(`HTTP ${r.status} sur ${primaryUrl}`);
-    return await r.json();
-  } catch (err) {
-    if (primaryUrl !== DEFAULT_URL) throw err;
-    console.warn("⚠️ GitHub bloqué ou indisponible, chargement via Cloudflare…", err);
-    try {
-      const backup = await fetch(DEFAULT_BACKUP_URL, { cache: "no-store" });
-      if (!backup.ok) throw new Error(`Cloudflare fallback HTTP ${backup.status}`);
-      return await backup.json();
-    } catch (apiErr) {
-      console.warn("⚠️ API Cloudflare indisponible, chargement de /data/f95list.json…", apiErr);
-      const staticBackup = await fetch(DEFAULT_STATIC_BACKUP_URL, { cache: "no-store" });
-      if (!staticBackup.ok) throw new Error(`Cloudflare data fallback HTTP ${staticBackup.status}`);
-      return await staticBackup.json();
-    }
+    return SiteDataSources.loadList(url || DEFAULT_URL);
   }
-}
 
 // ====== UI helpers ======
 
@@ -1149,6 +1138,8 @@ function setCover(url) {
   galleryState.initialPromise = galleryState.refreshPromise = null;
   galleryState.refreshAttempted = false;
   galleryState.failed = new Set();
+  galleryState.cloudflare = [];
+  galleryState.usingCloudflare = false;
   showGalleryPlaceholder();
 }
 
@@ -2356,7 +2347,7 @@ function renderVideoBlock({ id, videoUrl }) {
       if (heading) heading.textContent = "Discord & F95Zone";
       if (intro) intro.textContent = "Retrouve cette traduction exclusivement sur Discord.";
     }
-    loadF95Gallery(display.url || entry.url || "", display.imageUrl || entry.imageUrl || "");
+    loadF95Gallery(display.url || entry.url || "", display.imageUrl || entry.imageUrl || "", entry.cloudflareImages);
     renderTags(display.tags || entry.tags || []);
 
     renderBadgesFromGame(display, entry, isCollectionChild);
@@ -2493,6 +2484,7 @@ function renderVideoBlock({ id, videoUrl }) {
     }
 
     const mainTranslations = discordExclusive ? [] : normalizeMainTranslationsForDisplay(entry);
+    if (!discordExclusive && entry.cloudflareTranslation) mainTranslations.push({index:mainTranslations.length+1,title:"Traduction · secours Cloudflare",host:"Cloudflare R2",link:entry.cloudflareTranslation});
     const primaryMainTranslation = mainTranslations[0] || null;
     const megaHref = primaryMainTranslation ? primaryMainTranslation.link : "";
 

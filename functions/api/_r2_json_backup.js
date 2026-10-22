@@ -6,7 +6,7 @@ export async function backupJson(bucket,body){
   check(typeof name==='string'&&/^(?:creators|f95list(?:[_-][a-z0-9_-]+)?)\.json$/i.test(name),'Nom de fichier JSON non autorisé.');
   check(typeof body.content==='string'&&new TextEncoder().encode(body.content).length<=MAX,'JSON trop volumineux (20 Mo maximum).',413);
   let parsed;try{parsed=JSON.parse(body.content);}catch{}check(parsed&&typeof parsed==='object','Le fichier JSON est invalide.');
-  const key='json/'+name,history='json/sauvegardes/'+name+'/';
+  const key='f95list/'+name,history='f95list/sauvegardes/'+name+'/';
   const old=await bucket.get(key);check(!old||old.size<=MAX,'La version distante est trop volumineuse.',413);
   const oldText=old?await new Response(old.body).text():'';
   const unchanged=!!old&&oldText===body.content;

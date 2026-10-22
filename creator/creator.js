@@ -294,19 +294,9 @@
     }
 
     async function fetchCreators() {
-      if (creatorPromise) return creatorPromise;
-      creatorPromise = (async () => {
-        for (const url of CREATOR_DATA_URLS) {
-          try {
-            const response = await fetch(url, { cache: "no-store" });
-            if (!response.ok) continue;
-            return normalizeCreators(await response.json());
-          } catch {}
-        }
-        return [];
-      })();
-      return creatorPromise;
-    }
+    if (!creatorPromise) creatorPromise = SiteDataSources.loadCreators().then(normalizeCreators).catch(() => []);
+    return creatorPromise;
+  }
 
     function findCreator(creators, ref) {
       const target = creatorSlug(ref?.id || ref?.name || ref);
@@ -416,17 +406,7 @@
   }
 
   async function fetchFirstJson(urls) {
-    let lastError = null;
-    for (const url of urls) {
-      try {
-        const response = await fetch(url, { cache: "no-store" });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return await response.json();
-      } catch (error) {
-        lastError = error;
-      }
-    }
-    throw lastError || new Error("Données indisponibles");
+    return SiteDataSources.loadList(urls[0]);
   }
 
   function getDisplay(game) {

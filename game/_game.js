@@ -1,0 +1,2796 @@
+"use strict";
+
+const DEFAULT_URL = "https://raw.githubusercontent.com/andric31/f95list/main/f95list.json";
+const DEFAULT_BACKUP_URL = "/api/f95list";
+const DEFAULT_STATIC_BACKUP_URL = "/data/f95list.json";
+
+const ADMIN_VIEWER_STORAGE_KEY = "andric31AdminViewerMode";
+
+function isAdminCounterMode() {
+  try { return localStorage.getItem(ADMIN_VIEWER_STORAGE_KEY) === "1"; }
+  catch { return false; }
+}
+
+function adminCounterUrl(url) {
+  if (!isAdminCounterMode()) return url;
+  try {
+    const u = new URL(url, location.origin);
+    const op = String(u.searchParams.get("op") || "").toLowerCase();
+    const kind = String(u.searchParams.get("kind") || "").toLowerCase();
+    if (op === "hit" && (kind === "view" || kind === "mega")) {
+      u.searchParams.set("adminView", "1");
+    }
+    return u.pathname + u.search + u.hash;
+  } catch {
+    return url;
+  }
+}
+
+// ====== Helpers URL / JSON ======
+
+function getListUrl() {
+  try {
+    const p = new URLSearchParams(location.search);
+    const src = (p.get("src") || "").trim();
+    if (src) return src;
+  } catch {}
+  try {
+    return (localStorage.getItem("f95listUrl") || "").trim() || DEFAULT_URL;
+  } catch {
+    return DEFAULT_URL;
+  }
+}
+
+function getParamsFromUrl() {
+  try {
+    const p = new URLSearchParams(location.search);
+    const id = (p.get("id") || "").trim();
+    const uid = (p.get("uid") || "").trim();
+    return { id: id || "", uid: uid || "" };
+  } catch {
+    return { id: "", uid: "" };
+  }
+}
+
+function extractGames(raw) {
+  if (Array.isArray(raw)) return raw;
+  if (!raw || typeof raw !== "object") return [];
+  const candidates = ["games", "list", "items", "data", "rows", "results"];
+  for (const k of candidates) {
+    if (Array.isArray(raw[k])) return raw[k];
+  }
+  for (const k of Object.keys(raw)) {
+    if (Array.isArray(raw[k])) return raw[k];
+  }
+  return [];
+}
+
+function buildPrivateLinksKey(game) {
+  const g = game && typeof game === "object" ? game : {};
+  const id = String(g.id || "").trim();
+  if (id) return id;
+
+  const collection = String(g.collection || "").trim();
+  const uid = String(g.uid || "").trim();
+  if (collection && uid) return `${collection}__${uid}`;
+  if (uid) return `uid__${uid}`;
+
+  const title = String(g.cleanTitle || g.title || "").trim();
+  return title ? `title__${title}` : "";
+}
+
+function isDiscordExclusive(entry) {
+  return String(entry?.discordExclusive ?? entry?.gameData?.discordExclusive ?? "").trim().toLowerCase() === "oui";
+}
+
+async function fetchPrivateGameData(privateKey) {
+  const key = String(privateKey || "").trim();
+  if (!key) return null;
+
+  try {
+    const r = await fetch(`/api/f95list_links?key=${encodeURIComponent(key)}`, { cache: "no-store" });
+    const j = await r.json().catch(() => null);
+    if (!r.ok || !j || j.ok === false || !j.found) {
+      console.warn("Infos privées indisponibles", j || r.status);
+      return null;
+    }
+    return j;
+  } catch (e) {
+    console.warn("Impossible de charger les infos privées", e);
+    return null;
+  }
+}
+
+function mergePrivateGameData(entry, privateData) {
+  if (!privateData || typeof privateData !== "object") return entry;
+  const out = { ...(entry || {}) };
+  out.discordExclusive = isDiscordExclusive(entry) || isDiscordExclusive(privateData) ? "oui" : "non défini";
+
+  for (const k of [
+    "discordlink",
+    "translation",
+    "cloudflareTranslation",
+    "translationTitle",
+    "translationType",
+    "translationsArchive",
+    "description",
+    "notes"
+  ]) {
+    if (Object.prototype.hasOwnProperty.call(privateData, k) && String(privateData[k] || "").trim()) {
+      out[k] = privateData[k];
+    }
+  }
+
+  if (privateData.f95Info && typeof privateData.f95Info === "object") {
+    out.f95Info = privateData.f95Info;
+  }
+
+  if (Array.isArray(privateData.translationsExtra) && privateData.translationsExtra.length) {
+    out.translationsExtra = privateData.translationsExtra;
+  }
+
+  if (Array.isArray(privateData.mainTranslations) && privateData.mainTranslations.length) {
+    out.mainTranslations = privateData.mainTranslations;
+  }
+
+  for (const k of [
+    "hasDiscord",
+    "hasTranslation",
+    "hasCloudflareTranslation",
+    "hasTranslationsExtra",
+    "hasTranslationsArchive",
+    "hasDescription",
+    "hasNotes",
+    "hasF95Info"
+  ]) {
+    if (Object.prototype.hasOwnProperty.call(privateData, k)) out[k] = !!privateData[k];
+  }
+
+  return out;
+}
+
+function escapeHtml(s) {
+  return String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+
+function formatRichText(s) {
+  const raw = String(s ?? "");
+  const anchors = [];
+
+  // Format conseillé dans le JSON : [Texte cliquable](https://exemple.com)
+  let text = raw.replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g, (m, label, url) => {
+    const token = `@@LINK_${anchors.length}@@`;
+    anchors.push(`<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`);
+    return token;
+  });
+
+  text = escapeHtml(text);
+
+  // Rend aussi les URL simples cliquables.
+  text = text.replace(/(https?:\/\/[^\s<]+)/g, (url) => {
+    let clean = url;
+    let end = "";
+    while (/[.,;:!?)]$/.test(clean)) {
+      end = clean.slice(-1) + end;
+      clean = clean.slice(0, -1);
+    }
+    return `<a href="${clean}" target="_blank" rel="noopener noreferrer">${clean}</a>${end}`;
+  });
+
+  anchors.forEach((html, i) => {
+    text = text.replaceAll(`@@LINK_${i}@@`, html);
+  });
+
+  return text.replace(/\n/g, "<br>");
+}
+
+function setHtml(id, html) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = html ?? "";
+}
+
+function show(id, cond) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = cond ? "" : "none";
+}
+
+const galleryState = {
+  urls: [],
+  index: 0,
+  timer: null,
+  hover: false,
+  loadedForUrl: "",
+  cloudflare: [],
+  usingCloudflare: false,
+};
+
+function galleryUrlKey(raw) {
+  const u = String(raw || "").trim();
+  if (!u) return "";
+  try {
+    const x = new URL(u, location.origin);
+    const host = (x.hostname || "").toLowerCase();
+    const path = (x.pathname || "").replace(/\/+$/, "");
+    return `${host}${path}`;
+  } catch {
+    return u.replace(/[?#].*$/, "").replace(/\/+$/, "");
+  }
+}
+
+
+function isGalleryAvatarUrl(url) {
+  const u = String(url || "").trim().toLowerCase();
+  if (!u) return false;
+  return /\/data\/avatars?\//i.test(u) ||
+    /^https?:\/\/(?:[^/]+\.)?gravatar\.com\/avatar\//i.test(u);
+}
+
+function dedupKeepOrder(list) {
+  const out = [];
+  const seen = new Set();
+  for (const raw of list || []) {
+    const u = String(raw || "").trim();
+    const k = galleryUrlKey(u);
+    if (!u || !k || seen.has(k)) continue;
+    seen.add(k);
+    out.push(u);
+  }
+  return out;
+}
+
+function getF95GalleryApiUrl(f95Url) {
+  const u = String(f95Url || "").trim();
+  if (!u) return "";
+  return `/api/f95gallery?url=${encodeURIComponent(u)}`;
+}
+
+function stopGalleryAuto() {
+  try { if (galleryState.timer) clearInterval(galleryState.timer); } catch {}
+  galleryState.timer = null;
+}
+
+function startGalleryAuto() {
+  stopGalleryAuto();
+  if (!galleryState.hover) return;
+  if (!Array.isArray(galleryState.urls) || galleryState.urls.length < 2) return;
+  galleryState.timer = setInterval(() => {
+    galleryGoTo(galleryState.index + 1);
+  }, 3000);
+}
+
+function updateGalleryControls() {
+  const many = Array.isArray(galleryState.urls) && galleryState.urls.length > 1;
+  const countText = many ? `${galleryState.index + 1} / ${galleryState.urls.length}` : "";
+  const ids = ["coverPrevBtn", "coverNextBtn", "coverLightboxPrev", "coverLightboxNext"];
+  ids.forEach((id) => show(id, many));
+  const count = $("coverCount");
+  const lcount = $("coverLightboxCount");
+  if (count) { count.textContent = countText; count.style.display = many ? "" : "none"; }
+  if (lcount) { lcount.textContent = countText; lcount.style.display = many ? "" : "none"; }
+}
+
+function setLightboxBackground(url) {
+  const lb = $("coverLightbox");
+  if (!lb) return;
+  const u = String(url || "").trim();
+  lb.style.setProperty("--lb-bg", u ? `url("${u.replace(/"/g, '\"')}")` : "none");
+}
+
+function useCloudflareGallery() {
+  if(galleryState.usingCloudflare || !galleryState.cloudflare.length)return false;
+  galleryState.usingCloudflare=true;galleryState.urls=galleryState.cloudflare.slice();galleryState.index=0;
+  galleryGoTo(0);return true;
+}
+function galleryGoTo(index) {
+  if (!Array.isArray(galleryState.urls) || !galleryState.urls.length) return;
+  const len = galleryState.urls.length;
+  galleryState.index = ((index % len) + len) % len;
+  const u = galleryState.urls[galleryState.index] || "";
+  const img = $("cover");
+  const lb = $("coverLightboxImg");
+  if (img) {
+    img.classList.remove("is-placeholder");
+    img.src = u;
+    img.onerror = () => { img.onerror = null; useCloudflareGallery(); };
+  }
+  if (lb) lb.src = u;
+  setLightboxBackground(u);
+  updateGalleryControls();
+}
+
+function setupGalleryEvents() {
+  const stage = $("coverStage");
+  const lightbox = $("coverLightbox");
+  if (!stage || stage.dataset.galleryBound === "1") return;
+  stage.dataset.galleryBound = "1";
+
+  $("coverPrevBtn")?.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); galleryGoTo(galleryState.index - 1); startGalleryAuto(); });
+  $("coverNextBtn")?.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); galleryGoTo(galleryState.index + 1); startGalleryAuto(); });
+  $("coverLightboxPrev")?.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); galleryGoTo(galleryState.index - 1); });
+  $("coverLightboxNext")?.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); galleryGoTo(galleryState.index + 1); });
+  $("coverExpandBtn")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    const lb = $("coverLightbox");
+    if (!lb) return;
+    const current = galleryState.urls[galleryState.index] || "";
+    setLightboxBackground(current);
+    lb.classList.remove("hidden");
+    lb.setAttribute("aria-hidden", "false");
+    const img = $("coverLightboxImg");
+    if (img) img.src = current;
+  });
+  const closeLb = () => {
+    const lb = $("coverLightbox");
+    if (!lb) return;
+    lb.classList.add("hidden");
+    lb.setAttribute("aria-hidden", "true");
+  };
+  $("coverLightboxClose")?.addEventListener("click", closeLb);
+  $("coverLightboxBackdrop")?.addEventListener("click", closeLb);
+  lightbox?.addEventListener("click", (e) => { if (e.target === lightbox) closeLb(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeLb();
+    if (e.key === "ArrowLeft") galleryGoTo(galleryState.index - 1);
+    if (e.key === "ArrowRight") galleryGoTo(galleryState.index + 1);
+  });
+  stage.addEventListener("mouseenter", () => { galleryState.hover = true; startGalleryAuto(); });
+  stage.addEventListener("mouseleave", () => { galleryState.hover = false; stopGalleryAuto(); });
+}
+
+async function loadF95Gallery(f95Url, fallbackUrl, cloudflareImages) {
+  galleryState.usingCloudflare=false;
+  galleryState.cloudflare=dedupKeepOrder([cloudflareImages?.cover,...(Array.isArray(cloudflareImages?.gallery)?cloudflareImages.gallery:[])].filter(raw=>{
+    if(!raw)return false;try{const u=new URL(raw,location.origin);return u.origin===location.origin&&u.pathname.startsWith('/medias/traductions/');}catch{return false;}
+  }));
+  setupGalleryEvents();
+  const fallback = String(fallbackUrl || "").trim();
+  const baseUrl = String(f95Url || "").trim();
+  const fallbackKey = galleryUrlKey(fallback);
+
+  if (!baseUrl) {
+    galleryState.urls = fallback ? [fallback] : galleryState.cloudflare.slice();
+    galleryState.index = 0;
+    galleryGoTo(0);
+    updateGalleryControls();
+    return;
+  }
+  if (galleryState.loadedForUrl === baseUrl) return;
+  galleryState.loadedForUrl = baseUrl;
+
+  let merged = fallback ? [fallback] : [];
+  let remoteLoaded=false;
+  try {
+    const resp = await fetch(getF95GalleryApiUrl(baseUrl));
+    const data = await resp.json();
+    if (data && data.ok) {
+      const remote = [];
+      if (data.cover) remote.push(data.cover);
+      if (Array.isArray(data.gallery)) remote.push(...data.gallery);
+      if (remote.length) {
+        remoteLoaded=true;
+        const filteredRemote = remote.filter((u) => !isGalleryAvatarUrl(u) && galleryUrlKey(u) !== fallbackKey);
+        merged = fallback ? [fallback, ...filteredRemote] : filteredRemote;
+      }
+    }
+  } catch {}
+
+  if(!remoteLoaded && galleryState.cloudflare.length){merged=galleryState.cloudflare;galleryState.usingCloudflare=true;}
+  galleryState.urls = dedupKeepOrder(merged);
+  galleryState.index = 0;
+  if (galleryState.urls.length) galleryGoTo(0);
+  else updateGalleryControls();
+}
+
+// =========================
+// ✅ Routing (id central) + Collections + Séries
+// =========================
+
+function buildGameUrl(g) {
+  const coll = (g.collection || "").toString().trim();
+  const id = (g.id || "").toString().trim();
+  const uid = (g.uid ?? "").toString().trim();
+
+  if (coll) return `/game/?id=${encodeURIComponent(coll)}&uid=${encodeURIComponent(uid)}`;
+  if (id) return `/game/?id=${encodeURIComponent(id)}`;
+  return `/game/?uid=${encodeURIComponent(uid)}`;
+}
+
+function getDisplayTitle(g) {
+  const id = (g?.id || "").toString().trim();
+  const col = (g?.collection || "").toString().trim();
+  if (!id && col) {
+    return (g?.gameData?.title || "").toString().trim();
+  }
+  return (g?.cleanTitle || g?.title || "").toString().trim();
+}
+
+function getCollectionChildTitle(g) {
+  return (g?.gameData?.title || "").toString().trim();
+}
+
+function getEntryRefs(g) {
+  const refs = [];
+  const id = (g?.id || "").toString().trim();
+  if (id) refs.push(`id:${id}`);
+  if (g?.uid !== undefined && g?.uid !== null) refs.push(`uid:${String(g.uid)}`);
+  return refs;
+}
+
+function buildSeriesIndex(games) {
+  const map = new Map();
+  for (const owner of games || []) {
+    const s = owner?.serie;
+    if (!s?.name || !Array.isArray(s.refs)) continue;
+
+    const serieObj = {
+      name: String(s.name),
+      refs: s.refs.map((x) => String(x)),
+      ownerUid: owner?.uid,
+      ownerId: owner?.id || "",
+    };
+
+    for (const ref of serieObj.refs) {
+      if (!map.has(ref)) map.set(ref, []);
+      map.get(ref).push(serieObj);
+    }
+
+    for (const selfRef of getEntryRefs(owner)) {
+      if (!map.has(selfRef)) map.set(selfRef, []);
+      map.get(selfRef).push(serieObj);
+    }
+  }
+  return map;
+}
+
+function getCurrentPageRefs({ kind, idParam, uidParam, entry }) {
+  if (kind === "collectionChild") {
+    return [`id:${String(idParam)}`, `uid:${String(uidParam)}`];
+  }
+  return getEntryRefs(entry);
+}
+
+function getSeriesForCurrentPage(pageRefs, seriesIndex) {
+  const found = [];
+  for (const r of pageRefs || []) {
+    const arr = seriesIndex.get(r);
+    if (arr) found.push(...arr);
+  }
+  const uniq = new Map();
+  for (const s of found) {
+    uniq.set(`${s.name}|${s.ownerUid}`, s);
+  }
+  return [...uniq.values()];
+}
+
+function resolveSerieRefsToEntries(serie, games) {
+  const out = [];
+  for (const ref of serie?.refs || []) {
+    const [type, value] = String(ref).split(":");
+    if (type === "id") {
+      const g = (games || []).find((x) => String(x?.id) === String(value) && !x?.collection);
+      if (g) out.push(g);
+    } else if (type === "uid") {
+      const g = (games || []).find((x) => String(x?.uid) === String(value));
+      if (g) out.push(g);
+    }
+  }
+  return out;
+}
+
+function resolveGamePage(params, games) {
+  const id = (params?.id || "").toString().trim();
+  const uid = (params?.uid || "").toString().trim();
+
+  if (id && uid) {
+    const child = (games || []).find(
+      (g) => String(g?.uid) === String(uid) && String(g?.collection) === String(id)
+    );
+    if (!child) return { kind: "notfound" };
+
+    const parent = (games || []).find((g) => String(g?.id) === String(id) && !g?.collection) || null;
+    const siblings = (games || [])
+      .filter((g) => String(g?.collection) === String(id))
+      .sort((a, b) => Number(a?.uid) - Number(b?.uid));
+
+    return { kind: "collectionChild", idParam: id, uidParam: uid, entry: child, parent, siblings };
+  }
+
+  if (id) {
+    const parentOrGame =
+      (games || []).find((g) => String(g?.id) === String(id) && !g?.collection) || null;
+    if (!parentOrGame) return { kind: "notfound" };
+
+    const children = (games || [])
+      .filter((g) => String(g?.collection) === String(id))
+      .sort((a, b) => Number(a?.uid) - Number(b?.uid));
+
+    if (children.length) return { kind: "collectionParent", idParam: id, entry: parentOrGame, children };
+    return { kind: "normal", idParam: id, entry: parentOrGame };
+  }
+
+  if (uid) {
+    const g = (games || []).find((x) => String(x?.uid) === String(uid)) || null;
+    if (!g) return { kind: "notfound" };
+    return { kind: "uidOnly", uidParam: uid, entry: g };
+  }
+
+  return { kind: "notfound" };
+}
+
+// ====== Related container ======
+
+function ensureRelatedContainer() {
+  const main = document.getElementById("mainInfoBox");
+  const tags = document.getElementById("tags");
+  const descInner = document.getElementById("descInnerBox");
+  if (!main || !tags) return null;
+
+  let out = document.getElementById("relatedOut");
+  if (!out) {
+    out = document.createElement("div");
+    out.id = "relatedOut";
+    out.style.marginTop = "12px";
+    out.style.display = "grid";
+    out.style.gap = "10px";
+
+    if (descInner && descInner.parentNode === main) {
+      main.insertBefore(out, descInner);
+    } else {
+      main.appendChild(out);
+    }
+  }
+  return out;
+}
+
+function renderCollectionBlockForChild(parent) {
+  const parentId = parent?.id ? String(parent.id) : "";
+  const href = parentId ? `/game/?id=${encodeURIComponent(parentId)}` : "";
+  const label = parent ? (parent.cleanTitle || parent.title || parentId) : "Voir la collection";
+
+  return `
+    <div class="game-block collection-child-block">
+      <h3>📦 Fait partie de la collection</h3>
+      ${href ? `<a class="collection-parent-link" href="${href}">${escapeHtml(label)}</a>` : ``}
+    </div>
+  `;
+}
+
+function renderCollectionBlockForParent(parent, children) {
+  if (!children || !children.length) return "";
+
+  const items = children
+    .map((g) => {
+      const t = escapeHtml(getDisplayTitle(g, "collectionChild"));
+      const href = `/game/?id=${encodeURIComponent(parent.id)}&uid=${encodeURIComponent(g.uid)}`;
+      return `<li><a href="${href}">${t}</a></li>`;
+    })
+    .join("");
+
+  return `
+    <div class="game-block collection-block">
+      <h3>📦 Collection</h3>
+      <ul class="collection-list">
+        ${items}
+      </ul>
+    </div>
+  `;
+}
+
+function renderSeriesBlocks(seriesList, games, currentCanonicalKey) {
+  if (!Array.isArray(seriesList) || !seriesList.length) return "";
+
+  return seriesList
+    .map((serie) => {
+      const items = resolveSerieRefsToEntries(serie, games);
+
+      const li = items
+        .map((g) => {
+          const t = getCollectionChildTitle(g) || getDisplayTitle(g);
+          const href = buildGameUrl(g);
+
+          let key = "";
+          const id = (g.id || "").toString().trim();
+          const coll = (g.collection || "").toString().trim();
+          if (coll) key = `c:${coll}|u:${g.uid}`;
+          else if (id) key = `id:${id}`;
+          else key = `uid:${g.uid}`;
+
+          const isCurrent = key === currentCanonicalKey;
+
+          return `<li style="margin:4px 0;">
+            <a href="${href}" class="btn-link" style="${isCurrent ? "font-weight:700;text-decoration:underline;" : ""}">
+              ${escapeHtml(t || "Sans titre")}
+            </a>
+          </li>`;
+        })
+        .join("");
+
+      return `
+        <div class="game-block serie-block">
+          <h3>📚 Série : ${escapeHtml(serie.name)}</h3>
+          <ul style="margin:0;padding-left:18px;">${li}</ul>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+async function fetchJson(url) {
+  const primaryUrl = String(url || DEFAULT_URL).trim() || DEFAULT_URL;
+  try {
+    const r = await fetch(primaryUrl, { cache: "no-store" });
+    if (!r.ok) throw new Error(`HTTP ${r.status} sur ${primaryUrl}`);
+    return await r.json();
+  } catch (err) {
+    if (primaryUrl !== DEFAULT_URL) throw err;
+    console.warn("⚠️ GitHub bloqué ou indisponible, chargement via Cloudflare…", err);
+    try {
+      const backup = await fetch(DEFAULT_BACKUP_URL, { cache: "no-store" });
+      if (!backup.ok) throw new Error(`Cloudflare fallback HTTP ${backup.status}`);
+      return await backup.json();
+    } catch (apiErr) {
+      console.warn("⚠️ API Cloudflare indisponible, chargement de /data/f95list.json…", apiErr);
+      const staticBackup = await fetch(DEFAULT_STATIC_BACKUP_URL, { cache: "no-store" });
+      if (!staticBackup.ok) throw new Error(`Cloudflare data fallback HTTP ${staticBackup.status}`);
+      return await staticBackup.json();
+    }
+  }
+}
+
+// ====== UI helpers ======
+
+function $(id) {
+  return document.getElementById(id);
+}
+
+function showError(msg) {
+  const err = $("errBox");
+  const card = $("card");
+  const stats = $("statsOut");
+  if (card) card.style.display = "none";
+  if (stats) stats.style.display = "none";
+  if (err) {
+    err.style.display = "block";
+    err.textContent = msg;
+  }
+}
+
+function setText(id, text) {
+  const el = $(id);
+  if (el) el.textContent = text ?? "";
+}
+
+function setHref(id, href) {
+  const el = $(id);
+  if (!el) return;
+  if (!href) {
+    el.style.display = "none";
+    el.removeAttribute("href");
+  } else {
+    el.style.display = "";
+    el.href = href;
+  }
+}
+
+// Remplace les emojis drapeaux (🇷🇺, 🇺🇸, etc.) par des SVG locaux.
+// Il suffit d'ajouter le fichier correspondant dans /assets/flags/ : ru.svg, us.svg, es.svg...
+const FLAG_EMOJI_RE = /[\u{1F1E6}-\u{1F1FF}]{2}/gu;
+
+function flagEmojiToCode(flag) {
+  const points = Array.from(flag);
+  if (points.length !== 2) return "";
+  return points.map((ch) => {
+    const n = ch.codePointAt(0) - 0x1F1E6;
+    return n >= 0 && n <= 25 ? String.fromCharCode(97 + n) : "";
+  }).join("");
+}
+
+function shouldSkipFlagReplace(node) {
+  const parent = node?.parentElement;
+  if (!parent) return true;
+  return !!parent.closest("script, style, textarea, input, select, option, code, pre, .no-flag-replace");
+}
+
+function replaceFlagEmojis(root = document.body) {
+  if (!root) return;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      if (shouldSkipFlagReplace(node)) return NodeFilter.FILTER_REJECT;
+      FLAG_EMOJI_RE.lastIndex = 0;
+      return FLAG_EMOJI_RE.test(node.nodeValue || "") ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+    }
+  });
+
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+
+  nodes.forEach((node) => {
+    const text = node.nodeValue || "";
+    FLAG_EMOJI_RE.lastIndex = 0;
+    const frag = document.createDocumentFragment();
+    let last = 0;
+    let match;
+
+    while ((match = FLAG_EMOJI_RE.exec(text))) {
+      const flag = match[0];
+      const code = flagEmojiToCode(flag);
+      if (match.index > last) frag.appendChild(document.createTextNode(text.slice(last, match.index)));
+
+      if (code && code.length === 2) {
+        const img = document.createElement("img");
+        img.className = "flag-icon";
+        img.src = `/assets/flags/${code}.svg`;
+        img.alt = flag;
+        img.title = code.toUpperCase();
+        img.loading = "lazy";
+        img.decoding = "async";
+        img.onerror = () => img.replaceWith(document.createTextNode(flag));
+        frag.appendChild(img);
+      } else {
+        frag.appendChild(document.createTextNode(flag));
+      }
+
+      last = match.index + flag.length;
+    }
+
+    if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+    node.replaceWith(frag);
+  });
+}
+
+window.replaceFlagEmojis = replaceFlagEmojis;
+
+
+function hostLabelFromUrl(rawUrl, fallback = "Lien") {
+  try {
+    const host = new URL(String(rawUrl || "")).hostname.toLowerCase().replace(/^www\./, "");
+    if (host.includes("mega.nz")) return "MEGA";
+    if (host.includes("workupload")) return "WORKUPLOAD";
+    if (host.includes("gofile")) return "GOFILE";
+    if (host.includes("pixeldrain")) return "PIXELDRAIN";
+    if (host.includes("drive.google")) return "Google Drive";
+    if (host.includes("mediafire")) return "MediaFire";
+    if (host.includes("f95zone")) return "F95Zone";
+    if (host.includes("patreon")) return "Patreon";
+    if (host.includes("discord")) return "Discord";
+    return host || fallback;
+  } catch { return fallback; }
+}
+
+function normalizeF95LinkList(list) {
+  if (!Array.isArray(list)) return [];
+  const out = [];
+  const seen = new Set();
+  for (const x of list) {
+    const link = typeof x === "string" ? x : String(x?.link || x?.url || "").trim();
+    if (!/^https?:\/\//i.test(link)) continue;
+
+    const name = typeof x === "string" ? "" : String(x?.name || x?.host || "").trim();
+    const host = typeof x === "string" ? hostLabelFromUrl(link) : String(x?.host || "").trim();
+    const version = typeof x === "string" ? "" : String(x?.version || "").trim();
+    const platform = typeof x === "string" ? "" : String(x?.platform || "").trim();
+    const section = typeof x === "string" ? "" : String(x?.section || "").trim();
+    const mainSection = typeof x === "string" ? "" : String(x?.mainSection || x?.group || "").trim();
+    const sourceLine = typeof x === "string" ? "" : String(x?.sourceLine || x?.context || "").trim();
+
+    // Même URL autorisée si elle appartient à une autre version/plateforme/section.
+    const key = [link, version, platform, section, mainSection].join("\n");
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    out.push({
+      name: name || host || hostLabelFromUrl(link),
+      host: host || name || hostLabelFromUrl(link),
+      link,
+      version,
+      platform,
+      section,
+      mainSection,
+      sourceLine,
+    });
+  }
+  return out;
+}
+
+function normalizeF95ExtraInfos(list) {
+  if (!Array.isArray(list)) return [];
+  return list.map((x) => {
+    if (typeof x === "string") {
+      const raw = x.trim();
+      if (!raw) return null;
+      const parts = raw.split(/\s*:\s*/);
+      return parts.length > 1 ? { name: parts.shift().trim(), value: parts.join(": ").trim() } : { name: "Info", value: raw };
+    }
+    const name = String(x?.name || x?.label || "").trim();
+    const value = String(x?.value || x?.text || "").trim();
+    if (!name && !value) return null;
+    return { name: name || "Info", value };
+  }).filter(Boolean);
+}
+
+function renderF95InfoLinks(threadLinks) {
+  if (!threadLinks.length) return "";
+
+  const normalizeVersionForDisplay = (v) => {
+    const raw = String(v || "").trim();
+    if (!raw) return "";
+    // v0.1 est souvent une valeur par défaut d'ancienne extension : on ne l'affiche pas.
+    if (/^v?0\.1$/i.test(raw)) return "";
+    return raw.replace(/^v(\d)/i, "v$1");
+  };
+
+  const cleanPlatform = (p) => {
+    const raw = String(p || "").trim();
+    if (!raw || raw === "—" || raw === "-" || raw.toLowerCase() === "undefined") return "";
+    return raw;
+  };
+
+  const cleanSection = (v) => {
+    const raw = String(v || "").trim();
+    if (!raw || raw === "—" || raw === "-" || raw.toLowerCase() === "undefined") return "";
+    return raw;
+  };
+
+  const getLineLabel = (l) => {
+    const platform = cleanPlatform(l.platform);
+    const section = cleanSection(l.section);
+    const version = normalizeVersionForDisplay(l.version);
+
+    // Les extras F95 doivent s'afficher comme sur F95Zone : Extras: lien - lien
+    if (/^extras?$/i.test(section) && !platform) return "Extras";
+    if (/^others?$/i.test(platform)) return "Others";
+    if (!platform && section) return section;
+    if (!platform) return "Autres";
+
+    if (version && !platform.toLowerCase().includes(version.toLowerCase())) {
+      return `${platform} (${version})`;
+    }
+    return platform;
+  };
+
+  const normalizeName = (l) => {
+    const raw = String(l.name || l.host || "Lien").trim();
+    return raw || "Lien";
+  };
+
+  const groups = [];
+  const map = new Map();
+
+  for (const l of threadLinks) {
+    if (!l || !String(l.link || "").trim()) continue;
+
+    const main = cleanSection(l.mainSection);
+    const section = cleanSection(l.section);
+    const lineLabel = getLineLabel(l);
+    // Si la section sert déjà de libellé de ligne (ex: Patches: Incest),
+    // on ne l'affiche pas une deuxième fois comme titre au-dessus.
+    const sectionForHeader = (
+      (/^extras?$/i.test(section) && lineLabel === "Extras") ||
+      (section && section.toLowerCase() === String(lineLabel || "").trim().toLowerCase())
+    ) ? "" : section;
+    const key = [main, sectionForHeader, lineLabel].join("\n");
+
+    let g = map.get(key);
+    if (!g) {
+      g = { main, section: sectionForHeader, lineLabel, links: [] };
+      map.set(key, g);
+      groups.push(g);
+    }
+    g.links.push(l);
+  }
+
+  if (!groups.length) return "";
+
+  const parts = [`<div class="f95StyleLinksBlock">`];
+  let currentMain = "__INIT__";
+  let currentSection = "__INIT__";
+  let mainGroupOpen = false;
+
+  for (const g of groups) {
+    if (g.main !== currentMain) {
+      if (mainGroupOpen) {
+        parts.push(`</div>`);
+        mainGroupOpen = false;
+      }
+      if (g.main) {
+        parts.push(`<div class="f95MainGroup"><div class="f95MainSection">${escapeHtml(g.main)}</div>`);
+        mainGroupOpen = true;
+      }
+      currentMain = g.main;
+      currentSection = "__RESET__";
+    }
+
+    if (g.section !== currentSection) {
+      if (g.section) parts.push(`<div class="f95SubSection">${escapeHtml(g.section)}</div>`);
+      currentSection = g.section;
+    }
+
+    parts.push(`<div class="f95PlatformLine"><span class="f95PlatformLabel">${escapeHtml(g.lineLabel)}:</span>`);
+
+    g.links.forEach((l, idx) => {
+      const label = normalizeName(l);
+      // Pas de title sur les liens F95 : évite les infos-bulles natives du navigateur au survol.
+      if (idx > 0) parts.push(`<span class="f95Dash">-</span>`);
+      parts.push(`<a class="f95DownloadLink" href="${escapeHtml(l.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`);
+    });
+
+    parts.push(`</div>`);
+  }
+
+  if (mainGroupOpen) parts.push(`</div>`);
+  parts.push(`</div>`);
+  return parts.join("");
+}
+
+function renderF95InfoBlock(f95Info, discordExclusive = false) {
+  const box = $("f95InfoBox");
+  const grid = $("f95InfoGrid");
+  const linksBox = $("f95LinksBox");
+  const linksRow = $("f95LinksRow");
+  if (!box || !grid) return;
+
+  const info = f95Info && typeof f95Info === "object" ? f95Info : null;
+  const developerLinks = discordExclusive ? [] : normalizeF95LinkList(info?.developerLinks);
+  // L'API réserve ces liens F95 aux membres connectés, y compris pour une traduction exclusive.
+  const threadLinks = normalizeF95LinkList(info?.threadLinks || info?.links || info?.downloadLinks);
+  const extraInfos = normalizeF95ExtraInfos(info?.extraInfos);
+  const lastEdited = String(
+    info?.lastEdited ||
+    info?.lastEditedAt ||
+    info?.lastEdit ||
+    info?.last_edit ||
+    info?.lastEditedText ||
+    info?.postLastEdited ||
+    info?.editedAt ||
+    ""
+  ).trim();
+
+  const developerText = String(info?.developer || "").trim();
+  const developerTextKey = developerText.toLowerCase();
+  const hasDeveloperLink = developerTextKey && developerLinks.some((l) => String(l.name || "").trim().toLowerCase() === developerTextKey);
+  const developerLinksHtml = developerLinks.map((l) => `<a href="${escapeHtml(l.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(l.name)}</a>`).join(" · ");
+  const developerHtml = developerLinks.length
+    ? (hasDeveloperLink ? developerLinksHtml : `${escapeHtml(developerText || "Développeur")} · ${developerLinksHtml}`)
+    : escapeHtml(developerText);
+
+  const rows = [
+    ["Thread Updated", info?.threadUpdated || info?.updatedAt || ""],
+    ["Release Date", info?.releaseDate || ""],
+    ["Developer", developerHtml, true],
+    ["Status", info?.status || ""],
+    ["Engine", info?.engine || ""],
+    ["Version", info?.version || ""],
+    ["Censored", info?.censored || ""],
+    ["OS", info?.os || ""],
+  ].filter((r) => String(r[1] || "").trim());
+
+  if (!rows.length && !threadLinks.length && !extraInfos.length && !lastEdited) {
+    box.style.display = "none";
+    return;
+  }
+
+  grid.innerHTML = rows.map(([label, value, isHtml]) => `
+    <div class="f95InfoItem">
+      <span>${escapeHtml(label)}</span>
+      <strong>${isHtml ? value : escapeHtml(value)}</strong>
+    </div>
+  `).join("") + (extraInfos.length ? `
+    <div class="f95ExtraInfos">
+      <div class="f95LinksTitle">Infos supplémentaires</div>
+      ${extraInfos.map((x) => `
+        <div class="f95ExtraInfoItem">
+          <span>${escapeHtml(x.name)}</span>
+          <strong>${escapeHtml(x.value)}</strong>
+        </div>
+      `).join("")}
+    </div>
+  ` : "");
+
+  if (linksBox && linksRow) {
+    const lastEditedHtml = lastEdited
+      ? `<div class="f95LastEdited">Last edited: ${escapeHtml(lastEdited)}</div>`
+      : "";
+    linksRow.innerHTML = renderF95InfoLinks(threadLinks) + lastEditedHtml;
+    linksBox.style.display = (threadLinks.length || lastEdited) ? "" : "none";
+  }
+
+  box.style.display = "";
+  try { window.SiteAuth?.applyAuthDom?.(); } catch {}
+}
+
+function setCover(url) {
+  const img = $("cover");
+  if (!img) return;
+
+  const u = (url || "").trim();
+  img.referrerPolicy = "no-referrer";
+
+  if (!u) {
+    galleryState.urls = [];
+    img.removeAttribute("src");
+    img.classList.add("is-placeholder");
+    updateGalleryControls();
+    return;
+  }
+
+  galleryState.urls = [u];
+  galleryState.index = 0;
+  img.classList.remove("is-placeholder");
+  img.src = u;
+  const lb = $("coverLightboxImg");
+  if (lb) lb.src = u;
+  updateGalleryControls();
+
+  img.onerror = () => {
+    img.onerror = null;
+    img.removeAttribute("src");
+    img.classList.add("is-placeholder");
+  };
+}
+
+function renderTags(tags) {
+  const box = $("tags");
+  if (!box) return;
+  box.innerHTML = "";
+  (tags || []).forEach((t) => {
+    if (!t) return;
+    const s = document.createElement("span");
+    s.className = "tagPill";
+    s.textContent = String(t);
+    box.appendChild(s);
+  });
+}
+
+// ====== Badges ======
+
+const CAT_ALLOWED = ["VN", "Collection"];
+const ENGINE_ALLOWED = ["Ren'Py", "RPGM", "Unity", "Godot", "Unreal Engine", "HTML", "Java", "Flash", "QSP", "WebGL", "RAGS", "Tads", "ADRIFT", "Others", "Wolf RPG"];
+const STATUS_ALLOWED = ["Completed", "Abandoned", "Onhold"];
+
+const ENGINE_RAW = {
+  renpy: "Ren'Py",
+  "ren'py": "Ren'Py",
+  rpgm: "RPGM",
+  rpgmaker: "RPGM",
+  rpgmakermv: "RPGM",
+  rpgmakermz: "RPGM",
+  unity: "Unity",
+  godot: "Godot",
+  unreal: "Unreal Engine",
+  "unrealengine": "Unreal Engine",
+  "unreal engine": "Unreal Engine",
+  ue4: "Unreal Engine",
+  ue5: "Unreal Engine",
+  html: "HTML",
+  html5: "HTML",
+  web: "HTML",
+  java: "Java",
+  flash: "Flash",
+  qsp: "QSP",
+  webgl: "WebGL",
+  rags: "RAGS",
+  tads: "Tads",
+  adrift: "ADRIFT",
+  others: "Others",
+  other: "Others",
+  wolf: "Wolf RPG",
+  wolfrpg: "Wolf RPG",
+};
+
+function slug(s) {
+  return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+}
+
+const SEP_RE = /[\u2014\u2013\-:]/;
+const ucFirst = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
+
+function cleanTitle(raw) {
+  let t = String(raw || "").trim();
+  let categories = [];
+  let engines = [];
+  let status = null;
+  let othersExplicit = false;
+
+  if (/^collection\b/i.test(t)) {
+    categories.push("Collection");
+    t = t.replace(/^collection[ :\-]*/i, "").trim();
+  }
+
+  const head = t.split(SEP_RE)[0];
+  const tokens = head.split(/[\s/|,]+/).filter(Boolean);
+  let cut = 0;
+
+  for (let i = 0; i < tokens.length; i++) {
+    const wRaw = tokens[i];
+    const w = wRaw.toLowerCase();
+    const norm = w.replace(/[^\w']/g, "");
+
+    if (norm === "vn") {
+      if (!categories.includes("VN")) categories.push("VN");
+      cut = i + 1;
+      continue;
+    }
+
+    if (
+      norm === "wolf" &&
+      tokens[i + 1] &&
+      tokens[i + 1].toLowerCase().replace(/[^\w']/g, "") === "rpg"
+    ) {
+      if (!engines.includes("Wolf RPG")) engines.push("Wolf RPG");
+      cut = i + 2;
+      i++;
+      continue;
+    }
+
+    if (norm === "wolf") break;
+
+    if (norm === "flash") {
+      if (!engines.includes("Flash")) engines.push("Flash");
+      cut = i + 1;
+      continue;
+    }
+
+    if (norm === "others" || norm === "other") {
+      if (!engines.includes("Others")) engines.push("Others");
+      othersExplicit = true;
+      cut = i + 1;
+      continue;
+    }
+
+    if (ENGINE_RAW[norm] !== undefined) {
+      const eng = ENGINE_RAW[norm];
+      if (eng && !engines.includes(eng)) engines.push(eng);
+      cut = i + 1;
+      continue;
+    }
+
+    const pretty = ucFirst(norm);
+    if (STATUS_ALLOWED.includes(pretty)) {
+      status = pretty;
+      cut = i + 1;
+      continue;
+    }
+
+    if (w === "&" || w === "and" || w === "/") {
+      cut = i + 1;
+      continue;
+    }
+
+    break;
+  }
+
+  if (cut > 0) {
+    const headSlice = tokens.slice(0, cut).join(" ");
+    t = t.slice(headSlice.length).trim();
+    t = t.replace(/^[\u2014\u2013\-:|]+/, "").trim();
+  }
+
+  if (!status) status = "En cours";
+
+  const allowedCat = new Set(CAT_ALLOWED);
+  const allowedEng = new Set(ENGINE_ALLOWED);
+  categories = categories.filter((c) => allowedCat.has(c));
+  engines = engines.filter((e) => allowedEng.has(e));
+
+  if (!othersExplicit && engines.includes("Others") && engines.some((e) => e !== "Others")) {
+    engines = engines.filter((e) => e !== "Others");
+  }
+
+  return { title: t, categories, engines, status };
+}
+
+function makeBadge(type, value) {
+  const b = document.createElement("span");
+  b.className = `badge ${type}-${slug(value)}`;
+  b.textContent = value;
+  return b;
+}
+
+function renderBadgesFromGame(display, entry, isCollectionChild) {
+  const wrap = $("badges");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+
+  const childTitle = String(display?.title || "");
+  const parentTitle = String(entry?.title || "");
+
+  if (isCollectionChild) {
+    wrap.appendChild(makeBadge("cat", "Collection"));
+  }
+
+  let c = cleanTitle(isCollectionChild ? childTitle : parentTitle);
+
+  if (!isCollectionChild && c.categories.includes("Collection")) {
+    wrap.appendChild(makeBadge("cat", "Collection"));
+  }
+
+  if (!isCollectionChild && c.categories.includes("VN")) {
+    wrap.appendChild(makeBadge("cat", "VN"));
+  }
+
+  if (isCollectionChild) {
+    if (display?.engine) {
+      const eng = ENGINE_RAW[slug(display.engine)] || display.engine;
+      c.engines = [eng];
+    } else if (!c.engines || c.engines.length === 0) {
+      const cp = cleanTitle(parentTitle);
+      c.engines = cp.engines || [];
+    }
+
+    if (display?.status) {
+      c.status = display.status;
+    } else if (!c.status) {
+      const cp = cleanTitle(parentTitle);
+      if (cp.status) c.status = cp.status;
+    }
+  }
+
+  for (const eng of c.engines || []) {
+    wrap.appendChild(makeBadge("eng", eng));
+  }
+  if (c.status) wrap.appendChild(makeBadge("status", c.status));
+}
+
+async function renderTranslationStatus(game) {
+  if (!game?.url || !game?.title) return;
+
+  try {
+    const r = await fetch(
+      `/api/f95status?url=${encodeURIComponent(game.url)}&storedTitle=${encodeURIComponent(game.title)}`,
+      { cache: "no-store" }
+    );
+    if (!r.ok) return;
+
+    const j = await r.json();
+    if (!j?.ok || !j?.currentTitle) return;
+
+    const badge = document.createElement("span");
+    badge.classList.add("badge");
+
+    if (j.isUpToDate) {
+      badge.textContent = "✅ Traduction à jour";
+      badge.classList.add("status-updated");
+    } else {
+      badge.textContent = "🔄 Traduction non à jour";
+      badge.classList.add("status-outdated");
+    }
+
+    const wrap = $("badges");
+    if (wrap) wrap.appendChild(badge);
+  } catch {}
+}
+
+// ============================================================================
+// ✅ MENU ☰ (page game)
+// ============================================================================
+
+function positionPopover(pop, anchorBtn) {
+  const r = anchorBtn.getBoundingClientRect();
+  const margin = 8;
+
+  let left = Math.round(r.left);
+  let top = Math.round(r.bottom + margin);
+
+  const widthGuess = pop.getBoundingClientRect().width || 260;
+  const maxLeft = window.innerWidth - widthGuess - 10;
+
+  if (left > maxLeft) left = Math.max(10, maxLeft);
+  if (left < 10) left = 10;
+
+  pop.style.left = left + "px";
+  pop.style.top = top + "px";
+}
+
+function initHamburgerMenu() {
+  const btn = $("hamburgerBtn");
+  if (!btn) return;
+
+  try {
+    window.ViewerMenu?.init?.();
+  } catch {}
+
+  // ✅ Ajout item : retour page principale (viewer)
+  try {
+    if (!window.__homeMenuAdded && window.ViewerMenu?.addItem) {
+      window.__homeMenuAdded = true;
+      window.ViewerMenu.addItem("📚 Retour à la liste des traductions", () => { window.location.href = "../"; }, { prepend: true });
+    }
+  } catch {}
+
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const pop = document.getElementById("topMenuPopover");
+    if (!pop) return;
+
+    const isOpen = !pop.classList.contains("hidden");
+    if (isOpen) {
+      try {
+        window.ViewerMenu?.closeMenu?.();
+      } catch {
+        pop.classList.add("hidden");
+      }
+      btn.setAttribute("aria-expanded", "false");
+      return;
+    }
+
+    pop.classList.remove("hidden");
+    btn.setAttribute("aria-expanded", "true");
+    positionPopover(pop, btn);
+  });
+
+  document.addEventListener("click", (e) => {
+    const pop = document.getElementById("topMenuPopover");
+    if (!pop) return;
+
+    const target = e.target;
+    if (!pop.contains(target) && !btn.contains(target)) {
+      try {
+        window.ViewerMenu?.closeMenu?.();
+      } catch {
+        pop.classList.add("hidden");
+      }
+      btn.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  window.addEventListener("resize", () => {
+    const pop = document.getElementById("topMenuPopover");
+    if (pop && !pop.classList.contains("hidden")) positionPopover(pop, btn);
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    try { window.ViewerMenu?.closeMenu?.(); } catch {}
+    try { window.ViewerMenu?.closeAbout?.(); } catch {}
+    try { window.ViewerMenu?.closeExtension?.(); } catch {}
+    try { window.ViewerMenuExtension?.close?.(); } catch {}
+  });
+}
+
+// ====== Counters ======
+
+function formatInt(n) {
+  const x = Number(n);
+  if (!Number.isFinite(x)) return "0";
+  try {
+    return x.toLocaleString("fr-FR");
+  } catch {
+    return String(Math.floor(x));
+  }
+}
+
+function showStatsBox() {
+  const stats = $("statsOut");
+  if (stats) stats.style.display = "";
+}
+
+function formatRelativeTranslationTime(ts) {
+  const t = Number(ts || 0);
+  if (!Number.isFinite(t) || t <= 0) return "—";
+
+  let delta = Date.now() - t;
+  if (!Number.isFinite(delta) || delta < 0) delta = 0;
+
+  const MIN = 60 * 1000;
+  const HOUR = 60 * MIN;
+  const DAY = 24 * HOUR;
+  const WEEK = 7 * DAY;
+  const MONTH = 30 * DAY;
+  const YEAR = 365 * DAY;
+
+  if (delta < MIN) return "à l’instant";
+
+  if (delta < HOUR) {
+    const n = Math.max(1, Math.floor(delta / MIN));
+    return `${n} minute${n > 1 ? "s" : ""}`;
+  }
+
+  if (delta < DAY) {
+    const n = Math.max(1, Math.floor(delta / HOUR));
+    return `${n} heure${n > 1 ? "s" : ""}`;
+  }
+
+  if (delta < WEEK) {
+    const n = Math.max(1, Math.floor(delta / DAY));
+    return `${n} jour${n > 1 ? "s" : ""}`;
+  }
+
+  if (delta < 5 * WEEK) {
+    const n = Math.max(1, Math.floor(delta / WEEK));
+    return `${n} semaine${n > 1 ? "s" : ""}`;
+  }
+
+  if (delta < YEAR) {
+    const n = Math.max(1, Math.floor(delta / MONTH));
+    return `${n} mois`;
+  }
+
+  const n = Math.max(1, Math.floor(delta / YEAR));
+  return `${n} an${n > 1 ? "s" : ""}`;
+}
+
+function formatAbsoluteDateTime(ts, fallback = "Date inconnue") {
+  const t = Number(ts || 0);
+  if (!Number.isFinite(t) || t <= 0) return fallback;
+  try {
+    return new Date(t).toLocaleString("fr-FR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return new Date(t).toISOString();
+  }
+}
+
+function formatAbsoluteDateOnly(ts, fallback = "Date inconnue") {
+  const t = Number(ts || 0);
+  if (!Number.isFinite(t) || t <= 0) return fallback;
+  try {
+    return new Date(t).toLocaleDateString("fr-FR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+  } catch {
+    return new Date(t).toISOString().slice(0, 10);
+  }
+}
+
+function setStatMeta(entry) {
+  const updatedAtLocalRaw = entry?.updatedAtLocal || "";
+  const createdAtLocalRaw = entry?.createdAtLocal || "";
+  const updatedAtRaw = entry?.updatedAt || "";
+
+  const updatedAtLocalTs = updatedAtLocalRaw ? Date.parse(updatedAtLocalRaw) : NaN;
+  const createdAtLocalTs = createdAtLocalRaw ? Date.parse(createdAtLocalRaw) : NaN;
+  const lastTranslationTs = !Number.isNaN(updatedAtLocalTs) ? updatedAtLocalTs : (!Number.isNaN(createdAtLocalTs) ? createdAtLocalTs : 0);
+
+  setText("statTranslationTime", formatRelativeTranslationTime(lastTranslationTs));
+
+  const translationWrap = $("statTranslationWrap");
+  if (translationWrap) {
+    translationWrap.title = formatAbsoluteDateTime(lastTranslationTs, updatedAtRaw || "Date de traduction inconnue");
+  }
+
+  setText("statAddedDate", formatAbsoluteDateOnly(!Number.isNaN(createdAtLocalTs) ? createdAtLocalTs : 0, "—"));
+  const addedWrap = $("statAddedWrap");
+  if (addedWrap) {
+    addedWrap.title = formatAbsoluteDateTime(!Number.isNaN(createdAtLocalTs) ? createdAtLocalTs : 0, "Date d’ajout inconnue");
+  }
+}
+
+function setStatRating(avg, count) {
+  const a = Number(avg || 0);
+  const c = Number(count || 0);
+  const text = c > 0 && a > 0 ? `${a.toFixed(1)}/4` : "—";
+  setText("statRating", text);
+  const wrap = $("statRatingWrap");
+  if (wrap) wrap.title = c > 0 && a > 0 ? `${a.toFixed(1)}/4 · ${c} vote${c > 1 ? "s" : ""}` : "Aucune note pour le moment";
+}
+
+async function counterGet(id) {
+  const r = await fetch(`/api/counter?op=get&id=${encodeURIComponent(id)}`, { cache: "no-store" });
+  if (!r.ok) throw new Error("counter get HTTP " + r.status);
+  return await r.json();
+}
+
+// ✅ plus fiable (quand on quitte la page vite) : keepalive
+async function counterHit(id, kind) {
+  const rawUrl = `/api/counter?op=hit&kind=${encodeURIComponent(kind)}&id=${encodeURIComponent(id)}`;
+  const r = await fetch(adminCounterUrl(rawUrl), { cache: "no-store", keepalive: true });
+  if (!r.ok) throw new Error("counter hit HTTP " + r.status);
+  return await r.json();
+}
+
+// ✅ plus fiable (quand on quitte la page vite) : keepalive
+async function counterUnhit(id, kind) {
+  const url = `/api/counter?op=unhit&kind=${encodeURIComponent(kind)}&id=${encodeURIComponent(id)}`;
+  const r = await fetch(url, { cache: "no-store", keepalive: true });
+  if (!r.ok) throw new Error("counter unhit HTTP " + r.status);
+  return await r.json();
+}
+
+let connectedGameState = null;
+
+function isConnectedUser() {
+  return !!window.SiteAuth?.me;
+}
+
+function waitForAuthReady() {
+  if (!window.SiteAuth) return Promise.resolve(null);
+  if (window.SiteAuth.loaded) return Promise.resolve(window.SiteAuth.me || null);
+  return new Promise((resolve) => {
+    const off = window.SiteAuth.onChange?.((me) => {
+      try { off?.(); } catch {}
+      resolve(me || null);
+    });
+    setTimeout(() => resolve(window.SiteAuth?.me || null), 2500);
+  });
+}
+
+function buildUserGamePayload(extra = {}) {
+  const meta = window.__currentGameAccountMeta || {};
+  return {
+    game_key: meta.game_key || '',
+    title: meta.title || 'Jeu sans titre',
+    game_url: meta.game_url || '',
+    image_url: meta.image_url || '',
+    f95_url: meta.f95_url || '',
+    discord_url: meta.discord_url || '',
+    ...extra,
+  };
+}
+
+async function userGameStateApi(method, payloadOrKey) {
+  const options = {
+    method,
+    credentials: 'same-origin',
+    cache: 'no-store',
+    headers: { 'content-type': 'application/json' },
+  };
+  let url = '/api/user-game-state';
+  if (method === 'GET') {
+    url += `?game_key=${encodeURIComponent(payloadOrKey || '')}`;
+    delete options.headers;
+  } else {
+    options.body = JSON.stringify(payloadOrKey || {});
+  }
+  const resp = await fetch(url, options);
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Erreur compte.');
+  return data;
+}
+
+function getMyLike(gameId) {
+  if (isConnectedUser() && connectedGameState && connectedGameState.game_key === gameId) {
+    return !!connectedGameState.liked;
+  }
+  try {
+    return localStorage.getItem(`like_${gameId}`) === "1";
+  } catch {
+    return false;
+  }
+}
+function setMyLike(gameId, v) {
+  if (isConnectedUser()) {
+    connectedGameState = { ...(connectedGameState || {}), game_key: gameId, liked: !!v };
+    return;
+  }
+  try {
+    localStorage.setItem(`like_${gameId}`, v ? "1" : "0");
+  } catch {}
+}
+function getLikeIconSvg(liked) {
+  const path = `<path d="M8 21H5.5A1.5 1.5 0 0 1 4 19.5v-7A1.5 1.5 0 0 1 5.5 11H8m0 10V11m0 10h8.2c.8 0 1.4-.5 1.6-1.3l1.1-5.2c.2-.9-.5-1.8-1.5-1.8H13V7.8c0-1-.8-1.8-1.8-1.8h-.1L8 11"/>`;
+  return liked
+    ? `<svg class="likeIconSvg likeIconSvg--liked" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${path}</svg>`
+    : `<svg class="likeIconSvg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${path}</svg>`;
+}
+
+function updateLikeBtn(gameId) {
+  const b = $("btnLike");
+  if (!b) return;
+
+  const liked = getMyLike(gameId);
+  b.innerHTML = getLikeIconSvg(liked);
+  b.setAttribute("aria-label", liked ? "Je n’aime plus" : "J’aime");
+}
+
+function setLikesFromJson(j) {
+  if (!$("statLikes")) return;
+  const val = Number(j?.likes);
+  setText("statLikes", Number.isFinite(val) ? formatInt(val) : "0");
+}
+
+function cooldownKey(kind, gameId) {
+  return `cooldown_${kind}_${gameId}`;
+}
+
+function inCooldown(kind, gameId, ms) {
+  try {
+    const k = cooldownKey(kind, gameId);
+    const last = Number(localStorage.getItem(k) || "0");
+    const now = Date.now();
+    if (now - last < ms) return true;
+    localStorage.setItem(k, String(now));
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+// ✅ bind download sur un <a> (ou bouton) quelconque
+function bindDownloadClick(el, gameId, MEGA_COOLDOWN_MS) {
+  if (!el) return;
+  if (el.dataset.boundMega === "1") return;
+  el.dataset.boundMega = "1";
+
+  el.addEventListener(
+    "click",
+    async () => {
+      if (!isAdminCounterMode() && inCooldown("megaClick", gameId, MEGA_COOLDOWN_MS)) return;
+      try {
+        const j = await counterHit(gameId, "mega");
+        if (j?.ok) {
+          setText("statMegaClicks", formatInt(j.mega));
+          showStatsBox();
+        }
+      } catch {}
+
+      if (isConnectedUser()) {
+        try {
+          const payload = buildUserGamePayload();
+          await fetch('/api/user-game-top', {
+            method: 'POST',
+            credentials: 'same-origin',
+            cache: 'no-store',
+            keepalive: true,
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ game_key: payload.game_key || gameId, title: payload.title || '' }),
+          });
+        } catch {}
+      }
+    },
+    { passive: true }
+  );
+}
+
+async function initCounters(gameId, megaHref, archiveHref) {
+  const VIEW_COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
+  const MEGA_COOLDOWN_MS = 5 * 60 * 1000;  // 5 minutes
+
+  await waitForAuthReady();
+  if (isConnectedUser()) {
+    try {
+      const stateData = await userGameStateApi('GET', gameId);
+      connectedGameState = stateData?.state || { game_key: gameId, liked: false, rating: 0 };
+      if (stateData?.counters?.ok || typeof stateData?.counters?.likes !== 'undefined') setLikesFromJson(stateData.counters);
+    } catch {
+      connectedGameState = { game_key: gameId, liked: false, rating: 0 };
+    }
+  }
+
+  // 1) Vue (anti-refresh abusif + vue admin sans compteurs)
+  const adminCounterMode = isAdminCounterMode();
+  const skipViewHit = adminCounterMode || inCooldown("view", gameId, VIEW_COOLDOWN_MS);
+
+  try {
+    const j = skipViewHit ? await counterGet(gameId) : await counterHit(gameId, "view");
+    if (j?.ok) {
+      setText("statViews", formatInt(j.views));
+      setText("statMegaClicks", formatInt(j.mega));
+      setLikesFromJson(j);
+      showStatsBox();
+    }
+  } catch {
+    try {
+      const j = await counterGet(gameId);
+      if (j?.ok) {
+        setText("statViews", formatInt(j.views));
+        setText("statMegaClicks", formatInt(j.mega));
+        setLikesFromJson(j);
+        showStatsBox();
+      }
+    } catch {
+      setText("statViews", "0");
+      setText("statMegaClicks", "0");
+      if ($("statLikes")) setText("statLikes", "0");
+      showStatsBox();
+    }
+  }
+
+  // 2) 📥 Téléchargements
+  // - MEGA (btnMega)
+  // - Archives (archiveLink)
+  // - ✅ ET tous les liens extra (extraLinkBtn)
+  const btnMega = $("btnMega");
+  const archiveLink = $("archiveLink");
+
+  if (megaHref && btnMega) bindDownloadClick(btnMega, gameId, MEGA_COOLDOWN_MS);
+  if (archiveHref && archiveLink) bindDownloadClick(archiveLink, gameId, MEGA_COOLDOWN_MS);
+
+  // ✅ extra links (translationsExtra)
+  document.querySelectorAll("a.extraLinkBtn").forEach((a) => {
+    bindDownloadClick(a, gameId, MEGA_COOLDOWN_MS);
+  });
+
+  // 3) ❤️ Like toggle
+  const btnLike = $("btnLike");
+  if (btnLike && $("statLikes")) {
+    updateLikeBtn(gameId);
+
+    if (btnLike.dataset.boundLike === "1") return;
+    btnLike.dataset.boundLike = "1";
+
+    btnLike.addEventListener("click", async () => {
+      if (inCooldown("likeClick", gameId, 1500)) return;
+
+      const liked = getMyLike(gameId);
+
+      try {
+        let j;
+        if (isConnectedUser()) {
+          const data = await userGameStateApi('POST', buildUserGamePayload({ liked: !liked }));
+          connectedGameState = data?.state || { game_key: gameId, liked: !liked, rating: getMyVote4(gameId) };
+          setMyLike(gameId, !!connectedGameState.liked);
+          if (data?.counters) setLikesFromJson(data.counters);
+          updateLikeBtn(gameId);
+          showStatsBox();
+          return;
+        }
+
+        if (!liked) {
+          j = await counterHit(gameId, "like");
+          if (j?.ok) {
+            setMyLike(gameId, true);
+            setLikesFromJson(j);
+            updateLikeBtn(gameId);
+            showStatsBox();
+          }
+          return;
+        }
+
+        j = await counterUnhit(gameId, "like");
+        if (j?.ok) {
+          setMyLike(gameId, false);
+          setLikesFromJson(j);
+          updateLikeBtn(gameId);
+          showStatsBox();
+        }
+      } catch {}
+    });
+  }
+}
+
+// ============================================================================
+// ✅ COMPTEUR UID ONLY
+// ============================================================================
+function buildCounterKeyFromEntry(entry) {
+  const uid = String(entry?.uid ?? "").trim();
+  return uid ? `uid:${uid}` : "";
+}
+
+// ============================================================================
+// ✅ WATCHLIST (compte connecté)
+// ============================================================================
+function watchlistSetMsg(text, ok) {
+  const el = $("watchlistMsg");
+  if (!el) return;
+  el.textContent = text || "";
+  el.className = "watchlistMsg " + (text ? (ok ? "ok" : "err") : "");
+}
+
+function setWatchlistButton(inList, loading) {
+  const btn = $("btnWatchlist");
+  if (!btn) return;
+  btn.disabled = !!loading;
+  btn.classList.toggle("is-in-watchlist", !!inList);
+  btn.textContent = loading
+    ? "Traitement…"
+    : (inList ? "✅ Dans ma Watchlist" : "Ajouter à ma Watchlist");
+  btn.setAttribute("aria-label", inList ? "Retirer de ma Watchlist" : "Ajouter à ma Watchlist");
+}
+
+function getWatchlistGameUrl(idParam, uidParam) {
+  const p = new URLSearchParams();
+  if (idParam) p.set("id", idParam);
+  if (uidParam) p.set("uid", uidParam);
+  const qs = p.toString();
+  return `/game/${qs ? `?${qs}` : ""}`;
+}
+
+async function watchlistApi(method, payloadOrKey) {
+  const options = {
+    method,
+    credentials: "same-origin",
+    cache: "no-store",
+    headers: { "content-type": "application/json" },
+  };
+  let url = "/api/watchlist";
+  if (method === "GET") {
+    url += `?game_key=${encodeURIComponent(payloadOrKey || "")}`;
+    delete options.headers;
+  } else {
+    options.body = JSON.stringify(payloadOrKey || {});
+  }
+  const resp = await fetch(url, options);
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data?.ok) throw new Error(data?.error || "Erreur Watchlist.");
+  return data;
+}
+
+function initWatchlistForGame({ entry, display, title, counterKey, idParam, uidParam }) {
+  const box = $("watchlistBox");
+  const btn = $("btnWatchlist");
+  if (!box || !btn || !counterKey) return;
+
+  let inList = false;
+  let bound = false;
+
+  const payload = () => ({
+    game_key: counterKey,
+    title: title || "Jeu sans titre",
+    game_url: getWatchlistGameUrl(idParam, uidParam),
+    image_url: String(display?.imageUrl || entry?.imageUrl || "").trim(),
+    f95_url: String(display?.url || entry?.url || "").trim(),
+    discord_url: String(entry?.discordlink || "").trim(),
+  });
+
+  const refresh = async (me) => {
+    if (!me) {
+      box.style.display = "none";
+      watchlistSetMsg("", true);
+      return;
+    }
+
+    box.style.display = "";
+    setWatchlistButton(false, true);
+    watchlistSetMsg("", true);
+    try {
+      const data = await watchlistApi("GET", counterKey);
+      inList = !!data.in_watchlist;
+      setWatchlistButton(inList, false);
+      watchlistSetMsg(inList ? "Ce jeu est dans ta Watchlist." : "", true);
+    } catch (err) {
+      setWatchlistButton(false, false);
+      watchlistSetMsg(err?.message || "Impossible de vérifier la Watchlist.", false);
+    }
+  };
+
+  const bindClick = () => {
+    if (bound) return;
+    bound = true;
+    btn.addEventListener("click", async () => {
+      if (!window.SiteAuth?.me) {
+        location.href = "/connexion/";
+        return;
+      }
+      setWatchlistButton(inList, true);
+      try {
+        if (inList) {
+          await watchlistApi("DELETE", { game_key: counterKey });
+          inList = false;
+          setWatchlistButton(false, false);
+          watchlistSetMsg("Retiré de ta Watchlist.", true);
+          return;
+        }
+        await watchlistApi("POST", payload());
+        inList = true;
+        setWatchlistButton(true, false);
+        watchlistSetMsg("Ajouté à ta Watchlist ✅", true);
+      } catch (err) {
+        setWatchlistButton(inList, false);
+        watchlistSetMsg(err?.message || "Erreur Watchlist.", false);
+      }
+    });
+  };
+
+  bindClick();
+  if (window.SiteAuth?.onChange) window.SiteAuth.onChange(refresh);
+  if (window.SiteAuth?.loaded) refresh(window.SiteAuth.me);
+  else document.addEventListener("DOMContentLoaded", () => refresh(window.SiteAuth?.me || null));
+}
+
+
+// ============================================================================
+// ✅ Ordre des blocs côté droit
+// ============================================================================
+// Force l'ordre : Watchlist -> Like -> Note.
+// Ça évite que le bloc note reste au-dessus si le HTML est reconstruit ou mis en cache.
+function normalizeSidePanelOrder() {
+  try {
+    const side = document.querySelector(".gameSidePanel");
+    const likeBox = document.getElementById("likeBox");
+    const ratingBox = document.getElementById("ratingBox");
+    if (!side || !likeBox || !ratingBox) return;
+    if (likeBox.parentElement !== side) side.appendChild(likeBox);
+    if (ratingBox.parentElement !== side) side.appendChild(ratingBox);
+    side.insertBefore(likeBox, ratingBox);
+  } catch {}
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", normalizeSidePanelOrder);
+} else {
+  normalizeSidePanelOrder();
+}
+
+// ====== Rating 4 ======
+
+const RATING4_LABELS = {
+  1: "Traduction à refaire",
+  2: "Traduction avec des défauts",
+  3: "Traduction correcte",
+  4: "Bonne traduction",
+};
+
+async function rating4Get(id) {
+  const r = await fetch(`/api/rating4?op=get&id=${encodeURIComponent(id)}`, { cache: "no-store" });
+  if (!r.ok) throw new Error("rating4 get HTTP " + r.status);
+  return await r.json();
+}
+
+async function rating4Vote(id, v, prev) {
+  const qs = new URLSearchParams({
+    op: "vote",
+    id: String(id),
+    v: String(v),
+    prev: String(prev || 0),
+  });
+  const r = await fetch(`/api/rating4?${qs.toString()}`, { cache: "no-store" });
+  if (!r.ok) throw new Error("rating4 vote HTTP " + r.status);
+  return await r.json();
+}
+
+function getMyVote4(gameId) {
+  if (isConnectedUser() && connectedGameState && connectedGameState.game_key === gameId) {
+    const v = Number(connectedGameState.rating || 0);
+    return Number.isFinite(v) ? v : 0;
+  }
+  try {
+    const v = Number(localStorage.getItem(`rating4_${gameId}`) || "0");
+    return Number.isFinite(v) ? v : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function setMyVote4(gameId, v) {
+  if (isConnectedUser()) {
+    connectedGameState = { ...(connectedGameState || {}), game_key: gameId, rating: Number(v || 0) };
+    return;
+  }
+  try {
+    localStorage.setItem(`rating4_${gameId}`, String(v));
+  } catch {}
+}
+
+function setRatingVisibleForConnected(visible) {
+  const box = $("ratingBox");
+  const statWrap = $("statRatingWrap");
+  const choices = $("ratingChoices");
+  const msgEl = $("ratingMsg");
+  const isVisible = !!visible;
+
+  // Sert aussi aux cartes "Du même auteur" et "Jeux similaires".
+  // Par défaut, les notes restent masquées tant que le compte connecté n'est pas confirmé.
+  window.__GAME_RATING_VISIBLE = isVisible;
+  try {
+    document.documentElement.classList.toggle("game-rating-visible", isVisible);
+    document.documentElement.classList.toggle("game-rating-hidden", !isVisible);
+  } catch {}
+
+  if (box) box.style.display = isVisible ? "" : "none";
+  if (statWrap) statWrap.style.display = isVisible ? "" : "none";
+
+  if (!isVisible) {
+    if (choices) choices.innerHTML = "";
+    if (msgEl) msgEl.textContent = "";
+    setStatRating(0, 0);
+  }
+}
+
+async function refreshConnectedRatingBox(gameId) {
+  await waitForAuthReady();
+
+  if (!isConnectedUser()) {
+    setRatingVisibleForConnected(false);
+    return;
+  }
+
+  setRatingVisibleForConnected(true);
+  try {
+    const stateData = await userGameStateApi('GET', gameId);
+    connectedGameState = stateData?.state || { game_key: gameId, liked: getMyLike(gameId), rating: 0 };
+    if (stateData?.rating_stats) {
+      renderRating4UI(gameId, stateData.rating_stats);
+      return;
+    }
+  } catch {}
+
+  try {
+    const j = await rating4Get(gameId);
+    if (j?.ok) renderRating4UI(gameId, j);
+  } catch {}
+}
+
+function initConnectedOnlyRating(gameId) {
+  if (!gameId) return;
+  refreshConnectedRatingBox(gameId);
+  if (window.SiteAuth?.onChange) {
+    window.SiteAuth.onChange(() => refreshConnectedRatingBox(gameId));
+  }
+}
+
+
+function renderRating4UI(gameId, data) {
+  const choices = $("ratingChoices");
+  const avgEl = $("ratingAvg");
+  const countEl = $("ratingCount");
+  const msgEl = $("ratingMsg");
+  if (!choices || !avgEl || !countEl) return;
+
+  const avg = Number(data?.avg) || 0;
+  const count = Number(data?.count) || 0;
+  const myVote = getMyVote4(gameId);
+
+  avgEl.textContent = avg > 0 ? avg.toFixed(1) + "/4" : "—";
+  countEl.textContent = String(count);
+  setStatRating(avg, count);
+
+  choices.innerHTML = "";
+
+  const setVisual = (hoverValue) => {
+    const v =
+      hoverValue === 0 || typeof hoverValue === "number" ? hoverValue : getMyVote4(gameId) || 0;
+
+    [...choices.querySelectorAll(".ratingStar")].forEach((btn, idx) => {
+      btn.textContent = idx + 1 <= v ? "★" : "☆";
+    });
+  };
+
+  const restoreMsg = () => {
+    const v = getMyVote4(gameId);
+    if (!msgEl) return;
+    msgEl.textContent = v
+      ? `Ta note : ${v}/4 — ${RATING4_LABELS[v]} (tu peux changer ta note)`
+      : "Clique sur les étoiles pour noter la traduction.";
+  };
+
+  if (myVote) {
+    const cancel = document.createElement("button");
+    cancel.type = "button";
+    cancel.className = "ratingCancel";
+    cancel.textContent = "🗑️";
+    cancel.setAttribute("aria-label", "Annuler ma note");
+
+    cancel.addEventListener("mouseenter", () => {
+      setVisual(0);
+      if (msgEl) msgEl.textContent = "Annuler ma note";
+    });
+    cancel.addEventListener("mouseleave", () => {
+      setVisual(null);
+      restoreMsg();
+    });
+
+    cancel.addEventListener("click", async () => {
+      const prev = getMyVote4(gameId);
+      if (!prev) return;
+      try {
+        const res = isConnectedUser()
+          ? await userGameStateApi('POST', buildUserGamePayload({ rating: 0 }))
+          : await rating4Vote(gameId, 0, prev);
+        const stats = isConnectedUser() ? res?.rating_stats : res;
+        if (res?.ok && stats) {
+          if (isConnectedUser()) {
+            connectedGameState = res?.state || { game_key: gameId, liked: getMyLike(gameId), rating: 0 };
+            setMyVote4(gameId, 0);
+          } else {
+            try { localStorage.removeItem(`rating4_${gameId}`); } catch {}
+          }
+          renderRating4UI(gameId, stats);
+          if (msgEl) msgEl.textContent = "Note supprimée ✅";
+        }
+      } catch {
+        if (msgEl) msgEl.textContent = "Erreur lors de l’annulation.";
+      }
+    });
+
+    choices.appendChild(cancel);
+  }
+
+  for (let i = 1; i <= 4; i++) {
+    const star = document.createElement("button");
+    star.type = "button";
+    star.className = "ratingStar";
+    star.textContent = "☆";
+    star.setAttribute("aria-label", `${i}/4 — ${RATING4_LABELS[i]}`);
+
+    star.addEventListener("mouseenter", () => {
+      setVisual(i);
+      if (msgEl) msgEl.textContent = `${i}/4 — ${RATING4_LABELS[i]}`;
+    });
+    star.addEventListener("mouseleave", () => {
+      setVisual(null);
+      restoreMsg();
+    });
+
+    star.addEventListener("click", async () => {
+      const prev = getMyVote4(gameId);
+      if (prev === i) {
+        if (msgEl) msgEl.textContent = "C’est déjà ta note actuelle ✅";
+        return;
+      }
+      try {
+        const res = isConnectedUser()
+          ? await userGameStateApi('POST', buildUserGamePayload({ rating: i }))
+          : await rating4Vote(gameId, i, prev);
+        const stats = isConnectedUser() ? res?.rating_stats : res;
+        if (res?.ok && stats) {
+          if (isConnectedUser()) connectedGameState = res?.state || { game_key: gameId, liked: getMyLike(gameId), rating: i };
+          setMyVote4(gameId, i);
+          renderRating4UI(gameId, stats);
+          if (msgEl) msgEl.textContent = prev ? "Note modifiée ✅" : "Merci pour ton vote ⭐";
+        }
+      } catch {
+        if (msgEl) msgEl.textContent = "Erreur lors du vote.";
+      }
+    });
+
+    choices.appendChild(star);
+  }
+
+  setVisual(null);
+  restoreMsg();
+}
+
+// =========================
+// ✅ Blocs nouveaux champs
+// =========================
+
+function ensureBlockAfter(anchorEl, id) {
+  if (!anchorEl || !anchorEl.parentNode) return null;
+
+  let el = document.getElementById(id);
+  if (!el) {
+    el = document.createElement("div");
+    el.id = id;
+    anchorEl.parentNode.insertBefore(el, anchorEl.nextSibling);
+  }
+  return el;
+}
+
+function renderVideoBlock({ id, videoUrl }) {
+  const u = (videoUrl || "").trim();
+  if (!u) {
+    show(id, false);
+    return;
+  }
+  setHtml(
+    id,
+    `
+    <div class="game-block">
+      <iframe
+        src="${escapeHtml(u)}"
+        referrerpolicy="strict-origin-when-cross-origin"
+        style="width:100%; aspect-ratio:16/9; border-radius:12px; border:1px solid var(--border);"
+        loading="lazy"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen>
+      </iframe>
+    </div>
+  `
+  );
+  show(id, true);
+}
+
+// ====== Main ======
+
+(async function main() {
+  try {
+    initHamburgerMenu();
+
+    const { id: idParam, uid: uidParam } = getParamsFromUrl();
+
+    if (!idParam && !uidParam) {
+      showError(
+        "Aucun paramètre dans l’URL. Exemples : /game/?id=215277  ou  /game/?id=17373&uid=898  ou  /game/?uid=898"
+      );
+      return;
+    }
+
+    const listUrl = getListUrl();
+    const raw = await fetchJson(listUrl);
+    const list = extractGames(raw);
+
+    const page = resolveGamePage({ id: idParam, uid: uidParam }, list);
+
+    if (page.kind === "notfound") {
+      showError(`Jeu introuvable (id=${idParam || "-"} uid=${uidParam || "-"}) dans f95list.json`);
+      return;
+    }
+
+    let entry = page.entry;
+    const privateLinksKey = buildPrivateLinksKey(entry);
+    const privateGameData = await fetchPrivateGameData(privateLinksKey);
+    entry = mergePrivateGameData(entry, privateGameData);
+    const discordExclusive = isDiscordExclusive(entry);
+    const downloadStat = $("statMegaClicks")?.closest(".statsItem");
+    if (downloadStat) downloadStat.style.display = discordExclusive ? "none" : "";
+    if (page && typeof page === "object") page.entry = entry;
+
+    const display = entry?.gameData ? entry.gameData : entry;
+
+    const counterKey = buildCounterKeyFromEntry(entry);
+
+    const isCollectionChild = page.kind === "collectionChild" && entry && entry.gameData;
+
+    const title = (getDisplayTitle(entry) || getDisplayTitle(display) || `Jeu ${idParam || uidParam}`).trim();
+    window.__currentGameAccountMeta = {
+      game_key: counterKey,
+      title,
+      game_url: getWatchlistGameUrl(idParam, uidParam),
+      image_url: String(display?.imageUrl || entry?.imageUrl || '').trim(),
+      f95_url: String(display?.url || entry?.url || '').trim(),
+      discord_url: String(entry?.discordlink || '').trim(),
+    };
+    document.title = title;
+
+    setText("title", title);
+    if ($("discordExclusiveNotice")) $("discordExclusiveNotice").hidden = !discordExclusive;
+    if (discordExclusive) {
+      const actions = document.querySelector(".gameActionsCard");
+      actions?.classList.add("discord-exclusive-actions");
+      const heading = actions?.querySelector("h3");
+      const intro = actions?.querySelector(".sideIntro");
+      if (heading) heading.textContent = "Discord & F95Zone";
+      if (intro) intro.textContent = "Retrouve cette traduction exclusivement sur Discord.";
+    }
+    setCover(display.imageUrl || entry.imageUrl || "");
+    loadF95Gallery(display.url || entry.url || "", display.imageUrl || entry.imageUrl || "", entry.cloudflareImages);
+    renderTags(display.tags || entry.tags || []);
+
+    renderBadgesFromGame(display, entry, isCollectionChild);
+    renderTranslationStatus(entry);
+    initWatchlistForGame({ entry, display, title, counterKey, idParam, uidParam });
+    if (window.CreatorFeature?.renderGameCard) {
+      await window.CreatorFeature.renderGameCard(entry);
+    }
+
+    const relatedOut = ensureRelatedContainer();
+    if (relatedOut) {
+      const parts = [];
+
+      if (page.kind === "collectionParent") {
+        parts.push(renderCollectionBlockForParent(entry, page.children));
+      } else if (page.kind === "collectionChild") {
+        parts.push(renderCollectionBlockForChild(page.parent));
+      }
+
+      const seriesIndex = buildSeriesIndex(list);
+      const pageRefs = getCurrentPageRefs({ kind: page.kind, idParam: idParam, uidParam: uidParam, entry });
+      const seriesList = getSeriesForCurrentPage(pageRefs, seriesIndex);
+
+      let canonicalKey = "";
+      if (page.kind === "collectionChild") canonicalKey = `c:${page.idParam}|u:${page.uidParam}`;
+      else if (entry?.id) canonicalKey = `id:${String(entry.id).trim()}`;
+      else canonicalKey = `uid:${String(entry.uid).trim()}`;
+
+      parts.push(renderSeriesBlocks(seriesList, list, canonicalKey));
+
+      relatedOut.innerHTML = parts.filter(Boolean).join("");
+    }
+
+    const mainInfoBox = document.getElementById("mainInfoBox");
+    const descInnerBox = document.getElementById("descInnerBox");
+    const descTextEl = document.getElementById("descriptionText");
+
+    const description = (entry.description || "").trim();
+
+    if (mainInfoBox) {
+      const hasTags =
+        Array.isArray(display.tags || entry.tags) &&
+        (display.tags || entry.tags).length > 0;
+
+      const hasDesc = !!description;
+
+      if (descTextEl) {
+        descTextEl.innerHTML = hasDesc ? escapeHtml(description).replace(/\n/g, "<br>") : "";
+      }
+
+      if (descInnerBox) {
+        descInnerBox.style.display = hasDesc ? "" : "none";
+      }
+
+      mainInfoBox.style.display = (hasTags || hasDesc || !!entry.f95Info) ? "" : "none";
+    }
+
+    renderF95InfoBlock(entry.f95Info || null, discordExclusive);
+
+    const videoAnchor =
+      (relatedOut && relatedOut.innerHTML.trim())
+        ? relatedOut
+        : mainInfoBox;
+
+    const videoHost = ensureBlockAfter(videoAnchor, "videoHost");
+    renderVideoBlock({
+      id: "videoHost",
+      videoUrl: (entry.videoUrl || "").trim(),
+    });
+
+    const discordHref = String(entry.discordlink || (entry.hasDiscord && privateLinksKey
+      ? `/api/link?key=${encodeURIComponent(privateLinksKey)}&type=discordlink` : "")).trim();
+    setHref("btnDiscord", discordHref);
+    if ($("btnDiscord")) {
+      $("btnDiscord").textContent = "💬 Discord";
+      $("btnDiscord").classList.add("btn-discord");
+    }
+
+    setHref("btnF95", (entry.url || "").trim());
+    if ($("btnF95")) {
+      $("btnF95").innerHTML = '<span class="f95-logo"><span class="f95-white">F95</span><span class="f95-red">Zone</span></span>';
+      $("btnF95").classList.add("btn-f95");
+    }
+
+    const archiveHref = discordExclusive ? "" : (entry.translationsArchive || "").trim();
+    const translationType = String(entry.translationType || "").trim().toLowerCase();
+
+    function normalizeMainTranslationsForDisplay(source) {
+      if (!source || typeof source !== "object") return [];
+
+      const fromApi = Array.isArray(source.mainTranslations)
+        ? source.mainTranslations
+            .map((item, position) => {
+              if (!item || typeof item !== "object") return null;
+              const link = String(item.link || item.url || "").trim();
+              if (!link) return null;
+              const index = Number(item.index) || (position + 1);
+              return {
+                index,
+                title: String(item.title || item.name || "").trim(),
+                host: String(item.host || "").trim(),
+                link,
+              };
+            })
+            .filter(Boolean)
+        : [];
+
+      const list = fromApi.length ? fromApi : Object.entries(source)
+        .map(([field, rawValue]) => {
+          const match = String(field).match(/^translation(\d*)$/);
+          if (!match) return null;
+          const index = match[1] ? Number(match[1]) : 1;
+          if (!Number.isFinite(index) || index < 1) return null;
+          const link = String(rawValue || "").trim();
+          if (!link) return null;
+          const titleKey = index === 1 ? "translationTitle" : `translation${index}Title`;
+          const nameKey = index === 1 ? "translationName" : `translation${index}Name`;
+          const legacyTitleKey = `translationTitle${index}`;
+          return {
+            index,
+            title: String(source[titleKey] || source[nameKey] || source[legacyTitleKey] || "").trim(),
+            host: "",
+            link,
+          };
+        })
+        .filter(Boolean);
+
+      list.sort((a, b) => a.index - b.index);
+      const multiple = list.length > 1;
+      return list.map((item, position) => ({
+        ...item,
+        title: item.title || (multiple ? `Traduction ${position + 1}` : ""),
+      }));
+    }
+
+    const mainTranslations = discordExclusive ? [] : normalizeMainTranslationsForDisplay(entry);
+    if(!discordExclusive && entry.cloudflareTranslation)mainTranslations.push({index:mainTranslations.length+1,title:'Traduction · secours Cloudflare',host:'Cloudflare R2',link:entry.cloudflareTranslation});
+    const primaryMainTranslation = mainTranslations[0] || null;
+    const megaHref = primaryMainTranslation ? primaryMainTranslation.link : "";
+
+    function getTranslationTypeMeta(typeValue) {
+      const t = String(typeValue || "").trim().toLowerCase();
+      if (t === "auto rapide") {
+        return { title: "⚡ Traduction auto", note: "Version pour essayer vite fait !" };
+      }
+      if (t === "auto avec correction") {
+        return { title: "🤖 Traduction automatique avec correction", note: "Version pré-corrigée en automatique." };
+      }
+      if (t === "par ia") {
+        return { title: "🤖 Traduction automatique par IA", note: "Version traduite automatiquement par IA." };
+      }
+      if (t === "auto avec relecture") {
+        return { title: "👀 Traduction automatique avec relecture", note: "Version pré-relue manuellement." };
+      }
+      if (t === "manuel - humaine") {
+        return { title: "✍️ Traduction manuelle", note: "Version humaine." };
+      }
+      if (t === "vo française") {
+        return { title: "🇫🇷 Version française", note: "Français inclus de base." };
+      }
+      if (t === "a tester") {
+        return { title: "🧪 Version à tester", note: "À vérifier" };
+      }
+      return null;
+    }
+
+    const mainTranslationTypeMeta = getTranslationTypeMeta(translationType);
+    const isMainQuickAuto = !!mainTranslationTypeMeta;
+
+    function normalizeHostHint(hostHint) {
+      const h = String(hostHint || "").trim().toLowerCase();
+      if (!h) return "";
+      if (h.includes("mega")) return "MEGA";
+      if (h.includes("gofile")) return "Gofile";
+      if (h.includes("drive") || h.includes("google")) return "Google Drive";
+      if (h.includes("f95")) return "F95Zone";
+      return String(hostHint || "").trim();
+    }
+
+    function getHostClass(url, hostHint = ""){
+      const hint = normalizeHostHint(hostHint).toLowerCase();
+      if (hint === "mega") return "btnMega";
+      if (hint === "f95zone") return "btn-f95";
+      if (hint === "google drive") return "btn-host-drive";
+      if (hint === "gofile") return "btn-host-gofile";
+
+      const u = (url || "").toLowerCase();
+      if (u.includes("mega.nz")) return "btnMega";
+      if (u.includes("f95zone")) return "btn-f95";
+      if (u.includes("drive.google")) return "btn-host-drive";
+      if (u.includes("gofile")) return "btn-host-gofile";
+      if (u.includes("/api/link") && (u.includes("type=translation") || u.includes("type=translationsextra") || u.includes("type=translationsarchive"))) return "btnMega";
+      return "btn-host-default";
+    }
+
+    function getHostLabel(url, fallbackName = "Lien", hostHint = "") {
+      const normalizedHint = normalizeHostHint(hostHint);
+      if (normalizedHint) return normalizedHint;
+      const hostCls = getHostClass(url);
+      if (hostCls === "btnMega") return "MEGA";
+      if (hostCls === "btn-host-gofile") return "Gofile";
+      if (hostCls === "btn-host-drive") return "Google Drive";
+      if (hostCls === "btn-f95") return "F95Zone";
+      return String(fallbackName || "Lien").trim() || "Lien";
+    }
+
+    function setTranslationButtonContent(button, item) {
+      if (!button || !item) return;
+      const link = String(item.link || "").trim();
+      const titleText = String(item.title || "").trim();
+      const hostLabel = getHostLabel(link, "Lien", item.host);
+      const hostCls = getHostClass(link, item.host);
+
+      button.classList.add("translationMainLinkBtn");
+      if (button.id !== "btnMega") button.classList.add(hostCls);
+      button.target = "_blank";
+      button.rel = "noopener";
+      button.href = link;
+      button.style.display = "";
+      button.textContent = "";
+
+      const mainLine = document.createElement("span");
+      mainLine.className = "translationDownloadLine";
+      mainLine.appendChild(document.createTextNode("📥 Télécharger la traduction · "));
+
+      if (hostCls === "btn-f95" && /f95\s*zone/i.test(hostLabel)) {
+        const logo = document.createElement("span");
+        logo.className = "f95-logo";
+        const white = document.createElement("span");
+        white.className = "f95-white";
+        white.textContent = "F95";
+        const red = document.createElement("span");
+        red.className = "f95-red";
+        red.textContent = "Zone";
+        logo.appendChild(white);
+        logo.appendChild(red);
+        mainLine.appendChild(logo);
+      } else {
+        mainLine.appendChild(document.createTextNode(hostLabel));
+      }
+
+      button.appendChild(mainLine);
+
+      if (titleText) {
+        const title = document.createElement("span");
+        title.className = "translationLinkTitle";
+        title.textContent = titleText;
+        button.appendChild(title);
+      }
+    }
+
+    function createMainTranslationButton(item) {
+      const a = document.createElement("a");
+      a.className = "btnLike extraLinkBtn mainTranslationExtraBtn";
+      a.style.width = "auto";
+      a.style.margin = "0 auto";
+      a.style.justifyContent = "center";
+      setTranslationButtonContent(a, item);
+      a.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        return false;
+      });
+      return a;
+    }
+
+    setHref("btnMega", megaHref);
+    const megaBtn = document.getElementById("btnMega");
+    if (megaBtn && primaryMainTranslation) {
+      setTranslationButtonContent(megaBtn, primaryMainTranslation);
+    }
+
+    function createQuickAutoTile(link, fallbackName, extraClassName = "extraLinkBtn") {
+      const hostCls = getHostClass(link);
+      const tile = document.createElement("div");
+      tile.className = `${extraClassName} quickAutoTile`;
+
+      const tileMeta = getTranslationTypeMeta(fallbackName) || getTranslationTypeMeta("auto rapide") || {
+        title: "⚡ Traduction auto",
+        note: "Version pour essayer vite fait !"
+      };
+
+      const title = document.createElement("div");
+      title.className = "quickAutoTitleRow";
+      title.textContent = tileMeta.title;
+
+      const a = document.createElement("a");
+      a.className = `btnLike ${hostCls} extraLinkBtn`;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.href = link;
+      a.style.width = "auto";
+      a.style.margin = "0 auto";
+      a.style.justifyContent = "center";
+      a.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        return false;
+      });
+
+      const quickHostLabel = getHostLabel(link, fallbackName);
+      if (hostCls === "btn-f95") {
+        a.innerHTML = `📥 Télécharger la traduction · <span class="f95-logo"><span class="f95-white">F95</span><span class="f95-red">Zone</span></span>`;
+      } else {
+        a.textContent = `📥 Télécharger la traduction · ${quickHostLabel}`;
+      }
+
+      const note = document.createElement("div");
+      note.className = "quickAutoSub";
+      note.textContent = tileMeta.note;
+
+      tile.appendChild(title);
+      tile.appendChild(a);
+      tile.appendChild(note);
+      return tile;
+    }
+
+    const extraRaw = discordExclusive ? [] : entry.translationsExtra;
+    const extraList = Array.isArray(extraRaw) ? extraRaw : (extraRaw ? [extraRaw] : []);
+    const extraValid = extraList
+      .map(x => {
+        if (!x) return null;
+        if (typeof x === "string") {
+          const u = x.trim();
+          return u ? { name: "Lien", link: u } : null;
+        }
+        if (typeof x !== "object") return null;
+        const name = String(x.name || "Lien").trim();
+        const link = String(x.link || x.url || "").trim();
+        const host = String(x.host || "").trim();
+        return link ? { name, link, host } : null;
+      })
+      .filter(Boolean);
+
+    const hasQuickAutoExtra = extraValid.some(x => String(x.name || "").trim().toLowerCase() === "traduction auto rapide");
+    const megaRow = document.querySelector(".btnMainRow");
+
+    if (hasQuickAutoExtra && megaBtn) {
+      megaBtn.removeAttribute("href");
+      megaBtn.style.display = "none";
+    }
+
+    const visibleMainTranslations = hasQuickAutoExtra ? mainTranslations.filter(item=>item.host==='Cloudflare R2') : mainTranslations;
+    const hasMain = visibleMainTranslations.length > 0;
+    const hasExtra = extraValid.length > 0;
+
+    if (megaRow) {
+      const oldMainCol = megaRow.querySelector(".mainTranslationsCol");
+      if (oldMainCol && megaBtn && oldMainCol.contains(megaBtn)) {
+        megaRow.insertBefore(megaBtn, oldMainCol);
+      }
+      if (oldMainCol) oldMainCol.remove();
+
+      const oldMainQuickAutoTile = megaRow.querySelector(".mainQuickAutoTile");
+      if (oldMainQuickAutoTile && megaBtn && oldMainQuickAutoTile.contains(megaBtn)) {
+        megaRow.insertBefore(megaBtn, oldMainQuickAutoTile);
+      }
+      if (oldMainQuickAutoTile) oldMainQuickAutoTile.remove();
+
+      [...megaRow.querySelectorAll(".extraLinkBtn")].forEach(el => el.remove());
+      const oldWrap = megaRow.querySelector(".extraLinksCol");
+      if (oldWrap) oldWrap.remove();
+
+      if (!hasMain && !hasExtra) {
+        megaRow.style.display = "none";
+      } else {
+        megaRow.style.display = "flex";
+
+        const needsColumnLayout = hasExtra || visibleMainTranslations.length > 1 || (hasMain && isMainQuickAuto);
+
+        if (!needsColumnLayout) {
+          megaRow.style.flexDirection = "row";
+          megaRow.style.flexWrap = "wrap";
+          megaRow.style.gap = "0";
+          megaRow.style.alignItems = "center";
+          megaRow.style.justifyContent = "center";
+
+          if (megaBtn && hasMain) {
+            megaBtn.style.display = "";
+            megaBtn.style.width = "auto";
+            megaBtn.style.margin = "0 auto";
+            setTranslationButtonContent(megaBtn, visibleMainTranslations[0]);
+          }
+        } else {
+          megaRow.style.flexDirection = "column";
+          megaRow.style.flexWrap = "nowrap";
+          megaRow.style.gap = "10px";
+          megaRow.style.alignItems = "stretch";
+          megaRow.style.justifyContent = "flex-start";
+
+          if (hasMain) {
+            const mainCol = document.createElement("div");
+            mainCol.className = "mainTranslationsCol";
+
+            if (megaBtn) {
+              megaBtn.style.display = "";
+              megaBtn.style.width = "100%";
+              megaBtn.style.margin = "0";
+              setTranslationButtonContent(megaBtn, visibleMainTranslations[0]);
+              mainCol.appendChild(megaBtn);
+            }
+
+            visibleMainTranslations.slice(1).forEach((item) => {
+              mainCol.appendChild(createMainTranslationButton(item));
+            });
+
+            if (isMainQuickAuto) {
+              const mainTile = document.createElement("div");
+              mainTile.className = "mainQuickAutoTile quickAutoTile";
+
+              const title = document.createElement("div");
+              title.className = "quickAutoTitleRow";
+              title.textContent = mainTranslationTypeMeta.title;
+
+              const note = document.createElement("div");
+              note.className = "quickAutoSub";
+              note.textContent = mainTranslationTypeMeta.note;
+
+              mainTile.appendChild(title);
+              mainTile.appendChild(mainCol);
+              mainTile.appendChild(note);
+              megaRow.appendChild(mainTile);
+            } else {
+              megaRow.appendChild(mainCol);
+            }
+          }
+
+          if (hasExtra) {
+            const wrap = document.createElement("div");
+            wrap.className = "extraLinksCol";
+            wrap.style.display = "flex";
+            wrap.style.flexDirection = "column";
+            wrap.style.gap = "10px";
+            wrap.style.alignItems = "center";
+            wrap.style.width = "auto";
+
+            megaRow.appendChild(wrap);
+
+            extraValid.forEach((x) => {
+              const name = String(x.name || "Lien").trim();
+              const link = String(x.link || "").trim();
+              const hostCls = getHostClass(link, x.host);
+              const isQuickAuto = name.toLowerCase() === "traduction auto rapide";
+
+              if (isQuickAuto) {
+                wrap.appendChild(createQuickAutoTile(link, name));
+                return;
+              }
+
+              const a = document.createElement("a");
+              a.className = `btnLike ${hostCls} extraLinkBtn`;
+              a.target = "_blank";
+              a.rel = "noopener";
+              a.href = link;
+
+              a.style.width = "auto";
+              a.style.margin = "0 auto";
+              a.style.justifyContent = "center";
+
+              if (name.toLowerCase() === "patch") {
+                a.textContent = "📥 Télécharger · Patch";
+              } else {
+                // Les liens privés passent par /api/link, donc le host devient masqué.
+                // Pour les traductions supplémentaires, on garde en priorité le nom défini dans le JSON.
+                const rawName = String(name || "").trim();
+                const labelName = (rawName && rawName.toLowerCase() !== "lien")
+                  ? rawName
+                  : (String(x.host || rawName || "Lien").trim() || "Lien");
+
+                if (hostCls === "btn-f95" && /f95\s*zone/i.test(labelName)) {
+                  a.innerHTML = `📥 Télécharger la traduction · <span class="f95-logo"><span class="f95-white">F95</span><span class="f95-red">Zone</span></span>`;
+                } else {
+                  a.textContent = `📥 Télécharger la traduction · ${labelName}`;
+                }
+              }
+
+              wrap.appendChild(a);
+            });
+          }
+        }
+      }
+    }
+
+
+    const notes = (entry.notes || "").trim();
+    if (notes) {
+      let notesHtml = formatRichText(notes);
+      if (discordExclusive) {
+        const template = document.createElement("template");
+        template.innerHTML = notesHtml;
+        for (const link of template.content.querySelectorAll("a")) {
+          const label = link.textContent || "";
+          link.replaceWith(document.createTextNode(/^https?:\/\//i.test(label) ? "" : label));
+        }
+        notesHtml = template.innerHTML;
+      }
+      setHtml("notesText", notesHtml);
+      show("notesBox", true);
+    } else {
+      show("notesBox", false);
+    }
+
+    setHref("archiveLink", archiveHref);
+    if ($("archiveLink")) $("archiveLink").textContent = "📦 Archives de la traduction";
+
+    const ab = $("archiveBox");
+    if (ab) ab.style.display = archiveHref ? "flex" : "none";
+
+    const archiveLink = document.getElementById("archiveLink");
+    if (archiveLink) {
+      archiveLink.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        return false;
+      });
+    }
+
+    // ✅ key unique uid-only
+    const analyticsKey = counterKey;
+
+    setStatMeta(entry);
+
+    // ✅ IMPORTANT : initCounters après création des extraLinkBtn → maintenant ça compte aussi
+    await initCounters(counterKey, megaHref, archiveHref);
+
+    const btnMega2 = document.getElementById("btnMega");
+    if (btnMega2) {
+      btnMega2.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        return false;
+      });
+    }
+
+    setRatingVisibleForConnected(false);
+    initConnectedOnlyRating(analyticsKey);
+
+    try {
+      if (window.GameRelated && typeof window.GameRelated.render === "function") {
+        await window.GameRelated.render({
+          list,
+          page,
+          entry,
+          display,
+          currentTitle: title,
+          buildGameUrl,
+          getDisplayTitle
+        });
+      }
+    } catch (e) {
+      console.warn("GameRelated.render failed", e);
+    }
+
+    replaceFlagEmojis(document.body);
+
+  } catch (e) {
+    showError(`Erreur: ${e?.message || e}`);
+  }
+})();

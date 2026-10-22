@@ -1406,28 +1406,7 @@
   }
 
   async function fetchJsonWithDefaultBackup(url) {
-    const primaryUrl = String(url || DEFAULT_URL).trim() || DEFAULT_URL;
-    try {
-      const r = await fetch(primaryUrl, { cache: "no-store" });
-      if (!r.ok) throw new Error("HTTP " + r.status);
-      console.log("✅ f95list chargée depuis GitHub");
-      return await r.json();
-    } catch (err) {
-      if (primaryUrl !== DEFAULT_URL) throw err;
-      console.warn("⚠️ GitHub bloqué ou indisponible, chargement via Cloudflare…", err);
-      try {
-        const backup = await fetch(DEFAULT_BACKUP_URL, { cache: "no-store" });
-        if (!backup.ok) throw new Error("Cloudflare fallback HTTP " + backup.status);
-        console.log("✅ f95list chargée via Cloudflare API");
-        return await backup.json();
-      } catch (apiErr) {
-        console.warn("⚠️ API Cloudflare indisponible, chargement de /data/f95list.json…", apiErr);
-        const staticBackup = await fetch(DEFAULT_STATIC_BACKUP_URL, { cache: "no-store" });
-        if (!staticBackup.ok) throw new Error("Cloudflare data fallback HTTP " + staticBackup.status);
-        console.log("✅ f95list chargée depuis /data/f95list.json");
-        return await staticBackup.json();
-      }
-    }
+    return SiteDataSources.loadList(url || DEFAULT_URL);
   }
 
   async function loadList() {

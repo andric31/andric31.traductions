@@ -1644,7 +1644,7 @@ async function init() {
 
   let raw;
   try {
-    raw = await fetchJson(state.srcUrl);
+    raw = await SiteDataSources.loadList(state.srcUrl);
   } catch (e) {
     if (els.statusChart) els.statusChart.textContent = "Erreur: impossible de charger la liste";
     if (els.statusTable) els.statusTable.textContent = "Erreur: impossible de charger la liste";

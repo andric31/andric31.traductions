@@ -73,7 +73,7 @@
     const search=$('search').value.trim().toLocaleLowerCase('fr'),kind=$('filter').value,sort=$('sort').value;
     return state.entries.filter(e=>(kind==='all'||e.kind===kind)&&(!search||nameOf(e).toLocaleLowerCase('fr').includes(search))).sort((a,b)=>{
       if(a.folder!==b.folder)return a.folder?-1:1;
-      if(sort==='date'&&!a.folder)return (+new Date(b.uploaded)||0)-(+new Date(a.uploaded)||0)||collator.compare(nameOf(a),nameOf(b));
+      if(sort==='date')return (+new Date(b.uploaded)||0)-(+new Date(a.uploaded)||0)||collator.compare(nameOf(a),nameOf(b));
       if(sort==='size'&&!a.folder)return b.size-a.size||collator.compare(nameOf(a),nameOf(b));
       return collator.compare(nameOf(a),nameOf(b))*(sort==='name-desc'?-1:1);
     });
@@ -240,8 +240,8 @@
       const label=node('label','check'),check=node('input');check.type='checkbox';check.checked=state.selected.has(entry.key);check.setAttribute('aria-label','Sélectionner '+nameOf(entry));label.append(check);label.addEventListener('click',event=>{event.stopPropagation();});check.addEventListener('change',()=>select(entry,{toggle:true}));
       const more=node('button','icon-button more-button');more.title='Actions';more.setAttribute('aria-label','Actions pour '+nameOf(entry));more.append(icon('more'));more.onclick=event=>{event.stopPropagation();if(!state.selected.has(entry.key))select(entry);const rect=more.getBoundingClientRect();contextMenu(rect.right,rect.bottom,entry);};
       const name=node('span','entry-name',nameOf(entry));row.append(label);
-      if(state.view==='grid'){const info=node('div','entry-info'),meta=node('div','entry-meta');meta.append(node('span',entry.folder?'folder-status':'',entry.folder?folderLabel(entry):fmtSize(entry.size)),node('span','',entry.folder?'':shortDate(entry.uploaded)));info.append(name,meta);row.append(makeThumb(entry,index),info,more);}
-      else{const cell=node('div','list-name');cell.append(makeThumb(entry,index),name);row.append(cell,node('span','cell',entry.folder?'—':fmtSize(entry.size)),node('span','cell date',entry.folder?'—':fmtDate(entry.uploaded)),node('span','cell type'+(entry.folder?' folder-status':''),entry.folder?folderLabel(entry):kindName(entry.kind)),more);}
+      if(state.view==='grid'){const info=node('div','entry-info'),meta=node('div','entry-meta');meta.append(node('span',entry.folder?'folder-status':'',entry.folder?folderLabel(entry):fmtSize(entry.size)),node('span','entry-date',shortDate(entry.uploaded)));info.append(name,meta);row.append(makeThumb(entry,index),info,more);}
+      else{const cell=node('div','list-name');cell.append(makeThumb(entry,index),name);row.append(cell,node('span','cell',entry.folder?'—':fmtSize(entry.size)),node('span','cell date entry-date',fmtDate(entry.uploaded)),node('span','cell type'+(entry.folder?' folder-status':''),entry.folder?folderLabel(entry):kindName(entry.kind)),more);}
       row.addEventListener('click',event=>select(entry,event));row.addEventListener('dblclick',event=>{if(!event.target.closest('button,input,label'))openEntry(entry);});row.addEventListener('contextmenu',event=>{event.preventDefault();if(!state.selected.has(entry.key))select(entry);contextMenu(event.clientX,event.clientY,entry);});row.addEventListener('keydown',event=>{if(event.key===' '&&event.target===row){event.preventDefault();select(entry,{toggle:true});}});
       $('items').append(row);
     });
@@ -281,6 +281,36 @@
     }
   }
   function listingURL(prefix,cursor='',recursive=false){const p=new URLSearchParams({prefix});if(cursor)p.set('cursor',cursor);if(recursive)p.set('recursive','1');return API+'?'+p;}
+  async function refreshFolderDates(id,prefix){
+    const pending=state.entries.filter(entry=>entry.folder&&!entry.dateLoaded);
+    const current=()=>id===state.loadId&&prefix===state.prefix&&!state.busy;
+    // Deux parcours à la fois, sans retarder l'affichage ni développer l'arborescence.
+    async function worker(){
+      while(pending.length&&current()){
+        const entry=pending.shift(),seen=new Set();let cursor='',newest=0;
+        try{
+          do{
+            if(!current())return;
+            const data=await post({action:'folder-dates',prefix:entry.key,cursor});
+            if(!current())return;
+            if(data.prefix!==entry.key)throw Error('Dossier inattendu.');
+            newest=Math.max(newest,+new Date(data.uploaded)||0);
+            cursor=data.cursor||'';
+            if(cursor&&seen.has(cursor))throw Error('Lecture incomplète.');
+            seen.add(cursor);
+          }while(cursor);
+          entry.uploaded=newest?new Date(newest).toISOString():undefined;entry.dateLoaded=true;
+          for(const row of $('items').querySelectorAll('.entry')){
+            if(row.dataset.key!==entry.key)continue;
+            const date=row.querySelector('.entry-date');
+            if(date){date.textContent=state.view==='list'?fmtDate(entry.uploaded):shortDate(entry.uploaded);date.title=entry.uploaded?'Dernière modification dans ce dossier : '+new Date(entry.uploaded).toLocaleString('fr-FR'):'';}
+          }
+        }catch{} // Ne jamais présenter une date partielle comme le résultat définitif.
+      }
+    }
+    await Promise.all([worker(),worker()]);
+    if(current()&&$('sort').value==='date')render();
+  }
   async function load(append=false){
     const id=++state.loadId,prefix=state.prefix;state.loading=true;updateControls();$('items').setAttribute('aria-busy','true');status('Chargement du dossier…');
     try{
@@ -292,7 +322,7 @@
       const record=treeNode(prefix);
       if(!record.loading && (!record.loaded || !data.cursor)){record.children=state.entries.filter(e=>e.folder).map(e=>e.key).sort(collator.compare);record.loaded=!data.cursor;record.error='';}
     }catch(error){if(id!==state.loadId)return;state.entries=[];state.cursor=null;notice(error.message,'error');status('Chargement impossible.');}
-    finally{if(id===state.loadId){state.loading=false;$('items').setAttribute('aria-busy','false');render();void refreshFolderStatuses(id,prefix);}}
+    finally{if(id===state.loadId){state.loading=false;$('items').setAttribute('aria-busy','false');render();void refreshFolderStatuses(id,prefix);void refreshFolderDates(id,prefix);}}
   }
   async function refreshRoots(force=false){
     if(force)invalidateTree();

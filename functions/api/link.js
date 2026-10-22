@@ -2,6 +2,8 @@
 // Redirection protégée vers les liens privés d'un jeu.
 // Source privée : GitHub privé andric31/f95list_private_links/f95list_links.json
 import { getDiscordExclusivity } from './_discord_exclusive.js';
+import { validKey, category } from './_r2.js';
+import { preview } from './_r2_explorer.js';
 
 const DEFAULT_PRIVATE_OWNER = 'andric31';
 const DEFAULT_PRIVATE_REPO = 'f95list_private_links';
@@ -129,6 +131,17 @@ export async function onRequest(context) {
     if (!target) return json({ ok: false, error: 'Lien demandé introuvable' }, 404);
     if (!isAllowedUrl(target)) return json({ ok: false, error: 'Lien invalide' }, 400);
 
+    if(type === 'cloudflareTranslation') {
+      const stored=new URL(target),origin=new URL(request.url).origin;
+      if(stored.origin!==origin || !stored.pathname.startsWith('/medias/traductions/') || stored.search || stored.hash)
+        return json({ok:false,error:'Lien Cloudflare invalide'},400);
+      const objectKey=decodeURIComponent(stored.pathname.slice('/medias/'.length));
+      if(!validKey(objectKey)||category(objectKey)!=='archive')return json({ok:false,error:'Archive Cloudflare invalide'},400);
+      if(!context.env.MEDIA_BUCKET)return json({ok:false,error:'Cloudflare indisponible'},503);
+      // Same game authorization as every other translation, checked above.
+      // /medias/ itself remains restricted for archives; no public bypass.
+      return await preview(request,context.env.MEDIA_BUCKET,objectKey,true);
+    }
     return Response.redirect(target, 302);
   } catch (err) {
     return json({ ok: false, error: 'Impossible de récupérer le lien privé', detail: String(err?.message || err) }, 502);

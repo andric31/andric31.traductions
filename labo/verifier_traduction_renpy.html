@@ -373,6 +373,7 @@
       }
     }
   </style>
+  <script src="/list-sources.js?v=20261022-r2-secours"></script>
 </head>
 <body>
 
@@ -1443,9 +1444,13 @@
 
       for (const url of urls) {
         try {
-          const response = await fetch(url, { cache: "no-store" });
-          if (!response.ok) continue;
-          const data = await response.json();
+          let data;
+          if (url === DEFAULT_F95LIST_URL) data = await SiteDataSources.loadList(url);
+          else {
+            const response = await fetch(url, { cache: "no-store" });
+            if (!response.ok) continue;
+            data = await response.json();
+          }
           const items = normalizeDatabaseItems(data);
           if (items.length) {
             return { source: url, items: items };

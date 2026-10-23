@@ -439,7 +439,198 @@
     return p;
   }
 
-  const { bindCardHoverGallery } = window.GameImages;
+  const HOVER_GALLERY = {
+    timers: new WeakMap(),
+    activeToken: new WeakMap(),
+    baseSrc: new WeakMap(),
+    baseFallback: new WeakMap(),
+    images: new WeakMap(),
+  };
+  const THUMB_FALLBACK_URL = "/favicon.png";
+
+  function sameImageUrl(a, b) {
+    if (!a || !b) return false;
+    return window.GameImages.normalizeF95MediaKey(a) === window.GameImages.normalizeF95MediaKey(b);
+  }
+
+  function findWorkingF95Image(urls, excluded = new Set()) {
+    return window.GameImages.findWorkingF95Image(urls, excluded, { preferPreview: true });
+  }
+
+  function preloadImage(url) {
+    return window.GameImages.preloadImage(url);
+  }
+
+  async function loadHoverGallery(context, refresh = false) {
+    const media = await window.GameImages.fetchF95GalleryMedia(context.rawEntry, context.originalSrc, { refresh });
+    const base = HOVER_GALLERY.baseSrc.get(context.card);
+    return window.GameImages.mergeGalleryUrls(base === THUMB_FALLBACK_URL ? context.originalSrc : base, media);
+  }
+
+  function recoverCardCover(context, failedSrc, refreshOnly = false) {
+    if (context.coverRecovering) return context.coverRecovery;
+    if (context.coverRecovery && (!refreshOnly || context.coverRefreshUsed)) return context.coverRecovery;
+    const { card, img, rawEntry, originalSrc } = context;
+    HOVER_GALLERY.baseSrc.set(card, THUMB_FALLBACK_URL);
+    HOVER_GALLERY.baseFallback.set(card, true);
+    if (context.request?.isBase) setCardImage(img, THUMB_FALLBACK_URL, true, true);
+    context.coverRecovering = true;
+    context.coverRecovery = (async () => {
+      const excluded = new Set([failedSrc]);
+      let recovered = refreshOnly ? "" : await findWorkingF95Image([originalSrc], excluded);
+      if (!recovered && !refreshOnly) {
+        const media = await window.GameImages.fetchF95GalleryMedia(rawEntry, originalSrc);
+        recovered = await findWorkingF95Image([media.cover, ...media.gallery.slice(0, 4)], excluded);
+      }
+      // Une ancienne adresse peut avoir été remplacée sur le sujet F95.
+      if (!recovered && !context.coverRefreshUsed) {
+        context.coverRefreshUsed = true;
+        const media = await window.GameImages.fetchF95GalleryMedia(rawEntry, originalSrc, { refresh: true });
+        recovered = await findWorkingF95Image([media.cover, ...media.gallery.slice(0, 4)], excluded);
+      }
+      return recovered;
+    })().catch(() => "").then((recovered) => {
+      const src = recovered || THUMB_FALLBACK_URL;
+      HOVER_GALLERY.baseSrc.set(card, src);
+      HOVER_GALLERY.baseFallback.set(card, !recovered);
+      if (card.isConnected && context.request?.isBase) setCardImage(img, src, !recovered, true);
+      return src;
+    }).finally(() => { context.coverRecovering = false; });
+    return context.coverRecovery;
+  }
+
+  function recoverOrRestoreBase(context, failedSrc) {
+    HOVER_GALLERY.baseSrc.set(context.card, THUMB_FALLBACK_URL);
+    HOVER_GALLERY.baseFallback.set(context.card, true);
+    setCardImage(context.img, THUMB_FALLBACK_URL, true, true);
+    if (!context.coverRecovery) recoverCardCover(context, failedSrc);
+    else if (!context.coverRecovering && !context.coverRefreshUsed) recoverCardCover(context, failedSrc, true);
+  }
+
+  function setCardImage(img, src, isFallback, isBase = false, attempted = new Set()) {
+    if (!img) return;
+    const requestedSrc = String(src || "").trim() || THUMB_FALLBACK_URL;
+    const context = HOVER_GALLERY.images.get(img);
+    const request = { src: requestedSrc, isBase };
+    if (context) context.request = request;
+    img.onerror = () => {
+      if (!context || context.request !== request || requestedSrc === THUMB_FALLBACK_URL) return;
+      const tried = new Set(attempted);
+      tried.add(requestedSrc);
+      window.GameImages.markImageFailed(requestedSrc);
+      if (isBase) {
+        recoverOrRestoreBase(context, requestedSrc);
+        return;
+      }
+      findWorkingF95Image([requestedSrc], tried).then((recovered) => {
+        if (!context.card.isConnected || context.request !== request) return;
+        if (recovered) setCardImage(img, recovered, false, false, tried);
+        else {
+          const baseSrc = HOVER_GALLERY.baseSrc.get(context.card);
+          if (tried.has(baseSrc)) recoverOrRestoreBase(context, baseSrc);
+          else setCardImage(img, baseSrc, HOVER_GALLERY.baseFallback.get(context.card), true);
+        }
+      }).catch(() => {
+        if (context.card.isConnected && context.request === request) {
+          setCardImage(img, HOVER_GALLERY.baseSrc.get(context.card), HOVER_GALLERY.baseFallback.get(context.card), true);
+        }
+      });
+    };
+    img.referrerPolicy = "no-referrer";
+    img.classList.toggle("is-fallback", !!isFallback);
+    if (img.getAttribute("src") !== requestedSrc) img.src = requestedSrc;
+  }
+
+  function stopCardHoverSlideshow(card) {
+    const timer = HOVER_GALLERY.timers.get(card);
+    if (timer) clearInterval(timer);
+    HOVER_GALLERY.timers.delete(card);
+    const img = card?.querySelector(".similarThumb");
+    const baseSrc = HOVER_GALLERY.baseSrc.get(card) || THUMB_FALLBACK_URL;
+    setCardImage(img, baseSrc, !!HOVER_GALLERY.baseFallback.get(card), true);
+  }
+
+  function bindCardHoverGallery(card, rawEntry, fallbackUrl) {
+    const img = card?.querySelector(".similarThumb");
+    if (!card || !img) return;
+    const baseSrc = String(fallbackUrl || img.getAttribute("src") || "").trim() || THUMB_FALLBACK_URL;
+    const baseFallback = baseSrc === THUMB_FALLBACK_URL;
+    const context = {
+      card, img, rawEntry, originalSrc: baseSrc, request: null,
+      coverRecovery: null, coverRecovering: false, coverRefreshUsed: false, galleryRefreshUsed: false,
+    };
+    HOVER_GALLERY.baseSrc.set(card, baseSrc);
+    HOVER_GALLERY.baseFallback.set(card, baseFallback);
+    HOVER_GALLERY.images.set(img, context);
+    setCardImage(img, baseSrc, baseFallback, true);
+
+    card.addEventListener("mouseleave", () => {
+      HOVER_GALLERY.activeToken.set(card, null);
+      stopCardHoverSlideshow(card);
+    });
+
+    card.addEventListener("mouseenter", async () => {
+      stopCardHoverSlideshow(card);
+      const token = Symbol("hoverGallery");
+      HOVER_GALLERY.activeToken.set(card, token);
+      const isActive = () => card.isConnected && HOVER_GALLERY.activeToken.get(card) === token;
+      let urls;
+      try { urls = await loadHoverGallery(context); }
+      catch { if (isActive()) stopCardHoverSlideshow(card); return; }
+      if (!isActive()) return;
+      let idx = 0;
+      const resetIndex = () => {
+        const currentBase = HOVER_GALLERY.baseSrc.get(card);
+        idx = urls.length > 1 && sameImageUrl(urls[0], currentBase) ? 1 : 0;
+      };
+      resetIndex();
+      let switching = false;
+      const showNext = async () => {
+        if (switching) return true;
+        switching = true;
+        try {
+          let failedPreview = false;
+          for (let pass = 0; pass < 2; pass++) {
+            for (let attempts = 0; attempts < urls.length; attempts++) {
+              const next = urls[idx];
+              idx = (idx + 1) % urls.length;
+              const isCover = sameImageUrl(next, HOVER_GALLERY.baseSrc.get(card));
+              // Avant de retomber sur la cover, cherche les nouvelles adresses des aperçus cassés.
+              if (isCover && failedPreview && !context.galleryRefreshUsed) break;
+              const resolved = await findWorkingF95Image([next]);
+              if (!isActive()) return false;
+              if (!resolved) { if (!isCover) failedPreview = true; continue; }
+              setCardImage(img, resolved, false);
+              if (urls.length > 1) preloadImage(urls[idx]);
+              return true;
+            }
+            if (context.galleryRefreshUsed) break;
+            context.galleryRefreshUsed = true;
+            urls = await loadHoverGallery(context, true);
+            if (!isActive()) return false;
+            resetIndex();
+            failedPreview = false;
+          }
+          if (isActive()) stopCardHoverSlideshow(card);
+          return false;
+        } catch {
+          if (isActive()) stopCardHoverSlideshow(card);
+          return false;
+        } finally { switching = false; }
+      };
+      if (!await showNext() || !isActive()) return;
+      if (urls.length < 2) { stopCardHoverSlideshow(card); return; }
+      const timer = setInterval(() => {
+        if (!isActive() || !card.matches(":hover")) {
+          HOVER_GALLERY.activeToken.set(card, null);
+          stopCardHoverSlideshow(card);
+          return;
+        }
+        showNext().then((shown) => { if (!shown && isActive()) stopCardHoverSlideshow(card); });
+      }, 2000);
+      HOVER_GALLERY.timers.set(card, timer);
+    });
+  }
 
   function enableHorizontalWheelScroll(el){
     if (!el || el.dataset.wheelBound === '1') return;

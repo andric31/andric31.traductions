@@ -576,23 +576,18 @@
     $("creatorNoGames").style.display = games.length ? "none" : "";
 
     $("creatorGames").innerHTML = games.map((game) => {
+      const display = getDisplay(game);
+      const image = String(display.imageUrl || game.imageUrl || "/favicon.png").trim() || "/favicon.png";
       const version = getVersion(game);
       return `
         <a class="creatorGameCard" href="${escapeHtml(getGameUrl(game))}" target="_blank" rel="noopener noreferrer">
-          <img class="creatorGameThumb" alt="" loading="lazy" referrerpolicy="no-referrer">
+          <img class="creatorGameThumb" src="${escapeHtml(image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/favicon.png'">
           <div class="creatorGameBody">
             <h3 class="creatorGameTitle">${escapeHtml(getTitle(game))}</h3>
             ${version ? `<div class="creatorGameMeta">Version ${escapeHtml(version)}</div>` : ""}
           </div>
         </a>`;
     }).join("");
-
-    $("creatorGames").querySelectorAll(".creatorGameCard").forEach((card, index) => {
-      const game = games[index];
-      const display = getDisplay(game);
-      const image = String(display.imageUrl || game.imageUrl || "").trim();
-      window.GameImages.bindCardHoverGallery(card, game, image);
-    });
 
     const externalHost = $("creatorExternalGames");
     const externalList = $("creatorExternalGamesList");
@@ -700,7 +695,7 @@
 
   async function showDirectory(creators, allGames) {
     document.title = "Créateurs";
-    $("creatorBack").href = "/";
+    $("creatorBack").href = "/game";
     $("creatorBack").textContent = "← Retour aux jeux";
     $("creatorDirectory").style.display = "";
     renderDirectory(buildDirectoryEntries(creators, allGames));

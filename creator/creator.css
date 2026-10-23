@@ -258,8 +258,7 @@ body.creatorPage{
   transition:transform .15s ease, filter .15s ease;
 }
 .creatorGameCard:hover{ transform:translateY(-2px); filter:brightness(1.08); }
-.creatorGameThumb{ display:block; width:100%; aspect-ratio:16/10; object-fit:cover; background:rgba(255,255,255,.04); }
-.creatorGameThumb.is-fallback{ object-fit:contain; object-position:center; background:#1c2030; }
+.creatorGameThumb{ width:100%; aspect-ratio:16/10; object-fit:cover; background:rgba(255,255,255,.04); }
 .creatorGameBody{ padding:12px; }
 .creatorGameTitle{ margin:0; font-size:14px; line-height:1.35; }
 .creatorGameMeta{ margin-top:8px; color:var(--muted); font-size:11px; }

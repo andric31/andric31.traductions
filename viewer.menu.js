@@ -2,7 +2,7 @@
 (() => {
   "use strict";
 
-  const ITEMS = [];
+  const ITEMS = [{ label: "🏠 Accueil", onClick: () => { window.location.href = "/"; } }];
   let BOUND = false;
 
   function escapeHtml(s) {

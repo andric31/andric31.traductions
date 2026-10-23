@@ -1,22 +1,270 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Traductions — andric31</title>
-  <link rel="icon" href="/favicon.png">
-  <style>
-    html { background:#0b0d15; color:#e7eaf2; font-family:system-ui,sans-serif; }
-    body { margin:0; min-height:100vh; display:grid; place-items:center; }
-    a { color:#ff9b46; }
-  </style>
-  <script>
-    // Page provisoire : à remplacer plus tard par la future page d’accueil.
-    // Conserve les liens vers une liste ou un filtre et les anciens favoris.
-    location.replace("/game" + location.search + location.hash);
-  </script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Découvre les traductions de jeux d’andric31, les guides du wiki et les événements de la communauté.">
+<title>andric31 — Accueil</title>
+<link rel="icon" href="/favicon.png">
+<script src="/theme-init.js"></script>
+<style>:root{
+  --bg:#0f1117;
+  --bg2:#141826;
+  --fg:#e8eaf0;
+  --muted:#aab2c8;
+  --primary:#5aa2ff;
+  --accent:#6ce0b0;
+  --border:#23283b;
+  --card:#171b29;
+  --btn:#1e2437;
+
+  --thumb-h: 140px;
+  --name-lh: 1.25rem;
+  --name-lines: 2;
+  --badges-h: 28px;
+
+  --topbar-h: 78px; /* mis à jour dynamiquement en JS selon la hauteur réelle */
+
+  --topbar-bg: rgba(16,20,37,.9);
+
+  /* scrollbar (évite le hardcode dark) */
+  --scrollbar-thumb: #303a57;
+  --scrollbar-track: #0b0e14;
+
+  /* ✅ NOUVEAU : variables "thémables" (évite le hardcode dark partout) */
+  --body-grad-1: #0d1018;
+  --body-grad-2: #101425;
+  --body-grad-3: #0f1117;
+
+  --title: var(--fg);
+
+  --popover-bg: rgba(20,24,38,0.98);
+  --hover-bg: rgba(255,255,255,0.06);
+
+  --scrollbar-track-webkit: var(--scrollbar-track);
+  --scrollbar-thumb-webkit: var(--scrollbar-thumb);
+  --scrollbar-thumb-webkit-hover: #3f4b6b;
+
+  --overlay-bg: rgba(0,0,0,0.55);
+
+  --thumb-bg: #1c1f2e;
+  --thumb-fallback-bg: #0f0f10;
+
+  /* éléments avec transparence */
+  --border-soft: rgba(255,255,255,0.06);
+  --top-actions-border: rgba(255,255,255,0.03);
+  --card-hover-border: rgba(255,255,255,0.22);
+  --card-hover-glow: rgba(255,255,255,0.18);
+
+  /* UI "soft" */
+  --soft-04: rgba(255,255,255,0.04);
+  --soft-05: rgba(255,255,255,0.05);
+
+  /* ✅ dit aux navigateurs que ton site est dark (sera overridé en light dans themes.css) */
+  color-scheme: dark;
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+
+/* ✅ empêche le "zoom" quand la scrollbar apparaît */
+html{
+  background: var(--bg);
+  overflow-y: scroll;
+
+  /* 🔥 Firefox scrollbar */
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  scrollbar-width: auto; /* ← largeur normale, plus premium */
+}
+
+/* Firefox peut parfois utiliser body */
+body{
+  margin:0;
+  min-height:100%;
+  font-family:system-ui,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial;
+  color:var(--fg);
+  background: linear-gradient(
+    180deg,
+    var(--body-grad-1),
+    var(--body-grad-2) 30%,
+    var(--body-grad-3)
+  );
+
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}</style>
+<link rel="stylesheet" href="/themes.css">
+<link rel="stylesheet" href="/accueil.css?v=20261023-accueil-1">
 </head>
 <body>
-  <p><a href="/game">Ouvrir la liste des traductions</a></p>
-</body>
-</html>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<header class="site-header"><div class="shell">
+<nav class="nav" id="navigation" aria-label="Navigation principale"><a href="/" aria-current="page">🏠 Accueil</a><a data-path="/game" href="/game">🎮 Traductions</a><a data-path="/creator" href="/creator">👥 Créateurs</a><a data-path="/wiki" href="/wiki"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+    </svg></span> Wiki</a><a data-path="/labo" href="/labo"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M9 3h6"/>
+      <path d="M10 3v5.25L5.35 17.1A2.6 2.6 0 0 0 7.65 21h8.7a2.6 2.6 0 0 0 2.3-3.9L14 8.25V3"/>
+      <path d="M8.35 15h7.3"/>
+      <path d="M10 18h4"/>
+      <circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/>
+    </svg></span> Labo</a><a data-path="/blog" href="/blog"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M4 6.25A2.25 2.25 0 0 1 6.25 4h11.5A2.25 2.25 0 0 1 20 6.25v11.5A2.25 2.25 0 0 1 17.75 20H6.25A2.25 2.25 0 0 1 4 17.75z"/>
+      <path d="M7.5 8h9"/>
+      <path d="M7.5 12h9"/>
+      <path d="M7.5 16h5"/>
+      <circle cx="16.75" cy="16.25" r=".9" fill="currentColor" stroke="none"/>
+    </svg></span> Blog</a><a data-path="/ticket" href="/ticket"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M5 6.5h14a1.5 1.5 0 0 1 1.5 1.5v2a2 2 0 0 0 0 4v2a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 16v-2a2 2 0 0 0 0-4V8A1.5 1.5 0 0 1 5 6.5Z"/>
+      <path d="M9 10h6"/>
+      <path d="M9 14h6"/>
+    </svg></span> Ticket</a><a data-path="/messages" href="/messages"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M6.25 6.25h11.5A2.25 2.25 0 0 1 20 8.5v6a2.25 2.25 0 0 1-2.25 2.25H11l-4.75 3v-3H6.25A2.25 2.25 0 0 1 4 14.5v-6a2.25 2.25 0 0 1 2.25-2.25Z"/>
+      <path d="M8 10.5h8"/>
+      <path d="M8 13.5h5.5"/>
+    </svg></span> Messages</a><a data-path="/evenements" href="/evenements"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <rect x="4" y="5" width="16" height="15" rx="2"/>
+      <path d="M8 3v4"/>
+      <path d="M16 3v4"/>
+      <path d="M4 10h16"/>
+      <path d="M8 14h.01"/>
+      <path d="M12 14h.01"/>
+      <path d="M16 14h.01"/>
+      <path d="M8 17h.01"/>
+      <path d="M12 17h.01"/>
+    </svg></span> Événements</a><a class="auth-hidden" data-auth-only data-path="/compte/mes-jeux" href="/compte/mes-jeux"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M7 3.5h10a1 1 0 0 1 1 1v16.2l-6-3.9-6 3.9V4.5a1 1 0 0 1 1-1z"/>
+      <path d="M9 8.5h6"/>
+      <path d="M9 12h3.5"/>
+    </svg></span> Mes jeux</a><a class="auth-hidden" data-auth-only data-path="/top-jeux" href="/top-jeux"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M8 4h8v3a4 4 0 0 1-8 0V4z"/>
+      <path d="M8 5H5v1a4 4 0 0 0 4 4"/>
+      <path d="M16 5h3v1a4 4 0 0 1-4 4"/>
+      <path d="M12 11v5"/><path d="M9 20h6"/><path d="M10 16h4"/>
+    </svg></span> Top jeux</a></nav>
+<div class="head-row"><div class="head-actions"><label class="theme-label" for="theme">Thème</label><select id="theme" aria-label="Thème du site"><option value="auto">Automatique</option><option value="dark">Sombre</option><option value="clair">Clair</option><option value="midnight">Minuit</option><option value="ocean">Océan</option><option value="forest">Forêt</option><option value="coffee">Café</option><option value="sunset">Coucher de soleil</option><option value="sakura">Sakura</option><option value="galaxy">Galaxie</option><option value="cyberpunk">Cyberpunk</option><option value="crimson">Crimson</option><option value="ice">Ice</option><option value="neon">Neon</option><option value="matrix">Matrix</option><option value="gothic">Gothic</option><option value="retro">Retro</option><option value="steam">Steam</option><option value="vaporwave">Vaporwave</option><option value="desert">Desert</option><option value="lava">Lava</option><option value="tropical">Tropical</option><option value="soleil">Soleil</option><option value="white">Blanc</option><option value="printemps">Printemps</option><option value="ete">Été</option><option value="automne">Automne</option><option value="hiver">Hiver</option><option value="halloween">Halloween</option><option value="noel">Noël</option><option value="nouvelan">Nouvel an</option><option value="valentine">Valentine</option><option value="paques">Pâques</option><option value="carnaval">Carnaval</option></select><a class="btn account" id="accountLink" data-path="/connexion" href="/connexion">🔐 Se connecter</a><button class="btn mobile-menu" id="menu" aria-expanded="false" aria-controls="navigation" aria-label="Ouvrir le menu">☰</button></div></div>
+</div></header>
+<main class="shell main" id="contenu">
+<section class="welcome" aria-labelledby="welcome-title"><div><span class="eyebrow">🇫🇷 Traductions françaises</span><div class="welcome-heading"><h1 id="welcome-title">Bienvenue</h1><a class="btn" data-path="/game" href="/game"><span aria-hidden="true">🎮</span> Mes traductions</a></div><p>Découvre mes traductions de jeux en français et profite des guides pour bien démarrer.</p></div><aside class="welcome-side"><h2>Tout pour jouer en français</h2><ul><li><span class="icon" aria-hidden="true">🔎</span><span><b>Un catalogue à explorer</b><br>Recherche, filtres et fiches détaillées.</span></li><li><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+    </svg></span><span><b>Un coup de main pour l’installation</b><br>Des guides adaptés aux moteurs de jeux.</span></li></ul></aside></section>
+<section class="panel home-announcements" aria-labelledby="home-announcements-title">
+  <div class="panel-title"><span class="icon" aria-hidden="true">📢</span><h2 id="home-announcements-title">Annonces</h2></div>
+  <div class="panel-content"><p><strong>F95Zone modifie ses liens d’images.</strong> Cette modification affecte également le site : certaines images peuvent ne plus s’afficher correctement.</p></div>
+</section>
+<!-- Mises à jour des outils de l’accueil, indépendantes du bandeau du viewer. -->
+<section class="panel tools-updates" aria-labelledby="tools-updates-title">
+  <div class="panel-title"><span class="icon" aria-hidden="true">🛠️</span><h2 id="tools-updates-title">Retrouve les dernières mises à jour de mes outils</h2></div>
+  <div class="panel-content">
+<div class="viewer-release-stack">
+  <article class="viewer-release viewer-release--main" aria-labelledby="release-extension-title">
+    <div class="viewer-release__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 5V4a2 2 0 0 1 4 0v1h4a1 1 0 0 1 1 1v4h1a2.5 2.5 0 0 1 0 5h-1v4a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-4h1a2.5 2.5 0 0 0 0-5H4V6a1 1 0 0 1 1-1h4Z"/>
+      </svg>
+    </div>
+    <div class="viewer-release__content">
+      <div class="viewer-release__kicker">Extension navigateur <span class="viewer-release__status">Nouvelle version</span></div>
+      <h3 class="viewer-release__title" id="release-extension-title">f95list_andric31 <span class="viewer-release__version">v5.0</span></h3>
+      <p class="viewer-release__text">Accès rapide aux traductions sur F95Zone.</p>
+    </div>
+    <a class="viewer-release__cta"
+       data-path="/wiki/extension-f95list" href="/wiki/extension-f95list"
+       target="_blank" rel="noopener">
+      Découvrir l’extension
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>
+    </a>
+  </article>
+
+  <article class="viewer-release viewer-release--secondary" aria-labelledby="release-relecteur-title">
+    <div class="viewer-release__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M13 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-8M7 8h4M7 12h2M7 16h5"/>
+        <path d="m14 11 6.1-6.1a1.7 1.7 0 0 0-2.4-2.4L11.6 8.6l-.6 3 3-.6ZM16.5 3.7l2.4 2.4"/>
+      </svg>
+    </div>
+    <div class="viewer-release__content">
+      <div class="viewer-release__kicker">Outil de relecture <span class="viewer-release__status">Nouvelle version</span></div>
+      <h3 class="viewer-release__title" id="release-relecteur-title">Relecteur Ren’Py</h3>
+      <p class="viewer-release__text">Corriger une traduction en temps réel.</p>
+    </div>
+    <a class="viewer-release__cta"
+       data-path="/wiki/editeur-traduction-renpy-relecture" href="/wiki/editeur-traduction-renpy-relecture"
+       target="_blank" rel="noopener">
+      Voir le relecteur
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>
+    </a>
+  </article>
+
+  <article class="viewer-release viewer-release--image-extension" aria-labelledby="release-image-extension-title">
+    <div class="viewer-release__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3v12"/>
+        <path d="m7 10 5 5 5-5"/>
+        <path d="M5 20h14"/>
+      </svg>
+    </div>
+    <div class="viewer-release__content">
+      <div class="viewer-release__kicker">Extension navigateur <span class="viewer-release__status">Nouvelle version</span></div>
+      <h3 class="viewer-release__title" id="release-image-extension-title">Enregistrer l'image sous...</h3>
+      <p class="viewer-release__text">Enregistre les images de F95 et d'autres sites dans leur vrai format.</p>
+    </div>
+    <a class="viewer-release__cta"
+       data-path="/wiki/enregistrer-images-vrai-format" href="/wiki/enregistrer-images-vrai-format"
+       target="_blank" rel="noopener">
+      Voir l’extension
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>
+    </a>
+  </article>
+</div>
+  </div>
+</section>
+<section class="panel translation-topics" aria-labelledby="translation-topics-title">
+  <div class="panel-title"><span class="icon" aria-hidden="true">📚</span><h2 id="translation-topics-title">Comprendre la traduction des jeux</h2></div>
+  <div class="panel-content topics-grid">
+    <a class="topic-card" data-path="/wiki/moteurs-jeux-traduits" href="/wiki/moteurs-jeux-traduits">
+      <span class="card-icon" aria-hidden="true">🧠</span>
+      <div><h3>Moteurs de jeux et traduction</h3><p>Reconnaître le moteur d’un jeu, retrouver ses textes et comprendre comment une traduction s’y intègre.</p><span class="card-cta">Lire le guide →</span></div>
+    </a>
+    <a class="topic-card" data-path="/wiki/difficulte-traduction-moteurs" href="/wiki/difficulte-traduction-moteurs">
+      <span class="card-icon" aria-hidden="true">🎚️</span>
+      <div><h3>Difficulté technique de traduction des jeux</h3><p>Des repères pour comprendre ce qui facilite ou complique la traduction d’un jeu.</p><span class="card-cta">Lire le guide →</span></div>
+    </a>
+  </div>
+</section>
+<div class="lower-grid"><section class="panel"><div class="panel-title"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+    </svg></span><h2>Besoin d’un guide ?</h2></div><div class="panel-content"><p>Les ressources pour bien démarrer et aller plus loin.</p><div class="resource-list"><a class="resource-link" data-path="/wiki" href="/wiki"><span class="icon" aria-hidden="true">📚</span><span><strong>Explorer le wiki</strong><small>Guides, tutoriels et ressources autour des jeux et de leur traduction.</small></span><span class="arrow">→</span></a></div><details><summary>Première visite : comment commencer ?</summary><ol><li>Choisis un jeu dans le catalogue et ouvre sa fiche.</li><li>Vérifie la version du jeu et les instructions de la traduction.</li><li>Consulte le wiki si tu as besoin d’aide pour l’installation.</li></ol></details></div></section><section class="panel"><div class="panel-title"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M6.25 6.25h11.5A2.25 2.25 0 0 1 20 8.5v6a2.25 2.25 0 0 1-2.25 2.25H11l-4.75 3v-3H6.25A2.25 2.25 0 0 1 4 14.5v-6a2.25 2.25 0 0 1 2.25-2.25Z"/>
+      <path d="M8 10.5h8"/>
+      <path d="M8 13.5h5.5"/>
+    </svg></span><h2>La vie du site</h2></div><div class="panel-content"><p>Échange avec la communauté et retrouve les événements du site.</p><div class="community-grid"><a class="resource-link" data-path="/messages" href="/messages"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M6.25 6.25h11.5A2.25 2.25 0 0 1 20 8.5v6a2.25 2.25 0 0 1-2.25 2.25H11l-4.75 3v-3H6.25A2.25 2.25 0 0 1 4 14.5v-6a2.25 2.25 0 0 1 2.25-2.25Z"/>
+      <path d="M8 10.5h8"/>
+      <path d="M8 13.5h5.5"/>
+    </svg></span><span><strong>Messages</strong><small>Les échanges de la communauté.</small></span></a><a class="resource-link" data-path="/evenements" href="/evenements"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <rect x="4" y="5" width="16" height="15" rx="2"/>
+      <path d="M8 3v4"/>
+      <path d="M16 3v4"/>
+      <path d="M4 10h16"/>
+      <path d="M8 14h.01"/>
+      <path d="M12 14h.01"/>
+      <path d="M16 14h.01"/>
+      <path d="M8 17h.01"/>
+      <path d="M12 17h.01"/>
+    </svg></span><span><strong>Événements</strong><small>Les rendez-vous proposés.</small></span></a></div><div class="help-line"><span>Une question ou un problème ?</span><a data-path="/ticket" href="/ticket">Ouvrir un ticket →</a></div></div></section></div>
+</main>
+<footer class="shell footer"><span><span class="adult">🔞 18+</span> Site réservé aux personnes majeures.</span><span class="footer-links"><span>andric31 · Traductions françaises</span><button type="button" class="footer-contact" id="aboutOpen" aria-haspopup="dialog" aria-controls="aboutDialog">Contact</button></span></footer>
+<!-- Informations de contact reprises de la fenêtre « À propos » du viewer. -->
+<dialog class="home-about-dialog" id="aboutDialog" aria-labelledby="aboutTitle">
+  <div class="modal-head"><h2 class="modal-title" id="aboutTitle">À propos</h2><button type="button" class="modal-close" data-about-close aria-label="Fermer À propos" autofocus>✕</button></div>
+  <div class="modal-body aboutText">
+    <p>Pour tout renseignement, aide ou autre, rejoignez mon serveur Discord :<br><a href="https://discord.gg/Jr8Ykf8yMd" target="_blank" rel="noopener noreferrer">https://discord.gg/Jr8Ykf8yMd</a></p>
+    <p>Contact Discord :<br><a href="https://discord.com/users/@andric31" target="_blank" rel="noopener noreferrer">https://discord.com/users/@andric31</a></p>
+    <p>Vous pouvez aussi me contacter sur F95zone :<br>Profil <a href="https://f95zone.to/members/andric31.247797/" target="_blank" rel="noopener noreferrer">https://f95zone.to/members/andric31.247797/</a></p>
+  </div>
+  <div class="modal-foot"><button type="button" class="btn" data-about-close>OK</button></div>
+</dialog>
+<script src="/accueil.js?v=20261023-accueil-1"></script>
+</body></html>

@@ -361,7 +361,7 @@
       const params = new URLSearchParams();
       if (id) params.set("id", id);
       if (name) params.set("name", name);
-      return `/creator/?${params.toString()}`;
+      return `/creator?${params.toString()}`;
     }
 
     window.CreatorFeature = {
@@ -430,7 +430,7 @@
       if (id) params.set("id", id);
       if (uid && !id) params.set("uid", uid);
     }
-    return `/game/?${params.toString()}`;
+    return `/game?${params.toString()}`;
   }
 
   function getVersion(game) {

@@ -40,7 +40,7 @@
     const out = [], positions = new Map();
     for (const raw of urls || []) {
       const url = String(raw || "").trim();
-      if (!url || isGalleryAvatarUrl(url) || (url === THUMB_FALLBACK_URL || url === THUMB_LOADING_URL)) continue;
+      if (!url || !isRemoteImageUrl(url) || isGalleryAvatarUrl(url)) continue;
       const key = normalizeF95MediaKey(url);
       if (!positions.has(key)) { positions.set(key, out.length); out.push(url); continue; }
       const index = positions.get(key), previous = out[index];
@@ -67,6 +67,24 @@
     const origin = typeof location !== "undefined" && location.origin
       ? location.origin : "https://local.invalid";
     return new URL(value, origin);
+  }
+
+  function isRemoteImageUrl(value) {
+    if (!cleanUrl(value)) return false;
+    try { return /^https?:$/.test(parseUrl(value).protocol); }
+    catch { return false; }
+  }
+
+  function isF95Thumbnail(value) {
+    try {
+      const url = parseUrl(value);
+      return isF95ImageUrl(value) && (url.hostname.toLowerCase() === "preview.f95zone.to" ||
+        /\/thumb\//i.test(url.pathname) || /^\/data\/covers\/thread\//i.test(url.pathname));
+    } catch { return false; }
+  }
+
+  function originalImageUrls(urls) {
+    return preferFreshImages((Array.isArray(urls) ? urls : []).flatMap(value => imageCandidates(value, false, true)));
   }
 
   function isGalleryAvatarUrl(value) {
@@ -118,9 +136,19 @@
     return original;
   }
 
-  function imageCandidates(value, preferPreview = false) {
+  function imageCandidates(value, preferPreview = false, originalsOnly = false) {
     const original = cleanUrl(value);
-    if (!original || isGalleryAvatarUrl(original) || isExpiredImage(original)) return [];
+    if (!original || !isRemoteImageUrl(original) || isGalleryAvatarUrl(original) || isExpiredImage(original)) return [];
+    if (originalsOnly) {
+      if (!isF95Thumbnail(original)) return [original];
+      // Une vignette signée ne permet pas de reconstruire l'original signé.
+      if (hasImageSignature(original)) return [];
+      const url = parseUrl(original);
+      if (/^\/data\/covers\/thread\//i.test(url.pathname)) return [];
+      if (url.hostname.toLowerCase() === "preview.f95zone.to") url.hostname = "attachments.f95zone.to";
+      url.pathname = url.pathname.replace(/(\/\d{4}\/\d{2})\/thumb\//i, "$1/");
+      return isF95Thumbnail(url.href) ? [] : [url.href];
+    }
     // Les signatures F95 sont liées à leur hôte et à leur chemin exacts.
     if (hasImageSignature(original)) return [original];
     const preview = toF95PreviewUrl(original);
@@ -158,7 +186,7 @@
 
   function preloadImage(value) {
     const url = cleanUrl(value);
-    if (!url || isExpiredImage(url)) return Promise.resolve(false);
+    if (!url || !isRemoteImageUrl(url) || isExpiredImage(url)) return Promise.resolve(false);
     const cached = imageCache.get(url);
     if (cached && cached.until > Date.now()) return cached.promise;
 
@@ -203,10 +231,11 @@
     if (url) imageCache.set(url, { promise: Promise.resolve(false), status: "failed", until: Date.now() + 30000 });
   }
 
-  async function findWorkingF95Image(urls, excluded = new Set(), { preferPreview = false } = {}) {
+  async function findWorkingF95Image(urls, excluded = new Set(), { preferPreview = false, originalsOnly = false } = {}) {
     const tried = new Set(excluded);
-    for (const url of preferFreshImages(Array.isArray(urls) ? urls : [])) {
-      for (const candidate of imageCandidates(url, preferPreview)) {
+    const sources = originalsOnly ? originalImageUrls(urls) : preferFreshImages(Array.isArray(urls) ? urls : []);
+    for (const url of sources) {
+      for (const candidate of imageCandidates(url, preferPreview, originalsOnly)) {
         if (tried.has(candidate)) continue;
         tried.add(candidate);
         if (await preloadImage(candidate)) return candidate;
@@ -221,10 +250,14 @@
 
   function normalizeMedia(data) {
     if (!data || typeof data !== "object" || data.ok === false) return emptyMedia();
-    const gallery = preferFreshImages([data.cover, ...(Array.isArray(data.gallery) ? data.gallery : [])]);
+    const sources = [data.cover, ...(Array.isArray(data.gallery) ? data.gallery : []),
+      ...(Array.isArray(data.originals) ? data.originals : [])];
+    const gallery = preferFreshImages(sources);
     const coverKey = normalizeF95MediaKey(data.cover);
     const cover = gallery.find(url => normalizeF95MediaKey(url) === coverKey) || gallery[0] || "";
-    return { cover, gallery };
+    // Garder les originaux séparément : une miniature signée ne doit pas
+    // faire disparaître l'adresse originale du même fichier pour la fiche.
+    return { cover, gallery, originals: originalImageUrls(sources) };
   }
 
   async function requestMedia(threadUrl, refresh = false) {
@@ -282,14 +315,16 @@
       if (found) record.media = media;
       const deadlines = [record.media.cover, ...record.media.gallery].map(imageExpiry).filter(Boolean).map(time => time - 30000);
       record.until = Math.min(Date.now() + (found ? 300000 : 15000), ...deadlines);
-      return { cover: record.media.cover, gallery: record.media.gallery.slice() };
+      return { cover: record.media.cover, gallery: record.media.gallery.slice(), originals: (record.media.originals || []).slice() };
     }).finally(() => { record.pending = false; });
     return record.promise;
   }
 
-  function mergeGalleryUrls(baseUrl, media) {
+  function mergeGalleryUrls(baseUrl, media, { originalsOnly = false } = {}) {
     const remote = normalizeMedia(media);
-    return preferFreshImages([cleanUrl(baseUrl), remote.cover, ...remote.gallery]);
+    const urls = originalsOnly ? [cleanUrl(baseUrl), ...(remote.originals || [])]
+      : [cleanUrl(baseUrl), remote.cover, ...remote.gallery];
+    return originalsOnly ? originalImageUrls(urls) : preferFreshImages(urls);
   }
 
   function clearCaches() {
@@ -463,6 +498,11 @@
       try { urls = await loadHoverGallery(context); }
       catch { if (isActive()) stopCardHoverSlideshow(card); return; }
       if (!isActive()) return;
+      if (urls.length < 2 && !context.galleryRefreshUsed) {
+        context.galleryRefreshUsed = true;
+        urls = await loadHoverGallery(context, true);
+        if (!isActive()) return;
+      }
       let idx = 0;
       const resetIndex = () => {
         const currentBase = HOVER_GALLERY.baseSrc.get(card);
@@ -519,6 +559,7 @@
 
   window.GameImages = Object.freeze({
     bindCardHoverGallery, clearCaches, setPlaceholder, preferFreshImages, isExpiredImage,
+    originalImageUrls,
     getF95ThreadUrl,
     fetchF95GalleryMedia,
     findWorkingF95Image,

@@ -296,15 +296,14 @@ function setLightboxBackground(url) {
   if (lb) lb.style.setProperty("--lb-bg", url ? "url(" + JSON.stringify(String(url)) + ")" : "none");
 }
 
-function showGalleryPlaceholder() {
+function showGalleryPlaceholder(loading = true) {
   galleryState.displayToken++;
   galleryState.displayedUrl = "";
   galleryState.displayedLogicalUrl = "";
   ["cover", "coverLightboxImg"].forEach((id) => {
     const img = $(id);
     if (!img) return;
-    img.onerror = null;
-    img.removeAttribute("src");
+    window.GameImages.setPlaceholder(img, loading);
     if (id === "cover") img.classList.add("is-placeholder");
   });
   setLightboxBackground("");
@@ -320,7 +319,7 @@ function syncGalleryIndex() {
 }
 
 function applyGalleryMedia(media) {
-  galleryState.urls = window.GameImages.mergeGalleryUrls(galleryState.fallbackUrl, media)
+  galleryState.urls = window.GameImages.mergeGalleryUrls(galleryState.fallbackUrl, media, { originalsOnly: true })
     .filter((url) => !galleryState.failed.has(url));
   galleryState.metadataReady = true;
   syncGalleryIndex();
@@ -361,7 +360,10 @@ function displayGalleryImage(src, logicalUrl) {
     if (!img) return;
     img.referrerPolicy = "no-referrer";
     img.decoding = "async";
+    img.onload = null;
     img.onerror = handleError;
+    img.title = "";
+    img.setAttribute("aria-busy", "false");
     img.classList.remove("is-placeholder");
     if (img.getAttribute("src") !== src) img.src = src;
   });
@@ -402,7 +404,7 @@ async function galleryGoTo(index, { automatic = false, direction = 1 } = {}) {
       const source = nextCandidate();
       if (source) {
         tried.add(source);
-        const resolved = await window.GameImages.findWorkingF95Image([source]);
+        const resolved = await window.GameImages.findWorkingF95Image([source], new Set(), { originalsOnly: true });
         if (!current()) return false;
         if (resolved) {
           // Si l'API vient d'actualiser cette même image, essayer sa nouvelle URL.
@@ -441,7 +443,7 @@ async function galleryGoTo(index, { automatic = false, direction = 1 } = {}) {
         tried.clear();
         continue;
       }
-      if (!galleryState.displayedUrl) showGalleryPlaceholder();
+      if (!galleryState.displayedUrl) showGalleryPlaceholder(false);
       return false;
     }
     return false;
@@ -523,6 +525,7 @@ async function loadF95Gallery(f95Url, fallbackUrl, cloudflareImages) {
   }
   // L'image d'origine et les métadonnées se chargent en parallèle.
   if (galleryState.urls.length || galleryState.cloudflare.length || galleryState.initialPromise) void galleryGoTo(0);
+  else showGalleryPlaceholder(false);
   return galleryState.initialPromise;
 }
 
@@ -1131,7 +1134,7 @@ function setCover(url) {
   galleryState.navigation++;
   galleryState.fallbackUrl = String(url || "").trim();
   galleryState.loadedForUrl = "";
-  galleryState.urls = galleryState.fallbackUrl ? [galleryState.fallbackUrl] : [];
+  galleryState.urls = window.GameImages.originalImageUrls([galleryState.fallbackUrl]);
   galleryState.index = galleryState.targetIndex = 0;
   galleryState.pending = galleryState.automatic = false;
   galleryState.metadataReady = false;

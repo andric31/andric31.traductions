@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'gallery-v8-signed';
+const CACHE_VERSION = 'gallery-v9-real-images';
 
 export async function onRequest(context) {
   const { request } = context;
@@ -131,19 +131,7 @@ function extractContainerBlock(html, className) {
 
 function pickFromContainerBlock(block) {
   if (!block) return '';
-
-  const linkMatches = matchAll(block, /<a[^>]*class="[^"]*js-lbImage[^"]*"[^>]*href="([^"]+)"/gi)
-    .map(x => upgradeF95Url(decodeHtml(x[1] || '')))
-    .filter(Boolean)
-    .filter(u => !/\/thumb\//i.test(u));
-  if (linkMatches.length) return linkMatches[0];
-
-  const imgMatches = matchAll(block, /<img[^>]+(?:data-src|src)="([^"]+)"[^>]*>/gi)
-    .map(x => upgradeF95Url(decodeHtml(x[1] || '')))
-    .filter(Boolean)
-    .filter(u => !/\/thumb\//i.test(u))
-    .filter(u => !/smilie|emoji/i.test(u));
-  return imgMatches[0] || '';
+  return extractLightboxUrls(block)[0] || extractStandaloneImageUrls(block)[0] || '';
 }
 
 function getThreadGalleryUrlsFromHtml(op) {
@@ -159,10 +147,16 @@ function getThreadGalleryUrlsFromHtml(op) {
 }
 
 function extractLightboxUrls(html) {
-  return matchAll(String(html || ''), /<a[^>]*class="[^"]*js-lbImage[^"]*"[^>]*href="([^"]+)"/gi)
-    .map(m => upgradeF95Url(decodeHtml(m[1] || '')))
-    .filter(Boolean)
-    .filter(u => !/\/thumb\//i.test(u));
+  const out = [];
+  for (const tag of matchAll(String(html || ''), /<a\b([^>]*)>/gi)) {
+    const attrs = imageAttributes(tag[1]);
+    if (!/(?:^|\s)js-lbImage(?:\s|$)/i.test(attrs.class || '')) continue;
+    for (const key of ['data-url', 'data-src', 'href']) {
+      const url = upgradeF95Url(attrs[key]);
+      if (url) out.push(url);
+    }
+  }
+  return dedupKeepOrder(out);
 }
 
 function extractStandaloneImageUrls(html) {
@@ -170,22 +164,41 @@ function extractStandaloneImageUrls(html) {
   const s = String(html || '');
   const tags = matchAll(s, /<img([^>]+)>/gi);
   for (const m of tags) {
-    const attrs = m[1] || '';
-    if (/smilie|emoji/i.test(attrs)) continue;
-    if (/class=\"[^\"]*\bavatar(?:\b|[-_])/i.test(attrs)) continue;
-    const srcm = attrs.match(/(?:data-src|src)="([^"]+)"/i);
-    const u = upgradeF95Url(decodeHtml(srcm?.[1] || ''));
-    if (!u || /\/thumb\//i.test(u)) continue;
-    out.push(u);
+    const attrs = imageAttributes(m[1]);
+    if (/smilie|emoji|\bavatar(?:\b|[-_])/i.test(attrs.class || '')) continue;
+    // F95 place désormais un SVG transparent dans src. L'ordre des attributs
+    // ne doit pas masquer data-src, qui contient l'image réellement chargée.
+    for (const key of ['data-url', 'data-src', 'data-lazy-src', 'src']) {
+      const url = upgradeF95Url(attrs[key]);
+      if (url) out.push(url);
+    }
+    for (const key of ['data-srcset', 'srcset']) {
+      if (/^\s*data:/i.test(attrs[key] || '')) continue;
+      const candidates = String(attrs[key] || '').split(',').map(value => value.trim().split(/\s+/))
+        .sort((a, b) => (parseFloat(b[1]) || 0) - (parseFloat(a[1]) || 0));
+      for (const [value] of candidates) {
+        const url = upgradeF95Url(value);
+        if (url) out.push(url);
+      }
+    }
   }
-  return out;
+  return dedupKeepOrder(out);
+}
+
+function imageAttributes(source) {
+  const attrs = {};
+  const re = /([\w:-]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s'"=<>`]+))/g;
+  let match;
+  while ((match = re.exec(source))) {
+    attrs[match[1].toLowerCase()] = decodeHtml(match[2] ?? match[3] ?? match[4] ?? '');
+  }
+  return attrs;
 }
 
 function extractAttachmentPreviewUrls(html) {
-  return matchAll(String(html || ''), /(https?:)?\/\/attachments\.f95zone\.to\/[^"]+/gi)
+  return matchAll(String(html || ''), /(https?:)?\/\/(?:attachments|preview)\.f95zone\.to\/[^\s"'<>]+/gi)
     .map(m => upgradeF95Url(decodeHtml(m[0] || '')))
     .filter(Boolean)
-    .map(u => u.replace(/["'>].*$/, ''))
     .filter(u => !/\/thumb\//i.test(u))
     .filter(isAllowedImageUrl);
 }
@@ -222,17 +235,22 @@ function isPollutingUrl(u) {
 function upgradeF95Url(u) {
   const s = String(u || '').trim();
   if (!s) return '';
-  const out = s.startsWith('//')
-    ? 'https:' + s
-    : s.startsWith('/')
-      ? 'https://f95zone.to' + s
-      : s.replace(/&amp;/g, '&');
-  return isPollutingUrl(out) ? '' : out;
+  try {
+    const url = new URL(decodeHtml(s), 'https://f95zone.to/');
+    // Les images de remplissage ne sont jamais des médias de la galerie.
+    if (!/^https?:$/.test(url.protocol) || url.username || url.password) return '';
+    return isPollutingUrl(url.href) ? '' : url.href;
+  } catch { return ''; }
 }
 
 function decodeHtml(s) {
   return String(s || '')
+    .replace(/&#(x[0-9a-f]+|\d+);/gi, (whole, value) => {
+      const code = /^x/i.test(value) ? parseInt(value.slice(1), 16) : Number(value);
+      return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : whole;
+    })
     .replace(/&amp;/g, '&')
+    .replace(/&apos;/g, "'")
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
     .replace(/&lt;/g, '<')

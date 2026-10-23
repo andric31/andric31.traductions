@@ -447,13 +447,13 @@
     const timer = HOVER_GALLERY.timers.get(card);
     if (timer) clearInterval(timer);
     HOVER_GALLERY.timers.delete(card);
-    const img = card?.querySelector(".thumb, .similarThumb");
+    const img = card?.querySelector(".thumb, .similarThumb, .creatorGameThumb");
     const baseSrc = HOVER_GALLERY.baseSrc.get(card) || THUMB_FALLBACK_URL;
     setCardImage(img, baseSrc, !!HOVER_GALLERY.baseFallback.get(card), true);
   }
 
   function bindCardHoverGallery(card, rawEntry, fallbackUrl) {
-    const img = card?.querySelector(".thumb, .similarThumb");
+    const img = card?.querySelector(".thumb, .similarThumb, .creatorGameThumb");
     if (!card || !img) return;
     const supplied = String(fallbackUrl || img.getAttribute("src") || "").trim();
     const baseSrc = supplied === "/favicon.png" ? "" : supplied;

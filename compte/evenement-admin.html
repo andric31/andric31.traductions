@@ -146,7 +146,7 @@
       <h1 class="auth-title">⛔ Accès refusé</h1>
       <p class="auth-subtitle">Cette page est réservée aux administrateurs.</p>
       <div class="auth-actions">
-        <a class="auth-btn primary" href="/connexion/">Se connecter</a>
+        <a class="auth-btn primary" href="/connexion">Se connecter</a>
         <a class="auth-btn" href="/">Retour au site</a>
       </div>
     </section>
@@ -158,9 +158,9 @@
           <p class="auth-subtitle" style="margin:0;">Gère le jeu de l’événement sans toucher au JSON. Les changements sont sauvegardés automatiquement dans Cloudflare.</p>
         </div>
         <div class="auth-actions" style="margin:0;">
-          <a class="auth-btn" href="/compte/">Retour au compte</a>
+          <a class="auth-btn" href="/compte">Retour au compte</a>
           <a class="auth-btn" href="/">Retour au site</a>
-          <a class="auth-btn primary" href="/evenements/" target="_blank" rel="noopener">Voir la page événements</a>
+          <a class="auth-btn primary" href="/evenements" target="_blank" rel="noopener">Voir la page événements</a>
         </div>
       </div>
     </section>
@@ -511,7 +511,7 @@
             </div>
             <div class="event-admin-event-actions">
               <button class="auth-btn mini event-admin-apply-btn" type="button" data-no-event-apply="1">Appliquer aucun événement</button>
-              <a class="auth-btn mini event-admin-test-btn" href="/evenements/?test=aucun-evenement" target="_blank" rel="noopener">Test</a>
+              <a class="auth-btn mini event-admin-test-btn" href="/evenements?test=aucun-evenement" target="_blank" rel="noopener">Test</a>
             </div>
           </article>`;
         }
@@ -528,7 +528,7 @@
           <div class="event-admin-event-actions">
             <button class="auth-btn mini event-admin-open-btn" type="button" data-load-event="${esc(ev.id)}">Ouvrir</button>
             <button class="auth-btn mini event-admin-apply-btn" type="button" data-launch-event="${esc(ev.id)}">Lancer</button>
-            <a class="auth-btn mini event-admin-test-btn" href="/evenements/?test=${encodeURIComponent(ev.id)}" target="_blank" rel="noopener">Test</a>
+            <a class="auth-btn mini event-admin-test-btn" href="/evenements?test=${encodeURIComponent(ev.id)}" target="_blank" rel="noopener">Test</a>
           </div>
         </article>`;
       }).join('') || '<div class="event-admin-msg err">Aucun événement trouvé dans config.json.</div>';
@@ -607,7 +607,7 @@
     }
     function getDesc(g){ return String(g?.gameData?.description || g?.description || '').replace(/<br\s*\/?>(\s*)/gi,'\n').replace(/<[^>]*>/g,'').trim(); }
     function getTags(g){ const raw = g?.gameData?.tags || g?.tags || []; return Array.isArray(raw) ? raw.map(String).filter(Boolean) : String(raw || '').split(',').map(s=>s.trim()).filter(Boolean); }
-    function buildUrl(g){ const coll=String(g?.collection||'').trim(); const id=String(g?.id||'').trim(); const uid=String(g?.uid??'').trim(); if(coll) return `/game/?id=${encodeURIComponent(coll)}${uid ? `&uid=${encodeURIComponent(uid)}` : ''}`; if(id) return `/game/?id=${encodeURIComponent(id)}`; if(uid) return `/game/?uid=${encodeURIComponent(uid)}`; return '/'; }
+    function buildUrl(g){ const coll=String(g?.collection||'').trim(); const id=String(g?.id||'').trim(); const uid=String(g?.uid??'').trim(); if(coll) return `/game?id=${encodeURIComponent(coll)}${uid ? `&uid=${encodeURIComponent(uid)}` : ''}`; if(id) return `/game?id=${encodeURIComponent(id)}`; if(uid) return `/game?uid=${encodeURIComponent(uid)}`; return '/'; }
     function hashText(text){ let h=2166136261; for(const ch of String(text)){ h ^= ch.charCodeAt(0); h = Math.imul(h,16777619); } return Math.abs(h>>>0); }
 
     function getGameKey(g){ const id=String(g?.collection||g?.id||'').trim(); const uid=String(g?.uid??'').trim(); const title=norm(getTitle(g)).replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); return [id, uid, title].filter(Boolean).join('|') || title || 'jeu'; }
@@ -962,7 +962,7 @@
           </div>
           <div class="event-admin-choice-actions">
             <button class="auth-btn mini" id="saveAdventDayBtn" type="button">💾 Enregistrer cette case</button>
-            <a class="auth-btn mini" href="/evenements/?test=${encodeURIComponent(event.id || 'calendrier-avent-2025')}" target="_blank" rel="noopener">Tester</a>
+            <a class="auth-btn mini" href="/evenements?test=${encodeURIComponent(event.id || 'calendrier-avent-2025')}" target="_blank" rel="noopener">Tester</a>
           </div>
         </div>`;
     }
@@ -1037,7 +1037,7 @@
               <h3 class="event-admin-linked-title">🌙 Aucun événement en cours</h3>
               <p class="event-admin-linked-subtitle">Cette carte reste volontairement simple : elle affiche juste une page propre de pause.</p>
             </div>
-            <a class="auth-btn mini" href="/evenements/?test=aucun-evenement" target="_blank" rel="noopener">Tester</a>
+            <a class="auth-btn mini" href="/evenements?test=aucun-evenement" target="_blank" rel="noopener">Tester</a>
           </div>`;
         return;
       }
@@ -1121,7 +1121,7 @@
           <div class="event-admin-disabled-card">
             <h3>🌙 Aucun événement en cours</h3>
             <p class="event-admin-note" style="margin:0 0 12px;">Cette entrée affiche une page propre quand aucun événement saisonnier n’est actif.</p>
-            <a class="auth-btn primary" href="/evenements/?test=aucun-evenement" target="_blank" rel="noopener">🧪 Tester cette page</a>
+            <a class="auth-btn primary" href="/evenements?test=aucun-evenement" target="_blank" rel="noopener">🧪 Tester cette page</a>
           </div>`;
         return;
       }

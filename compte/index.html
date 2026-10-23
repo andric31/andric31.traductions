@@ -478,6 +478,7 @@
     }
   </style>
   <link rel="stylesheet" href="/auth/discord.css?v=20260926-6" />
+  <link rel="stylesheet" href="/game/game.images.css?v=20261023-pages-images-10" />
 </head>
 <body>
   <main class="auth-shell">
@@ -488,11 +489,11 @@
         <h3>📝 Inscription privée</h3>
         <p>Toute nouvelle inscription est privée. Ouvre un ticket pour choisir ton nom d’utilisateur et ton mot de passe. Le mot de passe est sécurisé et n’est jamais affiché à l’administrateur.</p>
         <div class="auth-actions">
-          <a class="auth-btn primary" href="/ticket/?category=inscription">Ouvrir un ticket</a>
+          <a class="auth-btn primary" href="/ticket?category=inscription">Ouvrir un ticket</a>
         </div>
       </div>
       <div class="auth-actions">
-        <a class="auth-btn primary" href="/connexion/">Se connecter</a>
+        <a class="auth-btn primary" href="/connexion">Se connecter</a>
         <a class="auth-btn" href="/">Retour au site</a>
       </div>
     </section>
@@ -613,6 +614,7 @@
     </div>
   </div>
 
+  <script src="/game/game.images.js?v=20261023-v255-urls-images"></script>
   <script src="/auth/auth.client.js"></script>
   <script>
     const logoutBtn = document.getElementById('logoutBtn');
@@ -770,12 +772,12 @@
         }
         watchlistList.innerHTML = items.map((item) => {
           const title = escapeHtml(item.title || 'Jeu sans titre');
-          const img = escapeHtml(item.image_url || '/favicon.png');
+
           const gameUrl = escapeHtml(normalizeGameUrl(item.game_url));
           const date = formatWatchDate(item.created_at);
           return `
             <article class="watchlist-item" data-watch-id="${escapeHtml(item.id)}">
-              <img class="watchlist-cover" src="${img}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='/favicon.png'">
+              <img class="watchlist-cover" alt="" loading="lazy" referrerpolicy="no-referrer">
               <div>
                 <a class="watchlist-title" href="${gameUrl}">${title}</a>
                 <div class="watchlist-meta">${date ? `Ajouté le ${escapeHtml(date)}` : 'Ajout récent'}</div>
@@ -785,6 +787,7 @@
               </div>
             </article>`;
         }).join('');
+        window.GameImages.bindSavedGameImages(watchlistList, items, ".watchlist-cover");
         setMsg(watchlistMsg, `${items.length} jeu${items.length > 1 ? 'x' : ''} dans ta Watchlist.`, true);
       } catch (err) {
         if (accountWatchCount) accountWatchCount.textContent = '!';
@@ -796,7 +799,7 @@
 
     function renderAccountGameItem(item, mode) {
       const title = escapeHtml(item.title || 'Jeu sans titre');
-      const img = escapeHtml(item.image_url || '/favicon.png');
+
       const gameUrl = escapeHtml(normalizeGameUrl(item.game_url));
       const rating = Number(item.rating || 0);
       const dateValue = mode === 'rated' ? item.rated_at : item.liked_at;
@@ -808,7 +811,7 @@
       const removeLabel = mode === 'rated' ? 'Supprimer la note' : 'Retirer le like';
       return `
         <article class="watchlist-item" data-game-key="${escapeHtml(item.game_key || '')}">
-          <img class="watchlist-cover" src="${img}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='/favicon.png'">
+          <img class="watchlist-cover" alt="" loading="lazy" referrerpolicy="no-referrer">
           <div>
             <a class="watchlist-title" href="${gameUrl}">${title}</a>
             <div class="watchlist-meta">${meta}</div>
@@ -838,6 +841,7 @@
           return;
         }
         listEl.innerHTML = items.map((item) => renderAccountGameItem(item, kind)).join('');
+        window.GameImages.bindSavedGameImages(listEl, items, '.watchlist-cover');
         setMsg(msgEl, `${items.length} jeu${items.length > 1 ? 'x' : ''} ${isRated ? 'noté' + (items.length > 1 ? 's' : '') : 'liké' + (items.length > 1 ? 's' : '')}.`, true);
       } catch (err) {
         const countEl = isRated ? accountRatedCount : accountLikedCount;
@@ -951,8 +955,8 @@
           <h2 style="margin-top:0;">🛡️ Modérateur</h2>
           <p>Accès rapide aux outils de modération.</p>
           <div class="account-admin-grid">
-            <a class="account-admin-card" href="/messages/"><strong>💬 Messages</strong><span>Modération des salons (suppression…)</span></a>
-            <a class="account-admin-card" href="/stats/"><strong>📊 Stats</strong><span>Statistiques et suivi du site.</span></a>
+            <a class="account-admin-card" href="/messages"><strong>💬 Messages</strong><span>Modération des salons (suppression…)</span></a>
+            <a class="account-admin-card" href="/stats"><strong>📊 Stats</strong><span>Statistiques et suivi du site.</span></a>
           </div>
         </section>`);
       }
@@ -970,7 +974,7 @@
             <button class="account-notif-switch" id="adminViewerModeAccountToggle" type="button" role="switch" aria-checked="false" aria-label="Activer la vue admin sans compteurs"></button>
           </div>
           <div id="adminViewerModeAccountState" style="display:none;">Désactivée</div>
-          <a class="account-notif-setting account-admin-mode-line account-admin-r2-link" id="adminR2ManagerLink" href="/admin-r2/">
+          <a class="account-notif-setting account-admin-mode-line account-admin-r2-link" id="adminR2ManagerLink" href="/admin-r2">
             <span class="account-notif-setting-text">
               <span class="account-notif-setting-ico" aria-hidden="true">🗂️</span>
               <span>Gestionnaire de fichiers R2 <span class="account-admin-mode-desc">Images, vidéos, documents et traductions.</span></span>
@@ -983,7 +987,7 @@
             <a class="account-admin-card" href="/compte/discord-diagnostic.html"><strong>🔔 Diagnostic Discord</strong><span>Tester l’envoi des notifications Discord.</span></a>
             <a class="account-admin-card" href="/compte/blog-admin.html"><strong>📝 Blog</strong><span>Création et modification des articles.</span></a>
             <a class="account-admin-card" href="/compte/evenement-admin.html"><strong>📅 Événements</strong><span>Gestion des événements.</span></a>
-            <a class="account-admin-card" href="/stats/"><strong>📊 Stats</strong><span>Statistiques et suivi du site.</span></a>
+            <a class="account-admin-card" href="/stats"><strong>📊 Stats</strong><span>Statistiques et suivi du site.</span></a>
             <a class="account-admin-card" href="/?f95France=oui"><strong>🇫🇷 andric31 F95 France</strong><span>Ouvrir le viewer filtré.</span></a>
           </div>
           <div class="account-admin-separator"><span>Liens externes</span></div>

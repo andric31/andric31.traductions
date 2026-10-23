@@ -406,7 +406,7 @@
 
   function renderCard(item) {
     const title = escapeHtml(item.title || 'Jeu sans titre');
-    const img = escapeHtml(item.image_url || '/favicon.png');
+
     const gameUrl = escapeHtml(normalizeGameUrl(item.game_url));
     const f95 = item.f95_url ? `<a class="account-games-btn" href="${escapeHtml(item.f95_url)}" target="_blank" rel="noopener">F95</a>` : '';
     const discord = item.discord_url ? `<a class="account-games-btn" href="${escapeHtml(item.discord_url)}" target="_blank" rel="noopener">Discord</a>` : '';
@@ -420,7 +420,7 @@
     return `
       <article class="account-game-card" data-game-key="${escapeHtml(item.game_key)}">
         <a class="account-game-cover-link" href="${gameUrl}" target="_blank" rel="noopener">
-          <img class="account-game-cover" src="${img}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='/favicon.png'">
+          <img class="account-game-cover" alt="" loading="lazy" referrerpolicy="no-referrer">
           <div class="account-game-badges">${badges(item)}</div>
         </a>
         <div class="account-game-body">
@@ -515,17 +515,18 @@
       const rank = ['🥇', '🥈', '🥉'][index] || `${index + 1}.`;
       const title = escapeHtml(item.title || 'Jeu sans titre');
       const gameUrl = escapeHtml(normalizeGameUrl(item.game_url));
-      const img = escapeHtml(item.image_url || '/favicon.png');
+
       return `
         <a class="account-games-top-item" href="${gameUrl}" target="_blank" rel="noopener" aria-label="${title}">
           <span class="account-games-top-rank">${rank}</span>
-          <img class="account-games-top-cover" src="${img}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='/favicon.png'">
+          <img class="account-games-top-cover" alt="" loading="lazy" referrerpolicy="no-referrer">
           <span class="account-games-top-info">
             <strong>${title}</strong>
           </span>
           ${topTooltipHtml(item)}
         </a>`;
     }).join('');
+    window.GameImages.bindSavedGameImages(els.topList, list, '.account-games-top-cover');
   }
 
   let publishFeedbackTimer = null;
@@ -589,6 +590,7 @@
       return;
     }
     els.grid.innerHTML = list.map(renderCard).join('');
+    window.GameImages.bindSavedGameImages(els.grid, list, '.account-game-cover', { hover: true });
     setStatus(`${list.length} ${label}${list.length > 1 ? 'x' : ''} affiché${list.length > 1 ? 's' : ''}.`);
   }
 

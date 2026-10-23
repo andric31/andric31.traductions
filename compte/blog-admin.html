@@ -257,7 +257,7 @@
       <h1 class="auth-title">📝 Blog admin</h1>
       <p class="auth-subtitle">Tu dois être connecté avec un compte admin pour utiliser cet outil.</p>
       <div class="auth-actions">
-        <a class="auth-btn primary" href="/connexion/">Se connecter</a>
+        <a class="auth-btn primary" href="/connexion">Se connecter</a>
         <a class="auth-btn" href="/">Retour au site</a>
       </div>
     </section>
@@ -268,8 +268,8 @@
           <h1 class="blog-admin-title">📝 Blog admin</h1>
         </div>
         <div class="blog-admin-actions">
-          <a class="auth-btn" href="/compte/">Retour au compte</a>
-          <a class="auth-btn" href="/blog/">Voir blog</a>
+          <a class="auth-btn" href="/compte">Retour au compte</a>
+          <a class="auth-btn" href="/blog">Voir blog</a>
           <a class="auth-btn" href="/">Retour au site</a>
         </div>
       </div>
@@ -612,10 +612,10 @@
       el.cardOut.value = card;
       el.fileLabel.textContent = `/blog/${data.href}`;
       if (state.tab === 'card') {
-        writePreview(`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><base href="/blog/"><script src="/theme-init.js"><\/script><link rel="stylesheet" href="/themes.css"><link rel="stylesheet" href="/blog/blog.css"></head><body><main class="blog-shell"><section class="blog-list" style="padding-top:24px;">${card}</section></main></body></html>`);
+        writePreview(`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><base href="/blog"><script src="/theme-init.js"><\/script><link rel="stylesheet" href="/themes.css"><link rel="stylesheet" href="/blog/blog.css"></head><body><main class="blog-shell"><section class="blog-list" style="padding-top:24px;">${card}</section></main></body></html>`);
       } else {
         writePreview(article
-          .replace('<head>', '<head><base href="/blog/">')
+          .replace('<head>', '<head><base href="/blog">')
           .replace('href="blog.css"', 'href="/blog/blog.css"'));
 
       }

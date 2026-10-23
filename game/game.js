@@ -538,9 +538,9 @@ function buildGameUrl(g) {
   const id = (g.id || "").toString().trim();
   const uid = (g.uid ?? "").toString().trim();
 
-  if (coll) return `/game/?id=${encodeURIComponent(coll)}&uid=${encodeURIComponent(uid)}`;
-  if (id) return `/game/?id=${encodeURIComponent(id)}`;
-  return `/game/?uid=${encodeURIComponent(uid)}`;
+  if (coll) return `/game?id=${encodeURIComponent(coll)}&uid=${encodeURIComponent(uid)}`;
+  if (id) return `/game?id=${encodeURIComponent(id)}`;
+  return `/game?uid=${encodeURIComponent(uid)}`;
 }
 
 function getDisplayTitle(g) {
@@ -692,7 +692,7 @@ function ensureRelatedContainer() {
 
 function renderCollectionBlockForChild(parent) {
   const parentId = parent?.id ? String(parent.id) : "";
-  const href = parentId ? `/game/?id=${encodeURIComponent(parentId)}` : "";
+  const href = parentId ? `/game?id=${encodeURIComponent(parentId)}` : "";
   const label = parent ? (parent.cleanTitle || parent.title || parentId) : "Voir la collection";
 
   return `
@@ -709,7 +709,7 @@ function renderCollectionBlockForParent(parent, children) {
   const items = children
     .map((g) => {
       const t = escapeHtml(getDisplayTitle(g, "collectionChild"));
-      const href = `/game/?id=${encodeURIComponent(parent.id)}&uid=${encodeURIComponent(g.uid)}`;
+      const href = `/game?id=${encodeURIComponent(parent.id)}&uid=${encodeURIComponent(g.uid)}`;
       return `<li><a href="${href}">${t}</a></li>`;
     })
     .join("");
@@ -2297,7 +2297,7 @@ function renderVideoBlock({ id, videoUrl }) {
 
     if (!idParam && !uidParam) {
       showError(
-        "Aucun paramètre dans l’URL. Exemples : /game/?id=215277  ou  /game/?id=17373&uid=898  ou  /game/?uid=898"
+        "Aucun paramètre dans l’URL. Exemples : /game?id=215277  ou  /game?id=17373&uid=898  ou  /game?uid=898"
       );
       return;
     }

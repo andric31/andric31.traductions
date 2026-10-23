@@ -264,7 +264,7 @@
     const name = normalizeText(creator?.name);
     const params = new URLSearchParams({ id });
     if (name) params.set("name", name);
-    return `/creator/?${params.toString()}`;
+    return `/creator?${params.toString()}`;
   }
 
 

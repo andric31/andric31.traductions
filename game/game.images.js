@@ -96,7 +96,7 @@
   function getF95ThreadUrl(rawOrUrl, imageUrl) {
     const entry = rawOrUrl && typeof rawOrUrl === "object" ? rawOrUrl : {};
     const candidates = [rawOrUrl, entry.url, entry.threadUrl, entry.f95url,
-      entry.f95Url, entry.sourceUrl, entry.gameData?.url,
+      entry.f95Url, entry.f95_url, entry.sourceUrl, entry.gameData?.url,
       entry.gameData?.threadUrl, entry.gameData?.f95url, entry.gameData?.f95Url];
     for (const candidate of candidates) {
       const value = cleanUrl(candidate);
@@ -108,6 +108,15 @@
         if (match) return `https://f95zone.to/threads/${match[1]}/`;
       } catch {}
     }
+    // Les listes personnelles et les tops conservent souvent uniquement la fiche locale.
+    // id est l’identifiant F95 ; uid est local et ne doit jamais servir de sujet F95.
+    try {
+      const gameUrl = parseUrl(cleanUrl(entry.game_url));
+      const id = gameUrl.searchParams.get("id") || "";
+      if (/^\/game\/?$/.test(gameUrl.pathname) && /^\d+$/.test(id)) {
+        return `https://f95zone.to/threads/${id}/`;
+      }
+    } catch {}
     for (const candidate of [imageUrl, entry.gameData?.imageUrl, entry.imageUrl, rawOrUrl]) {
       const value = cleanUrl(candidate);
       if (!value) continue;
@@ -346,6 +355,7 @@
     baseSrc: new WeakMap(),
     baseFallback: new WeakMap(),
     images: new WeakMap(),
+    cardImages: new WeakMap(),
   };
 
   function sameImageUrl(a, b) {
@@ -447,13 +457,13 @@
     const timer = HOVER_GALLERY.timers.get(card);
     if (timer) clearInterval(timer);
     HOVER_GALLERY.timers.delete(card);
-    const img = card?.querySelector(".thumb, .similarThumb, .creatorGameThumb");
+    const img = HOVER_GALLERY.cardImages.get(card) || card?.querySelector(".thumb, .similarThumb, .creatorGameThumb");
     const baseSrc = HOVER_GALLERY.baseSrc.get(card) || THUMB_FALLBACK_URL;
     setCardImage(img, baseSrc, !!HOVER_GALLERY.baseFallback.get(card), true);
   }
 
-  function bindCardHoverGallery(card, rawEntry, fallbackUrl) {
-    const img = card?.querySelector(".thumb, .similarThumb, .creatorGameThumb");
+  function bindCardHoverGallery(card, rawEntry, fallbackUrl, { image, hover = true } = {}) {
+    const img = image || card?.querySelector(".thumb, .similarThumb, .creatorGameThumb");
     if (!card || !img) return;
     const supplied = String(fallbackUrl || img.getAttribute("src") || "").trim();
     const baseSrc = supplied === "/favicon.png" ? "" : supplied;
@@ -465,6 +475,7 @@
     HOVER_GALLERY.baseSrc.set(card, THUMB_LOADING_URL);
     HOVER_GALLERY.baseFallback.set(card, true);
     HOVER_GALLERY.images.set(img, context);
+    HOVER_GALLERY.cardImages.set(card, img);
     setCardImage(img, THUMB_LOADING_URL, true, true);
     // Ne jamais exposer une image distante avant sa validation.
     const load = async () => {
@@ -483,6 +494,8 @@
       }, { rootMargin: "300px" });
       observer.observe(card);
     } else void load();
+
+    if (!hover) return;
 
     card.addEventListener("mouseleave", () => {
       HOVER_GALLERY.activeToken.set(card, null);
@@ -557,7 +570,18 @@
     });
   }
 
+  // Même validation et récupération pour les images enregistrées dans un compte ou un top.
+  function bindSavedGameImages(root, items, selector, { hover = false } = {}) {
+    if (!root) return;
+    root.querySelectorAll(selector).forEach((img, index) => {
+      const item = items[index];
+      if (!item) return;
+      bindCardHoverGallery(img.parentElement, item, item.image_url || item.imageUrl || "", { image: img, hover });
+    });
+  }
+
   window.GameImages = Object.freeze({
+    bindSavedGameImages,
     bindCardHoverGallery, clearCaches, setPlaceholder, preferFreshImages, isExpiredImage,
     originalImageUrls,
     getF95ThreadUrl,

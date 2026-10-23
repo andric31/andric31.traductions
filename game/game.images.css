@@ -1,0 +1,9 @@
+/* Les messages restent centrés sur un fond uniforme, quelle que soit la largeur. */
+.watchlist-cover.is-fallback,
+.account-game-cover.is-fallback,
+.account-games-top-cover.is-fallback,
+.community-top-cover.is-fallback {
+  object-fit: contain;
+  object-position: center;
+  background: #1c2030;
+}

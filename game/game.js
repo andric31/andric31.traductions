@@ -296,14 +296,15 @@ function setLightboxBackground(url) {
   if (lb) lb.style.setProperty("--lb-bg", url ? "url(" + JSON.stringify(String(url)) + ")" : "none");
 }
 
-function showGalleryPlaceholder(loading = true) {
+function showGalleryPlaceholder() {
   galleryState.displayToken++;
   galleryState.displayedUrl = "";
   galleryState.displayedLogicalUrl = "";
   ["cover", "coverLightboxImg"].forEach((id) => {
     const img = $(id);
     if (!img) return;
-    window.GameImages.setPlaceholder(img, loading);
+    img.onerror = null;
+    img.removeAttribute("src");
     if (id === "cover") img.classList.add("is-placeholder");
   });
   setLightboxBackground("");
@@ -360,10 +361,7 @@ function displayGalleryImage(src, logicalUrl) {
     if (!img) return;
     img.referrerPolicy = "no-referrer";
     img.decoding = "async";
-    img.onload = null;
     img.onerror = handleError;
-    img.title = "";
-    img.setAttribute("aria-busy", "false");
     img.classList.remove("is-placeholder");
     if (img.getAttribute("src") !== src) img.src = src;
   });
@@ -443,7 +441,7 @@ async function galleryGoTo(index, { automatic = false, direction = 1 } = {}) {
         tried.clear();
         continue;
       }
-      if (!galleryState.displayedUrl) showGalleryPlaceholder(false);
+      if (!galleryState.displayedUrl) showGalleryPlaceholder();
       return false;
     }
     return false;
@@ -525,7 +523,6 @@ async function loadF95Gallery(f95Url, fallbackUrl, cloudflareImages) {
   }
   // L'image d'origine et les métadonnées se chargent en parallèle.
   if (galleryState.urls.length || galleryState.cloudflare.length || galleryState.initialPromise) void galleryGoTo(0);
-  else showGalleryPlaceholder(false);
   return galleryState.initialPromise;
 }
 
@@ -1411,7 +1408,7 @@ function initHamburgerMenu() {
   try {
     if (!window.__homeMenuAdded && window.ViewerMenu?.addItem) {
       window.__homeMenuAdded = true;
-      window.ViewerMenu.addItem("📚 Retour à la liste des traductions", () => { window.location.href = "../"; }, { prepend: true });
+      window.ViewerMenu.addItem("📚 Retour à la liste des traductions", () => { window.location.href = "/game"; }, { prepend: true });
     }
   } catch {}
 

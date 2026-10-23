@@ -1249,9 +1249,9 @@
       const id = (entry.id || "").toString().trim();
       const uid = (entry.uid ?? "").toString().trim();
 
-      if (coll) return "/game/?id=" + encodeURIComponent(coll) + "&uid=" + encodeURIComponent(uid);
-      if (id) return "/game/?id=" + encodeURIComponent(id);
-      if (uid) return "/game/?uid=" + encodeURIComponent(uid);
+      if (coll) return "/game?id=" + encodeURIComponent(coll) + "&uid=" + encodeURIComponent(uid);
+      if (id) return "/game?id=" + encodeURIComponent(id);
+      if (uid) return "/game?uid=" + encodeURIComponent(uid);
       return "";
     }
 

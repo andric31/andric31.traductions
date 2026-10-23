@@ -319,7 +319,7 @@ function syncGalleryIndex() {
 }
 
 function applyGalleryMedia(media) {
-  galleryState.urls = window.GameImages.mergeGalleryUrls(galleryState.fallbackUrl, media, { originalsOnly: true })
+  galleryState.urls = window.GameImages.mergeGalleryUrls(galleryState.fallbackUrl, media)
     .filter((url) => !galleryState.failed.has(url));
   galleryState.metadataReady = true;
   syncGalleryIndex();
@@ -404,7 +404,7 @@ async function galleryGoTo(index, { automatic = false, direction = 1 } = {}) {
       const source = nextCandidate();
       if (source) {
         tried.add(source);
-        const resolved = await window.GameImages.findWorkingF95Image([source], new Set(), { originalsOnly: true });
+        const resolved = await window.GameImages.findWorkingF95Image([source]);
         if (!current()) return false;
         if (resolved) {
           // Si l'API vient d'actualiser cette même image, essayer sa nouvelle URL.
@@ -1134,7 +1134,7 @@ function setCover(url) {
   galleryState.navigation++;
   galleryState.fallbackUrl = String(url || "").trim();
   galleryState.loadedForUrl = "";
-  galleryState.urls = window.GameImages.originalImageUrls([galleryState.fallbackUrl]);
+  galleryState.urls = galleryState.fallbackUrl ? [galleryState.fallbackUrl] : [];
   galleryState.index = galleryState.targetIndex = 0;
   galleryState.pending = galleryState.automatic = false;
   galleryState.metadataReady = false;

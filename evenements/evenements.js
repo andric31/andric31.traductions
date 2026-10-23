@@ -201,9 +201,9 @@
     const coll = String(g.collection || '').trim();
     const id = String(g.id || '').trim();
     const uid = String(g.uid ?? '').trim();
-    if (coll) return `/game/?id=${encodeURIComponent(coll)}${uid ? `&uid=${encodeURIComponent(uid)}` : ''}`;
-    if (id) return `/game/?id=${encodeURIComponent(id)}`;
-    if (uid) return `/game/?uid=${encodeURIComponent(uid)}`;
+    if (coll) return `/game?id=${encodeURIComponent(coll)}${uid ? `&uid=${encodeURIComponent(uid)}` : ''}`;
+    if (id) return `/game?id=${encodeURIComponent(id)}`;
+    if (uid) return `/game?uid=${encodeURIComponent(uid)}`;
     return '/';
   }
 

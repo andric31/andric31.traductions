@@ -59,6 +59,19 @@ export function onRequest(context) {
   if (request.method !== "GET" && request.method !== "HEAD") return context.next();
   const url = new URL(request.url);
   const path = url.pathname;
+  // Les anciens liens du viewer à la racine restent valables après l’arrivée de l’accueil.
+  if (path === "/" || path === "/index.html") {
+    const viewerParams = ["id", "uid", "src", "f95France", "f95FranceTranslation"];
+    if (viewerParams.some(key => url.searchParams.has(key))) {
+      url.pathname = "/game";
+      return Response.redirect(url.href, 308);
+    }
+    if (path === "/index.html") {
+      url.pathname = "/";
+      return Response.redirect(url.href, 308);
+    }
+    return context.next();
+  }
   let canonical = path.replace(/\/+$/, "") || "/";
   if (canonical.endsWith("/index.html") && DIRECTORY_PAGES.has(canonical.slice(0, -11))) {
     canonical = canonical.slice(0, -11);

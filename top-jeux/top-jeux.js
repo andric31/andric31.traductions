@@ -32,7 +32,7 @@
       <div class="community-top-list">
         ${games.map((game,index)=>`<a class="community-top-game" href="${esc(gameUrl(game.game_url))}" target="_blank" rel="noopener">
           <span class="community-top-rank">${ranks[index] || `${index+1}.`}</span>
-          <img class="community-top-cover" src="${esc(game.image_url || '/favicon.png')}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='/favicon.png'">
+          <img class="community-top-cover" alt="" loading="lazy" referrerpolicy="no-referrer">
           <span><strong>${esc(game.title || 'Jeu sans titre')}</strong></span>
         </a>`).join('')}
       </div>
@@ -52,6 +52,7 @@
       }
       status.textContent = `${tops.length} top${tops.length>1?'s':''} publié${tops.length>1?'s':''}, du plus récent au plus ancien.`;
       grid.innerHTML = tops.map(renderCard).join('');
+      window.GameImages.bindSavedGameImages(grid, tops.flatMap(top => top.games), '.community-top-cover');
     } catch (err) {
       status.textContent = err?.message || 'Chargement impossible.';
       status.classList.add('err');

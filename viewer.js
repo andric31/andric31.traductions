@@ -42,12 +42,12 @@
       return `${openBase}${sep}${qs.toString()}`;
     }
 
-    // Sous-jeu de collection : /game/?id=<collection>&uid=<uid>
-    if (coll) return `/game/?id=${encodeURIComponent(coll)}&uid=${encodeURIComponent(uid)}`;
-    // Jeu normal / collection parent : /game/?id=<id>
-    if (id) return `/game/?id=${encodeURIComponent(id)}`;
+    // Sous-jeu de collection : /game?id=<collection>&uid=<uid>
+    if (coll) return `/game?id=${encodeURIComponent(coll)}&uid=${encodeURIComponent(uid)}`;
+    // Jeu normal / collection parent : /game?id=<id>
+    if (id) return `/game?id=${encodeURIComponent(id)}`;
     // Fallback uid seul
-    return `/game/?uid=${encodeURIComponent(uid)}`;
+    return `/game?uid=${encodeURIComponent(uid)}`;
   }
 
   // ✅ Titre affiché (gameData prioritaire si présent)

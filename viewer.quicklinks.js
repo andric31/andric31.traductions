@@ -23,14 +23,14 @@
 
   const MESSAGES_API_URL = "/api/messages?limit=1&scope=allowed";
   const MESSAGE_READ_STATE_API_URL = "/api/message-read-state";
-  const MESSAGES_BASE_URL = "/messages/";
-  const BLOG_INDEX_URL = "/blog/";
+  const MESSAGES_BASE_URL = "/messages";
+  const BLOG_INDEX_URL = "/blog";
   const TICKETS_ADMIN_URL = "/compte/ticket-admin.html";
-  const TICKETS_PUBLIC_URL = "/ticket/";
-  const EVENTS_URL = "/evenements/";
+  const TICKETS_PUBLIC_URL = "/ticket";
+  const EVENTS_URL = "/evenements";
   const EVENTS_CONFIG_URL = "/evenements/config.json";
   const NOTIFICATIONS_JSON_URL = "/notifications/notifications.json";
-  const NOTIFICATION_URL = "https://andric31-traductions.pages.dev/notifications/";
+  const NOTIFICATION_URL = "https://andric31-traductions.pages.dev/notifications";
 
 
   function iconWiki() {
@@ -308,9 +308,9 @@
     if (document.getElementById(IDS.wiki) || document.getElementById(IDS.labo) || document.getElementById(IDS.blog) || document.getElementById(IDS.ticket) || document.getElementById(IDS.messages) || document.getElementById(IDS.events) || document.getElementById(IDS.notifications)) return;
 
     const refClass = afterEl.className || "hamburger-btn";
-    const wiki = makeLink(IDS.wiki, "/wiki/", "Wiki", iconWiki(), refClass);
-    const labo = makeLink(IDS.labo, "/labo/", "Labo", iconLabo(), refClass);
-    const blog = makeLink(IDS.blog, "/blog/", "Blog", iconBlog(), refClass);
+    const wiki = makeLink(IDS.wiki, "/wiki", "Wiki", iconWiki(), refClass);
+    const labo = makeLink(IDS.labo, "/labo", "Labo", iconLabo(), refClass);
+    const blog = makeLink(IDS.blog, "/blog", "Blog", iconBlog(), refClass);
     const ticket = makeLink(IDS.ticket, TICKETS_PUBLIC_URL, "Ticket", iconTicket(), refClass);
     const notifications = makeButton(IDS.notifications, "Notifications", iconNotifications(), refClass);
     const events = makeLink(IDS.events, EVENTS_URL, "Événements", iconEvents(), refClass);

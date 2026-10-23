@@ -16,7 +16,7 @@
     watchlist: "/compte/mes-jeux.html#watchlist",
     likes: "/compte/mes-jeux.html#likes",
     notes: "/compte/mes-jeux.html#notes",
-    topGames: "/top-jeux/",
+    topGames: "/top-jeux",
   };
 
   function escapeHtml(value) {
@@ -106,7 +106,7 @@
     const name = getAccountName(me);
     const link = document.createElement("a");
     link.id = IDS.accountBtn;
-    link.href = "/compte/";
+    link.href = "/compte";
     link.target = "_blank";
     link.rel = "noopener";
     link.className = `${refClass} header-icon-link header-icon-link--quick account-profile-btn`;

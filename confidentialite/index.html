@@ -1,1 +1,214 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Comprendre les données utilisées par le site et les préférences mémorisées dans votre navigateur.">
+<meta name="robots" content="noindex">
+<title>Confidentialité et cookies — andric31</title>
+<link rel="icon" href="/favicon.png">
+<script src="/theme-init.js"></script>
+<style>:root{
+  --bg:#0f1117;
+  --bg2:#141826;
+  --fg:#e8eaf0;
+  --muted:#aab2c8;
+  --primary:#5aa2ff;
+  --accent:#6ce0b0;
+  --border:#23283b;
+  --card:#171b29;
+  --btn:#1e2437;
 
+  --thumb-h: 140px;
+  --name-lh: 1.25rem;
+  --name-lines: 2;
+  --badges-h: 28px;
+
+  --topbar-h: 78px; /* mis à jour dynamiquement en JS selon la hauteur réelle */
+
+  --topbar-bg: rgba(16,20,37,.9);
+
+  /* scrollbar (évite le hardcode dark) */
+  --scrollbar-thumb: #303a57;
+  --scrollbar-track: #0b0e14;
+
+  /* ✅ NOUVEAU : variables "thémables" (évite le hardcode dark partout) */
+  --body-grad-1: #0d1018;
+  --body-grad-2: #101425;
+  --body-grad-3: #0f1117;
+
+  --title: var(--fg);
+
+  --popover-bg: rgba(20,24,38,0.98);
+  --hover-bg: rgba(255,255,255,0.06);
+
+  --scrollbar-track-webkit: var(--scrollbar-track);
+  --scrollbar-thumb-webkit: var(--scrollbar-thumb);
+  --scrollbar-thumb-webkit-hover: #3f4b6b;
+
+  --overlay-bg: rgba(0,0,0,0.55);
+
+  --thumb-bg: #1c1f2e;
+  --thumb-fallback-bg: #0f0f10;
+
+  /* éléments avec transparence */
+  --border-soft: rgba(255,255,255,0.06);
+  --top-actions-border: rgba(255,255,255,0.03);
+  --card-hover-border: rgba(255,255,255,0.22);
+  --card-hover-glow: rgba(255,255,255,0.18);
+
+  /* UI "soft" */
+  --soft-04: rgba(255,255,255,0.04);
+  --soft-05: rgba(255,255,255,0.05);
+
+  /* ✅ dit aux navigateurs que ton site est dark (sera overridé en light dans themes.css) */
+  color-scheme: dark;
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+
+/* ✅ empêche le "zoom" quand la scrollbar apparaît */
+html{
+  background: var(--bg);
+  overflow-y: scroll;
+
+  /* 🔥 Firefox scrollbar */
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  scrollbar-width: auto; /* ← largeur normale, plus premium */
+}
+
+/* Firefox peut parfois utiliser body */
+body{
+  margin:0;
+  min-height:100%;
+  font-family:system-ui,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial;
+  color:var(--fg);
+  background: linear-gradient(
+    180deg,
+    var(--body-grad-1),
+    var(--body-grad-2) 30%,
+    var(--body-grad-3)
+  );
+
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}</style>
+<link rel="stylesheet" href="/themes.css">
+<link rel="stylesheet" href="/accueil.css?v=20261024-infos-1">
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<header class="site-header"><div class="shell">
+<nav class="nav" id="navigation" aria-label="Navigation principale"><a href="/">🏠 Accueil</a><a data-path="/game" href="/game">🎮 Traductions</a><a data-path="/creator" href="/creator">👥 Créateurs</a><a data-path="/wiki" href="/wiki"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+    </svg></span> Wiki</a><a data-path="/labo" href="/labo"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M9 3h6"/>
+      <path d="M10 3v5.25L5.35 17.1A2.6 2.6 0 0 0 7.65 21h8.7a2.6 2.6 0 0 0 2.3-3.9L14 8.25V3"/>
+      <path d="M8.35 15h7.3"/>
+      <path d="M10 18h4"/>
+      <circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/>
+    </svg></span> Labo</a><a data-path="/blog" href="/blog"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M4 6.25A2.25 2.25 0 0 1 6.25 4h11.5A2.25 2.25 0 0 1 20 6.25v11.5A2.25 2.25 0 0 1 17.75 20H6.25A2.25 2.25 0 0 1 4 17.75z"/>
+      <path d="M7.5 8h9"/>
+      <path d="M7.5 12h9"/>
+      <path d="M7.5 16h5"/>
+      <circle cx="16.75" cy="16.25" r=".9" fill="currentColor" stroke="none"/>
+    </svg></span> Blog</a><a data-path="/ticket" href="/ticket"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M5 6.5h14a1.5 1.5 0 0 1 1.5 1.5v2a2 2 0 0 0 0 4v2a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 16v-2a2 2 0 0 0 0-4V8A1.5 1.5 0 0 1 5 6.5Z"/>
+      <path d="M9 10h6"/>
+      <path d="M9 14h6"/>
+    </svg></span> Ticket</a><a data-path="/messages" href="/messages"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M6.25 6.25h11.5A2.25 2.25 0 0 1 20 8.5v6a2.25 2.25 0 0 1-2.25 2.25H11l-4.75 3v-3H6.25A2.25 2.25 0 0 1 4 14.5v-6a2.25 2.25 0 0 1 2.25-2.25Z"/>
+      <path d="M8 10.5h8"/>
+      <path d="M8 13.5h5.5"/>
+    </svg></span> Messages</a><a data-path="/evenements" href="/evenements"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <rect x="4" y="5" width="16" height="15" rx="2"/>
+      <path d="M8 3v4"/>
+      <path d="M16 3v4"/>
+      <path d="M4 10h16"/>
+      <path d="M8 14h.01"/>
+      <path d="M12 14h.01"/>
+      <path d="M16 14h.01"/>
+      <path d="M8 17h.01"/>
+      <path d="M12 17h.01"/>
+    </svg></span> Événements</a><a class="auth-hidden" data-auth-only data-path="/compte/mes-jeux" href="/compte/mes-jeux"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M7 3.5h10a1 1 0 0 1 1 1v16.2l-6-3.9-6 3.9V4.5a1 1 0 0 1 1-1z"/>
+      <path d="M9 8.5h6"/>
+      <path d="M9 12h3.5"/>
+    </svg></span> Mes jeux</a><a class="auth-hidden" data-auth-only data-path="/top-jeux" href="/top-jeux"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M8 4h8v3a4 4 0 0 1-8 0V4z"/>
+      <path d="M8 5H5v1a4 4 0 0 0 4 4"/>
+      <path d="M16 5h3v1a4 4 0 0 1-4 4"/>
+      <path d="M12 11v5"/><path d="M9 20h6"/><path d="M10 16h4"/>
+    </svg></span> Top jeux</a></nav>
+<div class="head-row"><div class="head-actions"><label class="theme-label" for="theme">Thème</label><select id="theme" aria-label="Thème du site"><option value="auto">Automatique</option><option value="dark">Sombre</option><option value="clair">Clair</option><option value="midnight">Minuit</option><option value="ocean">Océan</option><option value="forest">Forêt</option><option value="coffee">Café</option><option value="sunset">Coucher de soleil</option><option value="sakura">Sakura</option><option value="galaxy">Galaxie</option><option value="cyberpunk">Cyberpunk</option><option value="crimson">Crimson</option><option value="ice">Ice</option><option value="neon">Neon</option><option value="matrix">Matrix</option><option value="gothic">Gothic</option><option value="retro">Retro</option><option value="steam">Steam</option><option value="vaporwave">Vaporwave</option><option value="desert">Desert</option><option value="lava">Lava</option><option value="tropical">Tropical</option><option value="soleil">Soleil</option><option value="white">Blanc</option><option value="printemps">Printemps</option><option value="ete">Été</option><option value="automne">Automne</option><option value="hiver">Hiver</option><option value="halloween">Halloween</option><option value="noel">Noël</option><option value="nouvelan">Nouvel an</option><option value="valentine">Valentine</option><option value="paques">Pâques</option><option value="carnaval">Carnaval</option></select><a class="btn account" id="accountLink" data-path="/connexion" href="/connexion">🔐 Se connecter</a><button class="btn mobile-menu" id="menu" aria-expanded="false" aria-controls="navigation" aria-label="Ouvrir le menu">☰</button></div></div>
+</div></header>
+<main class="legal-main" id="contenu"><a class="legal-back" href="/">← Retour à l’accueil</a><header class="legal-heading"><h1>Confidentialité et cookies</h1><p>Comprendre les données utilisées par le site personnel et communautaire d’andric31 et les préférences mémorisées dans votre navigateur.</p></header><aside class="legal-draft" aria-label="Version de travail"><strong>Version de travail — à compléter avant publication</strong>Les informations ci-dessous reprennent le fonctionnement du site. L’identité juridique de l’éditeur, les bases légales des traitements et certaines durées de conservation doivent encore être précisées.</aside>
+<nav class="legal-toc" aria-label="Sommaire de la confidentialité"><a href="#donnees">Données utilisées</a><a href="#cookies">Cookies et préférences</a><a href="#destinataires">Accès et services tiers</a><a href="#conservation">Conservation</a><a href="#droits">Vos droits</a></nav>
+<section class="legal-section" id="donnees" aria-labelledby="data-title">
+ <h2 id="data-title">Données utilisées sur le site</h2>
+ <p>Selon les fonctions que vous utilisez, les informations suivantes peuvent être enregistrées :</p>
+ <ul>
+ <li><strong>Compte et connexion :</strong> identifiant, nom affiché, mot de passe sous forme de hachage, rôle et état du compte, dates de création et de connexion. Les sessions utilisent aussi une empreinte de l’adresse IP et des informations sur le navigateur pour leur fonctionnement et leur sécurité.</li>
+ <li><strong>Vos jeux :</strong> favoris, notes, mentions « J’aime », consultations et clics de téléchargement associés au compte, pour les fonctions de suivi et de classement. Des compteurs globaux de consultation et de téléchargement sont également utilisés.</li>
+ <li><strong>Messages :</strong> pseudonyme, texte, réactions, date et salon choisi. Des informations techniques, notamment une empreinte de l’adresse IP et le type de navigateur, servent à limiter les abus. Un message publié dans le salon public peut être lu par les visiteurs.</li>
+ <li><strong>Tickets et demandes de compte :</strong> nom ou pseudonyme, contact renseigné, sujet, message, catégorie, priorité, suivi et informations techniques. Le mot de passe d’une demande de compte est enregistré sous forme de hachage.</li>
+ <li><strong>Connexion ou association Discord, si vous l’utilisez :</strong> identifiant Discord, pseudonyme et nom affiché. Le site utilise la permission d’identification ; il n’enregistre pas les jetons d’accès Discord dans sa base.</li>
+ </ul>
+ <p class="to-complete">Le responsable du traitement et les bases légales correspondant à ces usages doivent être confirmés par l’éditeur avant publication de cette politique.</p>
+</section>
+<section class="legal-section" id="cookies" aria-labelledby="cookies-title">
+ <h2 id="cookies-title">Cookies et préférences sur votre appareil</h2>
+ <p>Comme indiqué dans le viewer, le site peut mémoriser la confirmation de majorité, le thème, l’affichage et certains réglages. Il mémorise aussi, selon les pages utilisées, des éléments déjà consultés, des choix de salon et un identifiant technique pour les réactions ou la protection du pseudonyme invité.</p>
+ <dl>
+ <dt>Connexion au site</dt><dd>Le cookie <strong>andric31_session</strong> maintient la connexion au compte. Sa validité maximale est de <strong>14 jours</strong> ; la déconnexion met fin à la session.</dd>
+ <dt>Vérification Discord</dt><dd>Lorsque vous lancez cette fonction, les cookies <strong>andric31_discord_flow</strong> et <strong>andric31_discord_signup</strong> sécurisent la démarche. Ils expirent respectivement après <strong>10 minutes</strong> et <strong>30 minutes</strong>, au plus.</dd>
+ <dt>Préférences locales</dt><dd>Les données du stockage local du navigateur restent sur cet appareil jusqu’à leur effacement ou leur remplacement. Certains états temporaires sont conservés pour la session de l’onglet.</dd>
+ </dl>
+ <h3>Comment les effacer ?</h3>
+ <p>Dans les paramètres de votre navigateur, recherchez les données du site <strong>andric31-traductions.pages.dev</strong>, puis supprimez-les. Cela peut réinitialiser vos préférences, demander à nouveau la confirmation de majorité et vous déconnecter.</p>
+ <p><strong>Effacer les données du navigateur ne supprime pas votre compte ni les données enregistrées sur le serveur.</strong> Pour celles-ci, consultez la rubrique « Vos droits ».</p>
+</section>
+<section class="legal-section" id="destinataires" aria-labelledby="recipients-title">
+ <h2 id="recipients-title">Accès aux données et services tiers</h2>
+ <p>L’administration du site accède aux informations nécessaires au fonctionnement, à l’assistance et à la modération. La visibilité des échanges dépend du salon utilisé.</p>
+ <p><strong>Cloudflare</strong> fournit l’hébergement et les services techniques du site. Des informations de connexion, dont l’adresse IP, sont traitées pour acheminer et protéger les requêtes.</p>
+ <p><strong>Discord :</strong> si les notifications du site sont activées, l’ouverture d’un ticket transmet au salon configuré son numéro, son auteur, son sujet, sa catégorie et sa priorité. Le corps du ticket et les coordonnées de contact ne figurent pas dans cette notification. Une notification de message peut inclure le pseudonyme, le salon et le texte du message public ; pour un salon privé, le texte du message n’est pas inclus.</p>
+ <p><strong>Images, vidéos et liens externes :</strong> certains contenus proviennent de services tiers, notamment F95Zone. Leur chargement peut transmettre à ces services des informations techniques comme votre adresse IP. Les lecteurs vidéo externes peuvent appliquer leurs propres traceurs.</p>
+ <p>Cloudflare et Discord exploitent des services internationaux. La localisation des traitements et les garanties applicables aux éventuels transferts hors de l’Espace économique européen doivent être précisées pour la configuration utilisée.</p>
+ <p>Informations des prestataires : <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">Cloudflare</a> et <a href="https://discord.com/privacy" target="_blank" rel="noopener noreferrer">Discord</a>.</p>
+</section>
+<section class="legal-section" id="conservation" aria-labelledby="retention-title">
+ <h2 id="retention-title">Durée de conservation</h2>
+ <p>Les durées des cookies et des préférences locales sont indiquées ci-dessus. Les sessions du site expirent après 14 jours ; les sessions expirées sont nettoyées lors des opérations d’authentification.</p>
+ <p>Les données enregistrées sur le serveur sont distinctes des données locales. La déconnexion ou l’effacement du navigateur ne les retire pas.</p>
+ <p class="to-complete"><strong>À définir avant publication :</strong> les durées et les modalités d’effacement des comptes inactifs, du suivi des jeux, des messages, des tickets, des informations techniques et des sauvegardes. Aucune durée uniforme ni suppression automatique de l’ensemble de ces données n’est annoncée ici.</p>
+</section>
+<section class="legal-section" id="droits" aria-labelledby="rights-title">
+ <h2 id="rights-title">Vos droits et vos demandes</h2>
+ <p>Selon les conditions prévues par le RGPD, vous pouvez demander l’accès à vos données, leur rectification, leur effacement ou la limitation de leur traitement, et exercer les droits d’opposition et de portabilité lorsqu’ils s’appliquent. Un consentement, lorsqu’il constitue la base du traitement, peut être retiré.</p>
+ <p>Pour adresser une demande à andric31, utilisez un <strong>message privé</strong> via <a href="https://f95zone.to/members/andric31.247797/" target="_blank" rel="noopener noreferrer">son profil F95Zone</a> ou les coordonnées présentées dans « Contact ». Évitez de publier des informations personnelles ou des identifiants de connexion dans un salon public.</p>
+ <p>Vous pouvez également adresser une réclamation à la <a href="https://www.cnil.fr/fr/adresser-une-plainte" target="_blank" rel="noopener noreferrer">CNIL</a>.</p>
+ <p class="to-complete">Un point de contact direct pour les questions de données personnelles reste à confirmer, ainsi que l’identité du responsable dans les <a href="/mentions-legales">mentions légales</a>.</p>
+</section></main>
+<footer class="shell footer site-info-footer">
+  <div class="footer-identity"><span>andric31 · Traductions françaises</span><span><span class="adult">🔞 18+</span> Site réservé aux personnes majeures.</span></div>
+  <nav class="footer-links" aria-label="Informations du site">
+    <a href="/mentions-legales">Mentions légales</a>
+    <a href="/confidentialite">Confidentialité et cookies</a>
+    <button type="button" class="footer-contact" id="aboutOpen" aria-haspopup="dialog" aria-controls="aboutDialog">Contact</button>
+  </nav>
+</footer>
+<!-- Informations de contact reprises de la fenêtre « À propos » du viewer. -->
+<dialog class="home-about-dialog" id="aboutDialog" aria-labelledby="aboutTitle">
+  <div class="modal-head"><h2 class="modal-title" id="aboutTitle">À propos</h2><button type="button" class="modal-close" data-about-close aria-label="Fermer À propos" autofocus>✕</button></div>
+  <div class="modal-body aboutText">
+    <p>Pour tout renseignement, aide ou autre, rejoignez mon serveur Discord :<br><a href="https://discord.gg/Jr8Ykf8yMd" target="_blank" rel="noopener noreferrer">https://discord.gg/Jr8Ykf8yMd</a></p>
+    <p>Contact Discord :<br><a href="https://discord.com/users/@andric31" target="_blank" rel="noopener noreferrer">https://discord.com/users/@andric31</a></p>
+    <p>Vous pouvez aussi me contacter sur F95zone :<br>Profil <a href="https://f95zone.to/members/andric31.247797/" target="_blank" rel="noopener noreferrer">https://f95zone.to/members/andric31.247797/</a></p>
+  </div>
+  <div class="modal-foot"><button type="button" class="btn" data-about-close>OK</button></div>
+</dialog>
+<script src="/accueil.js?v=20261023-accueil-1"></script>
+</body></html>

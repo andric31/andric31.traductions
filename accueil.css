@@ -343,7 +343,7 @@ body:has(.home-about-dialog[open]){overflow:hidden}
 .tools-updates>.panel-content{padding:0}
 .tools-updates .tools-carousel .viewer-release-stack{grid-template-columns:minmax(0,1fr);gap:12px}
 .tools-updates .tools-carousel .viewer-release{grid-column:auto;grid-row:auto;grid-template-columns:52px minmax(0,1fr) auto;grid-template-rows:auto;align-items:center;align-content:center;justify-content:normal;min-height:142px;padding:22px 24px;gap:16px;border:0;border-radius:13px;box-shadow:none}
-.tools-updates .tools-carousel .viewer-release::before{display:block}
+.tools-updates .tools-carousel .viewer-release::before{display:none}
 .tools-updates .tools-carousel .viewer-release__icon{width:52px;height:56px;border-radius:13px}
 .tools-updates .tools-carousel .viewer-release__icon svg{width:29px;height:29px}
 .tools-updates .tools-carousel .viewer-release__title{font-size:25px;margin:6px 0}

@@ -51,14 +51,4 @@
   menu.addEventListener('click', () => toggle(menu.getAttribute('aria-expanded') !== 'true'));
   nav.addEventListener('click', event => { if (event.target.closest('a')) toggle(false); });
   document.addEventListener('keydown', event => { if (event.key === 'Escape') { toggle(false); if (document.activeElement === menu || nav.contains(document.activeElement)) menu.focus(); } });
-  const firstVisitDialog = document.getElementById('firstVisitDialog');
-  const firstVisitOpen = document.querySelector('[data-first-visit]');
-  if (firstVisitDialog && firstVisitOpen) {
-    firstVisitOpen.addEventListener('click', () => firstVisitDialog.showModal());
-    firstVisitDialog.querySelectorAll('[data-close-steps]').forEach(button => button.addEventListener('click', () => firstVisitDialog.close()));
-    firstVisitDialog.addEventListener('click', event => {
-      const bounds = firstVisitDialog.getBoundingClientRect();
-      if (event.target === firstVisitDialog && (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom)) firstVisitDialog.close();
-    });
-  }
 })();

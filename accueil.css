@@ -301,12 +301,13 @@ body:has(.home-about-dialog[open]){overflow:hidden}
 
 
 /* Accueil v386 : ressources compactes et aide sous l'ensemble des tuiles. */
-.tools-updates .viewer-release--main{grid-template-columns:52px minmax(0,max-content);justify-content:center;align-content:center}
-.mosaic-guide{min-height:290px;padding:22px}
-.mosaic-guide .mosaic-copy{max-width:100%;padding-top:72px}
+.tools-updates .viewer-release--main{grid-template-columns:52px minmax(0,max-content);justify-content:start;align-content:center}
+.mosaic-guide{min-height:290px;padding:22px;justify-content:center;gap:12px}
+.mosaic-guide>.mosaic-kicker{max-width:calc(100% - 125px)}
+.mosaic-guide .mosaic-copy{max-width:calc(100% - 125px);margin-top:0;padding-top:0}
 .mosaic-guide h3{font-size:24px;margin-bottom:8px}
 .mosaic-guide p{margin-bottom:16px;line-height:1.6}
-.mosaic-illustration{position:absolute;right:22px;top:14px;min-height:142px;margin:0;transform:scale(.6);transform-origin:top right;opacity:.8}
+.mosaic-illustration{position:absolute;left:auto;right:22px;top:50%;height:142px;min-height:142px;margin:0;transform:translateY(-50%) scale(.65);transform-origin:center right;opacity:.8}
 .mosaic-community{display:flex;flex-direction:column;padding:18px 20px}
 .mosaic-community-top{margin-bottom:8px}
 .mosaic-community-top .mosaic-small-icon{top:17px;right:19px}
@@ -321,13 +322,14 @@ body:has(.home-about-dialog[open]){overflow:hidden}
 .home-first-visit{margin:0 10px 10px;z-index:auto}
 .home-first-visit summary{padding:10px 13px}
 @media(max-width:1050px){.mosaic-small{padding:16px 13px}.mosaic-small h3{font-size:17px}}
-@media(max-width:760px){.mosaic-guide{min-height:224px;padding:22px}.mosaic-guide .mosaic-copy{padding-top:50px}.mosaic-community{padding:18px 20px}.mosaic-small{min-height:146px}}
+@media(max-width:760px){.mosaic-guide{min-height:224px;padding:22px}.mosaic-community{padding:18px 20px}.mosaic-small{min-height:146px}}
 @media(max-width:460px){
  .tools-updates .viewer-release--main{grid-template-columns:44px minmax(0,max-content)}
- .mosaic-guide{min-height:236px;padding:20px}
- .mosaic-guide .mosaic-copy{padding-top:64px}
+ .mosaic-guide{min-height:216px;padding:20px;gap:8px}
+ .mosaic-guide>.mosaic-kicker{max-width:calc(100% - 80px);min-height:40px}
+ .mosaic-guide .mosaic-copy{max-width:100%;padding-top:0}
  .mosaic-guide h3{font-size:23px}
- .mosaic-illustration{right:19px;top:12px;transform:scale(.5)}
+ .mosaic-illustration{left:auto;right:18px;top:8px;transform:scale(.4);transform-origin:top right}
  .mosaic-small{min-height:118px;padding:17px 18px}
  .mosaic-small-top{height:auto}
  .mosaic-small-top .mosaic-small-icon{position:static}

@@ -51,4 +51,86 @@
   menu.addEventListener('click', () => toggle(menu.getAttribute('aria-expanded') !== 'true'));
   nav.addEventListener('click', event => { if (event.target.closest('a')) toggle(false); });
   document.addEventListener('keydown', event => { if (event.key === 'Escape') { toggle(false); if (document.activeElement === menu || nav.contains(document.activeElement)) menu.focus(); } });
+  const carousel = document.querySelector('[data-tools-carousel]');
+  if (carousel) {
+    const viewport = carousel.querySelector('.tools-carousel__viewport');
+    const track = carousel.querySelector('.tools-carousel__track');
+    const slides = [...track.querySelectorAll('.viewer-release')];
+    const controls = carousel.querySelector('.tools-carousel__controls');
+    const dots = [...controls.querySelectorAll('[data-carousel-go]')];
+    const pauseButton = controls.querySelector('[data-carousel-pause]');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let current = 0;
+    let timer = null;
+    let paused = reducedMotion.matches;
+    let hovered = false;
+    let focused = false;
+
+    function showSlide(index) {
+      const previous = current;
+      current = (index + slides.length) % slides.length;
+      slides.forEach((slide, i) => {
+        const active = i === current;
+        slide.classList.toggle('is-active', active);
+        slide.classList.toggle('is-previous', !active && i === previous);
+        slide.inert = !active;
+        slide.setAttribute('aria-hidden', String(!active));
+        slide.setAttribute('role', 'group');
+        slide.setAttribute('aria-roledescription', 'diapositive');
+        dots[i].toggleAttribute('data-active', active);
+        if (active) dots[i].setAttribute('aria-current', 'true');
+        else dots[i].removeAttribute('aria-current');
+      });
+    }
+
+    function schedule() {
+      window.clearTimeout(timer);
+      timer = null;
+      const running = slides.length > 1 && !paused && !hovered && !focused && !document.hidden;
+      track.setAttribute('aria-live', running ? 'off' : 'polite');
+      pauseButton.textContent = paused ? '▶ Reprendre' : 'Ⅱ Pause';
+      pauseButton.setAttribute('aria-label', paused ? 'Reprendre le défilement automatique' : 'Mettre le défilement en pause');
+      if (running) {
+        timer = window.setTimeout(() => {
+          showSlide(current + 1);
+          schedule();
+        }, 3000);
+      }
+    }
+
+    dots.forEach((dot, index) => {
+      dot.addEventListener('click', () => { showSlide(index); schedule(); });
+      dot.addEventListener('keydown', event => {
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+        event.preventDefault();
+        const next = event.key === 'Home' ? 0 : event.key === 'End' ? dots.length - 1 :
+          (index + (event.key === 'ArrowRight' ? 1 : -1) + dots.length) % dots.length;
+        dots[next].focus();
+        showSlide(next);
+        schedule();
+      });
+    });
+    pauseButton.addEventListener('click', () => {
+      paused = !paused;
+      if (!paused) focused = false;
+      schedule();
+    });
+    viewport.addEventListener('pointerenter', event => {
+      if (event.pointerType === 'mouse') { hovered = true; schedule(); }
+    });
+    viewport.addEventListener('pointerleave', () => { hovered = false; schedule(); });
+    carousel.addEventListener('focusin', () => { focused = true; schedule(); });
+    carousel.addEventListener('focusout', event => {
+      if (!carousel.contains(event.relatedTarget)) { focused = false; schedule(); }
+    });
+    document.addEventListener('visibilitychange', schedule);
+    reducedMotion.addEventListener('change', event => {
+      if (event.matches) paused = true;
+      schedule();
+    });
+    showSlide(0);
+    carousel.classList.add('is-ready');
+    controls.hidden = false;
+    schedule();
+  }
 })();

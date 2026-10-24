@@ -93,7 +93,7 @@ body{
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }</style>
 <link rel="stylesheet" href="/themes.css">
-<link rel="stylesheet" href="/accueil.css?v=20261024-accueil-v388">
+<link rel="stylesheet" href="/accueil.css?v=20261024-accueil-v389">
 </head>
 <body>
 <a class="skip" href="#contenu">Aller au contenu</a>
@@ -153,11 +153,12 @@ body{
   <div class="panel-content"><p><strong>F95Zone modifie ses liens d’images. </strong> Cette modification affecte également le site et certaines images peuvent ne plus s’afficher correctement.</p></div>
 </section>
 <!-- Mises à jour des outils de l’accueil, indépendantes du bandeau du viewer. -->
-<section class="panel tools-updates" aria-labelledby="tools-updates-title">
-  <div class="panel-title"><span class="icon" aria-hidden="true">🛠️</span><h2 id="tools-updates-title">Retrouve les dernières mises à jour de mes outils</h2></div>
+<section class="tools-updates" aria-roledescription="carrousel" aria-label="Dernières mises à jour des outils">
   <div class="panel-content">
-<div class="viewer-release-stack">
-  <article class="viewer-release viewer-release--main" aria-labelledby="release-extension-title">
+<div class="tools-carousel" data-tools-carousel>
+<div class="tools-carousel__viewport">
+<div class="viewer-release-stack tools-carousel__track">
+  <article id="tool-release-1" class="viewer-release viewer-release--main" aria-labelledby="release-extension-title">
     <div class="viewer-release__icon" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
         <path d="M9 5V4a2 2 0 0 1 4 0v1h4a1 1 0 0 1 1 1v4h1a2.5 2.5 0 0 1 0 5h-1v4a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-4h1a2.5 2.5 0 0 0 0-5H4V6a1 1 0 0 1 1-1h4Z" />
@@ -174,7 +175,7 @@ body{
     </a>
   </article>
 
-  <article class="viewer-release viewer-release--secondary" aria-labelledby="release-relecteur-title">
+  <article id="tool-release-2" class="viewer-release viewer-release--secondary" aria-labelledby="release-relecteur-title">
     <div class="viewer-release__icon" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
         <path d="M13 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-8M7 8h4M7 12h2M7 16h5" />
@@ -192,7 +193,7 @@ body{
     </a>
   </article>
 
-  <article class="viewer-release viewer-release--image-extension" aria-labelledby="release-image-extension-title">
+  <article id="tool-release-3" class="viewer-release viewer-release--image-extension" aria-labelledby="release-image-extension-title">
     <div class="viewer-release__icon" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 3v12" />
@@ -210,6 +211,17 @@ body{
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10" /></svg>
     </a>
   </article>
+</div>
+
+</div>
+<div class="tools-carousel__controls" hidden>
+  <div class="tools-carousel__indicators" role="group" aria-label="Choisir un outil">
+    <button type="button" class="tools-carousel__dot" data-carousel-go="0" aria-controls="tool-release-1" aria-label="Afficher f95list_andric31 (1 sur 3)"></button>
+    <button type="button" class="tools-carousel__dot" data-carousel-go="1" aria-controls="tool-release-2" aria-label="Afficher Relecteur Ren’Py (2 sur 3)"></button>
+    <button type="button" class="tools-carousel__dot" data-carousel-go="2" aria-controls="tool-release-3" aria-label="Afficher Enregistrer l’image sous… (3 sur 3)"></button>
+  </div>
+  <button type="button" class="tools-carousel__pause" data-carousel-pause aria-label="Mettre le défilement en pause">Ⅱ Pause</button>
+</div>
 </div>
   </div>
 </section>
@@ -246,5 +258,5 @@ body{
   </div>
   <div class="modal-foot"><button type="button" class="btn" data-about-close="">OK</button></div>
 </dialog>
-<script src="/accueil.js?v=20261024-accueil-v385"></script>
+<script src="/accueil.js?v=20261024-accueil-v389"></script>
 </body></html>

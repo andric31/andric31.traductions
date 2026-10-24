@@ -62,8 +62,8 @@
   <main class="ticket-shell">
     <section class="ticket-hero">
       <div class="ticket-kicker">🎫 Support</div>
-      <h1>Ticket</h1>
-      <p>Utilise ce ticket pour faire une demande liée au fonctionnement du site ou transmettre une information.</p>
+      <h1 id="ticketHeading">Ticket</h1>
+      <p id="ticketIntro">Utilise ce ticket pour faire une demande liée au fonctionnement du site ou transmettre une information.</p>
       <div class="ticket-note" role="note">
         <strong>Information importante</strong>
         <span>Après l’envoi, un lien privé te permet de lire les réponses et de poursuivre l’échange avec l’administration, sans compte.</span>
@@ -72,6 +72,7 @@
       <div class="ticket-actions">
         <a class="ticket-btn" href="/">Retour au site</a>
         <a class="ticket-btn" href="/confidentialite">Confidentialité</a>
+        <a class="ticket-btn" href="/regles-communaute">Règles de la communauté</a>
       </div>
     </section>
 
@@ -106,6 +107,13 @@
               <option value="urgent">Urgent</option>
             </select>
           </label>
+        </div>
+
+        <div id="reportNote" class="ticket-note" role="note" hidden>
+          <strong>Pour retrouver le contenu et traiter ton signalement</strong>
+          <span>Indique le lien précis de la page, le contenu ou le message concerné, le motif du signalement et ce que tu demandes.</span>
+          <span>Pour les droits d’auteur, précise l’œuvre concernée et ta qualité pour agir. Ne recopie pas de données sensibles ou de contenu illégal lorsque le lien suffit.</span>
+          <span>Ton signalement est transmis à l’administration dans un ticket privé.</span>
         </div>
 
         <div id="privateSignupNote" class="ticket-note ticket-hidden" role="note">
@@ -179,6 +187,7 @@
         const params = new URLSearchParams(location.search);
         const raw = String(params.get('category') || params.get('type') || params.get('motif') || '').toLowerCase().trim();
         const aliases = {
+          signalement: 'probleme',
           confidentialite: 'confidentialite',
           rgpd: 'confidentialite',
           inscription: 'inscription',
@@ -202,6 +211,20 @@
       function updateTicketCategoryMode() {
         const isPrivateSignup = category?.value === 'inscription';
         const isAccountPassword = category?.value === 'compte';
+        const isReport = category?.value === 'probleme';
+        document.getElementById('reportNote').hidden = !isReport;
+        document.getElementById('ticketHeading').textContent = isReport ? 'Signaler un contenu' : 'Ticket';
+        document.getElementById('ticketIntro').textContent = isReport
+          ? 'Signale un contenu ou un lien problématique à l’administration, sans compte ni adresse e-mail.'
+          : 'Utilise ce ticket pour faire une demande liée au fonctionnement du site ou transmettre une information.';
+        document.getElementById('ticketSubmit').textContent = isReport ? 'Envoyer le signalement' : 'Envoyer le ticket';
+        const message = document.getElementById('ticketMessage');
+        message.placeholder = isReport
+          ? 'Lien de la page, contenu concerné, motif du signalement et demande…'
+          : 'Explique ta demande le plus clairement possible…';
+        if (isReport) message.setAttribute('aria-describedby', 'reportNote');
+        else message.removeAttribute('aria-describedby');
+
         const usesAutoTitle = isPrivateSignup || isAccountPassword;
         const autoTitle = isPrivateSignup ? 'Création de compte' : (isAccountPassword ? 'Compte / mot de passe' : '');
 

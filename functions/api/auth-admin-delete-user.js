@@ -21,13 +21,23 @@ export async function onRequest(context) {
     const existing = await env.DB.prepare(`SELECT id, username FROM auth_users WHERE id = ?1 LIMIT 1`).bind(userId).first();
     if (!existing) return json({ ok: false, error: 'Utilisateur introuvable.' }, 404);
 
-    // The history table has no foreign key in existing databases.
+    // Certaines tables n'ont pas de clé étrangère, selon leur date et leur
+    // ordre de création. Nettoyer explicitement les données liées au compte.
     const tables = await env.DB.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all();
     const present = new Set((tables.results || []).map(row => row.name));
     const deletions = [env.DB.prepare('DELETE FROM auth_sessions WHERE user_id = ?').bind(userId)];
-    for (const table of ['user_page_views', 'user_game_state', 'auth_discord_links']) {
+    for (const table of [
+      'user_page_views', 'user_game_state', 'user_watchlist',
+      'community_game_tops', 'counter_view_locks',
+      'auth_discord_links', 'auth_discord_flows',
+    ]) {
       if (present.has(table)) deletions.push(env.DB.prepare(`DELETE FROM ${table} WHERE user_id = ?`).bind(userId));
     }
+    if (present.has('message_reactions')) {
+      deletions.push(env.DB.prepare('DELETE FROM message_reactions WHERE actor_key = ?').bind(`user:${userId}`));
+    }
+    // Les messages et tickets identifiés par un pseudo demandent un examen
+    // séparé : un pseudo ne suffit pas à attribuer un texte à ce compte.
     deletions.push(env.DB.prepare('DELETE FROM auth_users WHERE id = ?').bind(userId));
     await env.DB.batch(deletions);
 

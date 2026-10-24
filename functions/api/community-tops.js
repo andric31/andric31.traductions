@@ -1,4 +1,4 @@
-import { ensureAuthTables, requireUser, json } from './_auth.js';
+import { assertSameOrigin, ensureAuthTables, requireUser, json } from './_auth.js';
 
 function clean(value, max = 1000) {
   return String(value ?? '').replace(/\u0000/g, '').trim().slice(0, max);
@@ -43,11 +43,12 @@ export async function onRequestGet(context) {
   const db = getDb(context.env);
   if (!db) return json({ ok: false, error: 'DB non liée.' }, 500);
   await ensureTables(db);
+  // Les tops partagés sont réservés aux membres, comme la page qui les affiche.
+  const auth = await requireUser(db, context.env, context.request);
+  if (!auth.ok) return auth.response;
   const url = new URL(context.request.url);
 
   if (url.searchParams.get('mine') === '1') {
-    const auth = await requireUser(db, context.env, context.request);
-    if (!auth.ok) return auth.response;
     const row = await db.prepare(`SELECT items_json, published_at, updated_at FROM community_game_tops WHERE user_id = ?1`).bind(auth.user.id).first();
     return json({ ok: true, published: !!row, items: row ? parseItems(row.items_json) : [], published_at: row?.published_at || '', updated_at: row?.updated_at || '' });
   }
@@ -76,6 +77,9 @@ export async function onRequestGet(context) {
 }
 
 export async function onRequestPost(context) {
+  if (!assertSameOrigin(context.request) || context.request.headers.get('sec-fetch-site') === 'cross-site') {
+    return json({ ok: false, error: 'Origine invalide.' }, 403);
+  }
   const db = getDb(context.env);
   if (!db) return json({ ok: false, error: 'DB non liée.' }, 500);
   await ensureTables(db);
@@ -97,6 +101,9 @@ export async function onRequestPost(context) {
 }
 
 export async function onRequestDelete(context) {
+  if (!assertSameOrigin(context.request) || context.request.headers.get('sec-fetch-site') === 'cross-site') {
+    return json({ ok: false, error: 'Origine invalide.' }, 403);
+  }
   const db = getDb(context.env);
   if (!db) return json({ ok: false, error: 'DB non liée.' }, 500);
   await ensureTables(db);

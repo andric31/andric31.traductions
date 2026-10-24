@@ -30,6 +30,7 @@ const FILE_PAGES = new Set([
   "/blog/_news-de-fevrier",
   "/blog/bienvenue-sur-andric31",
   "/blog/capsule-01-on-fait-le-point",
+  "/ticket/suivi",
   "/compte/admin",
   "/compte/blog-admin",
   "/compte/discord-diagnostic",
@@ -56,11 +57,15 @@ const FILE_PAGES = new Set([
   "/wiki/traduction-others-asar"
 ]);
 
-export function onRequest(context) {
+export async function onRequest(context) {
   const { request } = context;
   if (request.method !== "GET" && request.method !== "HEAD") return context.next();
   const url = new URL(request.url);
   const path = url.pathname;
+  if (path === '/ticket/suivi.html') {
+    url.pathname = '/ticket/suivi';
+    return Response.redirect(url.href, 308);
+  }
   // Les anciens liens du viewer à la racine restent valables après l’arrivée de l’accueil.
   if (path === "/" || path === "/index.html") {
     const viewerParams = ["id", "uid", "src", "f95France", "f95FranceTranslation"];
@@ -89,6 +94,14 @@ export function onRequest(context) {
     // Ne pas rediriger ce chemin dans _redirects : cela créerait une boucle.
     url.pathname = canonical + "/";
     return context.next(new Request(url, request));
+  }
+  if (canonical === '/ticket/suivi') {
+    const response = new Response(await context.next());
+    response.headers.set('Referrer-Policy', 'no-referrer');
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+    response.headers.set('Cache-Control', 'no-store');
+    response.headers.set('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
+    return response;
   }
   return context.next();
 }

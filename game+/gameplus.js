@@ -228,17 +228,27 @@
     $('#catalogueHeading').hidden = true;
   }
 
+  function showGate(message, login = false) {
+    clearPrivateView();
+    $('#app').hidden = true; $('#gate').hidden = false;
+    $('#gateTitle').textContent = login ? '🔒 Game+' : 'Chargement de Game+';
+    $('#gateText').textContent = message;
+    loginBtn.hidden = !login; $('#retry').hidden = login;
+  }
+
   async function load() {
     const requestId = ++requestNumber;
-    if (!state.items.length) setState('Chargement de Game+…');
+    if ($('#app').hidden) {
+      $('#gate').hidden = false; $('#gateTitle').textContent = '✨ Game+';
+      $('#gateText').textContent = 'Vérification de la connexion…';
+      loginBtn.hidden = true; $('#retry').hidden = true;
+    }
     try {
       const resp = await fetch('/api/gameplus', { cache: 'no-store', credentials: 'same-origin' });
       const data = await resp.json().catch(() => null);
       if (requestId !== requestNumber) return;
       if (resp.status === 401 || data?.requiresLogin) {
-        clearPrivateView();
-        loginBtn.hidden = false;
-        setState('Connecte-toi pour accéder aux jeux Game+.', 'error');
+        showGate('Connecte-toi pour accéder à cette section privée et à ses jeux.', true);
         return;
       }
       if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Chargement impossible.');
@@ -246,7 +256,8 @@
       markGamePlusSeen(state.items);
       toolbar.hidden = false;
       $('#catalogueHeading').hidden = false;
-      loginBtn.hidden = true;
+      loginBtn.hidden = true; $('#retry').hidden = true;
+      $('#gate').hidden = true; $('#app').hidden = false;
       sortSelect.value = state.sort;
       fillEngines();
       if (![...engineSelect.options].some(o => o.value === state.engine)) state.engine = 'all';
@@ -258,11 +269,11 @@
       }
     } catch (err) {
       if (requestId !== requestNumber) return;
-      clearPrivateView();
-      setState(err?.message || 'Impossible de charger Game+.', 'error');
+      showGate('Le catalogue ne répond pas pour le moment. Réessaie dans un instant.');
     }
   }
 
+  $('#retry').addEventListener('click', load);
   searchInput?.addEventListener('input', () => { state.q = searchInput.value.trim(); applyFilters(); });
   engineSelect?.addEventListener('change', () => { state.engine = engineSelect.value || 'all'; applyFilters(); });
   sortSelect?.addEventListener('change', () => { state.sort = sortSelect.value || 'title'; applyFilters(); });

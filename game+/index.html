@@ -38,13 +38,14 @@
         <option value="crimson">Thème : Crimson 🩸</option>
         <option value="steam">Thème : Steam ⚙️</option>
       </select></header>
-<main>
+<section id="gate" class="ml-gate" role="status"><h1 id="gateTitle">✨ Game+</h1><p id="gateText">Vérification de la connexion…</p><a class="ml-btn primary" href="/connexion" id="loginBtn" hidden>Se connecter</a><button class="ml-btn" id="retry" hidden>Réessayer</button><noscript>Active JavaScript pour utiliser cette section privée.</noscript></section>
+<main id="app" hidden>
 <div class="ml-heading"><div class="ml-intro"><h1>✨ Game+</h1><p>Des jeux à découvrir, réservés aux comptes connectés.</p></div><span class="ml-label">🔒 Section privée</span></div>
 <section class="ml-toolbar" id="toolbar" hidden aria-label="Rechercher et trier les jeux"><label class="ml-search"><input id="searchInput" type="search" placeholder="Rechercher un jeu, un auteur, un tag…" aria-label="Rechercher" autocomplete="off"></label><select class="ml-sort" id="engineSelect" aria-label="Filtrer par moteur"><option value="all">Tous les moteurs</option></select><select class="ml-sort" id="sortSelect" aria-label="Trier"><option value="title">Titre A–Z</option><option value="date-desc" selected>Trad MAJ récente</option><option value="date-asc">Trad MAJ ancienne</option></select></section>
 <div class="ml-section-title" id="catalogueHeading" hidden><h2>Tous les jeux</h2><span class="ml-count" id="miniStats"></span></div>
 <div class="gp-state" id="stateBox" role="status">Chargement de Game+…</div><div class="ml-grid gp-grid" id="grid"></div>
-<a class="ml-btn primary gp-login" href="/connexion" id="loginBtn" hidden>Se connecter</a><noscript>Active JavaScript pour utiliser cette section privée.</noscript>
+
 </main><footer class="ml-footer"><span>andric31 · Game+</span><div><a href="/mentions-legales">Mentions légales</a><a href="/confidentialite">Confidentialité</a><a href="/ticket">Contact</a></div></footer>
 </div>
 <dialog class="ml-dialog gp-dialog" id="gameDialog" aria-labelledby="gameTitle"><header class="ml-dialog-head"><h2 id="gameTitle"></h2><button type="button" class="ml-btn ml-close" id="closeGame" aria-label="Fermer la fiche">×</button></header><div class="gp-detail-grid"><div id="gameVisual"></div><section class="gp-detail-info"><div class="gp-meta" id="gameMeta"></div><p class="gp-description" id="gameDescription"></p><div class="gp-tags" id="gameTags"></div></section><div class="gp-information" id="gameInformation"></div><div id="gameLinks"></div></div></dialog>
-<script src="/game+/gameplus.js?v=20261024-2"></script></body></html>
+<script src="/game+/gameplus.js?v=20261024-383"></script></body></html>

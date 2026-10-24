@@ -137,6 +137,7 @@ export async function onRequest(context) {
     const items = asItems(doc).map(cleanGame).filter(Boolean);
     return json({
       ok: true,
+      storage: 'r2',
       version: doc?.version || 1,
       updatedAt: cleanText(doc?.updatedAt),
       count: items.length,

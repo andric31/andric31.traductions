@@ -1,5 +1,6 @@
-// Catalogue privé existant et résolution des médias Game+ déclarés dans ses fiches.
+// Catalogue privé R2 et résolution des médias Game+ déclarés dans ses fiches.
 import {objectKey,preview} from './_r2_explorer.js';
+import {readGamePlusCatalogue} from './_gameplus-catalogue.js';
 export const GAMEPLUS_PREFIX='private-library/gameplus/';
 const value=v=>String(v??'').trim();
 export function asItems(doc){
@@ -15,19 +16,7 @@ export function getItem(doc,id){return asItems(doc).find(item=>visibleGame(item)
 export function httpTarget(raw){
   try{const u=new URL(value(raw));return ['https:','http:'].includes(u.protocol)&&!u.username&&!u.password?u.href:'';}catch{return '';}
 }
-export async function fetchGamePlusDoc(context){
-  const env=context.env||{},get=(name,fallback='')=>value(env[name]||fallback);
-  const token=get('GITHUB_PRIVATE_TOKEN')||get('GITHUB_TOKEN')||get('GH_TOKEN');
-  if(!token)throw Error('Catalogue privé indisponible.');
-  const owner=get('PRIVATE_LINKS_OWNER','andric31'),repo=get('PRIVATE_LINKS_REPO','f95list_private_links'),branch=get('PRIVATE_LINKS_BRANCH','main');
-  const path=get('GAMEPLUS_PRIVATE_PATH','gameplus.json').replace(/^\/+/, '');
-  const url=`https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path.split('/').map(encodeURIComponent).join('/')}?ref=${encodeURIComponent(branch)}`;
-  const response=await fetch(url,{headers:{accept:'application/vnd.github+json',authorization:'Bearer '+token,'user-agent':'andric31-traductions-pages','x-github-api-version':'2022-11-28'},cf:{cacheTtl:60,cacheEverything:true}});
-  if(!response.ok)throw Error('Catalogue privé indisponible.');
-  const data=await response.json();
-  const binary=atob(value(data?.content).replace(/\s/g,'')),bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));
-  return JSON.parse(new TextDecoder().decode(bytes));
-}
+export async function fetchGamePlusDoc(context){return (await readGamePlusCatalogue(context.env)).doc;}
 
 // Aucun chemin R2 libre ne vient de la requête : il doit figurer dans la fiche.
 export function gameplusKey(raw,id,type='download'){

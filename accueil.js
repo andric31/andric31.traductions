@@ -58,7 +58,6 @@
     const slides = [...track.querySelectorAll('.viewer-release')];
     const controls = carousel.querySelector('.tools-carousel__controls');
     const dots = [...controls.querySelectorAll('[data-carousel-go]')];
-    const pauseButton = controls.querySelector('[data-carousel-pause]');
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let current = 0;
     let timer = null;
@@ -88,8 +87,6 @@
       timer = null;
       const running = slides.length > 1 && !paused && !hovered && !focused && !document.hidden;
       track.setAttribute('aria-live', running ? 'off' : 'polite');
-      pauseButton.textContent = paused ? '▶ Reprendre' : 'Ⅱ Pause';
-      pauseButton.setAttribute('aria-label', paused ? 'Reprendre le défilement automatique' : 'Mettre le défilement en pause');
       if (running) {
         timer = window.setTimeout(() => {
           showSlide(current + 1);
@@ -110,11 +107,6 @@
         schedule();
       });
     });
-    pauseButton.addEventListener('click', () => {
-      paused = !paused;
-      if (!paused) focused = false;
-      schedule();
-    });
     viewport.addEventListener('pointerenter', event => {
       if (event.pointerType === 'mouse') { hovered = true; schedule(); }
     });
@@ -125,7 +117,7 @@
     });
     document.addEventListener('visibilitychange', schedule);
     reducedMotion.addEventListener('change', event => {
-      if (event.matches) paused = true;
+      paused = event.matches;
       schedule();
     });
     showSlide(0);

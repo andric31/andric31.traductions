@@ -7,6 +7,7 @@
   function rawVal(id){ return document.getElementById(id)?.value || ''; }
   form?.addEventListener('submit', async (event) => {
     event.preventDefault();
+    if (btn.disabled) return;
     await window.DiscordLink?.ready;
     const payload = {
       name: val('ticketName'),
@@ -18,7 +19,7 @@
       message: val('ticketMessage'),
       password: rawVal('ticketPassword'),
       password_confirm: rawVal('ticketPasswordConfirm'),
-      page_url: location.href,
+      page_url: location.origin + location.pathname,
       user_agent: navigator.userAgent || '',
     };
     if (!payload.name || !payload.category || !payload.title || !payload.message) {
@@ -48,11 +49,36 @@
       form.reset();
       if (payload.link_discord) window.DiscordLink?.clearSignup();
       document.getElementById('ticketCategory')?.dispatchEvent(new Event('change'));
-      setStatus(`Ticket envoyé ✅ Référence #${data.ticket?.id || data.id}.`, 'ok');
+      const ticketId = Number(data.ticket?.id || data.id);
+      const key = data.tracking?.key || '';
+      if (!Number.isSafeInteger(ticketId) || !/^[a-f0-9]{64}$/.test(key)) {
+        setStatus(`Ticket #${ticketId} enregistré, mais le suivi privé est indisponible. Recharge la page avant une nouvelle demande.`, 'err');
+        return;
+      }
+      const link = new URL('/ticket/suivi', location.origin);
+      link.hash = new URLSearchParams({ id: String(ticketId), cle: key }).toString();
+      document.getElementById('privateTicketLink').value = link.href;
+      document.getElementById('openPrivateTicket').href = link.href;
+      document.getElementById('receiptTitle').textContent = `Ticket #${ticketId} envoyé`;
+      form.hidden = true;
+      const receipt = document.getElementById('ticketReceipt');
+      receipt.hidden = false; receipt.focus();
     } catch (err) {
       setStatus(err?.message || 'Erreur pendant l’envoi du ticket.', 'err');
     } finally {
       btn.disabled = false;
     }
+  });
+  document.getElementById('copyTicketLink')?.addEventListener('click', async () => {
+    const input = document.getElementById('privateTicketLink');
+    try { await navigator.clipboard.writeText(input.value); document.getElementById('receiptStatus').textContent = 'Lien privé copié.'; }
+    catch { input.focus(); input.select(); document.getElementById('receiptStatus').textContent = 'Copie le lien sélectionné avec Ctrl+C.'; }
+  });
+  document.getElementById('saveTicketLink')?.addEventListener('click', () => {
+    const link = document.getElementById('privateTicketLink').value;
+    const blob = new Blob(['Suivi privé de ton ticket andric31\nNe partage pas ce lien.\n\n' + link + '\n'], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob), anchor = document.createElement('a');
+    anchor.href = url; anchor.download = 'mon-ticket-andric31.txt'; anchor.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   });
 })();

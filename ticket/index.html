@@ -7,7 +7,7 @@
   <link rel="icon" href="/favicon.png" />
   <link rel="stylesheet" href="/viewer.css" />
   <link rel="stylesheet" href="/themes.css" />
-  <link rel="stylesheet" href="/ticket/ticket.css" />
+  <link rel="stylesheet" href="/ticket/ticket.css?v=20261024-prive-1" />
   <script src="/theme-init.js"></script>
   <style>
     .ticket-form input,
@@ -66,12 +66,12 @@
       <p>Utilise ce ticket pour faire une demande liée au fonctionnement du site ou transmettre une information.</p>
       <div class="ticket-note" role="note">
         <strong>Information importante</strong>
-        <span>Le ticket est visible uniquement par un administrateur. Il ne crée pas de conversation directe, mais un message pourra être envoyé dans la page Messages si nécessaire.</span>
-        <span class="ticket-message-hint">Pour une question qui demande une réponse ou un échange, utilise la page Messages.</span>
+        <span>Après l’envoi, un lien privé te permet de lire les réponses et de poursuivre l’échange avec l’administration, sans compte.</span>
+        <span class="ticket-message-hint">Conserve ce lien : toute personne qui le possède peut consulter ton ticket et y répondre. Le numéro seul ne suffit pas.</span>
       </div>
       <div class="ticket-actions">
         <a class="ticket-btn" href="/">Retour au site</a>
-        <a class="ticket-btn" href="/messages">Aller aux messages</a>
+        <a class="ticket-btn" href="/confidentialite">Confidentialité</a>
       </div>
     </section>
 
@@ -91,6 +91,7 @@
               <option value="" selected disabled>Choisir le type de demande</option>
               <option value="inscription">Création de compte</option>
               <option value="compte">Compte / mot de passe</option>
+              <option value="confidentialite">Confidentialité / données personnelles</option>
               <option value="question">Support</option>
               <option value="probleme">Signalement</option>
               <option value="suggestion">Suggestion</option>
@@ -110,7 +111,7 @@
         <div id="privateSignupNote" class="ticket-note ticket-hidden" role="note">
           <strong>Création de compte</strong>
           <span>Le pseudo et le mot de passe sont obligatoires. Le mot de passe doit contenir au moins 8 caractères.</span>
-          <span>Après l’envoi, pense à noter le numéro du ticket : un message sera envoyé sur la page Messages avec ce numéro pour confirmer la validation par un administrateur.</span>
+          <span>Après l’envoi, conserve le lien privé pour consulter la réponse de l’administration.</span>
         </div>
 
         <div id="ticketDiscordWrap" class="ticket-hidden" data-discord-mode="signup"></div>
@@ -128,7 +129,7 @@
 
         <div id="accountPasswordNote" class="ticket-note ticket-hidden" role="note">
           <strong>Ticket pour un compte existant</strong>
-          <span>Après l’envoi, pense à noter le numéro du ticket : un message sera envoyé sur la page Messages avec ce numéro pour confirmer la validation par un administrateur.</span>
+          <span>Après l’envoi, conserve le lien privé pour consulter la réponse de l’administration.</span>
         </div>
 
         <label id="ticketTitleWrap">
@@ -147,7 +148,17 @@
         <div class="ticket-form-footer">
           <p id="ticketStatus" class="ticket-status" aria-live="polite"></p>
         </div>
+        <p class="ticket-data-note">Ton pseudo, ta demande et les échanges servent au traitement de ce ticket. <a href="/confidentialite#donnees">Données utilisées et droits</a>.</p>
       </form>
+      <section id="ticketReceipt" class="ticket-receipt" hidden aria-labelledby="receiptTitle" tabindex="-1">
+        <h2 id="receiptTitle">Ticket envoyé</h2>
+        <p>Garde ce lien privé pour lire les réponses et poursuivre l’échange. Aucun e-mail n’est envoyé.</p>
+        <label for="privateTicketLink">Ton lien de suivi privé</label>
+        <input id="privateTicketLink" type="text" readonly spellcheck="false" autocomplete="off">
+        <div class="ticket-actions"><a id="openPrivateTicket" class="ticket-btn primary">Consulter mon ticket</a><button class="ticket-btn" id="copyTicketLink" type="button">Copier le lien</button><button class="ticket-btn" id="saveTicketLink" type="button">Enregistrer le lien</button></div>
+        <p id="receiptStatus" class="ticket-status" role="status"></p>
+        <p class="ticket-data-note">Ne partage pas ce lien. Sans compte ni e-mail, un lien perdu ne peut pas être récupéré automatiquement.</p>
+      </section>
     </section>
   </main>
 
@@ -168,6 +179,8 @@
         const params = new URLSearchParams(location.search);
         const raw = String(params.get('category') || params.get('type') || params.get('motif') || '').toLowerCase().trim();
         const aliases = {
+          confidentialite: 'confidentialite',
+          rgpd: 'confidentialite',
           inscription: 'inscription',
           compte: 'compte',
           account: 'compte',
@@ -181,7 +194,7 @@
           'création-compte': 'inscription'
         };
         const value = aliases[raw] || raw;
-        if (value && category?.querySelector(`option[value="${value}"]`)) {
+        if (value && Array.from(category?.options || []).some(option => option.value === value)) {
           category.value = value;
         }
       }
@@ -222,7 +235,7 @@
       updateTicketCategoryMode();
     })();
   </script>
-  <script src="/ticket/ticket.js?v=20260926-discord-comptes"></script>
+  <script src="/ticket/ticket.js?v=20261024-prive-1"></script>
   <script src="/auth/discord.client.js?v=20260927-7"></script>
 </body>
 </html>

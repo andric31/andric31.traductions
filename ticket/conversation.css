@@ -1,0 +1,23 @@
+.private-thread{display:grid;gap:16px;min-width:0;color:var(--fg)}
+.private-thread [hidden],.private-dialog [hidden]{display:none!important}
+.private-thread-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.private-thread h2{margin:0;color:var(--title,var(--fg));font-size:21px;overflow-wrap:anywhere}
+.private-thread-heading p,.private-thread-hint{color:var(--muted);line-height:1.5;margin:8px 0 0}
+.private-message{border:1px solid var(--border);border-radius:14px;background:var(--btn);padding:14px;margin:0 0 12px;min-width:0}
+.private-message.from-admin{background:color-mix(in srgb,var(--primary) 12%,var(--card));border-color:color-mix(in srgb,var(--primary) 45%,var(--border))}
+.private-message strong{display:block;color:var(--title,var(--fg));font-size:13px}
+.private-message p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6;margin:8px 0 0}
+.private-thread form{display:grid;gap:12px}
+.private-thread label{display:grid;gap:8px;font-weight:700}
+.private-thread textarea{box-sizing:border-box;width:100%;min-height:130px;border:1px solid var(--border);border-radius:12px;padding:12px;background:var(--btn);color:var(--fg);font:inherit;resize:vertical}
+.private-thread button{justify-self:start}
+.private-thread button,.private-dialog-close{border:1px solid var(--border);border-radius:12px;padding:10px 14px;background:var(--btn);color:var(--title,var(--fg));font:inherit;cursor:pointer;min-height:42px}
+.private-thread button:disabled{opacity:.55;cursor:wait}
+.private-thread :focus-visible,.private-dialog-close:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
+.private-dialog{box-sizing:border-box;width:min(820px,calc(100% - 24px));max-height:90dvh;padding:20px;border:1px solid var(--border);border-radius:20px;background:var(--card);color:var(--fg);overflow:auto}
+.private-dialog::backdrop{background:rgba(0,0,0,.65)}
+.private-dialog-top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px}
+.private-dialog-top h2{margin:0;font-size:20px}
+.private-dialog .ticket-status{line-height:1.5;overflow-wrap:anywhere}
+.private-dialog .ticket-status.err{color:#e96b79}
+@media(max-width:520px){.private-dialog{padding:14px}.private-thread-heading{display:grid}.private-thread-heading button{justify-self:start}}

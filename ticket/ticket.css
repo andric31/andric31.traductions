@@ -297,3 +297,14 @@ body{
 .ticket-shell{
   background:transparent !important;
 }
+/* Suivi privé et confirmation d’envoi */
+[hidden]{display:none!important}
+.ticket-receipt{display:grid;gap:14px;min-width:0}
+.ticket-receipt h2,.ticket-receipt p{margin:0;line-height:1.6}
+.ticket-receipt h2{color:var(--title,var(--fg))}
+.ticket-receipt input{box-sizing:border-box;width:100%;min-width:0;padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--btn);color:var(--fg);font:inherit}
+.ticket-receipt label{font-weight:700}
+.ticket-data-note{color:var(--muted);font-size:13px;line-height:1.5}
+.ticket-data-note a{color:var(--title,var(--fg));text-decoration:underline}
+.ticket-btn:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
+.ticket-shell>*{min-width:0}

@@ -13,6 +13,8 @@ const DIRECTORY_PAGES = new Set([
   "/evenements",
   "/game",
   "/game+",
+  "/comics",
+  "/dramas",
   "/labo",
   "/messages",
   "/notifications",

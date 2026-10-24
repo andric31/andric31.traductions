@@ -234,7 +234,7 @@ export function notifyTicketOpened(context, ticket) {
       { name: 'N° du ticket', value: text(ticket.id, 40), inline: true },
       { name: 'Auteur', value: text(ticket.name), inline: true },
       { name: 'Sujet', value: text(ticket.title, 400) },
-      { name: 'Catégorie', value: text(({ question: 'Question', probleme: 'Problème', suggestion: 'Suggestion', inscription: 'Création de compte', compte: 'Compte', autre: 'Autre' })[ticket.category]), inline: true },
+      { name: 'Catégorie', value: text(({ question: 'Question', probleme: 'Problème', suggestion: 'Suggestion', inscription: 'Création de compte', compte: 'Compte', confidentialite: 'Confidentialité', autre: 'Autre' })[ticket.category]), inline: true },
       { name: 'Priorité', value: text(({ faible: 'Faible', normal: 'Normale', urgent: 'Urgente' })[ticket.priority]), inline: true },
     ],
     description: 'Ouvre la gestion des tickets pour consulter la demande et y répondre.',

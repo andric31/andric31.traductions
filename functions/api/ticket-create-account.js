@@ -1,3 +1,4 @@
+import { ensureSchema, trackingFields } from './_tickets.js';
 import {
   assertSameOrigin,
   ensureAuthTables,
@@ -16,33 +17,6 @@ function getTicketDb(env) {
   return null;
 }
 
-async function ensureTicketSchema(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS tickets_global (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      contact TEXT DEFAULT '',
-      category TEXT DEFAULT 'question',
-      priority TEXT DEFAULT 'normal',
-      title TEXT NOT NULL,
-      message TEXT NOT NULL,
-      status TEXT DEFAULT 'open',
-      page_url TEXT DEFAULT '',
-      user_agent TEXT DEFAULT '',
-      ip_hash TEXT DEFAULT '',
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      closed_at TEXT DEFAULT '',
-      admin_comment TEXT DEFAULT '',
-      signup_password_hash TEXT DEFAULT '',
-      account_created_at TEXT DEFAULT '',
-      account_username TEXT DEFAULT ''
-    )
-  `).run();
-  try { await db.prepare(`ALTER TABLE tickets_global ADD COLUMN signup_password_hash TEXT DEFAULT ''`).run(); } catch {}
-  try { await db.prepare(`ALTER TABLE tickets_global ADD COLUMN account_created_at TEXT DEFAULT ''`).run(); } catch {}
-  try { await db.prepare(`ALTER TABLE tickets_global ADD COLUMN account_username TEXT DEFAULT ''`).run(); } catch {}
-}
 
 function cleanUsernameKeepCase(value) {
   return String(value || '').trim().replace(/\s+/g, '').slice(0, 60);
@@ -64,7 +38,7 @@ export async function onRequest(context) {
     if (!ticketDb) return json({ ok: false, error: 'Base des tickets introuvable.' }, 500);
 
     await ensureAuthTables(env.DB);
-    await ensureTicketSchema(ticketDb);
+    await ensureSchema(ticketDb);
     await ensureTicketDiscordColumns(ticketDb);
     await ensureDiscordTables(env.DB);
 
@@ -78,7 +52,7 @@ export async function onRequest(context) {
     if (!Number.isInteger(id) || id <= 0) return json({ ok: false, error: 'Ticket invalide.' }, 400);
 
     const ticket = await ticketDb.prepare(`
-      SELECT id, name, category, message, signup_password_hash, account_created_at, account_username, signup_discord_id, signup_discord_username
+      SELECT id, name, category, message, signup_password_hash, account_created_at, account_username, signup_discord_id, signup_discord_username, ${trackingFields}
       FROM tickets_global
       WHERE id = ?1
       LIMIT 1
@@ -129,7 +103,7 @@ export async function onRequest(context) {
       ? String(ticket.message || '').replace(/Mot de passe souhaité\s*:\s*(.+)/i, 'Mot de passe : supprimé après la création du compte')
       : String(ticket.message || '');
 
-    await ticketDb.prepare(`
+    const updateTicket = ticketDb.prepare(`
       UPDATE tickets_global
       SET status = 'closed',
           closed_at = datetime('now'),
@@ -143,11 +117,16 @@ export async function onRequest(context) {
             ELSE admin_comment || char(10) || ?3
           END
       WHERE id = ?4
-    `).bind(username, sanitizedMessage, comment, id).run();
+    `).bind(username, sanitizedMessage, comment, id);
+    const updates = [updateTicket];
+    if (ticket.has_private_tracking) updates.push(ticketDb.prepare(`
+      INSERT INTO ticket_replies (ticket_id, author, message, request_id) VALUES (?, 'admin', ?, ?)
+    `).bind(id, 'Ton compte a été créé. Tu peux te connecter avec le pseudo et le mot de passe choisis dans ta demande.', 'account-created-' + id));
+    await ticketDb.batch(updates);
 
     const updatedTicket = await ticketDb.prepare(`
       SELECT id, name, contact, category, priority, title, message, status, page_url,
-             created_at, updated_at, closed_at, admin_comment, account_created_at, account_username, signup_discord_id, signup_discord_username
+             created_at, updated_at, closed_at, admin_comment, account_created_at, account_username, signup_discord_id, signup_discord_username, ${trackingFields}
       FROM tickets_global WHERE id = ?1
     `).bind(id).first();
 

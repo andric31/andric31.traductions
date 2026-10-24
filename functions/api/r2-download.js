@@ -7,6 +7,7 @@ export async function onRequest(context) {
   try {
     const body=await context.request.json();
     const key=body.key;
+    if(typeof key==='string' && key.startsWith('private-library/'))return fail('Ces médias restent privés. Ouvrez leur fiche Comics ou Dramas.',403);
     if(!validKey(key)||key.split('/').includes(MARKER))return fail('Fichier invalide.');
     if(!await context.env.MEDIA_BUCKET.head(key))return fail('Fichier introuvable.',404);
     const token=await signedMedia(context.env,key,{ttl:body.ttl||3600,access:body.access==='share'?'share':'site',download:body.download===true});

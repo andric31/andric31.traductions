@@ -8,6 +8,7 @@ const DIRECTORY_PAGES = new Set([
   "/connexion",
   "/confidentialite",
   "/mentions-legales",
+  "/regles-communaute",
   "/creator",
   "/evenements",
   "/game",

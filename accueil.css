@@ -298,3 +298,40 @@ body:has(.home-about-dialog[open]){overflow:hidden}
 .mosaic-guide{isolation:isolate}.mosaic-guide .mosaic-copy{position:static;z-index:auto}.mosaic-guide-link::after{content:"";position:absolute;inset:0;z-index:1;cursor:pointer;border-radius:inherit}
 .mosaic-community{display:block}.mosaic-guide:has(.mosaic-guide-link:hover),.mosaic-community:hover{border-color:var(--primary)}.mosaic-guide:has(.mosaic-guide-link:focus-visible),.mosaic-community:focus-visible{outline:2px solid var(--primary);outline-offset:-3px}.mosaic-guide-link:focus-visible{outline:none}
 .home-first-visit{position:relative;z-index:2;margin-top:12px;background:var(--soft-04);border:1px solid var(--border);border-radius:9px;cursor:auto}.home-first-visit summary{padding:11px 13px;font-size:12px;font-weight:700;line-height:1.5;cursor:pointer}.home-first-visit summary:hover{color:var(--primary)}.home-first-visit summary:focus-visible{outline-offset:-3px}.home-first-visit[open] summary{border-bottom:1px solid var(--border)}.home-first-visit ol{margin:13px 17px 16px;padding-left:18px;display:grid;gap:9px;color:var(--muted);font-size:12px;line-height:1.65}
+
+
+/* Accueil v386 : ressources compactes et aide sous l'ensemble des tuiles. */
+.tools-updates .viewer-release--main{grid-template-columns:52px minmax(0,max-content);justify-content:center;align-content:center}
+.mosaic-guide{min-height:290px;padding:22px}
+.mosaic-guide .mosaic-copy{max-width:100%;padding-top:72px}
+.mosaic-guide h3{font-size:24px;margin-bottom:8px}
+.mosaic-guide p{margin-bottom:16px;line-height:1.6}
+.mosaic-illustration{position:absolute;right:22px;top:14px;min-height:142px;margin:0;transform:scale(.6);transform-origin:top right;opacity:.8}
+.mosaic-community{display:flex;flex-direction:column;padding:18px 20px}
+.mosaic-community-top{margin-bottom:8px}
+.mosaic-community-top .mosaic-small-icon{top:17px;right:19px}
+.mosaic-community h3{margin-bottom:6px}
+.mosaic-community p{margin-bottom:12px;line-height:1.55}
+.mosaic-small{min-height:146px;padding:17px 18px}
+.mosaic-small-top{height:0;margin:0}
+.mosaic-small-top .mosaic-small-icon{position:absolute;top:12px;right:14px;width:27px;height:27px}
+.mosaic-small-top .mosaic-small-icon svg{width:24px;height:24px}
+.mosaic-small h3{padding-right:28px;margin-bottom:8px}
+.mosaic-small p{margin-bottom:12px}
+.home-first-visit{margin:0 10px 10px;z-index:auto}
+.home-first-visit summary{padding:10px 13px}
+@media(max-width:1050px){.mosaic-small{padding:16px 13px}.mosaic-small h3{font-size:17px}}
+@media(max-width:760px){.mosaic-guide{min-height:224px;padding:22px}.mosaic-guide .mosaic-copy{padding-top:50px}.mosaic-community{padding:18px 20px}.mosaic-small{min-height:146px}}
+@media(max-width:460px){
+ .tools-updates .viewer-release--main{grid-template-columns:44px minmax(0,max-content)}
+ .mosaic-guide{min-height:236px;padding:20px}
+ .mosaic-guide .mosaic-copy{padding-top:64px}
+ .mosaic-guide h3{font-size:23px}
+ .mosaic-illustration{right:19px;top:12px;transform:scale(.5)}
+ .mosaic-small{min-height:118px;padding:17px 18px}
+ .mosaic-small-top{height:auto}
+ .mosaic-small-top .mosaic-small-icon{position:static}
+ .mosaic-small h3{padding-right:0}
+ .home-first-visit{margin:0 8px 8px}
+ .home-first-visit summary{padding:10px;font-size:11px}
+}

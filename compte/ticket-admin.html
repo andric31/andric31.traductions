@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="/viewer.css" />
   <link rel="stylesheet" href="/themes.css" />
   <link rel="stylesheet" href="/auth/auth.css" />
+  <link rel="stylesheet" href="/ticket/conversation.css?v=20261024-prive-1">
   <script src="/theme-init.js"></script>
   <style>
     html:not(.auth-ready) body{visibility:hidden}
@@ -69,7 +70,7 @@
       <div class="ticket-toolbar">
         <label class="auth-label"><span>Recherche</span><input class="auth-input" id="ticketSearch" type="search" placeholder="N° ticket, titre, pseudo, contact, message…"></label>
         <label class="auth-label"><span>Affichage</span><select class="auth-select" id="ticketStatusFilter"><option value="all">Tous</option><option value="open">Ouverts</option><option value="closed">Historique clôturé</option></select></label>
-        <label class="auth-label"><span>Type</span><select class="auth-select" id="ticketCategoryFilter"><option value="all">Tous</option><option value="inscription">Création de compte</option><option value="compte">Compte / mot de passe</option><option value="question">Support</option><option value="probleme">Signalement</option><option value="suggestion">Suggestion</option><option value="autre">Autre</option></select></label>
+        <label class="auth-label"><span>Type</span><select class="auth-select" id="ticketCategoryFilter"><option value="all">Tous</option><option value="inscription">Création de compte</option><option value="compte">Compte / mot de passe</option><option value="confidentialite">Confidentialité / données personnelles</option><option value="question">Support</option><option value="probleme">Signalement</option><option value="suggestion">Suggestion</option><option value="autre">Autre</option></select></label>
         <button class="auth-btn" id="clearTicketFilters" type="button">Réinitialiser</button>
       </div>
       <div class="ticket-stats" id="ticketStats"></div>
@@ -91,6 +92,11 @@
 
   </main>
 
+  <dialog id="ticketThreadDialog" class="private-dialog" aria-labelledby="threadDialogTitle">
+    <div class="private-dialog-top"><h2 id="threadDialogTitle">Conversation privée</h2><button type="button" id="closeTicketThread" class="private-dialog-close">Fermer</button></div>
+    <div id="adminPrivateConversation"></div>
+  </dialog>
+  <script src="/ticket/conversation.js?v=20261024-prive-1"></script>
   <script src="/auth/auth.client.js"></script>
   <script>
     const openListEl = document.getElementById('openTicketsList');
@@ -105,8 +111,8 @@
     let tickets = [];
 
     const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    const dateFr = (v) => { try { return v ? new Date(v).toLocaleString('fr-FR') : ''; } catch { return v || ''; } };
-    const categoryLabel = (v) => ({ inscription:'Création de compte', compte:'Compte', question:'Support', probleme:'Signalement', suggestion:'Suggestion', autre:'Autre' }[String(v || '')] || 'Support');
+    const dateFr = (v) => { try { return v ? new Date(/^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/.test(v) ? v.replace(' ', 'T') + 'Z' : v).toLocaleString('fr-FR') : ''; } catch { return v || ''; } };
+    const categoryLabel = (v) => ({ inscription:'Création de compte', compte:'Compte', confidentialite:'Confidentialité / données personnelles', question:'Support', probleme:'Signalement', suggestion:'Suggestion', autre:'Autre' }[String(v || '')] || 'Support');
     const priorityLabel = (v) => ({ faible:'Faible', normal:'Normal', urgent:'Urgent' }[String(v || '')] || 'Normal');
     function setMsg(text, ok){ msgEl.textContent = text || ''; msgEl.className = 'auth-msg ' + (text ? (ok ? 'ok' : 'err') : ''); }
 
@@ -141,7 +147,8 @@
     function ticketHtml(t){
       const closed = String(t.status || 'open') === 'closed';
       const urgent = String(t.priority || '') === 'urgent';
-      const url = String(t.page_url || '').trim();
+      const rawUrl = String(t.page_url || '').trim();
+      const url = /^https?:\/\//i.test(rawUrl) ? rawUrl : '';
       return `<article class="ticket-card-admin ${closed ? 'closed' : ''} ${urgent ? 'is-urgent' : ''}" data-id="${esc(t.id)}">
         <div class="ticket-card-head">
           <div>
@@ -151,16 +158,17 @@
           <div class="ticket-meta"><span class="ticket-pill ${closed ? 'closed' : 'open'}">${closed ? 'Clôturé' : 'Ouvert'}</span><span class="ticket-pill">${esc(categoryLabel(t.category))}</span><span class="ticket-pill ${urgent ? 'urgent' : ''}">${esc(priorityLabel(t.priority))}</span></div>
         </div>
         <div class="ticket-message">${esc(t.message || '')}</div>
-        ${t.admin_comment ? `<div class="ticket-admin-comment"><strong>📝 Commentaire admin</strong>${esc(t.admin_comment)}</div>` : ''}
+        ${t.admin_comment ? `<div class="ticket-admin-comment"><strong>📝 Note interne (non visible par le visiteur)</strong>${esc(t.admin_comment)}</div>` : ''}
         <div class="ticket-actions-row">
+          ${t.has_private_tracking ? `<button class="auth-btn primary" data-action="thread" type="button">Conversation privée${t.last_reply_author === 'visitor' ? ' · Nouvelle réponse' : ''}</button>` : '<span class="ticket-meta">Ancien ticket : pas de lien privé.</span>'}
           ${closed ? `
             <button class="auth-btn ticket-info" data-action="toggle" type="button">Rouvrir</button>
             <button class="auth-btn ticket-danger" data-action="delete" type="button">Supprimer</button>
           ` : `
             ${String(t.category || '') === 'inscription' ? `<button class="auth-btn primary" data-action="createAccount" type="button">✅ Créer le compte</button>` : ''}
-            <button class="auth-btn ticket-info" data-action="comment" type="button">Ajouter un commentaire</button>
+            <button class="auth-btn ticket-info" data-action="comment" type="button">Note interne</button>
             <button class="auth-btn ticket-muted-btn" data-action="copy" type="button">Copier référence</button>
-            ${String(t.category || '') === 'compte' ? `<button class="auth-btn ticket-info" data-action="notifyPassword" type="button">Message accès compte</button>` : ''}
+            
             <button class="auth-btn ticket-ok" data-action="toggle" type="button">Clôturer</button>
           `}
         </div>
@@ -196,9 +204,10 @@
       const card = btn.closest('[data-id]'); const id = card?.dataset.id; if (!id) return;
       const t = tickets.find(x => String(x.id) === String(id)); if (!t) return;
       const action = btn.dataset.action;
+      if (action === 'thread') { openThread(id); return; }
       if (action === 'comment') {
         const current = String(t.admin_comment || '');
-        const comment = prompt(`Commentaire admin pour le ticket #${id} :`, current);
+        const comment = prompt(`Note interne (non visible par le visiteur) pour le ticket #${id} :`, current);
         if (comment === null) return;
         try {
           const data = await api('/api/ticket', { method:'PATCH', body:JSON.stringify({ id, admin_comment: comment }) });
@@ -225,28 +234,14 @@
         try {
           const data = await api('/api/ticket-create-account', { method:'POST', body:JSON.stringify({ id }) });
           Object.assign(t, data.ticket || { status:'closed', account_username: data.created?.username || username });
-          let notificationSent = false;
-          try {
-            const message = `✅ Création de compte — Ticket #${id} : le compte a été créé. Tu peux maintenant te connecter avec le pseudo et le mot de passe choisis dans ta demande.${t.signup_discord_id ? ' Tu peux aussi utiliser le bouton Se connecter avec Discord.' : ''}`;
-            await api('/api/messages', { method:'POST', body:JSON.stringify({ nickname:'Admin', message, room:'global' }) });
-            notificationSent = true;
-          } catch {}
           render();
           const legacyNote = data.legacy_password ? ' Ancien ticket accepté exceptionnellement.' : '';
-          setMsg(`Compte ${data.created?.username || username} créé.${legacyNote}${notificationSent ? ' Message de confirmation envoyé.' : ' Le message de confirmation n’a pas pu être envoyé.'}`, true);
+          setMsg(`Compte ${data.created?.username || username} créé.${legacyNote}${t.has_private_tracking ? ' Confirmation disponible dans le suivi privé.' : ' Ancien ticket : préviens le demandeur par un moyen privé.'}`, true);
         } catch(e) {
           setMsg(e.message || 'Création du compte impossible.', false);
         } finally {
           btn.disabled = false;
         }
-      }
-      if (action === 'notifyPassword') {
-        const message = `🔐 Compte / mot de passe — Ticket #${id} : ta demande a été traitée/validée.`;
-        if (!confirm(`Envoyer le message de confirmation pour le ticket #${id} sur la page Messages ?`)) return;
-        btn.disabled = true;
-        try { await api('/api/messages', { method:'POST', body:JSON.stringify({ nickname:'Admin', message, room:'global' }) }); setMsg(`Message de confirmation envoyé pour le ticket #${id}.`, true); }
-        catch(e){ setMsg(e.message || 'Envoi du message impossible.', false); }
-        finally { btn.disabled = false; }
       }
       if (action === 'toggle') {
         const status = String(t.status || 'open') === 'closed' ? 'open' : 'closed';
@@ -255,6 +250,20 @@
         catch(e){ setMsg(e.message, false); }
       }
     }
+
+    const threadDialog = document.getElementById('ticketThreadDialog');
+    let disposeThread = null;
+    function openThread(id) {
+      disposeThread?.();
+      threadDialog.showModal();
+      disposeThread = window.PrivateTicketThread.mount(document.getElementById('adminPrivateConversation'), {
+        id: Number(id), admin: true,
+        request: body => api('/api/ticket-thread', { method:'POST', body:JSON.stringify({ ...body, admin:true }) }),
+        afterReply: loadTickets,
+      });
+    }
+    document.getElementById('closeTicketThread').addEventListener('click', () => threadDialog.close());
+    threadDialog.addEventListener('close', () => { disposeThread?.(); disposeThread = null; loadTickets(); });
 
     openListEl.addEventListener('click', handleListClick);
     closedListEl.addEventListener('click', handleListClick);

@@ -1,1 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Les informations sur le site, son hébergement et les moyens de contact.">
+<meta name="robots" content="noindex">
+<title>Mentions légales — andric31</title>
+<link rel="icon" href="/favicon.png">
+<script src="/theme-init.js"></script>
+<style>:root{
+  --bg:#0f1117;
+  --bg2:#141826;
+  --fg:#e8eaf0;
+  --muted:#aab2c8;
+  --primary:#5aa2ff;
+  --accent:#6ce0b0;
+  --border:#23283b;
+  --card:#171b29;
+  --btn:#1e2437;
 
+  --thumb-h: 140px;
+  --name-lh: 1.25rem;
+  --name-lines: 2;
+  --badges-h: 28px;
+
+  --topbar-h: 78px; /* mis à jour dynamiquement en JS selon la hauteur réelle */
+
+  --topbar-bg: rgba(16,20,37,.9);
+
+  /* scrollbar (évite le hardcode dark) */
+  --scrollbar-thumb: #303a57;
+  --scrollbar-track: #0b0e14;
+
+  /* ✅ NOUVEAU : variables "thémables" (évite le hardcode dark partout) */
+  --body-grad-1: #0d1018;
+  --body-grad-2: #101425;
+  --body-grad-3: #0f1117;
+
+  --title: var(--fg);
+
+  --popover-bg: rgba(20,24,38,0.98);
+  --hover-bg: rgba(255,255,255,0.06);
+
+  --scrollbar-track-webkit: var(--scrollbar-track);
+  --scrollbar-thumb-webkit: var(--scrollbar-thumb);
+  --scrollbar-thumb-webkit-hover: #3f4b6b;
+
+  --overlay-bg: rgba(0,0,0,0.55);
+
+  --thumb-bg: #1c1f2e;
+  --thumb-fallback-bg: #0f0f10;
+
+  /* éléments avec transparence */
+  --border-soft: rgba(255,255,255,0.06);
+  --top-actions-border: rgba(255,255,255,0.03);
+  --card-hover-border: rgba(255,255,255,0.22);
+  --card-hover-glow: rgba(255,255,255,0.18);
+
+  /* UI "soft" */
+  --soft-04: rgba(255,255,255,0.04);
+  --soft-05: rgba(255,255,255,0.05);
+
+  /* ✅ dit aux navigateurs que ton site est dark (sera overridé en light dans themes.css) */
+  color-scheme: dark;
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+
+/* ✅ empêche le "zoom" quand la scrollbar apparaît */
+html{
+  background: var(--bg);
+  overflow-y: scroll;
+
+  /* 🔥 Firefox scrollbar */
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  scrollbar-width: auto; /* ← largeur normale, plus premium */
+}
+
+/* Firefox peut parfois utiliser body */
+body{
+  margin:0;
+  min-height:100%;
+  font-family:system-ui,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial;
+  color:var(--fg);
+  background: linear-gradient(
+    180deg,
+    var(--body-grad-1),
+    var(--body-grad-2) 30%,
+    var(--body-grad-3)
+  );
+
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}</style>
+<link rel="stylesheet" href="/themes.css">
+<link rel="stylesheet" href="/accueil.css?v=20261024-infos-1">
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<header class="site-header"><div class="shell">
+<nav class="nav" id="navigation" aria-label="Navigation principale"><a href="/">🏠 Accueil</a><a data-path="/game" href="/game">🎮 Traductions</a><a data-path="/creator" href="/creator">👥 Créateurs</a><a data-path="/wiki" href="/wiki"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+    </svg></span> Wiki</a><a data-path="/labo" href="/labo"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M9 3h6"/>
+      <path d="M10 3v5.25L5.35 17.1A2.6 2.6 0 0 0 7.65 21h8.7a2.6 2.6 0 0 0 2.3-3.9L14 8.25V3"/>
+      <path d="M8.35 15h7.3"/>
+      <path d="M10 18h4"/>
+      <circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/>
+    </svg></span> Labo</a><a data-path="/blog" href="/blog"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M4 6.25A2.25 2.25 0 0 1 6.25 4h11.5A2.25 2.25 0 0 1 20 6.25v11.5A2.25 2.25 0 0 1 17.75 20H6.25A2.25 2.25 0 0 1 4 17.75z"/>
+      <path d="M7.5 8h9"/>
+      <path d="M7.5 12h9"/>
+      <path d="M7.5 16h5"/>
+      <circle cx="16.75" cy="16.25" r=".9" fill="currentColor" stroke="none"/>
+    </svg></span> Blog</a><a data-path="/ticket" href="/ticket"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M5 6.5h14a1.5 1.5 0 0 1 1.5 1.5v2a2 2 0 0 0 0 4v2a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 16v-2a2 2 0 0 0 0-4V8A1.5 1.5 0 0 1 5 6.5Z"/>
+      <path d="M9 10h6"/>
+      <path d="M9 14h6"/>
+    </svg></span> Ticket</a><a data-path="/messages" href="/messages"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M6.25 6.25h11.5A2.25 2.25 0 0 1 20 8.5v6a2.25 2.25 0 0 1-2.25 2.25H11l-4.75 3v-3H6.25A2.25 2.25 0 0 1 4 14.5v-6a2.25 2.25 0 0 1 2.25-2.25Z"/>
+      <path d="M8 10.5h8"/>
+      <path d="M8 13.5h5.5"/>
+    </svg></span> Messages</a><a data-path="/evenements" href="/evenements"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <rect x="4" y="5" width="16" height="15" rx="2"/>
+      <path d="M8 3v4"/>
+      <path d="M16 3v4"/>
+      <path d="M4 10h16"/>
+      <path d="M8 14h.01"/>
+      <path d="M12 14h.01"/>
+      <path d="M16 14h.01"/>
+      <path d="M8 17h.01"/>
+      <path d="M12 17h.01"/>
+    </svg></span> Événements</a><a class="auth-hidden" data-auth-only data-path="/compte/mes-jeux" href="/compte/mes-jeux"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M7 3.5h10a1 1 0 0 1 1 1v16.2l-6-3.9-6 3.9V4.5a1 1 0 0 1 1-1z"/>
+      <path d="M9 8.5h6"/>
+      <path d="M9 12h3.5"/>
+    </svg></span> Mes jeux</a><a class="auth-hidden" data-auth-only data-path="/top-jeux" href="/top-jeux"><span class="icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M8 4h8v3a4 4 0 0 1-8 0V4z"/>
+      <path d="M8 5H5v1a4 4 0 0 0 4 4"/>
+      <path d="M16 5h3v1a4 4 0 0 1-4 4"/>
+      <path d="M12 11v5"/><path d="M9 20h6"/><path d="M10 16h4"/>
+    </svg></span> Top jeux</a></nav>
+<div class="head-row"><div class="head-actions"><label class="theme-label" for="theme">Thème</label><select id="theme" aria-label="Thème du site"><option value="auto">Automatique</option><option value="dark">Sombre</option><option value="clair">Clair</option><option value="midnight">Minuit</option><option value="ocean">Océan</option><option value="forest">Forêt</option><option value="coffee">Café</option><option value="sunset">Coucher de soleil</option><option value="sakura">Sakura</option><option value="galaxy">Galaxie</option><option value="cyberpunk">Cyberpunk</option><option value="crimson">Crimson</option><option value="ice">Ice</option><option value="neon">Neon</option><option value="matrix">Matrix</option><option value="gothic">Gothic</option><option value="retro">Retro</option><option value="steam">Steam</option><option value="vaporwave">Vaporwave</option><option value="desert">Desert</option><option value="lava">Lava</option><option value="tropical">Tropical</option><option value="soleil">Soleil</option><option value="white">Blanc</option><option value="printemps">Printemps</option><option value="ete">Été</option><option value="automne">Automne</option><option value="hiver">Hiver</option><option value="halloween">Halloween</option><option value="noel">Noël</option><option value="nouvelan">Nouvel an</option><option value="valentine">Valentine</option><option value="paques">Pâques</option><option value="carnaval">Carnaval</option></select><a class="btn account" id="accountLink" data-path="/connexion" href="/connexion">🔐 Se connecter</a><button class="btn mobile-menu" id="menu" aria-expanded="false" aria-controls="navigation" aria-label="Ouvrir le menu">☰</button></div></div>
+</div></header>
+<main class="legal-main" id="contenu"><a class="legal-back" href="/">← Retour à l’accueil</a><header class="legal-heading"><h1>Mentions légales</h1><p>Les informations sur le site, son hébergement et les moyens de contact.</p></header><aside class="legal-draft" aria-label="Version de travail"><strong>Version de travail — à compléter avant publication</strong>Les informations ci-dessous reprennent le fonctionnement du site. L’identité juridique de l’éditeur, les bases légales des traitements et certaines durées de conservation doivent encore être précisées.</aside>
+<section class="legal-section" aria-labelledby="edition-title">
+ <h2 id="edition-title">Édition et contact</h2>
+ <dl><dt>Site</dt><dd>andric31 · Traductions françaises</dd><dt>Adresse</dt><dd><a href="https://andric31-traductions.pages.dev/">andric31-traductions.pages.dev</a></dd><dt>Nature du site</dt><dd>Site personnel et communautaire.</dd><dt>Publication du site</dt><dd>Le site est animé sous le pseudonyme <strong>andric31</strong>.</dd><dt>Contact</dt><dd><a href="https://f95zone.to/members/andric31.247797/" target="_blank" rel="noopener noreferrer">Contacter andric31 sur F95Zone</a>. Les autres moyens de contact figurent dans « Contact », en bas de page.</dd></dl>
+ <p class="to-complete"><strong>Informations à compléter :</strong> identification légalement requise de l’éditeur, responsable de la publication et coordonnées de contact appropriées. Le pseudonyme affiché ici ne constitue pas, à lui seul, des mentions légales complètes.</p>
+</section>
+<section class="legal-section" aria-labelledby="host-title">
+ <h2 id="host-title">Hébergement</h2>
+ <p>Le site utilise <strong>Cloudflare Pages</strong>.</p>
+ <address><strong>Cloudflare, Inc.</strong><br>101 Townsend Street<br>San Francisco, CA 94107, États-Unis<br>Téléphone : <a href="tel:+16503198930">+1 650 319 8930</a></address>
+ <p><a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">Informations et politique de confidentialité de Cloudflare</a></p>
+</section>
+<section class="legal-section" aria-labelledby="content-title">
+ <h2 id="content-title">Contenus et liens externes</h2>
+ <p>Le site présente des traductions de jeux, des guides et des outils. Il s’adresse aux personnes majeures.</p>
+ <p>Les jeux, marques, visuels et autres contenus de tiers restent soumis aux droits de leurs titulaires. La présence d’une fiche ou d’un lien ne donne pas un droit de réutilisation ou de redistribution.</p>
+ <p>Les liens externes renvoient à des services qui appliquent leurs propres conditions et politiques de confidentialité. Pour signaler un contenu ou un lien problématique, utilisez les moyens de contact du site et indiquez la page concernée.</p>
+</section>
+<section class="legal-section" aria-labelledby="data-title">
+ <h2 id="data-title">Données personnelles</h2>
+ <p>Les informations sur les comptes, les échanges, les préférences et les cookies sont regroupées dans la page <a href="/confidentialite">Confidentialité et cookies</a>.</p>
+</section></main>
+<footer class="shell footer site-info-footer">
+  <div class="footer-identity"><span>andric31 · Traductions françaises</span><span><span class="adult">🔞 18+</span> Site réservé aux personnes majeures.</span></div>
+  <nav class="footer-links" aria-label="Informations du site">
+    <a href="/mentions-legales">Mentions légales</a>
+    <a href="/confidentialite">Confidentialité et cookies</a>
+    <button type="button" class="footer-contact" id="aboutOpen" aria-haspopup="dialog" aria-controls="aboutDialog">Contact</button>
+  </nav>
+</footer>
+<!-- Informations de contact reprises de la fenêtre « À propos » du viewer. -->
+<dialog class="home-about-dialog" id="aboutDialog" aria-labelledby="aboutTitle">
+  <div class="modal-head"><h2 class="modal-title" id="aboutTitle">À propos</h2><button type="button" class="modal-close" data-about-close aria-label="Fermer À propos" autofocus>✕</button></div>
+  <div class="modal-body aboutText">
+    <p>Pour tout renseignement, aide ou autre, rejoignez mon serveur Discord :<br><a href="https://discord.gg/Jr8Ykf8yMd" target="_blank" rel="noopener noreferrer">https://discord.gg/Jr8Ykf8yMd</a></p>
+    <p>Contact Discord :<br><a href="https://discord.com/users/@andric31" target="_blank" rel="noopener noreferrer">https://discord.com/users/@andric31</a></p>
+    <p>Vous pouvez aussi me contacter sur F95zone :<br>Profil <a href="https://f95zone.to/members/andric31.247797/" target="_blank" rel="noopener noreferrer">https://f95zone.to/members/andric31.247797/</a></p>
+  </div>
+  <div class="modal-foot"><button type="button" class="btn" data-about-close>OK</button></div>
+</dialog>
+<script src="/accueil.js?v=20261023-accueil-1"></script>
+</body></html>

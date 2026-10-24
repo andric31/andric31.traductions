@@ -19,7 +19,6 @@ function render(){
   let rows=all.filter(r=>(state.filter==='all'||r.status===state.filter)&&[r.title,r.author,...r.tags].join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(q));
   if(state.sort==='title')rows.sort((a,b)=>a.title.localeCompare(b.title,'fr'));
   if(state.sort==='recent')rows.sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||''));
-  $('notice').hidden=state.items.some(r=>r.status==='available');
   $('count').textContent=state.items.length?rows.length+' '+(comic?'comic(s)':'série(s)'):'Aperçu · aucun contenu publié';
   $('grid').innerHTML=rows.map((r,i)=>`<article class="ml-card"><button type="button" data-open="${esc(r.id)}" aria-label="${esc((r.demo?'Découvrir l’aperçu : ':'Ouvrir : ')+r.title)}">${poster(r,i)}<div class="ml-card-info"><h3>${esc(r.title)}</h3><p>${r.demo?'Découvrir le lecteur':r.status==='soon'?'Bientôt disponible':r.units.filter(u=>u.status==='available').length+' '+(comic?'chapitre(s)':'épisode(s)')}</p></div></button></article>`).join('');
   $('empty').hidden=rows.length>0;
@@ -96,7 +95,6 @@ $('search').addEventListener('input',e=>{state.q=e.target.value;render();});
 $('sort').addEventListener('change',e=>{state.sort=e.target.value;render();});
 document.querySelectorAll('[data-filter]').forEach(button=>button.addEventListener('click',()=>{state.filter=button.dataset.filter;document.querySelectorAll('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));render();}));
 $('grid').addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(b)openItem(b.dataset.open);});
-$('discover').addEventListener('click',()=>openItem(state.items[0]?.id||'preview-0'));
 $('units').addEventListener('click',e=>{const b=e.target.closest('[data-unit]');if(b&&!b.disabled)selectUnit(Number(b.dataset.unit));});
 $('closeDetail').addEventListener('click',()=>$('detailDialog').close());
 $('detailDialog').addEventListener('close',()=>{if(!comic){$('video').pause();$('video').removeAttribute('src');$('video').replaceChildren();$('video').load();}else $('comicInner').replaceChildren();document.body.style.overflow='';});

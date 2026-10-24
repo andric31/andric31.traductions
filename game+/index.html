@@ -1,51 +1,50 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="utf-8" />
-  <meta name="referrer" content="strict-origin-when-cross-origin">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Game+</title>
-  <script src="/theme-init.js"></script>
-  <link rel="icon" href="/favicon.png" />
-  <link rel="stylesheet" href="/themes.css" />
-  <link rel="stylesheet" href="/game+/gameplus.css" />
-</head>
-<body class="mode-gameplus">
-  <div class="gp-page">
-    <header class="gp-topbar">
-      <div class="gp-top-left">
-        <div class="gp-kicker">✨✨ Section privée</div>
-        <div class="gp-brand" aria-label="Game+"><span>✨✨</span> Game+</div>
-      </div>
-      <nav class="gp-top-left" aria-label="Sections"><a class="gp-back" href="/comics">📚 Comics</a><a class="gp-back" href="/dramas">🎬 Dramas</a><a class="gp-back" href="/game">← Viewer</a></nav>
-    </header>
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title>Game+ — andric31</title><style>html{background:#0f1117}</style><script src="/theme-init.js"></script><link rel="icon" href="/favicon.png"><link rel="stylesheet" href="/viewer.css"><link rel="stylesheet" href="/themes.css"><link rel="stylesheet" href="/mediatheque/library.css?v=20261024-2"><link rel="stylesheet" href="/game+/gameplus.css?v=20261024-2"></head><body class="media-page media-gameplus"><div class="ml-shell"><header class="ml-header"><a class="ml-brand" href="/"><img src="/favicon.png" alt=""><span>andric31</span></a><nav class="ml-nav" aria-label="Sections"><a href="/game">🎮 Traductions</a><a href="/game+" aria-current="page">✨ Game+</a><a href="/comics">📚 Comics</a><a href="/dramas">🎬 Dramas</a></nav><select id="theme" class="ml-theme" aria-label="Thème">
+        <option value="auto">Thème : Auto (Windows)</option>
+        <option value="dark">Thème : Sombre</option>
+        <option value="white">Thème : Clair</option>
 
-    <section class="gp-hero">
-      <div>
-        <h1>Game+</h1>
-        <p>Jeux exclusifs disponibles uniquement pour les comptes connectés.</p>
-      </div>
-      <div class="gp-hero-card" id="miniStats" style="display:none;"></div>
-    </section>
-
-    <section class="gp-panel" id="toolbar" style="display:none;">
-      <input id="searchInput" class="gp-search" type="search" placeholder="Rechercher un jeu, auteur, tag…" autocomplete="off">
-      <select id="engineSelect" class="gp-select" aria-label="Filtrer par moteur">
-        <option value="all">Tous les moteurs</option>
-      </select>
-      <select id="sortSelect" class="gp-select" aria-label="Tri">
-        <option value="title">Titre A-Z</option>
-        <option value="date-desc" selected">Trad MAJ récente</option>
-        <option value="date-asc">Trad MAJ ancienne</option>
-      </select>
-    </section>
-
-    <div class="gp-state" id="stateBox">Chargement de Game+…</div>
-    <main class="gp-list" id="grid" aria-live="polite"></main>
-
-    <a href="/connexion" class="gp-login" id="loginBtn" style="display:none;">Se connecter</a>
-  </div>
-
-  <script src="/game+/gameplus.js"></script>
-</body>
-</html>
+        <option value="valentine">Thème : Saint-Valentin 💘</option>
+        <option value="carnaval">Thème : Carnaval 🎭</option>
+        <option value="paques">Thème : Pâques 🐣</option>
+        <option value="halloween">Thème : Halloween 🎃</option>
+        <option value="noel">Thème : Noël 🎄</option>
+        <option value="nouvelan">Thème : Nouvel An 🎆</option>
+        
+        <option value="printemps">Thème : Printemps 🌸</option>
+        <option value="ete">Thème : Été 🌞</option>
+        <option value="automne">Thème : Automne 🍂</option>
+        <option value="hiver">Thème : Hiver ❄️</option>
+        
+        <option value="sakura">Thème : Sakura 🌸</option>
+        <option value="desert">Thème : Désert 🏜️</option>
+        <option value="ocean">Thème : Océan 🌊</option>
+        <option value="forest">Thème : Forêt 🌲</option>
+        
+        <option value="vaporwave">Thème : Vaporwave 🌴</option>
+        <option value="cyberpunk">Thème : Cyberpunk ⚡</option>
+        <option value="neon">Thème : Néon 🌈</option>
+        <option value="midnight">Thème : Midnight 🌑</option>
+        
+        <option value="galaxy">Thème : Galaxy 🌌</option>
+        <option value="gothic">Thème : Gothic 🧛</option>
+        <option value="coffee">Thème : Coffee ☕</option>
+        
+        <option value="lava">Thème : Lava 🔥</option>
+        <option value="ice">Thème : Ice 🧊</option>
+        <option value="matrix">Thème : Matrix 🌫</option>
+        <option value="sunset">Thème : Sunset 🌇</option>
+        <option value="retro">Thème : Retro 🎮</option>
+        <option value="tropical">Thème : Tropical 🏖️</option>
+        <option value="crimson">Thème : Crimson 🩸</option>
+        <option value="steam">Thème : Steam ⚙️</option>
+      </select></header>
+<main>
+<div class="ml-heading"><div class="ml-intro"><h1>✨ Game+</h1><p>Des jeux à découvrir, réservés aux comptes connectés.</p></div><span class="ml-label">🔒 Section privée</span></div>
+<section class="ml-toolbar" id="toolbar" hidden aria-label="Rechercher et trier les jeux"><label class="ml-search"><input id="searchInput" type="search" placeholder="Rechercher un jeu, un auteur, un tag…" aria-label="Rechercher" autocomplete="off"></label><select class="ml-sort" id="engineSelect" aria-label="Filtrer par moteur"><option value="all">Tous les moteurs</option></select><select class="ml-sort" id="sortSelect" aria-label="Trier"><option value="title">Titre A–Z</option><option value="date-desc" selected>Trad MAJ récente</option><option value="date-asc">Trad MAJ ancienne</option></select></section>
+<div class="ml-section-title" id="catalogueHeading" hidden><h2>Tous les jeux</h2><span class="ml-count" id="miniStats"></span></div>
+<div class="gp-state" id="stateBox" role="status">Chargement de Game+…</div><div class="ml-grid gp-grid" id="grid"></div>
+<a class="ml-btn primary gp-login" href="/connexion" id="loginBtn" hidden>Se connecter</a><noscript>Active JavaScript pour utiliser cette section privée.</noscript>
+</main><footer class="ml-footer"><span>andric31 · Game+</span><div><a href="/mentions-legales">Mentions légales</a><a href="/confidentialite">Confidentialité</a><a href="/ticket">Contact</a></div></footer>
+</div>
+<dialog class="ml-dialog gp-dialog" id="gameDialog" aria-labelledby="gameTitle"><header class="ml-dialog-head"><h2 id="gameTitle"></h2><button type="button" class="ml-btn ml-close" id="closeGame" aria-label="Fermer la fiche">×</button></header><div class="gp-detail-grid"><div id="gameVisual"></div><section class="gp-detail-info"><div class="gp-meta" id="gameMeta"></div><p class="gp-description" id="gameDescription"></p><div class="gp-tags" id="gameTags"></div></section><div class="gp-information" id="gameInformation"></div><div id="gameLinks"></div></div></dialog>
+<script src="/game+/gameplus.js?v=20261024-2"></script></body></html>

@@ -8,6 +8,9 @@
   const engineSelect = $('#engineSelect');
   const sortSelect = $('#sortSelect');
   const miniStats = $('#miniStats');
+  const dialog = $('#gameDialog');
+  let selectedId = '';
+  let requestNumber = 0;
 
   const state = { items: [], filtered: [], q: '', engine: 'all', sort: 'date-desc' }; // tri par défaut : Trad MAJ récente
   const GAMEPLUS_SEEN_KEY = 'andric31.gameplus.seenSignature.v1';
@@ -157,81 +160,105 @@
   }
 
   function renderStats() {
-    if (!miniStats) return;
-    const engines = [...new Set(state.items.map((g) => String(g.engine || '').trim()).filter(Boolean))];
-    const latest = state.items.map(dateValue).filter(Boolean).sort((a, b) => b - a)[0];
-    const latestText = latest ? new Date(latest).toLocaleDateString('fr-FR') : '—';
-    miniStats.style.display = '';
-    miniStats.innerHTML = `
-      <div class="gp-stat"><strong>${state.items.length}</strong> jeu${state.items.length > 1 ? 'x' : ''}</div>
-      <div class="gp-stat"><strong>${engines.length || '—'}</strong> moteur${engines.length > 1 ? 's' : ''}</div>
-      <div class="gp-stat"><strong>${esc(latestText)}</strong> MAJ</div>`;
+    const engines = new Set(state.items.map(g => String(g.engine || '').trim()).filter(Boolean));
+    miniStats.textContent = `${state.filtered.length} jeu${state.filtered.length > 1 ? 'x' : ''} · ${engines.size} moteur${engines.size > 1 ? 's' : ''}`;
   }
 
-  function renderGame(g) {
-    const img = g.image || g.cover || g.banner || '';
-    const hasImage = Boolean(img);
-    const gameDate = formatGameDate(g);
-    const tradCreated = formatTranslationCreatedDate(g);
-    const tradUpdated = formatTranslationUpdatedDate(g);
-    const meta = [g.developer, g.engine, g.version, gameDate, tradUpdated ? `Trad MAJ ${tradUpdated}` : '', tradCreated ? `Trad créée ${tradCreated}` : ''].filter(Boolean);
-    const tags = (g.tags || []).slice(0, 10).map((t) => `<span class="gp-tag">${esc(t)}</span>`).join('');
-    const hasDetails = Boolean(g.information || tags || (Array.isArray(g.links) && g.links.length));
-    return `
-      <article class="gp-game${hasDetails ? ' has-details' : ''}${hasImage ? '' : ' is-no-image'}">
-        <div class="gp-card-main" role="button" tabindex="0" aria-expanded="false" title="Ouvrir les informations">
-          <div class="gp-media">
-            ${hasImage ? `<img src="${esc(img)}" alt="" referrerpolicy="no-referrer" loading="lazy">` : '<div class="gp-placeholder"><div class="gp-placeholder-box"><span class="gp-stars">✨✨</span><span>Game+</span></div></div>'}
-            <span class="gp-ribbon">✨✨ Game+</span>
-          </div>
-          <div class="gp-summary">
-            <div>
-              <h2 class="gp-title">${esc(g.title)}</h2>
-              ${meta.length ? `<div class="gp-meta">${meta.map((m) => `<span class="gp-pill">${esc(m)}</span>`).join('')}</div>` : ''}
-            </div>
-            ${g.description ? `<p class="gp-desc">${esc(g.description)}</p>` : ''}
-            <div class="gp-open-hint"><span>Cliquer pour afficher les infos, téléchargements et sources</span></div>
-          </div>
-        </div>
-        <div class="gp-card-details" hidden>
-          ${g.information ? `<div class="gp-info"><strong>Informations</strong><span>${linkifyText(g.information)}</span></div>` : ''}
-          ${tags ? `<div class="gp-tags">${tags}</div>` : ''}
-          ${renderLinks(g)}
-        </div>
-      </article>`;
+  function imageSource(raw) {
+    if (!raw) return '';
+    try { const url = new URL(raw, location.href); return ['http:', 'https:'].includes(url.protocol) ? url.href : ''; } catch { return ''; }
+  }
+
+  function cover(g) {
+    const src = imageSource(g.banner || g.image || g.cover);
+    return `<div class="gp-cover"><div class="gp-cover-placeholder" ${src ? 'hidden' : ''}><span aria-hidden="true">✨</span><small>${src ? 'Image indisponible' : 'Game+'}</small></div>${src ? `<img src="${esc(src)}" alt="" referrerpolicy="no-referrer" loading="lazy">` : ''}<span class="ml-badge">✨ Game+</span></div>`;
+  }
+
+  function watchImages(container) {
+    container.querySelectorAll('.gp-cover img').forEach(img => img.addEventListener('error', () => {
+      img.parentElement.querySelector('.gp-cover-placeholder').hidden = false;
+      img.remove();
+    }, { once: true }));
+  }
+
+  function renderGame(g, index) {
+    const meta = [g.developer, g.engine, g.version].filter(Boolean).join(' · ');
+    const date = formatTranslationUpdatedDate(g);
+    return `<article class="ml-card gp-card"><button type="button" data-open="${index}" aria-haspopup="dialog" aria-label="${esc('Ouvrir : ' + g.title)}">${cover(g)}<div class="ml-card-info"><h3>${esc(g.title)}</h3>${meta ? `<p>${esc(meta)}</p>` : ''}${date ? `<p class="gp-card-date">Trad MAJ ${esc(date)}</p>` : ''}</div></button></article>`;
   }
 
   function render() {
+    renderStats();
     if (!state.filtered.length) {
-      grid.innerHTML = '';
+      grid.replaceChildren();
       setState(state.items.length ? 'Aucun jeu ne correspond aux filtres.' : 'Aucun jeu Game+ pour le moment.');
       return;
     }
     setState('', 'ok');
     grid.innerHTML = state.filtered.map(renderGame).join('');
+    watchImages(grid);
+  }
+
+  function showGame(g) {
+    if (!g) return;
+    selectedId = String(g.id);
+    $('#gameTitle').textContent = g.title;
+    const images = [g.banner || g.image || g.cover, ...(g.gallery || [])].map(imageSource).filter(Boolean);
+    $('#gameVisual').innerHTML = cover(g) + (images.length > 1 ? `<div class="gp-gallery" aria-label="Galerie">${images.map((src, i) => `<button type="button" data-gallery="${i}" aria-label="Afficher l’image ${i + 1}" aria-pressed="${i === 0}">${i + 1}</button>`).join('')}</div>` : '');
+    watchImages($('#gameVisual'));
+    const date = formatGameDate(g), created = formatTranslationCreatedDate(g), updated = formatTranslationUpdatedDate(g);
+    const meta = [g.developer, g.engine, g.status, g.version, date ? `Jeu : ${date}` : '', updated ? `Trad MAJ ${updated}` : '', created ? `Trad créée ${created}` : ''].filter(Boolean);
+    $('#gameMeta').innerHTML = meta.map(m => `<span class="gp-pill">${esc(m)}</span>`).join('');
+    $('#gameDescription').textContent = g.description || '';
+    $('#gameDescription').hidden = !g.description;
+    $('#gameTags').innerHTML = (g.tags || []).map(t => `<span class="gp-tag">${esc(t)}</span>`).join('');
+    $('#gameInformation').innerHTML = g.information ? '<h3>Informations</h3>' + linkifyText(g.information) : '';
+    $('#gameInformation').hidden = !g.information;
+    $('#gameLinks').innerHTML = renderLinks(g);
+    $('#gameLinks').hidden = !(g.links || []).length;
+    if (!dialog.open) dialog.showModal();
+    document.body.style.overflow = 'hidden';
+  }
+
+  function clearPrivateView() {
+    if (dialog.open) dialog.close();
+    state.items = []; state.filtered = [];
+    grid.replaceChildren();
+    toolbar.hidden = true;
+    $('#catalogueHeading').hidden = true;
   }
 
   async function load() {
-    setState('Chargement de Game+…');
+    const requestId = ++requestNumber;
+    if (!state.items.length) setState('Chargement de Game+…');
     try {
       const resp = await fetch('/api/gameplus', { cache: 'no-store', credentials: 'same-origin' });
       const data = await resp.json().catch(() => null);
+      if (requestId !== requestNumber) return;
       if (resp.status === 401 || data?.requiresLogin) {
-        loginBtn.style.display = '';
-        toolbar.style.display = 'none';
-        grid.innerHTML = '';
-        setState('Connexion requise pour accéder à Game+.', 'error');
+        clearPrivateView();
+        loginBtn.hidden = false;
+        setState('Connecte-toi pour accéder aux jeux Game+.', 'error');
         return;
       }
-      if (!resp.ok || !data?.ok) throw new Error(data?.detail || data?.error || 'Chargement impossible.');
+      if (!resp.ok || !data?.ok) throw new Error(data?.error || 'Chargement impossible.');
       state.items = Array.isArray(data.items) ? data.items : [];
       markGamePlusSeen(state.items);
-      toolbar.style.display = '';
-      if (sortSelect) sortSelect.value = state.sort;
+      toolbar.hidden = false;
+      $('#catalogueHeading').hidden = false;
+      loginBtn.hidden = true;
+      sortSelect.value = state.sort;
       fillEngines();
-      renderStats();
+      if (![...engineSelect.options].some(o => o.value === state.engine)) state.engine = 'all';
+      engineSelect.value = state.engine;
       applyFilters();
+      if (dialog.open) {
+        const selected = state.items.find(g => String(g.id) === selectedId);
+        if (selected) showGame(selected); else dialog.close();
+      }
     } catch (err) {
+      if (requestId !== requestNumber) return;
+      clearPrivateView();
       setState(err?.message || 'Impossible de charger Game+.', 'error');
     }
   }
@@ -240,29 +267,43 @@
   engineSelect?.addEventListener('change', () => { state.engine = engineSelect.value || 'all'; applyFilters(); });
   sortSelect?.addEventListener('change', () => { state.sort = sortSelect.value || 'title'; applyFilters(); });
 
-  function toggleGame(card, force) {
-    if (!card) return;
-    const main = card.querySelector('.gp-card-main');
-    const details = card.querySelector('.gp-card-details');
-    const open = typeof force === 'boolean' ? force : !card.classList.contains('is-open');
-    card.classList.toggle('is-open', open);
-    if (main) main.setAttribute('aria-expanded', open ? 'true' : 'false');
-    if (details) details.hidden = !open;
-  }
-
-  grid?.addEventListener('click', (ev) => {
-    const main = ev.target.closest('.gp-card-main');
-    if (!main || !grid.contains(main)) return;
-    toggleGame(main.closest('.gp-game'));
+  grid.addEventListener('click', ev => {
+    const button = ev.target.closest('[data-open]');
+    if (button) showGame(state.filtered[Number(button.dataset.open)]);
   });
-
-  grid?.addEventListener('keydown', (ev) => {
-    if (ev.key !== 'Enter' && ev.key !== ' ') return;
-    const main = ev.target.closest('.gp-card-main');
-    if (!main || !grid.contains(main)) return;
-    ev.preventDefault();
-    toggleGame(main.closest('.gp-game'));
+  $('#closeGame').addEventListener('click', () => dialog.close());
+  $('#gameVisual').addEventListener('click', ev => {
+    const button = ev.target.closest('[data-gallery]'), g = state.items.find(item => String(item.id) === selectedId);
+    if (!button || !g) return;
+    const images = [g.banner || g.image || g.cover, ...(g.gallery || [])].map(imageSource).filter(Boolean), src = images[Number(button.dataset.gallery)];
+    if (!src) return;
+    const wrapper = $('#gameVisual').querySelector('.gp-cover');
+    wrapper.querySelector('img')?.remove();
+    wrapper.querySelector('.gp-cover-placeholder').hidden = true;
+    const image = document.createElement('img'); image.src = src; image.alt = ''; image.referrerPolicy = 'no-referrer'; wrapper.append(image);
+    watchImages(wrapper);
+    $('#gameVisual').querySelectorAll('[data-gallery]').forEach(b => b.setAttribute('aria-pressed', String(b === button)));
   });
-
+  dialog.addEventListener('close', () => {
+    selectedId = '';
+    for (const id of ['gameVisual', 'gameMeta', 'gameTags', 'gameInformation', 'gameLinks']) $('#' + id).replaceChildren();
+    $('#gameTitle').textContent = ''; $('#gameDescription').textContent = '';
+    document.body.style.overflow = '';
+  });
+  dialog.addEventListener('click', ev => {
+    if (ev.target !== dialog) return;
+    const b = dialog.getBoundingClientRect();
+    if (ev.clientX < b.left || ev.clientX > b.right || ev.clientY < b.top || ev.clientY > b.bottom) dialog.close();
+  });
+  const theme = $('#theme');
+  try { theme.value = localStorage.getItem('viewerTheme') || 'auto'; } catch {}
+  if (!theme.value) theme.value = 'auto';
+  theme.addEventListener('change', () => {
+    if (theme.value === 'auto') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.dataset.theme = theme.value;
+    try { localStorage.setItem('viewerTheme', theme.value); } catch {}
+  });
+  window.addEventListener('pageshow', e => { if (e.persisted) load(); });
+  window.addEventListener('focus', load);
   load();
 })();

@@ -93,7 +93,7 @@ body{
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }</style>
 <link rel="stylesheet" href="/themes.css">
-<link rel="stylesheet" href="/accueil.css?v=20261023-accueil-1">
+<link rel="stylesheet" href="/accueil.css?v=20261024-infos-1">
 </head>
 <body>
 <a class="skip" href="#contenu">Aller au contenu</a>
@@ -255,7 +255,14 @@ body{
       <path d="M12 17h.01"/>
     </svg></span><span><strong>Événements</strong><small>Les rendez-vous proposés.</small></span></a></div><div class="help-line"><span>Une question ou un problème ?</span><a data-path="/ticket" href="/ticket">Ouvrir un ticket →</a></div></div></section></div>
 </main>
-<footer class="shell footer"><span><span class="adult">🔞 18+</span> Site réservé aux personnes majeures.</span><span class="footer-links"><span>andric31 · Traductions françaises</span><button type="button" class="footer-contact" id="aboutOpen" aria-haspopup="dialog" aria-controls="aboutDialog">Contact</button></span></footer>
+<footer class="shell footer site-info-footer">
+  <div class="footer-identity"><span>andric31 · Traductions françaises</span><span><span class="adult">🔞 18+</span> Site réservé aux personnes majeures.</span></div>
+  <nav class="footer-links" aria-label="Informations du site">
+    <a href="/mentions-legales">Mentions légales</a>
+    <a href="/confidentialite">Confidentialité et cookies</a>
+    <button type="button" class="footer-contact" id="aboutOpen" aria-haspopup="dialog" aria-controls="aboutDialog">Contact</button>
+  </nav>
+</footer>
 <!-- Informations de contact reprises de la fenêtre « À propos » du viewer. -->
 <dialog class="home-about-dialog" id="aboutDialog" aria-labelledby="aboutTitle">
   <div class="modal-head"><h2 class="modal-title" id="aboutTitle">À propos</h2><button type="button" class="modal-close" data-about-close aria-label="Fermer À propos" autofocus>✕</button></div>

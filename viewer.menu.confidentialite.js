@@ -14,6 +14,11 @@
       </p>
       <p>
         Vous pouvez effacer les données locales du site depuis votre navigateur si vous le souhaitez.
+        Cela ne supprime pas votre compte ni les données enregistrées sur le serveur.
+      </p>
+      <p>
+        Les fonctions de compte, de suivi des jeux, de messages et de tickets peuvent aussi enregistrer des données.
+        <a href="/confidentialite">Lire les informations sur la confidentialité et les cookies</a>.
       </p>
     </div>
   `;

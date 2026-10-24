@@ -1,92 +1,6 @@
-// /functions/api/gameplus.js
-// Base Game+ privée : lit andric31/f95list_private_links/gameplus.json via token Cloudflare.
-// Accès réservé aux comptes connectés.
-
-const DEFAULT_PRIVATE_OWNER = 'andric31';
-const DEFAULT_PRIVATE_REPO = 'f95list_private_links';
-const DEFAULT_PRIVATE_BRANCH = 'main';
-const DEFAULT_PRIVATE_PATH = 'gameplus.json';
-
-const CORS_HEADERS = {
-  'access-control-allow-origin': '*',
-  'access-control-allow-methods': 'GET,OPTIONS',
-  'access-control-allow-headers': 'content-type',
-};
-
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      ...CORS_HEADERS,
-      'content-type': 'application/json; charset=utf-8',
-      'cache-control': 'no-store',
-    },
-  });
-}
-
-function decodeBase64Utf8(encoded) {
-  const binary = atob(String(encoded || '').replace(/\s/g, ''));
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
-  return new TextDecoder('utf-8').decode(bytes);
-}
-
-function getEnv(context, name, fallback = '') {
-  return String(context.env?.[name] || fallback || '').trim();
-}
-
-function getToken(context) {
-  return getEnv(context, 'GITHUB_PRIVATE_TOKEN') || getEnv(context, 'GITHUB_TOKEN') || getEnv(context, 'GH_TOKEN');
-}
-
-async function isLoggedIn(context) {
-  try {
-    const authUrl = new URL('/api/auth-me', context.request.url);
-    const resp = await fetch(authUrl.toString(), {
-      headers: { cookie: context.request.headers.get('cookie') || '' },
-      cf: { cacheTtl: 0, cacheEverything: false },
-    });
-    const data = await resp.json().catch(() => null);
-    return !!(resp.ok && data && data.logged_in);
-  } catch {
-    return false;
-  }
-}
-
-async function fetchGamePlusDoc(context) {
-  const owner = getEnv(context, 'PRIVATE_LINKS_OWNER', DEFAULT_PRIVATE_OWNER);
-  const repo = getEnv(context, 'PRIVATE_LINKS_REPO', DEFAULT_PRIVATE_REPO);
-  const branch = getEnv(context, 'PRIVATE_LINKS_BRANCH', DEFAULT_PRIVATE_BRANCH);
-  const path = getEnv(context, 'GAMEPLUS_PRIVATE_PATH', DEFAULT_PRIVATE_PATH).replace(/^\/+/, '');
-  const token = getToken(context);
-
-  if (!token) throw new Error('Token GitHub privé manquant. Ajoute GITHUB_PRIVATE_TOKEN dans les variables Cloudflare Pages.');
-
-  const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path.split('/').map(encodeURIComponent).join('/')}?ref=${encodeURIComponent(branch)}`;
-  const resp = await fetch(apiUrl, {
-    headers: {
-      accept: 'application/vnd.github+json',
-      authorization: `Bearer ${token}`,
-      'user-agent': 'andric31-traductions-pages',
-      'x-github-api-version': '2022-11-28',
-    },
-    cf: { cacheTtl: 60, cacheEverything: true },
-  });
-
-  if (!resp.ok) throw new Error(`GitHub privé HTTP ${resp.status}`);
-  const data = await resp.json();
-  const encoded = String(data?.content || '').replace(/\s/g, '');
-  if (!encoded) throw new Error('Fichier gameplus.json vide ou illisible');
-  return JSON.parse(decodeBase64Utf8(encoded));
-}
-
-function asItems(doc) {
-  if (Array.isArray(doc)) return doc;
-  if (Array.isArray(doc?.items)) return doc.items;
-  if (doc?.items && typeof doc.items === 'object') return Object.values(doc.items);
-  if (doc && typeof doc === 'object') return Object.values(doc);
-  return [];
-}
+import {member} from './_library.js';
+import {json} from './_auth.js';
+import {fetchGamePlusDoc,asItems,visibleGame,publicImage} from './_gameplus.js';
 
 function cleanText(v) {
   return String(v ?? '').trim();
@@ -141,7 +55,7 @@ function cleanOneLink(id, link, index, key = '') {
   let raw = link;
   if (typeof raw === 'string') raw = { url: raw };
   if (!raw || typeof raw !== 'object') return null;
-  const url = cleanText(raw.url || raw.href || raw.link);
+  const url = cleanText(raw.r2Key || raw.url || raw.href || raw.link);
   if (!url) return null;
   const linkKey = cleanText(raw.key || key || `link_${index}`);
   const label = cleanText(raw.label || raw.name || raw.title || labelForLink(linkKey, url));
@@ -150,7 +64,7 @@ function cleanOneLink(id, link, index, key = '') {
     key: linkKey || `link_${index}`,
     section,
     label: label || hostLabel(url, 'Lien'),
-    host: hostLabel(url, linkKey),
+    host: url.startsWith('private-library/') || url.startsWith('r2://') ? 'Site' : hostLabel(url, linkKey),
     url: `/api/gameplus-link?id=${encodeURIComponent(id)}&type=${encodeURIComponent(linkKey || `link_${index}`)}`,
   };
 }
@@ -179,11 +93,12 @@ function cleanGame(raw) {
   const id = cleanText(raw.id || raw.uid || raw.key);
   const title = cleanText(raw.title || raw.cleanTitle || raw.name);
   if (!id || !title) return null;
-  if (raw.visible === false || raw.visible === 0 || raw.hidden === true) return null;
+  if (!visibleGame(raw)) return null;
 
-  const cover = cleanText(raw.cover || raw.cover_url || raw.image || raw.img);
-  const banner = cleanText(raw.banner || raw.banner_url || '');
-  const gallery = Array.isArray(raw.gallery) ? raw.gallery.map(cleanText).filter(Boolean) : [];
+  const cover = publicImage(raw, 'cover');
+  const banner = publicImage(raw, 'banner');
+  const gallerySource = raw.galleryKeys || raw.gallery;
+  const gallery = Array.isArray(gallerySource) ? gallerySource.map((_, i) => publicImage(raw, 'gallery', i)).filter(Boolean) : [];
 
   return {
     id,
@@ -211,12 +126,12 @@ function cleanGame(raw) {
 
 export async function onRequest(context) {
   const { request } = context;
-  if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS_HEADERS });
   if (request.method !== 'GET') return json({ ok: false, error: 'Méthode non autorisée' }, 405);
 
+  const auth = await member(context);
+  if (auth.response) return auth.response;
+  if (request.headers.get('sec-fetch-site') === 'cross-site') return json({ok:false,error:'Origine invalide.'},403);
   try {
-    const loggedIn = await isLoggedIn(context);
-    if (!loggedIn) return json({ ok: false, error: 'Connexion requise.', requiresLogin: true, items: [] }, 401);
 
     const doc = await fetchGamePlusDoc(context);
     const items = asItems(doc).map(cleanGame).filter(Boolean);
@@ -228,6 +143,6 @@ export async function onRequest(context) {
       items,
     });
   } catch (err) {
-    return json({ ok: false, error: 'Impossible de récupérer Game+', detail: String(err?.message || err), items: [] }, 502);
+    return json({ ok: false, error: 'Impossible de récupérer Game+', items: [] }, 502);
   }
 }

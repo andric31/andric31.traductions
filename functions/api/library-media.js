@@ -16,7 +16,8 @@ export async function onRequest(context) {
       const unit=item.units.find(u=>u.id===p.get('unit')&&u.status==='available');
       if(unit && doc.kind==='dramas' && p.get('type')==='video')key=unit.mediaKey;
       if(unit && doc.kind==='dramas' && p.get('type')==='subtitle' && /^\d+$/.test(p.get('track')||''))key=unit.subtitles[Number(p.get('track'))]?.key;
-      if(unit && doc.kind==='comics' && p.get('type')==='page' && /^\d+$/.test(p.get('page')||''))key=unit.pages[Number(p.get('page'))];
+      if(unit && doc.kind==='comics' && unit.source!=='cbz' && p.get('type')==='page' && /^\d+$/.test(p.get('page')||''))key=unit.pages[Number(p.get('page'))];
+      if(unit && doc.kind==='comics' && unit.source==='cbz' && p.get('type')==='archive')key=unit.archiveKey;
     }
     if(!key||!env.MEDIA_BUCKET)return silent(404);
     if(p.get('type')==='subtitle'){

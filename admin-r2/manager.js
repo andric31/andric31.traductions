@@ -328,7 +328,7 @@
     if(force)invalidateTree();
     const id=++tree.syncId;
     // Ne charger que la racine et les branches ouvertes pendant cette visite.
-    // La racine est imposée au démarrage ; les branches ne s'ouvrent qu'en naviguant.
+    // Un lien direct ouvre uniquement les branches menant au dossier demandé.
     await readTree('');if(id!==tree.syncId)return;
     const queue=[...treeNode('').children],seen=new Set();
     while(queue.length){
@@ -340,7 +340,7 @@
     renderSidebar();revealCurrentFolder();
   }
   function updateFolderAddress(prefix=''){
-    // Le fragment sert seulement à la navigation dans la visite en cours.
+    // Le fragment permet aussi d'ouvrir directement un dossier depuis un manager.
     // replaceState ne déclenche pas hashchange et ne recharge pas le document.
     try{history.replaceState(history.state,'',location.pathname+location.search+(prefix?'#d='+encodeURIComponent(prefix):''));}catch{}
   }
@@ -348,19 +348,20 @@
     $('rootFolders').scrollTop=0;
     window.scrollTo({top:0,left:0,behavior:'instant'});
   }
-  async function startAtRoot(){
-    // Aucune reprise du dernier dossier, même si l'URL contient encore #d=….
+  async function startVisit(prefix=''){
+    // Respecter un dossier explicitement demandé dans le lien ; sans dossier,
+    // repartir à la racine sans restaurer une ancienne position enregistrée.
     // Invalider les chargements en cours pour qu'une ancienne réponse ne
     // réaffiche pas le sous-dossier après un retour via le cache du navigateur.
     state.loadId++;
-    state.prefix='';state.entries=[];state.cursor=null;state.history=[];
+    state.prefix=prefix;state.entries=[];state.cursor=null;state.history=[];
     state.selected.clear();state.anchor=null;state.clipboard=null;
-    tree.expanded.clear();invalidateTree();
+    tree.expanded.clear();invalidateTree();expandPath(prefix);
     clearTimeout(searchTimer);$('search').value='';$('filter').value='all';
     hideMenu();closePreview();
     if($('promptDialog').open)finishPrompt(null);
     notice('');$('toast').hidden=true;
-    updateFolderAddress();render();resetVisitScroll();
+    updateFolderAddress(prefix);render();resetVisitScroll();
     await load();await refreshRoots();
   }
   async function navigate(prefix,remember=true){
@@ -582,8 +583,8 @@
   window.addEventListener('pageshow',event=>{
     // Nouvelle visite depuis le cache : remettre les deux panneaux à la racine.
     // Ne pas perturber un transfert que le navigateur aurait conservé en cours.
-    if(event.persisted){if(!state.busy)void startAtRoot();}
+    if(event.persisted){if(!state.busy)void startVisit();}
     else resetVisitScroll();
   });
-  void startAtRoot();
+  void startVisit(prefixFromHash());
 })();

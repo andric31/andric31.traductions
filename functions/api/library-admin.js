@@ -1,6 +1,6 @@
 import {member,readCatalogue} from './_library.js';
 import {json} from './_auth.js';
-import {catalogueKey,legacyCatalogueKey,kindOf,validateCatalogue} from '../../mediatheque/catalogue.js';
+import {catalogueKey,kindOf,validateCatalogue} from '../../mediatheque/catalogue.js';
 import {toWebVTT} from '../../mediatheque/subtitles.js';
 import {readGamePlusCatalogue,GAMEPLUS_CATALOGUE_KEY} from './_gameplus-catalogue.js';
 import {validate as validateGamePlus} from './_gameplus-model.js';
@@ -32,16 +32,7 @@ export async function onRequest(context) {
     }
     const doc=gameplus?validateGamePlus(body.doc):validateCatalogue(body.doc,kind);
     if(typeof body.etag!=='string'||body.etag.length>200)return json({ok:false,error:'Recharge la version R2 avant de publier.'},400);
-    let condition=body.etag?{etagMatches:body.etag}:new Headers({'If-None-Match':'*'});
-    if(kind==='comics'){
-      const current=await env.MEDIA_BUCKET.head(key);
-      if(!current){
-        const old=await env.MEDIA_BUCKET.head(legacyCatalogueKey(kind));
-        const expected=old?'legacy:'+old.etag:'';
-        if(body.etag!==expected)return json({ok:false,error:'Le catalogue R2 a changé ou utilise encore l’ancien dossier. Sauvegarde ton JSON local, puis charge le catalogue R2 avant de publier.'},409);
-        condition=new Headers({'If-None-Match':'*'});
-      }else if(body.etag.startsWith('legacy:'))return json({ok:false,error:'Un catalogue Galerie existe déjà. Recharge le catalogue R2 avant de publier.'},409);
-    }
+    const condition=body.etag?{etagMatches:body.etag}:new Headers({'If-None-Match':'*'});
     doc.updatedAt=new Date().toISOString();
     const saved=await env.MEDIA_BUCKET.put(key,JSON.stringify(doc,null,2),{
       httpMetadata:{contentType:'application/json'},onlyIf:condition

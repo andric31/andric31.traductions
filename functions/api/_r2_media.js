@@ -2,7 +2,7 @@ import {validKey,category,fromSite,silent,signedMedia,mediaTokenState,verify,adm
 import {preview,MARKER} from './_r2_explorer.js';
 import {json} from './_auth.js';
 const isPublicMedia = key => ['image','video'].includes(category(key));
-// Comics/Dramas passent exclusivement par leur route authentifiée ; aucun
+// Bibliothèque/Dramas passent exclusivement par leur route authentifiée ; aucun
 // ancien lien signé ou lien de partage ne doit contourner leurs publications.
 function accepted(key) { return validKey(key) && !key.startsWith('private-library/') && !key.split('/').includes(MARKER); }
 function redirectMedia(token) {

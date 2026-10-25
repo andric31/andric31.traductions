@@ -182,9 +182,8 @@
   }
 
   function renderGame(g, index) {
-    const date = formatTranslationUpdatedDate(g);
     const author = authorMarkup(g);
-    return `<article class="ml-card gp-card"><button type="button" data-open="${index}" aria-haspopup="dialog" aria-label="${esc('Ouvrir : ' + g.title)}">${cover(g)}<div class="ml-card-info"><h3 class="gp-title">${titleMarkup(g)}</h3>${author ? `<p class="gp-card-author gp-author-line">${author}</p>` : ''}${date ? `<p class="gp-card-date"><span>Traduction mise à jour</span><span>${esc(date)}</span></p>` : ''}</div></button></article>`;
+    return `<article class="ml-card gp-card"><button type="button" data-open="${index}" aria-haspopup="dialog" aria-label="${esc('Ouvrir : ' + g.title)}">${cover(g)}<div class="ml-card-info"><h3 class="gp-title">${titleMarkup(g)}</h3>${author ? `<p class="gp-card-author gp-author-line">${author}</p>` : ''}</div></button></article>`;
   }
 
   function render() {

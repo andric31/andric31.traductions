@@ -171,7 +171,7 @@
 
   function cover(g) {
     const src = imageSource(g.banner || g.image || g.cover);
-    return `<div class="gp-cover"><div class="gp-cover-placeholder" ${src ? 'hidden' : ''}><span aria-hidden="true">✨</span><small>${src ? 'Image indisponible' : 'Game+'}</small></div>${src ? `<img src="${esc(src)}" alt="" referrerpolicy="no-referrer" loading="lazy">` : ''}<span class="ml-badge">✨ Game+</span></div>`;
+    return `<div class="gp-cover"><div class="gp-cover-placeholder" ${src ? 'hidden' : ''}><span aria-hidden="true">✨</span><small>${src ? 'Image indisponible' : 'Game+'}</small></div>${src ? `<img src="${esc(src)}" alt="" referrerpolicy="no-referrer" loading="lazy">` : ''}</div>`;
   }
 
   function watchImages(container) {

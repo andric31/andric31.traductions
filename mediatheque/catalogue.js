@@ -68,7 +68,7 @@ export function validateCatalogue(raw, kind) {
     const s=status(r.status||'soon');
     assert(s!=='available'||units.some(u=>u.status==='available'),'Une fiche disponible doit avoir au moins un chapitre/épisode disponible.');
     assert(r.tags==null||Array.isArray(r.tags),'Les tags doivent être une liste.');
-    return {id:key,title,...comicSettings,description:text(r.description,5000,'Résumé'),author:text(r.author,160,'Auteur'),
+    return {id:key,title,...comicSettings,...(kind==='dramas'?{originalTitle:text(r.originalTitle,180,'Titre original')}:{}),description:text(r.description,5000,'Résumé'),author:text(r.author,160,'Auteur'),
       tags:(r.tags||[]).slice(0,12).map(t=>text(t,60,'Tag')).filter(Boolean),status:s,visible:r.visible!==false,
       coverKey:mediaKey(r.coverKey,kind,key),units,updatedAt:text(r.updatedAt,40,'Date')};
   });
@@ -81,7 +81,7 @@ export function mediaURL(kind,id,type,unit='',page=0) {
 export function publicCatalogue(doc) {
   return {ok:true,kind:doc.kind,updatedAt:doc.updatedAt,items:doc.items.filter(r=>r.visible).map(r=>({
     id:r.id,title:r.title,description:r.description,author:r.author,tags:r.tags,status:r.status,updatedAt:r.updatedAt,
-    ...(doc.kind==='bibliotheque'?{format:comicFormatOf(r),readingDirection:readingDirectionOf(r)}:{}),
+    ...(doc.kind==='bibliotheque'?{format:comicFormatOf(r),readingDirection:readingDirectionOf(r)}:{originalTitle:r.originalTitle||''}),
     cover:r.coverKey?mediaURL(doc.kind,r.id,'cover'):'',
     units:r.units.map(u=>({id:u.id,title:u.title,status:r.status==='available'?u.status:'soon',
       ...(doc.kind==='dramas'?{src:r.status==='available'&&u.status==='available'?mediaURL(doc.kind,r.id,'video',u.id):'',

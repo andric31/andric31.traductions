@@ -160,8 +160,7 @@
   }
 
   function renderStats() {
-    const engines = new Set(state.items.map(g => String(g.engine || '').trim()).filter(Boolean));
-    miniStats.textContent = `${state.filtered.length} jeu${state.filtered.length > 1 ? 'x' : ''} · ${engines.size} moteur${engines.size > 1 ? 's' : ''}`;
+    miniStats.textContent = `${state.filtered.length} jeu${state.filtered.length > 1 ? 'x' : ''}`;
   }
 
   function imageSource(raw) {

@@ -89,8 +89,31 @@ export function uploadedParts(value, size) {
   if (size != null) check(parts.length === Math.ceil(size/PART_SIZE), 'Le transfert est incomplet.');
   return parts;
 }
-function disposition(key, attachment) {
-  const name = key.split('/').pop() || 'fichier';
+function validDownloadName(name) {
+  return typeof name==='string'&&name.length>0&&encoder.encode(name).length<=1024&&!/[\/\\\u0000-\u001f\u007f]/.test(name)&&!['.','..',MARKER].includes(name);
+}
+export function downloadMetadata(key, originalName) {
+  const name=originalName??key.split('/').pop();
+  check(validDownloadName(name),'Nom de téléchargement invalide.');
+  // Les valeurs ASCII encodées préservent accents, espaces, casse et ponctuation.
+  return {downloadName:encodeURIComponent(name),downloadStoredName:encodeURIComponent(key.split('/').pop())};
+}
+export function downloadFilename(obj, key) {
+  const stored=key.split('/').pop()||'fichier',meta=obj.customMetadata||{};
+  if(typeof meta.downloadName==='string'){
+    try{
+      // Un déplacement conserve le nom ; un renommage explicite doit être respecté.
+      if(decodeURIComponent(meta.downloadStoredName)!==stored)return stored;
+      const name=decodeURIComponent(meta.downloadName);
+      return validDownloadName(name)?name:stored;
+    }catch{return stored;}
+  }
+  // Compatibilité des anciens envois du manager : seul son suffixe final de
+  // 16 caractères hexadécimaux est retiré, dans ses dossiers privés de médias.
+  const managed=/^private-library\/(?:gameplus\/[a-zA-Z0-9_-]+\/(?:images\/)?|(?:bibliotheque|galerie|comics)\/[a-z0-9_-]+\/(?:images\/|chapitres\/[a-z0-9_-]+\/(?:images\/)?)|dramas\/[a-z0-9_-]+\/(?:images\/|episodes\/[a-z0-9_-]+\/))[^/]+$/.test(key);
+  return managed?stored.replace(/-[a-f0-9]{16}(?=\.[^.]+$|$)/,''):stored;
+}
+function disposition(name, attachment) {
   const fallback = name.replace(/[^a-zA-Z0-9._ -]/g,'_').replace(/["\\]/g,'_');
   return `${attachment?'attachment':'inline'}; filename="${fallback}"; filename*=UTF-8''${encodeURIComponent(name).replace(/[!'()*]/g,c=>'%'+c.charCodeAt(0).toString(16).toUpperCase())}`;
 }
@@ -113,7 +136,7 @@ function previewHeaders(obj, key, attachment, range = null, revalidate = false) 
   const inline = /^(image\/|video\/|audio\/|text\/plain$|application\/pdf$)/.test(type);
   const headers = new Headers({
     'Content-Type':type,'Content-Length':String(range?range.length:obj.size),'Accept-Ranges':'bytes',
-    'Content-Disposition':disposition(key,attachment||!inline), 'ETag':obj.httpEtag || '"'+obj.etag+'"',
+    'Content-Disposition':disposition(downloadFilename(obj,key),attachment||!inline), 'ETag':obj.httpEtag || '"'+obj.etag+'"',
     'Cache-Control':revalidate?'private, no-cache, max-age=0, must-revalidate':'private, no-store',
     'Vary':'Cookie, Referer, Sec-Fetch-Site', 'X-Content-Type-Options':'nosniff',
     'Cross-Origin-Resource-Policy':'same-origin', 'Referrer-Policy':'no-referrer',

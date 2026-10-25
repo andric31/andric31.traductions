@@ -3,7 +3,7 @@ import { admin, fail, silent } from './_r2.js';
 import { json } from './_auth.js';
 import { MARKER, PART_SIZE, check, objectKey, folderKey, isMarker, contentType, describe,
   mustExist, exists, destinationFree, parentsFree, metadata, uploadId, partNumber, fileSize,
-  uploadedParts, preview } from './_r2_explorer.js';
+  uploadedParts, preview, downloadMetadata } from './_r2_explorer.js';
 
 // Un dossier R2 conserve un marqueur pour pouvoir rester vide. Seuls ses
 // propres marqueurs sont ignorés : un fichier de 0 octet ou le marqueur d'un
@@ -56,9 +56,13 @@ export async function onRequest(context) {
         return json({ok:true,part:result});
       }
       check(!action,'Action invalide.');
+      const encodedName=request.headers.get('X-F95-Original-Name');let originalName;
+      if(encodedName!==null){try{originalName=decodeURIComponent(encodedName);}catch{check(false,'Nom de téléchargement invalide.');}}
+      const customMetadata=downloadMetadata(key,originalName);
       await destinationFree(bucket,key);
       const result=await bucket.put(key,request.body||new Uint8Array(),{
         httpMetadata:{contentType:contentType(key,request.headers.get('content-type'))},
+        customMetadata,
         onlyIf:new Headers({'If-None-Match':'*'})
       });
       check(result,'Ce fichier existe déjà. Renommez-le avant de l’importer.',409);
@@ -191,8 +195,9 @@ export async function onRequest(context) {
     if(body.action==='upload-start') {
       const key=objectKey(body.key),size=fileSize(body.size);
       check(size>PART_SIZE,'Ce fichier ne nécessite pas d’envoi par morceaux.');
+      const customMetadata=downloadMetadata(key,body.originalName);
       await destinationFree(bucket,key);
-      const upload=await bucket.createMultipartUpload(key,{httpMetadata:{contentType:contentType(key,body.contentType)}});
+      const upload=await bucket.createMultipartUpload(key,{httpMetadata:{contentType:contentType(key,body.contentType)},customMetadata});
       return json({ok:true,key,uploadId:upload.uploadId,partSize:PART_SIZE});
     }
     if(body.action==='upload-complete' || body.action==='copy-complete') {

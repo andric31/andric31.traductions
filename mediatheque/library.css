@@ -46,33 +46,37 @@
 .ml-dialog.is-drama{width:min(1240px,calc(100vw - 36px))}
 .is-drama .ml-detail-grid{grid-template-columns:minmax(0,1.4fr) minmax(300px,1fr);gap:24px;padding:20px;align-items:start}
 .is-drama .ml-player{width:100%;height:min(84dvh,960px);min-height:0;max-height:84dvh;aspect-ratio:auto;margin:0;overflow:visible}
+.is-drama .ml-player,.is-drama .ml-player video{background:#000}
 .is-drama .ml-player video{display:block;border-radius:12px}
 .is-drama .ml-player.is-landscape{height:auto;aspect-ratio:var(--video-ratio,16/9)}
 .is-drama .ml-player-placeholder{border-radius:12px}
-.is-drama .ml-detail-info{min-width:0;max-height:84dvh;overflow:auto;padding-right:4px}
-.is-drama #detailBadge{margin-right:46px}
-.is-drama #detailName{font-size:27px;line-height:1.2;margin:15px 0;letter-spacing:-.03em;overflow-wrap:anywhere}
-.ml-drama-close{position:absolute;right:20px;top:19px;z-index:3}
+.is-drama .ml-drama-details{display:flex;flex-direction:column;min-width:0;max-height:84dvh}
+.ml-drama-titlebar{display:flex;align-items:flex-start;gap:16px;padding-bottom:17px;flex:none}
+.ml-drama-titles{flex:1;min-width:0}
+.is-drama .ml-detail-info{flex:1;min-width:0;min-height:0;overflow:auto;padding-right:4px}
+.is-drama #detailName{font-size:27px;line-height:1.2;margin:0;letter-spacing:-.03em;overflow-wrap:anywhere}
+.ml-drama-close{flex:none;align-self:flex-start}
 .is-drama .ml-units{max-height:none}
 .is-drama #subtitleMessage:empty{display:none}
 @media(max-width:760px){
   .media-dramas .ml-search{flex-basis:100%;gap:10px}
   .media-dramas .ml-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto}
-  .media-dramas .ml-search{grid-column:1/-1}
-  .media-dramas .ml-filters{order:0;width:auto;flex:1;min-width:0}
-  .media-dramas .ml-filter{padding:9px 6px;font-size:11px}
   .media-dramas .ml-sort{max-width:96px;font-size:11px;padding:10px 7px}
   .ml-dialog.is-drama{width:calc(100% - 18px);max-width:calc(100% - 18px)}
   .is-drama .ml-detail-grid{grid-template-columns:1fr;padding:12px;gap:18px}
   .is-drama .ml-player{height:72dvh;max-height:72dvh}
-  .is-drama .ml-detail-info{max-height:none;overflow:visible;padding-right:0}
+  .is-drama .ml-drama-details{max-height:none}
+  .is-drama .ml-detail-info{overflow:visible;padding-right:0}
   .is-drama #detailName{font-size:23px}
-  .ml-drama-close{top:18px;right:18px;background:var(--card)}
+  .ml-drama-close{position:absolute;top:18px;right:18px;z-index:3;background:var(--card)}
   .is-drama .ml-units{max-height:300px}
 }
-@media(max-width:340px){.media-dramas .ml-filters{grid-column:1/-1}.media-dramas .ml-sort{grid-column:2;justify-self:end}}
 
 .ml-card-info .ml-original-title{margin:-2px 0 9px;font-size:11px;overflow-wrap:anywhere}
-.is-drama .ml-original-title{font-size:14px;line-height:1.5;color:var(--muted);margin:-7px 0 17px;overflow-wrap:anywhere}
+.is-drama .ml-original-title{font-size:14px;line-height:1.5;color:var(--muted);margin:7px 0 0;overflow-wrap:anywhere}
 
 .is-drama .ml-player video::cue{font-size:clamp(16px,2vw,24px)}
+
+/* Les lecteurs commencent directement par le titre, sans statut global. */
+.is-comic .ml-detail-info h3{margin-top:0}
+.media-bibliotheque #search{min-width:0}

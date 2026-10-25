@@ -1,10 +1,10 @@
-import {comicFormatOf,readingDirectionOf} from './catalogue.js?v=20261025-419';
-import {openPrivateCbz,renderCbzPages} from './cbz-reader.js?v=20261025-bibliotheque-v404';
+import {comicFormatOf,readingDirectionOf} from './catalogue.js?v=20261025-420';
+import {openPrivateCbz,renderCbzPages} from './cbz-reader.js?v=20261025-420';
 const $=id=>document.getElementById(id);
 const kind=document.body.dataset.kind, comic=kind==='bibliotheque', title=comic?'Bibliothèque':'Dramas';
 const preview=document.documentElement.dataset.preview==='local';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const state={items:[],filter:'all',format:'all',q:'',sort:'default',item:null,unit:0,page:0,mode:'page',direction:'ltr',zoom:100};
+const state={items:[],format:'all',q:'',sort:'recent',item:null,unit:0,page:0,mode:'page',direction:'ltr',zoom:100};
 let archive=null,archiveController=null,archiveLoading=false,archiveError='',archiveGeneration=0,releasePages=()=>{};
 function resetArchive(){archiveGeneration++;archiveController?.abort();archiveController=null;releasePages();releasePages=()=>{};archive=null;archiveLoading=false;archiveError='';}
 const originalTitle=item=>!comic&&item.originalTitle?.trim()!==item.title?.trim()?item.originalTitle?.trim()||'':'';
@@ -14,20 +14,20 @@ const demoWords=comic?['Des histoires\nà découvrir','Une nouvelle\npage','À s
 function demos(){return demoWords.map((word,i)=>({id:'preview-'+i,title:(comic?(i%2?'Comic':'Manga'):'Drama')+' à venir'+(i?' · '+(i+1):''),word,
   ...(comic?{format:i%2?'comic':'manga',readingDirection:'auto'}:{}),
   demo:true,status:'soon',tags:[],description:comic?'Les premiers mangas et comics arrivent bientôt. Découvre la lecture page par page, de gauche à droite ou de droite à gauche, et le défilement vertical.':'Les premières séries arrivent bientôt. Retrouve ici leur présentation et leurs épisodes, à regarder directement sur le site.',
-  units:Array.from({length:3},(_,n)=>({id:'preview-'+n,title:(comic?'Chapitre ':'Épisode ')+(n+1),status:'soon',pages:[]}))}));}
+  units:Array.from({length:3},(_,n)=>({id:'preview-'+n,title:(comic?'Lecture ':'Épisode ')+(n+1),status:'soon',pages:[]}))}));}
 function safeMedia(raw){try{const u=new URL(raw,location.href);return u.origin===location.origin&&u.pathname==='/api/library-media'?u.href:'';}catch{return '';}}
 function poster(item,i=0){const cover=safeMedia(item.cover);return `<div class="ml-poster" style="--hue:${[217,276,169,30,333,195][i%6]}">
   ${cover?`<div class="ml-poster-image-fallback">${esc(item.title)}</div><img src="${esc(cover)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:
   `<div class="ml-poster-art"></div><span class="ml-poster-type">${comic?'Histoires illustrées':'Séries & épisodes'}</span><div class="ml-poster-word">${esc(item.word||item.title).replace(/\n/g,'<br>')}<small>${item.demo?(comic?'Bientôt dans la bibliothèque':'Bientôt sur '+title):'andric31 · '+title}</small></div>`}
-  ${item.status==='soon'||comic?`<span class="ml-badge">${item.status==='soon'?'Prochainement':'À lire'}</span>`:''}<span class="ml-play" aria-hidden="true">${comic?'▤':'▶'}</span></div>`;}
+  ${comic&&item.status==='available'?'<span class="ml-badge">À lire</span>':''}<span class="ml-play" aria-hidden="true">${comic?'▤':'▶'}</span></div>`;}
 function render(){
   const all=state.items.length?state.items:demos();
   const q=state.q.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-  let rows=all.filter(r=>(state.filter==='all'||r.status===state.filter)&&(!comic||state.format==='all'||comicFormatOf(r)===state.format)&&[r.title,r.originalTitle,r.author,...r.tags].join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(q));
+  let rows=all.filter(r=>(!comic||state.format==='all'||comicFormatOf(r)===state.format)&&[r.title,r.originalTitle,r.author,...r.tags].join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(q));
   if(state.sort==='title')rows.sort((a,b)=>a.title.localeCompare(b.title,'fr'));
   if(state.sort==='recent')rows.sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||''));
   $('count').textContent=state.items.length?rows.length+' '+(comic?'titre':'série')+(rows.length>1?'s':''):comic?'Aperçu · aucun contenu publié':'Aperçu';
-  $('grid').innerHTML=rows.map((r,i)=>`<article class="ml-card"><button type="button" data-open="${esc(r.id)}" aria-label="${esc((r.demo?'Découvrir l’aperçu : ':'Ouvrir : ')+r.title)}">${poster(r,i)}<div class="ml-card-info"><h3>${esc(r.title)}</h3>${originalTitle(r)?`<p class="ml-original-title">${esc(originalTitle(r))}</p>`:''}<p>${comic?formatLabel(r)+' · ':''}${r.demo?'Découvrir le lecteur':r.status==='soon'?'Bientôt disponible':r.units.filter(u=>u.status==='available').length+' '+(comic?'chapitre(s)':'épisode(s)')}</p></div></button></article>`).join('');
+  $('grid').innerHTML=rows.map((r,i)=>`<article class="ml-card"><button type="button" data-open="${esc(r.id)}" aria-label="${esc((r.demo?'Découvrir l’aperçu : ':'Ouvrir : ')+r.title)}">${poster(r,i)}<div class="ml-card-info"><h3>${esc(r.title)}</h3>${originalTitle(r)?`<p class="ml-original-title">${esc(originalTitle(r))}</p>`:''}<p>${comic?formatLabel(r)+' · ':''}${r.demo?'Découvrir le lecteur':r.units.filter(u=>u.status==='available').length+' '+(comic?'lecture(s)':'épisode(s)')}</p></div></button></article>`).join('');
   $('empty').hidden=rows.length>0;
   $('grid').querySelectorAll('img').forEach(img=>{
     const fallback=img.previousElementSibling;
@@ -56,11 +56,11 @@ function updatePages(){
     $('comicInner').replaceChildren();
     if(archive)releasePages=renderCbzPages({archive,container:$('comicInner'),stage:$('comicStage'),indices:pages,vertical:state.mode==='scroll'});
     else {
-      const message=document.createElement('p');message.className='ml-page-error';message.setAttribute('role','status');message.textContent=archiveLoading?'Ouverture du CBZ…':archiveError||'Ce chapitre sera disponible prochainement.';
+      const message=document.createElement('p');message.className='ml-page-error';message.setAttribute('role','status');message.textContent=archiveLoading?'Ouverture du CBZ…':archiveError||'Cette lecture sera disponible prochainement.';
       if(archiveError){const retry=document.createElement('button');retry.type='button';retry.className='ml-btn';retry.textContent='Réessayer';retry.onclick=()=>selectUnit(state.unit);message.append(document.createElement('br'),retry);}
       $('comicInner').append(message);
     }
-  }else $('comicInner').innerHTML=pages.map(i=>state.item.demo?demoPage(i):`<img src="${esc(safeMedia(currentUnit().pages[i]))}" alt="Page ${i+1}" loading="${state.mode==='scroll'?'lazy':'eager'}" referrerpolicy="no-referrer" data-page="${i}">`).join('')||'<p class="ml-page-error">Ce chapitre sera disponible prochainement.</p>';
+  }else $('comicInner').innerHTML=pages.map(i=>state.item.demo?demoPage(i):`<img src="${esc(safeMedia(currentUnit().pages[i]))}" alt="Page ${i+1}" loading="${state.mode==='scroll'?'lazy':'eager'}" referrerpolicy="no-referrer" data-page="${i}">`).join('')||'<p class="ml-page-error">Cette lecture sera disponible prochainement.</p>';
   $('comicInner').querySelectorAll('img[data-page]').forEach(img=>img.addEventListener('error',()=>{const p=document.createElement('p');p.className='ml-page-error';p.textContent=img.alt+' indisponible. Réessaie après avoir vérifié ta connexion.';img.replaceWith(p);},{once:true}));
   $('pageLabel').textContent=count?(state.mode==='scroll'?count+' pages · défilement':'Page '+(state.page+1)+' / '+count):archiveLoading?'Chargement…':archiveError?'Indisponible':'Prochainement';
   $('pageRange').max=String(Math.max(1,count));$('pageRange').value=String(state.page+1);$('pageRange').disabled=!count||state.mode==='scroll';
@@ -104,10 +104,9 @@ function openItem(id){
   $('detailName').textContent=item.title;
   if($('detailOriginalTitle')){$('detailOriginalTitle').textContent=originalTitle(item);$('detailOriginalTitle').hidden=!originalTitle(item);}
   $('detailDesc').textContent=item.description||'La présentation sera ajoutée prochainement.';
-  $('detailBadge').textContent=item.demo?'Aperçu · prochainement':item.status==='soon'?'Prochainement':'Disponible';
   $('detailTags').innerHTML=[...(comic?[formatLabel(item)]:[]),item.author,...item.tags].filter(Boolean).map(t=>`<span class="ml-tag">${esc(t)}</span>`).join('');
-  $('unitHeading').textContent=comic?'Chapitres':'Épisodes';
-  $('units').innerHTML=item.units.map((u,i)=>`<button class="ml-unit" data-unit="${i}" type="button" aria-current="${i===0}" ${(item.demo&&i===0)||u.status==='available'?'':'disabled'}><span>${esc(u.title)}</span><small>${item.demo?'Prochainement':u.status==='available'?(comic?(u.source==='cbz'?'Lire CBZ':u.pages.length+' pages'):'Lire ▶'):'Prochainement'}</small></button>`).join('')||'<p class="ml-description">'+(comic?'Les chapitres':'Les épisodes')+' arrivent bientôt.</p>';
+  $('unitHeading').textContent=comic?'Contenu à lire':'Épisodes';
+  $('units').innerHTML=item.units.map((u,i)=>`<button class="ml-unit" data-unit="${i}" type="button" aria-current="${i===0}" ${(item.demo&&i===0)||u.status==='available'?'':'disabled'}><span>${esc(u.title)}</span><small>${item.demo?'Prochainement':u.status==='available'?(comic?(u.source==='cbz'?'Lire CBZ':u.pages.length+' pages'):'Lire ▶'):'Prochainement'}</small></button>`).join('')||'<p class="ml-description">'+(comic?'Les lectures':'Les épisodes')+' arrivent bientôt.</p>';
   $('previewNote').hidden=!item.demo;$('previewNote').textContent=comic?'Ces trois pages neutres servent uniquement à découvrir le lecteur.':'Présentation du futur lecteur. Aucun épisode n’est encore publié.';
   if(comic){state.direction=readingDirectionOf(item);$('readingMode').value=state.mode;$('zoom').value=state.zoom;}
   const available=item.units.findIndex(u=>u.status==='available');
@@ -139,7 +138,6 @@ async function load(){
 }
 $('search').addEventListener('input',e=>{state.q=e.target.value;render();});
 $('sort').addEventListener('change',e=>{state.sort=e.target.value;render();});
-document.querySelectorAll('[data-filter]').forEach(button=>button.addEventListener('click',()=>{state.filter=button.dataset.filter;document.querySelectorAll('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));render();}));
 $('grid').addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(b)openItem(b.dataset.open);});
 $('units').addEventListener('click',e=>{const b=e.target.closest('[data-unit]');if(b&&!b.disabled)selectUnit(Number(b.dataset.unit));});
 $('closeDetail').addEventListener('click',()=>$('detailDialog').close());

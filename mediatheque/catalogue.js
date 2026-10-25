@@ -37,10 +37,10 @@ export function validateCatalogue(raw, kind) {
       assert(['comic','manga'].includes(comicSettings.format),'Type de lecture invalide : Manga ou Comic attendu.');
       assert(['auto','ltr','rtl'].includes(comicSettings.readingDirection),'Sens de lecture invalide.');
     }
-    assert(Array.isArray(r.units) && r.units.length<=200,'Liste de chapitres/épisodes invalide (200 maximum).');
+    assert(Array.isArray(r.units) && r.units.length<=200,'Liste de lectures/épisodes invalide (200 maximum).');
     const unitIds=new Set();
     const units=r.units.map(u=>{
-      const uid=id(u?.id);assert(!unitIds.has(uid),'Identifiant de chapitre/épisode en double : '+uid);unitIds.add(uid);
+      const uid=id(u?.id);assert(!unitIds.has(uid),'Identifiant de contenu/épisode en double : '+uid);unitIds.add(uid);
       const result={id:uid,title:text(u.title,180,'Titre') || uid,status:status(u.status||'soon')};
       if(kind==='dramas') {
         result.mediaKey=mediaKey(u.mediaKey,kind,key,'video');
@@ -56,17 +56,17 @@ export function validateCatalogue(raw, kind) {
       }
       else {
         result.source=u.source??'pages';
-        assert(['pages','cbz'].includes(result.source),'Source du chapitre invalide : pages ou CBZ attendu.');
+        assert(['pages','cbz'].includes(result.source),'Source de la lecture invalide : pages ou CBZ attendu.');
         result.archiveKey=mediaKey(u.archiveKey,kind,key,'archive');
-        assert(Array.isArray(u.pages) && u.pages.length<=500,'Pages invalides (500 maximum par chapitre).');
+        assert(Array.isArray(u.pages) && u.pages.length<=500,'Pages invalides (500 maximum par lecture).');
         result.pages=u.pages.map(p=>{const k=mediaKey(p,kind,key);assert(k,'Une page ne peut pas être vide.');return k;});
         total+=result.pages.length;
       }
-      assert(result.status!=='available' || (kind==='dramas'?result.mediaKey:result.source==='cbz'?result.archiveKey:result.pages.length),'Ajoute les médias avant de rendre ce chapitre/épisode disponible.');
+      assert(result.status!=='available' || (kind==='dramas'?result.mediaKey:result.source==='cbz'?result.archiveKey:result.pages.length),'Ajoute les médias avant de rendre ce contenu/épisode disponible.');
       return result;
     });
     const s=status(r.status||'soon');
-    assert(s!=='available'||units.some(u=>u.status==='available'),'Une fiche disponible doit avoir au moins un chapitre/épisode disponible.');
+    assert(s!=='available'||units.some(u=>u.status==='available'),'Une fiche disponible doit avoir au moins un contenu/épisode disponible.');
     assert(r.tags==null||Array.isArray(r.tags),'Les tags doivent être une liste.');
     return {id:key,title,...comicSettings,...(kind==='dramas'?{originalTitle:text(r.originalTitle,180,'Titre original')}:{}),description:text(r.description,5000,'Résumé'),author:text(r.author,160,'Auteur'),
       tags:(r.tags||[]).slice(0,12).map(t=>text(t,60,'Tag')).filter(Boolean),status:s,visible:r.visible!==false,

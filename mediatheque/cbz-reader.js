@@ -1,7 +1,7 @@
 import {openCbz,CBZ_LIMITS} from './cbz.js?v=20261025-bibliotheque-v404';
 
 function check(ok,message){if(!ok)throw Error(message);}
-function failure(response){return Error(response.status===401?'Reconnecte-toi pour lire ce chapitre.':response.status===404?'Ce CBZ est indisponible.':'Le CBZ ne peut pas être chargé. Réessaie dans un instant.');}
+function failure(response){return Error(response.status===401?'Reconnecte-toi pour lire cette lecture.':response.status===404?'Ce CBZ est indisponible.':'Le CBZ ne peut pas être chargé. Réessaie dans un instant.');}
 async function limitedBytes(response,length){
   const reader=response.body.getReader(),chunks=[];let total=0,done=false;
   try{
@@ -30,7 +30,7 @@ export async function openPrivateCbz(raw,{signal,fetcher=fetch,origin=location.o
     const response=await fetcher(url.href,{...options,signal:requestSignal,headers:{Range:`bytes=${start}-${end-1}`}});
     if(!response.ok){await response.body?.cancel();throw failure(response);}
     if(response.status!==206||response.headers.get('content-range')!==`bytes ${start}-${end-1}/${size}`||response.headers.get('etag')!==etag){
-      await response.body?.cancel();throw Error('Le CBZ a changé ou sa lecture partielle est indisponible. Ferme et rouvre le chapitre.');
+      await response.body?.cancel();throw Error('Le CBZ a changé ou sa lecture partielle est indisponible. Ferme et rouvre la lecture.');
     }
     const bytes=await limitedBytes(response,end-start);
     // Petit cache d’index/en-têtes uniquement, libéré avec le lecteur.

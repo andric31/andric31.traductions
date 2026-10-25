@@ -236,7 +236,7 @@
           }, gamePlusMenuStatus.hasNew ? { badge: 'NEW' } : undefined);
           const itemsGamePlus = window.ViewerMenu.__getItems?.();
           if (itemsGamePlus?.[itemsGamePlus.length - 1]) itemsGamePlus[itemsGamePlus.length - 1].__authManaged = true;
-          for (const [label, path] of [['📚 Galerie', '/galerie'], ['🎬 Dramas', '/dramas']]) {
+          for (const [label, path] of [['📚 Bibliothèque', '/bibliotheque'], ['🎬 Dramas', '/dramas']]) {
             window.ViewerMenu.addItem(label, () => { window.open(path, '_blank', 'noopener'); });
             const entries = window.ViewerMenu.__getItems?.();
             if (entries?.length) entries[entries.length - 1].__authManaged = true;

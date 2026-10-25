@@ -2,6 +2,7 @@ import {member,readCatalogue} from './_library.js';
 import {preview} from './_r2_explorer.js';
 import {silent} from './_r2.js';
 import {toWebVTT} from '../../mediatheque/subtitles.js';
+import {legacyMediaKey} from '../../mediatheque/catalogue.js';
 export async function onRequest(context) {
   const {request,env}=context;
   if(!['GET','HEAD'].includes(request.method))return silent(405);
@@ -25,7 +26,13 @@ export async function onRequest(context) {
       const converted=toWebVTT(new Uint8Array(await obj.arrayBuffer()),key);
       return new Response(request.method==='HEAD'?null:converted.text,{headers:{'Content-Type':'text/vtt; charset=utf-8','Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','Cross-Origin-Resource-Policy':'same-origin','X-Robots-Tag':'noindex','Vary':'Cookie'}});
     }
-    const source=await preview(request,env.MEDIA_BUCKET,key,false);
+    let source;
+    try{source=await preview(request,env.MEDIA_BUCKET,key,false);}
+    catch(error){
+      const oldKey=legacyMediaKey(key,doc.kind);
+      if(error.status!==404||!oldKey)throw error;
+      source=await preview(request,env.MEDIA_BUCKET,oldKey,false);
+    }
     const response=new Response(source.body,source);
     response.headers.set('Cache-Control','private, no-store');
     response.headers.set('X-Robots-Tag','noindex, nofollow, noarchive');

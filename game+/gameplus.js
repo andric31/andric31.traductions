@@ -232,7 +232,7 @@
     const facts = [['Statut', g.status], ['Sortie du jeu', date]].filter(([, value]) => value);
     const dates = [['Créée le', created], ['Mise à jour le', updated]].filter(([, value]) => value);
     const rows = entries => entries.map(([label, value, wide]) => `<div${wide ? ' class="gp-fact-wide"' : ''}><dt>${label}</dt><dd>${esc(value)}</dd></div>`).join('');
-    $('#gameMeta').innerHTML = (facts.length ? `<section class="gp-facts-section" aria-label="Informations du jeu"><dl class="gp-facts">${rows(facts)}</dl></section>` : '') + (dates.length ? `<section class="gp-facts-section gp-translation-facts" aria-label="Dates de la traduction"><h3><img src="/assets/flags/fr.svg" alt="">Traduction française</h3><dl class="gp-facts">${rows(dates)}</dl></section>` : '') + renderSources(g);
+    $('#gameMeta').innerHTML = (facts.length ? `<section class="gp-facts-section" aria-label="Informations du jeu"><dl class="gp-facts">${rows(facts)}</dl></section>` : '') + renderSources(g) + (dates.length ? `<section class="gp-facts-section gp-translation-facts" aria-label="Dates de la traduction"><h3><img src="/assets/flags/fr.svg" alt="">Traduction française</h3><dl class="gp-facts">${rows(dates)}</dl></section>` : '');
     $('#gameDescription').textContent = g.description || '';
     $('#gameDescription').hidden = !g.description;
     $('#gameSynopsis').hidden = !g.description;

@@ -1,5 +1,5 @@
-import {comicFormatOf,readingDirectionOf} from './catalogue.js?v=20261025-galerie-v402';
-import {openPrivateCbz,renderCbzPages} from './cbz-reader.js?v=20261025-galerie-v402';
+import {comicFormatOf,readingDirectionOf} from './catalogue.js?v=20261025-galerie-v403';
+import {openPrivateCbz,renderCbzPages} from './cbz-reader.js?v=20261025-galerie-v403';
 const $=id=>document.getElementById(id);
 const kind=document.body.dataset.kind, comic=kind==='comics', title=comic?'Galerie':'Dramas';
 const preview=document.documentElement.dataset.preview==='local';

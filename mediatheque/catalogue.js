@@ -4,12 +4,20 @@ export const PREFIX = 'private-library/';
 export function assert(value, message) { if (!value) throw new Error(message); }
 export function kindOf(value) { assert(KINDS.includes(value), 'Section invalide.'); return value; }
 export function emptyCatalogue(kind) { return {version:1, kind:kindOf(kind), updatedAt:'', items:[]}; }
-export function catalogueKey(kind) { return PREFIX + kindOf(kind) + '/catalogue.json'; }
+export function storageKind(kind) { return kindOf(kind)==='comics'?'galerie':kind; }
+export function catalogueKey(kind) { return PREFIX + storageKind(kind) + '/catalogue.json'; }
+export function legacyCatalogueKey(kind) { return kindOf(kind)==='comics'?PREFIX+'comics/catalogue.json':''; }
+export function legacyMediaKey(key,kind) {
+  return kind==='comics'&&key.startsWith(PREFIX+'galerie/')?PREFIX+'comics/'+key.slice((PREFIX+'galerie/').length):'';
+}
 export function mediaKey(key, kind, id, type='image') {
-  const value=String(key || '').trim();
+  let value=String(key || '').trim();
   if (!value) return '';
-  assert(value.startsWith(`${PREFIX}${kindOf(kind)}/${id}/`) && value.length<=800 && !/[\\\u0000-\u001f\u007f]/.test(value)
-    && value.split('/').every(x=>x && x!=='.' && x!=='..'), 'Le média doit être dans private-library/'+kind+'/'+id+'/');
+  const folder=storageKind(kind);
+  // Les anciens JSON sont convertis ; l’API garde une lecture de secours dans comics.
+  if(kind==='comics'&&value.startsWith(`${PREFIX}comics/${id}/`))value=PREFIX+'galerie/'+value.slice((PREFIX+'comics/').length);
+  assert(value.startsWith(`${PREFIX}${folder}/${id}/`) && value.length<=800 && !/[\\\u0000-\u001f\u007f]/.test(value)
+    && value.split('/').every(x=>x && x!=='.' && x!=='..'), 'Le média doit être dans private-library/'+folder+'/'+id+'/');
   assert((type==='archive'?/\.cbz$/i:type==='subtitle'?/\.(srt|vtt|ass|ssa)$/i:type==='video'?/\.(mp4|webm|m4v)$/i:/\.(png|jpe?g|webp|avif|gif)$/i).test(value), type==='archive'?'Archive CBZ attendue.':type==='subtitle'?'Sous-titre SRT, VTT, ASS ou SSA attendu.':type==='video'?'Vidéo MP4, WebM ou M4V attendue.':'Image JPG, PNG, WebP, AVIF ou GIF attendue.');
   return value;
 }

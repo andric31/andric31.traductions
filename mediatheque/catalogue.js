@@ -10,12 +10,16 @@ export function mediaKey(key, kind, id, type='image') {
   if (!value) return '';
   assert(value.startsWith(`${PREFIX}${kindOf(kind)}/${id}/`) && value.length<=800 && !/[\\\u0000-\u001f\u007f]/.test(value)
     && value.split('/').every(x=>x && x!=='.' && x!=='..'), 'Le média doit être dans private-library/'+kind+'/'+id+'/');
-  assert((type==='subtitle'?/\.(srt|vtt|ass|ssa)$/i:type==='video'?/\.(mp4|webm|m4v)$/i:/\.(png|jpe?g|webp|avif|gif)$/i).test(value), type==='subtitle'?'Sous-titre SRT, VTT, ASS ou SSA attendu.':type==='video'?'Vidéo MP4, WebM ou M4V attendue.':'Image JPG, PNG, WebP, AVIF ou GIF attendue.');
+  assert((type==='archive'?/\.cbz$/i:type==='subtitle'?/\.(srt|vtt|ass|ssa)$/i:type==='video'?/\.(mp4|webm|m4v)$/i:/\.(png|jpe?g|webp|avif|gif)$/i).test(value), type==='archive'?'Archive CBZ attendue.':type==='subtitle'?'Sous-titre SRT, VTT, ASS ou SSA attendu.':type==='video'?'Vidéo MP4, WebM ou M4V attendue.':'Image JPG, PNG, WebP, AVIF ou GIF attendue.');
   return value;
 }
 function text(value, max, label) { const v=String(value??'').trim();assert(v.length<=max, label+' trop long.');return v; }
 function id(value) { const v=String(value||'');assert(/^[a-z0-9][a-z0-9_-]{0,79}$/.test(v),'Identifiant : lettres minuscules, chiffres, tirets (80 caractères max).');return v; }
 function status(value) { assert(['soon','available'].includes(value),'Statut invalide.');return value; }
+export function comicFormatOf(record) { return record?.format==='manga'?'manga':'comic'; }
+export function readingDirectionOf(record) {
+  return ['ltr','rtl'].includes(record?.readingDirection)?record.readingDirection:comicFormatOf(record)==='manga'?'rtl':'ltr';
+}
 export function validateCatalogue(raw, kind) {
   kindOf(kind);
   assert(raw && raw.version===1 && raw.kind===kind && Array.isArray(raw.items),'Ce fichier doit être un catalogue '+kind+' de version 1.');
@@ -24,6 +28,13 @@ export function validateCatalogue(raw, kind) {
   const items=raw.items.map(r=>{
     const key=id(r?.id);assert(!ids.has(key),'Identifiant de fiche en double : '+key);ids.add(key);
     const title=text(r.title,180,'Titre');assert(title,'Le titre est obligatoire.');
+    const comicSettings={};
+    if(kind==='comics') {
+      comicSettings.format=r.format??'comic';
+      comicSettings.readingDirection=r.readingDirection??'auto';
+      assert(['comic','manga'].includes(comicSettings.format),'Type de lecture invalide : Manga ou Comic attendu.');
+      assert(['auto','ltr','rtl'].includes(comicSettings.readingDirection),'Sens de lecture invalide.');
+    }
     assert(Array.isArray(r.units) && r.units.length<=200,'Liste de chapitres/épisodes invalide (200 maximum).');
     const unitIds=new Set();
     const units=r.units.map(u=>{
@@ -42,17 +53,20 @@ export function validateCatalogue(raw, kind) {
         assert(defaults<=1,'Choisis une seule piste de sous-titres par défaut.');
       }
       else {
+        result.source=u.source??'pages';
+        assert(['pages','cbz'].includes(result.source),'Source du chapitre invalide : pages ou CBZ attendu.');
+        result.archiveKey=mediaKey(u.archiveKey,kind,key,'archive');
         assert(Array.isArray(u.pages) && u.pages.length<=500,'Pages invalides (500 maximum par chapitre).');
         result.pages=u.pages.map(p=>{const k=mediaKey(p,kind,key);assert(k,'Une page ne peut pas être vide.');return k;});
         total+=result.pages.length;
       }
-      assert(result.status!=='available' || (kind==='dramas'?result.mediaKey:result.pages.length),'Ajoute les médias avant de rendre ce chapitre/épisode disponible.');
+      assert(result.status!=='available' || (kind==='dramas'?result.mediaKey:result.source==='cbz'?result.archiveKey:result.pages.length),'Ajoute les médias avant de rendre ce chapitre/épisode disponible.');
       return result;
     });
     const s=status(r.status||'soon');
     assert(s!=='available'||units.some(u=>u.status==='available'),'Une fiche disponible doit avoir au moins un chapitre/épisode disponible.');
     assert(r.tags==null||Array.isArray(r.tags),'Les tags doivent être une liste.');
-    return {id:key,title,description:text(r.description,5000,'Résumé'),author:text(r.author,160,'Auteur'),
+    return {id:key,title,...comicSettings,description:text(r.description,5000,'Résumé'),author:text(r.author,160,'Auteur'),
       tags:(r.tags||[]).slice(0,12).map(t=>text(t,60,'Tag')).filter(Boolean),status:s,visible:r.visible!==false,
       coverKey:mediaKey(r.coverKey,kind,key),units,updatedAt:text(r.updatedAt,40,'Date')};
   });
@@ -65,10 +79,11 @@ export function mediaURL(kind,id,type,unit='',page=0) {
 export function publicCatalogue(doc) {
   return {ok:true,kind:doc.kind,updatedAt:doc.updatedAt,items:doc.items.filter(r=>r.visible).map(r=>({
     id:r.id,title:r.title,description:r.description,author:r.author,tags:r.tags,status:r.status,updatedAt:r.updatedAt,
+    ...(doc.kind==='comics'?{format:comicFormatOf(r),readingDirection:readingDirectionOf(r)}:{}),
     cover:r.coverKey?mediaURL(doc.kind,r.id,'cover'):'',
     units:r.units.map(u=>({id:u.id,title:u.title,status:r.status==='available'?u.status:'soon',
       ...(doc.kind==='dramas'?{src:r.status==='available'&&u.status==='available'?mediaURL(doc.kind,r.id,'video',u.id):'',
         subtitles:r.status==='available'&&u.status==='available'?u.subtitles.map((t,i)=>({lang:t.lang,label:t.label,default:t.default,src:mediaURL(doc.kind,r.id,'subtitle',u.id)+'&track='+i})):[]}
-        :{pages:r.status==='available'&&u.status==='available'?u.pages.map((_,i)=>mediaURL(doc.kind,r.id,'page',u.id,i)):[]})}))
+        :{source:u.source||'pages',archive:r.status==='available'&&u.status==='available'&&u.source==='cbz'?mediaURL(doc.kind,r.id,'archive',u.id):'',pages:r.status==='available'&&u.status==='available'&&u.source!=='cbz'?u.pages.map((_,i)=>mediaURL(doc.kind,r.id,'page',u.id,i)):[]})}))
   }))};
 }

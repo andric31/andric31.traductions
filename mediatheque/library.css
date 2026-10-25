@@ -26,3 +26,15 @@
 @media(max-width:760px){.ml-shell{padding:15px}.ml-header{flex-wrap:wrap}.ml-nav{order:3;flex-basis:100%;flex-wrap:nowrap;overflow:auto}.ml-theme{margin-left:auto}.ml-brand span{display:block}.ml-heading{align-items:flex-start;margin:24px 0 20px}.ml-intro{gap:8px 14px}.ml-heading p{font-size:13px;line-height:1.5}.ml-heading{flex-wrap:wrap}.ml-heading .ml-label{font-size:10px;padding:6px}.ml-toolbar{flex-wrap:wrap}.ml-search{flex-basis:65%}.ml-filters{order:3;width:100%}.ml-sort{font-size:12px;max-width:115px}.ml-filter{flex:1;padding:9px}.ml-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:15px 10px}.ml-poster-word{font-size:23px;left:13px}.ml-card-info{padding:11px 10px}.ml-card-info h3{font-size:13px}.ml-dialog{max-height:96dvh;width:calc(100vw - 18px);border-radius:12px}.ml-dialog-head{padding:12px 15px}.ml-detail-grid,.is-comic .ml-detail-grid{grid-template-columns:1fr;padding:16px;gap:20px}.ml-player{height:52dvh;min-height:300px;width:auto;max-width:100%}.ml-detail-info h3{font-size:23px}.ml-units{max-height:240px}.is-comic .ml-detail-info{border-top:1px solid var(--border);padding-top:15px}.ml-comic-stage{max-height:55dvh}.ml-demo-page{padding:12px;gap:8px}.ml-demo-panels{gap:8px}.ml-description{font-size:13px}.ml-footer{line-height:1.6;gap:12px}.ml-footer a{margin-left:0;margin-right:12px}}
 @media(max-width:480px){.ml-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ml-poster-word{font-size:27px}.ml-nav a{font-size:13px;padding:9px 11px}.ml-section-title h2{font-size:16px}.ml-count{font-size:11px}.ml-demo-page header{font-size:8px}.ml-zoom{margin-left:0}}
 @media(prefers-reduced-motion:reduce){.ml-card{transition:none}.ml-comic-stage{scroll-behavior:auto}}
+
+/* Sens de lecture : les pages restent dans leur ordre, seuls les contrôles changent de côté. */
+.ml-page-controls.is-rtl{flex-direction:row-reverse}
+.ml-page-controls.is-rtl input{direction:rtl}
+.media-comics .ml-toolbar{flex-wrap:wrap}
+.media-comics .ml-reader-tools select{max-width:100%}
+
+/* Les pages CBZ hors écran libèrent leur image, en conservant la place du feuillet. */
+.ml-cbz-sheet{position:relative;width:100%;aspect-ratio:2/3;display:grid;place-items:center;background:#1b2435;border-radius:3px;overflow:hidden}
+.ml-cbz-placeholder{position:absolute;inset:0;display:grid;place-content:center;text-align:center;padding:20px;color:#d6e2f8;margin:0;overflow-wrap:anywhere}
+.ml-cbz-placeholder .ml-btn,.ml-page-error .ml-btn{margin-top:12px}
+.ml-cbz-sheet img{width:100%;height:auto}

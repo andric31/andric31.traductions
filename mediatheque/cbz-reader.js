@@ -45,7 +45,7 @@ export async function openPrivateCbz(raw,{signal,fetcher=fetch,origin=location.o
 }
 
 // En mode vertical seules les pages proches de l’écran sont extraites.
-export function renderCbzPages({archive,container,stage,indices,vertical=false}){
+export function renderCbzPages({archive,container,stage,indices,vertical=false,onImageLoad=()=>{}}){
   let stopped=false,running=0;const pending=[],slots=[];
   function release(slot){slot.controller?.abort();slot.controller=null;if(slot.url){URL.revokeObjectURL(slot.url);slot.url='';}slot.image.removeAttribute('src');slot.image.hidden=true;slot.text.hidden=false;}
   function enqueue(slot){if(stopped||!slot.visible||slot.busy||slot.url)return;slot.busy=true;pending.push(slot);pump();}
@@ -69,7 +69,7 @@ export function renderCbzPages({archive,container,stage,indices,vertical=false})
     const box=document.createElement('div'),image=document.createElement('img'),text=document.createElement('p');
     box.className='ml-cbz-sheet';text.className='ml-cbz-placeholder';text.textContent='Page '+(index+1);image.alt='Page '+(index+1);image.hidden=true;
     const slot={index,box,image,text,visible:!vertical,busy:false,url:'',controller:null};slots.push(slot);
-    image.onload=()=>{if(stopped||!slot.visible)return;box.style.aspectRatio=image.naturalWidth+' / '+image.naturalHeight;image.hidden=false;text.hidden=true;};
+    image.onload=()=>{if(stopped||!slot.visible)return;box.style.aspectRatio=image.naturalWidth+' / '+image.naturalHeight;image.hidden=false;text.hidden=true;onImageLoad(image);};
     image.onerror=()=>{release(slot);text.textContent='Page illisible.';};
     box.append(text,image);container.append(box);if(observer)observer.observe(box);else enqueue(slot);
   }

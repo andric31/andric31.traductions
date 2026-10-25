@@ -9,6 +9,7 @@ let pageSize={width:3,height:4};
 let archive=null,archiveController=null,archiveLoading=false,archiveError='',archiveGeneration=0,releasePages=()=>{};
 function resetArchive(){archiveGeneration++;archiveController?.abort();archiveController=null;releasePages();releasePages=()=>{};archive=null;archiveLoading=false;archiveError='';}
 const originalTitle=item=>!comic&&item.originalTitle?.trim()!==item.title?.trim()?item.originalTitle?.trim()||'':'';
+const cardAuthor=item=>comic?item.author?.trim()||'':'';
 const formatLabel=item=>comicFormatOf(item)==='manga'?'Manga':'Comic';
 const demoWords=comic?['Des histoires\nà découvrir','Une nouvelle\npage','À suivre…','Un autre\nunivers','Bientôt\nà lire','La suite\narrive']:
   ['De nouvelles\nhistoires','Le prochain\népisode','À découvrir\nbientôt','Un autre\nregard','La suite\narrive','Rendez-vous\nbientôt'];
@@ -28,7 +29,7 @@ function render(){
   if(state.sort==='title')rows.sort((a,b)=>a.title.localeCompare(b.title,'fr'));
   if(state.sort==='recent')rows.sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||''));
   $('count').textContent=state.items.length?rows.length+' '+(comic?'titre':'série')+(rows.length>1?'s':''):comic?'Aperçu · aucun contenu publié':'Aperçu';
-  $('grid').innerHTML=rows.map((r,i)=>`<article class="ml-card"><button type="button" data-open="${esc(r.id)}" aria-label="${esc((r.demo?'Découvrir l’aperçu : ':'Ouvrir : ')+r.title)}">${poster(r,i)}<div class="ml-card-info"><h3>${esc(r.title)}</h3>${originalTitle(r)?`<p class="ml-original-title">${esc(originalTitle(r))}</p>`:''}<p>${comic?formatLabel(r)+' · ':''}${r.demo?'Découvrir le lecteur':r.units.filter(u=>u.status==='available').length+' '+(comic?'lecture(s)':'épisode(s)')}</p></div></button></article>`).join('');
+  $('grid').innerHTML=rows.map((r,i)=>`<article class="ml-card"><button type="button" data-open="${esc(r.id)}" aria-label="${esc((r.demo?'Découvrir l’aperçu : ':'Ouvrir : ')+r.title+(cardAuthor(r)?' — '+cardAuthor(r):''))}">${poster(r,i)}<div class="ml-card-info"><h3>${esc(r.title)}${cardAuthor(r)?` <span class="ml-card-author">— ${esc(cardAuthor(r))}</span>`:''}</h3>${originalTitle(r)?`<p class="ml-original-title">${esc(originalTitle(r))}</p>`:''}<p>${comic?formatLabel(r)+' · ':''}${r.demo?'Découvrir le lecteur':r.units.filter(u=>u.status==='available').length+' '+(comic?'lecture(s)':'épisode(s)')}</p></div></button></article>`).join('');
   $('empty').hidden=rows.length>0;
   $('grid').querySelectorAll('img').forEach(img=>{
     const fallback=img.previousElementSibling;

@@ -72,6 +72,8 @@
 }
 
 .ml-card-info .ml-original-title{margin:-2px 0 9px;font-size:11px;overflow-wrap:anywhere}
+.media-bibliotheque .ml-card-info h3{overflow-wrap:anywhere}
+.ml-card-info .ml-card-author{color:var(--muted);font-weight:400}
 .is-drama .ml-original-title{font-size:14px;line-height:1.5;color:var(--muted);margin:7px 0 0;overflow-wrap:anywhere}
 
 .is-drama .ml-player video::cue{font-size:clamp(16px,2vw,24px)}

@@ -248,7 +248,6 @@
     state.items = []; state.filtered = [];
     grid.replaceChildren();
     toolbar.hidden = true;
-    $('#catalogueHeading').hidden = true;
   }
 
   function showGate(message, login = false) {
@@ -278,7 +277,6 @@
       state.items = Array.isArray(data.items) ? data.items : [];
       markGamePlusSeen(state.items);
       toolbar.hidden = false;
-      $('#catalogueHeading').hidden = false;
       loginBtn.hidden = true; $('#retry').hidden = true;
       $('#gate').hidden = true; $('#app').hidden = false;
       sortSelect.value = state.sort;

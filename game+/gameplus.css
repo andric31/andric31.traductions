@@ -37,3 +37,9 @@
 .gp-author-line>span:not(.badge){min-width:0;overflow-wrap:anywhere}
 .gp-engine-badge{line-height:1;font-weight:400;background:var(--btn);color:var(--fg);max-width:100%;white-space:normal;overflow-wrap:anywhere}
 .gp-translation-facts:only-child{padding-top:0;border-top:0}
+
+/* Compteur sur la ligne de recherche, sans rangée supplémentaire. */
+.media-gameplus .gp-search{display:flex;align-items:center;gap:14px}
+.media-gameplus .gp-search input{flex:1;min-width:0;width:0}
+.media-gameplus .gp-search .ml-count{flex:none;max-width:none;white-space:nowrap;text-align:right;line-height:1.4}
+@media(max-width:760px){.media-gameplus .gp-search{gap:10px}}

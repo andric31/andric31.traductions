@@ -134,13 +134,18 @@
     return `<a class="gp-link ${kind === 'trad' ? 'is-trad' : ''}" href="${esc(link.url)}" target="_blank" rel="noopener">${esc(label)}</a>`;
   }
 
+  function renderSources(g) {
+    const sources = (Array.isArray(g.links) ? g.links : []).filter(link => linkKind(link) === 'source');
+    if (!sources.length) return '';
+    return `<section class="gp-link-group gp-sources" aria-label="Sources du jeu"><div class="gp-link-title">🔗 Liens / source</div><div class="gp-link-list">${sources.map(link => renderLink(link, 'source')).join('')}</div></section>`;
+  }
+
   function renderLinks(g) {
     const links = Array.isArray(g.links) ? g.links : [];
     if (!links.length) return '';
     const groups = {
       trad: links.filter((l) => linkKind(l) === 'trad'),
       download: links.filter((l) => linkKind(l) === 'download'),
-      source: links.filter((l) => linkKind(l) === 'source'),
       external: links.filter((l) => linkKind(l) === 'external'),
     };
     const parts = [];
@@ -150,13 +155,10 @@
     if (groups.download.length) {
       parts.push(`<section class="gp-link-group"><div class="gp-link-title">⬇️ Téléchargement du jeu</div><div class="gp-link-list">${groups.download.map((l) => renderLink(l, 'download')).join('')}</div></section>`);
     }
-    if (groups.source.length) {
-      parts.push(`<section class="gp-link-group"><div class="gp-link-title">🔗 Liens / source</div><div class="gp-link-list">${groups.source.map((l) => renderLink(l, 'source')).join('')}</div></section>`);
-    }
     if (groups.external.length) {
       parts.push(`<section class="gp-link-group"><div class="gp-link-title">➕ Autres liens</div><div class="gp-link-list">${groups.external.map((l) => renderLink(l, 'external')).join('')}</div></section>`);
     }
-    return `<div class="gp-links-box">${parts.join('')}</div>`;
+    return parts.length ? `<div class="gp-links-box">${parts.join('')}</div>` : '';
   }
 
   function renderStats() {
@@ -230,15 +232,16 @@
     const facts = [['Statut', g.status], ['Sortie du jeu', date]].filter(([, value]) => value);
     const dates = [['Créée le', created], ['Mise à jour le', updated]].filter(([, value]) => value);
     const rows = entries => entries.map(([label, value, wide]) => `<div${wide ? ' class="gp-fact-wide"' : ''}><dt>${label}</dt><dd>${esc(value)}</dd></div>`).join('');
-    $('#gameMeta').innerHTML = (facts.length ? `<section class="gp-facts-section" aria-label="Informations du jeu"><dl class="gp-facts">${rows(facts)}</dl></section>` : '') + (dates.length ? `<section class="gp-facts-section gp-translation-facts" aria-label="Dates de la traduction"><h3><img src="/assets/flags/fr.svg" alt="">Traduction française</h3><dl class="gp-facts">${rows(dates)}</dl></section>` : '');
+    $('#gameMeta').innerHTML = (facts.length ? `<section class="gp-facts-section" aria-label="Informations du jeu"><dl class="gp-facts">${rows(facts)}</dl></section>` : '') + (dates.length ? `<section class="gp-facts-section gp-translation-facts" aria-label="Dates de la traduction"><h3><img src="/assets/flags/fr.svg" alt="">Traduction française</h3><dl class="gp-facts">${rows(dates)}</dl></section>` : '') + renderSources(g);
     $('#gameDescription').textContent = g.description || '';
     $('#gameDescription').hidden = !g.description;
     $('#gameSynopsis').hidden = !g.description;
     $('#gameTags').innerHTML = (g.tags || []).map(t => `<span class="gp-tag">${esc(t)}</span>`).join('');
     $('#gameInformation').innerHTML = g.information ? '<h3>Informations</h3>' + linkifyText(g.information) : '';
     $('#gameInformation').hidden = !g.information;
-    $('#gameLinks').innerHTML = renderLinks(g);
-    $('#gameLinks').hidden = !(g.links || []).length;
+    const linksMarkup = renderLinks(g);
+    $('#gameLinks').innerHTML = linksMarkup;
+    $('#gameLinks').hidden = !linksMarkup;
     if (!dialog.open) dialog.showModal();
     document.body.style.overflow = 'hidden';
   }

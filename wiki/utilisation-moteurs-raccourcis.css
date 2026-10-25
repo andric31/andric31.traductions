@@ -1,0 +1,65 @@
+/* Styles limités au guide des commandes ; les autres pages gardent leur présentation. */
+.controls-guide kbd {
+  display: inline-block;
+  padding: 2px 7px;
+  margin: 2px 0;
+  border: 1px solid var(--wiki-border-strong);
+  border-bottom-width: 3px;
+  border-radius: 6px;
+  background: var(--wiki-soft-strong);
+  color: var(--wiki-text);
+  font: 650 .85em ui-monospace, SFMono-Regular, Consolas, monospace;
+  line-height: 1.5;
+  white-space: nowrap;
+  vertical-align: baseline;
+}
+.controls-guide .card a:not(.controls-top) { text-decoration: underline; text-underline-offset: 3px; }
+.controls-guide .quick-scroll { overflow-x: auto; margin-top: 20px; border: 1px solid var(--wiki-border); border-radius: 12px; }
+.controls-guide table { width: 100%; border-collapse: collapse; text-align: left; }
+.controls-guide .quick-table { min-width: 650px; }
+.controls-guide caption { text-align: left; padding: 12px 16px; color: var(--wiki-muted); font-size: 12px; }
+.controls-guide .quick-table thead { background: var(--wiki-soft-strong); }
+.controls-guide :is(th, td) { padding: 12px 16px; font-size: 14px; line-height: 1.65; vertical-align: top; }
+.controls-guide thead th { font-size: 12px; letter-spacing: .02em; color: var(--wiki-muted); }
+.controls-guide tbody tr { border-top: 1px solid var(--wiki-border); }
+.controls-guide tbody th { font-weight: 650; }
+.controls-guide td { color: var(--wiki-muted); }
+.controls-guide td strong { color: var(--wiki-text); font-weight: 600; }
+.controls-guide .quick-table tbody tr:nth-child(even) { background: var(--wiki-soft); }
+.controls-guide .keys-table { table-layout: fixed; }
+.controls-guide .keys-table caption { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.controls-guide .keys-table th:first-child { width: 24%; }
+.controls-guide .keys-table :is(th, td) { padding-left: 0; padding-right: 16px; }
+.controls-guide .keys-table td { padding-right: 0; }
+.controls-guide .engine-card .guide-note { border-left: 3px solid var(--engine-hue); }
+.controls-guide .controls-sources { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--wiki-border); }
+.controls-guide .controls-sources > span { color: var(--wiki-muted); font-size: 11px; font-weight: 650; text-transform: uppercase; letter-spacing: .06em; }
+.controls-guide .engine-sources { margin: 7px 0 12px; }
+.controls-guide .controls-top { color: var(--wiki-muted); font-size: 12px; }
+.controls-guide .guide-footer a { flex-shrink: 0; }
+.controls-guide .guide-note a, .controls-guide .guide-faq a { color: var(--wiki-link); }
+.controls-guide #mobile { scroll-margin-top: 20px; }
+@media (max-width: 600px) {
+  .controls-guide .keys-table th:first-child { width: 31%; }
+  .controls-guide .keys-table :is(th, td) { font-size: 13px; padding-top: 11px; padding-bottom: 11px; }
+  .controls-guide .keys-table th { padding-right: 10px; }
+  .controls-guide .engine-heading { align-items: flex-start; }
+  .controls-guide .engine-heading h2 { font-size: 23px; }
+  .controls-guide .engine-category { font-size: 11px; }
+  .controls-guide .guide-topline { gap: 8px; }
+  .controls-guide .guide-count { white-space: nowrap; }
+}
+@media print {
+  .controls-guide .quick-scroll { overflow: visible; }
+  .controls-guide .quick-table { min-width: 0; }
+  .controls-guide .controls-top { display: none; }
+}
+.controls-guide .guide-skip { clip-path: inset(50%); }
+.controls-guide .guide-skip:focus { clip-path: none; }
+@media (max-width: 600px) {
+  .controls-guide .keys-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .controls-guide .keys-table tbody, .controls-guide .keys-table tr { display: block; }
+  .controls-guide .keys-table tbody th, .controls-guide .keys-table tbody td { display: block; width: 100%; }
+  .controls-guide .keys-table tbody th:first-child { width: 100%; padding: 12px 0 3px; }
+  .controls-guide .keys-table tbody td { padding: 0 0 12px; font-size: 14px; }
+}

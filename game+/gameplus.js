@@ -82,9 +82,7 @@
     try { return new Date(d).toLocaleDateString('fr-FR'); } catch { return ''; }
   }
 
-  function formatGameDate(g) { return formatRawDate(g.date); }
   function formatTranslationUpdatedDate(g) { return formatRawDate(g.translationUpdatedAt || g.translationUpdateDate || g.tradUpdatedAt || g.updatedAt); }
-  function formatTranslationCreatedDate(g) { return formatRawDate(g.translationCreatedAt || g.translationCreationDate || g.tradCreatedAt); }
 
   function fillEngines() {
     const engines = [...new Set(state.items.map((g) => String(g.engine || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr'));
@@ -228,11 +226,12 @@
     const images = [g.banner || g.image || g.cover, ...(g.gallery || [])].map(imageSource).filter(Boolean);
     $('#gameVisual').innerHTML = cover(g) + (images.length > 1 ? `<div class="gp-gallery" aria-label="Galerie">${images.map((src, i) => `<button type="button" data-gallery="${i}" aria-label="Afficher l’image ${i + 1}" aria-pressed="${i === 0}">${i + 1}</button>`).join('')}</div>` : '');
     watchImages($('#gameVisual'));
-    const date = formatGameDate(g), created = formatTranslationCreatedDate(g), updated = formatTranslationUpdatedDate(g);
-    const facts = [['Statut', g.status], ['Sortie du jeu', date]].filter(([, value]) => value);
-    const dates = [['Créée le', created], ['Mise à jour le', updated]].filter(([, value]) => value);
-    const rows = entries => entries.map(([label, value, wide]) => `<div${wide ? ' class="gp-fact-wide"' : ''}><dt>${label}</dt><dd>${esc(value)}</dd></div>`).join('');
-    $('#gameMeta').innerHTML = (facts.length ? `<section class="gp-facts-section" aria-label="Informations du jeu"><dl class="gp-facts">${rows(facts)}</dl></section>` : '') + renderSources(g) + (dates.length ? `<section class="gp-facts-section gp-translation-facts" aria-label="Dates de la traduction"><h3><img src="/assets/flags/fr.svg" alt="">Traduction française</h3><dl class="gp-facts">${rows(dates)}</dl></section>` : '');
+    const updated = formatTranslationUpdatedDate(g);
+    const facts = [['Statut', g.status]].filter(([, value]) => value);
+    const rows = facts.map(([label, value]) => `<div><dt>${label}</dt><dd>${esc(value)}</dd></div>`).join('');
+    $('#gameMeta').innerHTML = (facts.length ? `<section class="gp-facts-section" aria-label="Informations du jeu"><dl class="gp-facts">${rows}</dl></section>` : '') + renderSources(g);
+    $('#gameUpdated').textContent = updated ? `Mise à jour le ${updated}` : '';
+    $('#gameUpdated').hidden = !updated;
     $('#gameDescription').textContent = g.description || '';
     $('#gameDescription').hidden = !g.description;
     $('#gameSynopsis').hidden = !g.description;

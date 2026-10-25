@@ -43,3 +43,6 @@
 .media-gameplus .gp-search input{flex:1;min-width:0;width:0}
 .media-gameplus .gp-search .ml-count{flex:none;max-width:none;white-space:nowrap;text-align:right;line-height:1.4}
 @media(max-width:760px){.media-gameplus .gp-search{gap:10px}}
+
+/* Dernière mise à jour discrète, au bas de la fiche. */
+.gp-detail-grid>.gp-updated{grid-column:1/-1;margin:0;text-align:right;color:var(--muted);font-size:11px;line-height:1.4}

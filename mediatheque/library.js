@@ -87,7 +87,7 @@ function selectUnit(index){
     updatePages();return;
   }
   const video=$('video');video.pause();video.removeAttribute('src');video.replaceChildren();video.load();
-  video.parentElement.classList.remove('is-landscape');video.parentElement.style.removeProperty('--video-ratio');
+  $('detailDialog').style.removeProperty('--video-ratio');
   const u=currentUnit(),src=safeMedia(u?.src);
   $('videoPlaceholder').hidden=!!src;video.hidden=!src;
   $('subtitleMessage').textContent='';
@@ -155,11 +155,12 @@ if(comic){
 }else {
   const video=$('video');
   video.addEventListener('error',()=>videoMessage('Cet épisode ne peut pas être lu. Vérifie ta connexion ou réessaie plus tard.'));
-  video.addEventListener('loadedmetadata',()=>{
+  const updateVideoRatio=()=>{
     if(!video.videoWidth||!video.videoHeight)return;
-    video.parentElement.classList.toggle('is-landscape',video.videoWidth>=video.videoHeight);
-    video.parentElement.style.setProperty('--video-ratio',String(video.videoWidth/video.videoHeight));
-  });
+    $('detailDialog').style.setProperty('--video-ratio',String(video.videoWidth/video.videoHeight));
+  };
+  video.addEventListener('loadedmetadata',updateVideoRatio);
+  video.addEventListener('resize',updateVideoRatio);
   const updateSubtitles=()=>{for(const track of video.textTracks)positionSubtitles(track);};
   video.textTracks.addEventListener('change',updateSubtitles);
 }

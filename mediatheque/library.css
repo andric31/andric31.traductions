@@ -43,12 +43,11 @@
 .media-dramas .ml-search{display:flex;align-items:center;gap:14px;min-width:0}
 .media-dramas #search{flex:1;min-width:0;width:0}
 .media-dramas .ml-search .ml-count{flex:none;white-space:nowrap}
-.ml-dialog.is-drama{width:min(1240px,calc(100vw - 36px))}
-.is-drama .ml-detail-grid{grid-template-columns:minmax(0,1.4fr) minmax(300px,1fr);gap:24px;padding:20px;align-items:start}
-.is-drama .ml-player{width:100%;height:min(84dvh,960px);min-height:0;max-height:84dvh;aspect-ratio:auto;margin:0;overflow:visible}
+.ml-dialog.is-drama{--video-ratio:.5625;--video-height:min(84dvh,960px);--drama-sidebar:clamp(300px,36vw,486px);width:min(calc(100vw - 36px),calc(var(--video-height) * var(--video-ratio) + var(--drama-sidebar) + 66px));max-width:calc(100vw - 36px)}
+.is-drama .ml-detail-grid{grid-template-columns:minmax(0,1fr) var(--drama-sidebar);gap:24px;padding:20px;align-items:start}
+.is-drama .ml-player{width:100%;height:auto;min-height:0;max-height:var(--video-height);aspect-ratio:var(--video-ratio);margin:0;overflow:visible}
 .is-drama .ml-player,.is-drama .ml-player video{background:#000}
 .is-drama .ml-player video{display:block;border-radius:12px}
-.is-drama .ml-player.is-landscape{height:auto;aspect-ratio:var(--video-ratio,16/9)}
 .is-drama .ml-player-placeholder{border-radius:12px}
 .is-drama .ml-drama-details{display:flex;flex-direction:column;min-width:0;max-height:84dvh}
 .ml-drama-titlebar{display:flex;align-items:flex-start;gap:16px;padding-bottom:17px;flex:none}
@@ -62,9 +61,9 @@
   .media-dramas .ml-search{flex-basis:100%;gap:10px}
   .media-dramas .ml-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto}
   .media-dramas .ml-sort{max-width:96px;font-size:11px;padding:10px 7px}
-  .ml-dialog.is-drama{width:calc(100% - 18px);max-width:calc(100% - 18px)}
+  .ml-dialog.is-drama{--video-height:72dvh;width:calc(100% - 18px);max-width:calc(100% - 18px)}
   .is-drama .ml-detail-grid{grid-template-columns:1fr;padding:12px;gap:18px}
-  .is-drama .ml-player{height:72dvh;max-height:72dvh}
+  .is-drama .ml-player{width:min(100%,calc(var(--video-height) * var(--video-ratio)));height:auto;max-height:var(--video-height);margin-inline:auto}
   .is-drama .ml-drama-details{max-height:none}
   .is-drama .ml-detail-info{overflow:visible;padding-right:0}
   .is-drama #detailName{font-size:23px}

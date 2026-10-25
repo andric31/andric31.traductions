@@ -1,4 +1,4 @@
-import {openCbz,CBZ_LIMITS} from './cbz.js?v=20261025-galerie-v403';
+import {openCbz,CBZ_LIMITS} from './cbz.js?v=20261025-bibliotheque-v404';
 
 function check(ok,message){if(!ok)throw Error(message);}
 function failure(response){return Error(response.status===401?'Reconnecte-toi pour lire ce chapitre.':response.status===404?'Ce CBZ est indisponible.':'Le CBZ ne peut pas être chargé. Réessaie dans un instant.');}

@@ -1,7 +1,7 @@
-import {comicFormatOf,readingDirectionOf} from './catalogue.js?v=20261025-galerie-v403';
-import {openPrivateCbz,renderCbzPages} from './cbz-reader.js?v=20261025-galerie-v403';
+import {comicFormatOf,readingDirectionOf} from './catalogue.js?v=20261025-bibliotheque-v404';
+import {openPrivateCbz,renderCbzPages} from './cbz-reader.js?v=20261025-bibliotheque-v404';
 const $=id=>document.getElementById(id);
-const kind=document.body.dataset.kind, comic=kind==='comics', title=comic?'Galerie':'Dramas';
+const kind=document.body.dataset.kind, comic=kind==='bibliotheque', title=comic?'Bibliothèque':'Dramas';
 const preview=document.documentElement.dataset.preview==='local';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const state={items:[],filter:'all',format:'all',q:'',sort:'default',item:null,unit:0,page:0,mode:'page',direction:'ltr',zoom:100};
@@ -17,7 +17,7 @@ function demos(){return demoWords.map((word,i)=>({id:'preview-'+i,title:(comic?(
 function safeMedia(raw){try{const u=new URL(raw,location.href);return u.origin===location.origin&&u.pathname==='/api/library-media'?u.href:'';}catch{return '';}}
 function poster(item,i=0){const cover=safeMedia(item.cover);return `<div class="ml-poster" style="--hue:${[217,276,169,30,333,195][i%6]}">
   ${cover?`<div class="ml-poster-image-fallback">${esc(item.title)}</div><img src="${esc(cover)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:
-  `<div class="ml-poster-art"></div><span class="ml-poster-type">${comic?'Histoires illustrées':'Séries & épisodes'}</span><div class="ml-poster-word">${esc(item.word||item.title).replace(/\n/g,'<br>')}<small>${item.demo?'Bientôt sur '+title:'andric31 · '+title}</small></div>`}
+  `<div class="ml-poster-art"></div><span class="ml-poster-type">${comic?'Histoires illustrées':'Séries & épisodes'}</span><div class="ml-poster-word">${esc(item.word||item.title).replace(/\n/g,'<br>')}<small>${item.demo?(comic?'Bientôt dans la bibliothèque':'Bientôt sur '+title):'andric31 · '+title}</small></div>`}
   <span class="ml-badge">${item.status==='soon'?'Prochainement':comic?'À lire':'À regarder'}</span><span class="ml-play" aria-hidden="true">${comic?'▤':'▶'}</span></div>`;}
 function render(){
   const all=state.items.length?state.items:demos();

@@ -1,21 +1,15 @@
 // Format commun au site et aux managers. Aucun accès réseau ou stockage ici.
-export const KINDS = ['comics', 'dramas'];
+export const KINDS = ['bibliotheque', 'dramas'];
 export const PREFIX = 'private-library/';
 export function assert(value, message) { if (!value) throw new Error(message); }
 export function kindOf(value) { assert(KINDS.includes(value), 'Section invalide.'); return value; }
 export function emptyCatalogue(kind) { return {version:1, kind:kindOf(kind), updatedAt:'', items:[]}; }
-export function storageKind(kind) { return kindOf(kind)==='comics'?'galerie':kind; }
+export function storageKind(kind) { return kindOf(kind); }
 export function catalogueKey(kind) { return PREFIX + storageKind(kind) + '/catalogue.json'; }
-export function legacyCatalogueKey(kind) { return kindOf(kind)==='comics'?PREFIX+'comics/catalogue.json':''; }
-export function legacyMediaKey(key,kind) {
-  return kind==='comics'&&key.startsWith(PREFIX+'galerie/')?PREFIX+'comics/'+key.slice((PREFIX+'galerie/').length):'';
-}
 export function mediaKey(key, kind, id, type='image') {
   let value=String(key || '').trim();
   if (!value) return '';
   const folder=storageKind(kind);
-  // Les anciens JSON sont convertis ; l’API garde une lecture de secours dans comics.
-  if(kind==='comics'&&value.startsWith(`${PREFIX}comics/${id}/`))value=PREFIX+'galerie/'+value.slice((PREFIX+'comics/').length);
   assert(value.startsWith(`${PREFIX}${folder}/${id}/`) && value.length<=800 && !/[\\\u0000-\u001f\u007f]/.test(value)
     && value.split('/').every(x=>x && x!=='.' && x!=='..'), 'Le média doit être dans private-library/'+folder+'/'+id+'/');
   assert((type==='archive'?/\.cbz$/i:type==='subtitle'?/\.(srt|vtt|ass|ssa)$/i:type==='video'?/\.(mp4|webm|m4v)$/i:/\.(png|jpe?g|webp|avif|gif)$/i).test(value), type==='archive'?'Archive CBZ attendue.':type==='subtitle'?'Sous-titre SRT, VTT, ASS ou SSA attendu.':type==='video'?'Vidéo MP4, WebM ou M4V attendue.':'Image JPG, PNG, WebP, AVIF ou GIF attendue.');
@@ -37,7 +31,7 @@ export function validateCatalogue(raw, kind) {
     const key=id(r?.id);assert(!ids.has(key),'Identifiant de fiche en double : '+key);ids.add(key);
     const title=text(r.title,180,'Titre');assert(title,'Le titre est obligatoire.');
     const comicSettings={};
-    if(kind==='comics') {
+    if(kind==='bibliotheque') {
       comicSettings.format=r.format??'comic';
       comicSettings.readingDirection=r.readingDirection??'auto';
       assert(['comic','manga'].includes(comicSettings.format),'Type de lecture invalide : Manga ou Comic attendu.');
@@ -87,7 +81,7 @@ export function mediaURL(kind,id,type,unit='',page=0) {
 export function publicCatalogue(doc) {
   return {ok:true,kind:doc.kind,updatedAt:doc.updatedAt,items:doc.items.filter(r=>r.visible).map(r=>({
     id:r.id,title:r.title,description:r.description,author:r.author,tags:r.tags,status:r.status,updatedAt:r.updatedAt,
-    ...(doc.kind==='comics'?{format:comicFormatOf(r),readingDirection:readingDirectionOf(r)}:{}),
+    ...(doc.kind==='bibliotheque'?{format:comicFormatOf(r),readingDirection:readingDirectionOf(r)}:{}),
     cover:r.coverKey?mediaURL(doc.kind,r.id,'cover'):'',
     units:r.units.map(u=>({id:u.id,title:u.title,status:r.status==='available'?u.status:'soon',
       ...(doc.kind==='dramas'?{src:r.status==='available'&&u.status==='available'?mediaURL(doc.kind,r.id,'video',u.id):'',

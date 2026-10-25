@@ -183,8 +183,8 @@
 
   function renderGame(g, index) {
     const date = formatTranslationUpdatedDate(g);
-    const specs = [['Moteur', g.engine], ['Version', g.version]].filter(([, value]) => value);
-    return `<article class="ml-card gp-card"><button type="button" data-open="${index}" aria-haspopup="dialog" aria-label="${esc('Ouvrir : ' + g.title)}">${cover(g)}<div class="ml-card-info"><h3>${esc(g.title)}</h3>${g.developer ? `<p class="gp-card-author">Par ${esc(g.developer)}</p>` : ''}${specs.length ? `<dl class="gp-card-specs">${specs.map(([label, value]) => `<div><dt>${label}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl>` : ''}${date ? `<p class="gp-card-date"><span>Traduction mise à jour</span><span>${esc(date)}</span></p>` : ''}</div></button></article>`;
+    const specs = [['Moteur', g.engine]].filter(([, value]) => value);
+    return `<article class="ml-card gp-card"><button type="button" data-open="${index}" aria-haspopup="dialog" aria-label="${esc('Ouvrir : ' + g.title)}">${cover(g)}<div class="ml-card-info"><h3 class="gp-title">${titleMarkup(g)}</h3>${g.developer ? `<p class="gp-card-author">Par ${esc(g.developer)}</p>` : ''}${specs.length ? `<dl class="gp-card-specs">${specs.map(([label, value]) => `<div><dt>${label}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl>` : ''}${date ? `<p class="gp-card-date"><span>Traduction mise à jour</span><span>${esc(date)}</span></p>` : ''}</div></button></article>`;
   }
 
   function render() {
@@ -199,18 +199,24 @@
     watchImages(grid);
   }
 
+  function titleMarkup(g) {
+    return `<span>${esc(g.title)}</span>${g.version ? ` <span class="gp-title-version" aria-label="${esc('Version ' + g.version)}">${esc(g.version)}</span>` : ''}`;
+  }
+
   function showGame(g) {
     if (!g) return;
     selectedId = String(g.id);
-    $('#gameTitle').textContent = g.title;
+    $('#gameTitle').innerHTML = titleMarkup(g);
+    $('#gameDeveloper').textContent = g.developer ? 'Par ' + g.developer : '';
+    $('#gameDeveloper').hidden = !g.developer;
     const images = [g.banner || g.image || g.cover, ...(g.gallery || [])].map(imageSource).filter(Boolean);
     $('#gameVisual').innerHTML = cover(g) + (images.length > 1 ? `<div class="gp-gallery" aria-label="Galerie">${images.map((src, i) => `<button type="button" data-gallery="${i}" aria-label="Afficher l’image ${i + 1}" aria-pressed="${i === 0}">${i + 1}</button>`).join('')}</div>` : '');
     watchImages($('#gameVisual'));
     const date = formatGameDate(g), created = formatTranslationCreatedDate(g), updated = formatTranslationUpdatedDate(g);
-    const facts = [['Développeur', g.developer, true], ['Moteur', g.engine], ['Version', g.version], ['Statut', g.status], ['Sortie du jeu', date]].filter(([, value]) => value);
+    const facts = [['Moteur', g.engine], ['Statut', g.status], ['Sortie du jeu', date]].filter(([, value]) => value);
     const dates = [['Créée le', created], ['Mise à jour le', updated]].filter(([, value]) => value);
     const rows = entries => entries.map(([label, value, wide]) => `<div${wide ? ' class="gp-fact-wide"' : ''}><dt>${label}</dt><dd>${esc(value)}</dd></div>`).join('');
-    $('#gameMeta').innerHTML = (facts.length ? `<section class="gp-facts-section" aria-label="Informations du jeu"><h3>Le jeu</h3><dl class="gp-facts">${rows(facts)}</dl></section>` : '') + (dates.length ? `<section class="gp-facts-section gp-translation-facts" aria-label="Dates de la traduction"><h3><img src="/assets/flags/fr.svg" alt="">Traduction française</h3><dl class="gp-facts">${rows(dates)}</dl></section>` : '');
+    $('#gameMeta').innerHTML = (facts.length ? `<section class="gp-facts-section" aria-label="Informations du jeu"><dl class="gp-facts">${rows(facts)}</dl></section>` : '') + (dates.length ? `<section class="gp-facts-section gp-translation-facts" aria-label="Dates de la traduction"><h3><img src="/assets/flags/fr.svg" alt="">Traduction française</h3><dl class="gp-facts">${rows(dates)}</dl></section>` : '');
     $('#gameDescription').textContent = g.description || '';
     $('#gameDescription').hidden = !g.description;
     $('#gameSynopsis').hidden = !g.description;

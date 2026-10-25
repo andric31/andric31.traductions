@@ -13,11 +13,8 @@
 
 .gp-gallery{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.gp-gallery button{padding:7px 12px;border:1px solid var(--border);background:var(--btn);color:var(--muted);border-radius:7px;cursor:pointer}.gp-gallery button[aria-pressed="true"]{border-color:var(--primary);color:var(--primary)}
 
-/* Informations du jeu et dates de traduction séparées, sans badges mélangés. */
+/* Développeur et moteur réunis ; dates de traduction séparées. */
 .gp-card .gp-card-author{margin:0;color:var(--muted)}
-.gp-card-specs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:13px 0 0;padding-top:11px;border-top:1px solid var(--border)}
-.gp-card-specs dt{font-size:10px;color:var(--muted);margin-bottom:3px}
-.gp-card-specs dd{font-size:12px;font-weight:600;color:var(--fg);margin:0;overflow-wrap:anywhere}
 .gp-card .gp-card-date{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:13px 0 0;padding-top:11px;border-top:1px solid var(--border);font-size:11px}
 .gp-facts-section h3,.gp-synopsis h3{display:flex;align-items:center;gap:8px;color:var(--fg);font-size:15px;line-height:1.4;margin:0 0 15px}
 .gp-facts-section h3 img{width:18px;height:12px;border-radius:2px}
@@ -34,3 +31,9 @@
 .gp-heading{min-width:0;flex:1}.gp-heading #gameTitle,.gp-card .gp-title{display:flex;align-items:baseline;flex-wrap:wrap;gap:5px 9px;overflow-wrap:anywhere}
 .gp-title-version{color:var(--muted);font-size:.8em;font-weight:500;line-height:1.4}
 .gp-heading .gp-developer{margin:6px 0 0;font-size:13px;line-height:1.4;color:var(--muted)}
+
+/* Même badge et mêmes couleurs de moteur que le viewer. */
+.gp-author-line{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px}
+.gp-author-line>span:not(.badge){min-width:0;overflow-wrap:anywhere}
+.gp-engine-badge{line-height:1;font-weight:400;background:var(--btn);color:var(--fg);max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.gp-translation-facts:only-child{padding-top:0;border-top:0}

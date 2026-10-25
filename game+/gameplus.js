@@ -183,8 +183,8 @@
 
   function renderGame(g, index) {
     const date = formatTranslationUpdatedDate(g);
-    const specs = [['Moteur', g.engine]].filter(([, value]) => value);
-    return `<article class="ml-card gp-card"><button type="button" data-open="${index}" aria-haspopup="dialog" aria-label="${esc('Ouvrir : ' + g.title)}">${cover(g)}<div class="ml-card-info"><h3 class="gp-title">${titleMarkup(g)}</h3>${g.developer ? `<p class="gp-card-author">Par ${esc(g.developer)}</p>` : ''}${specs.length ? `<dl class="gp-card-specs">${specs.map(([label, value]) => `<div><dt>${label}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl>` : ''}${date ? `<p class="gp-card-date"><span>Traduction mise à jour</span><span>${esc(date)}</span></p>` : ''}</div></button></article>`;
+    const author = authorMarkup(g);
+    return `<article class="ml-card gp-card"><button type="button" data-open="${index}" aria-haspopup="dialog" aria-label="${esc('Ouvrir : ' + g.title)}">${cover(g)}<div class="ml-card-info"><h3 class="gp-title">${titleMarkup(g)}</h3>${author ? `<p class="gp-card-author gp-author-line">${author}</p>` : ''}${date ? `<p class="gp-card-date"><span>Traduction mise à jour</span><span>${esc(date)}</span></p>` : ''}</div></button></article>`;
   }
 
   function render() {
@@ -199,6 +199,20 @@
     watchImages(grid);
   }
 
+  function engineBadge(value) {
+    const label = String(value || '').trim();
+    if (!label) return '';
+    const slug = label.toLowerCase().replace(/[^a-z0-9]+/g, '');
+    const aliases = {rpg:'rpgm',rpgmaker:'rpgm',rpgmakerxp:'rpgm',rpgmakermv:'rpgm',rpgmakermz:'rpgm',unreal:'unrealengine',ue4:'unrealengine',ue5:'unrealengine',html5:'html',web:'html',other:'others'};
+    const key = Object.hasOwn(aliases, slug) ? aliases[slug] : slug;
+    return `<span class="badge eng eng-${key} gp-engine-badge" title="${esc('Moteur : ' + label)}">${esc(label)}</span>`;
+  }
+
+  function authorMarkup(g) {
+    const developer = String(g.developer || '').trim();
+    return (developer ? `<span>Par ${esc(developer)}</span> ` : '') + engineBadge(g.engine);
+  }
+
   function titleMarkup(g) {
     return `<span>${esc(g.title)}</span>${g.version ? ` <span class="gp-title-version" aria-label="${esc('Version ' + g.version)}">${esc(g.version)}</span>` : ''}`;
   }
@@ -207,13 +221,14 @@
     if (!g) return;
     selectedId = String(g.id);
     $('#gameTitle').innerHTML = titleMarkup(g);
-    $('#gameDeveloper').textContent = g.developer ? 'Par ' + g.developer : '';
-    $('#gameDeveloper').hidden = !g.developer;
+    const author = authorMarkup(g);
+    $('#gameDeveloper').innerHTML = author;
+    $('#gameDeveloper').hidden = !author;
     const images = [g.banner || g.image || g.cover, ...(g.gallery || [])].map(imageSource).filter(Boolean);
     $('#gameVisual').innerHTML = cover(g) + (images.length > 1 ? `<div class="gp-gallery" aria-label="Galerie">${images.map((src, i) => `<button type="button" data-gallery="${i}" aria-label="Afficher l’image ${i + 1}" aria-pressed="${i === 0}">${i + 1}</button>`).join('')}</div>` : '');
     watchImages($('#gameVisual'));
     const date = formatGameDate(g), created = formatTranslationCreatedDate(g), updated = formatTranslationUpdatedDate(g);
-    const facts = [['Moteur', g.engine], ['Statut', g.status], ['Sortie du jeu', date]].filter(([, value]) => value);
+    const facts = [['Statut', g.status], ['Sortie du jeu', date]].filter(([, value]) => value);
     const dates = [['Créée le', created], ['Mise à jour le', updated]].filter(([, value]) => value);
     const rows = entries => entries.map(([label, value, wide]) => `<div${wide ? ' class="gp-fact-wide"' : ''}><dt>${label}</dt><dd>${esc(value)}</dd></div>`).join('');
     $('#gameMeta').innerHTML = (facts.length ? `<section class="gp-facts-section" aria-label="Informations du jeu"><dl class="gp-facts">${rows(facts)}</dl></section>` : '') + (dates.length ? `<section class="gp-facts-section gp-translation-facts" aria-label="Dates de la traduction"><h3><img src="/assets/flags/fr.svg" alt="">Traduction française</h3><dl class="gp-facts">${rows(dates)}</dl></section>` : '');

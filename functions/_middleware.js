@@ -13,7 +13,7 @@ const DIRECTORY_PAGES = new Set([
   "/evenements",
   "/game",
   "/game+",
-  "/galerie",
+  "/bibliotheque",
   "/dramas",
   "/labo",
   "/messages",
@@ -65,8 +65,8 @@ export async function onRequest(context) {
   if (request.method !== "GET" && request.method !== "HEAD") return context.next();
   const url = new URL(request.url);
   const path = url.pathname;
-  if (/^\/comics(?:\/+|\/index\.html\/*)?$/.test(path)) {
-    url.pathname = '/galerie';
+  if (/^\/(?:galerie|comics)(?:\/+|\/index\.html\/*)?$/.test(path)) {
+    url.pathname = '/bibliotheque';
     return Response.redirect(url.href, 308);
   }
   if (path === '/ticket/suivi.html') {

@@ -6,9 +6,9 @@ html{scroll-behavior:smooth}body{height:auto}a{color:inherit;text-decoration:non
 .welcome>div>p{margin-bottom:0}
 @media(max-width:620px){.head-row{min-height:56px;padding:10px 0}.head-actions>.btn.account{display:inline-flex;font-size:12px}.head-actions{width:100%;justify-content:flex-end}.theme-label{display:inline}.welcome{gap:20px}}
 
-/* Une seule ligne pour la navigation et les réglages sur ordinateur. */
-.site-header>.shell{width:min(1600px,calc(100% - 32px));display:flex;align-items:center;gap:12px;min-height:66px}
-.site-header .nav{flex:1;min-width:0;flex-wrap:nowrap;gap:6px;padding:10px 0;overflow-x:auto;scrollbar-width:thin}
+/* Largeur adaptée aux liens et centrée ; retour à la ligne si nécessaire. */
+.site-header>.shell{width:fit-content;max-width:calc(100% - 32px);display:flex;align-items:center;gap:12px;min-height:66px}
+.site-header .nav{flex:1;min-width:0;flex-wrap:wrap;gap:6px;padding:10px 0;overflow:visible}
 .site-header .nav a{flex-shrink:0;white-space:nowrap;padding:8px 9px;gap:6px;min-height:38px}
 .site-header .nav .icon{width:18px;height:18px}
 .site-header .head-row{min-height:0;flex-shrink:0;padding:0}
@@ -24,7 +24,7 @@ html{scroll-behavior:smooth}body{height:auto}a{color:inherit;text-decoration:non
  .site-header .head-actions>.btn.account{padding:8px}
 }
 @media(max-width:1199px){
- .site-header>.shell{width:calc(100% - 24px);flex-wrap:wrap;gap:0;min-height:56px}
+ .site-header>.shell{width:calc(100% - 24px);max-width:none;flex-wrap:wrap;gap:0;min-height:56px}
  .site-header .head-row{order:-1;width:100%;min-height:56px}
  .site-header .head-actions{width:100%;justify-content:flex-end}
  .site-header .mobile-menu{display:inline-flex}

@@ -3,6 +3,7 @@ import {openPrivateCbz,renderCbzPages} from './cbz-reader.js?v=20261025-422';
 import {createPageCache,loadPrivatePage,bindPageWheel,bindPagePan} from './page-reader.js?v=20261027-426';
 const $=id=>document.getElementById(id);
 const kind=document.body.dataset.kind, comic=kind==='bibliotheque', title=comic?'Bibliothèque':'Dramas';
+if(kind==='bibliotheque'||kind==='dramas')document.addEventListener('contextmenu',e=>e.preventDefault(),{capture:true});
 const preview=document.documentElement.dataset.preview==='local';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const state={items:[],format:'all',q:'',sort:'recent',item:null,unit:0,page:0,mode:'page',direction:'ltr',zoom:100};
@@ -212,7 +213,6 @@ $('closeDetail').addEventListener('click',async()=>{if(document.fullscreenElemen
 $('detailDialog').addEventListener('close',()=>{if(!comic){videoSelection++;$('video').pause();$('video').removeAttribute('src');$('video').replaceChildren();$('video').load();}else {resetArchive();$('comicInner').replaceChildren();}document.body.style.overflow='';});
 $('detailDialog').addEventListener('click',e=>{if(e.target===$('detailDialog')){const b=e.target.getBoundingClientRect();if(e.clientX<b.left||e.clientX>b.right||e.clientY<b.top||e.clientY>b.bottom)e.target.close();}});
 if(comic){
-  $('comicStage').addEventListener('contextmenu',e=>e.preventDefault());
   $('formatFilter').addEventListener('change',e=>{state.format=e.target.value;render();});
   $('readingDirection').addEventListener('change',e=>{state.direction=e.target.value;updateReadingDirection();});
   $('readingMode').addEventListener('change',e=>{state.mode=e.target.value;updatePages();});
@@ -226,7 +226,6 @@ if(comic){
   document.addEventListener('keydown',e=>{if(!$('detailDialog').open||state.mode!=='page'||e.altKey||e.ctrlKey||e.metaKey||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)||e.target.isContentEditable)return;const rtl=state.direction==='rtl',id=e.key==='ArrowLeft'?(rtl?'pageNext':'pagePrev'):e.key==='ArrowRight'?(rtl?'pagePrev':'pageNext'):'';if(id&&!$(id).disabled){e.preventDefault();$(id).click();}});
 }else {
   const video=$('video');
-  video.closest('.ml-player').addEventListener('contextmenu',e=>e.preventDefault());
   try{autoNext=localStorage.getItem('dramaAutoNext')!=='off';}catch{}
   const syncAutoNext=()=>{$('autoNext').setAttribute('aria-checked',String(autoNext));$('autoNext').title=autoNext?'Désactiver la lecture automatique de l’épisode suivant':'Activer la lecture automatique de l’épisode suivant';};
   syncAutoNext();

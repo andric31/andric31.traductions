@@ -1,13 +1,15 @@
 import {comicFormatOf,readingDirectionOf} from './catalogue.js?v=20261025-420';
 import {openPrivateCbz,renderCbzPages} from './cbz-reader.js?v=20261025-422';
+import {createPageCache,loadPrivatePage,bindPageWheel} from './page-reader.js?v=20261027-425';
 const $=id=>document.getElementById(id);
 const kind=document.body.dataset.kind, comic=kind==='bibliotheque', title=comic?'Bibliothèque':'Dramas';
 const preview=document.documentElement.dataset.preview==='local';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const state={items:[],format:'all',q:'',sort:'recent',item:null,unit:0,page:0,mode:'page',direction:'ltr',zoom:100};
 let pageSize={width:3,height:4};
+let pageCache=null,pagePending=false;
 let archive=null,archiveController=null,archiveLoading=false,archiveError='',archiveGeneration=0,releasePages=()=>{};
-function resetArchive(){archiveGeneration++;archiveController?.abort();archiveController=null;releasePages();releasePages=()=>{};archive=null;archiveLoading=false;archiveError='';}
+function resetArchive(){archiveGeneration++;archiveController?.abort();archiveController=null;releasePages();releasePages=()=>{};pageCache?.dispose();pageCache=null;pagePending=false;$('pageStatus')?.remove();if($('comicStage'))$('comicStage').removeAttribute('aria-busy');archive=null;archiveLoading=false;archiveError='';}
 const originalTitle=item=>!comic&&item.originalTitle?.trim()!==item.title?.trim()?item.originalTitle?.trim()||'':'';
 const cardAuthor=item=>comic?item.author?.trim()||'':'';
 const formatLabel=item=>comicFormatOf(item)==='manga'?'Manga':'Comic';
@@ -63,17 +65,44 @@ function comicPageLoaded(image){
   $('detailDialog').style.setProperty('--comic-ratio',String(pageSize.width/pageSize.height));
   fitComicPage();
 }
+function renderSinglePage(){
+  const inner=$('comicInner'),stage=$('comicStage'),index=state.page,unit=currentUnit(),book=archive;
+  pageCache??=createPageCache((n,options)=>unit.source==='cbz'?book.extract(book.pages[n],options):loadPrivatePage(safeMedia(unit.pages[n]),options));
+  const status=document.createElement('p');status.id='pageStatus';status.className='ml-page-status';status.setAttribute('role','status');status.textContent='Chargement de la page '+(index+1)+'…';stage.append(status);
+  pagePending=true;stage.setAttribute('aria-busy','true');
+  let cancelled=false,image=null;
+  const failed=error=>{
+    if(cancelled||error.name==='AbortError')return;
+    inner.replaceChildren();pagePending=false;stage.removeAttribute('aria-busy');
+    status.textContent=error.message||'Cette page ne peut pas être chargée.';
+    const retry=document.createElement('button');retry.className='ml-btn';retry.type='button';retry.textContent='Réessayer';
+    retry.onclick=()=>{pageCache?.dispose();pageCache=null;updatePages();};status.append(document.createElement('br'),retry);
+  };
+  const display=url=>{
+    if(cancelled)return;
+    image=new Image();image.alt='Page '+(index+1);image.decoding='async';
+    image.onload=()=>{if(cancelled)return;inner.replaceChildren(image);comicPageLoaded(image);pagePending=false;stage.removeAttribute('aria-busy');status.remove();};
+    image.onerror=()=>failed(Error('Cette image ne peut pas être affichée.'));
+    image.src=url;
+  };
+  pageCache.focus(index,pageCount()).then(display).catch(error=>{
+    // Les très grandes images séparées restent lisibles sans être préchargées.
+    if(error.name==='UncachedPageError')display(error.pageUrl);else failed(error);
+  });
+  releasePages=()=>{cancelled=true;status.remove();pagePending=false;stage.removeAttribute('aria-busy');if(image){image.onload=null;image.onerror=null;if(!image.isConnected)image.removeAttribute('src');}};
+}
 function updatePages(){
   updateReadingDirection();
   const count=pageCount();state.page=Math.max(0,Math.min(state.page,count-1));
   const pages=state.mode==='scroll'?Array.from({length:count},(_,i)=>i):count?[state.page]:[];
   $('detailDialog').classList.toggle('is-scroll',state.mode==='scroll');
   $('reader').classList.toggle('is-page',state.mode==='page');
-  pageSize={width:3,height:4};
-  $('detailDialog').style.removeProperty('--comic-ratio');
   fitComicPage();
   releasePages();releasePages=()=>{};
-  if(!state.item.demo&&currentUnit()?.source==='cbz'){
+  if(state.mode==='scroll'){pageCache?.dispose();pageCache=null;}
+  if(!state.item.demo&&state.mode==='page'&&count){
+    renderSinglePage();
+  }else if(!state.item.demo&&currentUnit()?.source==='cbz'){
     $('comicInner').replaceChildren();
     if(archive)releasePages=renderCbzPages({archive,container:$('comicInner'),stage:$('comicStage'),indices:pages,vertical:state.mode==='scroll',onImageLoad:comicPageLoaded});
     else {
@@ -104,7 +133,7 @@ function selectUnit(index){
   state.unit=index;state.page=0;
   document.querySelectorAll('[data-unit]').forEach(b=>b.setAttribute('aria-current',String(Number(b.dataset.unit)===index)));
   if(comic){
-    resetArchive();const unit=currentUnit(),src=safeMedia(unit?.archive);
+    resetArchive();$('comicInner').replaceChildren();pageSize={width:3,height:4};$('detailDialog').style.removeProperty('--comic-ratio');const unit=currentUnit(),src=safeMedia(unit?.archive);
     if(unit?.source==='cbz'&&src){
       archiveLoading=true;archiveController=new AbortController();const generation=archiveGeneration;
       openPrivateCbz(src,{signal:archiveController.signal}).then(value=>{if(generation!==archiveGeneration)return;archive=value;archiveLoading=false;updatePages();}).catch(e=>{if(generation!==archiveGeneration||e.name==='AbortError')return;archiveError=e.message||'Lecture du CBZ impossible.';archiveLoading=false;updatePages();});
@@ -165,7 +194,7 @@ $('search').addEventListener('input',e=>{state.q=e.target.value;render();});
 $('sort').addEventListener('change',e=>{state.sort=e.target.value;render();});
 $('grid').addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(b)openItem(b.dataset.open);});
 $('units').addEventListener('click',e=>{const b=e.target.closest('[data-unit]');if(b&&!b.disabled)selectUnit(Number(b.dataset.unit));});
-$('closeDetail').addEventListener('click',async()=>{if(comic&&document.fullscreenElement){try{await document.exitFullscreen();}catch{}}$('detailDialog').close();});
+$('closeDetail').addEventListener('click',async()=>{if(document.fullscreenElement){try{await document.exitFullscreen();}catch{}}$('detailDialog').close();});
 $('detailDialog').addEventListener('close',()=>{if(!comic){$('video').pause();$('video').removeAttribute('src');$('video').replaceChildren();$('video').load();}else {resetArchive();$('comicInner').replaceChildren();}document.body.style.overflow='';});
 $('detailDialog').addEventListener('click',e=>{if(e.target===$('detailDialog')){const b=e.target.getBoundingClientRect();if(e.clientX<b.left||e.clientX>b.right||e.clientY<b.top||e.clientY>b.bottom)e.target.close();}});
 if(comic){
@@ -175,18 +204,9 @@ if(comic){
   $('zoom').addEventListener('input',e=>{state.zoom=Number(e.target.value);fitComicPage();});
   $('fitPage').addEventListener('click',()=>{state.zoom=100;$('zoom').value='100';fitComicPage();$('comicStage').scrollTop=0;$('comicStage').scrollLeft=0;});
   new ResizeObserver(fitComicPage).observe($('comicStage'));
+  bindPageWheel($('comicStage'),{enabled:()=>$('detailDialog').open&&state.mode==='page',turn:direction=>{if(pagePending||archiveLoading)return;const button=$(direction>0?'pageNext':'pagePrev');if(!button.disabled)button.click();}});
   $('pagePrev').addEventListener('click',()=>{state.page--;updatePages();});$('pageNext').addEventListener('click',()=>{state.page++;updatePages();});
   $('pageRange').addEventListener('input',e=>{state.page=Number(e.target.value)-1;updatePages();});
-  const fullscreenLabel=()=>{$('fullscreen').textContent=document.fullscreenElement?'⛶ Quitter le plein écran':$('detailDialog').classList.contains('is-expanded')?'⛶ Réduire':'⛶ Plein écran';};
-  $('fullscreen').addEventListener('click',async()=>{
-    const dialog=$('detailDialog');
-    if(dialog.classList.contains('is-expanded'))dialog.classList.remove('is-expanded');
-    else {try{if(document.fullscreenElement)await document.exitFullscreen();else await $('reader').parentElement.requestFullscreen();}catch{dialog.classList.add('is-expanded');}}
-    fullscreenLabel();fitComicPage();
-  });
-  document.addEventListener('fullscreenchange',()=>{fullscreenLabel();fitComicPage();});
-  $('detailDialog').addEventListener('cancel',e=>{if($('detailDialog').classList.contains('is-expanded')){e.preventDefault();$('detailDialog').classList.remove('is-expanded');fullscreenLabel();fitComicPage();}});
-  $('detailDialog').addEventListener('close',()=>{$('detailDialog').classList.remove('is-expanded');fullscreenLabel();});
   document.addEventListener('keydown',e=>{if(!$('detailDialog').open||state.mode!=='page'||e.altKey||e.ctrlKey||e.metaKey||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)||e.target.isContentEditable)return;const rtl=state.direction==='rtl',id=e.key==='ArrowLeft'?(rtl?'pageNext':'pagePrev'):e.key==='ArrowRight'?(rtl?'pagePrev':'pageNext'):'';if(id&&!$(id).disabled){e.preventDefault();$(id).click();}});
 }else {
   const video=$('video');
@@ -200,6 +220,16 @@ if(comic){
   const updateSubtitles=()=>{for(const track of video.textTracks)positionSubtitles(track);};
   video.textTracks.addEventListener('change',updateSubtitles);
 }
+  const fullscreenLabel=()=>{$('fullscreen').textContent=document.fullscreenElement===$('detailDialog').querySelector('.ml-detail-grid')?'⛶ Quitter le plein écran':$('detailDialog').classList.contains('is-expanded')?'⛶ Réduire':'⛶ Plein écran';};
+  $('fullscreen').addEventListener('click',async()=>{
+    const dialog=$('detailDialog');
+    if(dialog.classList.contains('is-expanded'))dialog.classList.remove('is-expanded');
+    else {try{if(document.fullscreenElement)await document.exitFullscreen();else await $('detailDialog').querySelector('.ml-detail-grid').requestFullscreen();}catch{dialog.classList.add('is-expanded');}}
+    fullscreenLabel();if(comic)fitComicPage();
+  });
+  document.addEventListener('fullscreenchange',()=>{fullscreenLabel();if(comic)fitComicPage();});
+  $('detailDialog').addEventListener('cancel',e=>{if($('detailDialog').classList.contains('is-expanded')){e.preventDefault();$('detailDialog').classList.remove('is-expanded');fullscreenLabel();if(comic)fitComicPage();}});
+  $('detailDialog').addEventListener('close',()=>{$('detailDialog').classList.remove('is-expanded');fullscreenLabel();});
 $('retry').addEventListener('click',load);
 const theme=$('theme');try{theme.value=localStorage.getItem('viewerTheme')||'auto';}catch{}
 if(!theme.value)theme.value='auto';

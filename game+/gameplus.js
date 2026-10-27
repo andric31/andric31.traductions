@@ -1,4 +1,5 @@
 (() => {
+  document.addEventListener('contextmenu', ev => ev.preventDefault(), { capture: true });
   const $ = (s) => document.querySelector(s);
   const stateBox = $('#stateBox');
   const grid = $('#grid');

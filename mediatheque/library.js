@@ -260,8 +260,8 @@ if(comic){
   const fullscreenLabel=()=>{
     const button=$('fullscreen'),native=document.fullscreenElement===$('detailDialog').querySelector('.ml-detail-grid'),expanded=$('detailDialog').classList.contains('is-expanded');
     const label=native?'Quitter le plein écran':expanded?'Réduire':'Plein écran';
-    button.textContent=comic?'⛶ '+label:'⛶';
-    if(!comic){button.title=label;button.setAttribute('aria-label',label);button.setAttribute('aria-pressed',String(native||expanded));}
+    button.textContent='⛶';
+    button.title=label;button.setAttribute('aria-label',label);button.setAttribute('aria-pressed',String(native||expanded));
   };
   $('fullscreen').addEventListener('click',async()=>{
     const dialog=$('detailDialog');

@@ -118,7 +118,9 @@
 .is-comic .ml-reader-tools{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
 .is-comic .ml-reader-tools select{width:100%;padding:8px 6px;font-size:12px}
 .is-comic .ml-reader-tools .ml-btn{font-size:12px;padding:8px 6px}
-.is-comic .ml-zoom{grid-column:1/-1;width:100%;margin:1px 0 0;gap:8px}
+.is-comic .ml-zoom-row{grid-column:1/-1;display:flex;align-items:center;gap:8px;min-width:0;padding:6px 8px;border:1px solid var(--border);border-radius:8px;background:var(--card)}
+.is-comic .ml-zoom-row #fitPage{flex:none}
+.is-comic .ml-zoom{flex:1;min-width:0;margin:0;gap:8px}
 .is-comic .ml-zoom input{flex:1;min-width:0;width:auto;accent-color:var(--primary)}
 .is-comic .ml-zoom output{min-width:38px;text-align:right}
 .is-comic .ml-detail-info{min-height:0;overflow:auto;padding-right:4px}
@@ -139,8 +141,8 @@
 }
 
 /* Plein écran de la fiche Dramas, en complément de celui de la vidéo. */
-.ml-drama-actions{display:flex;align-items:flex-start;gap:8px;flex:none}
-.ml-drama-actions #fullscreen{width:34px;height:34px;flex:none;padding:0;font-size:22px;line-height:1}
+.ml-drama-actions,.ml-comic-actions{display:flex;align-items:flex-start;gap:8px;flex:none}
+.ml-drama-actions #fullscreen,.ml-comic-actions #fullscreen{width:34px;height:34px;flex:none;padding:0;font-size:22px;line-height:1}
 .ml-episodes-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:24px 0 12px}
 .ml-episodes-heading .ml-subtitle{margin:0}
 .ml-auto-next{display:inline-flex;align-items:center;gap:8px;padding:4px 0;border:0;background:transparent;color:var(--muted);font:500 12px/1.4 system-ui;cursor:pointer}

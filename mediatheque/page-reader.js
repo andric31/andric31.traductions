@@ -2,9 +2,9 @@ const PAGE_LIMIT=20*1024*1024;
 const aborted=()=>new DOMException('Lecture fermée.','AbortError');
 const uncachedPage=url=>Object.assign(Error('Image trop volumineuse pour le préchargement.'),{name:'UncachedPageError',pageUrl:url});
 
-// Trois pages au maximum, uniquement en mémoire et pendant cette lecture.
+// Page courante et trois voisines de chaque côté, uniquement en mémoire.
 export function createPageCache(load){
-  const entries=new Map();let generation=0,closed=false;
+  const entries=new Map();let generation=0,closed=false,lastIndex=null,direction=1;
   function remove(index,entry){
     entry.controller.abort();if(entry.url)URL.revokeObjectURL(entry.url);
     if(entries.get(index)===entry)entries.delete(index);
@@ -28,7 +28,8 @@ export function createPageCache(load){
     focus(index,count){
       if(closed)return Promise.reject(aborted());
       if(!Number.isInteger(index)||index<0||index>=count)return Promise.reject(Error('Page inconnue.'));
-      const token=++generation,nearby=[index,index+1,index-1].filter(n=>n>=0&&n<count);
+      if(lastIndex!==null&&index!==lastIndex)direction=Math.sign(index-lastIndex);lastIndex=index;
+      const token=++generation,nearby=[index,...[1,2,3].map(n=>index+n*direction),...[1,2,3].map(n=>index-n*direction)].filter(n=>n>=0&&n<count);
       for(const [n,entry] of entries)if(!nearby.includes(n))remove(n,entry);
       const current=get(index);
       // La page demandée passe avant les préchargements, qui restent séquentiels.
@@ -79,4 +80,29 @@ export function bindPageWheel(stage,{enabled,turn,clock=()=>performance.now()}){
   };
   stage.addEventListener('wheel',wheel,{passive:false});
   return ()=>stage.removeEventListener('wheel',wheel);
+}
+
+// En zoom : déplacer l’image au clic gauche sans déclencher le glisser natif.
+export function bindPagePan(stage,{enabled}){
+  let drag=null;
+  const stop=()=>{
+    const previous=drag;drag=null;stage.classList.remove('is-panning');
+    if(previous&&stage.hasPointerCapture?.(previous.id))stage.releasePointerCapture(previous.id);
+  };
+  stage.addEventListener('pointerdown',event=>{
+    if(!enabled()||event.button!==0||event.pointerType==='touch'||event.ctrlKey||event.metaKey||event.altKey||!event.target.closest?.('img,.ml-cbz-sheet,.ml-demo-page'))return;
+    if(stage.scrollHeight<=stage.clientHeight+2&&stage.scrollWidth<=stage.clientWidth+2)return;
+    event.preventDefault();stop();
+    drag={id:event.pointerId,x:event.clientX,y:event.clientY,left:stage.scrollLeft,top:stage.scrollTop};
+    stage.setPointerCapture(event.pointerId);stage.classList.add('is-panning');
+  });
+  stage.addEventListener('pointermove',event=>{
+    if(!drag||event.pointerId!==drag.id)return;
+    if(!enabled()||event.buttons===0){stop();return;}
+    event.preventDefault();stage.scrollLeft=drag.left+drag.x-event.clientX;stage.scrollTop=drag.top+drag.y-event.clientY;
+  });
+  for(const name of ['pointerup','pointercancel','lostpointercapture'])stage.addEventListener(name,event=>{if(drag&&event.pointerId===drag.id)stop();});
+  stage.addEventListener('dragstart',event=>{if(enabled())event.preventDefault();});
+  stage.ownerDocument?.defaultView?.addEventListener('blur',stop);
+  return stop;
 }

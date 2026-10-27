@@ -1,6 +1,6 @@
 import {comicFormatOf,readingDirectionOf} from './catalogue.js?v=20261025-420';
 import {openPrivateCbz,renderCbzPages} from './cbz-reader.js?v=20261025-422';
-import {createPageCache,loadPrivatePage,bindPageWheel} from './page-reader.js?v=20261027-425';
+import {createPageCache,loadPrivatePage,bindPageWheel,bindPagePan} from './page-reader.js?v=20261027-426';
 const $=id=>document.getElementById(id);
 const kind=document.body.dataset.kind, comic=kind==='bibliotheque', title=comic?'Bibliothèque':'Dramas';
 const preview=document.documentElement.dataset.preview==='local';
@@ -8,8 +8,10 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const state={items:[],format:'all',q:'',sort:'recent',item:null,unit:0,page:0,mode:'page',direction:'ltr',zoom:100};
 let pageSize={width:3,height:4};
 let pageCache=null,pagePending=false;
+let autoNext=true,videoSelection=0;
+let stopPagePan=()=>{};
 let archive=null,archiveController=null,archiveLoading=false,archiveError='',archiveGeneration=0,releasePages=()=>{};
-function resetArchive(){archiveGeneration++;archiveController?.abort();archiveController=null;releasePages();releasePages=()=>{};pageCache?.dispose();pageCache=null;pagePending=false;$('pageStatus')?.remove();if($('comicStage'))$('comicStage').removeAttribute('aria-busy');archive=null;archiveLoading=false;archiveError='';}
+function resetArchive(){stopPagePan();archiveGeneration++;archiveController?.abort();archiveController=null;releasePages();releasePages=()=>{};pageCache?.dispose();pageCache=null;pagePending=false;$('pageStatus')?.remove();if($('comicStage'))$('comicStage').removeAttribute('aria-busy');archive=null;archiveLoading=false;archiveError='';}
 const originalTitle=item=>!comic&&item.originalTitle?.trim()!==item.title?.trim()?item.originalTitle?.trim()||'':'';
 const cardAuthor=item=>comic?item.author?.trim()||'':'';
 const formatLabel=item=>comicFormatOf(item)==='manga'?'Manga':'Comic';
@@ -52,6 +54,7 @@ function updateReadingDirection(){
 }
 function fitComicPage(){
   const stage=$('comicStage'),inner=$('comicInner');
+  const pannable=state.mode==='page'&&state.zoom>100;stage.classList.toggle('is-pannable',pannable);if(!pannable)stopPagePan();
   inner.style.setProperty('--reader-width',state.zoom+'%');
   $('zoomValue').textContent=state.zoom+' %';
   if(state.mode!=='page'||!stage.clientWidth||!stage.clientHeight)return;
@@ -92,6 +95,7 @@ function renderSinglePage(){
   releasePages=()=>{cancelled=true;status.remove();pagePending=false;stage.removeAttribute('aria-busy');if(image){image.onload=null;image.onerror=null;if(!image.isConnected)image.removeAttribute('src');}};
 }
 function updatePages(){
+  stopPagePan();
   updateReadingDirection();
   const count=pageCount();state.page=Math.max(0,Math.min(state.page,count-1));
   const pages=state.mode==='scroll'?Array.from({length:count},(_,i)=>i):count?[state.page]:[];
@@ -129,7 +133,7 @@ function positionSubtitles(track){
     cue.position=50;cue.positionAlign='center';cue.size=92;cue.align='center';
   }
 }
-function selectUnit(index){
+function selectUnit(index,{play=false}={}){
   state.unit=index;state.page=0;
   document.querySelectorAll('[data-unit]').forEach(b=>b.setAttribute('aria-current',String(Number(b.dataset.unit)===index)));
   if(comic){
@@ -140,7 +144,8 @@ function selectUnit(index){
     }
     updatePages();return;
   }
-  const video=$('video');video.pause();video.removeAttribute('src');video.replaceChildren();video.load();
+  const selection=++videoSelection,video=$('video');video.pause();video.removeAttribute('src');video.replaceChildren();video.load();
+  $('playbackMessage').hidden=true;$('playbackMessage').textContent='';
   $('detailDialog').style.removeProperty('--video-ratio');
   const u=currentUnit(),src=safeMedia(u?.src);
   $('videoPlaceholder').hidden=!!src;video.hidden=!src;
@@ -149,7 +154,16 @@ function selectUnit(index){
     video.src=src;
     for(const sub of u.subtitles||[]){const url=safeMedia(sub.src);if(!url)continue;const track=document.createElement('track');track.kind='subtitles';track.srclang=sub.lang;track.label=sub.label;track.src=url;track.default=sub.default===true;track.addEventListener('load',()=>positionSubtitles(track.track));track.addEventListener('error',()=>{$('subtitleMessage').textContent='Une piste de sous-titres est indisponible. La vidéo reste accessible.';});video.append(track);}
     video.load();
+    if(play)video.play().catch(error=>{
+      if(selection!==videoSelection||!$('detailDialog').open||error.name==='AbortError')return;
+      $('playbackMessage').textContent='Épisode suivant prêt : appuie sur Lecture pour démarrer.';$('playbackMessage').hidden=false;
+    });
   }else videoMessage('Les premiers épisodes arrivent bientôt. Le lecteur sera disponible ici, dès leur publication.');
+}
+function playNextEpisode(){
+  const video=$('video'),next=state.unit+1,unit=state.item?.units[next];
+  if(!autoNext||!$('detailDialog').open||!video.ended||state.item?.demo||unit?.status!=='available'||!safeMedia(unit.src))return;
+  selectUnit(next,{play:true});
 }
 function openItem(id){
   const item=[...state.items,...demos()].find(r=>r.id===id);if(!item)return;
@@ -195,7 +209,7 @@ $('sort').addEventListener('change',e=>{state.sort=e.target.value;render();});
 $('grid').addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(b)openItem(b.dataset.open);});
 $('units').addEventListener('click',e=>{const b=e.target.closest('[data-unit]');if(b&&!b.disabled)selectUnit(Number(b.dataset.unit));});
 $('closeDetail').addEventListener('click',async()=>{if(document.fullscreenElement){try{await document.exitFullscreen();}catch{}}$('detailDialog').close();});
-$('detailDialog').addEventListener('close',()=>{if(!comic){$('video').pause();$('video').removeAttribute('src');$('video').replaceChildren();$('video').load();}else {resetArchive();$('comicInner').replaceChildren();}document.body.style.overflow='';});
+$('detailDialog').addEventListener('close',()=>{if(!comic){videoSelection++;$('video').pause();$('video').removeAttribute('src');$('video').replaceChildren();$('video').load();}else {resetArchive();$('comicInner').replaceChildren();}document.body.style.overflow='';});
 $('detailDialog').addEventListener('click',e=>{if(e.target===$('detailDialog')){const b=e.target.getBoundingClientRect();if(e.clientX<b.left||e.clientX>b.right||e.clientY<b.top||e.clientY>b.bottom)e.target.close();}});
 if(comic){
   $('formatFilter').addEventListener('change',e=>{state.format=e.target.value;render();});
@@ -204,12 +218,19 @@ if(comic){
   $('zoom').addEventListener('input',e=>{state.zoom=Number(e.target.value);fitComicPage();});
   $('fitPage').addEventListener('click',()=>{state.zoom=100;$('zoom').value='100';fitComicPage();$('comicStage').scrollTop=0;$('comicStage').scrollLeft=0;});
   new ResizeObserver(fitComicPage).observe($('comicStage'));
+  stopPagePan=bindPagePan($('comicStage'),{enabled:()=>$('detailDialog').open&&state.mode==='page'&&state.zoom>100});
   bindPageWheel($('comicStage'),{enabled:()=>$('detailDialog').open&&state.mode==='page',turn:direction=>{if(pagePending||archiveLoading)return;const button=$(direction>0?'pageNext':'pagePrev');if(!button.disabled)button.click();}});
   $('pagePrev').addEventListener('click',()=>{state.page--;updatePages();});$('pageNext').addEventListener('click',()=>{state.page++;updatePages();});
   $('pageRange').addEventListener('input',e=>{state.page=Number(e.target.value)-1;updatePages();});
   document.addEventListener('keydown',e=>{if(!$('detailDialog').open||state.mode!=='page'||e.altKey||e.ctrlKey||e.metaKey||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)||e.target.isContentEditable)return;const rtl=state.direction==='rtl',id=e.key==='ArrowLeft'?(rtl?'pageNext':'pagePrev'):e.key==='ArrowRight'?(rtl?'pagePrev':'pageNext'):'';if(id&&!$(id).disabled){e.preventDefault();$(id).click();}});
 }else {
   const video=$('video');
+  try{autoNext=localStorage.getItem('dramaAutoNext')!=='off';}catch{}
+  const syncAutoNext=()=>{$('autoNext').setAttribute('aria-checked',String(autoNext));$('autoNext').title=autoNext?'Désactiver la lecture automatique de l’épisode suivant':'Activer la lecture automatique de l’épisode suivant';};
+  syncAutoNext();
+  $('autoNext').addEventListener('click',()=>{autoNext=!autoNext;syncAutoNext();try{localStorage.setItem('dramaAutoNext',autoNext?'on':'off');}catch{}});
+  video.addEventListener('ended',playNextEpisode);
+  video.addEventListener('playing',()=>{$('playbackMessage').hidden=true;});
   video.addEventListener('error',()=>videoMessage('Cet épisode ne peut pas être lu. Vérifie ta connexion ou réessaie plus tard.'));
   const updateVideoRatio=()=>{
     if(!video.videoWidth||!video.videoHeight)return;

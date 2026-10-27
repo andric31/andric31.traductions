@@ -212,6 +212,7 @@ $('closeDetail').addEventListener('click',async()=>{if(document.fullscreenElemen
 $('detailDialog').addEventListener('close',()=>{if(!comic){videoSelection++;$('video').pause();$('video').removeAttribute('src');$('video').replaceChildren();$('video').load();}else {resetArchive();$('comicInner').replaceChildren();}document.body.style.overflow='';});
 $('detailDialog').addEventListener('click',e=>{if(e.target===$('detailDialog')){const b=e.target.getBoundingClientRect();if(e.clientX<b.left||e.clientX>b.right||e.clientY<b.top||e.clientY>b.bottom)e.target.close();}});
 if(comic){
+  $('comicStage').addEventListener('contextmenu',e=>e.preventDefault());
   $('formatFilter').addEventListener('change',e=>{state.format=e.target.value;render();});
   $('readingDirection').addEventListener('change',e=>{state.direction=e.target.value;updateReadingDirection();});
   $('readingMode').addEventListener('change',e=>{state.mode=e.target.value;updatePages();});
@@ -225,6 +226,7 @@ if(comic){
   document.addEventListener('keydown',e=>{if(!$('detailDialog').open||state.mode!=='page'||e.altKey||e.ctrlKey||e.metaKey||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)||e.target.isContentEditable)return;const rtl=state.direction==='rtl',id=e.key==='ArrowLeft'?(rtl?'pageNext':'pagePrev'):e.key==='ArrowRight'?(rtl?'pagePrev':'pageNext'):'';if(id&&!$(id).disabled){e.preventDefault();$(id).click();}});
 }else {
   const video=$('video');
+  video.closest('.ml-player').addEventListener('contextmenu',e=>e.preventDefault());
   try{autoNext=localStorage.getItem('dramaAutoNext')!=='off';}catch{}
   const syncAutoNext=()=>{$('autoNext').setAttribute('aria-checked',String(autoNext));$('autoNext').title=autoNext?'Désactiver la lecture automatique de l’épisode suivant':'Activer la lecture automatique de l’épisode suivant';};
   syncAutoNext();
@@ -232,6 +234,20 @@ if(comic){
   video.addEventListener('ended',playNextEpisode);
   video.addEventListener('playing',()=>{$('playbackMessage').hidden=true;});
   video.addEventListener('error',()=>videoMessage('Cet épisode ne peut pas être lu. Vérifie ta connexion ou réessaie plus tard.'));
+  const playButton=$('videoPlay');
+  const syncPlayButton=()=>{
+    playButton.hidden=!video.getAttribute('src')||video.hidden||!video.paused||!!video.error;
+    const label=video.ended?'Relire l’épisode':video.currentTime>0?'Reprendre la lecture':'Lire l’épisode';
+    playButton.setAttribute('aria-label',label);playButton.title=label;
+  };
+  for(const event of ['loadstart','emptied','loadedmetadata','play','pause','ended','error'])video.addEventListener(event,syncPlayButton);
+  playButton.addEventListener('click',()=>{
+    const selection=videoSelection;
+    video.play().then(()=>{if(selection===videoSelection&&$('detailDialog').open)video.focus();}).catch(error=>{
+      if(selection!==videoSelection||!$('detailDialog').open||error.name==='AbortError')return;
+      $('playbackMessage').textContent='La lecture n’a pas démarré. Appuie sur Lecture pour réessayer.';$('playbackMessage').hidden=false;syncPlayButton();
+    });
+  });
   const updateVideoRatio=()=>{
     if(!video.videoWidth||!video.videoHeight)return;
     $('detailDialog').style.setProperty('--video-ratio',String(video.videoWidth/video.videoHeight));

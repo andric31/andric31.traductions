@@ -136,7 +136,7 @@
 
 /* Plein écran de la fiche Dramas, en complément de celui de la vidéo. */
 .ml-drama-actions{display:flex;align-items:flex-start;gap:8px;flex:none}
-.ml-drama-actions #fullscreen{min-height:34px;padding:8px 10px;font-size:12px}
+.ml-drama-actions #fullscreen{width:34px;height:34px;flex:none;padding:0;font-size:22px;line-height:1}
 .ml-episodes-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:24px 0 12px}
 .ml-episodes-heading .ml-subtitle{margin:0}
 .ml-auto-next{display:inline-flex;align-items:center;gap:8px;padding:4px 0;border:0;background:transparent;color:var(--muted);font:500 12px/1.4 system-ui;cursor:pointer}

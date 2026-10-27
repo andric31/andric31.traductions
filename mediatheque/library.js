@@ -241,7 +241,12 @@ if(comic){
   const updateSubtitles=()=>{for(const track of video.textTracks)positionSubtitles(track);};
   video.textTracks.addEventListener('change',updateSubtitles);
 }
-  const fullscreenLabel=()=>{$('fullscreen').textContent=document.fullscreenElement===$('detailDialog').querySelector('.ml-detail-grid')?'⛶ Quitter le plein écran':$('detailDialog').classList.contains('is-expanded')?'⛶ Réduire':'⛶ Plein écran';};
+  const fullscreenLabel=()=>{
+    const button=$('fullscreen'),native=document.fullscreenElement===$('detailDialog').querySelector('.ml-detail-grid'),expanded=$('detailDialog').classList.contains('is-expanded');
+    const label=native?'Quitter le plein écran':expanded?'Réduire':'Plein écran';
+    button.textContent=comic?'⛶ '+label:'⛶';
+    if(!comic){button.title=label;button.setAttribute('aria-label',label);button.setAttribute('aria-pressed',String(native||expanded));}
+  };
   $('fullscreen').addEventListener('click',async()=>{
     const dialog=$('detailDialog');
     if(dialog.classList.contains('is-expanded'))dialog.classList.remove('is-expanded');

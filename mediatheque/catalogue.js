@@ -12,7 +12,7 @@ export function mediaKey(key, kind, id, type='image') {
   const folder=storageKind(kind);
   assert(value.startsWith(`${PREFIX}${folder}/${id}/`) && value.length<=800 && !/[\\\u0000-\u001f\u007f]/.test(value)
     && value.split('/').every(x=>x && x!=='.' && x!=='..'), 'Le média doit être dans private-library/'+folder+'/'+id+'/');
-  assert((type==='archive'?/\.cbz$/i:type==='subtitle'?/\.(srt|vtt|ass|ssa)$/i:type==='video'?/\.(mp4|webm|m4v)$/i:/\.(png|jpe?g|webp|avif|gif)$/i).test(value), type==='archive'?'Archive CBZ attendue.':type==='subtitle'?'Sous-titre SRT, VTT, ASS ou SSA attendu.':type==='video'?'Vidéo MP4, WebM ou M4V attendue.':'Image JPG, PNG, WebP, AVIF ou GIF attendue.');
+  assert((type==='archive'?/\.cbz$/i:type==='subtitle'?/\.(srt|vtt|ass|ssa)$/i:type==='video'?/\.(mp4|webm|m4v|ts)$/i:/\.(png|jpe?g|webp|avif|gif)$/i).test(value), type==='archive'?'Archive CBZ attendue.':type==='subtitle'?'Sous-titre SRT, VTT, ASS ou SSA attendu.':type==='video'?'Vidéo MP4, WebM, M4V ou TS attendue.':'Image JPG, PNG, WebP, AVIF ou GIF attendue.');
   return value;
 }
 function text(value, max, label) { const v=String(value??'').trim();assert(v.length<=max, label+' trop long.');return v; }
@@ -84,7 +84,7 @@ export function publicCatalogue(doc) {
     ...(doc.kind==='bibliotheque'?{format:comicFormatOf(r),readingDirection:readingDirectionOf(r)}:{originalTitle:r.originalTitle||''}),
     cover:r.coverKey?mediaURL(doc.kind,r.id,'cover'):'',
     units:r.units.map(u=>({id:u.id,title:u.title,status:r.status==='available'?u.status:'soon',
-      ...(doc.kind==='dramas'?{src:r.status==='available'&&u.status==='available'?mediaURL(doc.kind,r.id,'video',u.id):'',
+      ...(doc.kind==='dramas'?{format:/\.ts$/i.test(u.mediaKey)?'mpegts':'native',src:r.status==='available'&&u.status==='available'?mediaURL(doc.kind,r.id,'video',u.id):'',
         subtitles:r.status==='available'&&u.status==='available'?u.subtitles.map((t,i)=>({lang:t.lang,label:t.label,default:t.default,src:mediaURL(doc.kind,r.id,'subtitle',u.id)+'&track='+i})):[]}
         :{source:u.source||'pages',archive:r.status==='available'&&u.status==='available'&&u.source==='cbz'?mediaURL(doc.kind,r.id,'archive',u.id):'',pages:r.status==='available'&&u.status==='available'&&u.source!=='cbz'?u.pages.map((_,i)=>mediaURL(doc.kind,r.id,'page',u.id,i)):[]})}))
   }))};

@@ -1,4 +1,4 @@
-import {comicFormatOf,readingDirectionOf} from './catalogue.js?v=20261025-420';
+import {comicFormatOf,readingDirectionOf} from './catalogue.js?v=20261028-440';
 import {openPrivateCbz,renderCbzPages} from './cbz-reader.js?v=20261025-422';
 import {createPageCache,loadPrivatePage,bindPageWheel,bindPagePan} from './page-reader.js?v=20261027-426';
 const $=id=>document.getElementById(id);
@@ -9,7 +9,7 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const state={items:[],format:'all',q:'',sort:'recent',item:null,unit:0,page:0,mode:'page',direction:'ltr',zoom:100};
 let pageSize={width:3,height:4};
 let pageCache=null,pagePending=false;
-let autoNext=true,videoSelection=0;
+let autoNext=true,videoSelection=0,tsPlayer=null;
 let stopPagePan=()=>{};
 let archive=null,archiveController=null,archiveLoading=false,archiveError='',archiveGeneration=0,releasePages=()=>{};
 function resetArchive(){stopPagePan();archiveGeneration++;archiveController?.abort();archiveController=null;releasePages();releasePages=()=>{};pageCache?.dispose();pageCache=null;pagePending=false;$('pageStatus')?.remove();if($('comicStage'))$('comicStage').removeAttribute('aria-busy');archive=null;archiveLoading=false;archiveError='';}
@@ -126,7 +126,7 @@ function updatePages(){
   $('pagePrev').disabled=!count||state.page===0||state.mode==='scroll';$('pageNext').disabled=!count||state.page===count-1||state.mode==='scroll';
   $('comicStage').scrollTop=0;$('comicStage').scrollLeft=0;
 }
-function videoMessage(message){$('videoMessage').textContent=message;$('videoPlaceholder').hidden=false;$('video').hidden=true;}
+function videoMessage(message,heading='Lecture indisponible'){$('videoPlaceholder').querySelector('strong').textContent=heading;$('videoMessage').textContent=message;$('videoPlaceholder').hidden=false;$('video').hidden=true;}
 function positionSubtitles(track){
   // Garder une marge sous les sous-titres, même lorsque les commandes disparaissent.
   for(const cue of track.cues||[]){
@@ -145,21 +145,36 @@ function selectUnit(index,{play=false}={}){
     }
     updatePages();return;
   }
-  const selection=++videoSelection,video=$('video');video.pause();video.removeAttribute('src');video.replaceChildren();video.load();
+  const selection=++videoSelection,video=$('video');tsPlayer?.destroy();tsPlayer=null;video.pause();video.removeAttribute('src');video.replaceChildren();video.load();
   $('playbackMessage').hidden=true;$('playbackMessage').textContent='';
   $('detailDialog').style.removeProperty('--video-ratio');
   const u=currentUnit(),src=safeMedia(u?.src);
   $('videoPlaceholder').hidden=!!src;video.hidden=!src;
   $('subtitleMessage').textContent='';
   if(src){
-    video.src=src;
+    if(u.format!=='mpegts')video.src=src;
     for(const sub of u.subtitles||[]){const url=safeMedia(sub.src);if(!url)continue;const track=document.createElement('track');track.kind='subtitles';track.srclang=sub.lang;track.label=sub.label;track.src=url;track.default=sub.default===true;track.addEventListener('load',()=>positionSubtitles(track.track));track.addEventListener('error',()=>{$('subtitleMessage').textContent='Une piste de sous-titres est indisponible. La vidéo reste accessible.';});video.append(track);}
-    video.load();
-    if(play)video.play().catch(error=>{
+    const startPlayback=()=>{if(play)video.play().catch(error=>{
       if(selection!==videoSelection||!$('detailDialog').open||error.name==='AbortError')return;
       $('playbackMessage').textContent='Épisode suivant prêt : appuie sur Lecture pour démarrer.';$('playbackMessage').hidden=false;
-    });
-  }else videoMessage('Les premiers épisodes arrivent bientôt. Le lecteur sera disponible ici, dès leur publication.');
+    });};
+    if(u.format==='mpegts'){
+      $('playbackMessage').textContent='Préparation de la vidéo TS…';$('playbackMessage').hidden=false;
+      const failed=error=>{
+        if(selection!==videoSelection||error.name==='AbortError')return;
+        tsPlayer?.destroy();tsPlayer=null;$('playbackMessage').hidden=true;
+        videoMessage(error.message||'Impossible de préparer cette vidéo TS.');
+      };
+      import('./ts-player.js?v=20261028-440').then(({createTsPlayer})=>{
+        if(selection!==videoSelection)return;
+        tsPlayer=createTsPlayer(video,src,{onError:failed});
+        return tsPlayer.ready.then(()=>{
+          if(selection!==videoSelection)return;
+          $('playbackMessage').hidden=true;startPlayback();
+        });
+      }).catch(failed);
+    }else {video.load();startPlayback();}
+  }else videoMessage('Les premiers épisodes arrivent bientôt. Le lecteur sera disponible ici, dès leur publication.','À l’affiche, bientôt.');
 }
 function playNextEpisode(){
   const video=$('video'),next=state.unit+1,unit=state.item?.units[next];
@@ -210,7 +225,7 @@ $('sort').addEventListener('change',e=>{state.sort=e.target.value;render();});
 $('grid').addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(b)openItem(b.dataset.open);});
 $('units').addEventListener('click',e=>{const b=e.target.closest('[data-unit]');if(b&&!b.disabled)selectUnit(Number(b.dataset.unit));});
 $('closeDetail').addEventListener('click',async()=>{if(document.fullscreenElement){try{await document.exitFullscreen();}catch{}}$('detailDialog').close();});
-$('detailDialog').addEventListener('close',()=>{if(!comic){videoSelection++;$('video').pause();$('video').removeAttribute('src');$('video').replaceChildren();$('video').load();}else {resetArchive();$('comicInner').replaceChildren();}document.body.style.overflow='';});
+$('detailDialog').addEventListener('close',()=>{if(!comic){videoSelection++;tsPlayer?.destroy();tsPlayer=null;$('video').pause();$('video').removeAttribute('src');$('video').replaceChildren();$('video').load();}else {resetArchive();$('comicInner').replaceChildren();}document.body.style.overflow='';});
 $('detailDialog').addEventListener('click',e=>{if(e.target===$('detailDialog')){const b=e.target.getBoundingClientRect();if(e.clientX<b.left||e.clientX>b.right||e.clientY<b.top||e.clientY>b.bottom)e.target.close();}});
 if(comic){
   $('formatFilter').addEventListener('change',e=>{state.format=e.target.value;render();});

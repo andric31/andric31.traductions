@@ -25,6 +25,42 @@ if(video){
   player.append(controls);
   const $=id=>controls.querySelector('#'+id),menu=$('videoSettings'),more=$('videoMore');
   const seek=$('videoSeek'),subtitles=$('videoSubtitles'),speed=$('videoSpeed'),volume=$('videoVolume');
+  const choices=[];
+  function inlineChoice(select){
+    const label=select.getAttribute('aria-label'),box=document.createElement('div');box.className='ml-video-choice';
+    const trigger=document.createElement('button');trigger.type='button';trigger.id=select.id+'Toggle';trigger.className='ml-video-choice-toggle';
+    const list=document.createElement('div');list.id=select.id+'Choices';list.className='ml-video-choice-list';list.hidden=true;list.setAttribute('role','group');list.setAttribute('aria-label',label);
+    trigger.setAttribute('aria-expanded','false');trigger.setAttribute('aria-controls',list.id);
+    controls.querySelector(`label[for="${select.id}"]`).htmlFor=trigger.id;
+    select.hidden=true;select.after(box);box.append(trigger,list);
+    let signature='';
+    const close=(focus=false)=>{list.hidden=true;trigger.setAttribute('aria-expanded','false');if(focus)trigger.focus();};
+    const refresh=()=>{
+      const options=Array.from(select.options),next=JSON.stringify(options.map(o=>[o.value,o.textContent,o.disabled]));
+      if(next!==signature){
+        signature=next;list.replaceChildren();
+        options.forEach(option=>{
+          const button=document.createElement('button');button.type='button';button.textContent=option.textContent;button.dataset.value=option.value;button.disabled=option.disabled;
+          button.addEventListener('click',()=>{select.value=option.value;select.dispatchEvent(new Event('change',{bubbles:true}));refresh();close(true);});list.append(button);
+        });
+      }
+      trigger.textContent=select.selectedOptions[0]?.textContent||'Aucun';trigger.setAttribute('aria-label',label+' : '+trigger.textContent);trigger.disabled=select.disabled;
+      for(const button of list.children)button.setAttribute('aria-pressed',String(button.dataset.value===select.value));
+      if(select.disabled)close();
+    };
+    trigger.addEventListener('click',()=>{
+      const open=list.hidden;choices.forEach(choice=>choice.close());
+      if(open){refresh();list.hidden=false;trigger.setAttribute('aria-expanded','true');}
+    });
+    list.addEventListener('keydown',event=>{
+      if(!['ArrowDown','ArrowUp','Home','End'].includes(event.key))return;
+      const buttons=Array.from(list.children).filter(button=>!button.disabled),index=buttons.indexOf(document.activeElement);
+      if(!buttons.length)return;event.preventDefault();
+      const next=event.key==='Home'?0:event.key==='End'?buttons.length-1:(index+(event.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length;buttons[next].focus();
+    });
+    const choice={close,refresh,isOpen:()=>!list.hidden};choices.push(choice);refresh();return choice;
+  }
+  const subtitleChoice=inlineChoice(subtitles),speedChoice=inlineChoice(speed);
   let idleTimer,tracks=[],source='';
   const time=seconds=>{const n=Math.max(0,Math.floor(Number.isFinite(seconds)?seconds:0));return (n>=3600?Math.floor(n/3600)+':':'')+String(Math.floor(n/60)%60).padStart(n>=3600?2:1,'0')+':'+String(n%60).padStart(2,'0');};
   const hideWhenIdle=()=>{
@@ -32,7 +68,7 @@ if(video){
     if(!video.paused&&!video.ended&&menu.hidden&&!controls.querySelector(':focus-visible'))idleTimer=setTimeout(()=>player.classList.add('ml-controls-idle'),2600);
   };
   const reveal=()=>{player.classList.remove('ml-controls-idle');hideWhenIdle();};
-  const closeMenu=(focus=false)=>{menu.hidden=true;more.setAttribute('aria-expanded','false');if(focus)more.focus();reveal();};
+  const closeMenu=(focus=false)=>{choices.forEach(choice=>choice.close());menu.hidden=true;more.setAttribute('aria-expanded','false');if(focus)more.focus();reveal();};
   const message=text=>{$('videoControlMessage').textContent=text;$('videoControlMessage').hidden=!text;};
   const togglePlay=()=>{if(video.paused)document.getElementById('videoPlay').click();else video.pause();};
   const syncTime=()=>{
@@ -60,6 +96,7 @@ if(video){
     const active=tracks.findIndex(t=>t.mode==='showing');subtitles.value=active<0?'off':String(active);
     subtitles.disabled=!tracks.length;
     if(!tracks.length)subtitles.replaceChildren(new Option('Aucun sous-titre','off'));
+    subtitleChoice.refresh();
   };
   const expanded=()=>document.fullscreenElement===player||player.classList.contains('ml-video-expanded');
   const syncFullscreen=()=>{
@@ -82,7 +119,7 @@ if(video){
   subtitles.addEventListener('change',()=>{const selected=subtitles.value;tracks.forEach((track,i)=>{track.mode=String(i)===selected?'showing':'disabled';});});
   more.addEventListener('click',()=>{if(menu.hidden){syncTracks();message('');menu.hidden=false;more.setAttribute('aria-expanded','true');reveal();}else closeMenu();});
   document.addEventListener('pointerdown',event=>{if(!menu.hidden&&!controls.contains(event.target))closeMenu();});
-  controls.addEventListener('keydown',event=>{if(event.key==='Escape'&&!menu.hidden){event.preventDefault();event.stopPropagation();closeMenu(true);}});
+  controls.addEventListener('keydown',event=>{if(event.key==='Escape'&&!menu.hidden){event.preventDefault();event.stopPropagation();const choice=choices.find(choice=>choice.isOpen());if(choice)choice.close(true);else closeMenu(true);}});
   player.addEventListener('keydown',event=>{
     if(event.defaultPrevented||event.altKey||event.ctrlKey||event.metaKey)return;
     if(event.key==='Escape'&&player.classList.contains('ml-video-expanded')){event.preventDefault();event.stopPropagation();player.classList.remove('ml-video-expanded');syncFullscreen();return;}
@@ -111,7 +148,7 @@ if(video){
   for(const event of ['loadstart','emptied','loadedmetadata','error'])video.addEventListener(event,syncAvailability);
   for(const event of ['play','pause','ended'])video.addEventListener(event,syncPlayback);
   for(const event of ['timeupdate','durationchange','seeked'])video.addEventListener(event,syncTime);
-  video.addEventListener('volumechange',syncVolume);video.addEventListener('ratechange',()=>{speed.value=String(video.playbackRate);});
+  video.addEventListener('volumechange',syncVolume);video.addEventListener('ratechange',()=>{speed.value=String(video.playbackRate);speedChoice.refresh();});
   for(const event of ['addtrack','removetrack','change'])video.textTracks.addEventListener(event,syncTracks);
   dialog.addEventListener('close',()=>{clearTimeout(idleTimer);closeMenu();player.classList.remove('ml-video-expanded','ml-controls-idle');});
   // Le lecteur natif reste le repli si ce module ne peut pas être chargé.

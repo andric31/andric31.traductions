@@ -8,8 +8,8 @@
 .ml-video-controls :focus-visible{outline:2px solid #fff;outline-offset:2px}
 .ml-video-spacer{flex:1;min-width:0}
 .ml-video-time{white-space:nowrap;font-variant-numeric:tabular-nums;font-size:12px}
-.ml-video-toggle::before{content:"";border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:10px solid #fff;margin-left:2px}
-.ml-video-toggle.is-playing::before{height:13px;width:10px;border:0;border-left:3px solid #fff;border-right:3px solid #fff;margin:0}
+.ml-video-toggle::before{content:"";box-sizing:border-box;width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:10px solid #fff;margin-left:2px}
+.ml-video-toggle.is-playing::before{width:12px;height:14px;border:0;border-left:4px solid currentColor;border-right:4px solid currentColor;margin:0}
 .ml-video-bar svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .ml-video-bar .ml-sound-muted,.ml-video-bar .is-muted .ml-sound-waves{display:none}
 .ml-video-bar .is-muted .ml-sound-muted{display:block}

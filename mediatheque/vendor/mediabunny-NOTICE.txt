@@ -1,1 +1,6 @@
-
+Mediabunny 1.63.0 — Copyright (c) Vanilagy and contributors.
+https://github.com/Vanilagy/mediabunny
+License: Mozilla Public License 2.0; see mediabunny-LICENSE.txt.
+The distributed bundle is unmodified. Complete corresponding source is provided in mediabunny-1.63.0-source.tgz (the official npm distribution, including src/).
+No external CDN or service is used by the site.
+Official npm integrity: sha512-6958wlfDtass/zNcuSuGzUzFT9ciwEFd5AzDa02EQdPmifB4URcTcZoyQ//Ln5e47Z6EC3EJuKr3MM037w89OA==

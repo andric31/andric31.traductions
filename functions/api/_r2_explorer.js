@@ -28,7 +28,7 @@ export function folderKey(value, allowRoot = false) {
 }
 export function isMarker(key) { return key.endsWith('/') || key.split('/').pop() === MARKER; }
 export function contentType(key, supplied = '') {
-  const known = {png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',avif:'image/avif',gif:'image/gif',svg:'image/svg+xml',bmp:'image/bmp',ico:'image/x-icon',mp4:'video/mp4',webm:'video/webm',mov:'video/quicktime',m4v:'video/mp4',ogv:'video/ogg',mp3:'audio/mpeg',ogg:'audio/ogg',wav:'audio/wav',pdf:'application/pdf',txt:'text/plain',srt:'text/plain',vtt:'text/vtt',json:'application/json',cbz:'application/vnd.comicbook+zip',zip:'application/zip',rar:'application/vnd.rar','7z':'application/x-7z-compressed',doc:'application/msword',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'};
+  const known = {png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',avif:'image/avif',gif:'image/gif',svg:'image/svg+xml',bmp:'image/bmp',ico:'image/x-icon',ts:'video/mp2t',mp4:'video/mp4',webm:'video/webm',mov:'video/quicktime',m4v:'video/mp4',ogv:'video/ogg',mp3:'audio/mpeg',ogg:'audio/ogg',wav:'audio/wav',pdf:'application/pdf',txt:'text/plain',srt:'text/plain',vtt:'text/vtt',json:'application/json',cbz:'application/vnd.comicbook+zip',zip:'application/zip',rar:'application/vnd.rar','7z':'application/x-7z-compressed',doc:'application/msword',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'};
   const type = String(supplied || '').split(';')[0].trim();
   return (/^[a-z0-9!#$&^_.+-]+\/[a-z0-9!#$&^_.+-]+$/i.test(type) && type !== 'application/octet-stream') ? type : known[key.split('.').pop().toLowerCase()] || 'application/octet-stream';
 }

@@ -4,8 +4,7 @@
 .ml-controls-idle .ml-video-controls:has(:focus-visible){opacity:1;pointer-events:auto}
 .ml-video-bar{display:flex;align-items:center;gap:4px;min-width:0}
 .ml-video-bar button{display:grid;place-items:center;flex:none;width:32px;height:34px;padding:0;border:0;border-radius:5px;background:transparent;color:#fff;cursor:pointer;font:24px/1 system-ui}
-.ml-video-bar #videoFullscreen svg{width:18px;height:18px;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter}
-.ml-video-bar #videoFullscreen .ml-fullscreen-enter{fill:currentColor;stroke:none}
+.ml-video-bar #videoFullscreen .ml-fullscreen-exit{stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter}
 .ml-video-bar .ml-fullscreen-exit,.ml-video-bar #videoFullscreen[aria-pressed=true] .ml-fullscreen-enter{display:none}
 .ml-video-bar #videoFullscreen[aria-pressed=true] .ml-fullscreen-exit{display:block}
 .ml-video-bar button:hover{background:#ffffff24}
@@ -14,7 +13,8 @@
 .ml-video-time{white-space:nowrap;font-variant-numeric:tabular-nums;font-size:12px}
 .ml-video-toggle::before{content:"";box-sizing:border-box;width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:10px solid #fff;margin-left:2px}
 .ml-video-toggle.is-playing::before{width:12px;height:14px;border:0;border-left:4px solid currentColor;border-right:4px solid currentColor;margin:0}
-.ml-video-bar svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ml-video-bar svg{display:block;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ml-video-bar #videoMore svg{fill:currentColor;stroke:none}
 .ml-video-bar .ml-sound-muted,.ml-video-bar .is-muted .ml-sound-waves{display:none}
 .ml-video-bar .is-muted .ml-sound-muted{display:block}
 .ml-video-controls input[type=range]{accent-color:#fff;cursor:pointer;min-width:0}

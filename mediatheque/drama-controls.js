@@ -18,7 +18,7 @@ if(video){
     <span class="ml-video-time" id="videoTime">0:00 / 0:00</span>
     <span class="ml-video-spacer"></span>
     <button type="button" id="videoMute" aria-label="Couper le son" title="Couper le son"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4Z"/><path class="ml-sound-waves" d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/><path class="ml-sound-muted" d="m15 9 6 6m0-6-6 6"/></svg></button>
-    <button type="button" id="videoFullscreen" aria-label="Vidéo en plein écran" title="Vidéo en plein écran">⛶</button>
+    <button type="button" id="videoFullscreen" aria-label="Vidéo en plein écran" title="Vidéo en plein écran"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="ml-fullscreen-enter" d="M8 3H3v5m13-5h5v5M3 16v5h5m8 0h5v-5"/><path class="ml-fullscreen-exit" d="M3 8h5V3m13 5h-5V3M3 16h5v5m13-5h-5v5"/></svg></button>
     <button type="button" class="ml-video-more" id="videoMore" aria-label="Options de lecture" title="Options de lecture" aria-expanded="false" aria-controls="videoSettings">⋮</button>
   </div>
   <input class="ml-video-seek" id="videoSeek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Position dans l’épisode">`;
@@ -150,7 +150,7 @@ if(video){
   for(const event of ['timeupdate','durationchange','seeked'])video.addEventListener(event,syncTime);
   video.addEventListener('volumechange',syncVolume);video.addEventListener('ratechange',()=>{speed.value=String(video.playbackRate);speedChoice.refresh();});
   for(const event of ['addtrack','removetrack','change'])video.textTracks.addEventListener(event,syncTracks);
-  dialog.addEventListener('close',()=>{clearTimeout(idleTimer);closeMenu();player.classList.remove('ml-video-expanded','ml-controls-idle');});
+  dialog.addEventListener('close',()=>{clearTimeout(idleTimer);closeMenu();player.classList.remove('ml-video-expanded','ml-controls-idle');syncFullscreen();});
   // Le lecteur natif reste le repli si ce module ne peut pas être chargé.
   video.controls=false;video.tabIndex=0;player.classList.add('ml-custom-controls');
   syncVolume();syncFullscreen();syncAvailability();

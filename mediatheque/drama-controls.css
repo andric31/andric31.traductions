@@ -4,6 +4,9 @@
 .ml-controls-idle .ml-video-controls:has(:focus-visible){opacity:1;pointer-events:auto}
 .ml-video-bar{display:flex;align-items:center;gap:4px;min-width:0}
 .ml-video-bar button{display:grid;place-items:center;flex:none;width:32px;height:34px;padding:0;border:0;border-radius:5px;background:transparent;color:#fff;cursor:pointer;font:24px/1 system-ui}
+.ml-video-bar #videoFullscreen svg{width:18px;height:18px;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter}
+.ml-video-bar .ml-fullscreen-exit,.ml-video-bar #videoFullscreen[aria-pressed=true] .ml-fullscreen-enter{display:none}
+.ml-video-bar #videoFullscreen[aria-pressed=true] .ml-fullscreen-exit{display:block}
 .ml-video-bar button:hover{background:#ffffff24}
 .ml-video-controls :focus-visible{outline:2px solid #fff;outline-offset:2px}
 .ml-video-spacer{flex:1;min-width:0}

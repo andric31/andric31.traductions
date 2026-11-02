@@ -1,6 +1,130 @@
-const CACHE_VERSION = 'gallery-v14-fast-gallery';
+const CACHE_VERSION = 'gallery-v15-rate-limit';
+const inFlight = new Map();
+const cooldowns = new Map();
+const FRESH_MS = 60 * 60 * 1000;
+const RETAIN_MS = 24 * FRESH_MS;
+
+function retryDeadline(value) {
+  const raw = String(value || '').trim();
+  const seconds = /^\d+$/.test(raw) ? Number(raw) : NaN;
+  const deadline = Number.isFinite(seconds) ? Date.now() + seconds * 1000 : Date.parse(raw);
+  return Number.isFinite(deadline) && deadline > Date.now() ? deadline : Date.now() + 300000;
+}
+
+function cacheKey(origin, path) { return new Request(origin + '/__f95-gallery-cache/' + path); }
+async function cachedJson(key) {
+  try { const response = await caches.default.match(key); return response ? await response.json() : null; }
+  catch { return null; }
+}
+async function putJson(key, data, seconds) {
+  try { await caches.default.put(key, new Response(JSON.stringify(data), {headers:{'content-type':'application/json', 'cache-control':`public, max-age=${Math.max(1, Math.ceil(seconds))}`}})); }
+  catch {} // Une panne du cache ne doit pas masquer une galerie reçue.
+}
+
+function usableMedia(data) {
+  if (!data?.ok || !Array.isArray(data.gallery)) return null;
+  const clean = value => typeof value === 'string' ? upgradeF95Url(value) : '';
+  const gallery = dedupKeepOrder([data.cover, ...data.gallery].map(clean).filter(value => value && !isExpiredImage(value))).slice(0, 80);
+  if (!gallery.length) return null;
+  return {ok:true, source:data.source || 'cache', cover:gallery[0], gallery,
+    originals:gallery.filter(value => !isThumbnailUrl(value))};
+}
+
+async function readGallery(origin, threadId) {
+  const key = cacheKey(origin, 'media-v1/' + threadId);
+  let saved = await cachedJson(key);
+  if (!saved) {
+    // Reprendre un succès v14 encore en cache au lieu de repartir à vide.
+    const legacy = await cachedJson(new Request('https://cache.local/gallery-v14-fast-gallery/f95gallery?thread=' + threadId));
+    const media = usableMedia(legacy);
+    if (media) {
+      saved = {threadId, savedAt:Date.now(), media};
+      await putJson(key, saved, RETAIN_MS / 1000);
+    }
+  }
+  if (String(saved?.threadId) !== threadId || !Number.isFinite(saved?.savedAt) || Date.now() - saved.savedAt >= RETAIN_MS) return null;
+  const media = usableMedia(saved.media);
+  if (!media) return null;
+  const expires = Math.min(...media.gallery.map(value => imageExpiry(value) || Infinity));
+  return {media, fresh:Date.now() - saved.savedAt < FRESH_MS && expires > Date.now() + 30000 && media.gallery.length === saved.media.gallery.length};
+}
+
+function responseData(data, status, debug) {
+  const output = {...data, version:CACHE_VERSION};
+  if (!debug) delete output.diagnostic;
+  const headers = {'content-type':'application/json; charset=utf-8', 'cache-control':'no-store',
+    'access-control-allow-origin':'*', 'access-control-allow-methods':'GET,OPTIONS',
+    'access-control-allow-headers':'content-type', 'x-f95-gallery-version':CACHE_VERSION};
+  if (output.retryAfter > 0) headers['retry-after'] = String(Math.ceil(output.retryAfter));
+  return json(output, status, headers);
+}
+
+function limitedData(retryAt, diagnostic = {}) {
+  return {ok:false, code:'F95_RATE_LIMITED', error:'F95 limite temporairement les recherches d’images',
+    retryAfter:Math.max(1, Math.ceil((retryAt - Date.now()) / 1000)), diagnostic:{...diagnostic, rateLimited:true}};
+}
+function limitedResponse(retryAt, headers, diagnostic) {
+  const data = limitedData(retryAt, diagnostic);
+  return json(data, 429, {...headers, 'retry-after':String(data.retryAfter)});
+}
 
 export async function onRequest(context) {
+  const url = new URL(context.request.url), debug = url.searchParams.get('debug') === '1';
+  if (context.request.method === 'OPTIONS') return new Response(null, {status:204, headers:{'access-control-allow-origin':'*', 'access-control-allow-methods':'GET,OPTIONS', 'access-control-allow-headers':'content-type'}});
+  let thread;
+  try { thread = new URL(url.searchParams.get('url') || ''); } catch { return responseData({ok:false,error:'url invalide'},400,debug); }
+  const match = thread.pathname.match(/^\/threads\/(?:[^/]*\.)?(\d+)(?:\/|$)/i);
+  if (!/^https?:$/.test(thread.protocol) || thread.username || thread.password || !/^(?:www\.)?f95zone\.to$/i.test(thread.hostname) || !match) return responseData({ok:false,error:'host non autorisé'},400,debug);
+  const threadId = match[1], origin = url.origin;
+  const cached = await readGallery(origin, threadId);
+  const fromCache = (stale, failure = {}) => responseData({...cached.media, cached:true, stale,
+    ...(failure.retryAfter ? {retryAfter:failure.retryAfter} : {}),
+    diagnostic:{...failure.diagnostic, cacheHit:true, cacheStale:stale}},200,debug);
+  // Le diagnostic lit aussi le cache : le consulter ne doit pas créer une rafale.
+  if (cached?.fresh && url.searchParams.get('refresh') !== '1') return fromCache(false);
+  const cooldownKey = cacheKey(origin, 'cooldown-v1');
+  const control = {
+    retryAt:0,
+    async blocked() {
+      const saved = await cachedJson(cooldownKey);
+      this.retryAt = Math.max(cooldowns.get(origin) || 0, Number(saved?.retryAt) || 0);
+      return this.retryAt > Date.now();
+    },
+    async limit(response) {
+      this.retryAt = Math.max(cooldowns.get(origin) || 0, retryDeadline(response.headers.get('retry-after')));
+      cooldowns.set(origin, this.retryAt);
+      await putJson(cooldownKey, {retryAt:this.retryAt}, (this.retryAt - Date.now()) / 1000);
+    }
+  };
+  if (await control.blocked()) {
+    const failure = limitedData(control.retryAt, {latestStatus:429, latestAttempted:false});
+    return cached ? fromCache(true, failure) : responseData(failure,429,debug);
+  }
+  const flightKey = origin + '/' + threadId;
+  let pending = inFlight.get(flightKey);
+  if (!pending) {
+    pending = (async () => {
+      const diagnosticUrl = new URL(url); diagnosticUrl.searchParams.set('debug','1');
+      const response = await retrieveGallery({request:new Request(diagnosticUrl, context.request)}, control);
+      const data = await response.json();
+      const media = usableMedia(data);
+      if (media) await putJson(cacheKey(origin, 'media-v1/' + threadId), {threadId, savedAt:Date.now(), media}, RETAIN_MS / 1000);
+      return {data, status:response.status};
+    })();
+    inFlight.set(flightKey, pending);
+  }
+  try {
+    const {data,status} = await pending;
+    if (!data.ok && cached) return fromCache(true, data);
+    return responseData(data,status,debug);
+  } catch {
+    return cached ? fromCache(true) : responseData({ok:false,error:'Récupération F95 indisponible',code:'F95_FETCH_FAILED'},502,debug);
+  } finally {
+    if (inFlight.get(flightKey) === pending) inFlight.delete(flightKey);
+  }
+}
+
+async function retrieveGallery(context, control) {
   const { request } = context;
   const headers = {
     'content-type': 'application/json; charset=utf-8',
@@ -28,10 +152,6 @@ export async function onRequest(context) {
     }
 
     const threadId = u.pathname.match(/^\/threads\/(?:[^/]*\.)?(\d+)(?:\/|$)/i)[1];
-    const cache = caches.default;
-    const cacheKey = new Request(`https://cache.local/${CACHE_VERSION}/f95gallery?thread=` + threadId, request);
-    const cached = await cache.match(cacheKey);
-    if (cached && !debug && url.searchParams.get("refresh") !== "1") return new Response(await cached.text(), { headers });
     const deadline = Date.now() + 10500;
     const remaining = limit => Math.max(1, Math.min(limit, deadline - Date.now()));
 
@@ -39,10 +159,12 @@ export async function onRequest(context) {
     // sujet. L'identifiant exact reste obligatoire pour accepter le résultat.
     const latest = { attempted: false, status: 0, matched: false, images: 0, timedOut: false };
     const titleQuery = latestUpdatesQuery('', String(url.searchParams.get('title') || '').slice(0, 300));
-    const directMedia = titleQuery ? await fetchLatestUpdatesMedia(threadId, titleQuery, latest, remaining(6000)) : {cover:'', gallery:[]};
+    const directMedia = titleQuery ? await fetchLatestUpdatesMedia(threadId, titleQuery, latest, remaining(6000), control) : {cover:'', gallery:[]};
+    if (latest.status === 429 || latest.rateLimited) return limitedResponse(control.retryAt, headers, {latestStatus:latest.status, latestAttempted:latest.attempted});
     const threadSkipped = new Set(directMedia.gallery.map(mediaKey)).size >= 2;
     let html = '', upstreamStatus = 0;
     if (!threadSkipped) {
+      if (await control.blocked()) return limitedResponse(control.retryAt, headers);
       const threadController = new AbortController();
       const threadTimer = setTimeout(() => threadController.abort(), remaining(4000));
       try {
@@ -56,6 +178,10 @@ export async function onRequest(context) {
           signal: threadController.signal,
         });
         upstreamStatus = resp.status;
+        if (resp.status === 429) {
+          await control.limit(resp);
+          return limitedResponse(control.retryAt, headers, {upstreamStatus:429});
+        }
         if (!resp.ok) {
           if (!directMedia.gallery.length) return json({ ok: false, error: 'fetch F95 failed', status: resp.status }, 502, headers);
         } else html = await resp.text();
@@ -99,7 +225,7 @@ export async function onRequest(context) {
       const pageQuery = latestUpdatesQuery(html);
       let media = directMedia;
       if (!threadSkipped && pageQuery && (!latest.attempted || pageQuery !== titleQuery)) {
-        const recovered = await fetchLatestUpdatesMedia(threadId, pageQuery, latest, remaining(6000));
+        const recovered = await fetchLatestUpdatesMedia(threadId, pageQuery, latest, remaining(6000), control);
         if (recovered.gallery.length) media = recovered;
       }
       if (media.gallery.length) {
@@ -119,6 +245,7 @@ export async function onRequest(context) {
       latestImageUrls: latest.images,
       latestTimedOut: latest.timedOut,
     });
+    if (latest.status === 429 || latest.rateLimited) return limitedResponse(control.retryAt, headers, diagnostic);
     if (!gallery.length && !cover) return json({
       ok: false,
       error: firstArticle ? 'Aucune image de jeu trouvée dans les sources F95 disponibles' : 'Premier message F95 inaccessible',
@@ -135,22 +262,7 @@ export async function onRequest(context) {
       ...(debug ? { diagnostic } : {}),
     };
 
-    const body = JSON.stringify(payload);
-    const expirations = payload.gallery.map(value => {
-      try { return imageExpiry(value) / 1000 || Infinity; }
-      catch { return Infinity; }
-    });
-    const ttl = Math.max(0, Math.min(1800, Math.floor(Math.min(...expirations) - Date.now() / 1000 - 30)));
-    if (!debug && payload.gallery.length && ttl > 0) await cache.put(
-      cacheKey,
-      new Response(body, {
-        headers: {
-          'content-type': 'application/json; charset=utf-8',
-          'cache-control': `public, max-age=${ttl}`,
-        },
-      })
-    );
-    return new Response(body, { headers });
+    return json(payload, 200, headers);
   } catch (err) {
     return json({ ok: false, error: 'Exception Worker', detail: String(err?.message || err) }, 500, headers);
   }
@@ -217,12 +329,13 @@ function latestUpdatesQuery(html, knownTitle = '') {
   return query;
 }
 
-async function fetchLatestUpdatesMedia(threadId, query, diagnostic, timeout = 6000) {
+async function fetchLatestUpdatesMedia(threadId, query, diagnostic, timeout = 6000, control) {
   const empty = { cover: '', gallery: [] };
   if (!query) return empty;
   const endpoint = new URL('https://f95zone.to/sam/latest_alpha/latest_data.php');
   for (const [key, value] of Object.entries({cmd:'list', cat:'games', page:'1', search:query, sort:'likes', rows:'90'})) endpoint.searchParams.set(key, value);
-  Object.assign(diagnostic, { attempted:true, status:0, matched:false, images:0, timedOut:false });
+  if (await control.blocked()) { diagnostic.status = 429; return empty; }
+  Object.assign(diagnostic, { attempted:true, status:0, matched:false, images:0, timedOut:false, rateLimited:false });
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
   try {
@@ -231,8 +344,14 @@ async function fetchLatestUpdatesMedia(threadId, query, diagnostic, timeout = 60
       signal: controller.signal,
     });
     diagnostic.status = response.status;
+    if (response.status === 429) { await control.limit(response); return empty; }
     if (!response.ok) return empty;
     const data = await response.json();
+    if (data?.status === 'error' && typeof data.msg === 'string' && /temporarily blocked because of a large amount of requests|too many requests/i.test(data.msg)) {
+      diagnostic.rateLimited = true;
+      await control.limit(response);
+      return empty;
+    }
     if (data?.status !== 'ok' || !Array.isArray(data?.msg?.data)) return empty;
     const row = data.msg.data.find(item => item && String(item.thread_id) === threadId);
     if (!row) return empty;

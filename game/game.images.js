@@ -7,6 +7,9 @@
   const IMAGE_TIMEOUT_MS = 8000;
   const MEDIA_TIMEOUT_MS = 12000;
   const MEDIA_STORAGE_KEY = "f95-gallery-v14";
+  const PAUSE_STORAGE_KEY = "f95-gallery-pause-v1";
+  const mediaQueue = [];
+  let mediaQueueActive = false, mediaQueueTimer, lastMediaStart = 0, pausedUntil = 0;
 
   // Visuels intégrés : aucune requête réseau, même si un fichier SVG manque au déploiement.
   const THUMB_FALLBACK_URL = "data:image/svg+xml;charset=utf-8," + encodeURIComponent("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"480\" height=\"270\" viewBox=\"0 0 480 270\"><rect width=\"480\" height=\"270\" fill=\"#1c2030\"/><g fill=\"none\" stroke=\"#8993ac\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"212\" y=\"82\" width=\"56\" height=\"44\" rx=\"7\"/><circle cx=\"251\" cy=\"95\" r=\"4\"/><path d=\"m216 120 15-16 11 11 8-7 14 15\"/></g><text x=\"240\" y=\"165\" fill=\"#bbc3d6\" font-family=\"Arial,sans-serif\" font-size=\"19\" text-anchor=\"middle\">Image indisponible</text></svg>");
@@ -323,19 +326,63 @@
   function readStoredMedia(threadUrl) {
     try {
       const saved = JSON.parse(localStorage.getItem(MEDIA_STORAGE_KEY) || "{}")[threadUrl];
-      if (!saved || !(saved.until > Date.now())) return null;
+      const keepUntil = saved?.keepUntil || Number(saved?.until) + 86400000;
+      if (!saved || !(keepUntil > Date.now())) return null;
       const media = normalizeMedia(saved.media);
-      return media.gallery.length ? { until:saved.until, media } : null;
+      return media.gallery.length ? { until:saved.until, keepUntil, media } : null;
     } catch { return null; }
   }
 
   function storeMedia(threadUrl, media, until) {
     try {
       const saved = JSON.parse(localStorage.getItem(MEDIA_STORAGE_KEY) || "{}");
-      const kept = Object.entries(saved).filter(([key, value]) => key !== threadUrl && value?.until > Date.now()).slice(-39);
-      kept.push([threadUrl, {until, media}]);
+      const kept = Object.entries(saved).filter(([key, value]) => key !== threadUrl && (value?.keepUntil || Number(value?.until) + 86400000) > Date.now()).slice(-79);
+      kept.push([threadUrl, {until, keepUntil:Date.now() + 86400000, media}]);
       localStorage.setItem(MEDIA_STORAGE_KEY, JSON.stringify(Object.fromEntries(kept)));
     } catch {}
+  }
+
+  function pauseDeadline() {
+    try { pausedUntil = Math.max(pausedUntil, Number(localStorage.getItem(PAUSE_STORAGE_KEY)) || 0); } catch {}
+    return pausedUntil;
+  }
+
+  function pauseRequests(response, data) {
+    const raw = response.headers?.get('retry-after') || '';
+    let deadline = /^\d+$/.test(raw) ? Date.now() + Number(raw) * 1000 : Date.parse(raw);
+    if (!(deadline > Date.now())) deadline = Date.now() + (Number(data?.retryAfter) > 0 ? Number(data.retryAfter) : 300) * 1000;
+    pausedUntil = Math.max(pauseDeadline(), deadline);
+    try { localStorage.setItem(PAUSE_STORAGE_KEY, String(pausedUntil)); } catch {}
+    return pausedUntil;
+  }
+
+  function pausedMedia() {
+    return {...emptyMedia(), retryAt:pauseDeadline()};
+  }
+
+  function pumpMediaQueue() {
+    if (mediaQueueActive || !mediaQueue.length) return;
+    clearTimeout(mediaQueueTimer);
+    if (pauseDeadline() > Date.now()) {
+      for (const job of mediaQueue.splice(0)) job.resolve(pausedMedia());
+      return;
+    }
+    const delay = lastMediaStart + 750 - Date.now();
+    if (delay > 0) { mediaQueueTimer = setTimeout(pumpMediaQueue, delay); return; }
+    const job = mediaQueue.shift();
+    mediaQueueActive = true;
+    lastMediaStart = Date.now();
+    Promise.resolve().then(job.run).then(job.resolve, () => job.resolve(emptyMedia())).finally(() => {
+      mediaQueueActive = false;
+      pumpMediaQueue();
+    });
+  }
+
+  function requestMedia(threadUrl, refresh = false, title = "") {
+    return new Promise(resolve => {
+      mediaQueue.push({run:() => performMediaRequest(threadUrl, refresh, title), resolve});
+      pumpMediaQueue();
+    });
   }
 
   function getTitleHint(rawEntry) {
@@ -343,7 +390,7 @@
     return cleanUrl((rawEntry.collection && rawEntry.gameData?.title) || rawEntry.cleanTitle || rawEntry.title || rawEntry.gameData?.title).slice(0, 300);
   }
 
-  async function requestMedia(threadUrl, refresh = false, title = "") {
+  async function performMediaRequest(threadUrl, refresh = false, title = "") {
     let timeout;
     let controller;
     try {
@@ -356,7 +403,12 @@
       });
       const response = fetch(`/api/f95gallery?url=${encodeURIComponent(threadUrl)}${title ? "&title=" + encodeURIComponent(title) : ""}${refresh ? "&refresh=1" : ""}`, {
         credentials: "same-origin", cache: "no-store", signal: controller.signal,
-      }).then((r) => r.ok ? r.json() : null).then(normalizeMedia).catch(emptyMedia);
+      }).then(async r => {
+        const data = await r.json().catch(() => null);
+        const limited = r.status === 429 || data?.code === 'F95_RATE_LIMITED' || (data?.stale && data?.retryAfter > 0);
+        const retryAt = limited ? pauseRequests(r, data) : 0;
+        return {...normalizeMedia(r.ok ? data : null), retryAt, stale:!!data?.stale};
+      }).catch(emptyMedia);
       return await Promise.race([response, expired]);
     } catch {
       return emptyMedia();
@@ -378,20 +430,19 @@
     if (!threadUrl) return Promise.resolve(emptyMedia());
     const now = Date.now();
     let record = mediaCache.get(threadUrl);
-    if (!record && !refresh) {
+    if (!record) {
       const saved = readStoredMedia(threadUrl);
       if (saved) {
         record = { ...saved, pending:false, refreshed:false, created:now, promise:Promise.resolve(saved.media) };
         mediaCache.set(threadUrl, record);
       }
     }
+    if (pauseDeadline() > now) return Promise.resolve(normalizeMedia({ok:true, ...(record?.media || emptyMedia())}));
     if (record?.pending) {
-      // Une demande forcée attend une demande normale déjà en cours.
-      if (refresh && !record.refreshed) {
-        return record.promise.then(() => fetchF95GalleryMedia(rawOrUrl, imageUrl, { refresh: true, title }));
-      }
+      // Survol, récupération et actualisation partagent la même demande.
       return record.promise;
     }
+    if (record?.retryAt > now) return record.promise;
     if (record && record.until > now && (!refresh || (record.refreshed && now - record.created < 10000))) return record.promise;
     const previousMedia = record?.media || emptyMedia();
     record = { promise: null, pending: true, refreshed: refresh, created: now, until: now + 15000, media: previousMedia };
@@ -402,9 +453,10 @@
       }
       const found = !!(media.cover || media.gallery.length);
       // Une panne de l'API conserve les dernières adresses connues, mais permet un nouvel essai rapide.
-      if (found) record.media = media;
+      record.media = found ? media : normalizeMedia({ok:true, ...record.media});
+      record.retryAt = Math.max(Number(media.retryAt) || 0, found ? 0 : Date.now() + 60000);
       const deadlines = [record.media.cover, ...record.media.gallery].map(imageExpiry).filter(Boolean).map(time => time - 30000);
-      record.until = Math.min(Date.now() + (found ? 300000 : 15000), ...deadlines);
+      record.until = Math.min(Date.now() + (found && !media.stale ? 3600000 : 60000), ...deadlines);
       if (found && mediaCache.get(threadUrl) === record) storeMedia(threadUrl, record.media, record.until);
       return { cover: record.media.cover, gallery: record.media.gallery.slice(), originals: (record.media.originals || []).slice() };
     }).finally(() => { record.pending = false; });
@@ -420,8 +472,17 @@
 
   function clearCaches() {
     imageCache.clear();
-    mediaCache.clear();
-    try { localStorage.removeItem(MEDIA_STORAGE_KEY); } catch {}
+    for (const [key, record] of mediaCache) if (!record.pending) mediaCache.delete(key);
+    // Une actualisation invalide la fraîcheur, sans effacer le dernier succès
+    // ni la pause imposée par F95 : ils servent encore en cas de panne.
+    try {
+      const saved = JSON.parse(localStorage.getItem(MEDIA_STORAGE_KEY) || "{}");
+      for (const value of Object.values(saved)) {
+        value.keepUntil ||= Number(value.until) + 86400000;
+        value.until = 0;
+      }
+      localStorage.setItem(MEDIA_STORAGE_KEY, JSON.stringify(saved));
+    } catch {}
   }
 
   function setPlaceholder(img, loading = true) {

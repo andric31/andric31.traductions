@@ -328,7 +328,8 @@
     for (const candidate of candidates) {
       if (!isCurrent()) return "";
       const loaded = imageCache.get(candidate);
-      if (pauseDeadline() > Date.now() && !(loaded?.status === "ready" && loaded.until > Date.now())) return "";
+      // Le cooldown concerne la recherche de métadonnées, pas les fichiers
+      // image déjà connus. Leurs échecs ont leur propre cache ci-dessous.
       let checked = originalChecks.get(candidate);
       if (!checked || checked.until <= Date.now() || (checked.ok && (!loaded || loaded.until <= Date.now()))) {
         checked = {promise:null, until:Date.now() + IMAGE_TIMEOUT_MS};

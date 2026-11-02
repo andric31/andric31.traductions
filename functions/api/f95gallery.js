@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'gallery-v13-latest-updates';
+const CACHE_VERSION = 'gallery-v14-fast-gallery';
 
 export async function onRequest(context) {
   const { request } = context;
@@ -27,30 +27,43 @@ export async function onRequest(context) {
       return json({ ok: false, error: 'host non autorisé' }, 400, headers);
     }
 
+    const threadId = u.pathname.match(/^\/threads\/(?:[^/]*\.)?(\d+)(?:\/|$)/i)[1];
     const cache = caches.default;
-    const cacheKey = new Request(`https://cache.local/${CACHE_VERSION}/f95gallery?u=` + encodeURIComponent(f95Url), request);
+    const cacheKey = new Request(`https://cache.local/${CACHE_VERSION}/f95gallery?thread=` + threadId, request);
     const cached = await cache.match(cacheKey);
     if (cached && !debug && url.searchParams.get("refresh") !== "1") return new Response(await cached.text(), { headers });
+    const deadline = Date.now() + 10500;
+    const remaining = limit => Math.max(1, Math.min(limit, deadline - Date.now()));
 
-    const threadController = new AbortController();
-    const threadTimer = setTimeout(() => threadController.abort(), 4000);
-    let resp, html;
-    try {
-      resp = await fetch(f95Url, {
-        headers: {
-          'user-agent': 'Mozilla/5.0 (compatible; andric31-trad/1.0)',
-          'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'accept-language': 'en-US,en;q=0.9,fr;q=0.8',
-          'referer': 'https://f95zone.to/',
-        },
-        signal: threadController.signal,
-      });
-      if (!resp.ok) return json({ ok: false, error: 'fetch F95 failed', status: resp.status }, 502, headers);
-      html = await resp.text();
-    } catch {
-      return json({ ok: false, error: 'Récupération du message F95 indisponible', code: threadController.signal.aborted ? 'F95_TIMEOUT' : 'F95_FETCH_FAILED' }, 502, headers);
-    } finally {
-      clearTimeout(threadTimer);
+    // Le titre de la fiche permet d'éviter le téléchargement préalable du
+    // sujet. L'identifiant exact reste obligatoire pour accepter le résultat.
+    const latest = { attempted: false, status: 0, matched: false, images: 0, timedOut: false };
+    const titleQuery = latestUpdatesQuery('', String(url.searchParams.get('title') || '').slice(0, 300));
+    const directMedia = titleQuery ? await fetchLatestUpdatesMedia(threadId, titleQuery, latest, remaining(6000)) : {cover:'', gallery:[]};
+    const threadSkipped = new Set(directMedia.gallery.map(mediaKey)).size >= 2;
+    let html = '', upstreamStatus = 0;
+    if (!threadSkipped) {
+      const threadController = new AbortController();
+      const threadTimer = setTimeout(() => threadController.abort(), remaining(4000));
+      try {
+        const resp = await fetch(f95Url, {
+          headers: {
+            'user-agent': 'Mozilla/5.0 (compatible; andric31-trad/1.0)',
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'accept-language': 'en-US,en;q=0.9,fr;q=0.8',
+            'referer': 'https://f95zone.to/',
+          },
+          signal: threadController.signal,
+        });
+        upstreamStatus = resp.status;
+        if (!resp.ok) {
+          if (!directMedia.gallery.length) return json({ ok: false, error: 'fetch F95 failed', status: resp.status }, 502, headers);
+        } else html = await resp.text();
+      } catch {
+        if (!directMedia.gallery.length) return json({ ok: false, error: 'Récupération du message F95 indisponible', code: threadController.signal.aborted ? 'F95_TIMEOUT' : 'F95_FETCH_FAILED' }, 502, headers);
+      } finally {
+        clearTimeout(threadTimer);
+      }
     }
     const firstArticle = extractFirstPostArticle(html);
     const messageBody = extractContainerBlock(firstArticle, 'message-body');
@@ -59,7 +72,8 @@ export async function onRequest(context) {
     // Compteurs uniquement : ne jamais exposer le HTML, les cookies ou les
     // informations de compte de la page reçue dans une réponse de diagnostic.
     const diagnostic = debug ? {
-      upstreamStatus: resp.status,
+      upstreamStatus,
+      threadSkipped,
       htmlLength: html.length,
       postFound: !!firstArticle,
       postLength: firstArticle.length,
@@ -81,10 +95,13 @@ export async function onRequest(context) {
     // Le HTML invité peut omettre toutes les images du message. Latest Updates
     // expose séparément cover/screens : utiliser uniquement la ligne du même
     // thread_id, jamais le premier résultat de recherche ni un titre approchant.
-    const latest = { attempted: false, status: 0, matched: false, images: 0, timedOut: false };
     if (new Set([cover, ...gallery].filter(Boolean).map(mediaKey)).size < 2) {
-      const threadId = u.pathname.match(/^\/threads\/(?:[^/]*\.)?(\d+)(?:\/|$)/i)[1];
-      const media = await fetchLatestUpdatesMedia(threadId, html, latest);
+      const pageQuery = latestUpdatesQuery(html);
+      let media = directMedia;
+      if (!threadSkipped && pageQuery && (!latest.attempted || pageQuery !== titleQuery)) {
+        const recovered = await fetchLatestUpdatesMedia(threadId, pageQuery, latest, remaining(6000));
+        if (recovered.gallery.length) media = recovered;
+      }
       if (media.gallery.length) {
         const retained = gallery.filter(value => mediaKey(value) !== mediaKey(cover));
         gallery = dedupKeepOrder([...media.gallery, ...retained]);
@@ -167,9 +184,9 @@ function stripNonContentBlocks(html) {
 function countImageTags(html) { return matchAll(html, /<img\b/gi).length; }
 function countAttachmentUrls(html) { return matchAll(html, /(?:attachments|preview)\.f95zone\.to\//gi).length; }
 
-function latestUpdatesQuery(html) {
+function latestUpdatesQuery(html, knownTitle = '') {
   const source = stripNonContentBlocks(html);
-  let heading = extractContainerBlock(source, 'p-title-value');
+  let heading = knownTitle || extractContainerBlock(source, 'p-title-value');
   let prefix;
   while ((prefix = findContainer(heading, attrs => /(?:^|\s)p-title-prefix(?:\s|$)/i.test(attrs.class || '')))) {
     heading = heading.slice(0, prefix.start) + heading.slice(prefix.end);
@@ -200,15 +217,14 @@ function latestUpdatesQuery(html) {
   return query;
 }
 
-async function fetchLatestUpdatesMedia(threadId, html, diagnostic) {
+async function fetchLatestUpdatesMedia(threadId, query, diagnostic, timeout = 6000) {
   const empty = { cover: '', gallery: [] };
-  const query = latestUpdatesQuery(html);
   if (!query) return empty;
   const endpoint = new URL('https://f95zone.to/sam/latest_alpha/latest_data.php');
   for (const [key, value] of Object.entries({cmd:'list', cat:'games', page:'1', search:query, sort:'likes', rows:'90'})) endpoint.searchParams.set(key, value);
-  diagnostic.attempted = true;
+  Object.assign(diagnostic, { attempted:true, status:0, matched:false, images:0, timedOut:false });
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 6000);
+  const timer = setTimeout(() => controller.abort(), timeout);
   try {
     const response = await fetch(endpoint.href, {
       headers: { 'accept': 'application/json', 'user-agent': 'andric31-trad-gallery/1.0', 'referer': 'https://f95zone.to/sam/latest_alpha/' },

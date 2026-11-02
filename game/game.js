@@ -327,25 +327,19 @@ function applyGalleryMedia(media) {
   galleryState.metadataReady = true;
   galleryState.originals = Array.isArray(media?.originals) ? media.originals : [];
   syncGalleryIndex();
-  requestDisplayedOriginal();
 }
 
-function requestDisplayedOriginal(immediate = false) {
-  clearTimeout(galleryState.originalTimer);
-  const displayed = galleryState.displayedUrl;
-  if (!displayed || !window.GameImages.isF95Thumbnail(displayed)) return;
-  const token = galleryState.displayToken, session = galleryState.session, navigation = galleryState.navigation;
-  const logical = galleryState.displayedLogicalUrl;
-  const current = () => galleryState.displayToken === token && galleryState.session === session &&
-    galleryState.navigation === navigation && galleryState.displayedUrl === displayed;
-  const load = async () => {
-    if (!current()) return;
-    const original = await window.GameImages.findHigherResolutionImage(displayed, galleryState.originals, current);
-    if (original && current()) displayGalleryImage(original, logical);
-  };
-  // Afficher l'aperçu immédiatement, puis améliorer uniquement l'image regardée.
-  if (immediate) void load();
-  else galleryState.originalTimer = setTimeout(() => { void load(); }, 350);
+async function resolveGalleryImage(source, current) {
+  const resolved = await window.GameImages.findWorkingF95Image([source]);
+  if (!resolved || !current()) return '';
+  if (!window.GameImages.isF95Thumbnail(resolved)) return resolved;
+  // Une miniature signée nécessite l'adresse originale fournie par l'API.
+  if (!window.GameImages.originalImageUrls([resolved]).length && !galleryState.metadataReady && galleryState.initialPromise) {
+    await galleryState.initialPromise;
+    if (!current()) return '';
+  }
+  const original = await window.GameImages.findHigherResolutionImage(resolved, galleryState.originals, current);
+  return current() ? original || resolved : '';
 }
 
 async function refreshGalleryMedia(session) {
@@ -392,10 +386,11 @@ function displayGalleryImage(src, logicalUrl) {
   });
   setLightboxBackground(src);
   syncGalleryIndex();
-  requestDisplayedOriginal();
   if (galleryState.urls.length > 1) {
     const next = galleryState.urls[(galleryState.index + 1) % galleryState.urls.length];
-    void window.GameImages.findWorkingF95Image([next]);
+    const session = galleryState.session;
+    // Préparer uniquement la suivante, avec sa résolution finale, sans l'afficher.
+    void resolveGalleryImage(next, () => session === galleryState.session && token === galleryState.displayToken).catch(() => {});
   }
 }
 
@@ -432,7 +427,8 @@ async function galleryGoTo(index, { automatic = false, direction = 1 } = {}) {
       const source = nextCandidate();
       if (source) {
         tried.add(source);
-        const resolved = await window.GameImages.findWorkingF95Image([source]);
+        // Garder l'image actuelle pendant la sélection et le chargement de la suivante.
+        const resolved = await resolveGalleryImage(source, current);
         if (!current()) return false;
         if (resolved) {
           // Si l'API vient d'actualiser cette même image, essayer sa nouvelle URL.
@@ -507,7 +503,6 @@ function setupGalleryEvents() {
     lightbox.classList.remove("hidden");
     lightbox.setAttribute("aria-hidden", "false");
     stopGalleryAuto();
-    requestDisplayedOriginal(true);
   });
   const closeLb = () => {
     if (!lightbox) return;
@@ -1157,7 +1152,6 @@ function renderF95InfoBlock(f95Info, discordExclusive = false) {
 
 function setCover(url) {
   stopGalleryAuto();
-  clearTimeout(galleryState.originalTimer);
   galleryState.originals = [];
   galleryState.session++;
   galleryState.navigation++;

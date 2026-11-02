@@ -251,7 +251,12 @@
       img.decoding = "async";
       img.loading = "eager";
       img.referrerPolicy = "no-referrer";
-      img.onload = () => finish(usableImage(img, url));
+      img.onload = () => {
+        if (!usableImage(img, url)) { finish(false); return; }
+        // Résoudre après décodage pour ne pas exposer une image encore en préparation.
+        if (typeof img.decode === 'function') img.decode().then(() => finish(true), () => finish(false));
+        else finish(true);
+      };
       img.onerror = () => finish(false);
       timeout = setTimeout(() => finish(false), IMAGE_TIMEOUT_MS);
       img.src = url;

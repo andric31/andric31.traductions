@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'gallery-v11-diagnostic';
+const CACHE_VERSION = 'gallery-v12-nested-posts';
 
 export async function onRequest(context) {
   const { request } = context;
@@ -46,7 +46,9 @@ export async function onRequest(context) {
 
     const html = await resp.text();
     const firstArticle = extractFirstPostArticle(html);
-    const clean = stripJunk(extractContainerBlock(firstArticle, 'message-body') || extractContainerBlock(firstArticle, 'bbWrapper') || firstArticle);
+    const messageBody = extractContainerBlock(firstArticle, 'message-body');
+    const rawBody = messageBody || extractContainerBlock(firstArticle, 'bbWrapper') || firstArticle;
+    const clean = stripJunk(rawBody);
     // Compteurs uniquement : ne jamais exposer le HTML, les cookies ou les
     // informations de compte de la page reçue dans une réponse de diagnostic.
     const diagnostic = debug ? {
@@ -54,8 +56,16 @@ export async function onRequest(context) {
       htmlLength: html.length,
       postFound: !!firstArticle,
       postLength: firstArticle.length,
+      messageBodyFound: !!messageBody,
+      pageImageTags: countImageTags(stripNonContentBlocks(html)),
+      pageAttachmentUrls: countAttachmentUrls(html),
+      postImageTags: countImageTags(firstArticle),
+      rawBodyLength: rawBody.length,
+      rawBodyImageTags: countImageTags(rawBody),
+      rawBodyAttachmentUrls: countAttachmentUrls(rawBody),
       bodyLength: clean.length,
-      imageTags: matchAll(clean, /<img\b/gi).length,
+      imageTags: countImageTags(clean),
+      bodyAttachmentUrls: countAttachmentUrls(clean),
       lightboxTags: matchAll(clean, /<[^>]*\bclass\s*=\s*["'][^"']*\bjs-lbImage\b[^"']*["'][^>]*>/gi).length,
     } : null;
     if (!firstArticle) return json({
@@ -113,11 +123,24 @@ function json(obj, status, headers) {
 const TAG_PATTERN = /<\/?([a-z][\w:-]*)\b(?:"[^"]*"|'[^']*'|[^'">])*>/gi;
 
 function extractFirstPostArticle(html) {
-  const articles = matchAll(String(html || ''), /<article\b(?:"[^"]*"|'[^']*'|[^'">])*>[\s\S]*?<\/article\s*>/gi).map(m => m[0]);
-  const classes = block => imageAttributes(block.match(/^<article\b([^>]*)>/i)?.[1] || '').class || '';
-  return articles.find(block => /(?:^|\s)message-threadStarterPost(?:\s|$)/i.test(classes(block))) ||
-    articles.find(block => /(?:^|\s)message--post(?:\s|$)/i.test(classes(block))) || '';
+  // Le corps XenForo est lui-même un <article>. Ne pas tronquer le post à
+  // la fermeture d'un article enfant (encart, citation ou contenu du corps).
+  const source = stripNonContentBlocks(html);
+  for (const className of ['message-threadStarterPost', 'message--post']) {
+    const re = new RegExp('(?:^|\\s)' + className + '(?:\\s|$)', 'i');
+    const range = findContainer(source, (attrs, name) => name === 'article' && re.test(attrs.class || ''));
+    if (range) return source.slice(range.start, range.end);
+  }
+  return '';
 }
+
+function stripNonContentBlocks(html) {
+  return String(html || '').replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<(script|style)\b(?:"[^"]*"|'[^']*'|[^'">])*>[\s\S]*?<\/\1\s*>/gi, '');
+}
+
+function countImageTags(html) { return matchAll(html, /<img\b/gi).length; }
+function countAttachmentUrls(html) { return matchAll(html, /(?:attachments|preview)\.f95zone\.to\//gi).length; }
 
 function findContainer(html, matches) {
   const re = new RegExp(TAG_PATTERN.source, 'gi');
@@ -147,7 +170,7 @@ function extractContainerBlock(html, className) {
 }
 
 function stripJunk(html) {
-  let s = String(html || '').replace(/<!--[\s\S]*?-->/g, '').replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, '');
+  let s = stripNonContentBlocks(html);
   const unwanted = /(?:^|\s)(?:bbCodeBlock--quote|message-signature|avatar|smilie|emoji)(?:\s|$)/i;
   let range;
   while ((range = findContainer(s, attrs => unwanted.test(attrs.class || '')))) s = s.slice(0, range.start) + s.slice(range.end);

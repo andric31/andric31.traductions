@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'gallery-v15-rate-limit';
+const CACHE_VERSION = 'gallery-v17-creator-lookup';
 const inFlight = new Map();
 const cooldowns = new Map();
 const FRESH_MS = 60 * 60 * 1000;
@@ -157,8 +157,10 @@ async function retrieveGallery(context, control) {
 
     // Le titre de la fiche permet d'éviter le téléchargement préalable du
     // sujet. L'identifiant exact reste obligatoire pour accepter le résultat.
-    const latest = { attempted: false, status: 0, matched: false, images: 0, timedOut: false };
-    const titleQuery = latestUpdatesQuery('', String(url.searchParams.get('title') || '').slice(0, 300));
+    const latest = { attempted:false, status:0, matched:false, images:0, timedOut:false,
+      attempts:0, payloadValid:false, rows:0, creatorFallback:false, shortFallback:false };
+    const knownTitle = String(url.searchParams.get('title') || '').slice(0, 300);
+    const titleQuery = latestUpdatesQuery('', knownTitle);
     const directMedia = titleQuery ? await fetchLatestUpdatesMedia(threadId, titleQuery, latest, remaining(6000), control) : {cover:'', gallery:[]};
     if (latest.status === 429 || latest.rateLimited) return limitedResponse(control.retryAt, headers, {latestStatus:latest.status, latestAttempted:latest.attempted});
     const threadSkipped = new Set(directMedia.gallery.map(mediaKey)).size >= 2;
@@ -228,6 +230,20 @@ async function retrieveGallery(context, control) {
         const recovered = await fetchLatestUpdatesMedia(threadId, pageQuery, latest, remaining(6000), control);
         if (recovered.gallery.length) media = recovered;
       }
+      // Une seule recherche de secours, après une réponse valide sans ce sujet.
+      // Le créateur évite de dépendre des mots/symboles du titre indexé par F95.
+      if (!latest.matched && latest.payloadValid && latest.status === 200 &&
+          !latest.rateLimited && Date.now() < deadline) {
+        const creator = latestUpdatesCreator(html, clean, knownTitle);
+        const shortQuery = creator ? '' : latestUpdatesShortQuery(html, knownTitle);
+        const query = creator || (shortQuery !== pageQuery && shortQuery !== titleQuery ? shortQuery : '');
+        if (query) {
+          latest.creatorFallback = !!creator;
+          latest.shortFallback = !creator;
+          const recovered = await fetchLatestUpdatesMedia(threadId, query, latest, remaining(3500), control, creator ? 'creator' : 'search');
+          if (recovered.gallery.length) media = recovered;
+        }
+      }
       if (media.gallery.length) {
         const retained = gallery.filter(value => mediaKey(value) !== mediaKey(cover));
         gallery = dedupKeepOrder([...media.gallery, ...retained]);
@@ -244,6 +260,11 @@ async function retrieveGallery(context, control) {
       latestMatched: latest.matched,
       latestImageUrls: latest.images,
       latestTimedOut: latest.timedOut,
+      latestAttempts: latest.attempts,
+      latestPayloadValid: latest.payloadValid,
+      latestReturnedRows: latest.rows,
+      latestCreatorFallback: latest.creatorFallback,
+      latestShortFallback: latest.shortFallback,
     });
     if (latest.status === 429 || latest.rateLimited) return limitedResponse(control.retryAt, headers, diagnostic);
     if (!gallery.length && !cover) return json({
@@ -296,7 +317,7 @@ function stripNonContentBlocks(html) {
 function countImageTags(html) { return matchAll(html, /<img\b/gi).length; }
 function countAttachmentUrls(html) { return matchAll(html, /(?:attachments|preview)\.f95zone\.to\//gi).length; }
 
-function latestUpdatesQuery(html, knownTitle = '') {
+function latestUpdatesTitle(html, knownTitle = '') {
   const source = stripNonContentBlocks(html);
   let heading = knownTitle || extractContainerBlock(source, 'p-title-value');
   let prefix;
@@ -311,9 +332,13 @@ function latestUpdatesQuery(html, knownTitle = '') {
   }
   // Pas de recherche avec le titre d'une page de connexion/erreur générique.
   if (!heading) return '';
-  const title = decodeHtml(heading.replace(/<[^>]*>/g, ' '))
-    .replace(/\[[^\]]*\]/g, ' ').replace(/\s*\|\s*F95zone[\s\S]*$/i, '')
-    .replace(/^(?:(?:VN|HTML|Ren['’]?Py|RPGM|Unity|Unreal Engine|Godot|Flash|Java|Others)\s*-\s*)+/i, '')
+  return decodeHtml(heading.replace(/<[^>]*>/g, ' ')).trim()
+    .replace(/\s*\|\s*F95zone[\s\S]*$/i, '')
+    .replace(/^(?:(?:VN|HTML|Ren['’]?Py|RPGM|Unity|Unreal Engine|Godot|Flash|Java|Others)\s*-\s*)+/i, '');
+}
+
+function latestUpdatesQuery(html, knownTitle = '') {
+  const title = latestUpdatesTitle(html, knownTitle).replace(/\[[^\]]*\]/g, ' ')
     .replace(/['’]s\b/gi, '');
   const words = title.match(/[\p{L}\p{N}]+/gu) || [];
   const stop = new Set(['a', 'an', 'and', 'are', 'as', 'at', 'be', 'but', 'by', 'for', 'if', 'in', 'into', 'is', 'it', 'no', 'not', 'of', 'on', 'or', 'such', 'that', 'the', 'their', 'then', 'there', 'these', 'they', 'this', 'to', 'was', 'will', 'with']);
@@ -329,13 +354,38 @@ function latestUpdatesQuery(html, knownTitle = '') {
   return query;
 }
 
-async function fetchLatestUpdatesMedia(threadId, query, diagnostic, timeout = 6000, control) {
+function latestUpdatesCreator(html, body, knownTitle = '') {
+  const usable = value => typeof value === 'string' && value.trim().length <= 120 &&
+    !/[\x00-\x1f\x7f]/.test(value) ? value.trim() : '';
+  for (const tag of matchAll(body, /<a\b(?:"[^"]*"|'[^']*'|[^'">])*>/gi)) {
+    try {
+      const url = new URL(imageAttributes(tag[0]).href || '', 'https://f95zone.to/');
+      if (url.origin !== 'https://f95zone.to' || url.pathname !== '/sam/latest_alpha/') continue;
+      const match = url.hash.match(/(?:^#\/?|\/)creator=([^/]*)/);
+      const creator = usable(match ? decodeURIComponent(match[1]) : url.searchParams.get('creator'));
+      if (creator) return creator;
+    } catch {}
+  }
+  const title = latestUpdatesTitle(html) || latestUpdatesTitle('', knownTitle);
+  const groups = matchAll(title, /\[([^\]]+)\]/g);
+  // Un unique [v1.0] n'est pas un nom de créateur.
+  return groups.length >= 2 ? usable(groups.at(-1)[1]) : '';
+}
+
+function latestUpdatesShortQuery(html, knownTitle = '') {
+  const query = latestUpdatesQuery('', latestUpdatesTitle(html) || knownTitle);
+  const words = query.split(/\s+/).filter(word => /^[a-z]{4,30}$/i.test(word));
+  return words.sort((a, b) => b.length - a.length)[0] || '';
+}
+
+async function fetchLatestUpdatesMedia(threadId, query, diagnostic, timeout = 6000, control, field = 'search') {
   const empty = { cover: '', gallery: [] };
   if (!query) return empty;
   const endpoint = new URL('https://f95zone.to/sam/latest_alpha/latest_data.php');
-  for (const [key, value] of Object.entries({cmd:'list', cat:'games', page:'1', search:query, sort:'likes', rows:'90'})) endpoint.searchParams.set(key, value);
+  for (const [key, value] of Object.entries({cmd:'list', cat:'games', page:'1', [field === 'creator' ? 'creator' : 'search']:query, sort:'likes', rows:'90'})) endpoint.searchParams.set(key, value);
   if (await control.blocked()) { diagnostic.status = 429; return empty; }
-  Object.assign(diagnostic, { attempted:true, status:0, matched:false, images:0, timedOut:false, rateLimited:false });
+  Object.assign(diagnostic, { attempted:true, status:0, matched:false, images:0, timedOut:false,
+    rateLimited:false, payloadValid:false, rows:0, attempts:diagnostic.attempts + 1 });
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
   try {
@@ -353,6 +403,8 @@ async function fetchLatestUpdatesMedia(threadId, query, diagnostic, timeout = 60
       return empty;
     }
     if (data?.status !== 'ok' || !Array.isArray(data?.msg?.data)) return empty;
+    diagnostic.payloadValid = true;
+    diagnostic.rows = data.msg.data.length;
     const row = data.msg.data.find(item => item && String(item.thread_id) === threadId);
     if (!row) return empty;
     diagnostic.matched = true;

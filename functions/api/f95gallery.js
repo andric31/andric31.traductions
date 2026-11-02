@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'gallery-v10-f95-spoilers';
+const CACHE_VERSION = 'gallery-v11-diagnostic';
 
 export async function onRequest(context) {
   const { request } = context;
@@ -8,10 +8,12 @@ export async function onRequest(context) {
     'access-control-allow-origin': '*',
     'access-control-allow-methods': 'GET,OPTIONS',
     'access-control-allow-headers': 'content-type',
+    'x-f95-gallery-version': CACHE_VERSION,
   };
 
   try {
     const url = new URL(request.url);
+    const debug = url.searchParams.get('debug') === '1';
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers });
 
     const f95Url = String(url.searchParams.get('url') || '').trim();
@@ -28,7 +30,7 @@ export async function onRequest(context) {
     const cache = caches.default;
     const cacheKey = new Request(`https://cache.local/${CACHE_VERSION}/f95gallery?u=` + encodeURIComponent(f95Url), request);
     const cached = await cache.match(cacheKey);
-    if (cached && url.searchParams.get("refresh") !== "1") return new Response(await cached.text(), { headers });
+    if (cached && !debug && url.searchParams.get("refresh") !== "1") return new Response(await cached.text(), { headers });
 
     const resp = await fetch(f95Url, {
       headers: {
@@ -44,16 +46,41 @@ export async function onRequest(context) {
 
     const html = await resp.text();
     const firstArticle = extractFirstPostArticle(html);
-    if (!firstArticle) return json({ ok: false, error: 'Premier message F95 inaccessible' }, 502, headers);
     const clean = stripJunk(extractContainerBlock(firstArticle, 'message-body') || extractContainerBlock(firstArticle, 'bbWrapper') || firstArticle);
+    // Compteurs uniquement : ne jamais exposer le HTML, les cookies ou les
+    // informations de compte de la page reçue dans une réponse de diagnostic.
+    const diagnostic = debug ? {
+      upstreamStatus: resp.status,
+      htmlLength: html.length,
+      postFound: !!firstArticle,
+      postLength: firstArticle.length,
+      bodyLength: clean.length,
+      imageTags: matchAll(clean, /<img\b/gi).length,
+      lightboxTags: matchAll(clean, /<[^>]*\bclass\s*=\s*["'][^"']*\bjs-lbImage\b[^"']*["'][^>]*>/gi).length,
+    } : null;
+    if (!firstArticle) return json({
+      ok: false, error: 'Premier message F95 inaccessible', code: 'F95_POST_MISSING',
+      ...(debug ? { diagnostic } : {}),
+    }, 502, headers);
 
     const gallery = getThreadGalleryUrlsFromHtml(clean);
     const cover = getThreadHeaderImageUrl(html, gallery) || preferFreshUrl(gallery.filter(value => mediaKey(value) === mediaKey(gallery[0]))) || '';
+    if (debug) Object.assign(diagnostic, {
+      galleryUrls: gallery.length,
+      galleryImages: new Set(gallery.map(mediaKey)).size,
+      coverFound: !!cover,
+    });
+    if (!gallery.length && !cover) return json({
+      ok: false, error: 'Aucune image de jeu trouvée dans la page reçue de F95', code: 'F95_IMAGES_MISSING',
+      ...(debug ? { diagnostic } : {}),
+    }, 502, headers);
     const payload = {
       ok: true,
+      version: CACHE_VERSION,
       cover: cover || gallery[0] || '',
       gallery: dedupKeepOrder([...(cover ? [cover] : []), ...gallery]).slice(0, 80),
       originals: dedupKeepOrder([cover, ...gallery].filter(value => value && !isThumbnailUrl(value))).slice(0, 80),
+      ...(debug ? { diagnostic } : {}),
     };
 
     const body = JSON.stringify(payload);
@@ -62,7 +89,7 @@ export async function onRequest(context) {
       catch { return Infinity; }
     });
     const ttl = Math.max(0, Math.min(1800, Math.floor(Math.min(...expirations) - Date.now() / 1000 - 30)));
-    if (payload.gallery.length && ttl > 0) await cache.put(
+    if (!debug && payload.gallery.length && ttl > 0) await cache.put(
       cacheKey,
       new Response(body, {
         headers: {
@@ -78,7 +105,7 @@ export async function onRequest(context) {
 }
 
 function json(obj, status, headers) {
-  return new Response(JSON.stringify(obj), { status, headers });
+  return new Response(JSON.stringify({ ...obj, version: CACHE_VERSION }), { status, headers });
 }
 
 // Attributs simples, doubles ou non quotés ; les blocs imbriqués gardent

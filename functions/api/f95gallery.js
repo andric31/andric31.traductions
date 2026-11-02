@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'gallery-v9-real-images';
+const CACHE_VERSION = 'gallery-v10-f95-spoilers';
 
 export async function onRequest(context) {
   const { request } = context;
@@ -21,7 +21,7 @@ export async function onRequest(context) {
     try { u = new URL(f95Url); } catch {
       return json({ ok: false, error: 'url invalide' }, 400, headers);
     }
-    if (!/^https?:$/.test(u.protocol) || !/^(?:www\.)?f95zone\.to$/i.test(u.hostname)) {
+    if (!/^https?:$/.test(u.protocol) || u.username || u.password || !/^(?:www\.)?f95zone\.to$/i.test(u.hostname) || !/^\/threads\/(?:[^/]*\.)?\d+(?:\/|$)/i.test(u.pathname)) {
       return json({ ok: false, error: 'host non autorisé' }, 400, headers);
     }
 
@@ -44,19 +44,21 @@ export async function onRequest(context) {
 
     const html = await resp.text();
     const firstArticle = extractFirstPostArticle(html);
-    const clean = stripJunk(firstArticle);
+    if (!firstArticle) return json({ ok: false, error: 'Premier message F95 inaccessible' }, 502, headers);
+    const clean = stripJunk(extractContainerBlock(firstArticle, 'message-body') || extractContainerBlock(firstArticle, 'bbWrapper') || firstArticle);
 
-    const cover = getThreadMainImageUrlFromHtml(clean);
     const gallery = getThreadGalleryUrlsFromHtml(clean);
+    const cover = getThreadHeaderImageUrl(html, gallery) || preferFreshUrl(gallery.filter(value => mediaKey(value) === mediaKey(gallery[0]))) || '';
     const payload = {
       ok: true,
       cover: cover || gallery[0] || '',
       gallery: dedupKeepOrder([...(cover ? [cover] : []), ...gallery]).slice(0, 80),
+      originals: dedupKeepOrder([cover, ...gallery].filter(value => value && !isThumbnailUrl(value))).slice(0, 80),
     };
 
     const body = JSON.stringify(payload);
     const expirations = payload.gallery.map(value => {
-      try { const e = Number(new URL(value).searchParams.get('e')); return e > 0 ? e : Infinity; }
+      try { return imageExpiry(value) / 1000 || Infinity; }
       catch { return Infinity; }
     });
     const ttl = Math.max(0, Math.min(1800, Math.floor(Math.min(...expirations) - Date.now() / 1000 - 30)));
@@ -79,110 +81,130 @@ function json(obj, status, headers) {
   return new Response(JSON.stringify(obj), { status, headers });
 }
 
+// Attributs simples, doubles ou non quotés ; les blocs imbriqués gardent
+// leurs limites, notamment les captures rangées dans plusieurs spoilers.
+const TAG_PATTERN = /<\/?([a-z][\w:-]*)\b(?:"[^"]*"|'[^']*'|[^'">])*>/gi;
+
 function extractFirstPostArticle(html) {
-  const s = String(html || '');
-
-  // Priorité : premier article de post.
-  const articleMatch = s.match(/<article[^>]*class="[^"]*message--post[^"]*"[\s\S]*?<\/article>/i);
-  if (articleMatch?.[0]) return articleMatch[0];
-
-  // Fallback : premier bloc message.
-  const messageMatch = s.match(/<div[^>]*class="[^"]*message-inner[^"]*"[\s\S]*?<\/article>/i);
-  if (messageMatch?.[0]) return messageMatch[0];
-
-  return s;
+  const articles = matchAll(String(html || ''), /<article\b(?:"[^"]*"|'[^']*'|[^'">])*>[\s\S]*?<\/article\s*>/gi).map(m => m[0]);
+  const classes = block => imageAttributes(block.match(/^<article\b([^>]*)>/i)?.[1] || '').class || '';
+  return articles.find(block => /(?:^|\s)message-threadStarterPost(?:\s|$)/i.test(classes(block))) ||
+    articles.find(block => /(?:^|\s)message--post(?:\s|$)/i.test(classes(block))) || '';
 }
 
-function stripJunk(html) {
-  let s = String(html || '');
-  s = s.replace(/<blockquote[^>]*class="[^"]*bbCodeBlock--quote[^"]*"[^>]*>[\s\S]*?<\/blockquote>/gi, '');
-  s = s.replace(/<div[^>]*class="[^"]*bbCodeSpoiler[^"]*"[^>]*>[\s\S]*?<\/div>/gi, '');
-  s = s.replace(/<blockquote[^>]*class="[^"]*bbCodeSpoiler[^"]*"[^>]*>[\s\S]*?<\/blockquote>/gi, '');
-  s = s.replace(/<img[^>]*class="[^"]*smilie[^"]*"[^>]*>/gi, '');
-  return s;
-}
-
-function getThreadMainImageUrlFromHtml(op) {
-  try {
-    const zoomerBlock = extractContainerBlock(op, 'lbContainer-zoomer');
-    const u1 = pickFromContainerBlock(zoomerBlock);
-    if (u1) return u1;
-
-    const lbBlock = extractContainerBlock(op, 'lbContainer');
-    const u2 = pickFromContainerBlock(lbBlock);
-    if (u2) return u2;
-
-    const lightboxLinks = extractLightboxUrls(op);
-    if (lightboxLinks.length) return lightboxLinks[0];
-
-    const imgs = extractStandaloneImageUrls(op);
-    return imgs[0] || '';
-  } catch {
-    return '';
+function findContainer(html, matches) {
+  const re = new RegExp(TAG_PATTERN.source, 'gi');
+  let token;
+  while ((token = re.exec(html))) {
+    if (token[0].startsWith('</')) continue;
+    const name = token[1].toLowerCase(), attrs = imageAttributes(token[0]);
+    if (!matches(attrs, name)) continue;
+    const start = token.index;
+    if (/^(?:img|source|br|hr|input|meta|link)$/.test(name) || /\/\s*>$/.test(token[0])) return {start, end:re.lastIndex};
+    let depth = 1, inner;
+    while ((inner = re.exec(html))) {
+      if (inner[1].toLowerCase() !== name) continue;
+      if (inner[0].startsWith('</')) depth--;
+      else if (!/\/\s*>$/.test(inner[0])) depth++;
+      if (!depth) return {start, end:re.lastIndex};
+    }
+    return null;
   }
+  return null;
 }
 
 function extractContainerBlock(html, className) {
-  const s = String(html || '');
-  const re = new RegExp(`<[^>]+class="[^"]*${escapeRegExp(className)}[^"]*"[^>]*>[\\s\\S]*?<\\/[^>]+>`, 'i');
-  const m = s.match(re);
-  return m?.[0] || '';
+  const re = new RegExp('(?:^|\\s)' + escapeRegExp(className) + '(?:\\s|$)', 'i');
+  const range = findContainer(String(html || ''), attrs => re.test(attrs.class || ''));
+  return range ? html.slice(range.start, range.end) : '';
 }
 
-function pickFromContainerBlock(block) {
-  if (!block) return '';
-  return extractLightboxUrls(block)[0] || extractStandaloneImageUrls(block)[0] || '';
+function stripJunk(html) {
+  let s = String(html || '').replace(/<!--[\s\S]*?-->/g, '').replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, '');
+  const unwanted = /(?:^|\s)(?:bbCodeBlock--quote|message-signature|avatar|smilie|emoji)(?:\s|$)/i;
+  let range;
+  while ((range = findContainer(s, attrs => unwanted.test(attrs.class || '')))) s = s.slice(0, range.start) + s.slice(range.end);
+  // Les spoilers sont du contenu du jeu : ne pas les supprimer.
+  return s;
 }
 
-function getThreadGalleryUrlsFromHtml(op) {
-  try {
-    const urls = [];
-    urls.push(...extractLightboxUrls(op));
-    urls.push(...extractStandaloneImageUrls(op));
-    urls.push(...extractAttachmentPreviewUrls(op));
-    return dedupKeepOrder(urls);
-  } catch {
-    return [];
+function getThreadHeaderImageUrl(html, gallery) {
+  const fresh = value => {
+    const url = upgradeF95Url(value);
+    if (!url) return '';
+    const same = gallery.filter(other => mediaKey(other) === mediaKey(url));
+    return preferFreshUrl([url, ...same]);
+  };
+  for (const tag of matchAll(String(html || ''), /<meta\b(?:"[^"]*"|'[^']*'|[^'">])*>/gi)) {
+    const attrs = imageAttributes(tag[0]);
+    if (!/^(?:og:image|twitter:image)$/i.test(attrs.property || attrs.name || '')) continue;
+    const url = fresh(attrs.content);
+    if (url) return url;
   }
+  const header = extractContainerBlock(html, 'cover-thread');
+  const attrs = imageAttributes(header.match(/^<[^>]+>/)?.[0] || '');
+  return fresh((attrs.style || '').match(/background(?:-image)?\s*:[^;]*?url\(["']?(.*?)["']?\)/i)?.[1]);
 }
 
-function extractLightboxUrls(html) {
-  const out = [];
-  for (const tag of matchAll(String(html || ''), /<a\b([^>]*)>/gi)) {
-    const attrs = imageAttributes(tag[1]);
-    if (!/(?:^|\s)js-lbImage(?:\s|$)/i.test(attrs.class || '')) continue;
-    for (const key of ['data-url', 'data-src', 'href']) {
-      const url = upgradeF95Url(attrs[key]);
-      if (url) out.push(url);
-    }
-  }
-  return dedupKeepOrder(out);
-}
-
-function extractStandaloneImageUrls(html) {
-  const out = [];
-  const s = String(html || '');
-  const tags = matchAll(s, /<img([^>]+)>/gi);
-  for (const m of tags) {
-    const attrs = imageAttributes(m[1]);
+function getThreadGalleryUrlsFromHtml(html) {
+  const urls = [];
+  let pictureDepth = 0;
+  for (const tag of matchAll(String(html || ''), new RegExp(TAG_PATTERN.source, 'gi'))) {
+    const name = tag[1].toLowerCase();
+    if (name === 'picture') pictureDepth = Math.max(0, pictureDepth + (tag[0].startsWith('</') ? -1 : 1));
+    if (tag[0].startsWith('</')) continue;
+    const attrs = imageAttributes(tag[0]);
+    const image = name === 'img' || (name === 'source' && (pictureDepth > 0 || /^image\//i.test(attrs.type || '')));
+    const lightbox = /(?:^|\s)(?:js-lbImage|bbImageWrapper)(?:\s|$)/i.test(attrs.class || '');
+    if (!image && !lightbox && !(name === 'a' && isAllowedImageUrl(attrs.href))) continue;
     if (/smilie|emoji|\bavatar(?:\b|[-_])/i.test(attrs.class || '')) continue;
-    // F95 place désormais un SVG transparent dans src. L'ordre des attributs
-    // ne doit pas masquer data-src, qui contient l'image réellement chargée.
-    for (const key of ['data-url', 'data-src', 'data-lazy-src', 'src']) {
+    for (const key of ['data-url', 'data-original', 'data-src', 'data-lazy-src', ...(name === 'a' ? ['href'] : []), ...(image ? ['src'] : [])]) {
       const url = upgradeF95Url(attrs[key]);
-      if (url) out.push(url);
+      if (url && !isExpiredImage(url)) urls.push(url);
     }
-    for (const key of ['data-srcset', 'srcset']) {
+    if (image) for (const key of ['data-srcset', 'srcset']) {
       if (/^\s*data:/i.test(attrs[key] || '')) continue;
       const candidates = String(attrs[key] || '').split(',').map(value => value.trim().split(/\s+/))
         .sort((a, b) => (parseFloat(b[1]) || 0) - (parseFloat(a[1]) || 0));
       for (const [value] of candidates) {
         const url = upgradeF95Url(value);
-        if (url) out.push(url);
+        if (url && !isExpiredImage(url)) urls.push(url);
       }
     }
   }
-  return dedupKeepOrder(out);
+  // Garder les variantes complètes et miniatures : leurs signatures ne sont
+  // pas interchangeables. Le navigateur choisit une variante utilisable.
+  return dedupKeepOrder(urls);
+}
+
+function isThumbnailUrl(value) {
+  try { const u = new URL(value); return /^(?:preview)\.f95zone\.to$/i.test(u.hostname) || /\/thumb\//i.test(u.pathname); }
+  catch { return false; }
+}
+function mediaKey(value) {
+  try {
+    const u = new URL(value);
+    if (/^(?:attachments|preview)\.f95zone\.to$/i.test(u.hostname)) return u.pathname.replace(/^(\/\d{4}\/\d{2})\/thumb\//i, '$1/');
+    for (const key of ['h', 'e', 'u']) if (/(^|\.)f95zone\.to$/i.test(u.hostname)) u.searchParams.delete(key);
+    return u.href;
+  } catch { return value; }
+}
+function imageExpiry(value) {
+  try {
+    const u = new URL(value);
+    if (!/(^|\.)f95zone\.to$/i.test(u.hostname)) return 0;
+    const e = u.searchParams.get('e') || '';
+    return /^\d{10}(?:\d{3})?$/.test(e) ? Number(e) * (e.length === 10 ? 1000 : 1) : 0;
+  } catch { return 0; }
+}
+function isExpiredImage(value) { const expiry = imageExpiry(value); return !!expiry && expiry <= Date.now() + 1000; }
+function preferFreshUrl(urls) {
+  return urls.filter(value => value && !isExpiredImage(value)).reduce((best, value) => {
+    if (!best) return value;
+    if (imageExpiry(value) !== imageExpiry(best)) return imageExpiry(value) > imageExpiry(best) ? value : best;
+    if (isThumbnailUrl(best) !== isThumbnailUrl(value)) return isThumbnailUrl(best) ? value : best;
+    return best;
+  }, '');
 }
 
 function imageAttributes(source) {
@@ -193,14 +215,6 @@ function imageAttributes(source) {
     attrs[match[1].toLowerCase()] = decodeHtml(match[2] ?? match[3] ?? match[4] ?? '');
   }
   return attrs;
-}
-
-function extractAttachmentPreviewUrls(html) {
-  return matchAll(String(html || ''), /(https?:)?\/\/(?:attachments|preview)\.f95zone\.to\/[^\s"'<>]+/gi)
-    .map(m => upgradeF95Url(decodeHtml(m[0] || '')))
-    .filter(Boolean)
-    .filter(u => !/\/thumb\//i.test(u))
-    .filter(isAllowedImageUrl);
 }
 
 function dedupKeepOrder(list) {
@@ -224,10 +238,13 @@ function isAllowedImageUrl(u) {
 function isPollutingUrl(u) {
   const s = String(u || '').trim().toLowerCase();
   if (!s) return true;
-  if (/\/thumb\//i.test(s)) return true;
+  try {
+    const parsed = new URL(s);
+    if (/(^|\.)f95zone\.to$/i.test(parsed.hostname) && /^\/(?:assets\/|styles\/)/i.test(decodeURIComponent(parsed.pathname))) return true;
+  } catch { return true; }
   if (/\/data\/avatars?\//i.test(s)) return true;
   if (/^https?:\/\/(?:[^/]+\.)?gravatar\.com\/avatar\//i.test(s)) return true;
-  if (/smilie|emoji/i.test(s)) return true;
+  if (/smilie|emoji|favicon|blank\.gif|loading\.gif/i.test(s.split(/[?#]/)[0])) return true;
   if (/\.(zip|rar|7z|pdf|txt)(?:[?#].*)?$/.test(s)) return true;
   return false;
 }

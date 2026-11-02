@@ -325,7 +325,27 @@ function applyGalleryMedia(media) {
   galleryState.usingCloudflare = urls.length < 2 && stored.length > urls.length;
   galleryState.urls = galleryState.usingCloudflare ? stored : urls;
   galleryState.metadataReady = true;
+  galleryState.originals = Array.isArray(media?.originals) ? media.originals : [];
   syncGalleryIndex();
+  requestDisplayedOriginal();
+}
+
+function requestDisplayedOriginal(immediate = false) {
+  clearTimeout(galleryState.originalTimer);
+  const displayed = galleryState.displayedUrl;
+  if (!displayed || !window.GameImages.isF95Thumbnail(displayed)) return;
+  const token = galleryState.displayToken, session = galleryState.session, navigation = galleryState.navigation;
+  const logical = galleryState.displayedLogicalUrl;
+  const current = () => galleryState.displayToken === token && galleryState.session === session &&
+    galleryState.navigation === navigation && galleryState.displayedUrl === displayed;
+  const load = async () => {
+    if (!current()) return;
+    const original = await window.GameImages.findHigherResolutionImage(displayed, galleryState.originals, current);
+    if (original && current()) displayGalleryImage(original, logical);
+  };
+  // Afficher l'aperçu immédiatement, puis améliorer uniquement l'image regardée.
+  if (immediate) void load();
+  else galleryState.originalTimer = setTimeout(() => { void load(); }, 350);
 }
 
 async function refreshGalleryMedia(session) {
@@ -372,6 +392,7 @@ function displayGalleryImage(src, logicalUrl) {
   });
   setLightboxBackground(src);
   syncGalleryIndex();
+  requestDisplayedOriginal();
   if (galleryState.urls.length > 1) {
     const next = galleryState.urls[(galleryState.index + 1) % galleryState.urls.length];
     void window.GameImages.findWorkingF95Image([next]);
@@ -486,6 +507,7 @@ function setupGalleryEvents() {
     lightbox.classList.remove("hidden");
     lightbox.setAttribute("aria-hidden", "false");
     stopGalleryAuto();
+    requestDisplayedOriginal(true);
   });
   const closeLb = () => {
     if (!lightbox) return;
@@ -1135,6 +1157,8 @@ function renderF95InfoBlock(f95Info, discordExclusive = false) {
 
 function setCover(url) {
   stopGalleryAuto();
+  clearTimeout(galleryState.originalTimer);
+  galleryState.originals = [];
   galleryState.session++;
   galleryState.navigation++;
   galleryState.fallbackUrl = String(url || "").trim();

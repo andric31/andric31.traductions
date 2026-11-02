@@ -3,6 +3,7 @@
 
   // Les caches de chargement gardent l'adresse complète, paramètres compris.
   const imageCache = new Map();
+  const originalChecks = new Map();
   const mediaCache = new Map();
   const IMAGE_TIMEOUT_MS = 8000;
   const MEDIA_TIMEOUT_MS = 12000;
@@ -235,6 +236,7 @@
       finished = true;
       clearTimeout(timeout);
       entry.status = ok ? "ready" : "failed";
+      if (ok && img) { entry.width = img.naturalWidth; entry.height = img.naturalHeight; }
       entry.until = Math.min(Date.now() + (ok ? 300000 : 30000), imageExpiry(url) || Infinity);
       if (img) {
         img.onload = img.onerror = null;
@@ -261,7 +263,10 @@
 
   function markImageFailed(value) {
     const url = cleanUrl(value);
-    if (url) imageCache.set(url, { promise: Promise.resolve(false), status: "failed", until: Date.now() + 30000 });
+    if (url) {
+      imageCache.set(url, { promise: Promise.resolve(false), status: "failed", until: Date.now() + 30000 });
+      originalChecks.set(url, {promise:Promise.resolve(false), ok:false, until:Date.now() + 600000});
+    }
   }
 
   function firstWorkingVariant(candidates) {
@@ -301,6 +306,40 @@
       if (ready) return ready;
       const resolved = await firstWorkingVariant(candidates);
       if (resolved) return resolved;
+    }
+    return "";
+  }
+
+  async function findHigherResolutionImage(displayedUrl, knownOriginals = [], isCurrent = () => true) {
+    if (!isF95Thumbnail(displayedUrl) || !isCurrent()) return "";
+    const key = normalizeF95MediaKey(displayedUrl);
+    const matching = (Array.isArray(knownOriginals) ? knownOriginals : [])
+      .filter(url => normalizeF95MediaKey(url) === key);
+    // Une adresse candidate n'est un original utilisable qu'après chargement.
+    // Aucune signature d'aperçu n'est déplacée vers un autre hôte ou chemin.
+    const candidates = originalImageUrls([...matching, displayedUrl]);
+    const preview = imageCache.get(displayedUrl);
+    if (!preview?.width || !preview?.height) return "";
+    for (const candidate of candidates) {
+      if (!isCurrent()) return "";
+      const loaded = imageCache.get(candidate);
+      if (pauseDeadline() > Date.now() && !(loaded?.status === "ready" && loaded.until > Date.now())) return "";
+      let checked = originalChecks.get(candidate);
+      if (!checked || checked.until <= Date.now() || (checked.ok && (!loaded || loaded.until <= Date.now()))) {
+        checked = {promise:null, until:Date.now() + IMAGE_TIMEOUT_MS};
+        originalChecks.set(candidate, checked);
+        checked.promise = preloadImage(candidate).then(ok => {
+          checked.ok = ok;
+          checked.until = Math.min(Date.now() + (ok ? 300000 : 600000), imageExpiry(candidate) || Infinity);
+          return ok;
+        });
+      }
+      if (!await checked.promise || !isCurrent()) continue;
+      const original = imageCache.get(candidate);
+      // Une image d'erreur ou de taille identique ne constitue pas une amélioration.
+      if (original?.status === "ready" && original.until > Date.now() &&
+          original.width >= preview.width && original.height >= preview.height &&
+          (original.width > preview.width || original.height > preview.height)) return candidate;
     }
     return "";
   }
@@ -734,6 +773,7 @@
     getF95ThreadUrl,
     fetchF95GalleryMedia,
     findWorkingF95Image,
+    findHigherResolutionImage, isF95Thumbnail,
     preloadImage,
     markImageFailed,
     normalizeF95MediaKey,

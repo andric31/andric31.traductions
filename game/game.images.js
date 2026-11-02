@@ -19,8 +19,8 @@
   function imageExpiry(url) {
     if (!isF95ImageUrl(url)) return 0;
     try {
-      const value = Number(new URL(url, location.origin).searchParams.get("e"));
-      return Number.isFinite(value) && value > 0 ? value * 1000 : 0;
+      const value = new URL(url, location.origin).searchParams.get("e") || "";
+      return /^\d{10}(?:\d{3})?$/.test(value) ? Number(value) * (value.length === 10 ? 1000 : 1) : 0;
     } catch { return 0; }
   }
 
@@ -40,7 +40,7 @@
     const out = [], positions = new Map();
     for (const raw of urls || []) {
       const url = String(raw || "").trim();
-      if (!url || !isRemoteImageUrl(url) || isGalleryAvatarUrl(url)) continue;
+      if (!url || !isRemoteImageUrl(url) || isGalleryAvatarUrl(url) || isExpiredImage(url)) continue;
       const key = normalizeF95MediaKey(url);
       if (!positions.has(key)) { positions.set(key, out.length); out.push(url); continue; }
       const index = positions.get(key), previous = out[index];
@@ -89,8 +89,22 @@
 
   function isGalleryAvatarUrl(value) {
     const u = cleanUrl(value);
+    try {
+      const parsed = parseUrl(u);
+      if (isF95ImageUrl(u) && /^\/(?:assets\/|styles\/)/i.test(decodeURIComponent(parsed.pathname))) return true;
+    } catch { return true; }
     return /\/data\/avatars?\//i.test(u) ||
-      /^https?:\/\/(?:[^/]+\.)?gravatar\.com\/avatar\//i.test(u);
+      /^https?:\/\/(?:[^/]+\.)?gravatar\.com\/avatar\//i.test(u) ||
+      /smilie|emoji|favicon|blank\.gif|loading\.gif/i.test(u.split(/[?#]/)[0]);
+  }
+
+  function cloudflareImageUrls(rawEntry) {
+    const images = rawEntry?.cloudflareImages;
+    return [...new Set([images?.cover, ...(Array.isArray(images?.gallery) ? images.gallery : [])].filter(value => {
+      if (typeof value !== "string" || !value.trim()) return false;
+      try { const u = parseUrl(value); return !u.username && !u.password && u.origin === location.origin && u.pathname.startsWith('/medias/traductions/'); }
+      catch { return false; }
+    }))];
   }
 
   function getF95ThreadUrl(rawOrUrl, imageUrl) {
@@ -117,6 +131,12 @@
         return `https://f95zone.to/threads/${id}/`;
       }
     } catch {}
+    // Les nouvelles pièces jointes n'incluent plus l'identifiant du sujet.
+    // Utiliser l'id F95 explicite ; ne jamais confondre avec l'uid local.
+    for (const candidate of [entry.collection, entry.id]) {
+      const id = String(candidate ?? "").trim();
+      if (/^[1-9]\d*$/.test(id)) return `https://f95zone.to/threads/${id}/`;
+    }
     for (const candidate of [imageUrl, entry.gameData?.imageUrl, entry.imageUrl, rawOrUrl]) {
       const value = cleanUrl(candidate);
       if (!value) continue;
@@ -195,7 +215,7 @@
 
   function preloadImage(value) {
     const url = cleanUrl(value);
-    if (!url || !isRemoteImageUrl(url) || isExpiredImage(url)) return Promise.resolve(false);
+    if (!url || !isRemoteImageUrl(url) || isGalleryAvatarUrl(url) || isExpiredImage(url)) return Promise.resolve(false);
     const cached = imageCache.get(url);
     if (cached && cached.until > Date.now()) return cached.promise;
 
@@ -366,7 +386,9 @@
   async function loadHoverGallery(context, refresh = false) {
     const media = await window.GameImages.fetchF95GalleryMedia(context.rawEntry, context.originalSrc, { refresh });
     const base = HOVER_GALLERY.baseSrc.get(context.card);
-    return window.GameImages.mergeGalleryUrls((base === THUMB_FALLBACK_URL || base === THUMB_LOADING_URL) ? context.originalSrc : base, media);
+    const urls = window.GameImages.mergeGalleryUrls((base === THUMB_FALLBACK_URL || base === THUMB_LOADING_URL) ? context.originalSrc : base, media);
+    const stored = cloudflareImageUrls(context.rawEntry);
+    return urls.length < 2 && stored.length > urls.length ? stored : urls;
   }
 
   function recoverCardCover(context, failedSrc, refreshOnly = false) {
@@ -390,6 +412,7 @@
         const media = await window.GameImages.fetchF95GalleryMedia(rawEntry, originalSrc, { refresh: true });
         recovered = await findWorkingF95Image([media.cover, ...media.gallery.slice(0, 4)], excluded);
       }
+      if (!recovered) recovered = await findWorkingF95Image(cloudflareImageUrls(rawEntry), excluded);
       return recovered;
     })().catch(() => "").then((recovered) => {
       const src = recovered || THUMB_FALLBACK_URL;
@@ -583,7 +606,7 @@
   window.GameImages = Object.freeze({
     bindSavedGameImages,
     bindCardHoverGallery, clearCaches, setPlaceholder, preferFreshImages, isExpiredImage,
-    originalImageUrls,
+    originalImageUrls, cloudflareImageUrls,
     getF95ThreadUrl,
     fetchF95GalleryMedia,
     findWorkingF95Image,

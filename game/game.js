@@ -319,8 +319,11 @@ function syncGalleryIndex() {
 }
 
 function applyGalleryMedia(media) {
-  galleryState.urls = window.GameImages.mergeGalleryUrls(galleryState.fallbackUrl, media)
+  const urls = window.GameImages.mergeGalleryUrls(galleryState.fallbackUrl, media)
     .filter((url) => !galleryState.failed.has(url));
+  const stored = galleryState.cloudflare.filter((url) => !galleryState.failed.has(url));
+  galleryState.usingCloudflare = urls.length < 2 && stored.length > urls.length;
+  galleryState.urls = galleryState.usingCloudflare ? stored : urls;
   galleryState.metadataReady = true;
   syncGalleryIndex();
 }
@@ -508,10 +511,7 @@ function setupGalleryEvents() {
 async function loadF95Gallery(f95Url, fallbackUrl, cloudflareImages) {
   setupGalleryEvents();
   setCover(fallbackUrl);
-  galleryState.cloudflare = [...new Set([cloudflareImages?.cover, ...(Array.isArray(cloudflareImages?.gallery) ? cloudflareImages.gallery : [])].filter(raw => {
-    if (!raw) return false;
-    try { const u = new URL(raw, location.origin); return !u.username && !u.password && u.origin === location.origin && u.pathname.startsWith('/medias/traductions/'); } catch { return false; }
-  }))];
+  galleryState.cloudflare = window.GameImages.cloudflareImageUrls({cloudflareImages});
   const session = galleryState.session;
   galleryState.loadedForUrl = window.GameImages.getF95ThreadUrl(f95Url, fallbackUrl);
   if (galleryState.loadedForUrl) {
@@ -2350,7 +2350,7 @@ function renderVideoBlock({ id, videoUrl }) {
       if (heading) heading.textContent = "Discord & F95Zone";
       if (intro) intro.textContent = "Retrouve cette traduction exclusivement sur Discord.";
     }
-    loadF95Gallery(display.url || entry.url || "", display.imageUrl || entry.imageUrl || "", entry.cloudflareImages);
+    loadF95Gallery(display.url || entry.url || entry, display.imageUrl || entry.imageUrl || "", entry.cloudflareImages);
     renderTags(display.tags || entry.tags || []);
 
     renderBadgesFromGame(display, entry, isCollectionChild);

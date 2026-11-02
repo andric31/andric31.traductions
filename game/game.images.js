@@ -6,6 +6,7 @@
   const mediaCache = new Map();
   const IMAGE_TIMEOUT_MS = 8000;
   const MEDIA_TIMEOUT_MS = 12000;
+  const MEDIA_STORAGE_KEY = "f95-gallery-v14";
 
   // Visuels intégrés : aucune requête réseau, même si un fichier SVG manque au déploiement.
   const THUMB_FALLBACK_URL = "data:image/svg+xml;charset=utf-8," + encodeURIComponent("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"480\" height=\"270\" viewBox=\"0 0 480 270\"><rect width=\"480\" height=\"270\" fill=\"#1c2030\"/><g fill=\"none\" stroke=\"#8993ac\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"212\" y=\"82\" width=\"56\" height=\"44\" rx=\"7\"/><circle cx=\"251\" cy=\"95\" r=\"4\"/><path d=\"m216 120 15-16 11 11 8-7 14 15\"/></g><text x=\"240\" y=\"165\" fill=\"#bbc3d6\" font-family=\"Arial,sans-serif\" font-size=\"19\" text-anchor=\"middle\">Image indisponible</text></svg>");
@@ -260,15 +261,43 @@
     if (url) imageCache.set(url, { promise: Promise.resolve(false), status: "failed", until: Date.now() + 30000 });
   }
 
+  function firstWorkingVariant(candidates) {
+    return new Promise(resolve => {
+      let next = 0, pending = 0, timer, finished = false;
+      const finish = value => { if (finished) return; finished = true; clearTimeout(timer); resolve(value); };
+      const start = () => {
+        clearTimeout(timer);
+        if (finished || next >= candidates.length) return;
+        const candidate = candidates[next++];
+        pending++;
+        preloadImage(candidate).then(ok => {
+          pending--;
+          if (finished) return;
+          if (ok) finish(candidate);
+          else if (next < candidates.length) start();
+          else if (!pending) finish("");
+        });
+        // Un original lent ne doit pas bloquer son aperçu pendant 8 secondes.
+        // Seules les variantes de cette image sont essayées, sans modifier les signatures.
+        if (next < candidates.length) timer = setTimeout(start, 150);
+      };
+      if (candidates.length) start(); else finish("");
+    });
+  }
+
   async function findWorkingF95Image(urls, excluded = new Set(), { preferPreview = false, originalsOnly = false } = {}) {
     const tried = new Set(excluded);
     const sources = originalsOnly ? originalImageUrls(urls) : preferFreshImages(Array.isArray(urls) ? urls : []);
     for (const url of sources) {
-      for (const candidate of imageCandidates(url, preferPreview, originalsOnly)) {
-        if (tried.has(candidate)) continue;
-        tried.add(candidate);
-        if (await preloadImage(candidate)) return candidate;
-      }
+      const candidates = imageCandidates(url, preferPreview, originalsOnly).filter(candidate => !tried.has(candidate));
+      candidates.forEach(candidate => tried.add(candidate));
+      const ready = candidates.find(candidate => {
+        const cached = imageCache.get(candidate);
+        return cached?.status === "ready" && cached.until > Date.now();
+      });
+      if (ready) return ready;
+      const resolved = await firstWorkingVariant(candidates);
+      if (resolved) return resolved;
     }
     return "";
   }
@@ -286,10 +315,35 @@
     const cover = gallery.find(url => normalizeF95MediaKey(url) === coverKey) || gallery[0] || "";
     // Garder les originaux séparément : une miniature signée ne doit pas
     // faire disparaître l'adresse originale du même fichier pour la fiche.
-    return { cover, gallery, originals: originalImageUrls(sources) };
+    // Ne pas fabriquer d'originaux à partir des aperçus : une deuxième
+    // normalisation leur donnerait la priorité sur les vraies URL reçues.
+    return { cover, gallery, originals: preferFreshImages(sources.filter(value => !isF95Thumbnail(value))) };
   }
 
-  async function requestMedia(threadUrl, refresh = false) {
+  function readStoredMedia(threadUrl) {
+    try {
+      const saved = JSON.parse(localStorage.getItem(MEDIA_STORAGE_KEY) || "{}")[threadUrl];
+      if (!saved || !(saved.until > Date.now())) return null;
+      const media = normalizeMedia(saved.media);
+      return media.gallery.length ? { until:saved.until, media } : null;
+    } catch { return null; }
+  }
+
+  function storeMedia(threadUrl, media, until) {
+    try {
+      const saved = JSON.parse(localStorage.getItem(MEDIA_STORAGE_KEY) || "{}");
+      const kept = Object.entries(saved).filter(([key, value]) => key !== threadUrl && value?.until > Date.now()).slice(-39);
+      kept.push([threadUrl, {until, media}]);
+      localStorage.setItem(MEDIA_STORAGE_KEY, JSON.stringify(Object.fromEntries(kept)));
+    } catch {}
+  }
+
+  function getTitleHint(rawEntry) {
+    if (!rawEntry || typeof rawEntry !== "object") return "";
+    return cleanUrl((rawEntry.collection && rawEntry.gameData?.title) || rawEntry.cleanTitle || rawEntry.title || rawEntry.gameData?.title).slice(0, 300);
+  }
+
+  async function requestMedia(threadUrl, refresh = false, title = "") {
     let timeout;
     let controller;
     try {
@@ -300,7 +354,7 @@
           resolve(emptyMedia());
         }, MEDIA_TIMEOUT_MS);
       });
-      const response = fetch(`/api/f95gallery?url=${encodeURIComponent(threadUrl)}${refresh ? "&refresh=1" : ""}`, {
+      const response = fetch(`/api/f95gallery?url=${encodeURIComponent(threadUrl)}${title ? "&title=" + encodeURIComponent(title) : ""}${refresh ? "&refresh=1" : ""}`, {
         credentials: "same-origin", cache: "no-store", signal: controller.signal,
       }).then((r) => r.ok ? r.json() : null).then(normalizeMedia).catch(emptyMedia);
       return await Promise.race([response, expired]);
@@ -319,15 +373,22 @@
     }
   }
 
-  function fetchF95GalleryMedia(rawOrUrl, imageUrl, { refresh = false } = {}) {
+  function fetchF95GalleryMedia(rawOrUrl, imageUrl, { refresh = false, title = "" } = {}) {
     const threadUrl = getF95ThreadUrl(rawOrUrl, imageUrl);
     if (!threadUrl) return Promise.resolve(emptyMedia());
     const now = Date.now();
     let record = mediaCache.get(threadUrl);
+    if (!record && !refresh) {
+      const saved = readStoredMedia(threadUrl);
+      if (saved) {
+        record = { ...saved, pending:false, refreshed:false, created:now, promise:Promise.resolve(saved.media) };
+        mediaCache.set(threadUrl, record);
+      }
+    }
     if (record?.pending) {
       // Une demande forcée attend une demande normale déjà en cours.
       if (refresh && !record.refreshed) {
-        return record.promise.then(() => fetchF95GalleryMedia(rawOrUrl, imageUrl, { refresh: true }));
+        return record.promise.then(() => fetchF95GalleryMedia(rawOrUrl, imageUrl, { refresh: true, title }));
       }
       return record.promise;
     }
@@ -335,7 +396,7 @@
     const previousMedia = record?.media || emptyMedia();
     record = { promise: null, pending: true, refreshed: refresh, created: now, until: now + 15000, media: previousMedia };
     mediaCache.set(threadUrl, record);
-    record.promise = requestMedia(threadUrl, refresh).then((media) => {
+    record.promise = requestMedia(threadUrl, refresh, cleanUrl(title).slice(0, 300) || getTitleHint(rawOrUrl)).then((media) => {
       if (refresh) {
         forgetFailedImages([imageUrl, previousMedia.cover, ...previousMedia.gallery, media.cover, ...media.gallery]);
       }
@@ -344,6 +405,7 @@
       if (found) record.media = media;
       const deadlines = [record.media.cover, ...record.media.gallery].map(imageExpiry).filter(Boolean).map(time => time - 30000);
       record.until = Math.min(Date.now() + (found ? 300000 : 15000), ...deadlines);
+      if (found && mediaCache.get(threadUrl) === record) storeMedia(threadUrl, record.media, record.until);
       return { cover: record.media.cover, gallery: record.media.gallery.slice(), originals: (record.media.originals || []).slice() };
     }).finally(() => { record.pending = false; });
     return record.promise;
@@ -359,6 +421,7 @@
   function clearCaches() {
     imageCache.clear();
     mediaCache.clear();
+    try { localStorage.removeItem(MEDIA_STORAGE_KEY); } catch {}
   }
 
   function setPlaceholder(img, loading = true) {
@@ -562,7 +625,7 @@
               if (!isActive()) return false;
               if (!resolved) { if (!isCover) failedPreview = true; continue; }
               setCardImage(img, resolved, false);
-              if (urls.length > 1) preloadImage(urls[idx]);
+              if (urls.length > 1) void findWorkingF95Image([urls[idx]]);
               return true;
             }
             if (context.galleryRefreshUsed) break;

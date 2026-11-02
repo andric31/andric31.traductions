@@ -334,7 +334,7 @@ async function refreshGalleryMedia(session) {
   galleryState.refreshAttempted = true;
   const thread = galleryState.loadedForUrl;
   const fallback = galleryState.fallbackUrl;
-  galleryState.refreshPromise = window.GameImages.fetchF95GalleryMedia(thread, fallback, { refresh: true })
+  galleryState.refreshPromise = window.GameImages.fetchF95GalleryMedia(thread, fallback, { refresh: true, title:galleryState.titleHint })
     .then((media) => {
       if (galleryState.session === session) {
         galleryState.failed.clear();
@@ -372,6 +372,10 @@ function displayGalleryImage(src, logicalUrl) {
   });
   setLightboxBackground(src);
   syncGalleryIndex();
+  if (galleryState.urls.length > 1) {
+    const next = galleryState.urls[(galleryState.index + 1) % galleryState.urls.length];
+    void window.GameImages.findWorkingF95Image([next]);
+  }
 }
 
 async function galleryGoTo(index, { automatic = false, direction = 1 } = {}) {
@@ -508,14 +512,15 @@ function setupGalleryEvents() {
   });
 }
 
-async function loadF95Gallery(f95Url, fallbackUrl, cloudflareImages) {
+async function loadF95Gallery(f95Url, fallbackUrl, cloudflareImages, title = "") {
   setupGalleryEvents();
   setCover(fallbackUrl);
   galleryState.cloudflare = window.GameImages.cloudflareImageUrls({cloudflareImages});
   const session = galleryState.session;
   galleryState.loadedForUrl = window.GameImages.getF95ThreadUrl(f95Url, fallbackUrl);
+  galleryState.titleHint = title;
   if (galleryState.loadedForUrl) {
-    galleryState.initialPromise = window.GameImages.fetchF95GalleryMedia(galleryState.loadedForUrl, fallbackUrl)
+    galleryState.initialPromise = window.GameImages.fetchF95GalleryMedia(f95Url, fallbackUrl, { title })
       .then((media) => {
         if (galleryState.session !== session) return;
         applyGalleryMedia(media);
@@ -2350,7 +2355,7 @@ function renderVideoBlock({ id, videoUrl }) {
       if (heading) heading.textContent = "Discord & F95Zone";
       if (intro) intro.textContent = "Retrouve cette traduction exclusivement sur Discord.";
     }
-    loadF95Gallery(display.url || entry.url || entry, display.imageUrl || entry.imageUrl || "", entry.cloudflareImages);
+    loadF95Gallery(display.url || entry.url || entry, display.imageUrl || entry.imageUrl || "", entry.cloudflareImages, title);
     renderTags(display.tags || entry.tags || []);
 
     renderBadgesFromGame(display, entry, isCollectionChild);
